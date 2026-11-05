@@ -40,7 +40,7 @@ export async function recordEdge(arkiv, edge) {
   const values = recorderEdgeValues(edge);
   const ours = async ([k]) => {
     const e = await arkiv.publicClient.getEntity(k);
-    return e?.attributes?.ref?.value === values.ref;
+    return (e?.$attributes ?? e?.attributes)?.ref?.value === values.ref;
   };
   const { txs, createdKeys } = await arkiv.writer.send(
     { creates: [{ def: ENTITIES.edge, values, expiration: ExpirationTime.fromDays(LIFETIME.realDays) }] },

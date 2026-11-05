@@ -24,7 +24,8 @@ export async function createQuote(arkiv, quote) {
   const values = quoteValues(quote);
   const ours = async ([k]) => {
     const e = await arkiv.publicClient.getEntity(k);
-    return e?.attributes?.request_id?.value === values.request_id && BigInt(e?.attributes?.valid_until?.value ?? -1) === values.valid_until;
+    const a = e?.$attributes ?? e?.attributes;
+    return a?.request_id?.value === values.request_id && BigInt(a?.valid_until?.value ?? -1) === values.valid_until;
   };
   const { txs, createdKeys } = await arkiv.writer.send(
     { creates: [{ def: ENTITIES.quote, values, expiration: ExpirationTime.fromMinutes(LIFETIME.quoteMinutes) }] },

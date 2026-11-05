@@ -92,7 +92,7 @@ Agents (T4) and Join add one row per full errand run, so the presets can be cali
 - **What:** the story's re-registered shop epoch. **Where:** `packages/config/story.json` `syntheticCity.reRegisteredShop.epoch` (2). **Why:** fresh ENSv2 names start at epoch 0 and a re-registration goes up by one (`planning/SPEC/ARKIV_GRAPH.md` §8), so 1 would match the spec; 2 copies the lab. The S city uses the story's value; nothing is wrong by identity either way. **Recommendation:** the Coordinator sets it to 1 in the final story before M.
 - **What:** T3 added two blocks to the story config. **Where:** `story.json` `syntheticCity.generator` (generator inputs; the spec's values, the rest labelled as T3's choices) and `locations.neighbourhoods` (8 OpenStreetMap places with links). **Why:** ADR-0047 says every city parameter and place lives there. **Recommendation:** the Coordinator keeps them when the final story replaces the cast.
 - **What:** the SDK's publish prep. **Where:** `packages/arkiv-graph`. **Why:** the engine is in now, but there is no README, API reference or example yet. **Recommendation:** Friday item 18, as ADR-0057 says.
-- **What:** the explorer's entity page pattern. **Where:** `arkiv/schema.md`. **Why:** only the transaction pattern is verified. **Recommendation:** T3 checks it during M7b; no founder action.
+- **What:** the explorer's entity page pattern. **Where:** `arkiv/schema.md`. **Why:** only the transaction pattern is verified. **Recommendation:** T3 checks it during M9; no founder action.
 - Closed: the W_DIRECTORY top-up (it holds 0.50 tGLM); the i32 box (ADR-0058).
 
 ## agents

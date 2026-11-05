@@ -95,6 +95,33 @@ test('recorder edges (W_SYNC) are create-only; the mirror folds them into tallie
   assert.equal((await readAll(w.reader.publicClient, ENTITIES.edge, { owner: w.sync.owner })).length, 1);
 });
 
+// getEntity returns the columns under $attributes: a send that landed but was reported
+// as failed is found by nonce, read back and adopted, never sent a second time.
+test('an uncertain send is adopted by nonce: recorder edge, quote and unstreamed ledger land once', async () => {
+  const w = await wallets();
+  const uncertain = () => w.sim.injectFault({ method: 'eth_sendRawTransaction', kind: 'apply-then-fail' });
+
+  uncertain();
+  const r = await recordEdge(w.sync, { ref: 'facilitator:9', kind: 'fail', from: { ens: BUYER, epoch: 0 }, to: { ens: SHOP, epoch: 0 }, ts: at(10) });
+  assert.equal(r.recovered, true);
+  const syncEdges = await readAll(w.reader.publicClient, ENTITIES.edge, { owner: w.sync.owner });
+  assert.deepEqual(syncEdges.map((e) => e.$key), [r.entityKey], 'one recorder edge');
+
+  uncertain();
+  const requestId = `0x${'8'.repeat(64)}`;
+  const q = await createQuote(w.directory, { requestId, shopKey: `0x${'5'.repeat(64)}`, agentEns: BUYER, price: 4_800_000n, validUntil: at(600) });
+  assert.equal(q.recovered, true);
+  assert.deepEqual((await findQuotes(w.reader.publicClient, requestId, { owner: w.directory.owner })).map((f) => f.key), [q.entityKey], 'one quote');
+
+  const ledger = createLedger({ arkiv: w.ledger });
+  await ledger.load();
+  uncertain();
+  const out = await ledger.apply(ev('p9', 'pay', 4_800_000n, 20));
+  assert.equal(out.txs[0].recovered, true);
+  const edges = (await readAll(w.reader.publicClient, ENTITIES.edge, { owner: w.ledger.owner })).filter((e) => e.ref === 'p9');
+  assert.equal(edges.length, 1, 'one ledger edge');
+});
+
 test('a receipt cannot be edited: a simulated patch of an edge reverts, a tally patch would pass', async () => {
   const w = await wallets();
   const ledger = createLedger({ arkiv: w.ledger, stream: 's' });

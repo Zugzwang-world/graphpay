@@ -100,7 +100,7 @@ export function createLedger({ arkiv, stream = null, synthetic = null, lifetimeD
       const first = planned.creates.findIndex((c) => c.def === ENTITIES.edge);
       if (first === -1 || !createdKeys[first]) return false;
       const e = await arkiv.publicClient.getEntity(createdKeys[first]);
-      return e?.attributes?.ref?.value === planned.applied[0];
+      return (e?.$attributes ?? e?.attributes)?.ref?.value === planned.applied[0];
     };
   }
 
