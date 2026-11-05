@@ -216,6 +216,13 @@ export function createBuyerAgent({
     const { maxMicro, ...requestInit } = init;
     if (requestInit.body !== undefined && typeof requestInit.body !== 'string') throw new Error('pay(): send the body as a string, so the paid retry can repeat it');
     return lock(async () => {
+      // Signatures past their deadline (with a minute's grace for clock skew) can never settle now.
+      for (const [k, e] of pending) {
+        if (e.order.deadline + 60n <= BigInt(nowSec()) && !['PAID', 'DELIVERED'].includes(await orderStatus(e.order.orderId))) {
+          pending.delete(k);
+          release(e);
+        }
+      }
       const key = requestKey(url, requestInit);
       let entry = pending.get(key);
       if (entry) {
@@ -225,7 +232,7 @@ export function createBuyerAgent({
           confirmed(entry);
           return outcome(entry, { status: 'paid', httpStatus: undefined, transaction: entry.transaction, response: undefined });
         }
-        if (entry.order.deadline <= BigInt(nowSec())) {
+        if (entry.order.deadline + 60n <= BigInt(nowSec())) {
           // The signature has expired unpaid: Permit2 will never accept it now.
           pending.delete(key);
           release(entry);

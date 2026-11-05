@@ -71,6 +71,14 @@ Updated 04:20 IST, Fri 6 Nov (T5 Web). **On `main`:** the shell, phone views, ag
 - Blockers: none. Open toggle waits for T3's `shop_open`.
 - Next: M16 once M4 lands; the customer panels as M4 and M6 land. Fresh start file: `docs/sessions/website/resume.md`.
 
+## agentpay
+
+Updated 04:00 IST, Fri 6 Nov (T6 AgentPay). **V1 of `@graphpay/agentpay` works on an anvil fork of Whitechain Sepolia:** a customer agent with no gas pays a merchant route with one signature, under an on-chain spending pass, through our deployed checkout and the real test USDT. Its first PR is open.
+- Proven on the fork (13 tests): payment, refusals in code (daily cap, allowlist, budget, revoked pass), refund request and partial refund, CSV export, the relayer's anti-drain limits, a subscription with its renewal and cancel, and both examples (a sweet shop and a fixed-fare cab ride). 36 offline tests run in CI.
+- Reviewer: 2 blocking items (a stalled payment could be paid twice; an RPC URL could reach a model), both fixed and tested; a re-check is running.
+- Running: nothing on a real network. Blockers: none.
+- Next: the tiny real test payment for the sweet shop (the ride stays on the fork until a ride merchant is in the cast); the T1 facilitator adapter check once M3 merges; `docs/sessions/agentpay/resume.md` by 08:00.
+
 ## records
 
 Updated 03:20 IST. **Checked every session after the 02:14–03:01 sleep: none is hung.**

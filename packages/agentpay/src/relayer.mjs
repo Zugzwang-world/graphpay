@@ -304,10 +304,13 @@ export function createReferenceRelayer({ walletClient, publicClient, network = w
     return queue(async () => {
       // An earlier send of this order that has not confirmed yet: report it, never send again.
       const orderId = String(paymentPayload?.payload?.order?.orderId ?? '').toLowerCase();
+      for (const [id, e] of inFlight) if (clock() - e.at >= L.inFlightHoldMs) inFlight.delete(id);
       const earlier = inFlight.get(orderId);
       if (earlier) {
         const receipt = earlier.hash ? await publicClient.getTransactionReceipt({ hash: earlier.hash }).catch(() => null) : null;
-        if (!receipt && clock() - earlier.at < L.inFlightHoldMs) return { success: false, errorReason: 'in_flight', transaction: earlier.hash, network: network.caip2 };
+        // A write that failed before it had a hash is held a minute only (it most likely never left).
+        const hold = earlier.hash ? L.inFlightHoldMs : 60_000;
+        if (!receipt && clock() - earlier.at < hold) return { success: false, errorReason: 'in_flight', transaction: earlier.hash, network: network.caip2 };
         inFlight.delete(orderId);
         if (receipt) return settlementOf(earlier.order, earlier.payer, earlier.amount, earlier.hash, decodeReceipt(receipt));
       }

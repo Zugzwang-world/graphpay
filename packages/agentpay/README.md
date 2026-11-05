@@ -137,7 +137,7 @@ Spending pass: `issueSpendingPass`, `revokeSpendingPass`, `readSpendingPass`, `s
 
 `createMerchant({ name, address, facilitator, publicClient, walletClient?, network?, riskCheck?, authorize?, identity?, reputation?, quoteTtlSeconds?, maxRefundMicro?, resourceBase?, clock?, log? })`
 
-`authorize(request)` → boolean gates every request that makes the facilitator spend gas (a paid retry, a subscription, a cancel); GraphPay's hosted routes use it for their passcode. A settlement the facilitator could not confirm (`pending`, `in_flight`, a timeout) is answered 502, never 402, so the payer re-sends the same signature.
+`authorize(request)` → boolean gates every request that makes the facilitator spend gas (a paid retry, a subscription, a cancel); GraphPay's hosted routes use it for their passcode. Compare a passcode or token in constant time (`crypto.timingSafeEqual` on hashes); the SDK cannot check how the hook compares. A settlement the facilitator could not confirm (`pending`, `in_flight`, a timeout) is answered 502, never 402, so the payer re-sends the same signature.
 
 | method | what |
 |---|---|
