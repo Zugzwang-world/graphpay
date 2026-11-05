@@ -34,20 +34,41 @@ export interface CastShop {
   displayName: string;
   storyRole: string;
   walletRole: string;
+  category: string;
+  area: string | null;
+  location: { lat: number; lng: number } | null;
+  products: { sku: string; name: string; unit: string; quantity: number; priceMicro: number }[];
   scenario: Record<string, number | boolean>;
 }
 
 export interface Cast {
   key: string;
-  about: string;
-  city: { name: string; timeZone: string };
+  city: { name: string; timeZone: string; currency: string };
   persona: { key: string; label: string; displayName: string; walletRole: string };
   buyerAgents: CastAgent[];
   workingAgents: CastAgent[];
   disposable: { labelPrefix: string; walletRolePrefix: string; capMicro: number; expiryDays: number };
   shopAgents: { key: string; label: string; displayName: string }[];
   shops: CastShop[];
-  order: Record<string, string | number | boolean>;
+  order: Record<string, unknown>;
+  renewal: Record<string, unknown>;
+}
+
+export interface AgentModelSettings {
+  provider: string;
+  model: string;
+  effort: 'low' | 'medium' | 'high' | 'xhigh' | 'max';
+  maxTokens: number;
+}
+
+export interface Story {
+  about: string;
+  storyVersion: number;
+  name: string;
+  locked: boolean;
+  synthetic: boolean;
+  agentModels: { about: string; active: string; presets: Record<string, { purpose: string; roles: Record<string, AgentModelSettings> }> };
+  [section: string]: unknown;
 }
 
 export interface CastEntry {
@@ -77,8 +98,24 @@ export declare const config: Record<string, any> & {
   networks: Record<NetworkKey, Network>;
 };
 
+export declare const story: Story;
+
 export declare function network(key: NetworkKey): Network;
-export declare function activeCast(env?: Record<string, string | undefined>): Cast;
+export declare function activeCast(source?: Story): Cast;
+export declare function agentPreset(
+  role: string,
+  options?: { env?: Record<string, string | undefined>; source?: Story },
+): AgentModelSettings & { preset: string; role: string };
+export declare function apiCostUsd(
+  model: string,
+  usage: {
+    input_tokens?: number;
+    output_tokens?: number;
+    cache_creation_input_tokens?: number | null;
+    cache_read_input_tokens?: number | null;
+    cache_creation?: { ephemeral_1h_input_tokens?: number | null; ephemeral_5m_input_tokens?: number | null } | null;
+  },
+): number;
 export declare function castEntries(cast?: Cast, root?: string): CastEntry[];
 export declare function disposableEntry(n: number, cast?: Cast, root?: string): CastEntry;
 export declare function rpcCandidates(key: NetworkKey, env?: Record<string, string | undefined>): RpcCandidate[];

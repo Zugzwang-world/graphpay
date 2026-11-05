@@ -1,9 +1,14 @@
-// @graphpay/config: the one config file (ADR-0030) and the helpers every
-// package uses to read it. Names and addresses come from here, never from code.
+// @graphpay/config: the infrastructure config (addresses, networks, wallet roles,
+// model pricing; ADR-0030) and the one story config (everything story-specific;
+// ADR-0047), plus the helpers every package uses to read them. Names, story
+// values and addresses come from these files, never from code.
 
 import { readFileSync } from 'node:fs';
 
-export const config = JSON.parse(readFileSync(new URL('./graphpay.config.json', import.meta.url), 'utf8'));
+const read = (file) => JSON.parse(readFileSync(new URL(file, import.meta.url), 'utf8'));
+
+export const config = read('./graphpay.config.json');
+export const story = read('./story.json');
 
 export function network(key) {
   const net = config.networks[key];
@@ -11,12 +16,10 @@ export function network(key) {
   return net;
 }
 
-// The active cast: GRAPHPAY_CAST if set, else cast.active ("test" tonight, "demo" from Friday).
-export function activeCast(env = process.env) {
-  const key = env.GRAPHPAY_CAST || config.cast.active;
-  const cast = config.cast[key];
-  if (!cast || key === 'active') throw new Error(`cast "${key}" is not in the config file`);
-  return { key, ...cast };
+// The cast of the story (tonight the test story; the founder's final story replaces the file).
+export function activeCast(source = story) {
+  const { persona, buyerAgents, workingAgents, disposable, shopAgents, shops, city, order, renewal } = source;
+  return { key: source.name, persona, buyerAgents, workingAgents, disposable, shopAgents, shops, city, order, renewal };
 }
 
 // Every cast member with its ENS name and wallet role.
@@ -47,6 +50,51 @@ export function disposableEntry(n, cast = activeCast(), root = config.root.ens) 
     pays: true,
     capMicro: d.capMicro,
   };
+}
+
+// The model settings of an agent role under the active preset (ADR-0048).
+// AGENT_PRESET overrides the story's active preset for one run.
+export function agentPreset(role, { env = process.env, source = story } = {}) {
+  const { active, presets } = source.agentModels;
+  const name = env.AGENT_PRESET || active;
+  // Own keys only: "constructor" or "__proto__" is no preset and no role.
+  if (!Object.hasOwn(presets, name)) throw new Error(`agent preset "${name}" is not in the story config`);
+  const { roles } = presets[name];
+  if (!Object.hasOwn(roles, role)) throw new Error(`agent preset "${name}" has no settings for role "${role}"`);
+  return { preset: name, role, ...roles[role] };
+}
+
+// API cost in USD of one response's usage, from the configured per-million-token prices.
+// A model's longPrompt card (Haiku 5.5: a prompt over 100,000 tokens, counting cache
+// reads and writes) prices every token of that request, output included. 1-hour cache
+// writes cost cacheWrite1h and 5-minute writes cacheWrite5m, from usage.cache_creation;
+// writes it does not break down are priced at the 5-minute rate.
+export function apiCostUsd(model, usage) {
+  const prices = config.models.pricingUsdPerMTok;
+  if (!Object.hasOwn(prices, model)) throw new Error(`no price for model "${model}" in the config file`);
+  const tokens = (n) => (Number.isFinite(n) && n > 0 ? n : 0);
+  const u = usage ?? {};
+  const byTtl = u.cache_creation ?? {};
+  const input = tokens(u.input_tokens);
+  const output = tokens(u.output_tokens);
+  const read = tokens(u.cache_read_input_tokens);
+  const write1h = tokens(byTtl.ephemeral_1h_input_tokens);
+  const write5m = Math.max(tokens(byTtl.ephemeral_5m_input_tokens), tokens(u.cache_creation_input_tokens) - write1h);
+  const base = prices[model];
+  const long = base.longPrompt;
+  const card = long && input + read + write5m + write1h > long.aboveInputTokens ? long : base;
+  const rate = (key) => {
+    if (!Number.isFinite(card[key])) throw new Error(`no ${key} price for model "${model}" in the config file`);
+    return card[key];
+  };
+  return (
+    (input * rate('input') +
+      output * rate('output') +
+      write5m * rate('cacheWrite5m') +
+      write1h * rate('cacheWrite1h') +
+      read * rate('cacheRead')) /
+    1e6
+  );
 }
 
 // RPC candidates in order: the secret URL (if set), the keyed Arkiv URL (if the key
