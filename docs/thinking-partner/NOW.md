@@ -67,10 +67,10 @@ Updated 02:05 IST. **The mirror (M11) now runs on the real Arkiv writer, in the 
 
 ## website
 
-Updated 03:20 IST, Fri 6 Nov (T5 Web). **The shell, the phone views and the agent run route are on `main`.** A new PR wires the merchant phone's order stream and the accountant CSV to the live money graph on Arkiv (read through T3's GraphQL), so an order pops up on the merchant's phone as soon as the mirror writes it.
-- Running: nothing long. M16 (checkout kit, store) waits for M4 (shop, facilitator, not merged yet).
+Updated 03:45 IST, Fri 6 Nov (T5 Web). **On `main`:** the shell, the phone views, the agent run route, and (PR 23) the merchant order stream and accountant CSV on the live money graph. A new PR wires the order trail page (`/order/<id>`) to GraphQL and makes the explain page show each call's rows, bytes and milliseconds.
+- Running: nothing long. M16 (checkout kit, store) waits for M4 (shop, facilitator; not merged).
 - Blockers: none. Customer panels wait for M4 and M6, the race for M9, the agent run for M12.
-- Next: M16 once M4 lands; meanwhile Friday item 9 (Open toggle) needs T3's `shop_open`; the explain and order pages. Fresh start file: `docs/sessions/website/resume.md`.
+- Next: M16 once M4 lands; Friday item 9 (Open toggle) once T3's `shop_open` lands. Fresh start file: `docs/sessions/website/resume.md`.
 
 ## records
 
