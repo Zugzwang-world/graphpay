@@ -53,14 +53,19 @@ export function isCodePath(path) {
   return CODE_PATH.test(path) && CODE_EXT.test(path) && !NOT_CODE.test(path) && path !== CONFIG_FILE;
 }
 
-// Addendum B: no ENS or Whitechain address literals outside the config file.
+// Addendum B and acceptance A7: no ENS or Whitechain address literal outside the
+// config file, in any case, with or without 0x, also inside longer hex.
 export function addressFindings(path, text, known) {
   if (!isCodePath(path)) return [];
+  const lower = text.toLowerCase();
   const out = [];
-  for (const m of text.matchAll(ADDRESS)) {
-    if (known.has(m[0].toLowerCase())) out.push({ path, line: lineOf(text, m.index), label: 'address-literal-outside-config' });
+  for (const address of known) {
+    const hex = address.slice(2);
+    for (let i = lower.indexOf(hex); i !== -1; i = lower.indexOf(hex, i + hex.length)) {
+      out.push({ path, line: lineOf(text, i), label: 'address-literal-outside-config' });
+    }
   }
-  return out;
+  return out.sort((a, b) => a.line - b.line);
 }
 
 function listFiles(mode, root, paths) {

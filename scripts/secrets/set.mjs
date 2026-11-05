@@ -18,26 +18,42 @@ function readHidden(label) {
   return new Promise((resolve, reject) => {
     const { stdin, stderr } = process;
     let value = '';
-    let escape = null; // null, 'start' (after ESC) or 'csi' (inside ESC [ ...)
-    let done = null;
-    const finish = (error) => {
-      if (done) return;
-      done = error ?? true;
-      setTimeout(() => {
-        stdin.removeListener('data', onData);
-        stdin.setRawMode(false);
-        stdin.pause();
-        stderr.write('\n');
-        if (done !== true) reject(done);
-        else resolve(value.trim());
-      }, 150);
+    let escape = null; // null, 'start' (after ESC), 'csi' (inside ESC [ ...) or 'ss3' (after ESC O)
+    let outcome = null; // set at Enter, Ctrl-C or a refusal; input is then only drained
+    let timer = null;
+    const settle = () => {
+      stdin.removeListener('data', onData);
+      stdin.setRawMode(false);
+      stdin.pause();
+      stderr.write('\n');
+      if (outcome === true) resolve(value.trim());
+      else reject(outcome);
+    };
+    // Wait until input has been quiet for 150 ms, so a late second line is read
+    // here (and refused) instead of reaching the shell.
+    const drain = () => {
+      clearTimeout(timer);
+      timer = setTimeout(settle, 150);
+    };
+    const finish = (result) => {
+      outcome ??= result;
+      drain();
     };
     const onData = (chunk) => {
-      if (done) return; // draining
+      if (outcome !== null) {
+        if (outcome === true && chunk.replace(/\u001b(?:\[[0-9;]*[@-~]|O.)/g, '').trim() !== '') {
+          outcome = new EnvError(`${label}: refused (the paste had more than one line)`);
+        }
+        return drain();
+      }
       for (let i = 0; i < chunk.length; i += 1) {
         const ch = chunk[i];
         if (escape === 'start') {
-          escape = ch === '[' ? 'csi' : null;
+          escape = ch === '[' ? 'csi' : ch === 'O' ? 'ss3' : null;
+          continue;
+        }
+        if (escape === 'ss3') {
+          escape = null;
           continue;
         }
         if (escape === 'csi') {
@@ -50,9 +66,8 @@ function readHidden(label) {
         }
         if (ch === '\u0003') return finish(new EnvError(`${label}: cancelled`));
         if (ch === '\r' || ch === '\n' || ch === '\u0004') {
-          const rest = chunk.slice(i + 1).replace(/\u001b\[[0-9;]*[@-~]/g, '');
-          if (rest.trim() !== '') return finish(new EnvError(`${label}: refused (the paste had more than one line)`));
-          return finish();
+          const rest = chunk.slice(i + 1).replace(/\u001b(?:\[[0-9;]*[@-~]|O.)/g, '');
+          return finish(rest.trim() !== '' ? new EnvError(`${label}: refused (the paste had more than one line)`) : true);
         }
         if (ch === '\u007f' || ch === '\b') value = value.slice(0, -1);
         else if (ch >= ' ' && ch <= '~') value += ch;

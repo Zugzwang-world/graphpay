@@ -6,16 +6,16 @@ Every version the event code pins, with how it was checked. Each track adds the 
 
 | item | pinned | how checked | status |
 |---|---|---|---|
-| Node | 22.23.4 (`.node-version`, `engines.node` 22.x) | `fnm exec --using=22.23.4 node --version` → v22.23.4; the shell default on this Mac is v24.21.0 | installed; newest 22.x confirmed by the verifier (FACTS) |
+| Node | 22.23.4 (`.node-version`, `engines.node` 22.x) | `fnm exec --using=22.23.4 node --version` → v22.23.4 (the shell default on this Mac is v24.21.0); the newest 22.x on nodejs.org (verifier) | verified |
 | pnpm | 10.34.9 (`packageManager`) | `pnpm install` reports "using pnpm v10.34.9" (the global pnpm is 10.33.2; pnpm switches to the `packageManager` version) | verified |
 | viem | 2.57.16 (root devDependency, M0 scripts) | installed from the registry; lockfile | verified |
 | Foundry | v1.9.0 (CI `foundry-toolchain` `version:`) | `forge --version` → 1.9.0 (Homebrew) | installed |
-| forge-std | v1.9.7, commit 77041d2 | `install-libs.sh` clones the tag and checks the commit prefix | verified |
+| forge-std | v1.9.7, commit 77041d2 | `install-libs.sh` clones the tag and checks the commit prefix; the latest release is v1.17.0 (2026-09-30), the pin still resolves and the lab's tests passed on it | verified (not the newest; M1 may move it with a note) |
 | solc | 0.8.30, EVM prague, optimizer 200, via IR | `foundry.toml`; matches the Blockscout verification settings in `planning/FACTS.md` §2 | decided |
-| `actions/checkout` | v7 | first CI run on `main` | see the CI run |
-| `actions/setup-node` | v7 | first CI run on `main` | see the CI run |
-| `pnpm/action-setup` | v6 | first CI run on `main` | see the CI run |
-| `foundry-rs/foundry-toolchain` | v1.9.2 | first CI run on `main` | see the CI run |
+| `actions/checkout` | v7 | tag `v7` → `3d3c42e5aac5` = v7.0.1, the latest release (verifier, 21:56) | verified |
+| `actions/setup-node` | v7 | tag `v7` → `949feb2413d6` = v7.1.0, the latest release (verifier, 21:56) | verified |
+| `pnpm/action-setup` | v6 | tag `v6` → `73e46992e05b` = v6.1.1, the latest release (verifier, 21:56) | verified |
+| `foundry-rs/foundry-toolchain` | v1.9.2 | tag `v1.9.2` → `dba66c27052e`, the latest release (verifier, 21:56) | verified |
 | BIP-39 English wordlist | `scripts/lib/bip39-english.txt` from bitcoin/bips | SHA-256 `2f5eed53a4727b4bf8880d8f3f199efc90e58503646d9ff8eff3a2ed3b24dbda`, 2,048 words; a test compares it with viem's copy | verified |
 
 ## M0 web placeholder (`apps/web`, main, checked 2026-11-05 22:20 IST)
@@ -27,3 +27,7 @@ Every version the event code pins, with how it was checked. Each track adds the 
 | typescript | 5.9.3 | the pack's pin (npm `latest` is 7.0.2; Next's template major is 5) | verified |
 | @types/react, @types/react-dom | 19.3.0 | `npm view` (latest 19.x) | verified |
 | @types/node | 22.20.5 | `npm view @types/node@22` (latest 22.x, matching Node 22) | verified |
+
+## Versions the tracks install (re-check with `npm view` before pinning)
+
+The M0 verifier's snapshot of every package in `planning/FACTS.md` §5 is in `docs/technical/FACTS.md` (Results). Changes since the pack: x402 2.30.0 is `latest` (move all four `@x402/*` packages together or keep 2.29.0); `ai` 7.0.163, `@ai-sdk/anthropic` 4.0.97, `@ai-sdk/mcp` 2.0.91; graphql 16.15.0 is the newest 16.x (`latest` is 17.1.0; keep one major); sigma `latest` is 4.0.4 (3.0.3 is the newest 3.x). Each track adds its pins here under its own heading.
