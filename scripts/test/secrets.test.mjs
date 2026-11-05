@@ -270,3 +270,17 @@ test('the error boundary redacts a keyed RPC URL from a failing call (fake RPC: 
   assert.match(res.out, /^error: /m);
   assert.ok(!res.out.includes(secret), 'the keyed URL leaked');
 });
+
+test('secrets:vercel refuses client-exposed and unknown names and never prints a value', () => {
+  const dest = join(repo(), '.env');
+  writeFileSync(dest, `RECORDER_TOKEN=${'r'.repeat(30)}\n`);
+  for (const name of ['NEXT_PUBLIC_RPC', 'VITE_KEY', 'NOT_A_NAME']) {
+    const res = runScript('scripts/secrets/vercel-push.mjs', [name, '--dry-run'], dest);
+    assert.equal(res.status, 1, name);
+  }
+  const dry = runScript('scripts/secrets/vercel-push.mjs', ['RECORDER_TOKEN', '--dry-run'], dest);
+  assert.equal(dry.status, 0);
+  assert.match(dry.stdout, /RECORDER_TOKEN → graphpay-event production \(Sensitive\): dry run/);
+  assert.ok(!dry.stdout.includes('r'.repeat(30)));
+  assert.equal(runScript('scripts/secrets/vercel-push.mjs', ['CRON_SECRET', '--dry-run'], dest).status, 1); // not set
+});

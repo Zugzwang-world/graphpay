@@ -119,7 +119,12 @@
   "site": {
     "url": "https://graphpay-event.vercel.app",
     "mcpPath": "/api/mcp",
-    "graphqlPath": "/api/graphql"
+    "graphqlPath": "/api/graphql",
+    "vercel": {
+      "project": "graphpay-event",
+      "projectId": "prj_I3XDMAm2tg7lU6vPVzcYyouIqV0m",
+      "team": "hrizzup"
+    }
   },
   "wallets": {
     "carried": {
