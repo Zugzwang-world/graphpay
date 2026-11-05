@@ -112,6 +112,7 @@ export async function sendTx(ctx, { role, label, request, gasFloor = 0n, expecte
     publicClient.getTransactionCount({ address: account.address, blockTag: 'pending' }),
   ]);
   if (pending !== latest) throw new Error(`${role} has a pending transaction (nonce ${latest}); settle it first`);
+  if ((await publicClient.getChainId()) !== ctx.chain.id) throw new Error(`the RPC no longer answers chain ${ctx.chain.id}; nothing sent`);
   if (expectedNonce !== undefined && latest !== expectedNonce) throw new Error(`${role}'s nonce moved to ${latest} (expected ${expectedNonce}); nothing sent`);
   const estimate = request.bytecode
     ? await publicClient.estimateGas({ account, data: request.data })
