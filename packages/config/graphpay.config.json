@@ -1,5 +1,5 @@
 {
-  "about": "The one config file (ADR-0030): every person, shop and agent name and every ENS, Whitechain and Arkiv address and URL. Values come from planning/FACTS.md and are re-verified in docs/technical/FACTS.md. Section owners: root, networks, wallets, cast, site (main); whitechain.contracts (payments); ens (identity); arkiv (arkiv).",
+  "about": "The infrastructure config (ADR-0030): every ENS, Whitechain and Arkiv address and URL, the networks, the wallet roles and the model pricing. Everything story-specific lives in story.json (ADR-0047). Values come from planning/FACTS.md, re-verified in docs/technical/FACTS.md. Section owners: root, networks, wallets, models, site (main); whitechain.contracts (payments); ens (identity); arkiv (arkiv).",
   "schemaVersion": 1,
   "root": {
     "ens": "graphpay.eth"
@@ -11,8 +11,14 @@
       "nativeSymbol": "WBT",
       "secretRpcEnv": "WHITECHAIN_RPC_URL",
       "publicRpcs": [
-        { "label": "public Ankr", "url": "https://rpc.ankr.com/whitechain_testnet" },
-        { "label": "Whitechain public", "url": "https://rpc.testnet.whitechain.io" }
+        {
+          "label": "public Ankr",
+          "url": "https://rpc.ankr.com/whitechain_testnet"
+        },
+        {
+          "label": "Whitechain public",
+          "url": "https://rpc.testnet.whitechain.io"
+        }
       ],
       "ws": "wss://rpc.testnet.whitechain.io/ws",
       "explorer": "https://explorer.testnet.whitechain.io",
@@ -24,7 +30,12 @@
       "chainId": 11155111,
       "nativeSymbol": "ETH",
       "secretRpcEnv": "SEPOLIA_RPC_URL",
-      "publicRpcs": [{ "label": "publicnode", "url": "https://ethereum-sepolia-rpc.publicnode.com" }],
+      "publicRpcs": [
+        {
+          "label": "publicnode",
+          "url": "https://ethereum-sepolia-rpc.publicnode.com"
+        }
+      ],
       "explorer": "https://sepolia.etherscan.io"
     },
     "rabdi": {
@@ -33,7 +44,12 @@
       "nativeSymbol": "tGLM",
       "rpcBase": "https://rpc.rabdi.db-chain.testnet.arkiv.network",
       "accessKeyEnv": "ARKIV_ACCESS_KEY",
-      "publicRpcs": [{ "label": "Rabdi public (keyless)", "url": "https://rpc.rabdi.db-chain.testnet.arkiv.network" }],
+      "publicRpcs": [
+        {
+          "label": "Rabdi public (keyless)",
+          "url": "https://rpc.rabdi.db-chain.testnet.arkiv.network"
+        }
+      ],
       "explorer": "https://rabdi.explorer.arkiv.network"
     }
   },
@@ -44,10 +60,15 @@
         "name": "Tether USD",
         "symbol": "USDT",
         "decimals": 6,
-        "eip712": { "name": "Tether USD", "version": "1" },
+        "eip712": {
+          "name": "Tether USD",
+          "version": "1"
+        },
         "erc7930": "0x0001000002075214cedfb56113143d55b2358b8cfbb0deb5ad2f55a7"
       },
-      "neverUse": ["0xaa7962d073935D387e8d442DA1D7149C81388f46"]
+      "neverUse": [
+        "0xaa7962d073935D387e8d442DA1D7149C81388f46"
+      ]
     },
     "system": {
       "permit2": "0x000000000022D473030F116dDEE9F6B43aC78BA3",
@@ -55,7 +76,10 @@
       "entryPointV07": "0x0000000071727De22E5E9d8BAf0edAc6f37da032",
       "x402ExactPermit2Proxy": "0x402085c248EeA27D92E8b30b2C58ed07f9E20001"
     },
-    "labDoNotReuse": ["0x395dc742053F1D77595ED18884628B809A34f3D6", "0x4fD68FB630711Ef592F24c2441eA23B270C1e442"],
+    "labDoNotReuse": [
+      "0x395dc742053F1D77595ED18884628B809A34f3D6",
+      "0x4fD68FB630711Ef592F24c2441eA23B270C1e442"
+    ],
     "contracts": {}
   },
   "ens": {
@@ -103,23 +127,74 @@
       "OPERATOR": "0x531D49A595946a72b9C47b78D287Ff6e6B3CfF32"
     },
     "fresh": [
-      { "role": "DEPLOYER", "purpose": "Whitechain contract admin and deployer" },
-      { "role": "FACILITATOR", "purpose": "relayer for the hosted facilitator; holds only WBT" },
-      { "role": "RENEWER", "purpose": "second relayer, scheduled renewals" },
-      { "role": "POLICY_WRITER", "purpose": "setPolicy only" },
-      { "role": "W_SYNC", "purpose": "Arkiv recorder: create-only off-chain edges" },
-      { "role": "W_LEDGER", "purpose": "Arkiv money mirror: the single writer of money entities" },
-      { "role": "W_DIRECTORY", "purpose": "Arkiv directory writer: shop, quote, heartbeat and handoff entities, never money" },
-      { "role": "W_SEED_EVENT", "purpose": "synthetic city S" },
-      { "role": "W_SEED_M_EVENT", "purpose": "synthetic city M" },
-      { "role": "VITALIK", "purpose": "the persona slot: owner and human payer, never bound" },
-      { "role": "SHOP_KESAR", "purpose": "the good-shop slot: merchant and owner" },
-      { "role": "SHOP_JAMUN", "purpose": "the trap-shop slot: merchant and owner" },
-      { "role": "SHOP_SYRUP", "purpose": "the runner-up slot: merchant and owner" },
-      { "role": "PAYER", "purpose": "the stage payer agent" },
-      { "role": "DEAL_HUNTER", "purpose": "the scout agent (revoked-agent beat)" },
-      { "role": "REHEARSAL_PAYER", "purpose": "the rehearsal agent" },
-      { "role": "ACCEPTANCE_PAYER", "purpose": "the acceptance agent" }
+      {
+        "role": "DEPLOYER",
+        "purpose": "Whitechain contract admin and deployer"
+      },
+      {
+        "role": "FACILITATOR",
+        "purpose": "relayer for the hosted facilitator; holds only WBT"
+      },
+      {
+        "role": "RENEWER",
+        "purpose": "second relayer, scheduled renewals"
+      },
+      {
+        "role": "POLICY_WRITER",
+        "purpose": "setPolicy only"
+      },
+      {
+        "role": "W_SYNC",
+        "purpose": "Arkiv recorder: create-only off-chain edges"
+      },
+      {
+        "role": "W_LEDGER",
+        "purpose": "Arkiv money mirror: the single writer of money entities"
+      },
+      {
+        "role": "W_DIRECTORY",
+        "purpose": "Arkiv directory writer: shop, quote, heartbeat and handoff entities, never money"
+      },
+      {
+        "role": "W_SEED_EVENT",
+        "purpose": "synthetic city S"
+      },
+      {
+        "role": "W_SEED_M_EVENT",
+        "purpose": "synthetic city M"
+      },
+      {
+        "role": "VITALIK",
+        "purpose": "the persona slot: owner and human payer, never bound"
+      },
+      {
+        "role": "SHOP_KESAR",
+        "purpose": "the good-shop slot: merchant and owner"
+      },
+      {
+        "role": "SHOP_JAMUN",
+        "purpose": "the trap-shop slot: merchant and owner"
+      },
+      {
+        "role": "SHOP_SYRUP",
+        "purpose": "the runner-up slot: merchant and owner"
+      },
+      {
+        "role": "PAYER",
+        "purpose": "the stage payer agent"
+      },
+      {
+        "role": "DEAL_HUNTER",
+        "purpose": "the scout agent (revoked-agent beat)"
+      },
+      {
+        "role": "REHEARSAL_PAYER",
+        "purpose": "the rehearsal agent"
+      },
+      {
+        "role": "ACCEPTANCE_PAYER",
+        "purpose": "the acceptance agent"
+      }
     ],
     "disposablePrefix": "DISPOSABLE_",
     "labNotUsed": [
@@ -137,66 +212,29 @@
       "0x31F5ebe121F31dCcBE651E500E30d645b20C225E"
     ]
   },
-  "cast": {
-    "active": "test",
-    "test": {
-      "about": "Test cast: the pack's canonical cast (planning/SPEC/AGENTS.md §1, ADR-0013). The final demo cast is added on Friday as cast.demo and selected with cast.active. Every number in scenario blocks is synthetic and labelled as such.",
-      "city": { "name": "Mumbai", "timeZone": "Asia/Kolkata" },
-      "persona": { "key": "vitalik", "label": "vitalik", "displayName": "Vitalik", "walletRole": "VITALIK" },
-      "buyerAgents": [
-        { "key": "concierge", "label": "concierge", "displayName": "Concierge", "walletRole": "VITALIK", "pays": false },
-        { "key": "scout", "label": "scout", "displayName": "Scout", "walletRole": "DEAL_HUNTER", "pays": true, "capMicro": 1000000 },
-        { "key": "analyst", "label": "analyst", "displayName": "Analyst", "walletRole": "VITALIK", "pays": false },
-        { "key": "payer", "label": "payer", "displayName": "Payer", "walletRole": "PAYER", "pays": true, "capMicro": 6000000 }
-      ],
-      "workingAgents": [
-        { "key": "rehearsal", "label": "rehearsal", "displayName": "Rehearsal", "walletRole": "REHEARSAL_PAYER", "pays": true, "capMicro": 30000000 },
-        { "key": "acceptance", "label": "acceptance", "displayName": "Acceptance", "walletRole": "ACCEPTANCE_PAYER", "pays": true, "capMicro": 6000000 }
-      ],
-      "disposable": { "labelPrefix": "disposable-", "walletRolePrefix": "DISPOSABLE_", "capMicro": 1000000, "expiryDays": 14 },
-      "shopAgents": [
-        { "key": "storefront", "label": "storefront", "displayName": "Storefront" },
-        { "key": "risk", "label": "risk", "displayName": "Risk" },
-        { "key": "dispatch", "label": "dispatch", "displayName": "Dispatch" }
-      ],
-      "shops": [
-        {
-          "key": "kesar-kingdom",
-          "label": "kesar-kingdom",
-          "displayName": "Kesar Kingdom",
-          "storyRole": "good",
-          "walletRole": "SHOP_KESAR",
-          "scenario": { "synthetic": true, "refundRate90d": 0.012, "onTimeRate": 0.97, "orders90d": 4812, "verified": true, "priceFor12Micro": 4800000, "etaMinutes": 45, "distanceKm": 2.1 }
-        },
-        {
-          "key": "jamun-junction",
-          "label": "jamun-junction",
-          "displayName": "Jamun Junction",
-          "storyRole": "trap",
-          "walletRole": "SHOP_JAMUN",
-          "scenario": { "synthetic": true, "refundRate90d": 0.184, "onTimeRate": 0.71, "orders90d": 2190, "verified": true, "priceFor12Micro": 3300000, "etaMinutes": 25, "distanceKm": 0.9 }
-        },
-        {
-          "key": "syrup-street",
-          "label": "syrup-street",
-          "displayName": "Syrup Street",
-          "storyRole": "runner-up",
-          "walletRole": "SHOP_SYRUP",
-          "scenario": { "synthetic": true, "refundRate90d": 0.031, "onTimeRate": 0.93, "orders90d": 1204, "verified": true, "priceFor12Micro": 4200000, "etaMinutes": 50, "distanceKm": 1.4 }
-        }
-      ],
-      "order": {
-        "synthetic": true,
-        "item": "gulab jamun",
-        "quantity": 12,
-        "shop": "kesar-kingdom",
-        "priceMicro": 4800000,
-        "budgetMicro": 6000000,
-        "deadlineLocal": "20:00",
-        "refundMicro": 800000,
-        "refundReason": "two squashed jamuns"
+  "models": {
+    "source": "Anthropic model table in the claude-api reference (cached 2026-10-06), checked 2026-11-05; cache writes are 1.25x input and cache reads 0.1x (Opus 5.5's read price is listed; Haiku 5.5's is derived). Verify on the pricing page before quoting a cost publicly.",
+    "pricingUsdPerMTok": {
+      "claude-opus-5-5": {
+        "input": 4.0,
+        "output": 20.0,
+        "cacheWrite5m": 5.0,
+        "cacheRead": 0.2
+      },
+      "claude-haiku-5-5": {
+        "input": 0.1,
+        "output": 0.5,
+        "cacheWrite5m": 0.125,
+        "cacheRead": 0.01,
+        "note": "prompts up to 100K tokens; 0.50 / 2.50 beyond"
       }
     },
-    "demo": null
+    "effortLevels": [
+      "low",
+      "medium",
+      "high",
+      "xhigh",
+      "max"
+    ]
   }
 }

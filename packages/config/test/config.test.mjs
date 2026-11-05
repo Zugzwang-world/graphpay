@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { test } from 'node:test';
-import { activeCast, castEntries, config, disposableEntry, resolveRpc, rpcCandidates } from '../index.mjs';
+import { activeCast, agentPreset, apiCostUsd, castEntries, config, disposableEntry, resolveRpc, rpcCandidates, story } from '../index.mjs';
 
 const pack = (file) => readFileSync(new URL(`../../../planning/${file}`, import.meta.url), 'utf8');
 
@@ -23,13 +23,12 @@ test('chain ids and the test USDT match planning/FACTS.md', () => {
   for (const address of Object.values(config.ens.contracts)) assert.ok(facts.toLowerCase().includes(address.toLowerCase()), address);
 });
 
-test('the test cast has 4 owners and 13 agents plus the two working agents, all unique', () => {
-  const cast = activeCast({ GRAPHPAY_CAST: 'test' });
-  assert.equal(cast.key, 'test');
+test('the story cast is complete and unique, one wallet per paying agent, owners never bound', () => {
+  const cast = activeCast();
   const entries = castEntries(cast);
   const agents = entries.filter((e) => e.kind.endsWith('agent'));
-  assert.equal(entries.filter((e) => e.kind === 'persona' || e.kind === 'shop').length, 4);
-  assert.equal(agents.length, 15);
+  assert.equal(entries.filter((e) => e.kind === 'persona' || e.kind === 'shop').length, 1 + cast.shops.length);
+  assert.equal(agents.length, cast.buyerAgents.length + cast.workingAgents.length + cast.shops.length * cast.shopAgents.length);
   assert.equal(new Set(entries.map((e) => e.ensName)).size, entries.length);
   for (const e of entries) assert.ok(e.ensName.endsWith(`.${config.root.ens}`), e.ensName);
   const roles = new Set(config.wallets.fresh.map((w) => w.role));
@@ -37,11 +36,43 @@ test('the test cast has 4 owners and 13 agents plus the two working agents, all 
   const payers = agents.filter((a) => a.pays);
   assert.equal(new Set(payers.map((a) => a.walletRole)).size, payers.length, 'one wallet per paying agent');
   assert.ok(!payers.some((a) => a.walletRole === cast.persona.walletRole), 'owner wallets are never bound');
-  assert.equal(disposableEntry(1, cast).ensName, `disposable-1.vitalik.${config.root.ens}`);
+  assert.equal(disposableEntry(1, cast).ensName, `${cast.disposable.labelPrefix}1.${cast.persona.label}.${config.root.ens}`);
 });
 
-test('a cast that is not in the file is refused (the demo cast arrives on Friday)', () => {
-  assert.throws(() => activeCast({ GRAPHPAY_CAST: 'demo' }), /not in the config file/);
+test('the story names its order, renewal, city sizes and demo steps, and holds no address', () => {
+  const shopKeys = new Set(story.shops.map((s) => s.key));
+  assert.ok(shopKeys.has(story.order.shop) && shopKeys.has(story.renewal.shop));
+  const sku = story.shops.find((s) => s.key === story.order.shop).products.find((p) => p.sku === story.order.sku);
+  assert.equal(sku.priceMicro, story.order.priceMicro);
+  assert.ok(story.order.priceMicro <= story.order.budgetMicro);
+  assert.deepEqual(Object.keys(story.syntheticCity.sizes).sort(), ['M', 'S']);
+  assert.ok(story.demoScript.length > 0 && story.demoScript.every((s, i) => s.step === i + 1));
+  assert.ok(!/0x[0-9a-fA-F]{40}/.test(JSON.stringify(story)), 'addresses belong in graphpay.config.json');
+  assert.ok(!('cast' in config), 'the cast lives in story.json only');
+});
+
+test('every agent preset covers every agent role with a priced model and a valid effort', () => {
+  const roles = [...story.buyerAgents.map((a) => a.key), ...story.shopAgents.map((a) => a.key)];
+  assert.ok(story.agentModels.presets[story.agentModels.active], 'the active preset exists');
+  for (const [name, preset] of Object.entries(story.agentModels.presets)) {
+    for (const role of roles) {
+      const settings = preset.roles[role];
+      assert.ok(settings, `${name}/${role}`);
+      assert.ok(config.models.pricingUsdPerMTok[settings.model], `${name}/${role}: ${settings.model} has a price`);
+      assert.ok(config.models.effortLevels.includes(settings.effort), `${name}/${role}: effort`);
+      assert.ok(settings.maxTokens >= 16000, `${name}/${role}: room for xhigh thinking`);
+    }
+  }
+  assert.equal(agentPreset('payer', { env: {} }).preset, story.agentModels.active);
+  assert.equal(agentPreset('payer', { env: { AGENT_PRESET: 'live' } }).preset, 'live');
+  assert.throws(() => agentPreset('payer', { env: { AGENT_PRESET: 'nope' } }), /not in the story config/);
+});
+
+test('API cost comes from the configured prices', () => {
+  const model = Object.keys(config.models.pricingUsdPerMTok)[0];
+  const price = config.models.pricingUsdPerMTok[model];
+  assert.equal(apiCostUsd(model, { input_tokens: 1e6, output_tokens: 1e6 }), price.input + price.output);
+  assert.throws(() => apiCostUsd('not-a-model', {}), /no price/);
 });
 
 test('RPC candidates: the secret URL first, then public Ankr, then Whitechain public', () => {

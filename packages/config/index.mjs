@@ -1,9 +1,14 @@
-// @graphpay/config: the one config file (ADR-0030) and the helpers every
-// package uses to read it. Names and addresses come from here, never from code.
+// @graphpay/config: the infrastructure config (addresses, networks, wallet roles,
+// model pricing; ADR-0030) and the one story config (everything story-specific;
+// ADR-0047), plus the helpers every package uses to read them. Names, story
+// values and addresses come from these files, never from code.
 
 import { readFileSync } from 'node:fs';
 
-export const config = JSON.parse(readFileSync(new URL('./graphpay.config.json', import.meta.url), 'utf8'));
+const read = (file) => JSON.parse(readFileSync(new URL(file, import.meta.url), 'utf8'));
+
+export const config = read('./graphpay.config.json');
+export const story = read('./story.json');
 
 export function network(key) {
   const net = config.networks[key];
@@ -11,12 +16,10 @@ export function network(key) {
   return net;
 }
 
-// The active cast: GRAPHPAY_CAST if set, else cast.active ("test" tonight, "demo" from Friday).
-export function activeCast(env = process.env) {
-  const key = env.GRAPHPAY_CAST || config.cast.active;
-  const cast = config.cast[key];
-  if (!cast || key === 'active') throw new Error(`cast "${key}" is not in the config file`);
-  return { key, ...cast };
+// The cast of the story (tonight the test story; the founder's final story replaces the file).
+export function activeCast(source = story) {
+  const { persona, buyerAgents, workingAgents, disposable, shopAgents, shops, city, order, renewal } = source;
+  return { key: source.name, persona, buyerAgents, workingAgents, disposable, shopAgents, shops, city, order, renewal };
 }
 
 // Every cast member with its ENS name and wallet role.
@@ -47,6 +50,31 @@ export function disposableEntry(n, cast = activeCast(), root = config.root.ens) 
     pays: true,
     capMicro: d.capMicro,
   };
+}
+
+// The model settings of an agent role under the active preset (ADR-0048).
+// AGENT_PRESET overrides the story's active preset for one run.
+export function agentPreset(role, { env = process.env, source = story } = {}) {
+  const name = env.AGENT_PRESET || source.agentModels.active;
+  const preset = source.agentModels.presets[name];
+  if (!preset) throw new Error(`agent preset "${name}" is not in the story config`);
+  const settings = preset.roles[role];
+  if (!settings) throw new Error(`agent preset "${name}" has no settings for role "${role}"`);
+  return { preset: name, role, ...settings };
+}
+
+// API cost in USD of one response's usage, from the configured per-million-token prices.
+export function apiCostUsd(model, usage) {
+  const price = config.models.pricingUsdPerMTok[model];
+  if (!price) throw new Error(`no price for model "${model}" in the config file`);
+  const tokens = (n) => (Number.isFinite(n) ? n : 0);
+  return (
+    (tokens(usage.input_tokens) * price.input +
+      tokens(usage.output_tokens) * price.output +
+      tokens(usage.cache_creation_input_tokens) * price.cacheWrite5m +
+      tokens(usage.cache_read_input_tokens) * price.cacheRead) /
+    1e6
+  );
 }
 
 // RPC candidates in order: the secret URL (if set), the keyed Arkiv URL (if the key

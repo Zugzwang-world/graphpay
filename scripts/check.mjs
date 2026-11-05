@@ -63,6 +63,38 @@ export function addressFindings(path, text, known) {
   return out;
 }
 
+export const STORY_FILE = 'packages/config/story.json';
+
+// The design rule (ADR-0047): story names and values live only in the story file.
+// Distinctive literals only, matched case-sensitively: the persona's and shops'
+// labels and display names, product names and SKUs, the renewal item and plan id,
+// and the order's request text. Agent role words (scout, payer, ...) are structure,
+// and upper-case wallet role slots (VITALIK, SHOP_KESAR) are infrastructure names.
+export function storyLiterals(root) {
+  const file = join(root, STORY_FILE);
+  if (!existsSync(file)) return [];
+  const s = JSON.parse(readFileSync(file, 'utf8'));
+  const out = [s.persona?.label, s.persona?.displayName, s.order?.request, s.order?.item, s.renewal?.item, s.renewal?.plan];
+  for (const shop of s.shops ?? []) {
+    out.push(shop.label, shop.displayName);
+    for (const product of shop.products ?? []) out.push(product.name, product.sku);
+  }
+  return [...new Set(out.filter((v) => typeof v === 'string' && v.length >= 4))];
+}
+
+const escapeRe = (v) => v.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+export function storyFindings(path, text, literals) {
+  const code = CODE_PATH.test(path) && CODE_EXT.test(path) && !NOT_CODE.test(path) && path !== STORY_FILE;
+  if (!code) return [];
+  const out = [];
+  for (const literal of literals) {
+    const re = new RegExp(`(?<![A-Za-z0-9_-])${escapeRe(literal)}(?![A-Za-z0-9_-])`, 'g');
+    for (const m of text.matchAll(re)) out.push({ path, line: lineOf(text, m.index), label: 'story-literal-outside-story-config' });
+  }
+  return out;
+}
+
 function listFiles(mode, root, paths) {
   if (mode === 'paths') return paths;
   const args =
@@ -83,6 +115,7 @@ export function run(argv, root = git(['rev-parse', '--show-toplevel'], process.c
   const mode = argv.includes('--staged') ? 'staged' : argv.includes('--paths') ? 'paths' : 'tree';
   const paths = mode === 'paths' ? argv.slice(argv.indexOf('--paths') + 1) : [];
   const known = knownAddresses(root);
+  const literals = storyLiterals(root);
   const findings = [];
   const files = listFiles(mode, root, paths);
   for (const path of files) {
@@ -96,6 +129,7 @@ export function run(argv, root = git(['rev-parse', '--show-toplevel'], process.c
     if (text === null) continue;
     findings.push(...scanText(text, path));
     findings.push(...addressFindings(path, text, known));
+    findings.push(...storyFindings(path, text, literals));
     if (path === 'env.example') findings.push(...checkEnvExample(text, path));
     if (mode !== 'paths' && basename(path).startsWith('.env')) {
       if (mode === 'staged' || git(['ls-files', '--', path], root).trim()) {

@@ -3,13 +3,14 @@
   "version": "0.0.0",
   "private": true,
   "type": "module",
-  "description": "The one config file: every person, shop and agent name and every ENS, Whitechain and Arkiv address (ADR-0030).",
+  "description": "The infrastructure config (addresses, networks, wallet roles, model pricing; ADR-0030) and the one story config (ADR-0047).",
   "exports": {
     ".": {
       "types": "./index.d.ts",
       "default": "./index.mjs"
     },
-    "./graphpay.config.json": "./graphpay.config.json"
+    "./graphpay.config.json": "./graphpay.config.json",
+    "./story.json": "./story.json"
   },
   "types": "./index.d.ts",
   "scripts": {
