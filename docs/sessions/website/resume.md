@@ -20,7 +20,7 @@ Each unwired route is a file under `apps/web/app/api/**/route.ts` that checks th
 | `POST /api/merchant/{dispatch,refund}` | M4 | merchant key server-side behind the passcode (E-3) |
 
 ## Then
-M16 (checkout kit `packages/checkout-kit`, store `apps/store`; needs M4; read `planning/PROMPTS/16-checkout-kit-store.md`), then Friday items 8 to 13 (`docs/plan/MASTER_PLAN.md` §4). Items 9, 10 need T3's `shop_open` and `shops` queries.
+After M16 merges: the store's Sunday box (stretch), then Friday items 8 to 13 (`docs/plan/MASTER_PLAN.md` §4). Items 9, 10 need T3's `shop_open` and `shops` queries.
 
 ## Rules that bit
 - Story and addresses only from `@graphpay/config` (`pnpm check` fails otherwise; also in tests).

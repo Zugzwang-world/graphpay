@@ -65,10 +65,10 @@ Updated 04:10 IST, Fri 6 Nov. **The mirror runs live (since 03:13 IST); M12's si
 
 ## website
 
-Updated 06:05 IST, Fri 6 Nov (T5 Web). **On `main`:** the shell, phone views, agent run route, merchant stream and CSV, order trail, race mode, the Open toggle, Pause and Resume. **In a PR:** the customer phone's live state: the payer agent's status (ENS and policy), cap and spend today (the checkout contract), its last order (the graph). Read live from the three chains this session: Active, 0.00 of 6.00 USDT today. Also fixes the production status chip, which showed the checkout as not deployed.
-- Running: nothing long. M16 (checkout kit, store) waits for M4 (not merged).
-- Blockers: Pause/Resume and the Open toggle need two keys in Vercel (see OPEN).
-- Next: M16 once M4 lands; the map (item 10) and the explainer lanes (item 13) as Join's live hooks (item 3) write presence. Fresh start file: `docs/sessions/website/resume.md`.
+Updated 07:10 IST, Fri 6 Nov (T5 Web). **On `main`:** the shell, phone views, agent run route, merchant stream and CSV, order trail, race mode, the Open toggle, Pause and Resume, the customer's live state. **In a PR:** M16, the checkout kit (`packages/checkout-kit`) and the demo store (`apps/store`): a shop mounts its catalog and a 402 order route in 17 counted lines, a person pays from a browser wallet with no gas, the merchant view lists orders, dispatch and refund sign server-side, the accountant export comes from the chain (checked against the real C7 and lifecycle payments). Two reviewer passes on the kit.
+- Running: nothing long. The store is not deployed: it needs the Vercel project `graphpay-store` and its env (see OPEN).
+- Blockers: for a live demo of the store, T1's hosted facilitator (M4) and the Vercel project (a login step).
+- Next: after the PR, the Sunday-box subscription in the store (stretch), the map (item 10) and the explainer lanes (item 13) as Join's live hooks land. Fresh start file: `docs/sessions/website/resume.md`.
 
 ## agentpay
 
