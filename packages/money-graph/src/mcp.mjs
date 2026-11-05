@@ -34,7 +34,7 @@ export function askDocument({ intent, ens = [], order_id, window = 'D90', verify
     // status and cap from the node row, the window's orders, cancellations and disputes, today's
     // spend, and the principal (the owner) with its verified flag.
     const body = list
-      .map((n, i) => `n${i}: node(ens: ${JSON.stringify(n)}) { ens status capMicro owner { ens verified } reputation(window: ${window}, verify: ${verify ? 'true' : 'false'}) { orders cancellations disputes } today: reputation(window: TODAY) { paidUsdt } }`)
+      .map((n, i) => `n${i}: node(ens: ${JSON.stringify(n)}) { ens status capMicro owner { ens verified } reputation(window: ${window}, verify: ${verify ? 'true' : 'false'}) { orders cancellations disputes synthetic } today: reputation(window: TODAY) { paidUsdt } }`)
       .join(' ');
     return { query: `{ ${body} }`, columns: BUYER_COLUMNS };
   }
@@ -43,7 +43,7 @@ export function askDocument({ intent, ens = [], order_id, window = 'D90', verify
   return { query: `{ ${body} }`, columns: ['ens', 'epoch', ...fields.split(' ')] };
 }
 
-const BUYER_COLUMNS = ['ens', 'status', 'orders', 'cancellations', 'disputes', 'daily_cap_usdt', 'spend_today_usdt', 'principal', 'principal_verified'];
+const BUYER_COLUMNS = ['ens', 'status', 'orders', 'cancellations', 'disputes', 'daily_cap_usdt', 'spend_today_usdt', 'principal', 'principal_verified', 'synthetic'];
 
 export function askTable(intent, data, columns) {
   const rows = [columns.join('\t')];
@@ -51,7 +51,7 @@ export function askTable(intent, data, columns) {
     for (const n of Object.values(data ?? {})) {
       if (!n) continue;
       const rep = n.reputation ?? {};
-      rows.push([n.ens, n.status ?? 'unknown', rep.orders ?? 0, rep.cancellations ?? 0, rep.disputes ?? 0, usdt(n.capMicro ?? 0), n.today?.paidUsdt ?? '0', n.owner?.ens ?? '', n.owner?.verified ? 'true' : 'false'].join('\t'));
+      rows.push([n.ens, n.status ?? 'unknown', rep.orders ?? 0, rep.cancellations ?? 0, rep.disputes ?? 0, usdt(n.capMicro ?? 0), n.today?.paidUsdt ?? '0', n.owner?.ens ?? '', n.owner?.verified ? 'true' : 'false', rep.synthetic ? 'true' : 'false'].join('\t'));
     }
   } else if (intent === 'order_trail') {
     for (const e of data.order ?? []) rows.push([e.kind, e.from?.ens ?? '', e.to?.ens ?? '', e.amountMicro, e.day, e.ref].join('\t'));
