@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { execFileSync, spawnSync } from 'node:child_process';
+import { execFileSync, spawn, spawnSync } from 'node:child_process';
 import { mkdtempSync, readdirSync, readFileSync, statSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -101,9 +101,10 @@ test('import-lab copies exactly the allowlist, prints names only, refuses other 
   const res = runScript('scripts/secrets/import-lab.mjs', ['--from', lab], dest);
   for (const v of Object.values(values)) assert.ok(!res.stdout.includes(v) && !res.stderr.includes(v));
   assert.match(res.stdout, /OPERATOR_PRIVATE_KEY: missing in the lab file/);
-  assert.match(res.stdout, /FUNDER_PRIVATE_KEY: new \(FUNDER 0x[0-9a-fA-F]{40}, DOES NOT match the config file\)/);
+  assert.match(res.stdout, /FUNDER_PRIVATE_KEY: refused \(its address 0x[0-9a-fA-F]{40} is not the carried-over FUNDER 0x[0-9a-fA-F]{40}\)/);
   assert.equal(res.status, 1);
-  assert.deepEqual([...readEnvFile(dest).keys()].sort(), ['ANTHROPIC_API_KEY', 'ARKIV_ACCESS_KEY', 'FUNDER_PRIVATE_KEY']);
+  // A key that is not the carried-over wallet is never written.
+  assert.deepEqual([...readEnvFile(dest).keys()].sort(), ['ANTHROPIC_API_KEY', 'ARKIV_ACCESS_KEY']);
   const refused = runScript('scripts/secrets/import-lab.mjs', ['--from', lab, '--only', 'PAYER_PRIVATE_KEY'], dest);
   assert.match(refused.stdout, /PAYER_PRIVATE_KEY: refused \(not on the import allowlist\)/);
   assert.equal(refused.status, 1);
@@ -182,4 +183,90 @@ test('env helpers never JSON.parse a value', () => {
   for (const file of ['scripts/lib/env-file.mjs', 'scripts/lib/env-loader.mjs', 'scripts/secrets/import-lab.mjs']) {
     assert.ok(!readFileSync(file, 'utf8').includes('JSON.parse'), file);
   }
+});
+
+test('values with # or outside printable ASCII are refused', () => {
+  const file = join(repo(), '.env');
+  for (const bad of ['abc #def', 'a b', 'tab\there', 'café']) {
+    assert.throws(() => setEnvValue(file, 'SOME_NAME', bad), /refused/);
+  }
+});
+
+test('a dead writer leaves no lasting lock or temp copy', () => {
+  const dir = repo();
+  const file = join(dir, '.env');
+  setEnvValue(file, 'A_NAME', 'one');
+  const dead = 2147483646; // no such process
+  writeFileSync(`${file}.lock`, String(dead));
+  writeFileSync(join(dir, `.env.${dead}.0123456789ab.tmp`), 'A_NAME=copy\n');
+  assert.equal(setEnvValue(file, 'B_NAME', 'two'), 'new');
+  assert.deepEqual(readdirSync(dir).sort(), ['.env', '.git', '.gitignore']);
+});
+
+test('an argument that is not a plain name is never echoed', () => {
+  const dest = join(repo(), '.env');
+  const secretish = `ANTHROPIC_API_KEY=${SAMPLES['anthropic-api-key']}`;
+  for (const [script, args] of [
+    ['scripts/secrets/set.mjs', [secretish]],
+    ['scripts/secrets/set-from-stdin.mjs', [secretish]],
+    ['scripts/secrets/gen-secret.mjs', [secretish]],
+    ['scripts/secrets/gen-wallet.mjs', ['--only', secretish]],
+    ['scripts/secrets/import-lab.mjs', ['--only', secretish]],
+  ]) {
+    const res = runScript(script, args, dest, 'x');
+    assert.ok(!res.stdout.includes(SAMPLES['anthropic-api-key']) && !res.stderr.includes(SAMPLES['anthropic-api-key']), script);
+    assert.equal(res.status, 1, script);
+  }
+  assert.match(runScript('scripts/secrets/gen-secret.mjs', ['GRAPHPAY_TOKEN'], dest).stdout, /refused \(only DEMO_PASSCODE/);
+});
+
+test('status hides lines that are not plain names', () => {
+  const dest = join(repo(), '.env');
+  writeFileSync(dest, `CRON_SECRET=${'c'.repeat(30)}\nAbCdEf123=\nlower_case=1\n`);
+  const res = runScript('scripts/secrets/status.mjs', [], dest);
+  assert.ok(!res.stdout.includes('AbCdEf123') && !res.stdout.includes('lower_case'));
+  assert.match(res.stdout, /2 unrecognised line\(s\)/);
+});
+
+test('the error boundary redacts a keyed RPC URL from a failing call (fake RPC: chain id, then HTTP 500)', async () => {
+  const { createServer } = await import('node:http');
+  let calls = 0;
+  const server = createServer((req, res) => {
+    calls += 1;
+    if (calls === 1) {
+      res.setHeader('content-type', 'application/json');
+      res.end(JSON.stringify({ jsonrpc: '2.0', id: 1, result: '0x752' }));
+    } else {
+      res.statusCode = 500;
+      res.end('boom');
+    }
+  });
+  await new Promise((r) => server.listen(0, '127.0.0.1', r));
+  const secret = `k${'9'.repeat(40)}`;
+  const url = `http://127.0.0.1:${server.address().port}/${secret}`;
+  const dest = join(repo(), '.env');
+  writeFileSync(dest, `WHITECHAIN_RPC_URL=${url}\n`);
+  const probe = `
+    import { createPublicClient, http } from 'viem';
+    import { resolveRpc } from './packages/config/index.mjs';
+    import { loadEnv } from './scripts/lib/env-loader.mjs';
+    import { installErrorBoundary } from './scripts/lib/redact.mjs';
+    const { values } = loadEnv();
+    installErrorBoundary(() => values);
+    const rpc = await resolveRpc('whitechain', { env: Object.fromEntries(values) });
+    console.log('resolved', JSON.stringify(rpc));
+    await createPublicClient({ transport: http(rpc.url, { retryCount: 0 }) }).getBlockNumber();
+  `;
+  const res = await new Promise((resolveRun) => {
+    const child = spawn(process.execPath, ['--input-type=module', '-e', probe], { env: { ...process.env, ENV_FILE: dest } });
+    let out = '';
+    child.stdout.on('data', (d) => (out += d));
+    child.stderr.on('data', (d) => (out += d));
+    child.on('close', (status) => resolveRun({ status, out }));
+  });
+  server.close();
+  assert.equal(res.status, 1);
+  assert.match(res.out, /resolved \{"label":"WHITECHAIN_RPC_URL \(secret\)"/);
+  assert.match(res.out, /^error: /m);
+  assert.ok(!res.out.includes(secret), 'the keyed URL leaked');
 });

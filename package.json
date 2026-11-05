@@ -22,8 +22,7 @@
     "secrets:status": "node scripts/secrets/status.mjs",
     "secrets:import-lab": "node scripts/secrets/import-lab.mjs",
     "wallet:gen": "node scripts/secrets/gen-wallet.mjs",
-    "wallets:addresses": "node scripts/wallets/addresses.mjs",
-    "funding": "node scripts/funding/fund.mjs"
+    "wallets:addresses": "node scripts/wallets/addresses.mjs"
   },
   "devDependencies": {
     "viem": "2.57.16"

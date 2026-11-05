@@ -6,7 +6,9 @@
 import { config } from '../../packages/config/index.mjs';
 import { loadEnv } from '../lib/env-loader.mjs';
 import { CARRIED, FRESH, labAddresses, roleAddresses } from '../lib/wallets.mjs';
-import { fail } from '../secrets/common.mjs';
+import { fail, guard } from '../secrets/common.mjs';
+
+guard();
 
 try {
   const { values } = loadEnv();

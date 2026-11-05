@@ -10,6 +10,7 @@ import {
   existsSync,
   fsyncSync,
   openSync,
+  readdirSync,
   readFileSync,
   renameSync,
   unlinkSync,
@@ -18,11 +19,18 @@ import {
 import { basename, dirname, join } from 'node:path';
 
 export const NAME = /^[A-Z][A-Z0-9_]*$/;
-const UNSAFE = /["'\\$`\r\n\0]/;
+// Printable ASCII only, without quotes, backslash, $, backtick or # (an inline comment).
+const SAFE_VALUE = /^[\x20-\x7e]+$/;
+const UNSAFE = /["'\\$`#]/;
 const LINE = /^\s*(?:export\s+)?([A-Za-z_][A-Za-z0-9_]*)\s*=(.*)$/;
 
 // Every message names the variable at most, never its value.
 export class EnvError extends Error {}
+
+// A name is echoed in messages only once it is known to be a plain variable name.
+export function safeName(name) {
+  return typeof name === 'string' && NAME.test(name) ? name : 'that name';
+}
 
 function parseValue(raw) {
   let value = raw.trim();
@@ -49,8 +57,8 @@ export function readEnvFile(path) {
 export function assertSafeValue(name, value) {
   if (!NAME.test(name)) throw new EnvError('refused: not a valid variable name');
   if (typeof value !== 'string' || value.length === 0) throw new EnvError(`${name}: refused (empty value)`);
-  if (UNSAFE.test(value)) {
-    throw new EnvError(`${name}: refused (quotes, backslash, $, backtick or newline cannot be stored safely)`);
+  if (!SAFE_VALUE.test(value) || UNSAFE.test(value)) {
+    throw new EnvError(`${name}: refused (only printable ASCII without quotes, backslash, $, backtick or # can be stored safely)`);
   }
   if (value !== value.trim()) throw new EnvError(`${name}: refused (leading or trailing whitespace)`);
 }
@@ -59,20 +67,51 @@ function sleep(ms) {
   Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, ms);
 }
 
+function alive(pid) {
+  if (!Number.isInteger(pid) || pid <= 0) return false;
+  try {
+    process.kill(pid, 0);
+    return true;
+  } catch (error) {
+    return error.code === 'EPERM';
+  }
+}
+
+// Temp copies left by a writer that died between write and rename (they hold a full .env).
+function sweepStaleTemps(path) {
+  const dir = dirname(path);
+  const prefix = `${basename(path)}.`;
+  for (const name of readdirSync(dir)) {
+    const m = name.startsWith(prefix) && /\.(\d+)\.[0-9a-f]{12}\.tmp$/.exec(name);
+    if (m && !alive(Number(m[1]))) unlinkSync(join(dir, name));
+  }
+}
+
 function withLock(path, fn) {
   const lock = `${path}.lock`;
   let fd;
   for (let tries = 0; fd === undefined; tries += 1) {
     try {
       fd = openSync(lock, 'wx', 0o600);
+      writeSync(fd, String(process.pid));
     } catch (error) {
-      if (error.code !== 'EEXIST' || tries >= 50) {
-        throw new EnvError(`.env is locked by another writer (remove ${basename(lock)} if no script is running)`);
+      if (error.code !== 'EEXIST') throw new EnvError(`could not lock ${basename(path)} (${error.code ?? 'error'})`);
+      let holder = NaN;
+      try {
+        holder = Number(readFileSync(lock, 'utf8'));
+      } catch {
+        // the holder just released it
       }
+      if (!Number.isNaN(holder) && !alive(holder)) {
+        unlinkSync(lock); // a dead writer's lock
+        continue;
+      }
+      if (tries >= 50) throw new EnvError(`${basename(path)} is locked by a running writer (pid ${holder})`);
       sleep(100);
     }
   }
   try {
+    sweepStaleTemps(path);
     return fn();
   } finally {
     closeSync(fd);

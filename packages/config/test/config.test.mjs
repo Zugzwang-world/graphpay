@@ -24,7 +24,7 @@ test('chain ids and the test USDT match planning/FACTS.md', () => {
 });
 
 test('the test cast has 4 owners and 13 agents plus the two working agents, all unique', () => {
-  const cast = activeCast({});
+  const cast = activeCast({ GRAPHPAY_CAST: 'test' });
   assert.equal(cast.key, 'test');
   const entries = castEntries(cast);
   const agents = entries.filter((e) => e.kind.endsWith('agent'));
@@ -71,4 +71,16 @@ test('resolveRpc refuses any chain but 1874 and never names a secret URL', async
     resolveRpc('whitechain', { env: { WHITECHAIN_RPC_URL: secret }, fetchImpl: fakeFetch({ [secret]: '0x1', [wc]: '0xaa36a7' }) }),
     (error) => !error.message.includes(secret) && /no RPC answered with chain id 1874/.test(error.message),
   );
+});
+
+test('a resolved RPC never shows its URL when logged, and a plain-http secret URL is refused', async () => {
+  const [ankr] = config.networks.whitechain.publicRpcs.map((p) => p.url);
+  const rpc = await resolveRpc('whitechain', {
+    env: { WHITECHAIN_RPC_URL: 'http://keyed.example/abc' },
+    fetchImpl: fakeFetch({ [ankr]: '0x752' }),
+  });
+  assert.equal(rpc.label, 'public Ankr');
+  assert.deepEqual(rpc.refused, ['WHITECHAIN_RPC_URL (secret): refused, not an https URL']);
+  assert.equal(rpc.url, ankr);
+  assert.ok(!JSON.stringify(rpc).includes(ankr) && !JSON.stringify(rpc).includes('keyed.example'));
 });

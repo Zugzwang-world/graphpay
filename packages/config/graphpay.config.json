@@ -93,7 +93,7 @@
     "schemaVersion": 1
   },
   "site": {
-    "url": null,
+    "url": "https://graphpay-event.vercel.app",
     "mcpPath": "/api/mcp",
     "graphqlPath": "/api/graphql"
   },

@@ -6,10 +6,12 @@
 // never generated.
 
 import { generatePrivateKey } from 'viem/accounts';
-import { EnvError, readEnvFile, setEnvValue } from '../lib/env-file.mjs';
+import { EnvError, readEnvFile, safeName, setEnvValue } from '../lib/env-file.mjs';
 import { locateEnvFile } from '../lib/env-loader.mjs';
 import { addressOfKey, CARRIED, DISPOSABLE_ROLE, FRESH, labAddresses, roleAddresses } from '../lib/wallets.mjs';
-import { fail } from './common.mjs';
+import { fail, guard } from './common.mjs';
+
+guard();
 
 function main() {
   const args = process.argv.slice(2);
@@ -17,7 +19,7 @@ function main() {
   const role = at === -1 ? undefined : args[at + 1];
   if (!role || args.length !== 2) throw new EnvError('usage: pnpm wallet:gen --only ROLE (one role per run)');
   if (CARRIED.includes(role)) throw new EnvError(`${role}: refused (imported from the lab with secrets:import-lab, never generated)`);
-  if (!FRESH.includes(role) && !DISPOSABLE_ROLE.test(role)) throw new EnvError(`${role}: refused (not a fresh role in the config file)`);
+  if (!FRESH.includes(role) && !DISPOSABLE_ROLE.test(role)) throw new EnvError(`${safeName(role)}: refused (not a fresh role in the config file)`);
   const name = `${role}_PRIVATE_KEY`;
   const { path } = locateEnvFile({ create: true });
   const values = readEnvFile(path);

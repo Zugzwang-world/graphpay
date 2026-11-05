@@ -79,6 +79,10 @@ export async function resolveRpc(key, { env = process.env, fetchImpl = globalThi
   const net = network(key);
   const refused = [];
   for (const candidate of rpcCandidates(key, env)) {
+    if (candidate.secret && !/^https:\/\/|^http:\/\/(?:127\.0\.0\.1|localhost)(?::\d+)?\//.test(candidate.url)) {
+      refused.push(`${candidate.label}: refused, not an https URL`);
+      continue;
+    }
     let chainId;
     try {
       chainId = await probeChainId(candidate.url, fetchImpl, timeoutMs);
@@ -90,7 +94,9 @@ export async function resolveRpc(key, { env = process.env, fetchImpl = globalThi
       refused.push(`${candidate.label}: refused, chain ${chainId} is not ${net.chainId}`);
       continue;
     }
-    return { url: candidate.url, label: candidate.label, secret: candidate.secret, chainId, refused };
+    const resolved = { label: candidate.label, secret: candidate.secret, chainId, refused };
+    Object.defineProperty(resolved, 'url', { value: candidate.url, enumerable: false });
+    return resolved;
   }
   throw new Error(`${net.name}: no RPC answered with chain id ${net.chainId} (${refused.join('; ')})`);
 }

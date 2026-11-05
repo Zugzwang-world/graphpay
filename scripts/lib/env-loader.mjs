@@ -6,7 +6,13 @@
 import { execFileSync } from 'node:child_process';
 import { existsSync } from 'node:fs';
 import { basename, dirname, isAbsolute, join, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { EnvError, readEnvFile } from './env-file.mjs';
+
+// Lookups start from the checkout that holds these scripts, not the caller's
+// working directory, so a script run from another folder never picks up a
+// different repo's .env.
+const SCRIPTS_CHECKOUT = fileURLToPath(new URL('.', import.meta.url));
 
 function git(cwd, args) {
   return execFileSync('git', args, { cwd, encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }).trim();
@@ -28,9 +34,9 @@ function mainCheckout(cwd) {
 
 // Returns { path, source }. With create: true and no file anywhere, returns the
 // main checkout's .env (which the writer then creates), still only if ignored.
-export function locateEnvFile({ cwd = process.cwd(), env = process.env, create = false } = {}) {
+export function locateEnvFile({ cwd = SCRIPTS_CHECKOUT, env = process.env, create = false } = {}) {
   if (env.ENV_FILE) {
-    const path = isAbsolute(env.ENV_FILE) ? env.ENV_FILE : resolve(cwd, env.ENV_FILE);
+    const path = isAbsolute(env.ENV_FILE) ? env.ENV_FILE : resolve(process.cwd(), env.ENV_FILE);
     if (!existsSync(dirname(path)) || !isGitIgnored(path)) throw new EnvError('ENV_FILE: refused (it must be a git-ignored file)');
     if (!create && !existsSync(path)) throw new EnvError('ENV_FILE: refused (no such file)');
     return { path, source: 'ENV_FILE' };
