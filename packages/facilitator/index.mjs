@@ -8,3 +8,9 @@ export { startupChecks, networkMode, readiness, StartupError } from './src/start
 export { recorderClient, recorderHandler, attemptEdge, attemptSchema } from './src/recorder.mjs';
 export { RateLimiter, DailyCounter } from './src/limits.mjs';
 export { chainSettings, configMerchants, facilitatorSettings, shopSettings } from './src/settings.mjs';
+// The x402 pieces a host wires around the scheme (the M3 part B scripts, M4's routes), re-exported
+// so every caller uses this package's pinned @x402/core.
+export { x402Client, x402HTTPClient } from '@x402/core/client';
+export { x402Facilitator } from '@x402/core/facilitator';
+export { HTTPFacilitatorClient } from '@x402/core/server';
+export { decodePaymentRequiredHeader, decodePaymentResponseHeader } from '@x402/core/http';
