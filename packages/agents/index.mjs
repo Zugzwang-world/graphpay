@@ -3,6 +3,7 @@
 // (ADR-0019). Live services reach it only through interfaces (index.d.ts):
 // LiveHooks, McpLike, ShopSurface; the mocks are in ./mocks.
 
+export { createActivity, PRESENCE_RENEW_MS, STEPS } from './src/activity.mjs';
 export { runAgent, MAX_STEPS } from './src/agents.mjs';
 export { offerFor, runBuyerTeam } from './src/buyer.mjs';
 export { ROOT, SHOP_ROLES, teamCast } from './src/cast.mjs';

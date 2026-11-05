@@ -196,7 +196,18 @@ export interface LiveHooks {
   /** Contract addresses the payer may sign for; default: the config's whitechain.contracts. */
   contracts?: string[];
   x402?: X402Codec;
+  /**
+   * Optional, no-op when absent (EVENT_ADDENDUM A7). Called at an agent's first start, then 'renew'
+   * every PRESENCE_RENEW_MS while the errand runs. Fire and forget: errors are logged, never thrown.
+   */
+  presence?(phase: 'start' | 'renew', info: { agentEns: string; ownerEns: string; role: Role; session: string }): void | Promise<void>;
+  /** Optional, no-op when absent (A8): every message edge between two agents; `step` is the explainer lane. */
+  handoff?(from: string, to: string, step: HandoffStep, info: { requestId: string }): void | Promise<void>;
 }
+
+export type HandoffStep = 'ask' | 'check' | 'check-back' | 'quote' | 'pay';
+export declare const STEPS: { readonly ask: 'ask'; readonly check: 'check'; readonly checkBack: 'check-back'; readonly quote: 'quote'; readonly pay: 'pay' };
+export declare const PRESENCE_RENEW_MS: number;
 
 // ---- running an errand ------------------------------------------------------
 
@@ -234,6 +245,10 @@ export interface ErrandOptions {
   signal?: AbortSignal;
   /** Run every pre-sign check, then stop with DRY_RUN: nothing is signed (acceptance B9 b, D10). */
   dryRun?: boolean;
+  /** Presence renewal period in ms (default PRESENCE_RENEW_MS), and the timer functions (tests). */
+  presenceRenewMs?: number;
+  setTimer?: (fn: () => void, ms: number) => unknown;
+  clearTimer?: (timer: any) => void;
 }
 
 export interface ErrandMetrics {
