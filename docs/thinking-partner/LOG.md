@@ -42,7 +42,7 @@ One line per PR: time (IST) · activity · result · PR link. Append under your 
 
 - 01:30 IST · website · opened: the website shell (stage, both phones, explainer, race, how-it-works, passcode guard and its F2 tests, status chips) · https://github.com/Zugzwang-world/graphpay/pull/10 (merged; production serves it)
 - 01:31 IST · website · opened: phone views, Friday items 11 and 12 that need no other track (request card with budget and deadline countdown, spending-pass states, merchant notifications) · https://github.com/Zugzwang-world/graphpay/pull/13
-- 03:03 IST · website · opened: the agent run route (one request streams the errand over SSE, one at a time, 503 until M12 wires the live agents), the run registry, client streaming · PR link added once opened
+- 03:03 IST · website · opened: the agent run route (one request streams the errand over SSE, one at a time, 503 until M12 wires the live agents), the run registry, client streaming · https://github.com/Zugzwang-world/graphpay/pull/17
 
 ## records
 
