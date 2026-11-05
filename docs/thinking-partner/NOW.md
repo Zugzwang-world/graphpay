@@ -50,11 +50,10 @@ Updated 01:40 IST, Fri 6 Nov (T3).
 
 ## agents
 
-Updated 01:45 IST. **M10 built; five live errands on the testing preset all paid the good shop and never the trap.** The "(M10 done)" PR is the next merge.
-- 5 of 5 live runs: 73 to 321 s (median 94 s), $0.29 to $0.31 and about 47,000 to 52,000 tokens each, on mock services (rows in `OPEN.md`).
-- Reviewer pass done, findings fixed. Join's M12 can wire against `packages/agents/index.d.ts` and `docs/sessions/agents/NOTES.md`.
-- Next: merge, then the Friday presence and handoff hooks.
-
+Updated 02:40 IST. **M10 is merged; the presence and handoff hooks are built** (Friday item 2, before CP4).
+- Agents can now announce themselves (presence, renewed every 5 min while an errand runs) and report each hand-off between agents with its explainer lane. Both are optional and do nothing until Join wires them (item 3).
+- 64 tests pass on mocks; a run log with the hooks absent or recording is byte-identical to one without.
+- Blockers: none. Next: merge, then wait for Join's M12 counting run; re-run the live errand if time allows.
 ## integration
 
 Updated 01:20 IST. **Join is running: the mirror (M11) is being built on test doubles while it waits for M7a (Arkiv writer), M1 (checkout events) and M5 (the cast on ENS); none has merged yet.**

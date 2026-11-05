@@ -13,6 +13,7 @@ import { createPayer, knownContracts } from './payer.mjs';
 import { rankShops, volumeReference } from './scoring.mjs';
 import { payGuard } from './state.mjs';
 import { clip, errorText } from './scrub.mjs';
+import { STEPS } from './activity.mjs';
 import { tracedTool } from './tools.mjs';
 
 const MCP_TOOLS = ['schema', 'ask', 'graphql', 'explain'];
@@ -72,7 +73,7 @@ export async function runBuyerTeam(ctx) {
     const adopted = adoptNeed(state, proposal, log, names.concierge);
     if (!adopted.ok) return { ok: false, reason: adopted.reason, detail: adopted.detail };
     const need = adopted.need;
-    log.message(names.concierge, names.scout, `find ${need.quantity} × ${need.item} in ${need.city}`);
+    log.message(names.concierge, names.scout, `find ${need.quantity} × ${need.item} in ${need.city}`, STEPS.ask);
     const executed = new Set();
     const tools = {
       directory_list: tracedTool(log, names.scout, 'directory_list', {
@@ -110,7 +111,7 @@ export async function runBuyerTeam(ctx) {
     }
     state.scoutDone = true;
     const offers = [...state.offers.values()];
-    log.message(names.scout, names.concierge, `${offers.length} offers (SYNTHETIC)`);
+    log.message(names.scout, names.concierge, `${offers.length} offers (SYNTHETIC)`, STEPS.check);
     return { offers, synthetic: true, ...(run.error ? { scoutNote: run.error } : {}) };
   }
 
@@ -118,7 +119,7 @@ export async function runBuyerTeam(ctx) {
     const adopted = adoptNeed(state, proposal, log, names.concierge);
     if (!adopted.ok) return { ok: false, reason: adopted.reason, detail: adopted.detail };
     const need = adopted.need;
-    log.message(names.concierge, names.analyst, `rank shops for ${need.item} in ${need.city} by trust`);
+    log.message(names.concierge, names.analyst, `rank shops for ${need.item} in ${need.city} by trust`, STEPS.ask);
     const read = await readRanking(mcp, { category: need.category, city: need.city });
     if (read.ok) {
       state.tallies = read.tallies;
@@ -148,7 +149,7 @@ export async function runBuyerTeam(ctx) {
       log.guard('G2', false, `the analyst's model ranked differently (recommended ${run.output?.recommendation ?? 'none'}${widened.length ? `; called ${widened.join(', ')} eligible` : ''}); code's ranking stands`);
     }
     state.analystDone = true;
-    log.message(names.analyst, names.concierge, codeTop ? `best eligible: ${codeTop}` : 'no eligible shop');
+    log.message(names.analyst, names.concierge, codeTop ? `best eligible: ${codeTop}` : 'no eligible shop', STEPS.check);
     return {
       ranking: state.ranking,
       explainId: state.explainId,
@@ -176,7 +177,7 @@ export async function runBuyerTeam(ctx) {
         deadlineIso: state.mandate.deadlineIso,
         agents: cast.shopAgentNames(shopEns),
       });
-      log.message(names.concierge, payer.ens, `pay ${shopEns}: ${need.quantity} × ${need.item}, at most ${displayUsdt(guard.priceMicro)} USDT`);
+      log.message(names.concierge, payer.ens, `pay ${shopEns}: ${need.quantity} × ${need.item}, at most ${displayUsdt(guard.priceMicro)} USDT`, STEPS.pay);
       const executed = new Set();
       // The shop's client; an in-process gateway (createShopGateway) shares this errand's log and models.
       const team = { log, models, meter, sdl, clock, signal, codec: hooks.x402 };
@@ -215,7 +216,7 @@ export async function runBuyerTeam(ctx) {
       }
     }
     const out = state.payment;
-    log.message(payer.ens, names.concierge, `${out.status}${out.reason ? ` (${out.reason})` : ''}`);
+    log.message(payer.ens, names.concierge, `${out.status}${out.reason ? ` (${out.reason})` : ''}`, STEPS.pay);
     if (out.status === 'paid') {
       return { status: 'paid', shop: shopEns, amountUsdt: displayUsdt(out.priceMicro), transaction: out.receipt.transaction, explorerUrl: out.receipt.explorerUrl, orderId: out.orderId, arrivesAt: out.arrivesAt, synthetic: true };
     }

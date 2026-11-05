@@ -35,6 +35,7 @@ One line per PR: time (IST) · activity · result · PR link. Append under your 
 ## agents
 
 - 01:40 IST · agents · M10 package, guards, mocks and tests, reviewer findings fixed; five live runs on the testing preset all paid the good shop · [PR 11](https://github.com/Zugzwang-world/graphpay/pull/11)
+- 02:40 IST · agents · Friday item 2: optional `presence` and `handoff` hooks, mocks and 8 tests, no-op by default · PR pending
 
 ## integration
 
