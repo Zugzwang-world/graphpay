@@ -11,9 +11,9 @@ GraphPay was built with **Claude Code** (Anthropic), running mostly unattended i
 | where | what |
 |---|---|
 | M0 session (foundation), Thu 21:35–23:58 IST | Claude Code 2.1.318, Opus 5.5 at max effort (the app's session metadata) |
-| track sessions T1 Payments, T2 Identity, T3 Arkiv, T4 Agents, T5 Web and Join, from Fri 00:44 IST | started on Opus 5.5 at max effort; at 01:22 IST the Coordinator switched them to the plan (`docs/plan/sessions/README.md`), each from its next turn: Sonnet 5.5 at high for identity, agents and the website, Opus 5.5 at xhigh for payments, Arkiv and integration (to protect the weekly plan limit; FACTS records rows) |
+| track sessions T1 Payments, T2 Identity, T3 Arkiv, T4 Agents, T5 Web and Join, from Fri 00:44 IST | started on Opus 5.5 at max effort; at 01:22 IST the Coordinator switched them to the plan (`docs/plan/sessions/README.md`), each from its next turn: Sonnet 5.5 at high for identity, agents and the website, Opus 5.5 at xhigh for payments, Arkiv and integration (to protect the weekly plan limit; FACTS records rows); at 03:37 IST one more step for the Opus sessions, payments, Arkiv and integration, to high |
 | Coordinator (records, merges, story lock, top-ups), from Fri 00:46 IST | Opus 5.5 at max effort as started (the plan: high; only the founder can change a session's own setting, in its model menu) |
-| T6 AgentPay SDK (`packages/agentpay`), from Fri 03:25 IST | Opus 5.5 at xhigh, as the founder started it |
+| T6 AgentPay SDK (`packages/agentpay`), from Fri 03:25 IST | Opus 5.5 at xhigh, as the founder started it; high from 03:37 IST (the same budget step) |
 | Submission (M17), from Fri 13:00 IST | planned: Sonnet 5.5 at high |
 | subagents | a **reviewer** (reads each branch's diff, blocking issues first) and a **verifier** (checks versions, addresses, chain ids and API names against primary sources), defined in `.claude/agents/` |
 | the product at runtime | the buyer and shop agents run on `claude-haiku-5-5` through the Anthropic API with the Vercel AI SDK (ADR-0011, ADR-0019); Grok only if a session switches to it, and then it is recorded here |
