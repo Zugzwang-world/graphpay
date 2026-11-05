@@ -13,7 +13,8 @@
       "PAYER": "0.005",
       "DEAL_HUNTER": "0.005",
       "REHEARSAL_PAYER": "0.005",
-      "ACCEPTANCE_PAYER": "0.005"
+      "ACCEPTANCE_PAYER": "0.005",
+      "DISPOSABLE_1": "0.005"
     },
     "sepolia": {
       "VITALIK": "0.002",
@@ -44,8 +45,7 @@
       "SHOP_KESAR": "20",
       "VITALIK": "10",
       "REHEARSAL_PAYER": "40",
-      "DEAL_HUNTER": "2",
-      "DISPOSABLE_1": "1"
+      "DEAL_HUNTER": "2"
     }
   },
   "funderReserve": {
