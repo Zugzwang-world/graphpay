@@ -44,7 +44,8 @@
       "SHOP_KESAR": "20",
       "VITALIK": "10",
       "REHEARSAL_PAYER": "40",
-      "DEAL_HUNTER": "2"
+      "DEAL_HUNTER": "2",
+      "DISPOSABLE_1": "1"
     }
   },
   "funderReserve": {

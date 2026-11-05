@@ -235,6 +235,10 @@
       {
         "role": "ACCEPTANCE_PAYER",
         "purpose": "the acceptance agent"
+      },
+      {
+        "role": "DISPOSABLE_1",
+        "purpose": "the disposable paying agent for the kill check (F, E7, B6); holds 1 test USDT, no WBT"
       }
     ],
     "disposablePrefix": "DISPOSABLE_",
