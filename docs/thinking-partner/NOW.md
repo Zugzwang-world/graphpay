@@ -64,10 +64,10 @@ Updated 04:10 IST, Fri 6 Nov. **The mirror runs live (since 03:13 IST); M12's si
 
 ## website
 
-Updated 05:05 IST, Fri 6 Nov (T5 Web). **On `main`:** the shell, phone views, agent run route, merchant stream and CSV, order trail, race mode. **In a PR:** the merchant's Open toggle (Friday item 9): "Open shop" also lists the shop as open on Arkiv and renews every 5 minutes while the page is open; "Close shop" takes it off at once. It needs the `W_DIRECTORY` key on Vercel; until then the phone says it is listening only.
-- Running: nothing long. M16 (checkout kit, store) waits for M4 (not merged); customer state waits for M6's reads.
-- Blockers: the Open toggle needs `W_DIRECTORY_PRIVATE_KEY` set in Vercel (Coordinator, see OPEN).
-- Next: M16 once M4 lands; the map (item 10) once Join's live hooks (item 3) write presence. Fresh start file: `docs/sessions/website/resume.md`.
+Updated 05:50 IST, Fri 6 Nov (T5 Web). **On `main`:** the shell, phone views, agent run route, merchant stream and CSV, order trail, race mode (and the Open toggle once #39 merges). **In a PR:** the customer's Pause and Resume buttons (M6 landed): the owner wallet sets the payer agent's ENS status on Sepolia; the gate sees it within 20 s. It needs the owner's key on Vercel; until then the buttons say "not live yet".
+- Running: nothing long. M16 (checkout kit, store) waits for M4 (not merged).
+- Blockers: Pause/Resume and the Open toggle need two keys in Vercel (see OPEN).
+- Next: the customer state panel (status, cap, spent) and M16 once M4 lands. Fresh start file: `docs/sessions/website/resume.md`.
 
 ## agentpay
 
