@@ -4,7 +4,7 @@
 // need a tap for Web Audio) and starts listening for the shop's new edges; a pay
 // edge pops an order with the buyer agent's ENS name. Buttons sign server-side.
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import type { MerchantEdgeEvent } from '@/lib/contracts';
 import { entityUrl, txUrl } from '@/lib/explorer';
 import { formatMicro, parseUsdt } from '@/lib/money';
@@ -14,6 +14,11 @@ import { ExplorerChip } from './explorer-chip';
 import { TiffinBot } from './tiffin-bot';
 import { useSite, type ApiAnswer } from './site-context';
 
+// Whether the shop is listed as open on Arkiv (the Open toggle's shop_open row).
+type Listed = { state: 'off' } | { state: 'on' } | { state: 'locked' } | { state: 'waiting'; waitingFor: string } | { state: 'error'; note: string };
+
+const RENEW_MS = 5 * 60_000;
+
 type Listening = { state: 'closed' } | { state: 'connecting' } | { state: 'open' } | { state: 'waiting'; waitingFor: string } | { state: 'error' };
 
 export function MerchantScreen() {
@@ -21,6 +26,7 @@ export function MerchantScreen() {
   const shop = model.merchant;
   const [open, setOpen] = useState(false);
   const [listening, setListening] = useState<Listening>({ state: 'closed' });
+  const [listed, setListed] = useState<Listed>({ state: 'off' });
   const [edges, setEdges] = useState<MerchantEdgeEvent[]>([]);
   const [popup, setPopup] = useState<MerchantEdgeEvent | null>(null);
   const [refundText, setRefundText] = useState(formatMicro(model.order.refundMicro));
@@ -69,10 +75,67 @@ export function MerchantScreen() {
     };
   }, [open, sound]);
 
+  // Lists the shop as open on Arkiv (or takes it off): passcode-gated, W_DIRECTORY signs.
+  // Calls run one after another, so a Close never overtakes an Open or a renewal.
+  const queue = useRef<Promise<unknown>>(Promise.resolve());
+  // Set while a Close is under way: a renewal that fires (or was queued) in that window
+  // must not list the shop again after it.
+  const closing = useRef(false);
+  const announce = useCallback(
+    (on: boolean): Promise<'done' | 'unlisted' | 'failed'> => {
+      const run = async (): Promise<'done' | 'unlisted' | 'failed'> => {
+        if (on && closing.current) return 'done';
+        const answer = await post('/api/merchant/open', { on });
+        if (answer.ok) {
+          setListed(on ? { state: 'on' } : { state: 'off' });
+          return 'done';
+        }
+        // Locked or not configured: the shop was never listed, so there is nothing to take off.
+        if (answer.waitingFor) {
+          setListed({ state: 'waiting', waitingFor: answer.waitingFor });
+          return 'unlisted';
+        }
+        if (answer.status === 0 && answer.error?.startsWith('locked')) {
+          setListed({ state: 'locked' });
+          return 'unlisted';
+        }
+        setListed({ state: 'error', note: answer.error ?? 'the shop list could not be updated' });
+        return 'failed';
+      };
+      const next = queue.current.then(run, run);
+      queue.current = next.catch(() => undefined);
+      return next;
+    },
+    [post],
+  );
+
   const openShop = async () => {
     await enableSound();
+    closing.current = false;
     setOpen(true);
+    void announce(true);
   };
+
+  // The shop stays on screen as open until Arkiv has confirmed it is off the list, so a
+  // failed Close is never shown as closed.
+  const closeShop = async () => {
+    closing.current = true;
+    const outcome = await announce(false);
+    if (outcome === 'failed') {
+      closing.current = false;
+      return;
+    }
+    setOpen(false);
+    setListening({ state: 'closed' });
+  };
+
+  // While the shop stays open the listing is renewed every 5 minutes (a failed renewal is
+  // tried again at the next one); it lapses on its own within 15 minutes of the last write.
+  useEffect(() => {
+    if (!open || (listed.state !== 'on' && listed.state !== 'error')) return;
+    const timer = setInterval(() => void announce(true), RENEW_MS);
+    return () => clearInterval(timer);
+  }, [open, listed.state, announce]);
 
   const orderId = popup?.orderId ?? edges.find((e) => e.kind === 'pay')?.orderId ?? null;
 
@@ -135,7 +198,21 @@ export function MerchantScreen() {
         <span className="chip" data-tone={listening.state === 'open' ? 'pista' : undefined}>
           {listening.state === 'open' ? 'open, listening' : 'open'}
         </span>
+        <button type="button" className="btn btn-quiet" onClick={() => void closeShop()}>
+          Close shop
+        </button>
       </header>
+      <p className="muted small" aria-live="polite">
+        {listed.state === 'on'
+          ? 'Listed as open on Arkiv; renewed every 5 minutes while this page stays open.'
+          : listed.state === 'locked'
+            ? 'Listening only: enter the passcode to list this shop as open on Arkiv.'
+            : listed.state === 'waiting'
+              ? `Listening only: listing as open waits for ${listed.waitingFor}.`
+              : listed.state === 'error'
+                ? `Not updated: ${listed.note}. It is tried again in 5 minutes; Close shop can be pressed again.`
+                : 'Not listed as open.'}
+      </p>
 
       {listening.state === 'waiting' ? (
         <div className="waiting">

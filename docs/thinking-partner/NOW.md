@@ -66,10 +66,10 @@ Updated 03:35 IST, Fri 6 Nov. **The mirror runs live on the real networks.** The
 
 ## website
 
-Updated 04:20 IST, Fri 6 Nov (T5 Web). **On `main`:** the shell, phone views, agent run route, merchant stream and CSV, order trail. **In a PR:** race mode goes live (Friday item 8): both sides ask Arkiv's testnet the same question live, reads tick per call, the answer is badged correct by identity or by name, and the committed benchmark table sits under it (reads and bytes, no times). Tried live on Rabdi: Graph Arkiv 2 reads, plain 5 or 6.
-- Running: nothing long. M16 (checkout kit, store) waits for M4 (not merged); customer state waits for M6.
-- Blockers: none. Open toggle waits for T3's `shop_open`.
-- Next: M16 once M4 lands; the customer panels as M4 and M6 land. Fresh start file: `docs/sessions/website/resume.md`.
+Updated 05:05 IST, Fri 6 Nov (T5 Web). **On `main`:** the shell, phone views, agent run route, merchant stream and CSV, order trail, race mode. **In a PR:** the merchant's Open toggle (Friday item 9): "Open shop" also lists the shop as open on Arkiv and renews every 5 minutes while the page is open; "Close shop" takes it off at once. It needs the `W_DIRECTORY` key on Vercel; until then the phone says it is listening only.
+- Running: nothing long. M16 (checkout kit, store) waits for M4 (not merged); customer state waits for M6's reads.
+- Blockers: the Open toggle needs `W_DIRECTORY_PRIVATE_KEY` set in Vercel (Coordinator, see OPEN).
+- Next: M16 once M4 lands; the map (item 10) once Join's live hooks (item 3) write presence. Fresh start file: `docs/sessions/website/resume.md`.
 
 ## records
 

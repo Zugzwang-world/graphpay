@@ -124,6 +124,7 @@ Updated 03:36 IST, Fri 6 Nov. Nothing for the founder now: the live mirror needs
 
 ## agentpay
 - **Closed 04:20 IST (T3's race-truth item):** `@graphpay/city` is now a dependency of `apps/web`; `/api/race` takes its truth and parameters from the generated city. **Open, for the Coordinator:** the seeded city's end day (`2026-11-05`) is a constant in `apps/web/lib/race.server.ts` (`SEEDED_END`), because no committed record holds it. Why: a re-seed on another day changes the params and the truth. Recommendation: keep it and update it with any re-seed (a note in T3's README already names it).
+- **Ask of the Coordinator (blocks the Open toggle going live):** set `W_DIRECTORY_PRIVATE_KEY` in Vercel Production as a Sensitive value (`pnpm -s secrets:vercel W_DIRECTORY_PRIVATE_KEY`); `ARKIV_ACCESS_KEY` is already used by the read routes. Why: `/api/merchant/open` signs the `shop_open` row as W_DIRECTORY (ADR-0033: create-only or extend-only, no local W_DIRECTORY script while the site is live). Without it the route answers "not live yet" and the phone listens only. Recommendation: set it now so rehearsal 1 can show "open now" on the map. Check W_DIRECTORY's tGLM balance first (0.5 tGLM was planned; each renewal costs a small patch).
 
 ## records
 

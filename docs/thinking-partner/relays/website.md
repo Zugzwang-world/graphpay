@@ -1,6 +1,6 @@
 # Relay: website (T5 Web)
 
-Updated 04:20 IST, Fri 6 Nov. Latest step: **race mode live** (branch `web/race`; M16 still waits for M4).
+Updated 05:05 IST, Fri 6 Nov. Latest step: **the Open toggle** (branch `web/open-toggle`; M16 still waits for M4).
 
 ## In plain words
 
@@ -21,6 +21,8 @@ What the founder must do: nothing now. The Coordinator needs `DEMO_PASSCODE` set
 **Update (03:45 IST):** the merchant stream and CSV are merged (PR 23). The next PR makes `/order/<id>` real: it reads every edge that carries the order id through GraphQL `order(id)`, puts them oldest first (Requested, Order created, Paid, Dispatched, Refunded, with the shop's net after refunds), links each settlement transaction to the Whitechain explorer, and links to the explain page of that very answer. `/explain/<id>` now shows each Arkiv call's entity, rows, bytes and milliseconds from the engine's `reads`. Tested on ArkivSim (an empty order shows its empty state) and in the browser pane; 4 new unit tests.
 
 **Update (04:20 IST):** race mode is live. After M9 landed, `GET /api/race` runs one side (Graph Arkiv or plain) against Arkiv's live testnet on the synthetic size S city, uncached, and streams one `call` event per read as it lands, then the answer with its reads, bytes and a badge: correct by identity, or right by name but wrong by identity (plain credits a re-registered shop's earlier holder to the new one). No time is shown as a result (ADR-0042). Tried on Rabdi from this Mac: the city-wide top 10 took Graph Arkiv 2 reads (35,370 bytes) and plain 5 reads one page at a time (135,068 bytes), the same counts as the committed benchmark. Under the race, the table of all six questions comes from `bench/results/questions-S.csv` (reads, kilobytes, correctness; no time columns), including the questions where plain needs fewer reads. Safeguards: only the size S city is accepted, one race per side per server, a per-client rate limit, errors reach the browser only as a fixed line. Tests: 6 new, the live race on ArkivSim equals 2, 5 and 6 reads and is right both ways.
+
+**Update (05:05 IST):** race mode is merged. This step is the merchant's Open toggle (Friday item 9). Tapping "Open shop" now also lists the shop as open on Arkiv: `POST /api/merchant/open` (behind the passcode) writes the shop's `shop_open` row as the W_DIRECTORY wallet, and the merchant phone sends it again every 5 minutes while the page stays open, which keeps the row alive (it lapses by itself 15 minutes after the last renewal). "Close shop" sets it to closed at once, and the shop drops out of the "open now" list. The phone says in words whether it is listed, listening only (locked or key not set), or failed. Tested on ArkivSim: open, renew keeps one row, close, close again writes nothing. It needs the W_DIRECTORY key in Vercel (OPEN); until then the route says "not live yet". The reviewer agent ran twice on it; its two blocking findings (a Close that first re-extended the listing, and an Open or renewal that could re-list the shop after a Close) are fixed, and a Close that fails is shown as failed, never as closed.
 
 ## Technical
 
