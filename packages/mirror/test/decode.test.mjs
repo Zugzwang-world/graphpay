@@ -49,3 +49,22 @@ test('logs decode into events with id 1874:<tx>:<logIndex>, in chain order; unkn
   assert.equal(events[1].args.deliveredAt, 1234n);
   assert.equal(events[1].block, 12);
 });
+
+test('the checkout ABI from M1 decodes every mapped event', async () => {
+  const { checkoutAbi } = await import('@graphpay/contracts');
+  const names = new Set(checkoutAbi.filter((x) => x.type === 'event').map((x) => x.name));
+  for (const n of ['OrderCreated', 'PaymentSettled', 'PaymentFailed', 'Refunded', 'OrderDelivered', 'OrderCancelled', 'Disputed', 'SubscriptionCreated', 'SubscriptionRenewed', 'RenewalFailed', 'SubscriptionCancelled', 'AgentPolicySet']) {
+    assert.ok(names.has(n), n);
+  }
+  const args = { orderId: hash('o'), payerNode: hash('p'), shopNode: hash('s') };
+  const ev = checkoutAbi.find((x) => x.type === 'event' && x.name === 'PaymentSettled');
+  const data = encodeAbiParameters(
+    ev.inputs.filter((i) => !i.indexed),
+    [`0x${'33'.repeat(20)}`, 4_800_000n, 20_398n, hash('m'), 0],
+  );
+  const l = { address: `0x${'11'.repeat(20)}`, topics: encodeEventTopics({ abi: checkoutAbi, eventName: 'PaymentSettled', args }), data, blockNumber: 5n, logIndex: 2, transactionHash: hash('t'), removed: false };
+  const { events } = decodeLogs(checkoutAbi, [l], { chainId: CHAIN });
+  assert.equal(events[0].name, 'PaymentSettled');
+  assert.equal(events[0].args.amountMicro, 4_800_000n);
+  assert.equal(events[0].args.payerEpoch, 0);
+});

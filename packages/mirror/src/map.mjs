@@ -3,15 +3,17 @@
 // actor is unknown. Epochs: the payer's from the event where it carries one, everyone
 // else's from the node rows; a fresh ENSv2 name is epoch 0.
 
+import { FAIL_REASON } from '@graphpay/contracts';
 import { isZeroNode, utcDay } from './ids.mjs';
 
-// FailReason, in the contract's order (SPEC/PAYMENTS_WHITECHAIN.md §3.2).
-export const FAIL_REASONS = ['NONE', 'AGENT_REVOKED', 'SPEND_CAP', 'TRANSFER_FAILED', 'EXPIRED', 'DUPLICATE', 'AGENT_EXPIRED', 'NODE_MISMATCH'];
+// FailReason, in the contract's order (the contracts package, M1).
+export const FAIL_REASONS = FAIL_REASON;
 export const DEFAULT_DELIVERY_PROMISE_S = 2 * 60 * 60;
 
 // Events that move no tally and write nothing; the cursor passes them.
 const NO_WRITE = new Set([
   'DisputeResolved',
+  'EIP712DomainChanged',
   'SubscriptionLapsed',
   'RelayerSet',
   'PolicyWriterSet',
@@ -58,6 +60,8 @@ export async function mapEvent(e, ctx) {
         toEpoch: to.epoch,
         fromEns: from.ens,
         toEns: to.ens,
+        fromKind: from.kind,
+        toKind: to.kind,
         amountMicro: BigInt(fields.amountMicro ?? 0n),
         ts: at,
         day: fields.day ?? utcDay(at),
@@ -190,7 +194,7 @@ export async function mapEvent(e, ctx) {
       const capMicro = BigInt(a.dailyCapMicro);
       // Already the node row's standing (a replay, a lost cursor): bind the wallet, write nothing.
       const unchanged = actor.status === status && actor.capMicro != null && BigInt(actor.capMicro) === capMicro;
-      return { action: 'standing', node: actor.node, epoch, status, capMicro, wallet: a.wallet.toLowerCase(), unchanged };
+      return { action: 'standing', ref: e.id, ens: actor.ens, ts: at, node: actor.node, epoch, status, capMicro, wallet: a.wallet.toLowerCase(), unchanged };
     }
     default:
       if (NO_WRITE.has(e.name)) return { action: 'none', why: e.name };

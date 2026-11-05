@@ -51,7 +51,7 @@ The M0 verifier's snapshot of every package in `planning/FACTS.md` §5 is in `do
 
 | item | pinned | in | status |
 |---|---|---|---|
-| `@arkiv-network/sdk` | 1.0.1 (`latest`) | `packages/arkiv-graph`, `packages/money-graph` | verified |
+| `@arkiv-network/sdk` | 1.0.1 (`latest`) | `packages/arkiv-graph`, `packages/money-graph`, `packages/mirror` | verified |
 | viem | 2.57.16 (`latest`) | both | verified |
 | graphql | 16.14.2 (the pack's pin; 16.15.0 is the newest 16.x, `latest` is 17.1.0) | `packages/money-graph` (M7b) | verified; one major in the repo |
 | graphql-yoga | 5.24.6 (newest 5.x; `latest` 6.0.1 avoided) | `packages/money-graph` (M7b) | verified |

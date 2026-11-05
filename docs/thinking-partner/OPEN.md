@@ -101,7 +101,7 @@ Agents (T4) and Join add one row per full errand run, so the presets can be cali
 
 ## integration
 
-Updated 01:20 IST. Nothing for the founder now.
+Updated 02:05 IST. Nothing for the founder now. The live mirror run needs no login or funding (W_LEDGER holds 1.998 tGLM at 02:06 IST against a projected 0.7–0.9 for the history).
 
 - **Network drops (watch).** What: the Mac's DNS stopped answering at about 00:50 and again at 01:15 IST (GitHub, npm and the RPCs unreachable; the gateway still pinged). Where: this Mac's Wi-Fi. Why it matters: every session pushes and every live run needs it, and the mirror must resume after a drop (D15). Recommendation: if it recurs during the live runs, switch the Mac to a phone hotspot; the mirror resumes from its Arkiv checkpoint by design.
 

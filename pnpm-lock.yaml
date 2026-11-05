@@ -119,9 +119,21 @@ importers:
 
   packages/mirror:
     dependencies:
+      '@arkiv-network/sdk':
+        specifier: 1.0.1
+        version: 1.0.1(typescript@5.9.3)(viem@2.57.16(typescript@5.9.3)(zod@4.6.7))
+      '@graphpay/arkiv-graph':
+        specifier: workspace:*
+        version: link:../arkiv-graph
       '@graphpay/config':
         specifier: workspace:*
         version: link:../config
+      '@graphpay/contracts':
+        specifier: workspace:*
+        version: link:../contracts
+      '@graphpay/money-graph':
+        specifier: workspace:*
+        version: link:../money-graph
       viem:
         specifier: 2.57.16
         version: 2.57.16(typescript@5.9.3)(zod@4.6.7)
