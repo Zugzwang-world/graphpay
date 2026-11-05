@@ -122,3 +122,16 @@ test('the parser renders what the SDK renders, and parses its own output', () =>
   assert.deepEqual(parsed.orderBy, { name: 'score', tag: 'u64', direction: 'DESC' });
   assert.throws(() => parseQuery(`a = str('x') OR (b = str('y')`));
 });
+
+test('the metered transport counts every response body when reads are in flight together', async () => {
+  const t = setup();
+  for (let i = 0; i < 3; i += 1) await create(t, note, { topic: 'meter', score: BigInt(i), lat: 0 });
+  const read = () => t.publicClient.select('*').from(note.schema).where(...scoped(note), eq('topic', str('meter'))).limit(10).fetch();
+  const stats = t.transport.stats;
+  const before = stats.responseBytes;
+  await read();
+  const one = stats.responseBytes - before;
+  const start = stats.responseBytes;
+  await Promise.all(Array.from({ length: 5 }, read));
+  assert.equal(stats.responseBytes - start, 5 * one);
+});

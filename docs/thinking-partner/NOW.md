@@ -41,15 +41,14 @@ Updated 02:00 IST. **M5 is built and run for real; its PR is open.** The `graphp
 
 ## arkiv
 
-Updated 04:05 IST, Fri 6 Nov (T3).
+Updated 03:42 IST, Fri 6 Nov (T3).
 
-- **Where we are:** M7a, M8 (size S) and M7b have merged (PR #21, 03:11). The small test city is on Arkiv's testnet and answers through GraphQL, the explain trace and the hosted MCP. All three S stores survived the Mac's sleep (each manifest says done; nothing was mid-run).
-- **This step:** a small fix that T1's recorder depends on. After a send that landed but was reported as failed, the recorder, quotes and the ledger's check now read the row back correctly, so they adopt it instead of writing a second copy. A test on the simulator proves it lands once.
-- **Labelling fix (04:05):** the cast shops are real but carry labelled synthetic history; their reputation now says synthetic too, in GraphQL, the hosted MCP and the agents' ranking.
-- **Running:** nothing.
-- **Blockers:** none.
-- **Checked on the production domain (03:22):** `/api/graphql` answers the city's top shops in 2 reads from Arkiv's testnet; `/api/mcp` lists its tools.
-- **Next:** M9, the live benchmark (reads, not speed).
+- **Where we are:** M9, the live benchmark, is done at size S and going up as a PR. Ranking the city's shops by sales takes Graph Arkiv 2 reads against plain Arkiv's 5 (6 with every page at once), because plain code must read all 490 payments. Every Graph Arkiv answer was right; acceptance D6 passes. The report also says plainly where Graph Arkiv does not win.
+- **Also this step:** Join's receipt bug is fixed and merged (PR #25, 03:23). Two bugs were found during the benchmark and fixed: a byte counter that lost counts when reads overlapped, and one read per agent where one batched read will do.
+- **Labelling fix (PR #30, merged 03:41):** the cast shops are real but carry labelled synthetic history; their reputation now says synthetic too, in GraphQL, the hosted MCP and the agents' ranking.
+- **Running:** nothing. The Swarm gateway check is back: uploads are open with no account, but files may vanish at any time; Swarm is the next step.
+- **Blockers:** none. Size M waits for the founder's final story (D7).
+- **Next:** Swarm (Friday items 4–5), then the presence and handoff rows (item 1).
 
 ## agents
 
