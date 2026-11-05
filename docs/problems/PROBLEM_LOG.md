@@ -55,3 +55,10 @@ Cause: a new session takes the model and effort shown in the picker (the last on
 Fix: at 01:22 the Coordinator set each track session to the plan (`set_session_model`, `set_session_effort`; from each session's next turn) and asked each to end its turn at a natural stop so the change applies.
 Prevention: the Coordinator checks every session's model and effort and the plan usage at each tick; a new session's start step sets the picker before the start line is pasted.
 
+### P-records-4: the Mac slept with the lid closed
+When: 2026-11-06 02:14–03:01 IST · Activity: records · Cost: about 47 minutes of every session
+Symptom: no session made progress and no tick ran from 02:14 to 03:01; `pmset -g log` shows "Entering Sleep state due to 'Clamshell Sleep'" at 02:14:20, dark wakes only, then a lid wake at 03:01:32; the Mac was on battery.
+Cause: a closed lid sleeps the Mac whatever the keep-awake holds say (the app's hold and `caffeinate` stop idle sleep only), and it was not on power.
+Fix: a push notification to the founder at 03:04 (charger in, lid open); first in "Founder now".
+Prevention: the Coordinator checks `pmset -g batt` and the lid state each tick and notifies the founder at once.
+

@@ -1,19 +1,18 @@
 # NOW
 
-Updated 01:20 IST, Fri 6 Nov (Coordinator)
+Updated 03:10 IST, Fri 6 Nov (Coordinator)
 
 ## Summary (Coordinator only)
 
-Updated 01:20 IST, Fri 6 Nov. **Wave 1 is running.** T1–T5 and Join started at about 00:44 IST; the Coordinator took over at 00:46 (10-minute checks, merges, records). No track has opened a PR yet; T3 is building M7a, the first gate (T1's recorder, Join's mirror and the small city wait for it).
+Updated 03:10 IST, Fri 6 Nov. **Four milestones are merged: M7a (the Arkiv writer, 01:51), M1 (the checkout contract, 01:51), M10 (the agents) and M2 (the checkout deployed and verified on Whitechain).** In progress: M5 (ENS, T2), M3 (shop and facilitator, T1), M7b and the small-city seeding (T3), M11 (the mirror, Join), the website (T5) and the agent hooks (T4, PR #16).
 
-New since the handover:
-- **Usage risk:** the weekly plan limit is 71% used and resets Fri 21:30 IST. All seven sessions started on Opus 5.5 at max effort; at 01:22 the Coordinator switched the six track sessions to the planned mix (from their next turn). The Coordinator's own setting and extra usage are the founder's (`OPEN.md` "Founder now" 1).
-- **The graph layer becomes a developer SDK** (ADR-0057): T3 keeps `@graphpay/arkiv-graph` generic now, GraphPay's payment model sits in `packages/money-graph`, and on Friday after acceptance the package goes to npm (Friday item 18).
-- M0's background tasks: none failed (11 agents and 3 background commands, all completed; `relays/records.md`).
+Two risks for the founder (`OPEN.md` "Founder now"):
+- **Power and lid:** the lid closed at 02:14 and the Mac slept until 03:01, so every session lost about 47 minutes; it runs on battery.
+- **Plan usage:** 74% at 03:04, about 3 points an hour, resetting Fri 21:30 IST. The track sessions run the planned models, and the busiest ones restart with a fresh context at milestone boundaries (T4 dropped to 94K tokens).
 
 Next:
-1. Tell T1 and Join M7a's import path when it merges; CP2 expected about 01:35.
-2. Acceptance (CP4) about 05:30 IST; the next records relay about 02:45.
+1. M5 merges (T2), then T1's M3 part B and Join's real mirror runs.
+2. CP4 (acceptance) moves to about 06:15 IST after the lost 47 minutes.
 3. The large city waits for the founder's story lock (by Fri 08:30 for rehearsal 1, at the latest 13:00; seeding starts by 14:00).
 
 ## foundation
@@ -73,11 +72,10 @@ Updated 01:31 IST, Fri 6 Nov (T5 Web). **The website shell is on `main` and live
 
 ## records
 
-Updated 01:20 IST. **The Coordinator is on duty** (`docs/plan/sessions/coordinator.md`): 10-minute ticks from 00:58, a keep-awake hold, merges, records.
-- Done: ADR-0057 and Friday item 18 (the graph SDK on npm); T3 briefed at 01:04 and adopted it in M7a; the npm name checked (free); the first M14 relay; AI usage rows for the new sessions.
-- Running: the ticks (PRs, conflicts, gates, `OPEN.md` questions, silent sessions).
-- Blockers: none. Risk: plan usage (`OPEN.md` "Founder now" 1).
-- Next: each session's prompt log written into its own worktree (P-records-1); M7a's gate messages; records again about 02:45.
+Updated 03:10 IST. **The Coordinator is on duty**, with ticks every 10 minutes and the merges and records.
+- Done since 01:20: PR #9 merged (ADR-0057, Friday item 18); the six track sessions switched to the planned models (01:22); gate messages for M7a and M1; two conflict rounds on #14 guided; fresh starts for T4 (done) and asked of T1, T3, T5 and Join.
+- Blockers: the Mac slept 02:14–03:01 (lid closed, on battery; P-records-4).
+- Next: start lines after each fresh start; tell T1 and Join when M5 merges; records again about 04:45.
 
 ## submission
 
