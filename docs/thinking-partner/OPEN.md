@@ -104,9 +104,12 @@ Agents (T4) and Join add one row per full errand run, so the presets can be cali
 
 ## integration
 
-Updated 02:05 IST. Nothing for the founder now. The live mirror run needs no login or funding (W_LEDGER holds 1.998 tGLM at 02:06 IST against a projected 0.7–0.9 for the history).
+Updated 03:36 IST, Fri 6 Nov. Nothing for the founder now: the live mirror needs no login or funding. W_LEDGER holds 1.51 test GLM after the history (0.49 spent); one mirrored payment costs about 0.002 (the lab figure, `planning/SPEC/INTEGRATION_AND_MIRROR.md` §6).
 
-- **Network drops (watch).** What: the Mac's DNS stopped answering at about 00:50 and again at 01:15 IST (GitHub, npm and the RPCs unreachable; the gateway still pinged). Where: this Mac's Wi-Fi. Why it matters: every session pushes and every live run needs it, and the mirror must resume after a drop (D15). Recommendation: if it recurs during the live runs, switch the Mac to a phone hotspot; the mirror resumes from its Arkiv checkpoint by design.
+- **Keep the lid open (watch).** What: the workers process runs on this Mac under `caffeinate -ims`. Where: this Mac. Why: caffeinate stops idle sleep but not a closed lid (it slept 02:14–03:01 IST). A closed lid stops the mirror; it resumes from Arkiv on wake by design (D15), but the website's scores lag until then. Recommendation: keep the lid open and the charger in until Saturday's submission.
+- **Ask of T3: the reputation's synthetic label (open, sent to the Coordinator 03:29 IST).** What: `Reputation.synthetic` in `packages/money-graph/src/graphql.mjs` (line 323) comes from the node row only. The cast nodes are real, so the scores built from the labelled history say `synthetic: false`, although the stored tally rows say `true`. Why: synthetic data must always be labelled, on the site and in the agents' answers. Recommendation: `synthetic` is true when the node or any tally row the answer read is synthetic.
+- **Network drops (watch).** What: this Mac's DNS stopped answering at 00:50 and 01:15 IST. Why: the mirror must keep up during the live runs. Recommendation: if it recurs, switch to a phone hotspot; the mirror catches up from its Arkiv checkpoint (2-minute freeze tested: 127 blocks caught up in under 5 s).
+- **Closed 03:13 IST:** the checkout's address and deploy block (M2, PR 15) and the cast on ENS (M5, PR 18) arrived. Every name is epoch 0 and the 16 hand-off nodes match the cast (`docs/sessions/identity/namespace.md`).
 
 ## website
 

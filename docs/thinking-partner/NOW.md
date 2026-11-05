@@ -58,12 +58,13 @@ Updated 02:40 IST. **M10 is merged; the presence and handoff hooks are built** (
 - Blockers: none. Next: merge, then wait for Join's M12 counting run; re-run the live errand if time allows.
 ## integration
 
-Updated 02:05 IST. **The mirror (M11) now runs on the real Arkiv writer, in the emulator. The live run on the real networks waits for M2 (the deployed checkout) and M5 (the cast on ENS).**
-- Done: PR 8 merged (the mirror's core). This step wires it to T3's writer (M7a) and T1's contract events (M1), and adds `pnpm workers`, the one long-lived process.
-- Emulator result with the real planner: the good shop's tallies match the lab's lifecycle (orders 5, paid 6.40, one refund of 0.80, 2 fails, 3 delivered). A restart writes nothing. A refusal is counted once. The history and a live payment add to the same scoreboard. A second workers process is refused, and the heartbeat keeps beating during long work. 29 tests green; the reviewer's 2 blocking and 7 should-fix items are fixed.
-- Running: nothing on a real network yet.
-- Blockers: the checkout's address and deploy block (T1, M2) and the cast's names on ENS (T2, M5).
-- Next: when both land, start `pnpm workers` on this Mac: register the cast, write the 5% history (about 100 Arkiv transactions, 10–15 min), mirror the lifecycle run, then D1–D3 and the network-drop test (D15).
+Updated 03:35 IST, Fri 6 Nov. **The mirror runs live on the real networks.** The one workers process has run on this Mac since 03:13 IST, kept awake by `caffeinate`.
+- On Arkiv's testnet: the 19 cast names registered; the labelled 5% history written (1,258 synthetic events, about 0.49 test GLM); the checkout's 9 setup events read from its deploy block. It keeps up 2 blocks (about 4 s) behind the chain head.
+- Live so far: re-reading the same blocks sends nothing, and a 2-minute freeze, then a hard kill and restart, lost and repeated nothing; it took over at once and went on from the same place. These count as D2 and D15 only once a payment is in the window: until then the checks report "not run", not "pass".
+- The agents' hosted MCP endpoint answers through the new client, and its scores come from the mirror's history: kesar 97% on time, jamun 71% with 18% refunds (the trap).
+- Running: `pnpm workers` (port 8788 on this Mac only), a 30-minute lag sample.
+- Blockers: the first real payment (T1's M3, then M6) for D1, D2b/c and D3. T3 has a labelling fix to make (`OPEN.md`).
+- Next: M12's live hooks in `integration/` (the shop side once M3 merges), then the D checks on the first payment and `(M11 done)`.
 
 ## website
 

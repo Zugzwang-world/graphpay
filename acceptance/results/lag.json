@@ -1,0 +1,26 @@
+{
+  "id": "lag",
+  "at": "2026-11-05T22:00:32.253Z",
+  "pass": true,
+  "what": "exactly one workers process, its heartbeat fresh",
+  "measured": [
+    {
+      "instance": "6161b774ea7e172e",
+      "state": "running",
+      "cursorBlock": 12314093,
+      "headBlock": 12319491,
+      "lagBlocks": 2,
+      "ageS": 172
+    },
+    {
+      "instance": "f82114f0ed9f425b",
+      "state": "running",
+      "cursorBlock": 12313886,
+      "headBlock": 0,
+      "lagBlocks": 0,
+      "ageS": 28
+    }
+  ],
+  "expected": "one running heartbeat under 90 s old",
+  "evidence": {}
+}
