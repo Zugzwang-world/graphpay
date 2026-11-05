@@ -452,7 +452,7 @@ export function createMerchant({
   // Charge every subscription of ours that is due, through the facilitator's renew.
   async function chargeDueRenewals({ fromBlock = network.deployBlock } = {}) {
     if (!facilitator.renew) throw new AgentPayError('NO_RENEW', 'this facilitator does not renew subscriptions');
-    const toBlock = await publicClient.getBlockNumber();
+    const toBlock = await publicClient.getBlockNumber({ cacheTime: 0 });
     const results = [];
     for (const subId of await ourSubscriptions(fromBlock, toBlock)) {
       const s = asSub(await read('subscription', [subId]));
@@ -472,7 +472,7 @@ export function createMerchant({
     let stopped = false;
     const ours = new Map();
     async function tick() {
-      const head = await publicClient.getBlockNumber();
+      const head = await publicClient.getBlockNumber({ cacheTime: 0 });
       if (next === undefined) next = head;
       if (head < next) return;
       for (const l of await logsOf('SubscriptionRenewed', undefined, next, head)) {
@@ -498,7 +498,9 @@ export function createMerchant({
 
   // Every order of ours from the chain, as CSV: one row per order with payments and refunds.
   async function exportCsv({ fromBlock = network.deployBlock, toBlock } = {}) {
-    const to = toBlock ?? (await publicClient.getBlockNumber());
+    // The head uncached: viem keeps eth_blockNumber for its polling interval, which would drop
+    // the last few seconds of orders and refunds.
+    const to = toBlock ?? (await publicClient.getBlockNumber({ cacheTime: 0 }));
     const args = { shopNode: merchant.node };
     const [created, settled, refunded] = await Promise.all([
       logsOf('OrderCreated', args, fromBlock, to),

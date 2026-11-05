@@ -3,8 +3,9 @@
 // Sepolia against the deployed GraphPayCheckout, the real test USDT and Permit2. Both adapters:
 // inProcessFacilitator over an @x402/core x402Facilitator, and httpFacilitator over T1's
 // Fetch-API handler on a loopback port. Only T1's public exports are used.
-// T1's ENS gate is a stub here (the fork has no ENS): it answers the name's node and the
-// pass's on-chain epoch, as T2's gate does for an active agent.
+// T1's ENS gate is a stub here (the fork has no ENS): for the test agent it answers the name's
+// node and the pass's on-chain epoch, as T2's gate does for an active agent; any other name gets
+// T2's ENS_EXPIRED_OR_REVOKED.
 //   pnpm --filter @graphpay/agentpay test:fork
 
 import { after, before, test } from 'node:test';
@@ -23,10 +24,12 @@ const shop = story.shops.find((s) => s.key === story.order.shop);
 const product = shop.products.find((p) => p.sku === story.order.sku);
 const merchantName = `${shop.label}.${config.root.ens}`;
 const agent = disposableEntry(9000 + Math.floor(Math.random() * 900));
-// A test pass cap for three payments of the story's order item (the story budget fits one).
+// A test pass cap for three payments of the story's order item (the story budget fits one): two
+// paid, and the wrong-token payment, which the buyer keeps reserved as an unknown outcome.
 const dailyCap = BigInt(product.priceMicro) * 4n;
 const authToken = randomBytes(24).toString('hex'); // this run only, never printed
 
+const posts = { verify: 0, settle: 0 }; // authorised POSTs that reached T1's handler
 let fork, clock, relayerAccount, buyerAccount, merchantAccount, scheme, facilitator, fServer, buyer;
 const recorded = [];
 const servers = [];
@@ -55,7 +58,8 @@ before(async () => {
     chain: viemChain({ publicClient: fork.publicClient, walletClient: fork.wallet(relayerAccount), account: relayerAccount, checkout: network.checkout, token, permit2: network.permit2, chain: fork.chain }),
     ensGate: async (name) => {
       const policy = await fork.publicClient.readContract({ address: network.checkout, abi: checkoutAbi, functionName: 'policies', args: [namehash(name)] });
-      return { ok: name === agent.ensName, node: namehash(name), epoch: Number(policy.epoch) };
+      if (name !== agent.ensName) return { ok: false, reason: 'ENS_EXPIRED_OR_REVOKED' };
+      return { ok: true, node: namehash(name), epoch: Number(policy.epoch) };
     },
     recorder: { refused: async (r) => recorded.push(r) },
     clock: clock.now,
@@ -71,7 +75,12 @@ before(async () => {
     health: async () => ({ signer: relayerAccount.address }),
     log: () => {},
   });
-  fServer = await listen(async (req, res) => sendFetchResponse(res, await handle(await toFetchRequest(req))));
+  fServer = await listen(async (req, res) => {
+    const response = await handle(await toFetchRequest(req));
+    const route = req.url.split('/').pop();
+    if (req.method === 'POST' && response.status === 200 && route in posts) posts[route]++;
+    await sendFetchResponse(res, response);
+  });
 
   buyer = createBuyerAgent({ account: buyerAccount, publicClient: fork.publicClient, network, name: agent.ensName, pass: { capMicro: dailyCap, period: 'day', merchants: [merchantName] }, clock: clock.now });
 });
@@ -89,6 +98,23 @@ async function shopThrough(f) {
   const s = await listen(merchant.node(pricer, (_req, { order }) => ({ ok: true, orderId: order.orderId })));
   servers.push(s);
   return s;
+}
+
+// Nothing sent: the relayer's nonce (pending included), the payer's and merchant's test USDT, and
+// the order is not PAID.
+async function snapshot(payer) {
+  return {
+    nonce: await fork.publicClient.getTransactionCount({ address: relayerAccount.address, blockTag: 'pending' }),
+    payer: await fork.usdtBalance(payer),
+    merchant: await fork.usdtBalance(merchantAccount.address),
+  };
+}
+async function assertNothingSent(before, payer, orderId) {
+  assert.deepEqual(await snapshot(payer), before);
+  if (orderId) {
+    const o = await fork.publicClient.readContract({ address: network.checkout, abi: checkoutAbi, functionName: 'orders', args: [orderId] });
+    assert.notEqual(Number(o.status), 2);
+  }
 }
 
 async function assertPaid(r, before) {
@@ -114,23 +140,25 @@ test('over HTTP: the same through T1\'s facilitator handler and httpFacilitator'
   assert.ok(supported.kinds.some((k) => k.scheme === 'graphpay-order' && k.network === network.caip2));
   const s = await shopThrough(f);
   const before = await fork.usdtBalance(merchantAccount.address);
+  const seen = { ...posts };
   await assertPaid(await buyer.pay(`${s.url}/order`), before);
-  assert.equal(scheme.stats().queued, 0);
+  assert.equal(posts.verify - seen.verify, 1);
+  assert.equal(posts.settle - seen.settle, 1);
 });
 
 test('a wrong bearer token is refused by T1 and nothing is sent', async () => {
   const f = httpFacilitator({ url: `${fServer.url}/api/facilitator`, authToken: randomBytes(24).toString('hex') });
   await assert.rejects(f.verify({}, {}), FacilitatorUnavailable);
   const s = await shopThrough(f);
-  const nonce = await fork.publicClient.getTransactionCount({ address: relayerAccount.address });
+  const before = await snapshot(buyerAccount.address);
   const r = await buyer.pay(`${s.url}/order`).catch((e) => ({ status: 'error', reason: e.code ?? e.name }));
   // The merchant answers 502: its facilitator is unavailable, so the buyer is not charged.
   assert.notEqual(r.status, 'paid');
   assert.equal(r.response?.status, 502);
-  assert.equal(await fork.publicClient.getTransactionCount({ address: relayerAccount.address }), nonce);
+  await assertNothingSent(before, buyerAccount.address, r.orderId);
 });
 
-test('T1 refuses an agent its ENS gate refuses, fails closed before any send', async () => {
+test('T1 refuses an agent its ENS gate refuses before any send, and records the refusal', async () => {
   const other = disposableEntry(9900 + Math.floor(Math.random() * 99));
   const account = fork.newAccount();
   await fork.giveUsdt(account.address, BigInt(product.priceMicro));
@@ -140,9 +168,14 @@ test('T1 refuses an agent its ENS gate refuses, fails closed before any send', a
   await issueSpendingPass({ walletClient: fork.wallet(writer), publicClient: fork.publicClient, network, name: other.ensName, wallet: account.address, dailyCapMicro: dailyCap });
   const stranger = createBuyerAgent({ account, publicClient: fork.publicClient, network, name: other.ensName, pass: { capMicro: dailyCap, period: 'day', merchants: [merchantName] }, clock: clock.now });
   const s = await shopThrough(inProcessFacilitator(facilitator));
-  const nonce = await fork.publicClient.getTransactionCount({ address: relayerAccount.address });
+  const before = await snapshot(account.address);
   const r = await stranger.pay(`${s.url}/order`);
   assert.equal(r.status, 'failed');
-  assert.equal(r.reason, 'ENS_READ_FAILED');
-  assert.equal(await fork.publicClient.getTransactionCount({ address: relayerAccount.address }), nonce);
+  assert.equal(r.reason, 'ENS_EXPIRED_OR_REVOKED');
+  await assertNothingSent(before, account.address, r.orderId);
+  // T1 records the refusal off-chain (async, never awaited by the pipeline).
+  for (let i = 0; i < 50 && !recorded.length; i++) await new Promise((res) => setTimeout(res, 100));
+  assert.equal(recorded.length, 1);
+  assert.equal(recorded[0].reason, 'ENS_EXPIRED_OR_REVOKED');
+  assert.equal(recorded[0].payer.toLowerCase(), account.address.toLowerCase());
 });
