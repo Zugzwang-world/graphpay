@@ -28,7 +28,8 @@
     "agents:errand": "node scripts/agents/errand.mjs",
     "secrets:vercel": "node scripts/secrets/vercel-push.mjs",
     "workers": "node packages/mirror/src/main.mjs",
-    "workers:replay": "node packages/mirror/src/replay.mjs"
+    "workers:replay": "node packages/mirror/src/replay.mjs",
+    "acceptance": "node acceptance/run.mjs"
   },
   "devDependencies": {
     "viem": "2.57.16",
