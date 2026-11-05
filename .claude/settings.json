@@ -1,0 +1,52 @@
+{
+  "permissions": {
+    "deny": [
+      "Read(./.env)",
+      "Read(./.env.*)",
+      "Read(**/.env)",
+      "Read(**/.env.*)",
+      "Read(./keystore/**)",
+      "Read(**/*.pem)",
+      "Read(**/*.key)",
+      "Read(~/.ssh/**)",
+      "Bash(cat .env*)",
+      "Bash(printenv*)",
+      "Bash(env)",
+      "Bash(cast wallet new*)",
+      "Bash(cast wallet private-key*)",
+      "Bash(git push --force*)",
+      "Bash(git push -f*)",
+      "Bash(git push * --force*)",
+      "Bash(git push * -f*)",
+      "Bash(git push *--force-with-lease*)",
+      "Bash(git push * +*)",
+      "Bash(git -C * push* --force*)",
+      "Bash(git -C * push* -f*)",
+      "Bash(git -C * push* +*)",
+      "Bash(git push *--mirror*)",
+      "Bash(git -C * push*--mirror*)",
+      "Bash(gh repo delete*)",
+      "Bash(vercel remove*)",
+      "Bash(vercel rm*)",
+      "Bash(vercel project rm*)",
+      "Bash(vercel projects rm*)",
+      "Bash(supabase projects delete*)",
+      "Bash(vercel project ls*)",
+      "Bash(vercel project list*)",
+      "Bash(vercel projects ls*)",
+      "Bash(vercel projects list*)"
+    ]
+  },
+  "hooks": {
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/scripts/hooks/prompt-log.mjs\""
+          }
+        ]
+      }
+    ]
+  }
+}

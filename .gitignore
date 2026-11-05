@@ -1,0 +1,27 @@
+# secrets (SPEC/SECURITY_AND_OPS.md §6); env.example holds names only
+.env
+.env.*
+keystore/
+*.pem
+*.key
+
+# dependencies and build output
+node_modules/
+.next/
+out/
+dist/
+coverage/
+*.tsbuildinfo
+.turbo/
+
+# Foundry (contract libraries are installed per checkout)
+packages/contracts/out/
+packages/contracts/cache/
+packages/contracts/lib/
+
+# Vercel
+.vercel/
+
+# local
+.DS_Store
+*.log
