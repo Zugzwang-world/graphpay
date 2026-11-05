@@ -27,6 +27,7 @@ import { privateKeyToAccount } from 'viem/accounts';
 import { clientsFor } from '../scripts/lib/chains.mjs';
 import { loadEnv } from '../scripts/lib/env-loader.mjs';
 import { installErrorBoundary, redactor } from '../scripts/lib/redact.mjs';
+import { roleAddresses } from '../scripts/lib/wallets.mjs';
 import { balances, mirrorSync } from './src/evidence.mjs';
 import { createPayerGate } from './src/gate.mjs';
 
@@ -66,6 +67,9 @@ const relayer = fh.signer;
 out.health = { facilitator: { startup: fh.startup ?? null, signer: relayer ?? null }, shop: (await req('/api/shop/health')).status };
 say(`facilitator signer ${relayer}, shop health ${out.health.shop}`);
 const nonce = () => pub.getTransactionCount({ address: relayer, blockTag: 'latest' });
+const isRelayer = relayer ? await pub.readContract({ address: checkout, abi: checkoutAbi, functionName: 'isRelayer', args: [relayer] }) : false;
+const healthy = out.health.shop === 200 && fh.startup === 'ok' && isRelayer;
+out.health.signerIsRelayer = isRelayer;
 
 // C6 and F2: every route that makes anyone sign, without and with a wrong passcode or bearer.
 const quote = async (qs) => {
@@ -74,11 +78,14 @@ const quote = async (qs) => {
   if (r.status !== 200) throw new Error(`quote answered ${r.status}: ${body.error ?? ''}`);
   return body;
 };
-const wallet = privateKeyToAccount(env[`${payer.walletRole}_PRIVATE_KEY`]);
+const addresses = roleAddresses(values);
+const wallet = send ? privateKeyToAccount(env[`${payer.walletRole}_PRIVATE_KEY`]) : { address: addresses[payer.walletRole] };
+const merchantNonce = () => pub.getTransactionCount({ address: addresses[shop.walletRole], blockTag: 'latest' });
 const q0 = await quote({ shop: shop.ensName, item: story.order.sku, qty: String(story.order.quantity), buyer: persona.ensName, payer: payer.ensName, wallet: wallet.address });
 const payPath = new URL(q0.payUrl).pathname;
 const reorderPath = payPath.replace(/\/pay$/, '/reorder');
 const nonce0 = await nonce();
+const mNonce0 = await merchantNonce();
 const routes = [
   { path: payPath, gate: 'passcode', body: q0.terms, signs: 'FACILITATOR (and W_DIRECTORY writes the quote on the 402 step)' },
   { path: reorderPath, gate: 'passcode', body: q0.terms, signs: 'FACILITATOR' },
@@ -91,15 +98,19 @@ const routes = [
 const table = [];
 for (const r of routes) {
   const call = (headers) => (r.method === 'GET' ? req(r.path, { headers }) : post(r.path, r.body ?? {}, headers));
-  const without = (await call({})).status;
-  const wrong = (await call(r.gate === 'bearer' ? { authorization: `Bearer ${WRONG}` } : { [PASSCODE_HEADER]: WRONG })).status;
+  // A 401 counts only as the app's own JSON refusal (not a platform login page).
+  const status = async (res) => (res.status === 401 && typeof (await res.json().catch(() => null))?.error === 'string' ? 401 : `${res.status} (not the app's refusal)`);
+  const without = await status(await call({}));
+  const wrong = await status(await call(r.gate === 'bearer' ? { authorization: `Bearer ${WRONG}` } : { [PASSCODE_HEADER]: WRONG }));
   table.push({ route: `${r.method ?? 'POST'} ${r.path.replace(/0x[0-9a-f]{64}/i, ':id')}`, gate: r.gate, signs: r.signs, without, wrong });
 }
 const nonce1 = await nonce();
+const mNonce1 = await merchantNonce();
 const all401 = table.every((t) => t.without === 401 && t.wrong === 401);
-out.rows.F2 = { pass: all401 && nonce1 === nonce0, table, relayerNonce: { before: nonce0, after: nonce1 } };
+// Nothing sent: the hosted relayer's and the shop's merchant nonces (RENEWER is the cron's own).
+out.rows.F2 = { pass: healthy && all401 && nonce1 === nonce0 && mNonce1 === mNonce0, table, relayerNonce: { before: nonce0, after: nonce1 }, merchantNonce: { role: shop.walletRole, before: mNonce0, after: mNonce1 } };
 const c6 = table.filter((t) => /orders\/:id\/pay|facilitator\/(settle|verify)/.test(t.route));
-out.rows.C6 = { pass: c6.length === 3 && c6.every((t) => t.without === 401 && t.wrong === 401) && nonce1 === nonce0, table: c6, relayerNonce: { before: nonce0, after: nonce1 } };
+out.rows.C6 = { pass: healthy && c6.length === 3 && c6.every((t) => t.without === 401 && t.wrong === 401) && nonce1 === nonce0, table: c6, relayerNonce: { before: nonce0, after: nonce1 } };
 for (const t of table) say(`${t.without === 401 && t.wrong === 401 ? 'ok  ' : 'FAIL'} ${t.route} (${t.gate}): ${t.without}, ${t.wrong}`);
 
 // The paying rows need a fresh UTC day for the acceptance payer (4.80 + 1.20 = its 6.00).
@@ -127,14 +138,16 @@ const signer = (mandate, max) => {
 const passcode = { [PASSCODE_HEADER]: env.DEMO_PASSCODE };
 
 // One payment through the hosted shop: 402 (the quote written) → sign → 200.
-async function payOnce(q, path, { mandate, max, gated = true }) {
+async function payOnce(q, path, { mandate, max, payee, gated = true }) {
   const r402 = await post(path, { ...q.terms, requestId: `m13-${q.orderId.slice(2, 14)}` }, passcode);
   if (r402.status !== 402) return { stage: '402', status: r402.status, body: await r402.json().catch(() => null) };
   const required = decodePaymentRequiredHeader(r402.headers.get('payment-required'));
   const quoteKey = required.accepts?.[0]?.extra?.quoteKey ?? null;
+  const accepted = required.accepts?.[0];
+  if (!payee?.ok || !accepted?.payTo || accepted.payTo.toLowerCase() !== payee.payee.toLowerCase()) return { stage: 'payee', payTo: accepted?.payTo ?? null };
   let gate = null;
   if (gated) {
-    gate = await createPayerGate({ ens: sepolia.publicClient, whitechain: pub }).ensGate(payer.ensName, BigInt(q.priceMicro));
+    gate = await createPayerGate({ ens: sepolia.publicClient, whitechain: pub }).ensGate(payer.ensName, BigInt(accepted.amount));
     if (!gate.ok) return { stage: 'gate', gate };
   }
   const client = signer(mandate, max);
@@ -147,8 +160,10 @@ async function payOnce(q, path, { mandate, max, gated = true }) {
 
 // Every outcome is written, a thrown step included.
 const dir = join(here, '..', 'docs', 'sessions', 'integration', 'hosted');
-const file = join(dir, `${send ? 'paid' : 'read'}-${out.startedAt.slice(0, 10)}.json`);
+const file = join(dir, `${send ? 'paid' : 'read'}-${out.startedAt.replace(/[:.]/g, '-')}.json`);
+let keep = !send;
 process.on('exit', () => {
+  if (!keep) return;
   out.endedAt = new Date().toISOString();
   mkdirSync(dir, { recursive: true });
   writeFileSync(file, `${redact(json(out))}\n`);
@@ -157,6 +172,9 @@ process.on('exit', () => {
 
 if (send) {
   if (spent0 !== 0n) throw new Error(`the acceptance payer has spent ${spent0} micro today; run after the UTC day changes (05:30 IST)`);
+  const toMidnight = 86_400 - (Math.floor(Date.now() / 1000) % 86_400);
+  if (toMidnight < 15 * 60) throw new Error('within 15 minutes of the UTC day change; run after it');
+  keep = true;
   if (!env.DEMO_PASSCODE) throw new Error('DEMO_PASSCODE is not in .env');
   const who = { payer: wallet.address };
   const payee = await createEnsReader({ client: sepolia.publicClient }).resolvePayee(shop.ensName);
@@ -165,9 +183,9 @@ if (send) {
   // C2: 4.80, no payer gas.
   const wbt0 = await pub.getBalance({ address: wallet.address });
   const usdt0 = (await balances(pub, who)).payer;
-  const c2 = await payOnce(q0, payPath, { mandate: `M13 C2 ${out.startedAt}`, max: story.order.budgetMicro });
+  const c2 = await payOnce(q0, payPath, { mandate: `M13 C2 ${out.startedAt}`, max: story.order.priceMicro, payee });
   if (c2.status !== 200) {
-    out.rows.C2 = { pass: false, response: { stage: c2.stage, status: c2.status, body: c2.body, gate: c2.gate } };
+    out.rows.C2 = { pass: false, response: { stage: c2.stage, status: c2.status, body: c2.body, gate: c2.gate, payTo: c2.payTo } };
     throw new Error(`C2 answered ${c2.status ?? c2.stage}`);
   }
   const tx2 = c2.body.transaction;
@@ -176,7 +194,7 @@ if (send) {
   const settled2 = events(rc2).find((e) => e.eventName === 'PaymentSettled');
   const gas2 = Number(rc2.gasUsed);
   out.rows.C2 = {
-    pass: wbt1 === wbt0 && Boolean(settled2) && rc2.from.toLowerCase() === relayer.toLowerCase() && (within(gas2, 312_024, 312_024) || within(gas2, 234_292, 252_082)),
+    pass: rc2.status === 'success' && wbt1 === wbt0 && settled2?.args.amountMicro === BigInt(story.order.priceMicro) && settled2?.args.orderId.toLowerCase() === q0.orderId.toLowerCase() && isRelayer && rc2.from.toLowerCase() === relayer.toLowerCase() && (within(gas2, 312_024, 312_024) || within(gas2, 234_292, 252_082)),
     tx: tx2, explorer: whitechain.explorerTx(tx2), gasUsed: gas2, wbt: { before: wbt0, after: wbt1 }, from: rc2.from, relayer,
     settled: settled2 ? { amountMicro: settled2.args.amountMicro, orderId: settled2.args.orderId } : null,
     delivery: c2.body.delivery, quoteKey: c2.quoteKey, payeeRead: payee.ok ? { payee: payee.payee, node: payee.node, epoch: payee.epoch } : payee, payerGate: c2.gate,
@@ -196,12 +214,20 @@ if (send) {
 
   // C3: the refund (local, SHOP_KESAR, only with --refund and after the delivery's receipt).
   const c3 = {};
-  if (refundToo) {
-    const order = await pub.readContract({ address: checkout, abi: checkoutAbi, functionName: 'orders', args: [q0.orderId] });
-    if (Number(order.status) !== 3) throw new Error(`the order is not DELIVERED yet (status ${order.status}); no refund`);
+  out.rows.C3 = c3;
+  let delivered = false;
+  for (let i = 0; refundToo && i < 30 && !delivered; i += 1) {
+    delivered = Number((await pub.readContract({ address: checkout, abi: checkoutAbi, functionName: 'orders', args: [q0.orderId] })).status) === 3;
+    if (!delivered) await new Promise((ok) => setTimeout(ok, 3_000));
+  }
+  if (refundToo && !delivered) c3.refund = { pass: null, why: 'the hosted delivery had not landed after 90 s; refund skipped' };
+  if (refundToo && delivered) {
     if ((await pub.getChainId()) !== config.networks.whitechain.chainId) throw new Error('not Whitechain');
-    const key = env[`${shop.walletRole}_PRIVATE_KEY`];
-    const merchant = merchantActions({ publicClient: pub, walletClients: { [shop.key]: whitechain.walletClient(privateKeyToAccount(key)) }, checkout, chain: whitechain.chain });
+    const account = privateKeyToAccount(env[`${shop.walletRole}_PRIVATE_KEY`]);
+    // The hosted shop sends markDelivered with this key too: refuse while it has one in flight.
+    const [latest, pending] = await Promise.all(['latest', 'pending'].map((blockTag) => pub.getTransactionCount({ address: account.address, blockTag })));
+    if (latest !== pending) throw new Error(`${shop.walletRole} has a pending transaction (nonce ${latest}); no refund`);
+    const merchant = merchantActions({ publicClient: pub, walletClients: { [shop.key]: whitechain.walletClient(account) }, checkout, chain: whitechain.chain });
     const before = (await balances(pub, who)).payer;
     const rf = await merchant.refund(shop.key, q0.orderId, story.order.refundMicro);
     const rrc = await pub.waitForTransactionReceipt({ hash: rf.hash, timeout: 120_000 });
@@ -213,7 +239,7 @@ if (send) {
   }
   // C3: the re-order of 3 for 1.20 through the hosted reorder route.
   const qr = await quote({ shop: shop.ensName, item: story.order.sku, qty: String(story.order.reorder.quantity), buyer: persona.ensName, payer: payer.ensName, wallet: wallet.address, parent: q0.orderId });
-  const re = await payOnce(qr, new URL(qr.payUrl).pathname, { mandate: `M13 C3 ${out.startedAt}`, max: story.order.reorder.priceMicro });
+  const re = await payOnce(qr, new URL(qr.payUrl).pathname, { mandate: `M13 C3 ${out.startedAt}`, max: story.order.reorder.priceMicro, payee });
   if (re.status === 200) {
     const rc = await pub.waitForTransactionReceipt({ hash: re.body.transaction, timeout: 120_000 });
     const evs = events(rc);
@@ -223,7 +249,6 @@ if (send) {
     c3.reorder.pass = c3.reorder.kind === 1 && String(c3.reorder.parent).toLowerCase() === q0.orderId.toLowerCase() && c3.reorder.amountMicro === BigInt(story.order.reorder.priceMicro) && within(c3.reorder.gasUsed, 252_082, 252_082);
   } else c3.reorder = { pass: false, response: { stage: re.stage, status: re.status, body: re.body, gate: re.gate } };
   say(`C3 re-order ${c3.reorder.pass ? 'ok' : 'FAIL'}: ${c3.reorder.explorer ?? JSON.stringify(c3.reorder.response)}`);
-  out.rows.C3 = c3;
 
   // C4(b): 0.40 more is over the 6.00 cap: refused off-chain (signed ungated, so the hosted
   // facilitator refuses it and its recorder writes the off-chain fail edge).
@@ -236,7 +261,7 @@ if (send) {
     throw new Error('C4(b) skipped: the payer is not over its cap, so the attempt would settle');
   }
   const n4 = await nonce();
-  const over = await payOnce(one, new URL(one.payUrl).pathname, { mandate: `M13 C4b ${out.startedAt}`, max: one.priceMicro, gated: false });
+  const over = await payOnce(one, new URL(one.payUrl).pathname, { mandate: `M13 C4b ${out.startedAt}`, max: one.priceMicro, payee, gated: false });
   await new Promise((ok) => setTimeout(ok, 4_000));
   const n4b = await nonce();
   let failEdge = null;

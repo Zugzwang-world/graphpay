@@ -1,6 +1,6 @@
 {
   "site": "https://graphpay-event.vercel.app",
-  "startedAt": "2026-11-05T23:45:32.137Z",
+  "startedAt": "2026-11-05T23:51:43.324Z",
   "payer": "acceptance.vitalik.graphpay.eth",
   "shop": "kesar-kingdom.graphpay.eth",
   "mode": "read-only",
@@ -129,8 +129,13 @@
         }
       ],
       "relayerNonce": {
-        "before": 9,
-        "after": 9
+        "before": 10,
+        "after": 10
+      },
+      "merchantNonce": {
+        "role": "SHOP_KESAR",
+        "before": 11,
+        "after": 11
       }
     },
     "C6": {
@@ -159,8 +164,8 @@
         }
       ],
       "relayerNonce": {
-        "before": 9,
-        "after": 9
+        "before": 10,
+        "after": 10
       }
     }
   },
@@ -169,7 +174,8 @@
       "startup": "ok",
       "signer": "0x1AB82871c3E1Be64717269D45F08cA9d54C1EBf6"
     },
-    "shop": 200
+    "shop": 200,
+    "signerIsRelayer": true
   },
   "plan": {
     "spentTodayMicro": "4800000",
@@ -181,5 +187,5 @@
     },
     "gas": "none from the payer; the hosted relayer pays"
   },
-  "endedAt": "2026-11-05T23:45:46.458Z"
+  "endedAt": "2026-11-05T23:52:00.854Z"
 }

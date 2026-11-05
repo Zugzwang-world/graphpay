@@ -331,6 +331,7 @@ async function hostedRenewal(root, env) {
   const created = evs.find((e) => e.eventName === 'OrderCreated');
   const settled = evs.find((e) => e.eventName === 'PaymentSettled');
   const gas = Number(receipt.gasUsed);
-  const pass = receipt.status === 'success' && Number(renewed?.args.cycle) === 2 && Number(created?.args.kind) === 2 && Boolean(settled) && gas >= Math.floor(201_555 * 0.85) && gas <= Math.ceil(201_555 * 1.15);
-  return { pass, measured: { cycle: renewed ? Number(renewed.args.cycle) : null, orderKind: created ? Number(created.args.kind) : null, settledMicro: settled ? String(settled.args.amountMicro) : null, gasUsed: gas, from: receipt.from }, evidence: { tx: `${config.networks.whitechain.explorer}/tx/${hash}`, by: "the hosted cron as RENEWER (T1's M4)" } };
+  const byRelayer = await wc.publicClient.readContract({ address: config.whitechain.contracts.checkout.address, abi: checkoutAbi, functionName: 'isRelayer', args: [receipt.from] });
+  const pass = receipt.status === 'success' && byRelayer && settled?.args.amountMicro === BigInt(story.renewal.priceMicro) && Number(renewed?.args.cycle) === 2 && Number(created?.args.kind) === 2 && Boolean(settled) && gas >= Math.floor(201_555 * 0.85) && gas <= Math.ceil(201_555 * 1.15);
+  return { pass, measured: { cycle: renewed ? Number(renewed.args.cycle) : null, orderKind: created ? Number(created.args.kind) : null, settledMicro: settled ? String(settled.args.amountMicro) : null, gasUsed: gas, from: receipt.from, fromIsRelayer: byRelayer }, evidence: { tx: `${config.networks.whitechain.explorer}/tx/${hash}`, by: "the hosted cron as RENEWER (T1's M4)", subscription: "the rehearsal agent's 120 s demo subscription (C3 asks only for cycle 2 and a kind-2 PaymentSettled)" } };
 }
