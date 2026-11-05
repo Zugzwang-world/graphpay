@@ -28,6 +28,12 @@ Every version the event code pins, with how it was checked. Each track adds the 
 | @types/react, @types/react-dom | 19.3.0 | `npm view` (latest 19.x) | verified |
 | @types/node | 22.20.5 | `npm view @types/node@22` (latest 22.x, matching Node 22) | verified |
 
+## M0 agent preset probe (`m0/story-config`, checked 2026-11-05 23:37 IST)
+
+| item | pinned | how checked | status |
+|---|---|---|---|
+| `@anthropic-ai/sdk` | 1.5.0 (root devDependency, used by `pnpm agents:probe`) | `npm view @anthropic-ai/sdk dist-tags` → `latest` 1.5.0 (published 2026-11-04 20:29 UTC); installed from the registry, lockfile. The client takes its base URL from the config (`models.apiBaseUrl`), so a shell `ANTHROPIC_BASE_URL` is never read | verified |
+
 ## Versions the tracks install (re-check with `npm view` before pinning)
 
 The M0 verifier's snapshot of every package in `planning/FACTS.md` §5 is in `docs/technical/FACTS.md` (Results). Changes since the pack: x402 2.30.0 is `latest` (move all four `@x402/*` packages together or keep 2.29.0); `ai` 7.0.163, `@ai-sdk/anthropic` 4.0.97, `@ai-sdk/mcp` 2.0.91; graphql 16.15.0 is the newest 16.x (`latest` is 17.1.0; keep one major); sigma `latest` is 4.0.4 (3.0.3 is the newest 3.x). Each track adds its pins here under its own heading.

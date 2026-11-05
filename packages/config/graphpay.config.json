@@ -1,0 +1,255 @@
+{
+  "about": "The infrastructure config (ADR-0030): every ENS, Whitechain and Arkiv address and URL, the networks, the wallet roles, the model pricing and the model API URL. Everything story-specific lives in story.json (ADR-0047). Values come from planning/FACTS.md, re-verified in docs/technical/FACTS.md. Section owners: root, networks, wallets, models, site (main); whitechain.contracts (payments); ens (identity); arkiv (arkiv).",
+  "schemaVersion": 1,
+  "root": {
+    "ens": "graphpay.eth"
+  },
+  "networks": {
+    "whitechain": {
+      "name": "Whitechain Sepolia",
+      "chainId": 1874,
+      "nativeSymbol": "WBT",
+      "secretRpcEnv": "WHITECHAIN_RPC_URL",
+      "publicRpcs": [
+        {
+          "label": "public Ankr",
+          "url": "https://rpc.ankr.com/whitechain_testnet"
+        },
+        {
+          "label": "Whitechain public",
+          "url": "https://rpc.testnet.whitechain.io"
+        }
+      ],
+      "ws": "wss://rpc.testnet.whitechain.io/ws",
+      "explorer": "https://explorer.testnet.whitechain.io",
+      "explorerApi": "https://explorer.testnet.whitechain.io/api/",
+      "ensCoinType": 2147485522
+    },
+    "sepolia": {
+      "name": "Ethereum Sepolia",
+      "chainId": 11155111,
+      "nativeSymbol": "ETH",
+      "secretRpcEnv": "SEPOLIA_RPC_URL",
+      "publicRpcs": [
+        {
+          "label": "publicnode",
+          "url": "https://ethereum-sepolia-rpc.publicnode.com"
+        }
+      ],
+      "explorer": "https://sepolia.etherscan.io"
+    },
+    "rabdi": {
+      "name": "Arkiv Rabdi",
+      "chainId": 7794095,
+      "nativeSymbol": "tGLM",
+      "rpcBase": "https://rpc.rabdi.db-chain.testnet.arkiv.network",
+      "accessKeyEnv": "ARKIV_ACCESS_KEY",
+      "publicRpcs": [
+        {
+          "label": "Rabdi public (keyless)",
+          "url": "https://rpc.rabdi.db-chain.testnet.arkiv.network"
+        }
+      ],
+      "explorer": "https://rabdi.explorer.arkiv.network"
+    }
+  },
+  "whitechain": {
+    "tokens": {
+      "usdt": {
+        "address": "0xcedfB56113143d55b2358b8CFbB0dEB5Ad2f55a7",
+        "name": "Tether USD",
+        "symbol": "USDT",
+        "decimals": 6,
+        "eip712": {
+          "name": "Tether USD",
+          "version": "1"
+        },
+        "erc7930": "0x0001000002075214cedfb56113143d55b2358b8cfbb0deb5ad2f55a7"
+      },
+      "neverUse": [
+        "0xaa7962d073935D387e8d442DA1D7149C81388f46"
+      ]
+    },
+    "system": {
+      "permit2": "0x000000000022D473030F116dDEE9F6B43aC78BA3",
+      "multicall3": "0xcA11bde05977b3631167028862bE2a173976CA11",
+      "entryPointV07": "0x0000000071727De22E5E9d8BAf0edAc6f37da032",
+      "x402ExactPermit2Proxy": "0x402085c248EeA27D92E8b30b2C58ed07f9E20001"
+    },
+    "labDoNotReuse": [
+      "0x395dc742053F1D77595ED18884628B809A34f3D6",
+      "0x4fD68FB630711Ef592F24c2441eA23B270C1e442"
+    ],
+    "contracts": {}
+  },
+  "ens": {
+    "network": "sepolia",
+    "deployment": "ENSv2 Sepolia (redeployed 2026-09-15)",
+    "contracts": {
+      "rootRegistry": "0xb458d6a3a77919449d03e7a6903c26827c1ec43f",
+      "ethRegistry": "0xd4ebcbbdf463c9c45784603db0ddd499bc44a8b4",
+      "ethRegistrar": "0xf633e7fc17e2bbe0d0965d18ec1821dcb754a3d3",
+      "standardRentPriceOracle": "0x8196665d4ca7488b6474a9ec8e7d2719fb42263a",
+      "mockUsdc": "0x240b0316df57887dbbe58b586508b19e633a14aa",
+      "mockDai": "0xf6fac8a58a0be13b9197f27c41b73162fe32572b",
+      "verifiableFactory": "0xda70306c98e97ece36f997a21368e53298572991",
+      "userRegistryImpl": "0x9bd8a88719068d09ecee662f36c0e3856708366a",
+      "permissionedResolverImpl": "0x115eb53f0c60696633855f90b138178fb40b2b2c",
+      "universalResolverV2": "0x24e1d8e068620b647ca097f961a61055f4f42d72",
+      "universalResolverProxy": "0xeEeEEEeE14D718C2B47D9923Deab1335E144EeEe",
+      "universalHelper": "0xd453e5bdb62cc3bea84341b1e306319c8ffd7dfe"
+    },
+    "erc8004": {
+      "status": "unverified (code only); Friday, only if time",
+      "identityRegistry": "0x8004A818BFB912233c491871b3d84c89A494BD9e",
+      "reputationRegistry": "0x8004B663056A597Dffe9eCcC1965A193B7388713"
+    },
+    "records": {
+      "acceptsText": "x-graphpay-accepts",
+      "agentContext": "agent-context",
+      "agentEndpointMcp": "agent-endpoint[mcp]",
+      "agentEndpointWeb": "agent-endpoint[web]"
+    }
+  },
+  "arkiv": {
+    "entityContract": "0x4400000000000000000000000000000000000044",
+    "project": "graphpay",
+    "schemaVersion": 1
+  },
+  "site": {
+    "url": "https://graphpay-event.vercel.app",
+    "mcpPath": "/api/mcp",
+    "graphqlPath": "/api/graphql",
+    "vercel": {
+      "project": "graphpay-event",
+      "projectId": "prj_I3XDMAm2tg7lU6vPVzcYyouIqV0m",
+      "team": "hrizzup"
+    }
+  },
+  "wallets": {
+    "carried": {
+      "FUNDER": "0x5c359FC0Edb28f918C8D8E44418339CA55c67e65",
+      "OPERATOR": "0x531D49A595946a72b9C47b78D287Ff6e6B3CfF32"
+    },
+    "fresh": [
+      {
+        "role": "DEPLOYER",
+        "purpose": "Whitechain contract admin and deployer"
+      },
+      {
+        "role": "FACILITATOR",
+        "purpose": "relayer for the hosted facilitator; holds only WBT"
+      },
+      {
+        "role": "RENEWER",
+        "purpose": "second relayer, scheduled renewals"
+      },
+      {
+        "role": "POLICY_WRITER",
+        "purpose": "setPolicy only"
+      },
+      {
+        "role": "W_SYNC",
+        "purpose": "Arkiv recorder: create-only off-chain edges"
+      },
+      {
+        "role": "W_LEDGER",
+        "purpose": "Arkiv money mirror: the single writer of money entities"
+      },
+      {
+        "role": "W_DIRECTORY",
+        "purpose": "Arkiv directory writer: shop, quote, heartbeat and handoff entities, never money"
+      },
+      {
+        "role": "W_SEED_EVENT",
+        "purpose": "synthetic city S"
+      },
+      {
+        "role": "W_SEED_M_EVENT",
+        "purpose": "synthetic city M"
+      },
+      {
+        "role": "VITALIK",
+        "purpose": "the persona slot: owner and human payer, never bound"
+      },
+      {
+        "role": "SHOP_KESAR",
+        "purpose": "the good-shop slot: merchant and owner"
+      },
+      {
+        "role": "SHOP_JAMUN",
+        "purpose": "the trap-shop slot: merchant and owner"
+      },
+      {
+        "role": "SHOP_SYRUP",
+        "purpose": "the runner-up slot: merchant and owner"
+      },
+      {
+        "role": "PAYER",
+        "purpose": "the stage payer agent"
+      },
+      {
+        "role": "DEAL_HUNTER",
+        "purpose": "the scout agent (revoked-agent beat)"
+      },
+      {
+        "role": "REHEARSAL_PAYER",
+        "purpose": "the rehearsal agent"
+      },
+      {
+        "role": "ACCEPTANCE_PAYER",
+        "purpose": "the acceptance agent"
+      }
+    ],
+    "disposablePrefix": "DISPOSABLE_",
+    "labNotUsed": [
+      "0x2b07cDE60404Eb5FE3b1B179CD12376Eee1EF801",
+      "0x396657eD1441f5C58D73c75ddB35C22cA95790A0",
+      "0x6e8b2Deea86987A0bF5304ac2e5998E325f17f16",
+      "0xB15e23A7B52238d1CEe6acbadb19B67911606580",
+      "0x24CAD0Dc6477D85E6a78d14F60598dE800A035f7",
+      "0x8100EB81D78153269F875689F0A54045Ac586dFa",
+      "0xc42D84af5D24588aDC06D13BfB5Bf11aECCab0EB",
+      "0xf99468Ba7C41D5E4dC713e11E286C1Faf1FD975c",
+      "0x4E0c2C442bd42dc139d9EB716DE6D8bE58505774",
+      "0x33aFF4aC99cFA86042F5B60af2dADE357F140ef4",
+      "0x7e00F8C22cD55556a1070dC2F6536E1942A977d3",
+      "0x31F5ebe121F31dCcBE651E500E30d645b20C225E"
+    ]
+  },
+  "models": {
+    "source": "Anthropic pricing page (https://platform.claude.com/docs/en/about-claude/pricing), checked 2026-11-05; every price here is listed there. Cache writes cost 1.25x input for 5 minutes and 2x input for 1 hour; cache reads 0.1x input (0.05x on Opus 5.5). Haiku 5.5 has a second card (longPrompt) for a prompt over 100,000 tokens, counting all input tokens including cache reads and writes; it then prices every token of that request, output included. Re-check the page before quoting a cost publicly.",
+    "apiBaseUrl": "https://api.anthropic.com",
+    "pricingUsdPerMTok": {
+      "claude-opus-5-5": {
+        "input": 4.0,
+        "output": 20.0,
+        "cacheWrite5m": 5.0,
+        "cacheWrite1h": 8.0,
+        "cacheRead": 0.2
+      },
+      "claude-haiku-5-5": {
+        "input": 0.1,
+        "output": 0.5,
+        "cacheWrite5m": 0.125,
+        "cacheWrite1h": 0.2,
+        "cacheRead": 0.01,
+        "longPrompt": {
+          "aboveInputTokens": 100000,
+          "input": 0.5,
+          "output": 2.5,
+          "cacheWrite5m": 0.625,
+          "cacheWrite1h": 1.0,
+          "cacheRead": 0.05
+        }
+      }
+    },
+    "effortLevels": [
+      "low",
+      "medium",
+      "high",
+      "xhigh",
+      "max"
+    ]
+  }
+}

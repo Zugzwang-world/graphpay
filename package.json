@@ -15,9 +15,20 @@
     "lint": "pnpm -r --if-present run lint",
     "typecheck": "pnpm -r --if-present run typecheck",
     "build": "pnpm -r --if-present run build",
-    "contracts:libs": "sh packages/contracts/install-libs.sh"
+    "contracts:libs": "sh packages/contracts/install-libs.sh",
+    "secrets:set": "node scripts/secrets/set.mjs",
+    "secrets:stdin": "node scripts/secrets/set-from-stdin.mjs",
+    "secrets:gen": "node scripts/secrets/gen-secret.mjs",
+    "secrets:status": "node scripts/secrets/status.mjs",
+    "secrets:import-lab": "node scripts/secrets/import-lab.mjs",
+    "wallet:gen": "node scripts/secrets/gen-wallet.mjs",
+    "wallets:addresses": "node scripts/wallets/addresses.mjs",
+    "funding": "node scripts/funding/fund.mjs",
+    "agents:probe": "node scripts/agents/preset-probe.mjs",
+    "secrets:vercel": "node scripts/secrets/vercel-push.mjs"
   },
   "devDependencies": {
-    "viem": "2.57.16"
+    "viem": "2.57.16",
+    "@anthropic-ai/sdk": "1.5.0"
   }
 }

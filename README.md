@@ -11,7 +11,7 @@ AI agents with ENS names pay shops over x402 on Whitechain through our own facil
 | path | what |
 |---|---|
 | `planning/` | the pre-event knowledge pack, committed unchanged (specs, facts, decisions, prompts, acceptance tests; no code) |
-| `packages/config/` | the one config file: every person, shop and agent name, every ENS, Whitechain and Arkiv address and URL (ADR-0030) |
+| `packages/config/` | the two config files, read through `@graphpay/config`: `story.json`, the one story config (the cast, shops, agents, products, prices, the renewal, the demo steps and the agent model presets; ADR-0047), and `graphpay.config.json`, the infrastructure config (every ENS, Whitechain and Arkiv address and URL, the networks, the wallet roles and the model prices; ADR-0030) |
 | `packages/contracts/` | the Whitechain checkout contract and its Foundry tests |
 | `packages/*` | the facilitator and shop, ENS identity, the Arkiv money graph, agents, the mirror (one package per track) |
 | `apps/web/` | the website and the hosted API routes (Vercel project `graphpay-event`, https://graphpay-event.vercel.app) |

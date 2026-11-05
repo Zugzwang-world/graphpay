@@ -1,0 +1,459 @@
+{
+  "about": "The one story config (ADR-0047): everything story-specific comes from here and never from code: the cast, shops, agents, products, prices, the renewal item and schedule, locations, the synthetic city parameters, the scripted demo steps and the agent model presets. Tonight it holds the pack's cast as the test story (planning/SPEC/AGENTS.md §1, planning/WEBSITE_SPEC.md); the founder's final story replaces it. Every number here is a synthetic story input, never a measurement.",
+  "storyVersion": 1,
+  "name": "test",
+  "locked": false,
+  "synthetic": true,
+  "rules": {
+    "mumbai": "real Mumbai neighbourhoods, dishes and landmarks; fictional shop names, especially the trap shop (ADR-0050)",
+    "wording": "identify (ENS), remember (Arkiv), pay (Whitechain); say decentralized, secure and verifiable, never hidden (ADR-0052)"
+  },
+  "city": {
+    "name": "Mumbai",
+    "timeZone": "Asia/Kolkata",
+    "currency": "USDT"
+  },
+  "persona": {
+    "key": "vitalik",
+    "label": "vitalik",
+    "displayName": "Vitalik",
+    "walletRole": "VITALIK"
+  },
+  "buyerAgents": [
+    {
+      "key": "concierge",
+      "label": "concierge",
+      "displayName": "Concierge",
+      "walletRole": "VITALIK",
+      "pays": false
+    },
+    {
+      "key": "scout",
+      "label": "scout",
+      "displayName": "Scout",
+      "walletRole": "DEAL_HUNTER",
+      "pays": true,
+      "capMicro": 1000000
+    },
+    {
+      "key": "analyst",
+      "label": "analyst",
+      "displayName": "Analyst",
+      "walletRole": "VITALIK",
+      "pays": false
+    },
+    {
+      "key": "payer",
+      "label": "payer",
+      "displayName": "Payer",
+      "walletRole": "PAYER",
+      "pays": true,
+      "capMicro": 6000000
+    }
+  ],
+  "workingAgents": [
+    {
+      "key": "rehearsal",
+      "label": "rehearsal",
+      "displayName": "Rehearsal",
+      "walletRole": "REHEARSAL_PAYER",
+      "pays": true,
+      "capMicro": 30000000
+    },
+    {
+      "key": "acceptance",
+      "label": "acceptance",
+      "displayName": "Acceptance",
+      "walletRole": "ACCEPTANCE_PAYER",
+      "pays": true,
+      "capMicro": 6000000
+    }
+  ],
+  "disposable": {
+    "labelPrefix": "disposable-",
+    "walletRolePrefix": "DISPOSABLE_",
+    "capMicro": 1000000,
+    "expiryDays": 14
+  },
+  "shopAgents": [
+    {
+      "key": "storefront",
+      "label": "storefront",
+      "displayName": "Storefront"
+    },
+    {
+      "key": "risk",
+      "label": "risk",
+      "displayName": "Risk"
+    },
+    {
+      "key": "dispatch",
+      "label": "dispatch",
+      "displayName": "Dispatch"
+    }
+  ],
+  "shops": [
+    {
+      "key": "kesar-kingdom",
+      "label": "kesar-kingdom",
+      "displayName": "Kesar Kingdom",
+      "storyRole": "good",
+      "walletRole": "SHOP_KESAR",
+      "category": "sweets",
+      "area": null,
+      "location": null,
+      "products": [
+        {
+          "sku": "gulab-jamun-12",
+          "name": "gulab jamun",
+          "unit": "box of 12",
+          "quantity": 12,
+          "priceMicro": 4800000
+        }
+      ],
+      "scenario": {
+        "synthetic": true,
+        "refundRate90d": 0.012,
+        "onTimeRate": 0.97,
+        "orders90d": 4812,
+        "verified": true,
+        "priceFor12Micro": 4800000,
+        "etaMinutes": 45,
+        "distanceKm": 2.1
+      }
+    },
+    {
+      "key": "jamun-junction",
+      "label": "jamun-junction",
+      "displayName": "Jamun Junction",
+      "storyRole": "trap",
+      "walletRole": "SHOP_JAMUN",
+      "category": "sweets",
+      "area": null,
+      "location": null,
+      "products": [
+        {
+          "sku": "gulab-jamun-12",
+          "name": "gulab jamun",
+          "unit": "box of 12",
+          "quantity": 12,
+          "priceMicro": 3300000
+        }
+      ],
+      "scenario": {
+        "synthetic": true,
+        "refundRate90d": 0.184,
+        "onTimeRate": 0.71,
+        "orders90d": 2190,
+        "verified": true,
+        "priceFor12Micro": 3300000,
+        "etaMinutes": 25,
+        "distanceKm": 0.9
+      }
+    },
+    {
+      "key": "syrup-street",
+      "label": "syrup-street",
+      "displayName": "Syrup Street",
+      "storyRole": "runner-up",
+      "walletRole": "SHOP_SYRUP",
+      "category": "sweets",
+      "area": null,
+      "location": null,
+      "products": [
+        {
+          "sku": "gulab-jamun-12",
+          "name": "gulab jamun",
+          "unit": "box of 12",
+          "quantity": 12,
+          "priceMicro": 4200000
+        }
+      ],
+      "scenario": {
+        "synthetic": true,
+        "refundRate90d": 0.031,
+        "onTimeRate": 0.93,
+        "orders90d": 1204,
+        "verified": true,
+        "priceFor12Micro": 4200000,
+        "etaMinutes": 50,
+        "distanceKm": 1.4
+      }
+    }
+  ],
+  "order": {
+    "synthetic": true,
+    "request": "Just landed in Mumbai. Get me the best gulab jamun near me under 6 USDT by 8 pm.",
+    "shop": "kesar-kingdom",
+    "sku": "gulab-jamun-12",
+    "item": "gulab jamun",
+    "quantity": 12,
+    "priceMicro": 4800000,
+    "budgetMicro": 6000000,
+    "deadlineLocal": "20:00",
+    "refundMicro": 800000,
+    "refundReason": "two squashed jamuns",
+    "reorder": {
+      "quantity": 3,
+      "priceMicro": 1200000
+    }
+  },
+  "renewal": {
+    "synthetic": true,
+    "plan": "sunday-box",
+    "item": "Sunday sweets box",
+    "shop": "kesar-kingdom",
+    "priceMicro": 400000,
+    "schedule": {
+      "period": "weekly",
+      "weekday": "Sunday"
+    },
+    "demoPeriod": {
+      "id": "demo-2min",
+      "seconds": 120,
+      "label": "2-minute demo period"
+    }
+  },
+  "locations": {
+    "about": "Tonight's test points; the final story sets real neighbourhoods and landmarks (ADR-0050). The persona point is the addendum's own example coordinate; T3 places the cast shops at their scenario distances from it and adds the generator's neighbourhoods here in a PR, each with its source.",
+    "persona": {
+      "label": "arrival point",
+      "area": null,
+      "lat": 19.076,
+      "lng": 72.8777
+    },
+    "searchRadiusKm": 3,
+    "neighbourhoods": []
+  },
+  "syntheticCity": {
+    "about": "Parameters of the synthetic city generator (planning/SPEC/ARKIV_GRAPH.md §8, planning/PROMPTS/08-city-and-seeding.md). Seeded straight into Arkiv, labelled synthetic, no real payments (ADR-0043). Tonight only size S, with the test cast, for acceptance; size M waits until the founder locks the final story and is never seeded with the test cast (ADR-0049).",
+    "rng": "mulberry32",
+    "seed": 2026,
+    "days": 120,
+    "dataset": "graphpay-city-v1",
+    "lifetimeDays": 14,
+    "popularity": "Zipf, with the cast shops at ranks 1 to 3 and their refund rates as inputs",
+    "amounts": "log-normal",
+    "subscriptions": "weekly",
+    "personaRecentPurchasesDays": 7,
+    "reRegisteredShop": {
+      "daysBeforeEnd": 30,
+      "epoch": 2
+    },
+    "sizes": {
+      "S": {
+        "approxEdges": 1000,
+        "seed": "tonight, test story",
+        "owner": "W_SEED_EVENT"
+      },
+      "M": {
+        "approxEdges": 10000,
+        "seed": "only after the final story is locked",
+        "owner": "W_SEED_M_EVENT"
+      }
+    }
+  },
+  "demoScript": [
+    {
+      "step": 1,
+      "at": "0:00-0:20",
+      "action": "The stage; one line: \"Your next customer is an agent. Ask before you pay.\"",
+      "proves": "the pitch"
+    },
+    {
+      "step": 2,
+      "at": "0:20-1:10",
+      "action": "Vitalik's request; the team fans out; the analyst's one GraphQL call (2 reads); the trap shop vetoed in red; the good shop chosen",
+      "proves": "agents, guards in code, Graph Arkiv"
+    },
+    {
+      "step": 3,
+      "at": "1:10-1:45",
+      "action": "The 402, the signature, the settlement; you paid no gas; the explorer page opens",
+      "proves": "x402 on Whitechain, our facilitator"
+    },
+    {
+      "step": 4,
+      "at": "1:45-2:10",
+      "action": "The merchant's phone rings; the buyer's ENS name and reputation; mark dispatched",
+      "proves": "ENS identity, merchant view"
+    },
+    {
+      "step": 5,
+      "at": "2:10-2:35",
+      "action": "The Arkiv write as dots and lines; the GraphQL answer with its exact reads",
+      "proves": "Arkiv as the memory"
+    },
+    {
+      "step": 6,
+      "at": "2:35-3:00",
+      "action": "Refund request, partial refund; re-order; renewal in the demo period",
+      "proves": "refunds, renewals"
+    },
+    {
+      "step": 7,
+      "at": "3:00-3:25",
+      "action": "Pause my agent: refused within 20 s of the Sepolia receipt; resume",
+      "proves": "the ENS kill switch"
+    },
+    {
+      "step": 8,
+      "at": "3:25-3:50",
+      "action": "Race mode at the largest seeded city: the reads each side needs",
+      "proves": "the benchmark (reads, not speed)"
+    },
+    {
+      "step": 9,
+      "at": "3:50-4:00",
+      "action": "The demo store's 20 lines; links",
+      "proves": "drop-in checkout"
+    }
+  ],
+  "agentModels": {
+    "about": "Named presets of model and effort per agent role (ADR-0048), never hard-coded. Agents use the active preset; AGENT_PRESET overrides it for one run. Every test run records seconds and API cost per errand in docs/thinking-partner/OPEN.md (preset calibration).",
+    "active": "testing",
+    "presets": {
+      "testing": {
+        "purpose": "every test run (active tonight)",
+        "roles": {
+          "concierge": {
+            "provider": "anthropic",
+            "model": "claude-opus-5-5",
+            "effort": "xhigh",
+            "maxTokens": 64000
+          },
+          "scout": {
+            "provider": "anthropic",
+            "model": "claude-opus-5-5",
+            "effort": "xhigh",
+            "maxTokens": 64000
+          },
+          "analyst": {
+            "provider": "anthropic",
+            "model": "claude-opus-5-5",
+            "effort": "xhigh",
+            "maxTokens": 64000
+          },
+          "payer": {
+            "provider": "anthropic",
+            "model": "claude-opus-5-5",
+            "effort": "xhigh",
+            "maxTokens": 64000
+          },
+          "storefront": {
+            "provider": "anthropic",
+            "model": "claude-opus-5-5",
+            "effort": "xhigh",
+            "maxTokens": 64000
+          },
+          "risk": {
+            "provider": "anthropic",
+            "model": "claude-opus-5-5",
+            "effort": "xhigh",
+            "maxTokens": 64000
+          },
+          "dispatch": {
+            "provider": "anthropic",
+            "model": "claude-opus-5-5",
+            "effort": "xhigh",
+            "maxTokens": 64000
+          }
+        }
+      },
+      "video": {
+        "purpose": "the recorded video, if its timing fits (videos cannot be sped up)",
+        "roles": {
+          "concierge": {
+            "provider": "anthropic",
+            "model": "claude-opus-5-5",
+            "effort": "xhigh",
+            "maxTokens": 64000
+          },
+          "scout": {
+            "provider": "anthropic",
+            "model": "claude-opus-5-5",
+            "effort": "xhigh",
+            "maxTokens": 64000
+          },
+          "analyst": {
+            "provider": "anthropic",
+            "model": "claude-opus-5-5",
+            "effort": "xhigh",
+            "maxTokens": 64000
+          },
+          "payer": {
+            "provider": "anthropic",
+            "model": "claude-opus-5-5",
+            "effort": "xhigh",
+            "maxTokens": 64000
+          },
+          "storefront": {
+            "provider": "anthropic",
+            "model": "claude-opus-5-5",
+            "effort": "xhigh",
+            "maxTokens": 64000
+          },
+          "risk": {
+            "provider": "anthropic",
+            "model": "claude-opus-5-5",
+            "effort": "xhigh",
+            "maxTokens": 64000
+          },
+          "dispatch": {
+            "provider": "anthropic",
+            "model": "claude-opus-5-5",
+            "effort": "xhigh",
+            "maxTokens": 64000
+          }
+        }
+      },
+      "live": {
+        "purpose": "the live demo and the submission",
+        "roles": {
+          "concierge": {
+            "provider": "anthropic",
+            "model": "claude-haiku-5-5",
+            "effort": "xhigh",
+            "maxTokens": 64000
+          },
+          "scout": {
+            "provider": "anthropic",
+            "model": "claude-haiku-5-5",
+            "effort": "xhigh",
+            "maxTokens": 64000
+          },
+          "analyst": {
+            "provider": "anthropic",
+            "model": "claude-haiku-5-5",
+            "effort": "xhigh",
+            "maxTokens": 64000
+          },
+          "payer": {
+            "provider": "anthropic",
+            "model": "claude-haiku-5-5",
+            "effort": "xhigh",
+            "maxTokens": 64000
+          },
+          "storefront": {
+            "provider": "anthropic",
+            "model": "claude-haiku-5-5",
+            "effort": "xhigh",
+            "maxTokens": 64000
+          },
+          "risk": {
+            "provider": "anthropic",
+            "model": "claude-haiku-5-5",
+            "effort": "xhigh",
+            "maxTokens": 64000
+          },
+          "dispatch": {
+            "provider": "anthropic",
+            "model": "claude-haiku-5-5",
+            "effort": "xhigh",
+            "maxTokens": 64000
+          }
+        }
+      }
+    }
+  }
+}
