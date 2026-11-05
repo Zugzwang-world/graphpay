@@ -49,7 +49,10 @@ Not started (Join, when M7a merges).
 
 ## website
 
-Not started (T5, wave 1). A placeholder page is live at https://graphpay-event.vercel.app.
+Updated 01:30 IST, Fri 6 Nov (T5 Web). **The website shell is built and in a PR (`web/shell`).** The stage (customer phone, explainer, merchant phone), the phone-only routes, race mode and the how-it-works page render from the story config; every spending route is passcode-gated server-side.
+- Running: nothing long. Waiting on the other tracks' routes; each panel says which milestone it waits for.
+- Blockers: none. Check: this Mac's network to GitHub and some RPCs was flaky around 00:50.
+- Next: wire each panel as its route merges (M4 shop, M6 pause, M7b GraphQL and explain, M9 race, M10 agents, M11 mirror); then M16 (checkout kit, demo store); then Friday items 8 to 13.
 
 ## records
 
