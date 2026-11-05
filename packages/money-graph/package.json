@@ -1,0 +1,30 @@
+{
+  "name": "@graphpay/money-graph",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "GraphPay's money graph on @graphpay/arkiv-graph: model, ledger, recorder, quotes and the shop directory.",
+  "exports": {
+    ".": {
+      "types": "./index.d.ts",
+      "default": "./index.mjs"
+    }
+  },
+  "types": "./index.d.ts",
+  "scripts": {
+    "test": "node --test \"test/*.test.mjs\"",
+    "smoke": "node scripts/smoke.mjs",
+    "probe": "node scripts/live-probe.mjs"
+  },
+  "dependencies": {
+    "@arkiv-network/sdk": "1.0.1",
+    "@graphpay/arkiv-graph": "workspace:*",
+    "@graphpay/config": "workspace:*",
+    "@modelcontextprotocol/sdk": "1.32.2",
+    "dataloader": "2.2.3",
+    "graphql": "16.14.2",
+    "graphql-yoga": "5.24.6",
+    "viem": "2.57.16",
+    "zod": "4.6.7"
+  }
+}

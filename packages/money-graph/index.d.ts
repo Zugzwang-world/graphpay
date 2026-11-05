@@ -1,0 +1,67 @@
+import type { Graph, EntityDef, Row, Writer, TransportStats, ArkivSim } from '@graphpay/arkiv-graph';
+import type { PublicArkivClient, WalletArkivClient } from '@arkiv-network/sdk';
+import type { Hex } from 'viem';
+
+export declare const PROJECT: string;
+export declare const SCHEMA_VERSION: number;
+export declare const ENTITY_CONTRACT: Hex;
+export declare const RABDI: { name: string; chainId: number; rpcBase: string; accessKeyEnv: string; explorer: string };
+export declare const LIFETIME: Readonly<{ realDays: number; syntheticDays: number; shopDays: number; quoteMinutes: number; probeDays: number; heartbeatDays: number }>;
+export declare const EDGE_KINDS: string[];
+export declare const MONEY_KINDS: string[];
+export declare const TALLY_COUNTERS: string[];
+export declare function tallyRules(event: { kind: string; reason?: string }): Record<string, 'count' | 'value'> | null;
+export declare const graph: Graph;
+export declare const ENTITIES: Record<'node' | 'edge' | 'tally' | 'link' | 'checkpoint' | 'shop' | 'quote' | 'record' | 'profile' | 'heartbeat', EntityDef>;
+export declare const QUERIES: Record<string, string[]>;
+export declare const WRITER_ROLES: string[];
+export type WriterRole = 'W_LEDGER' | 'W_SYNC' | 'W_DIRECTORY' | 'W_SEED_EVENT' | 'W_SEED_M_EVENT';
+export declare function writerAddresses(source?: unknown): Record<WriterRole, Hex>;
+export declare function trustedOwners(type: string, options?: { writers?: Record<WriterRole, Hex>; synthetic?: string | null }): Hex[];
+export declare function seedOwner(size: string, story: unknown, writers?: Record<WriterRole, Hex>): Hex;
+
+export declare function normalizedName(ens: string): string;
+export declare function nodeOf(ens: string): Hex;
+export declare function identityKey(node: Hex, epoch: number | bigint): Hex;
+export declare function microDegrees(deg: number): number;
+export declare function boxAround(point: { lat: number; lng: number }, km: number): { latMin: number; latMax: number; lngMin: number; lngMax: number };
+
+export interface ArkivConnection { backend: 'sim' | 'local' | 'rabdi'; label: string; publicClient: PublicArkivClient; walletClient: WalletArkivClient | null; writer: Writer | null; owner: Hex | null; role: WriterRole | null; sim: ArkivSim | null; stats: TransportStats; chainId: number }
+export declare function connectArkiv(options?: { backend?: 'sim' | 'local' | 'rabdi'; env?: Record<string, string | undefined>; role?: WriterRole | null; privateKey?: Hex | null; sim?: ArkivSim | null; log?: (entry: Record<string, unknown>) => void; recoveryMs?: number; pollMs?: number }): Promise<ArkivConnection>;
+export declare function newSim(options?: Record<string, unknown>): ArkivSim;
+
+export interface MoneyEnd { ens: string; epoch?: number | bigint; kind: string; verified?: boolean; columns?: Record<string, unknown> }
+export interface MoneyEvent { ref: string; kind: string; from: MoneyEnd; to: MoneyEnd; amountMicro?: bigint; ts: number; day?: number; orderId?: string; reason?: string; counted?: boolean; payload?: Hex; position?: { block: bigint | number; logIndex: number }; existingEdge?: boolean }
+export interface WriteResult { skipped: string[]; applied: string[]; txs: { hash: Hex; gasUsed: bigint; recovered: boolean }[]; edgeKeys: Record<string, Hex> }
+export interface Ledger {
+  owner: Hex;
+  load(): Promise<unknown>;
+  apply(event: MoneyEvent, options?: { nonce?: number | null }): Promise<WriteResult>;
+  applyBatch(events: MoneyEvent[]): Promise<WriteResult>;
+  foldRecorder(events: MoneyEvent[], options?: { nonce?: number | null }): Promise<WriteResult>;
+  writeStanding(change: { ref: string; ens: string; epoch: number | bigint; status?: string; capMicro?: bigint; ts: number; position?: { block: bigint | number; logIndex: number } }, options?: { nonce?: number | null }): Promise<WriteResult>;
+  edgeExists(ref: string): Promise<boolean>;
+  confirmedNonce(): Promise<number>;
+  readonly state: unknown;
+}
+export declare function createLedger(options: { arkiv: ArkivConnection; stream?: string | null; synthetic?: { dataset: string } | null; lifetimeDays?: number; createNodes?: boolean }): Ledger;
+export declare function toGraphEvent(event: MoneyEvent, labels: Record<string, unknown>): unknown;
+
+export declare const RECORDER_KINDS: string[];
+export declare function recorderEdgeValues(edge: { ref: string; kind: 'fail' | 'request'; from: { ens: string; epoch?: number | bigint }; to: { ens: string; epoch?: number | bigint }; amountMicro?: bigint; ts: number; orderId?: string; payload?: Hex }): Record<string, unknown>;
+export declare function recordEdge(arkiv: ArkivConnection, edge: Parameters<typeof recorderEdgeValues>[0]): Promise<{ entityKey: Hex; txHash: Hex; recovered: boolean }>;
+
+export interface QuoteInput { requestId: Hex; shopKey: Hex; agentEns: string; price: bigint; validUntil: number | bigint }
+export declare function quoteValues(quote: QuoteInput): Record<string, unknown>;
+export declare function createQuote(arkiv: ArkivConnection, quote: QuoteInput): Promise<{ entityKey: Hex; txHash: Hex; recovered: boolean }>;
+export declare function findQuotes(client: PublicArkivClient, requestId: Hex, options?: { owner?: string }): Promise<{ key: Hex; requestId: Hex; shopKey: Hex; agentEns: string; price: bigint; validUntil: bigint; expiresAt: bigint }[]>;
+
+export declare const SHOP_STATUS: string[];
+export interface ShopInput { shopEns: string; epoch?: number; category: string; area?: string; city?: string; lat: number; lng: number; status?: string; synthetic?: boolean; dataset?: string; name?: string; hours?: string }
+export declare function shopValues(shop: ShopInput): Record<string, unknown>;
+export declare function writeShop(arkiv: ArkivConnection, shop: ShopInput, options?: { lifetimeDays?: number }): Promise<{ entityKey: Hex; txHash: Hex; created: boolean }>;
+export declare function discoveryFilters(options: { category?: string; box: { latMin: number; latMax: number; lngMin: number; lngMax: number }; synthetic?: boolean }): unknown[];
+export declare function discoverShops(client: PublicArkivClient, options: { category?: string; box: { latMin: number; latMax: number; lngMin: number; lngMax: number }; synthetic?: boolean; owner?: string; cap?: number }): Promise<{ shops: { key: Hex; shopKey: Hex; ens: string; category: string; area: string | null; city: string | null; lat: number; lng: number; synthetic: boolean; dataset: string | null; name: string | null; hours: string | null }[]; queries: string[]; calls: number; query: string }>;
+
+export declare function writeHeartbeat(arkiv: ArkivConnection, values: { instance: string; state: string; cursorBlock: number | bigint; cursorLog: number | bigint; headBlock: number | bigint; lagBlocks: number | bigint; updatedTs: number | bigint }, options?: { key?: Hex | null; extend?: boolean }): Promise<Hex>;
+export declare function readHeartbeats(client: PublicArkivClient, options?: { owner?: string }): Promise<Row[]>;

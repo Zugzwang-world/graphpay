@@ -8,21 +8,21 @@ The money graph on Arkiv: the safe writer, the engine (GraphQL, explain, hosted 
 
 | step | prompt (`planning/PROMPTS/`) | also apply |
 |---|---|---|
-| M7a model, writer, ArkivSim | `07a-graph-model-writer.md` | `docs/plan/amendments/M7-arkiv.md`, which wins where they differ: conventions, W_DIRECTORY, readonly edges, the `shop` directory, quotes, the box query, `arkiv/schema.md`; ADR-0033 to ADR-0035, ADR-0040, ADR-0041 |
+| M7a model, writer, ArkivSim | `07a-graph-model-writer.md` | `docs/plan/amendments/M7-arkiv.md`, which wins where they differ: conventions, W_DIRECTORY, readonly edges, the `shop` directory, quotes, the box query, `arkiv/schema.md`; ADR-0033 to ADR-0035, ADR-0040, ADR-0041; the SDK boundary of ADR-0057 |
 | M7b engine, GraphQL, explain, MCP | `07b-graph-engine-graphql-mcp.md` | `M7-arkiv.md` §6 (discovery) and §8 (the hosted MCP; ADR-0037) |
 | M8 city and seeding | `08-city-and-seeding.md` | `M7-arkiv.md` §3 and §8: size S only (ADR-0049); ADR-0043, ADR-0050 |
 | M9 live benchmark | `09-live-benchmark.md` | `M7-arkiv.md` §8: reads, not speed (ADR-0042) |
-| Friday | `docs/plan/MASTER_PLAN.md` §4 | items 1 (heartbeat and handoff entities), 4–5 (Swarm; ADR-0039), 6 (the demo cast's `shop` rows), 10 (the link builder), 15 (`arkiv/` drafts) |
+| Friday | `docs/plan/MASTER_PLAN.md` §4 | items 1 (heartbeat and handoff entities), 4–5 (Swarm; ADR-0039), 6 (the demo cast's `shop` rows), 10 (the link builder), 15 (`arkiv/` drafts), 18 (publish the SDK as `@graphpay/arkiv-graph`; ADR-0057) |
 
 ## Gates
 
-- M7a needs only M0; M7b and M8 need M7a; M9 needs M7b and the S city. Friday item 5 needs item 4 to pass and the wrapping key from the Coordinator.
+- M7a needs only M0; M7b and M8 need M7a; M9 needs M7b and the S city. Friday item 5 needs item 4 to pass and the wrapping key from the Coordinator. Friday item 18 starts after CP4's acceptance run; the publish waits for the founder's npm login, which the Coordinator asks for.
 - Others wait on M7a (T1's recorder, Join's M11) and M7b (Join's M12, T5): ship M7a first, small.
 - **How to wait:** every 10 minutes, `gh pr list --state merged --limit 30`; a milestone has landed when a merged PR title ends `(Mn done)`, so end yours the same way. Meanwhile build what the gate does not block.
 
 ## Owns
 
-`packages/arkiv-graph`, `packages/city`, `bench/`, `apps/web/app/api/{graphql,explain,mcp}`, `arkiv/schema.md`, the drafts of `arkiv/friction.md`, `how-you-use-arkiv.md` and `swarm.md` until Submission takes them, `docs/sessions/arkiv/`. In the Coordinator's `packages/config/`, only the `arkiv` writer addresses, by a PR that says so.
+`packages/arkiv-graph` (`@graphpay/arkiv-graph`, the generic SDK), `packages/money-graph` (`@graphpay/money-graph`, GraphPay's payment model over it; ADR-0057), `packages/city`, `bench/`, `apps/web/app/api/{graphql,explain,mcp}`, `arkiv/schema.md`, the drafts of `arkiv/friction.md`, `how-you-use-arkiv.md` and `swarm.md` until Submission takes them, `docs/sessions/arkiv/`. In the Coordinator's `packages/config/`, only the `arkiv` writer addresses, by a PR that says so.
 
 ## Acceptance checks
 
@@ -31,6 +31,7 @@ The money graph on Arkiv: the safe writer, the engine (GraphQL, explain, hosted 
 ## The specific rules for this session
 
 - Code against the installed SDK types (`docs/technical/FACTS.md`, Arkiv SDK API notes).
+- **The SDK boundary (ADR-0057):** nothing payment-specific in `packages/arkiv-graph`; the developer defines nodes, edges and totals (views); GraphPay code imports only the package's exports, never deep paths; a boundary test enforces it.
 - Every city parameter, name and location comes from `packages/config/story.json` (ADR-0047).
 - As soon as M7a has merged, seed **size S only, with the test story**, in the background.
 - **Never seed size M.** The Coordinator runs your driver for M after the founder locks the final story (ADR-0049): write its exact dry-run and real commands in `docs/sessions/arkiv/seeding.md`.

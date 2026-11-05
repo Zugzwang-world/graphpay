@@ -114,7 +114,14 @@
   "arkiv": {
     "entityContract": "0x4400000000000000000000000000000000000044",
     "project": "graphpay",
-    "schemaVersion": 1
+    "schemaVersion": 1,
+    "writers": {
+      "W_LEDGER": "0x7DeAF022B3829C53c73031B7d28Ed9746F517665",
+      "W_SYNC": "0x7c32D2a9Cc01Fb855Ab7877E99886bE8d846ED71",
+      "W_DIRECTORY": "0x146002b43A9Fb8EB963699e77Ed18579dC30A6e4",
+      "W_SEED_EVENT": "0x9DA407FfDbF6e4dee5f972f7adcFA873D72B60D0",
+      "W_SEED_M_EVENT": "0x734Fc394248777046fb80d55AD1f0b0C142a0d64"
+    }
   },
   "site": {
     "url": "https://graphpay-event.vercel.app",
