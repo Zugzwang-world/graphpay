@@ -30,7 +30,12 @@ One line per PR: time (IST) · activity · result · PR link. Append under your 
 
 ## integration
 
+- 01:20 IST · integration · opened: the mirror core on test doubles (decoding, mapping, parking, lease, recorder fold, 5% history, endpoints; 22 tests) · https://github.com/Zugzwang-world/graphpay/pull/8
+
 ## website
+
+- 01:30 IST · website · opened: the website shell (stage, both phones, explainer, race, how-it-works, passcode guard and its F2 tests, status chips) · https://github.com/Zugzwang-world/graphpay/pull/10 (merged; production serves it)
+- 01:31 IST · website · opened: phone views, Friday items 11 and 12 that need no other track (request card with budget and deadline countdown, spending-pass states, merchant notifications) · https://github.com/Zugzwang-world/graphpay/pull/13
 
 ## records
 

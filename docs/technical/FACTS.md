@@ -271,6 +271,15 @@ offset(offset: number): this;
 
 Each track adds its own rows here (under `### <activity>`), with source, time and status.
 
+### website
+
+| item | value | source | time (IST) | status |
+|---|---|---|---|---|
+| Arkiv explorer routes | `/tx/<hash>`, `/entity/<key>`, `/address/<addr>`, `/blocks` (list; `/block` takes no number in the path), `/entity-explorer?q=<query>` (its query page; `/entity/<key>` itself resolves to `$key = key(<key>)` there) | the explorer's own client bundle (`rabdi.explorer.arkiv.network/assets/index-*.js`: its route table and path matchers), read 6 Nov | 01:05 | verified in code; `/entity-explorer?q=` answers 200 |
+| Whitechain explorer (Blockscout) | `/tx/<hash>`, `/address/<addr>`, `/block/<n>`, `/token/<addr>` answer 200 (a single-page app answers 200 for any path, so only the tx page was checked against a known transaction) | HTTP GET on `explorer.testnet.whitechain.io`, 6 Nov | 01:15 | verified for tx (known hash); others standard Blockscout |
+| Sepolia explorer | Etherscan `/tx/`, `/address/`, `/block/` | HTTP GET on `sepolia.etherscan.io/block/1000` → 200 | 01:15 | verified |
+| Next.js file tracing of `@graphpay/config` | its two JSON files are read at run time (`readFileSync` next to `index.mjs`) and the trace misses them; `outputFileTracingIncludes` in `apps/web/next.config.ts` adds them (the route's `.nft.json` then lists both) | local `next build` on Node 22.23.4 | 00:40 | verified locally; first Vercel deploy confirms |
+
 ### records
 
 | fact | value | source | checked (IST) | status | note |
