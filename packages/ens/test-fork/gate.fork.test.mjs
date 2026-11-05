@@ -12,6 +12,8 @@ import { loadEnv } from '../../../scripts/lib/env-loader.mjs';
 import { roleAddresses } from '../../../scripts/lib/wallets.mjs';
 import {
   createEnsGate,
+  createEnsWatcher,
+  memoryCheckpoint,
   createOwnerActions,
   createTxRunner,
   disposableAgent,
@@ -160,3 +162,34 @@ isolated('a lapse then renew revives the same epoch; a never-registered label is
   void a;
 });
 
+
+isolated('watcher on the fork: unregister revokes the policy; a later renew does not un-revoke it; a pause patches the node; the policy cap never moves', async () => {
+  const d = disposableAgent(1);
+  const a = await actions(d.ownerWalletRole);
+  const calls = [];
+  const patches = [];
+  const sink = { updatePolicy: async (c) => calls.push(c), patchNode: async (node, f) => patches.push(f) };
+  const watcher = createEnsWatcher({ client, names: [d.name], sink, checkpoint: memoryCheckpoint() });
+  await watcher.start();
+  const pr = await a.pause(d.name);
+  const pl = await watcher.poll();
+  assert.deepEqual([pr.changed, pl.events], [true, 1]);
+  assert.deepEqual(patches.at(-1), { status: 'paused' });
+  await a.kill(d.name);
+  await watcher.poll();
+  assert.deepEqual(calls, [{ node: watcher.tracked()[0].node, epoch: 0, revoked: true }]);
+  assert.equal(patches.at(-1).status, 'revoked');
+  const at = await locate(client, d.name);
+  const block = await client.getBlock();
+  const data = encodeFunctionData({ abi: userRegistryAbi, functionName: 'renew', args: [labelId(d.label), block.timestamp + 86_400n * 30n] });
+  let renewed = true;
+  try {
+    await createTxRunner({ client, chainId: 11155111, log: () => {} }).send('renew', await senderFor(d.ownerWalletRole), { to: at.registry, data });
+  } catch {
+    renewed = false; // the burned token cannot be renewed: also safe
+  }
+  await watcher.poll();
+  assert.equal(calls.length, 1, `renew ${renewed ? 'succeeded' : 'reverted'}: no un-revoke`);
+  assert.notEqual((await registryState(client, at.registry, d.label)).status, STATUS.REGISTERED);
+  console.log(`# renew after unregister: ${renewed ? 'accepted, label is RESERVED' : 'reverted'}`);
+});
