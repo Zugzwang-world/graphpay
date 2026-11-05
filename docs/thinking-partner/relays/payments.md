@@ -1,6 +1,6 @@
 # Relay: payments (T1)
 
-Updated 05:05 IST, Fri 6 Nov.
+Updated 05:11 IST, Fri 6 Nov.
 
 ## In plain words
 
@@ -16,13 +16,13 @@ Updated 05:05 IST, Fri 6 Nov.
 - the persona paid 0.40 as a human, with no agent name involved;
 - a weekly sweets-box subscription was created (first charge included), renewed by our renewer after the 2-minute demo period, and cancelled with the subscriber's own signature.
 
-**Now (M4): the same payments from the public site.** The shop, our facilitator, the refusal recorder and a renewal job that runs every minute are routes on https://graphpay-event.vercel.app, behind the demo passcode and bearer tokens, on the real chain only. The server keys went to Vercel as Sensitive values (never printed, never in the browser). Once it is deployed, one 0.40 payment goes through the public URL, and Join's agents switch to the hosted facilitator.
+**Now (M4): the same payments from the public site.** The shop, our facilitator, the refusal recorder and a renewal job that runs every minute are routes on https://graphpay-event.vercel.app, behind the demo passcode and bearer tokens, on the real chain only. The server keys went to Vercel as Sensitive values (never printed, never in the browser). It is live: a 0.40 payment went through the public URL with no payer gas ([explorer](https://explorer.testnet.whitechain.io/tx/0x06d43ca9a501342a1177d3a48383dc1611505863bab15a396aa38bc02aee6e01)), the repeat answered "already paid", every protected route answers 401 without its passcode or token, a refusal record landed on Arkiv, and the renewal job renewed a 2-minute demo subscription by itself ([explorer](https://explorer.testnet.whitechain.io/tx/0x48b14aa45f56d487dee743721416a359fed96296b3ad0ababf546838f55e480f)). Join's agents now pay through the hosted facilitator.
 
 **What it meant for the demo (M3):** identify (ENS), pay (Whitechain) and the refusal and revocation stories all have real transactions behind them now. Join's watcher and the integration checks (D1, D2b/c, D3, CP4) can use these. Next is M4: hosting the facilitator and the shop on Vercel, so these same payments run from the public site. Nothing for the founder.
 
 ## Technical
 
-- M4 (PR from `pay/hosted`; dependencies in https://github.com/Zugzwang-world/graphpay/pull/53): `apps/web/lib/payments.server.ts` (one build per instance, 503 and retried on a failed start-up, hosted URLs pinned to the production domain, merchant lists from the shop keys), routes `/api/{facilitator,shop,recorder}/[...path]` and `/api/cron/renew` (RENEWER, 25 newest subscriptions, at most 3 renewals per run, 25 s budget), `scripts/whitechain/vercel-env.mjs` (14 Sensitive values set at 05:00 IST), `pnpm pay:public`. Security and correctness reviews: one blocker (typecheck), fixed; should-fixes done; "ship". Notes: `docs/sessions/payments/m4-hosted.md`.
+- M4 (PR from `pay/hosted`; dependencies in https://github.com/Zugzwang-world/graphpay/pull/53): `apps/web/lib/payments.server.ts` (one build per instance, 503 and retried on a failed start-up, hosted URLs pinned to the production domain, merchant lists from the shop keys), routes `/api/{facilitator,shop,recorder}/[...path]` and `/api/cron/renew` (RENEWER, 25 newest subscriptions, at most 3 renewals per run, 25 s budget), `scripts/whitechain/vercel-env.mjs` (14 Sensitive values set at 05:00 IST), `pnpm pay:public`. Security and correctness reviews: one blocker (typecheck), fixed; should-fixes done; "ship". Merged as https://github.com/Zugzwang-world/graphpay/pull/58 (05:05 IST); live checks (health 200, C6, pay:public 226,480 gas, recorder edge, cron renewal 222,881 gas as RENEWER) in `docs/sessions/payments/m4-hosted.md`. FACTS.md entries for main: the pay:public and cron links.
 
 - PRs: part A merged as https://github.com/Zugzwang-world/graphpay/pull/42 (04:06 IST); part B on `pay/part-b`, titled `(M3 done)`.
 - C7: https://explorer.testnet.whitechain.io/tx/0x87505ef2457b6e925fa7378a55fd91419e83c37fb8effc06d901884700c72c00, block 12,322,239, 309,483 gas with the gasless EIP-2612 approval, `tx.from` FACILITATOR, `PaymentSettled`, 4,800,000 units of `0xcedf…55a7`, payer WBT 0.005 before and after. Paid on UTC 5 Nov, so the acceptance agent's 6.00 for M13 (UTC 6 Nov) is fresh. Record `docs/sessions/payments/c7.json`; the README link is asked for in OPEN.md.
