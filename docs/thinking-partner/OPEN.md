@@ -120,6 +120,7 @@ Updated 03:36 IST, Fri 6 Nov. Nothing for the founder now: the live mirror needs
 - **Note:** the CSV and the stream read the live dataset only; one query returns at most 100 edges each way (the engine's list cap), enough for the demo.
 
 ## agentpay
+- **Closed 04:20 IST (T3's race-truth item):** `@graphpay/city` is now a dependency of `apps/web`; `/api/race` takes its truth and parameters from the generated city. **Open, for the Coordinator:** the seeded city's end day (`2026-11-05`) is a constant in `apps/web/lib/race.server.ts` (`SEEDED_END`), because no committed record holds it. Why: a re-seed on another day changes the params and the truth. Recommendation: keep it and update it with any re-seed (a note in T3's README already names it).
 
 ## records
 

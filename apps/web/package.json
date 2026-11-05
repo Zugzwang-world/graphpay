@@ -11,6 +11,7 @@
     "test": "node --test \"lib/**/*.test.ts\""
   },
   "dependencies": {
+    "@graphpay/city": "workspace:*",
     "@graphpay/config": "workspace:*",
     "@graphpay/money-graph": "workspace:*",
     "next": "16.4.5",

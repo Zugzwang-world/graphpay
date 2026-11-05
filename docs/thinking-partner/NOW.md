@@ -68,14 +68,10 @@ Updated 03:35 IST, Fri 6 Nov. **The mirror runs live on the real networks.** The
 
 ## website
 
-Updated 03:45 IST, Fri 6 Nov (T5 Web). **On `main`:** the shell, the phone views, the agent run route, and (PR 23) the merchant order stream and accountant CSV on the live money graph. A new PR wires the order trail page (`/order/<id>`) to GraphQL and makes the explain page show each call's rows, bytes and milliseconds.
-- Running: nothing long. M16 (checkout kit, store) waits for M4 (shop, facilitator; not merged).
-- Blockers: none. Customer panels wait for M4 and M6, the race for M9, the agent run for M12.
-- Next: M16 once M4 lands; Friday item 9 (Open toggle) once T3's `shop_open` lands. Fresh start file: `docs/sessions/website/resume.md`.
-
-## agentpay
-
-Started 03:25 IST (T6 AgentPay SDK: `packages/agentpay`, `examples/agentpay-*`, the Whitechain lane; it uses T1's and T4's public exports). T6 owns this section.
+Updated 04:20 IST, Fri 6 Nov (T5 Web). **On `main`:** the shell, phone views, agent run route, merchant stream and CSV, order trail. **In a PR:** race mode goes live (Friday item 8): both sides ask Arkiv's testnet the same question live, reads tick per call, the answer is badged correct by identity or by name, and the committed benchmark table sits under it (reads and bytes, no times). Tried live on Rabdi: Graph Arkiv 2 reads, plain 5 or 6.
+- Running: nothing long. M16 (checkout kit, store) waits for M4 (not merged); customer state waits for M6.
+- Blockers: none. Open toggle waits for T3's `shop_open`.
+- Next: M16 once M4 lands; the customer panels as M4 and M6 land. Fresh start file: `docs/sessions/website/resume.md`.
 
 ## records
 

@@ -2,6 +2,12 @@
 
 Working notes; deviations from `planning/WEBSITE_SPEC.md` and why. Newest first.
 
+## Race mode (`web/race`)
+
+- `/api/race` calls T3's `raceQuestion` per request on a new connection (`lib/race.server.ts`); truth and params from `@graphpay/city` (`generateCity` with `SEEDED_END`, a constant: the seeded city's end day, `2026-11-05`; update on a re-seed). One race per side per instance; `size` other than S is refused (ADR-0049).
+- Local type declarations in `apps/web/types/` for `raceQuestion`, `callTap` and `@graphpay/city` (the packages ship no types for them); T3 may replace them.
+- The benchmark table is read from `bench/results/questions-S.csv` at build time (the page is static); labels in `app/race/page.tsx` are generic, not story names.
+
 ## Merchant stream and CSV (`web/m16-checkout-kit`)
 
 - Reads T3's GraphQL (`node.in/out`) through the shared engine; `lib/merchant-feed.ts` is pure (tests on ArkivSim), `lib/merchant-feed.server.ts` shares one query per 2 s per instance.
