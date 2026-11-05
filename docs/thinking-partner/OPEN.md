@@ -8,7 +8,7 @@ The founder's to-dos and open questions. Each item says what, where, why and wha
 2. **Send ETHGlobal the written pre-event disclosure, if not sent yet.** Where: the Hacker Dashboard or an organiser; paste-ready text in `docs/plan/DISCLOSURE_MESSAGE.md`. Why: the rules require written disclosure of pre-existing work.
 3. **Lock the final story config** (the story-config brief goes to the Coordinator). Why: the demo cast, products, prices, places and demo steps come only from it (ADR-0047), and the large city is seeded only from the locked story (ADR-0049). When: by **Fri 08:30 IST** for rehearsal 1; at the latest **Fri 13:00**, because the M seeding's latest safe start is 14:00.
 4. **Laptop on power, lid open, the app open and online until Saturday's pitch.** Why: all seven sessions run on this Mac, and the mirror joins them after M11 (under `caffeinate`).
-5. **Optional, before Friday's publish: claim the npm organisation `graphpay`.** Where: npmjs.com, signed in with your account → Add Organization → `graphpay`, free plan (public packages). Why: only the scope's owner can publish `@graphpay/arkiv-graph` (ADR-0057); the scope is unclaimed at 01:05 IST and anyone could take it before Friday. Recommendation: do it when convenient; the Coordinator asks for the npm login itself when the package is ready (Friday item 18).
+5. **Optional, before Friday's publish: claim the npm organisation `graphpay`.** Where: npmjs.com, signed in with your account → Add Organization → `graphpay`, free plan (public packages). Why: only the scope's owner can publish `@graphpay/arkiv-graph` (ADR-0059); the scope is unclaimed at 01:05 IST and anyone could take it before Friday. Recommendation: do it when convenient; the Coordinator asks for the npm login itself when the package is ready (Friday item 18).
 
 **Closed tonight:** the six track sessions and the Coordinator started (00:44–00:46 IST); the Ankr session's worktree and branch (removed at 23:09), the Vercel GitHub link (connected 22:42 IST; checks in `NOW.md`), the personal Ankr URL (stored, verified 22:51 IST: chain 1874, HTTPS), test USDT (150 arrived 21:54 IST; distributed, ADR-0045) and tGLM (FUNDER held 12.86; every planned wallet funded).
 
@@ -84,12 +84,15 @@ Agents (T4) and Join add one row per full errand run, so the presets can be cali
 - Nothing for the founder from M1. Gas: a recorded failure is paid by the relayer; the facilitator refuses doomed payments before sending (M3), so FACILITATOR's 0.8 WBT covers hundreds of payments.
 
 ## identity
+- **Nothing needs the founder.** Defaults taken: non-paying agents publish a zero cap in ENS (ADR-0059; recommendation: keep). The agent record `agent-endpoint[mcp]` points at `https://graphpay-event.vercel.app/api/mcp`, which T3 builds (M7b); until then it answers 404 (B8's MCP call waits for it).
+- **For T1 (policies):** read the node, epoch and wallet of each paying agent from `docs/sessions/identity/namespace.md`. A killed label is never provisioned again; `disposable-1` is the first kill target.
 
 ## arkiv
 
 - **What:** the story's re-registered shop epoch. **Where:** `packages/config/story.json` `syntheticCity.reRegisteredShop.epoch` (2). **Why:** fresh ENSv2 names start at epoch 0 and a re-registration goes up by one (`planning/SPEC/ARKIV_GRAPH.md` §8), so 1 would match the spec; 2 copies the lab. The S city uses the story's value; nothing is wrong by identity either way. **Recommendation:** the Coordinator sets it to 1 in the final story before M.
 - **What:** T3 added two blocks to the story config. **Where:** `story.json` `syntheticCity.generator` (generator inputs; the spec's values, the rest labelled as T3's choices) and `locations.neighbourhoods` (8 OpenStreetMap places with links). **Why:** ADR-0047 says every city parameter and place lives there. **Recommendation:** the Coordinator keeps them when the final story replaces the cast.
 - **What:** the SDK's publish prep. **Where:** `packages/arkiv-graph`. **Why:** the engine is in now, but there is no README, API reference or example yet. **Recommendation:** Friday item 18, as ADR-0057 says.
+- **What:** the explorer's entity page pattern. **Where:** `arkiv/schema.md`. **Why:** only the transaction pattern is verified. **Recommendation:** T3 checks it during M7b; no founder action.
 - Closed: the W_DIRECTORY top-up (it holds 0.50 tGLM); the i32 box (ADR-0058).
 
 ## agents
@@ -110,7 +113,7 @@ Updated 01:20 IST. Nothing for the founder now.
 
 ## records
 
-- **npm login for the Friday publish (ADR-0057, item 18).** What: your npm login and go-ahead when the package is ready, after CP4 and T3's item 18. Where: a Terminal-panel tab the Coordinator opens; npm's sign-in and any one-time code happen there and Claude never sees them. Why: publishing needs your account, and a publish cannot be undone after 72 hours. Recommendation: nothing now; the Coordinator asks.
+- **npm login for the Friday publish (ADR-0059, item 18).** What: your npm login and go-ahead when the package is ready, after CP4 and T3's item 18. Where: a Terminal-panel tab the Coordinator opens; npm's sign-in and any one-time code happen there and Claude never sees them. Why: publishing needs your account, and a publish cannot be undone after 72 hours. Recommendation: nothing now; the Coordinator asks.
 - **Prompt logs land in the main checkout** (P-records-1). What: the prompt-log hook writes every session's log to `~/graphpay/prompts/raw/`, not to the session's worktree, so track PRs do not carry their logs. Recommendation: the Coordinator changes the hook to write into the session's own checkout and sweeps the logs written so far into a records PR. No founder action.
 
 ## submission

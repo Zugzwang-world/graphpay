@@ -108,6 +108,15 @@ importers:
         specifier: 2.57.16
         version: 2.57.16(typescript@5.9.3)(zod@4.6.7)
 
+  packages/ens:
+    dependencies:
+      '@graphpay/config':
+        specifier: workspace:*
+        version: link:../config
+      viem:
+        specifier: 2.57.16
+        version: 2.57.16(typescript@5.9.3)(zod@4.6.7)
+
   packages/mirror:
     dependencies:
       '@graphpay/config':

@@ -3,6 +3,7 @@
 // model prose (G13). Returns the run log of planning/SPEC/AGENTS.md §9.
 
 import { createHash, randomBytes } from 'node:crypto';
+import { createActivity } from './activity.mjs';
 import { runBuyerTeam } from './buyer.mjs';
 import { teamCast } from './cast.mjs';
 import { parseMandate, needFromRequest, zoneOffsetMinutes } from './mandate.mjs';
@@ -90,7 +91,9 @@ export async function runErrand(options = {}) {
   const runId = options.runId ?? (mode === 'mock' ? `mock-${sha256(`${request}|${now}`).slice(0, 16)}` : `run-${randomBytes(8).toString('hex')}`);
   const requestId = `0x${sha256(runId)}`;
   const scrub = createScrubber([...Object.entries(env).filter(([k]) => /(?:_PRIVATE_KEY|_API_KEY|_ACCESS_KEY|_TOKEN|_SECRET|_PASSCODE|_RPC_URL)$/.test(k)).map(([, v]) => v), ...(options.secrets ?? [])]);
-  const log = createRunLog({ scrub, onEvent: options.onEvent });
+  let activity = null; // presence and handoff hooks: no-ops unless the hooks define them
+  const log = createRunLog({ scrub, onEvent: options.onEvent, observe: (entry, meta) => activity?.observe(entry, meta) });
+  activity = createActivity({ hooks: options.hooks, cast, log, runId, renewMs: options.presenceRenewMs, setTimer: options.setTimer, clearTimer: options.clearTimer });
   const meter = createMeter();
   const started = performance.now();
   const label = options.label ?? `${cast.key} story errand (SYNTHETIC)`;
@@ -137,6 +140,7 @@ export async function runErrand(options = {}) {
       log.guard('ERRAND', false, `the errand stopped: ${fatal}`);
     }
   }
+  activity.stop();
   const result = buildResult(state, concierge);
   if (fatal) result.error = fatal;
   const runLog = {

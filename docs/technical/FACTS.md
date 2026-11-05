@@ -271,6 +271,19 @@ offset(offset: number): this;
 
 Each track adds its own rows here (under `### <activity>`), with source, time and status.
 
+### identity
+
+| fact | value | source | checked (IST) | status | note |
+|---|---|---|---|---|---|
+| ENSIP-31 vectors | USDC on Ethereum 27 bytes, USDC on Base 28, native ETH 7, the three concatenated 62 bytes; the test-USDT entry for chain 1874 is 28 bytes and equals the config's `erc7930` | https://docs.ens.domains/ensip/31 (raw `ensips/31.md`); `packages/ens/test/unit.test.mjs` | 2026-11-06 01:05 | verified (draft) | the encoder reproduces all four vectors; a malformed entry voids the whole record |
+| Real namespace run | 60 transactions, 72,668,520 gas in all, finished 2026-11-06 01:58 IST at 19 wei gas price; per step: root resolver 3.16M, owner registry 1.02M, owner resolver 1.94–2.41M, agent resolver 2.66–2.77M, agent registration 0.27–0.39M, setters 0.50M, wildcard resolver 1.38M | `docs/sessions/identity/namespace.json` | 01:58 | measured | within the pack's lab figure (77 tx, 68.4M gas, other root) |
+| Both setter grants in one transaction | `grantSetterRoles` for `agent-context` and for coin type 2147485522 go through one `multicall` on the agent's resolver: 495,925–495,949 gas; an agent with its own wallet takes 3 transactions, an owner-held agent 2 | the 5 `C3` transactions in `namespace.md`; the fork rehearsal | 01:20 | measured | closes the amendment's "3, or 4 if one call cannot carry both" |
+| Setter scope | an agent's key can `setText` `agent-context` and `setAddress` 2147485522 on its own resolver; `setText` of `graphpay.cap_micro`, `graphpay.status`, `x-graphpay-accepts`, `agent-endpoint[mcp]`, `graphpay.principal`, `graphpay.kind`, `setAddress(60)` and `setContenthash` revert `EACUnauthorizedAccountRoles` | `packages/ens/test-fork/namespace.fork.test.mjs` on an anvil fork | 01:30 | verified (fork and real Sepolia) | on real Sepolia (`node scripts/ens/b3-real.mjs --send`, 02:25 IST): the acceptance agent's own `setText` of `agent-context` landed, 59,046 gas, [0x12f009…456e](https://sepolia.etherscan.io/tx/0x12f009dfe98a8a5a7b4cab317774cb4d79fc40c64a16bff8cb9093052c7e456e); the five refused writes revert in simulation and were not sent; `acceptance.mjs` reads the roles (none on the root, cap, status, accepts, endpoint, principal, kind or coin type 60) |
+| Transfers | `safeTransferFrom` reverts `TransferUnsafeUntilRegistryIsEmancipated`; `unsafeTransfer` reverts `TransferDisallowed` | same fork test | 01:30 | verified (fork) | |
+| Registry roles | verified against `RegistryRolesLib` and `EACBaseRolesLib` source from Sourcify: `ALL_ROLES` is 64 nybbles of 1, admin = role << 128, `CAN_TRANSFER_ADMIN` = `(1<<28)<<128` | https://sourcify.dev/server/v2/contract/11155111/<UserRegistryImpl>?fields=sources | 01:00 | verified | matches `planning/SPEC/IDENTITY_ENS.md` §3 |
+| Wildcard | `<anything>.sim.graphpay.eth` reads `graphpay.synthetic=true`, kind `agent`, status and cap empty, with no transaction | `node scripts/ens/acceptance.mjs` on real Sepolia | 02:05 | verified-on-chain | B5 |
+| Anvil fork | `anvil --fork-url` at the latest block fails ("block not found") on the load-balanced RPC; pin `--fork-block-number` ten blocks behind the head. Anvil's default tip is 1 gwei, so impersonated signers need `anvil_setBalance` | rehearsal | 01:10 | measured | |
+
 ### payments
 
 | fact | value | source | checked (IST) | status | note |
@@ -278,6 +291,8 @@ Each track adds its own rows here (under `### <activity>`), with source, time an
 | Test USDT EIP-2612 domain | the configured domain (`Tether USD`, version `1`, chain 1874, the proxy) hashes to the token's `DOMAIN_SEPARATOR()`; both `permit` overloads approve Permit2; a permit signed under another name reverts | Foundry fork tests at block 12,310,000 (`packages/contracts/test/Digests.t.sol`) | 01:30 | verified-on-chain (fork) | the start-up check of M3 relies on it |
 | Permit2 domain | `{ name: "Permit2", chainId: 1874, verifyingContract: <Permit2> }` hashes to the deployed Permit2's `DOMAIN_SEPARATOR()` | same | 01:30 | verified-on-chain (fork) | |
 | Checkout gas (fork, execution only) | first agent settle with the gasless approval 318,377 (merchant holds a float) / 333,479 (merchant at zero); re-order 251,143; partial refund 81,275; createSubscription with first charge 482,697; renew 218,399; cancelWithSig 43,073 | `forge test -vv` gas logs | 01:45 | measured (fork) | a receipt adds about 33,000; real receipts replace these at M2/M3 |
+| GraphPayCheckout (test USDT) | `0x75233b7341B9e86407e4b31599f07b8936716FcA`, deploy block 12,313,887, tx `0x0cf2fc15…01f6` (3,873,126 gas); `USDT()` = test USDT; verified on the explorer (`is_verified` true, `is_fully_verified` false) | `scripts/whitechain/deploy-checkout.mjs`, `verify.mjs`, explorer API `/api/v2/smart-contracts/<addr>` | 01:55 | verified-on-chain | config `whitechain.contracts.checkout`; details `docs/sessions/payments/m2-deploy.md` |
+| Setup gas (real receipts) | `setRelayer` 53,196; token `approve` 53,376; `setPolicy` new 95,177–95,237 | `docs/sessions/payments/txlog.jsonl` | 01:57 | measured | the lab had 95,233 for a new policy |
 
 ### arkiv (T3, M7a, 2026-11-06)
 

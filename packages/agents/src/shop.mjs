@@ -11,6 +11,7 @@ import { readBuyerStanding, tracedMcpTools } from './graph.mjs';
 import { displayUsdt, microFrom, toMicro } from './money.mjs';
 import { buyerRiskReasons } from './scoring.mjs';
 import { errorText } from './scrub.mjs';
+import { STEPS } from './activity.mjs';
 import { tracedTool } from './tools.mjs';
 import { base64JsonCodec, header } from './x402.mjs';
 
@@ -59,7 +60,7 @@ export function createShopGateway(ctx) {
 
   // G9: stricter wins. The decision is code's reasons ∪ the risk agent's.
   async function vet(req, amountMicro) {
-    log.message(names.storefront, names.risk, `vet ${req.payer}`);
+    log.message(names.storefront, names.risk, `vet ${req.payer}`, STEPS.checkBack);
     const code = await codeRisk(req.payer, amountMicro);
     const executed = new Set();
     const tools = {
@@ -77,7 +78,7 @@ export function createShopGateway(ctx) {
     if (run.output?.decision === 'decline' && model.length === 0) model.push('risk agent: declined');
     const reasons = [...code, ...model];
     log.guard('G9', reasons.length === 0, reasons.length ? `declined ${req.payer}: ${reasons.join('; ')}` : `approved ${req.payer} (code and the risk agent)`);
-    log.message(names.risk, names.storefront, reasons.length ? 'decline' : 'approve');
+    log.message(names.risk, names.storefront, reasons.length ? 'decline' : 'approve', STEPS.checkBack);
     return reasons;
   }
 
@@ -177,7 +178,7 @@ export function createShopGateway(ctx) {
     };
     const task = { item: bound.item, quantity: bound.quantity, deadlineIso: req.deadlineIso, orderId: bound.orderId };
     await runAgent({ role: 'dispatch', ens: names.dispatch, task, tools, executed, ...common });
-    if (confirmation) log.message(names.dispatch, req.payer, `dispatched ${bound.orderId}, arrives ${confirmation.etaIso}`);
+    if (confirmation) log.message(names.dispatch, req.payer, `dispatched ${bound.orderId}, arrives ${confirmation.etaIso}`, STEPS.pay);
     return { ...res, body: { ...(res.body && typeof res.body === 'object' ? res.body : {}), dispatch: confirmation } };
   }
 

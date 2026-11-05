@@ -50,7 +50,7 @@ What was proven on the live testnet:
 
 **MCP** (`mcp.mjs`): the tools `schema`, `ask` (shop_reputation, buyer_risk, compare_shops, order_trail; TSV plus `explain=… calls=…`), `graphql` and `explain`. A server and a stateless web-standard Streamable HTTP transport are created per request.
 
-**Routes** (T3's): `/api/graphql` (GET cached 5 s, POST uncached), `/api/explain/[id]` and `/api/mcp`, rate-limited per instance (ADR-0059).
+**Routes** (T3's): `/api/graphql` (GET cached 5 s, POST uncached), `/api/explain/[id]` and `/api/mcp`, rate-limited per instance (ADR-0060).
 
 **Tests:**
 - 9 M7b tests on the simulated S city: Q2 in 2 calls, the same explain id twice, Q1 verified, three shops in 2 calls, the re-registered name empty, Q3 and Q5, TRUNCATED, the limits, the MCP tool list.
@@ -58,7 +58,7 @@ What was proven on the live testnet:
 - The writer now retries its reads.
 
 **Deviations, and why:**
-- GraphQL runs on graphql-js directly rather than Yoga (simpler, and it gives the same answers): ADR-0059.
+- GraphQL runs on graphql-js directly rather than Yoga (simpler, and it gives the same answers): ADR-0060.
 - The benchmark-only `arkiv_query` tool moves to M9.
 - `top` reads up to twice the limit so that superseded epochs can be dropped and still leave 10.
 - The story's re-registration epoch is 2 rather than the spec's +1 (OPEN).

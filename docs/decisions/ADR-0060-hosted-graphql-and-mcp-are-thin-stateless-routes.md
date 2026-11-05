@@ -1,4 +1,4 @@
-# ADR-0059: Hosted GraphQL and MCP are thin, stateless routes
+# ADR-0060: Hosted GraphQL and MCP are thin, stateless routes
 
 Status: accepted · Date: 2026-11-06 · Decided by: T3 Arkiv (M7 amendment §8, ADR-0037)
 
