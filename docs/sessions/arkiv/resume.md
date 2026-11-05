@@ -23,7 +23,7 @@ Updated 03:20 IST, Fri 6 Nov. Read this, then `docs/plan/sessions/T3-arkiv.md`, 
 
 ## Open threads
 
-- The `arkiv` LOG line of 03:20 says "PR pending": in the next PR, add the `arkiv/attributes` PR's link and merge time.
+- The `arkiv` LOG line of 03:20 carries PR #25's link: in the next PR, add its merge time.
 - Story `syntheticCity.reRegisteredShop.epoch` is 2 while fresh names start at epoch 0 (the spec says +1). The generator uses the story value; flagged in OPEN for the Coordinator.
 - `graphql-yoga` is a dependency but unused (GraphQL runs on graphql-js; ADR-0060).
 - The benchmark-only MCP tool `arkiv_query` (parse and re-render before adding the owner) is not built yet: M9.
