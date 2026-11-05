@@ -1,0 +1,22 @@
+{
+  "name": "@graphpay/shop",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "The shop's stateless 402 API (M3): synthetic catalog, quotes, pay and re-order through our facilitator; the chain is the record.",
+  "exports": {
+    ".": "./index.mjs"
+  },
+  "scripts": {
+    "test": "node --test \"test/*.test.mjs\"",
+    "e2e:fork": "node scripts/fork-e2e.mjs"
+  },
+  "dependencies": {
+    "@graphpay/config": "workspace:*",
+    "@graphpay/contracts": "workspace:*",
+    "@graphpay/facilitator": "workspace:*",
+    "@x402/core": "2.30.0",
+    "viem": "2.57.16",
+    "zod": "4.6.7"
+  }
+}

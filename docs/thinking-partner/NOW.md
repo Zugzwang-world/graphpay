@@ -25,18 +25,16 @@ Updated 23:55 IST. **M0 done; handed over to the Coordinator** (`docs/plan/sessi
 
 ## payments
 
-Updated 02:10 IST, Fri 6 Nov (T1).
-- **M1 merged (#12). M2 is done on the real chain:** the checkout is deployed on Whitechain Sepolia for the real test USDT, verified on the explorer and set up (the renewal relayer, three shops' refund floats, five agent spending policies from the story). PR with the scripts and records is open.
-- Checkout: https://explorer.testnet.whitechain.io/address/0x75233b7341B9e86407e4b31599f07b8936716FcA (its address and deploy block are in the config for the mirror).
-- The qualifying payment's readiness check passes: the acceptance agent holds 20 test USDT and has its 6.00/day policy.
-- Next: M3 part A (our facilitator, the shop's 402 API, the recorder routes). Part B (real payments) waits for T2's M5 and M6.
+Updated 04:05 IST, Fri 6 Nov (T1).
+- **M3 part A ships now:** our own x402 facilitator, the shop's 402 payment API and the refusal recorder. Two reviewer passes; pass 2 found two real holes (a cached gate answer could let an agent spend past its ENS cap for 20 s; an order that failed on-chain could be resent at our gas cost), both fixed and confirmed "ship". 77 offline tests, and the fork run passes every beat.
+- **Part B is unblocked** (T2's gate merged as #34) and starting: the payment lifecycle as `rehearsal.vitalik` on the real chain through the real ENS gate (fork rehearsal first), then the qualifying payment C7 once as `acceptance.vitalik`, then the subscription.
 - Blockers: none.
 
 ## identity
-Updated 03:50 IST. **M6 part 1 is built; PR #34 is open.** The payment gate (`ensGate`), the agents' `ens_check`, and the owner actions (pause, resume, kill, next free disposable) are written, unit-tested and fork-tested. On real Sepolia, with the real checkout policies, every paying agent passes the full gate; non-paying agents say `ENS_NO_POLICY` as designed.
-- The kill ladder holds on a fork: pause bites within 25 s of its receipt, unregister refuses at once, a `renew` after an unregister leaves the label unregistered.
-- Running: nothing. Blockers: none. T1's M3 can now call `createEnsGate` from `@graphpay/ens`.
-- Next: the watcher (M6 part 2, built and tested, waiting for its own PR and the reviewer pass), then the real kill timings (B6/B7/E7) with Join.
+Updated 04:25 IST. **M6 is built: the gate is merged (PR #34); the watcher PR is open.** The watcher keeps the payment policy and the Arkiv node standing in step with ENS: a kill revokes the policy, a pause shows on the node, a lapse is caught by a 30 s ticker, and it never creates a policy or copies an ENS cap into one. Join hosts it in the workers process.
+- Checked: 47 unit tests, 11 fork tests (including a `renew` after `unregister` that must not revive a killed agent), a dry run on real Sepolia, B8's MCP call (`initialize` and `tools/list` on the hosted endpoint).
+- Running: nothing. Blockers: none. Real kill timings (B6/B7/E7) wait for Join's workers process.
+- Next: after the merge, B6/B7/E7 with Join, then B9 (a) after T1's first settled payment, then the Friday items.
 
 ## arkiv
 
@@ -56,13 +54,13 @@ Updated 02:40 IST. **M10 is merged; the presence and handoff hooks are built** (
 - Blockers: none. Next: merge, then wait for Join's M12 counting run; re-run the live errand if time allows.
 ## integration
 
-Updated 03:35 IST, Fri 6 Nov. **The mirror runs live on the real networks.** The one workers process has run on this Mac since 03:13 IST, kept awake by `caffeinate`.
-- On Arkiv's testnet: the 19 cast names registered; the labelled 5% history written (1,258 synthetic events, about 0.49 test GLM); the checkout's 9 setup events read from its deploy block. It keeps up 2 blocks (about 4 s) behind the chain head.
-- Live so far: re-reading the same blocks sends nothing, and a 2-minute freeze, then a hard kill and restart, lost and repeated nothing; it took over at once and went on from the same place. These count as D2 and D15 only once a payment is in the window: until then the checks report "not run", not "pass".
-- The agents' hosted MCP endpoint answers through the new client, and its scores come from the mirror's history: kesar 97% on time, jamun 71% with 18% refunds (the trap).
-- Running: `pnpm workers` (port 8788 on this Mac only), a 30-minute lag sample.
-- Blockers: the first real payment (T1's M3, then M6) for D1, D2b/c and D3. T3 has a labelling fix to make (`OPEN.md`).
-- Next: M12's live hooks in `integration/` (the shop side once M3 merges), then the D checks on the first payment and `(M11 done)`.
+Updated 04:10 IST, Fri 6 Nov. **The mirror runs live (since 03:13 IST); M12's signing path now has the ENS gate; the agents' presence and hand-offs can be written live.**
+- The mirror: the cast and the labelled history are on Arkiv's testnet, 2 blocks behind the chain (PR 33 merged). Retry and drop tests ran clean; they count once a payment is in the window.
+- New: before the payer signs, the same ENS gate the facilitator uses (T2's M6) checks the agent's name, its spending policy on the checkout and today's spend; a refusal signs nothing. Live: the stage payer passes under its 6.00 cap; over-cap, unknown and policy-less agents are refused.
+- New (Friday item 3): agents' "at work" rows and hand-offs go to Arkiv in one transaction per phase and never slow an agent down.
+- Running: `pnpm workers` on this Mac.
+- Blockers: the first real payment and M12's shop side wait for T1's M3. T2's watcher (M6 part 2) is next, to host in the workers.
+- Next: host the watcher; wire the shop side and signing when M3 merges; then `pnpm e2e:food`.
 
 ## website
 
@@ -70,6 +68,14 @@ Updated 05:05 IST, Fri 6 Nov (T5 Web). **On `main`:** the shell, phone views, ag
 - Running: nothing long. M16 (checkout kit, store) waits for M4 (not merged); customer state waits for M6's reads.
 - Blockers: the Open toggle needs `W_DIRECTORY_PRIVATE_KEY` set in Vercel (Coordinator, see OPEN).
 - Next: M16 once M4 lands; the map (item 10) once Join's live hooks (item 3) write presence. Fresh start file: `docs/sessions/website/resume.md`.
+
+## agentpay
+
+Updated 04:10 IST, Fri 6 Nov (T6 AgentPay). **`@graphpay/agentpay` V1 is merged (PR 38), and the first real test payment through it settled on Whitechain Sepolia:** the rehearsal agent paid the good shop 0.01 test USDT with one signature and no gas (https://explorer.testnet.whitechain.io/tx/0xfbd7d307b1b0c08f3af015b4bdb03aaeed12d0c2d18c2553432cb4679ff14c7e, 309,451 gas, order PAID on-chain).
+- Proven on an anvil fork (13 tests): payment, refusals in code, refund request and refund, CSV, relayer limits, subscription renew and cancel, both examples. 36 offline tests in CI.
+- The ride example stays on the fork: its operator is not in the cast, and the mirror would park the event (OPEN).
+- Running: nothing. Blockers: none.
+- Next: the T1 facilitator adapter test once M3 merges; a resume file by 08:00.
 
 ## records
 

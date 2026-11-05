@@ -9,6 +9,7 @@
   },
   "dependencies": {
     "@ai-sdk/mcp": "2.0.90",
+    "@arkiv-network/sdk": "1.0.1",
     "@graphpay/agents": "workspace:*",
     "@graphpay/arkiv-graph": "workspace:*",
     "@graphpay/config": "workspace:*",

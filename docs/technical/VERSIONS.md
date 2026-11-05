@@ -47,6 +47,13 @@ The M0 verifier's snapshot of every package in `planning/FACTS.md` §5 is in `do
 | forge-std | v1.9.7 (`77041d2`), kept | has every cheatcode the suite uses (`getBlockTimestamp`, `snapshotState`, `keyExistsJson`, `deployCodeTo`) | verified |
 | viem (in `@graphpay/contracts`) | 2.57.16 | same as the root pin | verified |
 
+## M3 payments (`pay/facilitator`, T1, checked 2026-11-06 03:20 IST)
+
+| item | pinned | how checked | status |
+|---|---|---|---|
+| `@x402/core` | 2.30.0 (`latest`; only this one of the four `@x402/*` packages is used) | `packages/facilitator`, `packages/shop`; API names read from the installed `dist/esm/*.d.mts` and `.mjs`. They match `planning/SPEC/PAYMENTS_WHITECHAIN.md` §5 (written against 2.29.0) with three notes: `SchemeNetworkClient.createPaymentPayload(x402Version, requirements, context?)` returns only `{ x402Version, payload }` (x402Client adds `accepted`, `resource` and `extensions`) and receives `context.maxAmountPerPayment`, the resolved spend cap, which our client also enforces; `HTTPFacilitatorClient` uses the global `fetch` with `redirect: "follow"`, a timeout, and throws on any non-2xx answer (the shop turns that into a 502); `createAuthHeaders` must return headers keyed by path (`{ verify, settle, supported }`), a flat object throws. `setSpendControls({ allowedAssets: [{ network, asset, maxAmountPerPayment }] })` is required for the token (a test shows the default refuses it) | verified |
+| viem, zod | 2.57.16, 4.6.7 | the repo's pins | verified |
+
 ## arkiv (T3, M7a, checked 2026-11-06 00:58 IST with `npm view`)
 
 | item | pinned | in | status |
@@ -85,3 +92,15 @@ Not installed: `@ai-sdk/mcp` (the live MCP client is Join's wiring in M12, throu
 |---|---|---|---|
 | `@ai-sdk/mcp` | 2.0.90 (published 2026-11-03) | `npm view @ai-sdk/mcp time` and `dependencies`: 2.0.90 depends on `@ai-sdk/provider-utils` 5.0.74 and `@ai-sdk/provider` 4.0.35, the same as `ai` 7.0.162 (T4's pin), so the tools share one copy; `latest` 2.0.91 (2026-11-05) moved to provider-utils 5.0.75 and would install a second one. Live: `connectMcp()` lists `schema, ask, graphql, explain` on the production domain's `/api/mcp` and answers `schema` and `graphql` | verified |
 | `ai`, `zod`, `viem` | 7.0.162, 4.6.7, 2.57.16 | the pins already in the lockfile (T4, T3, M0) | verified |
+
+## T6 AgentPay (`packages/agentpay`, `examples/agentpay-*`, checked 2026-11-06 03:55 IST)
+
+No new package versions: every dependency is a pin already verified above, so the lockfile only gains importer entries.
+
+| item | pinned | how checked | status |
+|---|---|---|---|
+| viem | 2.57.16 | the root pin (M0) | verified |
+| zod | 4.6.7 | the arkiv and agents pin | verified |
+| `ai` | 7.0.162 | the agents pin; `tool({ description, inputSchema, execute })` as `packages/agents/src/tools.mjs` uses it | verified |
+| `@modelcontextprotocol/sdk` | 1.32.2 | the money-graph pin; `McpServer.registerTool(name, { description, inputSchema }, handler)` as `packages/money-graph` uses it | verified |
+| anvil (fork tests only, not a package) | 1.9.0 (Homebrew, commit `6056c58`) | `anvil --version` on this Mac; `--fork-url` to the public Whitechain RPC keeps chain id 1874 | verified |
