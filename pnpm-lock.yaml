@@ -42,7 +42,14 @@ importers:
 
   packages/config: {}
 
-  packages/contracts: {}
+  packages/contracts:
+    dependencies:
+      '@graphpay/config':
+        specifier: workspace:*
+        version: link:../config
+      viem:
+        specifier: 2.57.16
+        version: 2.57.16(typescript@5.9.3)
 
 packages:
 
