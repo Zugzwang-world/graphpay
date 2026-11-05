@@ -73,11 +73,11 @@ Updated 04:20 IST, Fri 6 Nov (T5 Web). **On `main`:** the shell, phone views, ag
 
 ## agentpay
 
-Updated 04:00 IST, Fri 6 Nov (T6 AgentPay). **V1 of `@graphpay/agentpay` works on an anvil fork of Whitechain Sepolia:** a customer agent with no gas pays a merchant route with one signature, under an on-chain spending pass, through our deployed checkout and the real test USDT. Its first PR is open.
-- Proven on the fork (13 tests): payment, refusals in code (daily cap, allowlist, budget, revoked pass), refund request and partial refund, CSV export, the relayer's anti-drain limits, a subscription with its renewal and cancel, and both examples (a sweet shop and a fixed-fare cab ride). 36 offline tests run in CI.
-- Reviewer: 2 blocking items (a stalled payment could be paid twice; an RPC URL could reach a model), both fixed and tested; a re-check is running.
-- Running: nothing on a real network. Blockers: none.
-- Next: the tiny real test payment for the sweet shop (the ride stays on the fork until a ride merchant is in the cast); the T1 facilitator adapter check once M3 merges; `docs/sessions/agentpay/resume.md` by 08:00.
+Updated 04:10 IST, Fri 6 Nov (T6 AgentPay). **`@graphpay/agentpay` V1 is merged (PR 38), and the first real test payment through it settled on Whitechain Sepolia:** the rehearsal agent paid the good shop 0.01 test USDT with one signature and no gas (https://explorer.testnet.whitechain.io/tx/0xfbd7d307b1b0c08f3af015b4bdb03aaeed12d0c2d18c2553432cb4679ff14c7e, 309,451 gas, order PAID on-chain).
+- Proven on an anvil fork (13 tests): payment, refusals in code, refund request and refund, CSV, relayer limits, subscription renew and cancel, both examples. 36 offline tests in CI.
+- The ride example stays on the fork: its operator is not in the cast, and the mirror would park the event (OPEN).
+- Running: nothing. Blockers: none.
+- Next: the T1 facilitator adapter test once M3 merges; a resume file by 08:00.
 
 ## records
 

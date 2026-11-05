@@ -1,6 +1,6 @@
 # Relay: agentpay (T6 AgentPay SDK)
 
-Updated 04:05 IST, Fri 6 Nov.
+Updated 04:10 IST, Fri 6 Nov. V1 merged in https://github.com/Zugzwang-world/graphpay/pull/38.
 
 ## In plain words
 
@@ -11,7 +11,7 @@ AgentPay is a small toolkit, `@graphpay/agentpay`, that lets any business take p
 
 The same actions also come as ready-made AI tools for both sides, in two standard formats (AI SDK and MCP). Identity and reputation plug in from outside the toolkit. GraphPay plugs in its ENS names and its Arkiv money graph, but the toolkit imports neither.
 
-**What works now:** everything above, on a private copy of Whitechain Sepolia (an anvil fork). The copy holds our deployed checkout contract, the real test USDT and Permit2. Two examples of about 20 lines each run on it end to end: a sweet shop (the story's good shop and its box) and a fixed-fare cab ride. Nothing has been paid on the real chain yet.
+**What works now:** everything above, on a private copy of Whitechain Sepolia (an anvil fork). The copy holds our deployed checkout contract, the real test USDT and Permit2. Two examples of about 20 lines each run on it end to end: a sweet shop (the story's good shop and its box) and a fixed-fare cab ride. On the real Whitechain Sepolia, one test payment went through the sweet-shop example: the rehearsal agent paid the good shop 0.01 test USDT, with one signature and no gas (https://explorer.testnet.whitechain.io/tx/0xfbd7d307b1b0c08f3af015b4bdb03aaeed12d0c2d18c2553432cb4679ff14c7e).
 
 **What it means for the demo:** step 9's "drop-in checkout" now has a general SDK behind it, and the ride example shows the same payment path working outside food.
 
@@ -34,4 +34,5 @@ The same actions also come as ready-made AI tools for both sides, in two standar
   - From the should-fix list: a deadline bound, lower-case hex, the refund-tool limit, the `authorize` hook, a key-order test, and wallet-binding checks.
   - Re-check: both closed, nothing new blocking; its follow-ups applied.
 - **Deviations:** week and month caps and the merchant allowlist are SDK-side, because the contract has only a daily cap (an on-chain allowlist needs a contract change, V2). A human payer's cap lives in process memory. The examples' story values sit in a new `agentpayExamples` section of the story config (Coordinator: see OPEN).
+- **Real test payment (04:00 IST):** `examples/agentpay-sweets/real.mjs` (dry run unless `--yes`), rehearsal agent → good shop, 0.01 (`agentpayExamples.testAmountMicro`), the reference relayer on the RENEWER key with limits of one order an hour at that amount. 309,451 gas; `orders(id)` status PAID, payer the rehearsal wallet. Logged in `docs/sessions/agentpay/txlog.jsonl`. The FUNDER was not needed (RENEWER held 0.1 WBT).
 - **Risks:** a real ride payment would name an actor outside the cast, which the mirror parks, and its checkpoint would stop there. So the ride stays on the fork.

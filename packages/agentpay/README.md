@@ -89,6 +89,8 @@ Two examples of about 20 lines each, on the same SDK, with names and prices from
 
 Both run end to end on an anvil fork of Whitechain Sepolia against the deployed checkout, the real test USDT and Permit2: `pnpm --filter @graphpay/agentpay test:fork`.
 
+On the real Whitechain Sepolia, the sweet-shop example made one labelled test payment of 0.01 test USDT, with one signature and no gas for the agent: [the settlement](https://explorer.testnet.whitechain.io/tx/0xfbd7d307b1b0c08f3af015b4bdb03aaeed12d0c2d18c2553432cb4679ff14c7e) (`examples/agentpay-sweets/real.mjs`, dry run unless `--yes`).
+
 ## API reference
 
 ### Network

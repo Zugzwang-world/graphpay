@@ -5,7 +5,8 @@ Updated 04:05 IST, Fri 6 Nov. Brief: `docs/thinking-partner/briefs/0325-agentpay
 ## State
 
 - PR 1 (`agentpay/v1-core`): the SDK, its offline tests (CI) and fork tests, both examples, README, VERSIONS rows, story section `agentpayExamples`. Reviewer: 2 blocking fixed, re-check clean.
-- Not done yet: the tiny real test payment of the sweet shop; the T1 facilitator adapter test (waits for M3); npm publish (founder's login, later).
+- PR 1 merged (#38). Real test payment done 04:00 IST: https://explorer.testnet.whitechain.io/tx/0xfbd7d307b1b0c08f3af015b4bdb03aaeed12d0c2d18c2553432cb4679ff14c7e (txlog.jsonl; script `examples/agentpay-sweets/real.mjs`).
+- Not done yet: the T1 facilitator adapter test (waits for M3); npm publish (founder's login, later).
 
 ## How to run
 
