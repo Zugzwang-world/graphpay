@@ -4,10 +4,12 @@
 // today, the request, the agents' live feed, the result, and the actions. Every
 // figure comes from a route; until a route is live the screen says what it waits for.
 
-import { useRef, useState } from 'react';
-import type { AgentStatus, CustomerState, RunResult, RunStarted, TraceEvent } from '@/lib/contracts';
+import { useEffect, useRef, useState } from 'react';
+import type { CustomerState, RunResult, RunStarted, TraceEvent } from '@/lib/contracts';
 import { txUrl } from '@/lib/explorer';
+import { countdown, nextDeadline } from '@/lib/deadline';
 import { formatMicro } from '@/lib/money';
+import { passState, remainingMicro, type PassState } from '@/lib/pass';
 import { streamEvents, waitingForIn } from '@/lib/sse-client';
 import { usePoll, waitingForOf } from '@/lib/use-poll';
 import { ActionAnswer } from './action-answer';
@@ -16,13 +18,25 @@ import { ExplorerChip } from './explorer-chip';
 import { Person, TiffinBot } from './tiffin-bot';
 import { useSite, type ApiAnswer } from './site-context';
 
-const STATUS_TONE: Record<AgentStatus, 'pista' | 'chilli' | undefined> = {
-  ACTIVE: 'pista',
-  PAUSED: 'chilli',
-  REVOKED: 'chilli',
-  EXPIRED: 'chilli',
-  UNKNOWN: undefined,
+const PASS_TONE: Record<PassState, 'pista' | 'chilli' | 'kesar' | undefined> = {
+  Active: 'pista',
+  'Used up': 'kesar',
+  Expired: 'chilli',
+  Paused: 'chilli',
+  Revoked: 'chilli',
+  Unknown: undefined,
 };
+
+// Re-renders once a second while a deadline is on screen.
+function useNow(): Date | null {
+  const [now, setNow] = useState<Date | null>(null);
+  useEffect(() => {
+    setNow(new Date());
+    const timer = setInterval(() => setNow(new Date()), 1000);
+    return () => clearInterval(timer);
+  }, []);
+  return now;
+}
 
 type ActionKey = 'refund' | 'reorder' | 'subscribe' | 'unsubscribe' | 'pause' | 'resume' | 'kill';
 
@@ -73,8 +87,10 @@ export function CustomerScreen() {
     }
   };
 
-  const status = live?.agent.status ?? 'UNKNOWN';
-  const paused = status === 'PAUSED';
+  const now = useNow();
+  const pass: PassState = live ? passState({ status: live.agent.status, capMicro: live.capMicro, spentTodayMicro: live.spentTodayMicro, expiresAt: live.policyExpiresAt }, now ?? new Date()) : 'Unknown';
+  const paused = live?.agent.status === 'PAUSED';
+  const deadline = now ? nextDeadline(now, model.order.deadlineLocal, model.city.timeZone) : null;
   const result = run.result;
 
   return (
@@ -94,8 +110,8 @@ export function CustomerScreen() {
             <p className="pass-name">{model.payer.ens}</p>
             <p className="muted small">pays for the team, within its cap</p>
           </div>
-          <span className="chip" data-tone={STATUS_TONE[status]}>
-            {live ? status.toLowerCase() : 'status —'}
+          <span className="chip" data-tone={PASS_TONE[pass]}>
+            {live ? pass : 'status —'}
           </span>
         </div>
         {live ? (
@@ -103,6 +119,10 @@ export function CustomerScreen() {
             <p>
               <span className="num">{formatMicro(live.spentTodayMicro)}</span> <span className="muted">of</span>{' '}
               <span className="num">{formatMicro(live.capMicro)}</span> {model.token.symbol} <span className="muted">today</span>
+            </p>
+            <p className="muted small">
+              Pays {model.merchant.ens} only; <span className="num">{formatMicro(remainingMicro(live.capMicro, live.spentTodayMicro))}</span> left
+              {live.policyExpiresAt ? `; expires ${new Date(live.policyExpiresAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}` : ''}
             </p>
             <meter min={0} max={Number(live.capMicro)} value={Number(live.spentTodayMicro)} aria-label="Spent today against the daily cap" />
           </div>
@@ -126,6 +146,15 @@ export function CustomerScreen() {
           void send();
         }}
       >
+        <div className="request-chips">
+          <span className="chip" data-tone="kesar">
+            <span className="label">Budget</span> <span className="num">{formatMicro(model.order.budgetMicro)}</span> {model.token.symbol}
+          </span>
+          <span className="chip" data-tone={deadline && deadline.getTime() - (now?.getTime() ?? 0) < 600_000 ? 'chilli' : undefined}>
+            <span className="label">By</span> {model.order.deadlineLocal}
+            {deadline && now ? <span className="num">, in {countdown(deadline.getTime() - now.getTime())}</span> : null}
+          </span>
+        </div>
         <label htmlFor="ask-text" className="small muted">
           Ask your agents
         </label>

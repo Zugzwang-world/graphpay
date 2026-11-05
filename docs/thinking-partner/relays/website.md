@@ -12,6 +12,8 @@ What does not work yet, on purpose: anything that needs another track's code. Th
 
 What the founder must do: nothing now. The Coordinator needs `DEMO_PASSCODE` set in Vercel (at least 24 characters); until then every spending route refuses ("spending is off").
 
+**Update (01:31 IST):** the shell is merged and live; the next PR adds the customer request card (budget chip, deadline countdown to 20:00 in the city's time zone), the spending pass states (Active, Used up, Expired, Paused, Revoked; a stopped agent never reads Active), and merchant in-page notifications. Pure helpers `lib/deadline.ts` and `lib/pass.ts` have tests (71 in `apps/web`).
+
 ## Technical
 
 - **Pages** (`apps/web/app`): `/`, `/customer`, `/merchant`, `/explain`, `/explain/[explainId]`, `/order/[orderId]`, `/race`, `/how`. Components in `apps/web/components`, pure code in `apps/web/lib`.

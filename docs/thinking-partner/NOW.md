@@ -54,10 +54,10 @@ Updated 01:20 IST. **Join is running: the mirror (M11) is being built on test do
 
 ## website
 
-Updated 01:30 IST, Fri 6 Nov (T5 Web). **The website shell is built and in a PR (`web/shell`).** The stage (customer phone, explainer, merchant phone), the phone-only routes, race mode and the how-it-works page render from the story config; every spending route is passcode-gated server-side.
-- Running: nothing long. Waiting on the other tracks' routes; each panel says which milestone it waits for.
-- Blockers: none. Check: this Mac's network to GitHub and some RPCs was flaky around 00:50.
-- Next: wire each panel as its route merges (M4 shop, M6 pause, M7b GraphQL and explain, M9 race, M10 agents, M11 mirror); then M16 (checkout kit, demo store); then Friday items 8 to 13.
+Updated 01:31 IST, Fri 6 Nov (T5 Web). **The website shell is on `main` and live** at https://graphpay-event.vercel.app (the top-bar chips already show the three chains' real latest blocks). Now adding the phone views' Friday items that need no other track: the request card (budget chip, deadline countdown), the spending pass states, merchant notifications.
+- Running: nothing long. Panels that need other tracks' routes say which milestone they wait for (M4, M6, M7b, M9, M10, M11).
+- Blockers: none. The venue network to GitHub is slow (retries needed).
+- Next: wire each panel as its route merges; M16 once M4 lands; Friday items 8 to 13.
 
 ## records
 

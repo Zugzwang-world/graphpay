@@ -44,6 +44,8 @@ export interface CustomerState {
   agent: { ens: string; status: AgentStatus; epoch: number };
   capMicro: Micro;
   spentTodayMicro: Micro;
+  // The AgentPolicy's expiry (ISO), when the route reports one.
+  policyExpiresAt?: string | null;
   lastOrder: OrderSummary | null;
   subscription: SubscriptionSummary | null;
 }

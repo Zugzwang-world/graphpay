@@ -976,3 +976,43 @@ pre.query {
   justify-content: flex-end;
   gap: 8px;
 }
+
+.request-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.toasts {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 6px;
+}
+
+.toasts li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border-radius: 10px;
+  background: var(--surface);
+  border: 1px solid var(--varq-15);
+  font-size: 13.5px;
+}
+
+.toasts li[data-tone='chilli'] {
+  border-color: color-mix(in srgb, var(--chilli) 55%, transparent);
+  color: var(--chilli);
+}
+
+.toasts li[data-tone='pista'] {
+  border-color: color-mix(in srgb, var(--pista) 55%, transparent);
+}
+
+.toasts .btn {
+  margin-left: auto;
+  min-height: 28px;
+  padding: 0 8px;
+}
