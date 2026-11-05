@@ -72,6 +72,10 @@ Updated 03:45 IST, Fri 6 Nov (T5 Web). **On `main`:** the shell, the phone views
 - Blockers: none. Customer panels wait for M4 and M6, the race for M9, the agent run for M12.
 - Next: M16 once M4 lands; Friday item 9 (Open toggle) once T3's `shop_open` lands. Fresh start file: `docs/sessions/website/resume.md`.
 
+## agentpay
+
+Started 03:25 IST (T6 AgentPay SDK: `packages/agentpay`, `examples/agentpay-*`, the Whitechain lane; it uses T1's and T4's public exports). T6 owns this section.
+
 ## records
 
 Updated 03:20 IST. **Checked every session after the 02:14–03:01 sleep: none is hung.**
