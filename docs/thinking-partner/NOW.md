@@ -7,7 +7,7 @@ Updated 01:20 IST, Fri 6 Nov (Coordinator)
 Updated 01:20 IST, Fri 6 Nov. **Wave 1 is running.** T1–T5 and Join started at about 00:44 IST; the Coordinator took over at 00:46 (10-minute checks, merges, records). No track has opened a PR yet; T3 is building M7a, the first gate (T1's recorder, Join's mirror and the small city wait for it).
 
 New since the handover:
-- **Usage risk:** the weekly plan limit is 70% used and resets Fri 21:30 IST; all seven sessions run Opus 5.5 at max effort, not the planned mix. A founder decision, `OPEN.md` "Founder now" 1.
+- **Usage risk:** the weekly plan limit is 71% used and resets Fri 21:30 IST. All seven sessions started on Opus 5.5 at max effort; at 01:22 the Coordinator switched the six track sessions to the planned mix (from their next turn). The Coordinator's own setting and extra usage are the founder's (`OPEN.md` "Founder now" 1).
 - **The graph layer becomes a developer SDK** (ADR-0057): T3 keeps `@graphpay/arkiv-graph` generic now, GraphPay's payment model sits in `packages/money-graph`, and on Friday after acceptance the package goes to npm (Friday item 18).
 - M0's background tasks: none failed (11 agents and 3 background commands, all completed; `relays/records.md`).
 

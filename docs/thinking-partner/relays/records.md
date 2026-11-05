@@ -8,7 +8,7 @@ M0 closed at 23:55 IST (PRs #1–#7). The six wave-1 sessions (T1 Payments, T2 I
 
 | what | where | why |
 |---|---|---|
-| Decide on session models: reply "switch" | this chat with the Coordinator | The weekly plan limit is 70% used and resets Fri 21:30 IST, and every session runs Opus 5.5 at max effort. If the limit runs out, every session stops until after the freeze |
+| Set the Coordinator to Opus 5.5 at high, and decide on extra usage with a cap | the Coordinator's model menu; Claude account settings | The weekly plan limit is 71% used and resets Fri 21:30 IST. If it runs out, every session stops until after the freeze. The six track sessions were switched to the planned models at 01:22 |
 | Send the disclosure, if not sent yet | Hacker Dashboard; text in `docs/plan/DISCLOSURE_MESSAGE.md` | The rules require it |
 | Send the story brief | the Coordinator, by 08:30 (at the latest 13:00) | Rehearsal 1, and the large city that has to start seeding by 14:00 |
 | Keep the laptop on power, lid open, app open | — | Every session runs on this Mac |
@@ -44,12 +44,12 @@ M0 closed at 23:55 IST (PRs #1–#7). The six wave-1 sessions (T1 Payments, T2 I
 
 | question | recommendation |
 |---|---|
-| Should the sessions switch to the planned models and efforts to protect the weekly limit? | Yes. The work runs on budget, not on effort, and a stop before the freeze would cost far more than slower turns |
+| Is the planned model mix enough to last until the reset at Fri 21:30, or should extra usage be on? | Extra usage with a cap. The switch cuts the burn, but a stop before the freeze would cost far more than the overage |
 | Is it fine that `@graphpay/arkiv-graph` replaces the pack's `arkiv-graphql` package? | Yes. One package is clearer for reach, and the GraphiQL URL and the MCP server stay |
 
 ## Next
 
-Ticks every 10 minutes. On M7a's merge, tell T1 and Join the import path and T3 to seed size S. Fix the prompt-log hook (with a reviewer pass, since it masks secrets). Measure the usage burn each tick. Records again about 02:45.
+Ticks every 10 minutes. Restart each track session with "continue" when it goes idle on its new setting. On M7a's merge, tell T1 and Join the import path and T3 to seed size S. Fix the prompt-log hook (with a reviewer pass, since it masks secrets). Measure the usage burn each tick. Records again about 02:45.
 
 ## Technical notes
 

@@ -48,3 +48,10 @@ Cause: slow venue Wi-Fi: name lookups took 3–7 s, the TLS handshake about 6 s,
 Fix: retry the same call a few times with a pause; every call has gone through within three tries so far.
 Prevention: the ticks retry GitHub calls before reporting a failure; a session whose push fails retries rather than stopping.
 
+### P-records-3: the event sessions started on the wrong model and effort
+When: 2026-11-06 01:08 IST · Activity: records · Cost: about 25 minutes of every session at max effort; the weekly plan limit went from 70% to 71%
+Symptom: all seven sessions reported Opus 5.5 at max effort, while the plan has Sonnet 5.5 at high for T2, T4 and T5, Opus 5.5 at xhigh for T1, T3 and Join, and Opus 5.5 at high for the Coordinator; the weekly limit was at 70% with 20 hours to its reset.
+Cause: a new session takes the model and effort shown in the picker (the last ones used, M0's Opus 5.5 at max); the start lines carry no model.
+Fix: at 01:22 the Coordinator set each track session to the plan (`set_session_model`, `set_session_effort`; from each session's next turn) and asked each to end its turn at a natural stop so the change applies.
+Prevention: the Coordinator checks every session's model and effort and the plan usage at each tick; a new session's start step sets the picker before the start line is pasted.
+
