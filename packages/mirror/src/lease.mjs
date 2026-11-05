@@ -40,6 +40,23 @@ export function writeClaim(claim, path = defaultClaimPath()) {
   writeFileSync(path, `${JSON.stringify(claim)}\n`, { mode: 0o600 });
 }
 
+// Takes the claim file exclusively: refused while another live process holds it; a
+// claim left by an exited process is replaced.
+export function takeClaim(claim, path = defaultClaimPath()) {
+  const text = `${JSON.stringify(claim)}\n`;
+  try {
+    writeFileSync(path, text, { flag: 'wx', mode: 0o600 });
+  } catch (err) {
+    if (err.code !== 'EEXIST') throw err;
+    const held = readClaim(path);
+    if (held && held.instance !== claim.instance && held.pid !== process.pid && pidAlive(held.pid)) {
+      throw Object.assign(new Error(`workers: another workers process (pid ${held.pid}) holds ${path}`), { code: 'LEASE_HELD' });
+    }
+    unlinkSync(path);
+    writeFileSync(path, text, { flag: 'wx', mode: 0o600 });
+  }
+}
+
 export function dropClaim(instance, path = defaultClaimPath()) {
   const c = readClaim(path);
   if (c?.instance === instance) unlinkSync(path);

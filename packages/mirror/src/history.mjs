@@ -176,11 +176,12 @@ export function historyEdge(e, actors) {
 // by bytes, every transaction carrying the checkpoint of its own last event), resuming
 // from the stream's checkpoint. `run` serialises each batch with the other writes of
 // this wallet (the mirror's lock).
-export async function writeHistory({ ledger, plan, actors, run = (fn) => fn(), log = () => {} }) {
+export async function writeHistory({ ledger, plan, actors, run = (fn) => fn(), stopped = () => false, log = () => {} }) {
   const checkpointOf = (edge) => ({ block: edge.seq, logIndex: 0, events: edge.seq + 1 });
   const start = (await ledger.readCheckpoint(plan.stream))?.block ?? -1;
   let written = 0;
   for (const batch of historyBatches(plan.events.filter((e) => e.seq > start))) {
+    if (stopped()) return { written, total: plan.events.length, done: false };
     written += await run(async () => {
       const nonce = await ledger.confirmedNonce();
       const done = (await ledger.readCheckpoint(plan.stream))?.block ?? -1;
@@ -191,5 +192,5 @@ export async function writeHistory({ ledger, plan, actors, run = (fn) => fn(), l
     });
     log(`history: ${start + 1 + written} of ${plan.events.length} events`);
   }
-  return { written, total: plan.events.length };
+  return { written, total: plan.events.length, done: true };
 }

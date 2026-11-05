@@ -51,6 +51,7 @@ export class Mirror {
     this.cursor = null;
     this.scannedTo = deployBlock - 1;
     this.head = null;
+    this.between = null;
     this.stats = { written: 0, standing: 0, skippedCheckpoint: 0, skippedRef: 0, none: 0, unknownLogs: 0, retries: 0, lastWriteAt: null };
   }
 
@@ -112,7 +113,11 @@ export class Mirror {
       for (const r of ranges(this.scannedTo + 1, safe)) {
         const { events, unknown } = await this.#source.events(r.from, r.to);
         this.stats.unknownLogs += unknown;
-        for (const e of events) await this.#process(e);
+        for (const e of events) {
+          await this.#process(e);
+          // The workers' heartbeat, due or not, between events of a long catch-up.
+          if (this.between) await this.between();
+        }
         this.scannedTo = r.to;
       }
       await this.#retryParked();

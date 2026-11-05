@@ -1,35 +1,34 @@
 # Mirror working notes (Join, M11)
 
-The interfaces `packages/mirror` expects from the other tracks, so the wiring is short when each gate lands. Owners: T3 (Arkiv), T1 (payments), T2 (identity). Updated 01:20 IST, Fri 6 Nov.
+Updated 02:05 IST, Fri 6 Nov.
 
-## From T3 (M7a; the Coordinator says the import is `@graphpay/money-graph`)
+## Wiring (done)
 
-The mirror talks to Arkiv through a small port (`Ledger` in `packages/mirror/index.d.ts`); the adapter over M7a's writer is written when it merges.
+- Arkiv: `packages/mirror/src/arkiv.mjs` implements the mirror's ledger port over `@graphpay/money-graph` (M7a, PR 14). It runs three ledgers on W_LEDGER's rows: the chain stream `chain:1874:<checkout>`, the `recorder` stream and the history stream. A write through one marks the others stale, and they re-read from Arkiv before their next write. The live writes pin the nonce read before the anchors (`NONCE_TAKEN` otherwise). The history is written in parts sized to one unsplit transaction, so each part lands whole with its checkpoint.
+- Chain: the ABI and `FAIL_REASON` come from `@graphpay/contracts` (M1, PR 12); `nodeOfWallet` attributes recorder refusals.
+- Process: `src/workers.mjs` (lease, heartbeat, history, loops) and `src/main.mjs` (`pnpm workers`).
 
-| port call | needs from the writer | why |
-|---|---|---|
-| `confirmedNonce()`, then `writeEdge(edge, { stream, checkpoint, nonce })` | a send **at a nonce the caller read before the anchors**, refusing (code `NONCE_TAKEN` or equivalent) if it is taken | §2: read the confirmed nonce before the anchors; a stale batch must not land at the next nonce |
-| `writeEdge` | one batch: the readonly edge (ADR-0034), the tally rows of both ends (`all` and the day), the link, the stream checkpoint; split by bytes only for the history | D1 |
-| `edge.counted = false` | the planner skips the tally for a `DUPLICATE` fail | §3 tally rules |
-| `writeStanding({ node, epoch, status, capMicro })` | a node-row patch plus the checkpoint, same epoch only | `AgentPolicySet` |
-| `registerActors(actors)` | node-row creates (30-day life; synthetic history buyers 14 days) | bootstrap, recognised disposables |
-| `hasRef(ref)`, `readCheckpoint(stream)`, `readActors()` | W_LEDGER-owned reads | anchors, adopt |
-| `readRecorderEdges({ sinceTs, untilTs })` | W_SYNC edges by `ts` (indexed, per the M7 amendment §9) | recorder fold |
-| `foldRecorder(edges, { stream, checkpoint, nonce })` | **tally patches for existing edges, no edge create** | refusals fold into `fails` |
-| heartbeat row | a `heartbeat` entity, owner W_LEDGER, mutable: `instance` str, `state` str, `cursor_block` u64, `cursor_log` u64, `head_block` u64, `lag_blocks` u64, `updated_ts` u64, 1-day life, extended | the lease and the website's lag chip; T3 lists it in `arkiv/schema.md` |
+## Still needed
 
-## From T1 (M1, M2, M3)
+- T1 (M2): `whitechain.contracts.checkout` in the config with `address` and `deployBlock` (or `GRAPHPAY_CONTRACT` and `DEPLOY_BLOCK` in `.env`).
+- T2 (M5): the epochs by name. Fresh names are epoch 0; a `BOOTSTRAP_FILE` JSON `{ "epochs": { "<ens>": <n> } }` overrides. Then the M6 watcher hosted in this process.
+- T1 (M3): the recorder's refusal edge carries the signing wallet (`payload.payer`, or the ref `att:<orderId>:<wallet>:<n>`).
 
-- The checkout ABI, exported from `packages/contracts` (the mirror decodes with it; the event list in `planning/SPEC/PAYMENTS_WHITECHAIN.md` §3.3).
-- The checkout address and its **deploy block** in `whitechain.contracts` of the config file (`DEPLOY_BLOCK` otherwise).
-- A view `nodeOfWallet(address)` (in the spec) for recorder attribution.
-- The recorder's refusal edge carries the signing wallet: `payload.payer`, or the ref `att:<orderId>:<wallet>:<n>`.
+## Running it (founder's Mac)
 
-## From T2 (M5, M6)
+```bash
+fnm exec --using=22.23.4 pnpm workers
+```
 
-- `docs/sessions/identity/namespace.md`: epoch per name (fresh names are epoch 0) for the bootstrap.
-- The watcher as a library this process starts and stops; its node writes go through the mirror's lock (single W_LEDGER writer).
+- The process holds `caffeinate -ims -w <pid>`. Check it with `pmset -g assertions | grep caffeinate`.
+- It refuses to start while another instance's heartbeat is under 90 s old. A clean stop (Ctrl-C) frees the lease at once.
+- Local endpoints: `curl -s 127.0.0.1:8788/status`, `curl -s -X POST 127.0.0.1:8788/sync`.
+- The first start registers the cast and writes the 5% history (1,258 events, about 100 transactions, 10–15 min). Later starts resume from the checkpoints.
 
-## Decisions taken here
+## D15 (resume after a drop)
 
-See `docs/thinking-partner/relays/integration.md` ("Where I chose"): the history's 12 synthetic buyers and its day spread; the checkpoint held before the earliest parked event; standing replays; the recorder's settle window (120 s).
+1. With the process running, record `/status` (checkpoint, cursor).
+2. Cut the network for 2 minutes (Wi-Fi off), or `kill -STOP <pid>`, then restore it (`kill -CONT <pid>`).
+3. Make a payment during or after the cut. `/status` shows the poll errors, then the catch-up.
+4. Force a restart (Ctrl-C, start again).
+5. Check every event in the window: `count(edge where ref = id) = 1`, and the cursor continues from the last processed block.

@@ -37,6 +37,7 @@ One line per PR: time (IST) · activity · result · PR link. Append under your 
 ## integration
 
 - 01:20 IST · integration · opened: the mirror core on test doubles (decoding, mapping, parking, lease, recorder fold, 5% history, endpoints; 22 tests) · https://github.com/Zugzwang-world/graphpay/pull/8
+- 02:05 IST · integration · opened: the mirror on M7a's writer, the workers process, `pnpm workers` (ArkivSim with the real planner; 29 tests; reviewer: 2 blocking and 7 should-fix items, all fixed) · PR link to follow
 
 ## website
 

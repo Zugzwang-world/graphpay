@@ -42,6 +42,9 @@ const address = (checkout.address ?? env.GRAPHPAY_CONTRACT ?? '').toLowerCase();
 const deployBlock = Number(checkout.deployBlock ?? env.DEPLOY_BLOCK);
 if (!/^0x[0-9a-f]{40}$/.test(address)) throw new Error('workers: no checkout address (config whitechain.contracts.checkout or GRAPHPAY_CONTRACT)');
 if (!Number.isInteger(deployBlock) || deployBlock <= 0) throw new Error('workers: no deploy block (config whitechain.contracts.checkout or DEPLOY_BLOCK)');
+if (config.whitechain.labDoNotReuse.some((a) => a.toLowerCase() === address)) throw new Error('workers: refused, that checkout is a lab deployment');
+const confirmations = Number(env.CONFIRMATIONS ?? 2);
+if (!Number.isInteger(confirmations) || confirmations < 1) throw new Error('workers: CONFIRMATIONS must be a whole number of at least 1');
 
 const whitechain = await clientsFor('whitechain', env);
 log(`whitechain: ${whitechain.rpcLabel} (chain ${whitechain.chain.id})`);
@@ -52,7 +55,7 @@ const stream = `chain:${whitechain.chain.id}:${address}`;
 const ledger = arkivLedger({ arkiv, stream, log });
 const actors = new Actors();
 const orders = new OrderBook({ load: (id) => ledger.loadOrder(id), loadSub: (id) => ledger.loadSub(id) });
-const source = chainSource({ client: whitechain.publicClient, address, abi: checkoutAbi, chainId: whitechain.chain.id, confirmations: Number(env.CONFIRMATIONS ?? 2) });
+const source = chainSource({ client: whitechain.publicClient, address, abi: checkoutAbi, chainId: whitechain.chain.id, confirmations });
 const mirror = new Mirror({
   source,
   ledger,
@@ -82,17 +85,12 @@ const workers = createWorkers({
   bootstrap: castActors({ epochs }),
   history: scale > 0 ? { paramsFor: (endDay) => historyParams({ scale, endDay }) } : null,
   bindings,
+  onLost: () => process.exit(1),
   log,
   redact,
 });
 
-const awake = keepAwake();
-log(`keep-awake: ${awake.why}`);
-await workers.start();
-const port = Number(env.MIRROR_PORT ?? DEFAULT_PORT);
-await startServer(workers, { port, log, redact });
-log(`workers: running as instance ${workers.state.instance}; http://127.0.0.1:${port}/status`);
-
+// Installed before the start: a Ctrl-C during the history still writes the "stopped" beat.
 let stopping = false;
 for (const signal of ['SIGINT', 'SIGTERM']) {
   process.on(signal, async () => {
@@ -103,3 +101,10 @@ for (const signal of ['SIGINT', 'SIGTERM']) {
     process.exit(0);
   });
 }
+
+const awake = keepAwake();
+log(`keep-awake: ${awake.why}`);
+await workers.start();
+const port = Number(env.MIRROR_PORT ?? DEFAULT_PORT);
+await startServer(workers, { port, log, redact });
+log(`workers: running as instance ${workers.state.instance}; http://127.0.0.1:${port}/status`);

@@ -18,7 +18,8 @@ import { BLOCK_DONE, comparePosition } from './ids.mjs';
 import { RECORDER_STREAM } from './recorder.mjs';
 
 const num = (v) => (v === undefined || v === null ? undefined : Number(v));
-// One unsplit transaction, with room for the encoding's overhead.
+// One unsplit transaction, with room for the encoding's overhead (the writer refuses to
+// cut a batch sent at a fixed nonce).
 const TX_TARGET_BYTES = Math.floor(LIMITS.splitBytes * 0.85);
 const REGISTER_CHUNK = 12;
 
@@ -105,6 +106,9 @@ export function arkivLedger({ arkiv, stream, recorderOwner, log = () => {} }) {
     await fresh(l);
     try {
       return await fn(l);
+    } catch (err) {
+      stale.add(l);
+      throw err;
     } finally {
       // Whatever landed, the other streams' copies of the shared rows are now old; a
       // failed write left this ledger re-read (or unreadable, then stale).
@@ -119,6 +123,16 @@ export function arkivLedger({ arkiv, stream, recorderOwner, log = () => {} }) {
   };
 
   const kindOf = (state, node, epoch) => state.nodes.get(`${node}:${BigInt(epoch ?? 0)}`)?.values?.kind;
+
+  async function readCheckpoint(s) {
+    const row = await findOne(pc, ENTITIES.checkpoint, { owner, where: [eq('stream', str(s))] });
+    const l = byStream.get(s);
+    const known = l?.state?.checkpoints.get(s)?.values;
+    // Someone moved the anchor since this ledger read its rows: re-read before planning.
+    if (l && (row ? !known || known.last_event !== row.last_event || BigInt(known.events) !== BigInt(row.events) : Boolean(known))) stale.add(l);
+    return row ? { block: num(row.block), logIndex: num(row.log_index), events: num(row.events), lastEvent: row.last_event } : null;
+  }
+
 
   return {
     owner,
@@ -136,14 +150,7 @@ export function arkivLedger({ arkiv, stream, recorderOwner, log = () => {} }) {
       return name;
     },
 
-    async readCheckpoint(s) {
-      const row = await findOne(pc, ENTITIES.checkpoint, { owner, where: [eq('stream', str(s))] });
-      const l = byStream.get(s);
-      const known = l?.state?.checkpoints.get(s)?.values;
-      // Someone moved the anchor since this ledger read its rows: re-read before planning.
-      if (l && (row ? !known || known.last_event !== row.last_event || BigInt(known.events) !== BigInt(row.events) : Boolean(known))) stale.add(l);
-      return row ? { block: num(row.block), logIndex: num(row.log_index), events: num(row.events), lastEvent: row.last_event } : null;
-    },
+    readCheckpoint,
 
     hasRef: (ref) => live.edgeExists(ref),
 
@@ -189,7 +196,8 @@ export function arkivLedger({ arkiv, stream, recorderOwner, log = () => {} }) {
           const first = creates[0].values;
           const ours = async ([k]) => {
             const e = await pc.getEntity(k);
-            return e?.attributes?.node?.value?.toLowerCase() === first.node && e?.attributes?.ens?.value === first.ens;
+            const a = e?.$attributes ?? e?.attributes;
+            return a?.node?.value?.toLowerCase() === first.node && a?.ens?.value === first.ens;
           };
           await arkiv.writer.send({ creates }, { nonce: n ?? (await live.confirmedNonce()), verifyRecovered: ours });
           n = null;
@@ -206,45 +214,62 @@ export function arkivLedger({ arkiv, stream, recorderOwner, log = () => {} }) {
 
     // Refusals of one second, folded in one transaction: positions (ts, 0), (ts, 1), …
     // and the last (ts, whole second done).
+    // A refusal naming a node with no node row (never mirrored, another epoch) is
+    // skipped and reported, never allowed to block the later ones.
     foldRecorder(edges, { nonce }) {
-      return writing(recorder, (l) => {
-        const events = edges.map((e, i) => {
-          const fromKind = kindOf(l.state, e.fromNode, e.fromEpoch);
-          const toKind = kindOf(l.state, e.toNode, e.toEpoch);
-          if (!fromKind || !toKind) throw new Error(`mirror: refusal ${e.ref} names a node with no node row`);
-          const position = { block: e.ts, logIndex: i === edges.length - 1 ? BLOCK_DONE : i };
-          return ledgerEvent({ ...e, fromKind, toKind, counted: true }, position);
-        });
-        return l.foldRecorder(events, { nonce });
+      return writing(recorder, async (l) => {
+        const known = edges
+          .map((e) => ({ ...e, fromKind: kindOf(l.state, e.fromNode, e.fromEpoch), toKind: kindOf(l.state, e.toNode, e.toEpoch), counted: true }))
+          .filter((e) => e.fromKind && e.toKind);
+        const skipped = edges.filter((e) => !known.some((k) => k.ref === e.ref)).map((e) => e.ref);
+        if (known.length === 0) return { noNode: skipped, applied: [] };
+        const events = known.map((e, i) => ledgerEvent(e, { block: e.ts, logIndex: i === known.length - 1 ? BLOCK_DONE : i }));
+        const out = await l.foldRecorder(events, { nonce });
+        return { ...out, noNode: skipped };
       });
     },
 
-    // The history: each part sized to plan into one unsplit transaction, so a part lands
-    // whole with its checkpoint or not at all.
+    // The history in parts that each plan into one unsplit transaction, sent at a
+    // nonce read before its anchor and checked by its checkpoint if found by nonce, so
+    // a part lands whole with its checkpoint or not at all. A shared tally or link row
+    // that the history touches is labelled synthetic (it then holds synthetic counts).
     writeEdges(edges, { stream: s, checkpointOf }) {
       if (!history || s !== historyStream) throw new Error(`mirror: no history ledger for stream ${s}`);
+      const labels = { synthetic: true, dataset: historyDataset };
+      const expiration = ExpirationTime.fromDays(LIFETIME.syntheticDays);
+      const planOf = (l, part) => {
+        const planned = graph.plan(
+          part.map((e) => toGraphEvent(e, labels)),
+          l.state,
+          { stream: s, labels },
+        );
+        const real = new Set();
+        for (const group of [l.state.totals, l.state.links]) for (const row of group.values()) if (row.values.synthetic === false) real.add(row.key);
+        const patches = planned.patches.map((p) => (real.has(p.key) && p.def !== ENTITIES.checkpoint ? { ...p, values: { ...p.values, synthetic: true } } : p));
+        return { planned, batch: { creates: planned.creates.map((c) => ({ ...c, expiration })), patches } };
+      };
+      const size = (batch) => arkiv.writer.operations(batch).reduce((n, op) => n + operationBytes(op), 0);
+      const events = edges.map((e) => ledgerEvent(e, checkpointOf(e)));
       return writing(history, async (l) => {
-        const labels = { synthetic: true, dataset: historyDataset };
-        const expiration = ExpirationTime.fromDays(LIFETIME.syntheticDays);
-        const fits = (part) => {
-          const planned = graph.plan(
-            part.map((e) => toGraphEvent(e, labels)),
-            l.state,
-            { stream: s, labels },
-          );
-          const ops = arkiv.writer.operations({ creates: planned.creates.map((c) => ({ ...c, expiration })), patches: planned.patches });
-          return ops.reduce((n, op) => n + operationBytes(op), 0) <= TX_TARGET_BYTES;
-        };
-        const events = edges.map((e) => ledgerEvent(e, checkpointOf(e)));
         for (let i = 0; i < events.length; ) {
+          const nonce = await live.confirmedNonce();
+          await readCheckpoint(s);
+          await fresh(l);
           let lo = 1;
           let hi = events.length - i;
           while (lo < hi) {
             const mid = Math.ceil((lo + hi) / 2);
-            if (fits(events.slice(i, i + mid))) lo = mid;
+            if (size(planOf(l, events.slice(i, i + mid)).batch) <= TX_TARGET_BYTES) lo = mid;
             else hi = mid - 1;
           }
-          await l.applyBatch(events.slice(i, i + lo));
+          const part = events.slice(i, i + lo);
+          const { planned, batch } = planOf(l, part);
+          if (planned.applied.length > 0) {
+            const last = planned.applied.at(-1);
+            const ours = async () => (await findOne(pc, ENTITIES.checkpoint, { owner, where: [eq('stream', str(s))] }))?.last_event === last;
+            const result = await arkiv.writer.send(batch, { nonce, verifyRecovered: ours });
+            planned.commit(result.createdKeys);
+          }
           i += lo;
         }
       });
@@ -277,6 +302,7 @@ export function arkivLedger({ arkiv, stream, recorderOwner, log = () => {} }) {
         state: r.state,
         updatedTs: num(r.updated_ts),
         updatedBlock: typeof r.$updatedAt === 'number' || typeof r.$updatedAt === 'bigint' ? Number(r.$updatedAt) : undefined,
+        createdBlock: typeof r.$createdAt === 'number' || typeof r.$createdAt === 'bigint' ? Number(r.$createdAt) : undefined,
         cursorBlock: num(r.cursor_block),
         lagBlocks: num(r.lag_blocks),
       }));

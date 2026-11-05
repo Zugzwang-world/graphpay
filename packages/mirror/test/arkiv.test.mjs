@@ -145,3 +145,47 @@ test('ArkivSim: a second workers process is refused while the first one\'s heart
   assert.equal(third.state.running, true, 'a clean stop frees the lease');
   await third.stop();
 });
+
+test('ArkivSim: the instance whose heartbeat row came first keeps the lease; the later one stops itself', async () => {
+  const { ledgerConn } = await sim();
+  const t = lifecycle();
+  const dir = mkdtempSync(join(tmpdir(), 'graphpay-race-'));
+  const clock = blockTime(200) * 1000;
+  const make = (claim, instance) => {
+    const a = mirrorOn(ledgerConn, t.events);
+    return { a, w: createWorkers({ mirror: a.mirror, ledger: a.ledger, actors: a.actors, bootstrap: t.c.actors, claimPath: join(dir, claim), instance, now: () => clock, pollMs: 60_000, beatMs: 60_000, foldMs: 60_000 }) };
+  };
+  const first = make('a.json', 'ffff');
+  await first.w.start();
+  // The second one read the heartbeats before the first's row existed (it passes the
+  // lease), and has the smaller id: order of creation decides, not the id.
+  const second = make('b.json', '0000');
+  const read = second.a.ledger.readHeartbeats;
+  let calls = 0;
+  second.a.ledger.readHeartbeats = async () => (calls++ === 0 ? [] : read());
+  await assert.rejects(second.w.start(), { code: 'LEASE_HELD' });
+  assert.equal(second.w.state.alive, false);
+  await first.w.beat();
+  assert.equal(first.w.state.alive, true, 'the first keeps running');
+  await first.w.stop();
+});
+
+test('ArkivSim: a long catch-up still beats between events', async () => {
+  const { ledgerConn } = await sim();
+  const t = lifecycle();
+  const dir = mkdtempSync(join(tmpdir(), 'graphpay-beat-'));
+  let clock = blockTime(200) * 1000;
+  const a = mirrorOn(ledgerConn, t.events);
+  const w = createWorkers({ mirror: a.mirror, ledger: a.ledger, actors: a.actors, bootstrap: t.c.actors, claimPath: join(dir, 'c.json'), now: () => clock, pollMs: 600_000, beatMs: 30_000, foldMs: 600_000 });
+  // Each event of the catch-up takes 40 s of clock: every one is a due beat.
+  assert.equal(a.mirror.between, null);
+  const ledgerWrite = a.ledger.writeEdge;
+  a.ledger.writeEdge = async (...args) => {
+    clock += 40_000;
+    return ledgerWrite(...args);
+  };
+  await w.start();
+  const beats = (await a.ledger.readHeartbeats()).find((r) => r.instance === w.state.instance);
+  assert.ok(beats.updatedTs >= Math.floor(clock / 1000) - 40, 'the heartbeat followed the catch-up');
+  await w.stop();
+});
