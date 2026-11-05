@@ -78,6 +78,10 @@ Agents (T4) and Join add one row per full errand run, so the presets can be cali
 
 ## arkiv
 
+- **What:** W_DIRECTORY holds about 0.2 tGLM. **Where:** Rabdi. **Why:** M8 lists every synthetic S shop from it (ADR-0043); M7a's probe used about 0.0002. **Recommendation:** the Coordinator tops it up to 0.5 from FUNDER before M8 writes the synthetic directory (planned in `docs/technical/WALLETS.md` §3). Not needed for M7a.
+- **What:** the SDK's generic polish for the npm release. **Where:** `packages/arkiv-graph`. **Why:** tonight's API is generic and the boundary test holds, but the engine (M7b) is not in it yet, and there is no README, API reference or example. **Recommendation:** Friday milestone (item 18), as ADR-0057 says.
+- **What:** the explorer's entity page pattern. **Where:** `arkiv/schema.md`. **Why:** only the transaction pattern is verified. **Recommendation:** T3 checks it during M7b; no founder action.
+
 ## agents
 
 ## integration

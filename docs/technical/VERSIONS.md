@@ -37,3 +37,15 @@ Every version the event code pins, with how it was checked. Each track adds the 
 ## Versions the tracks install (re-check with `npm view` before pinning)
 
 The M0 verifier's snapshot of every package in `planning/FACTS.md` §5 is in `docs/technical/FACTS.md` (Results). Changes since the pack: x402 2.30.0 is `latest` (move all four `@x402/*` packages together or keep 2.29.0); `ai` 7.0.163, `@ai-sdk/anthropic` 4.0.97, `@ai-sdk/mcp` 2.0.91; graphql 16.15.0 is the newest 16.x (`latest` is 17.1.0; keep one major); sigma `latest` is 4.0.4 (3.0.3 is the newest 3.x). Each track adds its pins here under its own heading.
+
+## arkiv (T3, M7a, checked 2026-11-06 00:58 IST with `npm view`)
+
+| item | pinned | in | status |
+|---|---|---|---|
+| `@arkiv-network/sdk` | 1.0.1 (`latest`) | `packages/arkiv-graph`, `packages/money-graph` | verified |
+| viem | 2.57.16 (`latest`) | both | verified |
+| graphql | 16.14.2 (the pack's pin; 16.15.0 is the newest 16.x, `latest` is 17.1.0) | `packages/money-graph` (M7b) | verified; one major in the repo |
+| graphql-yoga | 5.24.6 (newest 5.x; `latest` 6.0.1 avoided) | `packages/money-graph` (M7b) | verified |
+| dataloader | 2.2.3 (`latest`) | `packages/money-graph` (M7b) | verified |
+| `@modelcontextprotocol/sdk` | 1.32.2 (`latest`, 2026-10-23) | `packages/money-graph` (M7b) | verified (the pack had from-research) |
+| zod | 4.6.7 (`latest`; the MCP SDK accepts ^3.25 or ^4) | `packages/money-graph` (M7b) | verified |

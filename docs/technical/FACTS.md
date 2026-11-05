@@ -270,3 +270,18 @@ offset(offset: number): this;
 ## Track rows
 
 Each track adds its own rows here (under `### <activity>`), with source, time and status.
+
+### arkiv (T3, M7a, 2026-11-06)
+
+| fact | value | source | checked (IST) | status | note |
+|---|---|---|---|---|---|
+| Keyed Rabdi rate limit | `ratelimit: limit=5000`, lowest remaining seen 4,916 | header read by the metered transport (smoke and probe runs) | 01:29 | verified-on-chain | no 429, every response 200 |
+| Predicate budget | 64 leaves (project, type, owner and 61 OR terms) accepted; 65 refused with JSON-RPC `-32004` | `pnpm -s --filter @graphpay/money-graph smoke` | 01:24 | verified-on-chain | matches the pack |
+| Typed literals | `u64(20398n)` renders `day = u64(20398)`; a bare `20398n` renders `day = u256(20398)` | same smoke run (SDK 1.0.1 `render`) | 01:24 | verified | the bare bigint matches nothing on a u64 column |
+| First live probe event (W_LEDGER, 7 creates: edge, 4 tallies, link, checkpoint; 1-day rows) | 1,301,681 gas, block 261502, [0xe249…1dec](https://rabdi.explorer.arkiv.network/tx/0xe2499c099a2d0b61157a07678a6ac16111bd942e498e0f871351ac1b70361dec) | `pnpm -s --filter @graphpay/money-graph probe` | 01:29 | measured | lab 977,978 for 6 creates; ours adds the checkpoint and the merged columns |
+| Steady live event (1 create, 6 patches incl. link and checkpoint) | **377,893 gas** (lab 310,527; 333,320 with the link), block 261505, [0x247a…68d0](https://rabdi.explorer.arkiv.network/tx/0x247a78a3919c679d4c2565fab59eeec4a1a433534212ec9d4fe073dd0c8a68d0) | same probe run | 01:29 | measured | the reference for M11 and the seeding estimates |
+| Readonly edge | the probe edge `0x88b9…53d0` reads back `creationFlags { readonly: true, raw: 1 }`; a simulated `amount_micro` patch from W_LEDGER reverts; a simulated tally patch passes | probe run (eth_call, nothing sent) | 01:29 | verified-on-chain | acceptance D9's mechanics |
+| Indexed attributes as written | the probe edge's `attributeSchema`: `day, from_epoch, from_node, kind, project, ref, to_epoch, to_node, ts, type` indexed; `amount_micro, dataset, from_ens, schema_v, synthetic, to_ens` stored only; the node reports `key` columns as type `bytes32` | `smoke <edge key>` (raw `arkiv_query`, `attributeSchema`) | 01:30 | verified-on-chain | ADR-0041 |
+| i32 box query | a W_DIRECTORY probe shop at the persona's point (1-day row, [0xbf9a…09aa](https://rabdi.explorer.arkiv.network/tx/0xbf9ac8f4cf76f9e14d6b0d110b31e15d5f434ca934f2cdd3e13be887845309aa)) is found by a 1 km box in 1 call; a box 0.05° north finds none | probe run | 01:29 | verified-on-chain | ADR-0058 (no u64 fallback) |
+| SDK entity address | the SDK sends every operation to its fixed entity address (the config's `arkiv.entityContract`), whatever the caller passes | SDK 1.0.1 `src/utils/arkivTransactions.ts` | 01:10 | verified | ArkivSim and the writer take it from the config |
+| 256 KiB limit through the SDK | a batch over 256 KiB fails at `eth_estimateGas` as `EntityMutationError` "Execution error without revert data", with `HttpRequestError` status 413 three causes down | ArkivSim (same viem HTTP path) | 01:15 | verified (emulated) | the writer halves on it |

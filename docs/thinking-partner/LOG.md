@@ -26,6 +26,8 @@ One line per PR: time (IST) · activity · result · PR link. Append under your 
 
 ## arkiv
 
+- 01:40 IST · arkiv · M7a: generic `@graphpay/arkiv-graph` SDK and `@graphpay/money-graph` (model, safe writer, ArkivSim, ledger, recorder, quotes, directory); live probe on Rabdi · PR pending
+
 ## agents
 
 ## integration
