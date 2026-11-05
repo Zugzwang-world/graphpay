@@ -1,6 +1,6 @@
 # Join: resume after a fresh start
 
-Updated 03:36 IST, Fri 6 Nov. Read this first, then `docs/plan/sessions/join.md`.
+Updated 04:10 IST, Fri 6 Nov. Read this first, then `docs/plan/sessions/join.md`.
 
 ## Running now
 
@@ -9,14 +9,15 @@ Updated 03:36 IST, Fri 6 Nov. Read this first, then `docs/plan/sessions/join.md`
 
 ## Where M11 stands
 
-- Merged: PR 8 (core), PR 20 (the ledger and the workers). Open: this branch's PR (`join/m11-live`, M11 part 3): the replay tool, the acceptance reads, the integration package.
+- Merged: PR 8 (core), PR 20 (the ledger and the workers). PR 33 (M11 part 3) merged: the replay tool, the acceptance reads, the integration package.
 - Live: the cast and the history are on Rabdi; D2a passes; D15 has a first pass on an empty window (`docs/sessions/integration/mirror.md`).
 - To finish: on the first real payment (T1's M3 part B), run D1, D2b and D2c (workers stopped, see `mirror.md`), D3, D15 again with payments, and 30 minutes of lag under 30 s. Host T2's M6 watcher in `main.mjs` when it merges. Then the PR titled `… (M11 done)`.
 
 ## M12 (started)
 
 - `integration/src/mcp.mjs` (works against the hosted MCP) and `integration/src/hooks.mjs` (ENS payee and accepts, discovery, shop keys, quotes, payer wallets).
-- Missing: the shop surface (catalog, storefront, 402, settlement) and x402 signing from T1's M3 (`pay/facilitator`, WIP), and `ensCheck` from T2's M6 (`ens/gate`). Then `pnpm e2e:food` (`planning/PROMPTS/12-e2e-food.md`).
+- Done since: `integration/src/gate.mjs` (the gate on the signing path, `ensCheck`) and `integration/src/activity.mjs` (Friday item 3, batched presence and hand-offs). E7's kill step must use the ungated sign.
+- Missing: the shop surface (catalog, storefront, 402, settlement) and x402 signing from T1's M3 (`graphPayOrderClient` in `@graphpay/facilitator`); T2's watcher (M6 part 2) hosted in `packages/mirror/src/main.mjs`. Then `pnpm e2e:food` (`planning/PROMPTS/12-e2e-food.md`).
 
 ## Notes
 

@@ -74,6 +74,8 @@ export function RaceView({ questions, cityNote }: { questions: RaceQuestion[]; c
         if (event === 'call') {
           const call = JSON.parse(data) as RaceCall;
           set((prev) => ({ ...prev, reads: Math.max(prev.reads, call.call), bytes: prev.bytes + call.bytes }));
+        } else if (event === 'error') {
+          set((prev) => ({ ...prev, status: 'error', note: 'Arkiv could not be read just now. Try again.' }));
         } else if (event === 'answer') {
           const answer = JSON.parse(data) as RaceAnswer;
           set((prev) => ({ ...prev, status: 'done', answer, reads: answer.calls, bytes: answer.bytes }));
@@ -85,6 +87,7 @@ export function RaceView({ questions, cityNote }: { questions: RaceQuestion[]; c
     if (waiting) return set(() => ({ ...IDLE, status: 'waiting', note: `Not live yet: waiting for ${waiting}.` }));
     if (outcome.kind === 'refused' && outcome.status === 429) return set(() => ({ ...IDLE, status: 'error', note: 'Another race is running. Try again in a few seconds.' }));
     if (outcome.kind !== 'ended') set((prev) => ({ ...prev, status: 'error', note: 'The race stream stopped early.' }));
+    else set((prev) => (prev.status === 'running' ? { ...prev, status: 'error', note: 'The race stream stopped early.' } : prev));
   };
 
   const start = () => {

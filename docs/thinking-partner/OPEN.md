@@ -86,10 +86,10 @@ Agents (T4) and Join add one row per full errand run, so the presets can be cali
 - Nothing for the founder in M3 part A. Gas (fork receipts, 03:20 IST): a first payment with its approval costs 309,495 gas, about 0.0015 WBT at 5 gwei; FACILITATOR's 0.8 WBT covers hundreds of payments above the 0.3 WBT floor.
 
 ## identity
-- **Nothing needs the founder.** Defaults taken: non-paying agents publish a zero cap in ENS (ADR-0059; recommendation: keep). `agent-endpoint[mcp]` points at `https://graphpay-event.vercel.app/api/mcp` (B8's MCP call is next, now that T3's M7b is merged).
-- **For T1 (the gate):** `createEnsGate({ client, expectedEpoch, policyCapMicro, spentToday })` from `@graphpay/ens`; `ensCheck` for the risk agent. Policies: read node, epoch and wallet from `docs/sessions/identity/namespace.md`. A killed label is never provisioned again.
-- **For the Coordinator (funding, only when a new disposable agent is needed):** `disposable-2` has a key (`DISPOSABLE_2`, generated, unfunded) and is not yet on Sepolia. Before provisioning it for real: 0.005 WBT and 1 test USDT to its address (`pnpm funding`). Recommendation: do it only when the kill demo needs a fresh label; `disposable-1` is the first kill target.
-- **Decision for the founder (low stakes):** `ens_check` says ACTIVE for any status other than `paused`, as `planning/SPEC/AGENTS.md` §5 says, while the gate refuses anything but exactly `active`. Recommendation: keep the spec wording; the gate is the authority.
+- **Nothing needs the founder.** Defaults taken: non-paying agents publish a zero cap in ENS (ADR-0059; recommendation: keep). The agent record `agent-endpoint[mcp]` points at the hosted MCP and B8's MCP call now passes (closed 2026-11-06, `scripts/ens/acceptance.mjs`).
+- **For Join (the watcher):** host `createEnsWatcher` from `@graphpay/ens` in the workers process: `watcher.start()`, then `watcher.run()`. Give it `sink = { updatePolicy: createPolicySink({ configured, readPolicy, writePolicy }).updatePolicy, patchNode }` (POLICY_WRITER signs `writePolicy`; one nonce stream: only the watcher writes policies after M2's setup). A persistent `checkpoint` ({ get, set }) is optional: without it the watcher starts at the head and catches up from chain state. `node scripts/ens/watch.mjs` shows it running with logging sinks.
+- **For the Coordinator (only when the kill demo needs a fresh label):** `DISPOSABLE_2` has a key and no funds; it needs 0.005 WBT and 1 test USDT (`pnpm funding`) before `node scripts/ens/owner.mjs disposable --real`. `disposable-1` is the first kill target.
+- **Decision for the founder (low stakes):** `ens_check` says ACTIVE for any status other than `paused` (the agents spec), while the gate refuses anything but exactly `active`. Recommendation: keep the spec wording.
 
 ## arkiv
 
@@ -125,6 +125,13 @@ Updated 03:36 IST, Fri 6 Nov. Nothing for the founder now: the live mirror needs
 - **Note:** the CSV and the stream read the live dataset only; one query returns at most 100 edges each way (the engine's list cap), enough for the demo.
 
 ## agentpay
+
+- **The examples' story values (for the Coordinator).** What: a new `agentpayExamples` section in `packages/config/story.json`: the ride (operator name, from and to neighbourhoods, a 1.50 fixed fare, synthetic) and `testAmountMicro` (0.01, the real test payment's operational amount, never a story price). Where: the story config, which you own. Why: the brief says names come from the story config, and the ride had none. Recommendation: keep the section in the final story, or tell T6 to move it.
+- **A real ride payment needs a ride merchant in the cast (for the Coordinator, T2 and Join).** What: a real payment to a merchant the mirror does not know is parked, and the mirror's checkpoint never passes a parked event. Where: `packages/mirror/src/mirror.mjs`. Why: one test ride would stall the money graph's mirror. Recommendation: keep the ride on the fork (as now). If the founder wants a real ride, add the operator to the cast (story, ENS name, mirror actor) first.
+- **RENEWER has a second use (for the Coordinator, `docs/technical/WALLETS.md`).** What: AgentPay's real test payment settled through the reference relayer on the RENEWER key (one `settleOrder`, 309,451 gas); RENEWER now holds about 0.098 WBT. Why: the wallet record should say so, and T1's renewals share its gas. Recommendation: note it in WALLETS.md; top up RENEWER before the M4 renewals run; T6 makes no further real payments with it tonight.
+- **T1's facilitator adapter (for T1).** What: `httpFacilitator` speaks the x402 facilitator HTTP API that T1's M3 branch serves (`POST /verify`, `/settle`, bearer token). Nothing is missing from T1's public exports. Recommendation: once M3 merges, T6 runs one fork test of the SDK merchant through T1's `facilitatorHandler`.
+- **Two website lines sit under the `agentpay` headings** in `LOG.md` and `OPEN.md` (a merge slip; the race-truth item and the race-mode line). Recommendation: the Coordinator moves them to `website`; T6 leaves them in place.
+- **Closed 04:20 IST (T3's race-truth item):** `@graphpay/city` is now a dependency of `apps/web`; `/api/race` takes its truth and parameters from the generated city. **Open, for the Coordinator:** the seeded city's end day (`2026-11-05`) is a constant in `apps/web/lib/race.server.ts` (`SEEDED_END`), because no committed record holds it. Why: a re-seed on another day changes the params and the truth. Recommendation: keep it and update it with any re-seed (a note in T3's README already names it).
 
 ## records
 

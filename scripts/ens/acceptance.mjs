@@ -90,5 +90,19 @@ for (const a of agents) {
   check('B8', ctx.length > 0 && !ctx.startsWith('error') && ep === mcp, `${a.name} agent-context and agent-endpoint[mcp]`);
 }
 
+// B8's MCP call: the endpoint the root's ENS record names answers initialize and lists the four tools (M7b).
+const endpoint = await safe(() => readText(client, plan.root.name, KEYS.agentEndpointMcp));
+const rpc = async (id, method, params) => {
+  const res = await fetch(endpoint, { method: 'POST', headers: { 'content-type': 'application/json', accept: 'application/json, text/event-stream' }, body: JSON.stringify({ jsonrpc: '2.0', id, method, params }), signal: AbortSignal.timeout(30_000) });
+  return res.json();
+};
+try {
+  const init = await rpc(1, 'initialize', { protocolVersion: '2025-03-26', capabilities: {}, clientInfo: { name: 'graphpay-acceptance', version: '0' } });
+  const tools = (await rpc(2, 'tools/list', {})).result?.tools?.map((t) => t.name) ?? [];
+  check('B8', Boolean(init.result?.serverInfo) && ['schema', 'ask', 'graphql', 'explain'].every((n) => tools.includes(n)), `${endpoint}: initialize and tools/list = ${tools.join(', ')}`);
+} catch (e) {
+  check('B8', false, `${endpoint}: MCP call failed (${e.message})`);
+}
+
 console.log(failures.length === 0 ? '\nENS acceptance reads: all pass' : `\n${failures.length} failure(s)`);
 if (failures.length > 0) process.exitCode = 1;

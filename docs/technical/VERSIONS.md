@@ -92,3 +92,15 @@ Not installed: `@ai-sdk/mcp` (the live MCP client is Join's wiring in M12, throu
 |---|---|---|---|
 | `@ai-sdk/mcp` | 2.0.90 (published 2026-11-03) | `npm view @ai-sdk/mcp time` and `dependencies`: 2.0.90 depends on `@ai-sdk/provider-utils` 5.0.74 and `@ai-sdk/provider` 4.0.35, the same as `ai` 7.0.162 (T4's pin), so the tools share one copy; `latest` 2.0.91 (2026-11-05) moved to provider-utils 5.0.75 and would install a second one. Live: `connectMcp()` lists `schema, ask, graphql, explain` on the production domain's `/api/mcp` and answers `schema` and `graphql` | verified |
 | `ai`, `zod`, `viem` | 7.0.162, 4.6.7, 2.57.16 | the pins already in the lockfile (T4, T3, M0) | verified |
+
+## T6 AgentPay (`packages/agentpay`, `examples/agentpay-*`, checked 2026-11-06 03:55 IST)
+
+No new package versions: every dependency is a pin already verified above, so the lockfile only gains importer entries.
+
+| item | pinned | how checked | status |
+|---|---|---|---|
+| viem | 2.57.16 | the root pin (M0) | verified |
+| zod | 4.6.7 | the arkiv and agents pin | verified |
+| `ai` | 7.0.162 | the agents pin; `tool({ description, inputSchema, execute })` as `packages/agents/src/tools.mjs` uses it | verified |
+| `@modelcontextprotocol/sdk` | 1.32.2 | the money-graph pin; `McpServer.registerTool(name, { description, inputSchema }, handler)` as `packages/money-graph` uses it | verified |
+| anvil (fork tests only, not a package) | 1.9.0 (Homebrew, commit `6056c58`) | `anvil --version` on this Mac; `--fork-url` to the public Whitechain RPC keeps chain id 1874 | verified |

@@ -31,6 +31,7 @@ One line per PR: time (IST) · activity · result · PR link. Append under your 
 ## identity
 - 02:00 IST · identity · M5: the ens package, ABIs from Sourcify, run script and checkers; namespace provisioned on real Sepolia (60 tx, 72.7M gas); B1/B4/B5/B8/B9a reads pass · [PR #18](https://github.com/Zugzwang-world/graphpay/pull/18)
 - 03:50 IST · identity · M6 part 1: `ensGate`, `ens_check`, owner actions (pause, resume, kill), `scripts/ens/owner.mjs`; 33 unit + 10 fork tests, real-Sepolia read-only gate pass · [PR #34](https://github.com/Zugzwang-world/graphpay/pull/34)
+- 04:25 IST · identity · M6 done: the ENS watcher library and policy sink (reviewed twice), B8's MCP call in the acceptance script · [PR #40](https://github.com/Zugzwang-world/graphpay/pull/40)
 
 ## arkiv
 
@@ -51,6 +52,7 @@ One line per PR: time (IST) · activity · result · PR link. Append under your 
 - 01:20 IST · integration · opened: the mirror core on test doubles (decoding, mapping, parking, lease, recorder fold, 5% history, endpoints; 22 tests) · https://github.com/Zugzwang-world/graphpay/pull/8
 - 02:05 IST · integration · opened: the mirror on M7a's writer, the workers process, `pnpm workers` (ArkivSim with the real planner; 29 tests; reviewer: 2 blocking and 7 should-fix items, all fixed) · https://github.com/Zugzwang-world/graphpay/pull/20
 - 03:36 IST · integration · opened: the mirror live on Rabdi (history 1,258 labelled events; retry and drop tests clean, counted after the first payment), the replay tool and acceptance reads, the integration package with the live MCP client and read hooks · https://github.com/Zugzwang-world/graphpay/pull/33
+- 04:10 IST · integration · opened: the ENS gate on the payer's signing path (M12) and batched live presence and hand-off hooks (Friday item 3) · https://github.com/Zugzwang-world/graphpay/pull/37
 
 ## website
 
@@ -61,6 +63,9 @@ One line per PR: time (IST) · activity · result · PR link. Append under your 
 - 03:45 IST · website · opened: the order trail page on GraphQL `order(id)`, the explain page shows each call's rows, bytes and ms · https://github.com/Zugzwang-world/graphpay/pull/26
 
 ## agentpay
+- 04:05 IST · agentpay · opened: `@graphpay/agentpay` V1, the two-sided SDK (buyer pass and guards, merchant middleware, facilitator interface and reference relayer, AI SDK and MCP tools, the sweet shop and ride examples), 36 offline and 13 fork tests, reviewer's 2 blocking fixed · https://github.com/Zugzwang-world/graphpay/pull/38
+- 04:10 IST · agentpay · opened: the first real test payment through the SDK (0.01 test USDT, rehearsal agent → good shop, https://explorer.testnet.whitechain.io/tx/0xfbd7d307b1b0c08f3af015b4bdb03aaeed12d0c2d18c2553432cb4679ff14c7e), its script and tx log · (link once merged)
+- 04:20 IST · website · opened: race mode live (Friday item 8): `/api/race` runs one side on Rabdi with per-read ticks and truth badges, the committed benchmark table under it · https://github.com/Zugzwang-world/graphpay/pull/36
 
 ## records
 

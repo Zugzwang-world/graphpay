@@ -84,3 +84,11 @@ Cause: a closed lid sleeps the Mac whatever the keep-awake holds say (the app's 
 Fix: a push notification to the founder at 03:04 (charger in, lid open); first in "Founder now".
 Prevention: the Coordinator checks `pmset -g batt` and the lid state each tick and notifies the founder at once.
 
+
+
+### P-identity-2: the watcher saw no event on a fork, then the public RPC refused its log query
+When: 2026-11-06 04:00 IST · Activity: identity · Cost: about 30 minutes
+Symptom: a watcher fork test saw no `TextUpdated` after a pause (0 events), and a dry run on real Sepolia failed with "Invalid parameters were provided to the RPC method" for the log query.
+Cause: (1) viem caches `getBlockNumber` for its polling interval (4 s), so a poll right after a write read the old head; (2) the public Sepolia RPC refuses a `getLogs` with 19 contract addresses and accepts 10; (3) fork tests that kill a name or jump time leave the fork changed for later tests.
+Fix: `getBlockNumber({ cacheTime: 0 })`; log queries chunk addresses by 8; each stateful fork test runs between `evm_snapshot` and `evm_revert`.
+Prevention: watcher polls never rely on the client's block cache; any new `getLogs` use chunks addresses; a fork test that changes state is wrapped with the snapshot helper.
