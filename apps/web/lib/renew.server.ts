@@ -12,14 +12,14 @@ import { StartupError } from '@graphpay/facilitator';
 import { whitechain } from './payments.server.ts';
 
 const ACTIVE = 1;
-const SCAN = 200n; // the most recent subscriptions looked at per run
+const SCAN = 25n; // the most recent subscriptions looked at per run (reads stay well inside 60 s)
 const PER_RUN = 3; // renewals sent per run (the cron runs every minute)
 const GAS_FLOOR = 300_000n; // renew's try/catch around the pull makes the estimate undershoot
-const RECEIPT_MS = 30_000;
+const MIN_BALANCE_WEI = 20_000_000_000_000_000n; // 0.02 WBT: below it the renewer stops sending
 
 export interface RenewResult {
   checked: number;
-  renewed: { subId: Hex; tx: Hex; status: string }[];
+  renewed: { subId: Hex; tx: Hex }[]; // sent; the receipt is not waited for (the next run sees the state)
   skipped: { subId: Hex; reason: string }[];
 }
 
@@ -32,6 +32,8 @@ export async function renewDue(env: Record<string, string | undefined> = process
   const c = { address: checkout, abi: checkoutAbi } as const;
   const read = (functionName: string, args: unknown[] = []) => w.publicClient.readContract({ ...c, functionName, args } as never) as Promise<unknown>;
   if (!(await read('isRelayer', [renewer.address]))) throw new StartupError('the renewer key is not a relayer on the checkout');
+  if (String(await read('owner')).toLowerCase() === renewer.address.toLowerCase()) throw new StartupError('the renewer key is the checkout admin');
+  if ((await w.publicClient.getBalance({ address: renewer.address })) < MIN_BALANCE_WEI) throw new StartupError('the renewer is below its 0.02 WBT floor');
 
   const count = BigInt((await read('subscriptionCount')) as bigint);
   const now = (await w.publicClient.getBlock()).timestamp;
@@ -53,8 +55,7 @@ export async function renewDue(env: Record<string, string | undefined> = process
       continue;
     }
     const tx = await wallet.writeContract({ ...c, functionName: 'renew', args: [subId], account: renewer, chain: w.chain, gas });
-    const receipt = await w.publicClient.waitForTransactionReceipt({ hash: tx, timeout: RECEIPT_MS }).catch(() => null);
-    result.renewed.push({ subId, tx, status: receipt ? receipt.status : 'pending' });
+    result.renewed.push({ subId, tx });
   }
   return result;
 }

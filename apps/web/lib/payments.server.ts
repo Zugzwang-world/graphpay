@@ -49,10 +49,12 @@ const keyAddress = (env: Env, role: string): `0x${string}` | null => {
   }
 };
 
-// The hosted defaults on top of the environment: the routes' own production URLs (never
-// VERCEL_URL) and, until the config holds the public role addresses, the merchant lists derived
-// from the shops' merchant keys held here (E-3). An explicit env value always wins and is checked
-// by the settings against the config.
+// The hosted environment: the routes' own production URLs (never VERCEL_URL) and, until the config
+// holds the public role addresses, the merchant lists derived from the shops' merchant keys held
+// here (E-3). An explicit value may only repeat these: a URL on another origin would carry the
+// bearer tokens elsewhere, and a merchant list that differs is refused.
+const sameAddresses = (a: string[], b: string[]) => a.length === b.length && a.every((x) => b.some((y) => x.trim().toLowerCase() === y.toLowerCase()));
+
 export function hostedEnv(env: Env = process.env): Env {
   const shops = storyShops();
   const merchants: Record<string, string> = {};
@@ -61,10 +63,30 @@ export function hostedEnv(env: Env = process.env): Env {
     if (address) merchants[shop.key] = address;
   }
   const out: Env = { ...env };
-  out.FACILITATOR_URL ||= `${SITE}/api/facilitator`;
-  if (!out.ATTEMPTS_URL && env.RECORDER_TOKEN) out.ATTEMPTS_URL = `${SITE}/api/recorder/attempts`;
-  if (!out.SHOP_MERCHANTS && Object.keys(merchants).length) out.SHOP_MERCHANTS = JSON.stringify(merchants);
-  if (!out.ALLOWED_MERCHANTS && Object.keys(merchants).length) out.ALLOWED_MERCHANTS = Object.values(merchants).join(',');
+  const own = { FACILITATOR_URL: `${SITE}/api/facilitator`, ATTEMPTS_URL: `${SITE}/api/recorder/attempts` };
+  for (const [name, value] of Object.entries(own)) {
+    if (env[name] && env[name]!.replace(/\/+$/, '') !== value) throw new StartupError(`${name} must be ${value} when hosted`);
+  }
+  out.FACILITATOR_URL = own.FACILITATOR_URL;
+  out.ATTEMPTS_URL = env.RECORDER_TOKEN ? own.ATTEMPTS_URL : undefined;
+  const derived = Object.values(merchants);
+  if (env.ALLOWED_MERCHANTS && !sameAddresses(env.ALLOWED_MERCHANTS.split(','), derived)) throw new StartupError('ALLOWED_MERCHANTS differs from the shop keys held here');
+  if (env.SHOP_MERCHANTS) {
+    let listed: Record<string, string>;
+    try {
+      listed = JSON.parse(env.SHOP_MERCHANTS) as Record<string, string>;
+    } catch {
+      throw new StartupError('SHOP_MERCHANTS is not a JSON object');
+    }
+    const keys = Object.keys(listed);
+    if (keys.length !== Object.keys(merchants).length || keys.some((k) => !merchants[k] || String(listed[k]).toLowerCase() !== merchants[k].toLowerCase())) {
+      throw new StartupError('SHOP_MERCHANTS differs from the shop keys held here');
+    }
+  }
+  if (derived.length) {
+    out.SHOP_MERCHANTS = JSON.stringify(merchants);
+    out.ALLOWED_MERCHANTS = derived.join(',');
+  }
   return out;
 }
 

@@ -5,7 +5,8 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { generatePrivateKey, privateKeyToAccount } from 'viem/accounts';
-import { config, story } from '@graphpay/config';
+import { config } from '@graphpay/config';
+import { storyShops } from '@graphpay/shop';
 import { hostedEnv, route } from './payments.server.ts';
 import { GET as cron } from '../app/api/cron/renew/route.ts';
 import { POST as recorderPost } from '../app/api/recorder/[...path]/route.ts';
@@ -13,8 +14,8 @@ import { POST as recorderPost } from '../app/api/recorder/[...path]/route.ts';
 const SITE = String(config.site.url);
 const secret = 'c'.repeat(32);
 
-test('hostedEnv: the production URLs and the merchant lists from the shop keys; explicit values win', () => {
-  const shop = story.shops[0];
+test('hostedEnv: the production URLs and the merchant lists from the shop keys; an explicit value may only repeat them', () => {
+  const shop = storyShops()[0]!;
   const key = generatePrivateKey();
   const address = privateKeyToAccount(key).address;
   const env = hostedEnv({ [`${shop.walletRole}_PRIVATE_KEY`]: key });
@@ -23,9 +24,12 @@ test('hostedEnv: the production URLs and the merchant lists from the shop keys; 
   assert.deepEqual(JSON.parse(env.SHOP_MERCHANTS ?? '{}'), { [shop.key]: address });
   assert.equal(env.ALLOWED_MERCHANTS, address);
   assert.equal(hostedEnv({ RECORDER_TOKEN: secret }).ATTEMPTS_URL, `${SITE}/api/recorder/attempts`);
-  const own = hostedEnv({ FACILITATOR_URL: 'https://other.example/api/facilitator', ALLOWED_MERCHANTS: '0x1', [`${shop.walletRole}_PRIVATE_KEY`]: key });
-  assert.equal(own.FACILITATOR_URL, 'https://other.example/api/facilitator');
-  assert.equal(own.ALLOWED_MERCHANTS, '0x1', 'an explicit list is kept (and checked by the settings)');
+  assert.throws(() => hostedEnv({ FACILITATOR_URL: 'https://other.example/api/facilitator' }), /must be/, 'the bearer never goes to another origin');
+  assert.throws(() => hostedEnv({ RECORDER_TOKEN: secret, ATTEMPTS_URL: 'http://127.0.0.1:9/api/recorder/attempts' }), /must be/);
+  assert.equal(hostedEnv({ FACILITATOR_URL: `${SITE}/api/facilitator/` }).FACILITATOR_URL, `${SITE}/api/facilitator`, 'repeating it is fine');
+  assert.throws(() => hostedEnv({ ALLOWED_MERCHANTS: privateKeyToAccount(generatePrivateKey()).address, [`${shop.walletRole}_PRIVATE_KEY`]: key }), /differs/);
+  assert.throws(() => hostedEnv({ SHOP_MERCHANTS: JSON.stringify({ [shop.key]: privateKeyToAccount(generatePrivateKey()).address }), [`${shop.walletRole}_PRIVATE_KEY`]: key }), /differs/);
+  assert.equal(hostedEnv({ ALLOWED_MERCHANTS: address, [`${shop.walletRole}_PRIVATE_KEY`]: key }).ALLOWED_MERCHANTS, address);
   assert.throws(() => hostedEnv({ [`${shop.walletRole}_PRIVATE_KEY`]: 'not a key' }), /is not a valid key/);
 });
 

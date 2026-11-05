@@ -20,6 +20,7 @@ const ctx = await context([]); // read-only: no --yes, nothing is sent on-chain
 const checkout = configuredCheckout().address;
 const read = (functionName, args = []) => ctx.publicClient.readContract({ address: checkout, abi: checkoutAbi, functionName, args });
 const owner = await read('owner');
+if (isAddressEqual(ctx.account('FACILITATOR').address, ctx.account('RENEWER').address)) throw new Error('FACILITATOR and RENEWER must be different keys (E-1)');
 for (const role of ['FACILITATOR', 'RENEWER']) {
   const { address } = ctx.account(role);
   if (!(await read('isRelayer', [address]))) throw new Error(`${role} is not a relayer on the checkout`);
@@ -45,5 +46,6 @@ const missing = NAMES.filter((n) => !ctx.env[n]);
 if (missing.length) throw new Error(`not set in .env: ${missing.join(', ')}`);
 if (ctx.env.ALLOW_REAL_NETWORK !== '1') throw new Error('ALLOW_REAL_NETWORK must be 1 in .env for the hosted routes');
 
-const res = spawnSync('node', ['scripts/secrets/vercel-push.mjs', ...NAMES, ...(flag(argv, '--dry-run') ? ['--dry-run'] : [])], { stdio: 'inherit' });
+const push = new URL('../secrets/vercel-push.mjs', import.meta.url).pathname;
+const res = spawnSync(process.execPath, [push, ...NAMES, ...(flag(argv, '--dry-run') ? ['--dry-run'] : [])], { stdio: 'inherit' });
 process.exitCode = res.status ?? 1;

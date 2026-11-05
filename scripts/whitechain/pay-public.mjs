@@ -10,7 +10,7 @@
 import { writeFileSync } from 'node:fs';
 import { keccak256, toHex } from 'viem';
 import { castEntries, config, story } from '../../packages/config/index.mjs';
-import { PASSCODE_HEADER } from '../../packages/shop/index.mjs';
+import { PASSCODE_HEADER, priceOf, productOf, storyShops } from '../../packages/shop/index.mjs';
 import { decodePaymentRequiredHeader, decodePaymentResponseHeader, graphPayOrderClient, x402Client, x402HTTPClient } from '../../packages/facilitator/index.mjs';
 import { configuredCheckout, context, flag, usdt } from './lib.mjs';
 
@@ -68,7 +68,9 @@ if (ctx.send && process.exitCode !== 1) {
   const checkout = configuredCheckout().address;
   const network = `eip155:${ctx.chain.id}`;
   const scheme = graphPayOrderClient({ account: human, publicClient: ctx.publicClient, chainId: ctx.chain.id, token, permit2: config.whitechain.system.permit2, checkout, payerName: '', mandateHash: keccak256(toHex('M4 pay:public')) });
-  const client = new x402Client().register(network, scheme).setSpendControls({ allowedAssets: [{ network, asset: token.address, maxAmountPerPayment: String(q.priceMicro) }] });
+  // The spend control comes from the story's catalog, never from the server's quote.
+  const onePiece = priceOf(productOf(storyShops().find((s) => s.key === story.order.shop), story.order.sku), 1);
+  const client = new x402Client().register(network, scheme).setSpendControls({ allowedAssets: [{ network, asset: token.address, maxAmountPerPayment: String(onePiece) }] });
   const passcode = { [PASSCODE_HEADER]: ctx.env.DEMO_PASSCODE };
   const wbtBefore = await ctx.publicClient.getBalance({ address: human.address });
   const r402 = await post(payPath, q.terms, passcode);
