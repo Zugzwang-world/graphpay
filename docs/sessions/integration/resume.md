@@ -19,6 +19,10 @@ Updated 04:10 IST, Fri 6 Nov. Read this first, then `docs/plan/sessions/join.md`
 - Done since: `integration/src/gate.mjs` (the gate on the signing path, `ensCheck`) and `integration/src/activity.mjs` (Friday item 3, batched presence and hand-offs). E7's kill step must use the ungated sign.
 - Missing: the shop surface (catalog, storefront, 402, settlement) and x402 signing from T1's M3 (`graphPayOrderClient` in `@graphpay/facilitator`); T2's watcher (M6 part 2) hosted in `packages/mirror/src/main.mjs`. Then `pnpm e2e:food` (`planning/PROMPTS/12-e2e-food.md`).
 
+## The website's errand runner (T5, 05:05 IST)
+
+- When wiring `apps/web/lib/agents-live.server.ts` `errandRunner()`: pass `runId: input.runId` to `runErrand` (PR 55); the explainer lanes and the map query the hand-off and presence rows by it. Use `batchedActivity(dir)` with `await activity.flush()` before the stream ends. The seam waits for M4 (the hosted facilitator and shop).
+
 ## Notes
 
 - T3 was told (via the Coordinator, 03:29) that `Reputation.synthetic` ignores the tally rows' label.

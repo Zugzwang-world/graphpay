@@ -1,0 +1,59 @@
+{
+  "agent": "disposable-1.vitalik.graphpay.eth",
+  "startedAt": "2026-11-05T23:22:29.679Z",
+  "alive": {
+    "status": 200,
+    "reason": null,
+    "transaction": "0x763973499f7f7eb7bdda058fa03ee3d9f9480be53d75bc4574c62d7beec84b9c"
+  },
+  "kill": {
+    "output": "kill disposable-1.vitalik.graphpay.eth: done (block 12072701, tx 0x785a13f119ab77f67c1ed8dfa6f1213708fde4f43158122a357e72c018acf29f)",
+    "receiptAt": "2026-11-05T23:23:01.534Z",
+    "timing": "receipt time taken when owner.mjs returned (slightly late)"
+  },
+  "attempts": [
+    {
+      "afterS": 9.3,
+      "status": 402,
+      "reason": "ENS_EXPIRED_OR_REVOKED"
+    }
+  ],
+  "refused": {
+    "ms": 1793920990847,
+    "status": 402,
+    "reason": "ENS_EXPIRED_OR_REVOKED",
+    "orderId": "0x589e74d2290ff16d0cfbe27ad8c00acc854b81ed493d8f27d0f74248ef2476d6"
+  },
+  "failEdge": {
+    "entityKey": "0xc2d2ed3801c81500b108d904c3048c4c9c984f10d2f88c5218073e0b581e2699",
+    "onArkiv": true
+  },
+  "assertion": {
+    "id": "F",
+    "pass": true,
+    "failed": [],
+    "measured": {
+      "status": 402,
+      "reason": "ENS_EXPIRED_OR_REVOKED",
+      "secondsToBite": 9.3,
+      "failEdge": "0xc2d2ed3801c81500b108d904c3048c4c9c984f10d2f88c5218073e0b581e2699"
+    },
+    "expected": "402 ENS_EXPIRED_OR_REVOKED within 25 s; an off-chain fail edge"
+  },
+  "refusalOnly": {
+    "startedAt": "2026-11-05T23:25:25.899Z",
+    "attempts": [
+      {
+        "afterS": 153.8,
+        "status": 402,
+        "reason": "ENS_EXPIRED_OR_REVOKED"
+      }
+    ],
+    "refused": {
+      "ms": 1793921135366,
+      "status": 402,
+      "reason": "ENS_EXPIRED_OR_REVOKED",
+      "orderId": "0x3bf568209a41e4c3479e952a67ef3e3b9c9915e2c2d6dafb526c8699daa4f359"
+    }
+  }
+}

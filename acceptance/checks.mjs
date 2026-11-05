@@ -74,6 +74,8 @@ export function checks(root, env) {
     E4: fromRun('E4', 'the mirror writes it to Arkiv', 'C', 'cursor past the settle block; trail order → pay → deliver; refs 1874:<tx>:<logIndex>'),
     E5: fromRun('E5', 'GraphQL shows the new edge and the updated tallies', 'D', 'TODAY +1 order, +4.80, +1 delivered, +1 on time; all-time +1; payer TODAY +4.80'),
     E6: fromRun('E6', 'a refund updates the tallies', 'E', 'refunds +1, refunded +0.80, trail ends in refund'),
+    E7: async () => killCheck(root, env, 'E7'),
+    B6: async () => killCheck(root, env, 'B6'),
     E8: async () => {
       const r = e2e();
       const open = readFileSync(join(root, 'docs/thinking-partner/OPEN.md'), 'utf8');
@@ -178,4 +180,25 @@ function cityCheck(root, id) {
   const c = city.data.checks;
   if (id === 'D4') return { pass: city.run === 0 && c.q2_top10?.ok === true && c.q2_top10?.calls === 2, what: 'GraphQL\'s top 10 matches the ground truth (seeded S city, synthetic)', measured: c.q2_top10, expected: 'exact order and amounts against the generator\'s identity truth; 2 calls', evidence: { script: 'packages/city/scripts/check.mjs (read-only)', file: 'docs/sessions/arkiv/city/check-S.json', exit: city.run } };
   return { pass: city.run === 0 && c.d8_discovery?.ok === true, what: 'the geo query returns only shops inside the box, and only from our writers', measured: c.d8_discovery, expected: 'the cast shops only; synthetic ones only when opted in', evidence: { script: 'packages/city/scripts/check.mjs (read-only)', exit: city.run } };
+}
+
+// E7 and B6 from the one kill (docs/sessions/integration/runs/kill-<label>/kill.json), plus the
+// mirror's fold of the recorder's fail edge into the agent's `fails` (read live).
+async function killCheck(root, env, id) {
+  const dir = join(root, 'docs/sessions/integration/runs');
+  const name = existsSync(dir) ? readdirSync(dir).find((d) => d.startsWith('kill-')) : null;
+  if (!name) return { pass: null, why: 'no kill run yet', what: id === 'E7' ? 'a killed agent is refused' : 'killing a disposable agent makes the gate deny it', measured: null, expected: '', evidence: {} };
+  const k = JSON.parse(readFileSync(join(dir, name, 'kill.json'), 'utf8'));
+  const evidence = { file: `docs/sessions/integration/runs/${name}/kill.json`, kill: k.kill?.output, alive: k.alive?.transaction ?? null };
+  if (id === 'B6') {
+    const r = k.refused;
+    return { pass: r?.reason === 'ENS_EXPIRED_OR_REVOKED', what: 'killing a disposable agent makes the gate deny it', measured: { reason: r?.reason ?? null, secondsAfterKill: r ? Math.round((r.ms - Date.parse(k.kill.receiptAt)) / 100) / 10 : null }, expected: 'the gate denies ENS_EXPIRED_OR_REVOKED after the owner unregisters', evidence };
+  }
+  const arkiv = await connectArkiv({ backend: 'rabdi', env: {} });
+  const node = (await import('../packages/money-graph/index.mjs')).nodeOf(k.agent);
+  const tally = (await import('../packages/mirror/src/checks.mjs')).storedTally;
+  const t = await tally(arkiv.publicClient, { owner: writerAddresses().W_LEDGER, node });
+  const a = k.assertion ?? {};
+  const pass = a.pass === true && Number(t?.fails ?? 0) >= 1;
+  return { pass, what: 'a killed agent is refused', measured: { assertion: a.measured ?? null, failed: a.failed ?? [], foldedFails: t?.fails ?? null }, expected: "HTTP 402 ENS_EXPIRED_OR_REVOKED within 25 s of the kill's receipt; the recorder's fail edge on Arkiv; folded into fails by the mirror", evidence: { ...evidence, failEdge: k.failEdge?.entityKey ?? null } };
 }

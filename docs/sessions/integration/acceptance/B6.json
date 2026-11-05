@@ -1,0 +1,16 @@
+{
+  "id": "B6",
+  "at": "2026-11-05T23:26:19.713Z",
+  "pass": true,
+  "what": "killing a disposable agent makes the gate deny it",
+  "measured": {
+    "reason": "ENS_EXPIRED_OR_REVOKED",
+    "secondsAfterKill": 9.3
+  },
+  "expected": "the gate denies ENS_EXPIRED_OR_REVOKED after the owner unregisters",
+  "evidence": {
+    "file": "docs/sessions/integration/runs/kill-disposable-1/kill.json",
+    "kill": "kill disposable-1.vitalik.graphpay.eth: done (block 12072701, tx 0x785a13f119ab77f67c1ed8dfa6f1213708fde4f43158122a357e72c018acf29f)",
+    "alive": "0x763973499f7f7eb7bdda058fa03ee3d9f9480be53d75bc4574c62d7beec84b9c"
+  }
+}
