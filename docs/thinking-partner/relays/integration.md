@@ -1,6 +1,6 @@
 # Relay: integration (Join)
 
-Updated 03:36 IST, Fri 6 Nov.
+Updated 04:10 IST, Fri 6 Nov.
 
 ## In plain words
 
@@ -22,6 +22,8 @@ What was proven on the live networks:
 What the founder must do: **keep the Mac's lid open and the charger in**. caffeinate stops idle sleep but not a closed lid. Nothing else: no login, no funding.
 
 Both checks count for acceptance (D2, D15) only with a payment in the window, so until then they report "not run", never "pass". Still waiting: the first real payment. It comes through T1's facilitator (M3), which needs T2's spending gate (M6). D1 (one payment = one atomic Arkiv transaction), the other two retry cases of D2, and D3 (the scores recomputed from the raw edges) run on that payment. M11 closes then.
+
+**Since 03:36 (second PR):** the payer now runs the ENS gate before it signs. This is T2's gate (M6 part 1), with the agent's spending policy and today's spend read from the checkout on Whitechain. A refusal signs nothing; the facilitator still checks again. The one exception is the kill test (E7): it signs without this gate on purpose, because it proves that the facilitator refuses a killed agent and the refusal lands on Arkiv. Separately, the agents' "at work" rows and hand-offs (Friday item 3, on T3's new rows) are queued and written as one Arkiv transaction per phase, so they never slow an agent.
 
 ## Technical
 
@@ -53,5 +55,13 @@ Both checks count for acceptance (D2, D15) only with a payment in the window, so
 - Found: `Reputation.synthetic` (money-graph GraphQL, T3) reads only the node row, so scores from the labelled history show `synthetic: false`. Sent to the Coordinator for T3 (`OPEN.md`).
 - The killed instance's heartbeat row stays `running` until its 1-day expiry. The lease reads its age (stale after 90 s), so this is harmless, but a reader counting `running` rows must also check the age (the `lag` check does).
 - Not yet hosted in the workers: T2's ENS watcher (M6, not merged).
+
+**Second PR (`join/m12-gate`):**
+- `integration/src/gate.mjs`: `createPayerGate`, `gatedSign(sign)` and `ensCheck`, on `createEnsGate` from `@graphpay/ens` (PR 34). It makes one `policies(node)` read per call (epoch and cap from the same policy), reads `spentToday(node)`, and checks chain 1874 once.
+- Live, read-only: `payer` 4.80 passes (cap 6.00), `rehearsal` passes (30.00), `payer` 7.00 is `CAP_EXCEEDED`, `scout` 4.80 is `CAP_EXCEEDED` (cap 1.00), `analyst` is `ENS_NO_POLICY`, `disposable-2` is `ENS_NOT_FOUND`.
+- Reviewer: no blocking issues. Its should-fix items are taken: one policy read, the chain check, and tests for the missing amount, the failed read and the zero cap.
+- `integration/src/activity.mjs`: `batchedActivity(arkiv)` for T3's `agent_presence` and `handoff` (PR 35). Hook calls only queue. A flush every 2 s while calls arrive, plus `flush()` at the end of a run, sends at most 20 operations in one transaction. A renewal extends its row; a failed batch is dropped and logged.
+- ArkivSim test: 1 presence and 5 hand-offs land in 1 transaction, and the renewal in 1 more.
+- Tests: integration 11.
 
 **Next:** M12's shop side, signing and gate once M3 and M6 merge; `pnpm e2e:food` (fork, then real with `E2E_BUYER=rehearsal`); then D1–D3 on the first real payment and the `(M11 done)` PR.

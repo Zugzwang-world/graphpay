@@ -26,16 +26,33 @@ export class GateRefusedError extends Error {
 // ens: a Sepolia public client; whitechain: a public client on chain 1874.
 // reads: the ENS walk and text reads, faked in the tests (createEnsGate's defaults otherwise).
 export function createPayerGate({ ens, whitechain, checkout = config.whitechain.contracts.checkout.address, clock = Date.now, reads = {} }) {
-  const read = (functionName, args) => whitechain.readContract({ address: checkout, abi: checkoutAbi, functionName, args });
-  const policyOf = async (node) => {
-    const p = await read('policies', [node]);
-    return p && !isAddressEqual(p.wallet, zeroAddress) ? p : null;
+  const chainId = config.networks.whitechain.chainId;
+  let chainChecked = null;
+  const read = async (functionName, args) => {
+    // The checkout is read only on Whitechain (1874), checked once per gate.
+    chainChecked ??= whitechain.getChainId().then((id) => {
+      if (id !== chainId) throw new Error(`gate: the Whitechain client answers chain ${id}`);
+    });
+    await chainChecked;
+    return whitechain.readContract({ address: checkout, abi: checkoutAbi, functionName, args });
+  };
+  // One policy read per gate call: the epoch and the cap must come from the same policy.
+  const reads_ = new Map();
+  const policyOf = (node) => {
+    const at = reads_.get(node);
+    if (at && clock() - at.t < 5_000) return at.p;
+    const p = read('policies', [node]).then((x) => (x && !isAddressEqual(x.wallet, zeroAddress) ? x : null));
+    reads_.set(node, { t: clock(), p });
+    p.catch(() => reads_.delete(node));
+    return p;
   };
   const gate = createEnsGate({
     client: ens,
     clock,
     ...reads,
     expectedEpoch: async (node) => (await policyOf(node))?.epoch ?? null,
+    // Payer side only: a revoked policy refuses before signing. The facilitator must not
+    // reuse this (it would hide the on-chain AGENT_REVOKED record, INTEGRATION_AND_MIRROR §8.7).
     policyCapMicro: async (node) => {
       const p = await policyOf(node);
       return p && !p.revoked ? BigInt(p.dailyCapMicro) : null;
