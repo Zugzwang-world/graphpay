@@ -28,7 +28,6 @@ import {
   viemChain,
   x402Client,
   x402Facilitator,
-  x402HTTPClient,
 } from '@graphpay/facilitator';
 import { createQuote, recordEdge } from '@graphpay/money-graph';
 import { PASSCODE_HEADER, merchantActions, shopHandler, storyShops, viemOrders } from '@graphpay/shop';
@@ -191,7 +190,8 @@ export async function startStack({ env, whitechain, sepolia, directory, sync, sh
       const s = graphPayOrderClient({ account, publicClient: pub, chainId, token, permit2, checkout, payerName: payerEns, mandateHash: mandate.hash });
       const client = new x402Client().register(NETWORK, s).setSpendControls({ allowedAssets: [{ network: NETWORK, asset: token.address, maxAmountPerPayment: String(story.order.budgetMicro) }] });
       const payload = await client.createPaymentPayload(paymentRequired);
-      return new x402HTTPClient(client).encodePaymentSignatureHeader(payload);
+      // The header value itself (x402HTTPClient's method answers a headers object).
+      return encodePaymentSignatureHeader(payload);
     };
   }
 
