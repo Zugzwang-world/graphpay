@@ -72,6 +72,10 @@ Updated 03:45 IST, Fri 6 Nov (T5 Web). **On `main`:** the shell, the phone views
 - Blockers: none. Customer panels wait for M4 and M6, the race for M9, the agent run for M12.
 - Next: M16 once M4 lands; Friday item 9 (Open toggle) once T3's `shop_open` lands. Fresh start file: `docs/sessions/website/resume.md`.
 
+## agentpay
+
+Started 03:25 IST (T6 AgentPay SDK: `packages/agentpay`, `examples/agentpay-*`, the Whitechain lane; it uses T1's and T4's public exports). T6 owns this section.
+
 ## records
 
 Updated 03:20 IST. **Checked every session after the 02:14–03:01 sleep: none is hung.**
@@ -80,7 +84,8 @@ Updated 03:20 IST. **Checked every session after the 02:14–03:01 sleep: none i
 - T1 got its start line at 03:08 after a fresh start. T2, T4 and Join got theirs at 03:12; Join's gates (M2, M5) are open.
 - **M0's one failed background task:** "fast-forward the main checkout" (Thu 23:56) aborted with "Please commit your changes", because the prompt-log hook had appended M0's last prompt to its committed log. It mattered: the secret helpers, the funding script and the hook itself run from the main checkout. Fixed at 03:14: the main checkout is on `main` (2dd307d), and M0's extra line and one session's extra lines are committed here. The cause (P-records-1: every session's log was written to the main checkout) is fixed in this PR, with a reviewer pass.
 - Usage: 75% at 03:15 IST (resets Fri 21:30 IST). The founder's extra-usage decision is still open.
-- Next: sweep the remaining main-checkout prompt logs once the hook fix is live; records again about 04:45.
+- 03:30: the hook fix is live (the main checkout is on #24), and the seven old prompt logs are swept into a records PR as `*.main-checkout.jsonl`. The main checkout is clean.
+- Next: records again about 04:45.
 
 ## submission
 

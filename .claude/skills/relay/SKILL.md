@@ -5,7 +5,7 @@ description: Write the end-of-step thinking-partner update (NOW section, relay f
 
 # relay
 
-Activity names: `foundation`, `payments`, `identity`, `arkiv`, `agents`, `integration`, `website`, `records`, `submission`. Touch only your own parts of `docs/thinking-partner/`.
+Activity names: `foundation`, `payments`, `identity`, `arkiv`, `agents`, `integration`, `website`, `agentpay` (T6), `records`, `submission`. Touch only your own parts of `docs/thinking-partner/`.
 
 1. **`NOW.md`** — rewrite only your `## <activity>` section: `Updated HH:MM IST`; where we are in plain words; what's running; blockers; next. Five to ten lines. (Main alone rewrites the top summary.)
 2. **`relays/<activity>.md`** — overwrite with about 800 words: plain language first (what now works, what it means for the demo, what the founder must do), then technical (what was built, PR links, numbers with their sources, transaction links, deviations from the spec and why, open risks).
