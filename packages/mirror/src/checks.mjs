@@ -4,10 +4,10 @@
 // created the W_LEDGER edge with a given `ref`, and each of its operations by entity
 // type, decoded from the receipt's entity events (EntityCreated, EntityPatched).
 
-import { ENTITY_EVENTS_ABI, key, str } from '@arkiv-network/sdk';
+import { ENTITY_EVENTS_ABI, key, str, u64 } from '@arkiv-network/sdk';
 import { eq } from '@arkiv-network/sdk/query';
-import { countRows, findOne, readAll } from '@graphpay/arkiv-graph';
-import { ENTITIES, ENTITY_CONTRACT } from '@graphpay/money-graph';
+import { countRows, findOne, fromJsonBytes, readAll } from '@graphpay/arkiv-graph';
+import { ENTITIES, ENTITY_CONTRACT, tallyRules } from '@graphpay/money-graph';
 import { decodeEventLog } from 'viem';
 
 const attr = (e, name) => e?.$attributes?.[name]?.value;
@@ -96,7 +96,8 @@ export function d1Verdict(tx, { shopNode, payerNode, stream }) {
   const links = tx.ops.filter((o) => is(o, 'link'));
   const checkpoints = tx.ops.filter((o) => is(o, 'checkpoint'));
   const other = tx.ops.filter((o) => !['edge', 'tally', 'link', 'checkpoint'].includes(o.type));
-  const tally = (node, window) => tallies.some((t) => t.node?.toLowerCase() === node && t.window === window);
+  // Tally rows are keyed `all` and `day:<n>` (arkiv-graph's planner).
+  const tally = (node, window) => tallies.some((t) => t.node?.toLowerCase() === node && (window === 'day' ? String(t.window ?? '').startsWith('day:') : t.window === window));
   const want = {
     'one pay edge create with the ref': edges.length === 1 && edges[0].op === 'create' && edges[0].kind === 'pay' && edges[0].ref === tx.ref,
     'shop all tally': tally(shopNode, 'all'),
@@ -130,35 +131,48 @@ export async function refCounts(publicClient, { owner, events }) {
   return { pass: rows.every((r) => r.ok), events: rows.length, edgeEvents: rows.filter((r) => r.want === 1).length, wrong: rows.filter((r) => !r.ok) };
 }
 
-// D3: the stored tallies of a node against its own edges, read in full by paging.
-// Money is counted as the tallies count it: pay and renew add to paid (the renew edge
-// carries 0, its PaymentSettled carries the money), refund to refunded, fail to fails.
-export async function recount(publicClient, { owner, node, side }) {
-  const where = [eq(side === 'shop' ? 'to_node' : 'from_node', key(node.toLowerCase()))];
-  const rows = await readAll(publicClient, ENTITIES.edge, { owner, where });
-  const sum = (kind) => rows.filter((r) => r.kind === kind).reduce((s, r) => s + BigInt(r.amount_micro ?? 0), 0n);
-  const count = (kind) => rows.filter((r) => r.kind === kind).length;
+// D3: the stored all-time tally of a node against its own edges, read in full by paging.
+// Counted as the planner counts (tallyRules): every edge adds to both of its ends, at the
+// epoch it names, so the edges where the node is either end and at its current epoch.
+// Fails also come from W_SYNC's recorder edges, folded by the mirror only when the wallet
+// is bound; they are compared by GraphQL's verify (count()), not here.
+export async function recount(publicClient, { owner, node, epoch = 0 }) {
+  const n = node.toLowerCase();
+  const byRef = new Map();
+  for (const side of ['from', 'to']) {
+    const where = [eq(`${side}_node`, key(n)), eq(`${side}_epoch`, u64(BigInt(epoch)))];
+    for (const r of await readAll(publicClient, ENTITIES.edge, { owner, where })) byRef.set(r.ref, r);
+  }
+  const t = { orders: 0n, refunds: 0n, delivered: 0n, onTime: 0n, paidMicro: 0n, refundedMicro: 0n };
+  const field = { orders: 'orders', refunds: 'refunds', delivered: 'delivered', on_time: 'onTime', paid_micro: 'paidMicro', refunded_micro: 'refundedMicro' };
+  for (const r of byRef.values()) {
+    const reason = fromJsonBytes(r.payload)?.reason;
+    const rules = tallyRules({ kind: r.kind, reason }) ?? {};
+    for (const [counter, how] of Object.entries(rules)) {
+      if (!field[counter]) continue;
+      t[field[counter]] += how === 'count' ? 1n : BigInt(r.amount_micro ?? 0);
+    }
+  }
+  return { edges: byRef.size, ...Object.fromEntries(Object.entries(t).map(([k, v]) => [k, String(v)])) };
+}
+
+export async function storedTally(publicClient, { owner, node, epoch = 0 }) {
+  const t = await findOne(publicClient, ENTITIES.tally, { owner, where: [eq('node', key(node.toLowerCase())), eq('epoch', u64(BigInt(epoch))), eq('window', str('all'))] });
+  if (!t) return null;
   return {
-    edges: rows.length,
-    orders: count('order'),
-    refunds: count('refund'),
-    fails: count('fail'),
-    delivered: rows.filter((r) => r.kind === 'deliver' || r.kind === 'late').length,
-    paidMicro: String(sum('pay') + sum('renew')),
-    refundedMicro: String(sum('refund')),
+    orders: String(t.orders),
+    refunds: String(t.refunds),
+    delivered: String(t.delivered),
+    onTime: String(t.on_time),
+    paidMicro: String(t.paid_micro),
+    refundedMicro: String(t.refunded_micro),
+    fails: String(t.fails),
+    synthetic: Boolean(t.synthetic),
   };
 }
 
-export async function storedTally(publicClient, { owner, node }) {
-  const t = await findOne(publicClient, ENTITIES.tally, { owner, where: [eq('node', key(node.toLowerCase())), eq('window', str('all'))] });
-  if (!t) return null;
-  return {
-    orders: Number(t.orders),
-    refunds: Number(t.refunds),
-    fails: Number(t.fails),
-    delivered: Number(t.delivered),
-    paidMicro: String(t.paid_micro),
-    refundedMicro: String(t.refunded_micro),
-    synthetic: Boolean(t.synthetic),
-  };
+// The node's current epoch from its W_LEDGER rows (the highest; fresh names are 0).
+export async function epochOf(publicClient, { owner, node }) {
+  const rows = await readAll(publicClient, ENTITIES.node, { owner, where: [eq('node', key(node.toLowerCase()))] });
+  return rows.reduce((m, r) => Math.max(m, Number(r.epoch ?? 0)), 0);
 }

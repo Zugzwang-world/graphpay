@@ -1,7 +1,8 @@
 {
   "id": "D15-refs",
-  "at": "2026-11-05T22:01:09.645Z",
-  "pass": true,
+  "at": "2026-11-05T22:12:38.117Z",
+  "pass": null,
+  "why": "no edge event in the window yet",
   "what": "no event in the window skipped or written twice",
   "measured": {
     "pass": true,
@@ -12,6 +13,6 @@
   "expected": "count(edge where ref = id) = 1 for every edge event, 0 for the rest",
   "evidence": {
     "from": 12313887,
-    "to": 12319659
+    "to": 12320379
   }
 }

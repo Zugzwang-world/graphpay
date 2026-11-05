@@ -22,7 +22,7 @@ import { fileURLToPath } from 'node:url';
 import { parseArgs } from 'node:util';
 import { checkoutAbi } from '../packages/contracts/index.mjs';
 import { config } from '../packages/config/index.mjs';
-import { d1Verdict, LAB_PAY_GAS, mirrorTxOf, recount, refCounts, storedTally } from '../packages/mirror/src/checks.mjs';
+import { d1Verdict, epochOf, LAB_PAY_GAS, mirrorTxOf, recount, refCounts, storedTally } from '../packages/mirror/src/checks.mjs';
 import { decodeLogs } from '../packages/mirror/src/decode.mjs';
 import { connectArkiv, createGraphEngine, nodeOf, readHeartbeats, runGraphql, writerAddresses } from '../packages/money-graph/index.mjs';
 import { clientsFor } from '../scripts/lib/chains.mjs';
@@ -77,9 +77,15 @@ function replay(mode, extra = []) {
     let out = '';
     child.stdout.on('data', (d) => (out += d));
     child.stderr.on('data', (d) => (out += d));
-    child.on('exit', (code, signal) => {
+    child.on('close', (code, signal) => {
       const line = out.split('\n').reverse().find((l) => l.startsWith('replay: '));
-      resolve({ code, signal, report: line ? JSON.parse(line.slice(8)) : null, tail: line ? undefined : out.split('\n').slice(-5).join('\n') });
+      let report = null;
+      try {
+        report = line ? JSON.parse(line.slice(8)) : null;
+      } catch {
+        report = null;
+      }
+      resolve({ code, signal, report, tail: report ? undefined : out.split('\n').slice(-5).join('\n') });
     });
   });
 }
@@ -130,9 +136,13 @@ switch (check) {
     const a = await replay('dry', range);
     const b = await replay('lost-cursor', range);
     const sent = (r) => r.report?.sends?.refused?.length ?? NaN;
-    const pass = a.code === 0 && b.code === 0 && sent(a) === 0 && sent(b) === 0;
+    const weighed = (r) => (r.report?.stats?.skippedCheckpoint ?? 0) + (r.report?.stats?.skippedRef ?? 0);
+    const clean = a.code === 0 && b.code === 0 && sent(a) === 0 && sent(b) === 0;
+    // A range with no mirrored edge event tests nothing: reported as not run, not pass.
+    const pass = !clean ? false : weighed(a) > 0 && weighed(b) > 0 ? true : null;
     result('D2a', {
       pass,
+      ...(pass === null ? { why: 'no mirrored edge event in the range yet' } : {}),
       what: 'the mirror step again over the same blocks sends no transaction',
       measured: {
         checkpointForgotten: { stats: a.report?.stats, wouldSend: a.report?.sends?.refused, nonce: a.report?.nonce },
@@ -161,13 +171,29 @@ switch (check) {
     }
     const window = events.filter((e) => e.block <= todo.block);
     const counts = await refCounts(arkiv.publicClient, { owner, events: window });
-    const landed = runs.flatMap((r) => r.report?.sends?.raw ?? []).filter((s) => s.hash);
+    const raws = runs.map((r) => r.report?.sends?.raw ?? []);
+    const firsts = raws.map((r) => r[0]).filter(Boolean);
+    const mined = new Map();
+    for (const h of new Set(raws.flat().map((x) => x.hash).filter(Boolean))) {
+      try {
+        mined.set(h, (await arkiv.publicClient.getTransactionReceipt({ hash: h })).status === 'success');
+      } catch {
+        mined.set(h, false);
+      }
+    }
+    const landed = [...mined].filter(([, ok]) => ok).map(([h]) => h);
+    // D2b: both first sends at one nonce, exactly one of them mined. D2c: the crash run was
+    // killed right after its send, and that transaction was mined.
+    const pass =
+      check === 'd2b'
+        ? counts.pass && counts.edgeEvents > 0 && firsts.length === 2 && firsts[0].nonce === firsts[1].nonce && new Set(firsts.map((f) => f.hash).filter((h) => mined.get(h))).size === 1
+        : counts.pass && counts.edgeEvents > 0 && runs[0].signal === 'SIGKILL' && Boolean(firsts[0] && mined.get(firsts[0].hash));
     result(check === 'd2b' ? 'D2b' : 'D2c', {
-      pass: counts.pass,
+      pass,
       what: check === 'd2b' ? 'the same batch sent twice at once with the same confirmed nonce: exactly one lands' : 'stopped after sending, before the receipt; the restart finds the mined transaction',
       measured: { window: { events: counts.events, edgeEvents: counts.edgeEvents, wrong: counts.wrong }, runs: runs.map((r) => ({ exit: r.code, signal: r.signal, stats: r.report?.stats, error: r.report?.error, nonce: r.report?.nonce, raw: r.report?.sends?.raw })) },
-      expected: 'count(edge where ref = id) = 1 for every edge event up to the raced one',
-      evidence: { event: todo.id, rawSends: landed.map((s) => explorer.rabdi(s.hash)) },
+      expected: check === 'd2b' ? 'both first sends at one nonce, exactly one mined; count(edge where ref = id) = 1 for every edge event up to the raced one' : 'the crash run killed after its send, that transaction mined, the restart sends no copy; one edge per event',
+      evidence: { event: todo.id, mined: landed.map((h) => explorer.rabdi(h)), firstSends: firsts.map((f) => ({ hash: f.hash, nonce: f.nonce, mined: mined.get(f.hash) ?? false })) },
     });
     break;
   }
@@ -182,12 +208,12 @@ switch (check) {
       const q = `query($e: String!) { node(ens: $e) { kind reputation(window: ALL, verify: true) { orders refunds fails delivered paidUsdt refundedUsdt source synthetic } } }`;
       const answer = await runGraphql({ engine, query: q, variables: { e: ens } });
       const kind = answer.data?.node?.kind;
-      const side = kind === 'shop' ? 'shop' : 'payer';
-      const stored = await storedTally(arkiv.publicClient, { owner, node });
-      const counted = await recount(arkiv.publicClient, { owner, node, side });
+      const epoch = await epochOf(arkiv.publicClient, { owner, node });
+      const stored = await storedTally(arkiv.publicClient, { owner, node, epoch });
+      const counted = await recount(arkiv.publicClient, { owner, node, epoch });
       const rep = answer.data?.node?.reputation;
-      const same = stored && ['orders', 'refunds', 'paidMicro', 'refundedMicro'].every((k) => String(stored[k]) === String(counted[k]));
-      rows.push({ ens, kind, source: rep?.source, reputation: rep, stored, counted, recountMatches: Boolean(same), explainId: answer.extensions?.arkiv?.explainId, errors: answer.errors });
+      const same = stored && ['orders', 'refunds', 'delivered', 'onTime', 'paidMicro', 'refundedMicro'].every((k) => stored[k] === counted[k]);
+      rows.push({ ens, kind, epoch, source: rep?.source, reputation: rep, stored, counted, recountMatches: Boolean(same), explainId: answer.extensions?.arkiv?.explainId, errors: answer.errors });
     }
     result('D3', {
       pass: rows.every((r) => r.source === 'RAW_VERIFIED' && r.recountMatches),
@@ -204,7 +230,8 @@ switch (check) {
     const { events } = await chainEvents(Number(args.from), Number(args.to));
     const counts = await refCounts(arkiv.publicClient, { owner, events });
     result('D15-refs', {
-      pass: counts.pass,
+      pass: !counts.pass ? false : counts.edgeEvents > 0 ? true : null,
+      ...(counts.edgeEvents === 0 ? { why: 'no edge event in the window yet' } : {}),
       what: 'no event in the window skipped or written twice',
       measured: counts,
       expected: 'count(edge where ref = id) = 1 for every edge event, 0 for the rest',

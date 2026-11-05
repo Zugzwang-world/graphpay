@@ -16,12 +16,12 @@ It keeps up 2 blocks (about 4 seconds) behind the chain head.
 What this means for the demo: the agents' scores are now real reads. Asked through the hosted MCP endpoint (the same one the agents and judges use), the graph answers from the mirror's rows. Kesar Kingdom is on time 97% of the time with 1% refunds, Syrup Street 93%, and Jamun Junction 71% with 18% refunds. Jamun is the trap the analyst should exclude. These figures are synthetic story inputs, labelled as such on Arkiv.
 
 What was proven on the live networks:
-- **No double writes on a retry (D2a):** running the mirror again over the same blocks, with its memory of progress wiped, sends nothing.
-- **It survives a drop (D15, first pass):** the process was frozen for 2 minutes, then killed hard and restarted. It caught up 127 blocks in under 5 seconds and took over at once (the dead process's lease was released). It went on from the same place, and nothing was lost or written twice.
+- **No double writes on a retry:** running the mirror again over the same blocks, with its memory of progress wiped, sends nothing.
+- **It survives a drop:** the process was frozen for 2 minutes, then killed hard and restarted. It caught up 127 blocks in under 5 seconds and took over at once (the dead process's lease was released). It went on from the same place, and nothing was lost or written twice.
 
 What the founder must do: **keep the Mac's lid open and the charger in**. caffeinate stops idle sleep but not a closed lid. Nothing else: no login, no funding.
 
-Still waiting: the first real payment. It comes through T1's facilitator (M3), which needs T2's spending gate (M6). D1 (one payment = one atomic Arkiv transaction), the other two retry cases of D2, and D3 (the scores recomputed from the raw edges) run on that payment. M11 closes then.
+Both checks count for acceptance (D2, D15) only with a payment in the window, so until then they report "not run", never "pass". Still waiting: the first real payment. It comes through T1's facilitator (M3), which needs T2's spending gate (M6). D1 (one payment = one atomic Arkiv transaction), the other two retry cases of D2, and D3 (the scores recomputed from the raw edges) run on that payment. M11 closes then.
 
 ## Technical
 
@@ -37,7 +37,7 @@ Still waiting: the first real payment. It comes through T1's facilitator (M3), w
   - `@ai-sdk/mcp` 2.0.90, verified: it shares `@ai-sdk/provider-utils` 5.0.74 with `ai` 7.0.162, whereas `latest` 2.0.91 would add a second copy. Recorded in `docs/technical/VERSIONS.md`.
   - `src/mcp.mjs`: the agents' `McpLike` over Streamable HTTP to `https://graphpay-event.vercel.app/api/mcp`. Live, it lists `schema, ask, graphql, explain`.
   - `src/hooks.mjs`: `resolvePayee` and `readAccepts` (the ENS reader with its 20 s cache, M5 amendment §2), `nodeOf`, `directory` and `shopKey` (`discoverShops` around the persona's point and 3 km radius, M7 amendment §6), `findQuotes` (W_DIRECTORY quotes, §5), and `payerWallet` by wallet role (public addresses only).
-- Tests: mirror 32, integration 2, money-graph 15 (after merging PR 25). `pnpm check` is clean. The reviewer runs before merge.
+- Tests: mirror 34, integration 8, money-graph 15 (after merging PR 25). `pnpm check` is clean. The reviewer runs before merge.
 
 **Live numbers (Rabdi, W_LEDGER `0x7DeAF022B3829C53c73031B7d28Ed9746F517665`):**
 - History stream `history:test:v1:x0.05:d20762:b7d36bb9`: 1,258 events, about 50 parts, about 13 min (03:13–03:26 IST).
@@ -47,7 +47,9 @@ Still waiting: the first real payment. It comes through T1's facilitator (M3), w
 - Restart: 0 nodes re-registered, the history found complete, running in 22 s.
 
 **Deviations and open items:**
-- D15 ran on a window with no edge events (no payments exist yet). It is repeated with payments in M13.
+- D2a and D15 ran on a window with no edge events (no payments exist yet), so they record `not run`. They are repeated with payments in M13.
+- The reviewer found 3 blocking issues, all fixed before merge: the race and crash hold never fired (viem copies the client, so the hold now sits at the transport, `packages/mirror/src/intercept.mjs`); D1 looked for `day` where the rows say `day:<n>`; the D3 recount read only one end of each edge. ArkivSim tests now run D1 on every mirrored payment and the recount on every node.
+- Known limit: a replay with its checkpoint lost (`lost-cursor`) would re-apply an old `AgentPolicySet` standing; the real mirror is protected by its checkpoint (every standing write moves it). Guarding standings by their last event is a follow-up.
 - Found: `Reputation.synthetic` (money-graph GraphQL, T3) reads only the node row, so scores from the labelled history show `synthetic: false`. Sent to the Coordinator for T3 (`OPEN.md`).
 - The killed instance's heartbeat row stays `running` until its 1-day expiry. The lease reads its age (stale after 90 s), so this is harmless, but a reader counting `running` rows must also check the age (the `lag` check does).
 - Not yet hosted in the workers: T2's ENS watcher (M6, not merged).

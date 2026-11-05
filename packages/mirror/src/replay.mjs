@@ -17,6 +17,7 @@
 // Prints one JSON line (`replay:`) with the counts; names only, never a secret.
 
 import { parseArgs } from 'node:util';
+import { withRawSendHook } from './intercept.mjs';
 import { heartbeatAgeS, STALE_AFTER_S } from './lease.mjs';
 import { connectMirror, loadWorkersEnv } from './setup.mjs';
 
@@ -28,28 +29,71 @@ if (!MODES.has(args.mode)) throw new Error('replay: --mode dry, lost-cursor, rac
 const writes = args.mode === 'race' || args.mode === 'crash';
 if (args.mode === 'race' && !/^\d+$/.test(args.at ?? '')) throw new Error('replay: race needs --at <unix ms> (the same for both processes)');
 
-const { env, log } = loadWorkersEnv();
+const { env, log, redact } = loadWorkersEnv();
+const say = (obj) => process.stdout.write(`replay: ${redact(JSON.stringify(obj))}\n`);
+const sends = { attempted: 0, refused: [], raw: [] };
+let ledgerRef = null;
+let first = true;
+
+// Workers running? (the write modes refuse; checked again just before a held send).
+async function liveWorkers() {
+  const rows = await ledgerRef.readHeartbeats();
+  const arkivBlock = await ledgerRef.arkivBlock();
+  return rows.find((r) => r.state === 'running' && heartbeatAgeS(r, { arkivBlock }) <= STALE_AFTER_S) ?? null;
+}
+
+// The hold sits at the transport (intercept.mjs): connectArkiv captures globalThis.fetch.
+const realFetch = globalThis.fetch;
+globalThis.fetch = withRawSendHook(realFetch, async ({ send, hash, nonce }) => {
+  sends.attempted += 1;
+  if (!writes) {
+    // A second guard behind the replaced write ports: the read modes never send.
+    sends.refused.push({ port: 'raw', hash, nonce });
+    throw Object.assign(new Error('replay: a raw send was refused in a read mode'), { code: 'DRY_SEND' });
+  }
+  const wasFirst = first;
+  first = false;
+  if (wasFirst && args.mode === 'race') await new Promise((r) => setTimeout(r, Math.max(0, Number(args.at) - Date.now())));
+  const rival = await liveWorkers();
+  if (rival) {
+    say({ mode: args.mode, refused: `workers instance ${rival.instance} started during the hold; nothing sent` });
+    process.exit(2);
+  }
+  const res = await send();
+  let error = null;
+  try {
+    const body = await res.clone().json();
+    error = (Array.isArray(body) ? body : [body]).find((m) => m?.error)?.error?.message ?? null;
+  } catch {
+    // not JSON: left to the writer
+  }
+  sends.raw.push({ hash, nonce, at: Date.now(), error });
+  if (wasFirst && args.mode === 'crash' && !error) {
+    say({ mode: 'crash', killedAfterSend: hash, nonce, sends });
+    process.kill(process.pid, 'SIGKILL');
+  }
+  return res;
+});
+
 let cap = Infinity;
-const { arkiv, ledger, mirror, deployBlock, confirmations, stream } = await connectMirror({
+const { ledger, mirror, deployBlock, confirmations, stream } = await connectMirror({
   env,
   log,
   // The pass ends at --to: the head is capped so `to` is the last confirmed block.
   wrapSource: (s) => ({ ...s, head: async () => Math.min(await s.head(), cap + s.confirmations), events: s.events, blockTime: s.blockTime }),
 });
+ledgerRef = ledger;
 const from = args.from ? Number(args.from) : deployBlock;
 if (args.to) cap = Number(args.to);
 if (!Number.isInteger(from) || from < deployBlock) throw new Error(`replay: --from must be a block at or after the deploy block ${deployBlock}`);
 if (Number.isFinite(cap) && (!Number.isInteger(cap) || cap < from)) throw new Error('replay: --to must be a block at or after --from');
 
 if (writes) {
-  const rows = await ledger.readHeartbeats();
-  const arkivBlock = await ledger.arkivBlock();
-  const live = rows.find((r) => r.state === 'running' && heartbeatAgeS(r, { arkivBlock }) <= STALE_AFTER_S);
+  const live = await liveWorkers();
   if (live) throw new Error(`replay: refused, workers instance ${live.instance} is running (stop it cleanly first)`);
 }
 
 const nonceAtStart = await ledger.confirmedNonce();
-const sends = { attempted: 0, refused: [], raw: [] };
 if (!writes) {
   // Every write port sends nothing and records what it was asked to write: here that
   // would be a second copy of a mirrored event. The pass goes on, so all are counted.
@@ -59,35 +103,17 @@ if (!writes) {
       sends.refused.push({ port: name, ref: what?.ref ?? null });
     };
   }
-} else {
-  // The raw transaction is where a send becomes real: race holds it to --at, crash
-  // dies right after the node took it.
-  const wallet = arkiv.walletClient;
-  const request = wallet.request.bind(wallet);
-  let first = true;
-  wallet.request = async (req, opts) => {
-    if (req?.method !== 'eth_sendRawTransaction') return request(req, opts);
-    sends.attempted += 1;
-    if (first && args.mode === 'race') await new Promise((r) => setTimeout(r, Math.max(0, Number(args.at) - Date.now())));
-    const wasFirst = first;
-    first = false;
-    try {
-      const hash = await request(req, opts);
-      sends.raw.push({ hash, at: Date.now() });
-      if (wasFirst && args.mode === 'crash') {
-        process.stdout.write(`replay: ${JSON.stringify({ mode: 'crash', killedAfterSend: hash, nonceBefore: nonceAtStart })}\n`);
-        process.kill(process.pid, 'SIGKILL');
-      }
-      return hash;
-    } catch (err) {
-      sends.raw.push({ error: err.shortMessage ?? err.message, at: Date.now() });
-      throw err;
-    }
-  };
 }
 
 await mirror.adopt();
 const adopted = mirror.checkpoint;
+if (!writes && !args.to) {
+  // Without --to, only what the workers have already weighed: up to the checkpoint, or
+  // (no checkpoint yet) the last event their heartbeat reports.
+  const beats = await ledger.readHeartbeats();
+  const seen = Math.max(0, ...beats.map((r) => r.cursorBlock ?? 0));
+  cap = Math.max(from, adopted?.block ?? seen ?? deployBlock);
+}
 if (!writes) {
   // Forget the checkpoint in memory, so every event in the range is weighed again.
   mirror.checkpoint = null;
@@ -128,5 +154,5 @@ const out = {
   nonce: { before: nonceAtStart, after: await ledger.confirmedNonce() },
   error,
 };
-process.stdout.write(`replay: ${JSON.stringify(out)}\n`);
+say(out);
 process.exit((error && !error.recovered) || sends.refused.length > 0 ? 1 : 0);

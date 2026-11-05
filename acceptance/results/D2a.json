@@ -1,7 +1,8 @@
 {
   "id": "D2a",
-  "at": "2026-11-05T21:57:01.645Z",
-  "pass": true,
+  "at": "2026-11-05T22:12:30.335Z",
+  "pass": null,
+  "why": "no mirrored edge event in the range yet",
   "what": "the mirror step again over the same blocks sends no transaction",
   "measured": {
     "checkpointForgotten": {
@@ -17,8 +18,8 @@
       },
       "wouldSend": [],
       "nonce": {
-        "before": 128,
-        "after": 129
+        "before": 151,
+        "after": 152
       }
     },
     "anchorHiddenToo": {
@@ -34,8 +35,8 @@
       },
       "wouldSend": [],
       "nonce": {
-        "before": 129,
-        "after": 129
+        "before": 152,
+        "after": 152
       }
     }
   },
@@ -45,7 +46,7 @@
   "evidence": {
     "range": {
       "from": 12313887,
-      "to": 12319423
+      "to": 12314093
     },
     "errors": []
   }

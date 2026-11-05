@@ -8,9 +8,11 @@
 //   kill      { receiptMs, refusedMs, status, reason, failEdge }
 // Each returns { id, pass, measured, expected }. Names come from the story's roles.
 
+import { config } from '@graphpay/config';
+
 const micro = (v) => BigInt(v ?? 0);
 const usdt = (m) => (Number(micro(m)) / 1e6).toFixed(2);
-const REF = /^1874:0x[0-9a-f]{64}:\d+$/;
+const REF = new RegExp(`^${config.networks.whitechain.chainId}:0x[0-9a-f]{64}:\\d+$`);
 
 function verdict(id, checks, measured, expected) {
   const failed = Object.entries(checks).filter(([, ok]) => !ok).map(([k]) => k);

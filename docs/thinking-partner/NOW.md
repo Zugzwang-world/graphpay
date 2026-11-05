@@ -60,7 +60,7 @@ Updated 02:40 IST. **M10 is merged; the presence and handoff hooks are built** (
 
 Updated 03:35 IST, Fri 6 Nov. **The mirror runs live on the real networks.** The one workers process has run on this Mac since 03:13 IST, kept awake by `caffeinate`.
 - On Arkiv's testnet: the 19 cast names registered; the labelled 5% history written (1,258 synthetic events, about 0.49 test GLM); the checkout's 9 setup events read from its deploy block. It keeps up 2 blocks (about 4 s) behind the chain head.
-- Proven live: re-reading the same blocks sends nothing (D2a). A 2-minute freeze, then a hard kill and restart, lost and repeated nothing; it took over at once and went on from the same place (D15, first pass).
+- Live so far: re-reading the same blocks sends nothing, and a 2-minute freeze, then a hard kill and restart, lost and repeated nothing; it took over at once and went on from the same place. These count as D2 and D15 only once a payment is in the window: until then the checks report "not run", not "pass".
 - The agents' hosted MCP endpoint answers through the new client, and its scores come from the mirror's history: kesar 97% on time, jamun 71% with 18% refunds (the trap).
 - Running: `pnpm workers` (port 8788 on this Mac only), a 30-minute lag sample.
 - Blockers: the first real payment (T1's M3, then M6) for D1, D2b/c and D3. T3 has a labelling fix to make (`OPEN.md`).

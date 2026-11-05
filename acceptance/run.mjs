@@ -88,7 +88,8 @@ function statusOf(c) {
   if (results.length === 0) return { status: 'not run', why: runner ? 'no result yet' : 'no runner yet', results };
   const allIn = results.length === files.length;
   const pass = allIn && results.every((r) => r.pass === true);
-  return { status: pass ? 'pass' : results.some((r) => r.pass === false) ? 'fail' : 'not run', why: allIn ? '' : `${files.length - results.length} of ${files.length} parts not run`, results };
+  const why = results.find((r) => r.pass === null)?.why ?? (allIn ? '' : `${files.length - results.length} of ${files.length} parts not run`);
+  return { status: pass ? 'pass' : results.some((r) => r.pass === false) ? 'fail' : 'not run', why, results };
 }
 
 const checks = allChecks().filter(selected);
@@ -120,7 +121,7 @@ const cell = (t) => String(t).replace(/\|/g, '\\|').replace(/\n/g, ' ');
 const lines = [
   '# Acceptance report',
   '',
-  `Written by \`pnpm acceptance\` at ${new Date().toISOString()}. Checks and pass criteria: \`planning/ACCEPTANCE_TESTS.md\` and \`docs/plan/ACCEPTANCE_ADDITIONS.md\`. Only C7, E3 and D7 may be \`blocked\`; a check without a result is \`not run\`, never \`pass\`.`,
+  `Written by \`pnpm acceptance\` at ${new Date().toISOString()}. Checks and pass criteria: \`planning/ACCEPTANCE_TESTS.md\` and \`docs/plan/ACCEPTANCE_ADDITIONS.md\`. Only D7 may be \`blocked\` (C7 and E3 no longer wait on supply, ADR-0054); a check without a result is \`not run\`, never \`pass\`.`,
   '',
   `**${count('pass')} pass, ${count('fail')} fail, ${count('blocked')} blocked, ${count('not run')} not run** (of ${rows.length}).`,
   '',

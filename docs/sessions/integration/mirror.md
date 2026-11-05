@@ -11,8 +11,8 @@ Updated 03:36 IST, Fri 6 Nov.
 ## Live run (since 03:13 IST, Fri 6 Nov)
 
 - First start: 19 cast nodes registered; history `history:test:v1:x0.05:d20762:b7d36bb9`, 1,258 events (synthetic), 03:13–03:26 IST; the chain stream from block 12,313,887: 9 setup events (OwnershipTransferred, RelayerSet, AgentPolicySet × 5, …), none needing a write; lag 2 blocks. W_LEDGER 1.998 → 1.510 tGLM.
-- D2a (`node acceptance/mirror.mjs d2a`): pass. Both replays over 12,313,887–12,319,423 would send 0 batches. The nonce moved once during the first, from the running workers' heartbeat.
-- D15, first pass (no edge events in the window yet): SIGSTOP 21:57:43–21:59:43 UTC; `/health` came back within 5 s, 127 blocks caught up, no retries. SIGKILL at 21:59:54, restart: the lease was taken at once (the claim's pid had exited), 0 nodes re-registered, history done, running in 22 s, same cursor (12,314,093:0). `refs` over 12,313,887–12,319,659: 9 events, 0 edges, pass.
+- D2a (`node acceptance/mirror.mjs d2a`): clean, but `not run` (no mirrored edge event yet). Both replays would send 0 batches; the nonce moved once during the first, from the running workers' heartbeat.
+- D15, first pass (no edge events in the window yet): SIGSTOP 21:57:43–21:59:43 UTC; `/health` came back within 5 s, 127 blocks caught up, no retries. SIGKILL at 21:59:54, restart: the lease was taken at once (the claim's pid had exited), 0 nodes re-registered, history done, running in 22 s, same cursor (12,314,093:0). `refs` over the window: 9 events, 0 edges, no duplicates; `not run` until a payment is in the window.
 - Still needed for `(M11 done)`: the first real payment (T1's M3 part B) for D1, D2b, D2c and D3; D15 again with payments in the window; the M6 watcher hosted in `main.mjs`; T1's recorder edge carrying the signing wallet (`payload.payer`, or the ref `att:<orderId>:<wallet>:<n>`).
 
 ## The D checks (`acceptance/mirror.mjs`, results in `acceptance/results/`)
