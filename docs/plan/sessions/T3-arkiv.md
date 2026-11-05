@@ -39,6 +39,10 @@ The money graph on Arkiv: the safe writer, the engine (GraphQL, explain, hosted 
 - Never run a local W_DIRECTORY script while the site is live (ADR-0033).
 - Short of time: Swarm goes first and map heartbeats second (ADR-0053); the 48-against-2 race is never cut.
 
+## Open items from other sessions (the Coordinator adds; T3 closes them by PR)
+
+- **03:10 IST, from Join (PR #20): a bug in merged `packages/money-graph`.** `publicClient.getEntity()` returns the columns under `$attributes`, but `recordEdge` (`src/recorder.mjs` ~L43), `src/quotes.mjs` ~L27 and the ledger's unstreamed verifier (`src/ledger.mjs` ~L103) read `e.attributes`, so their found-by-nonce check is always false. After an uncertain send, `recordEdge` resends and the same refusal ref gets a second edge (Join's fold guard keeps it from counting twice). Fix: `e.$attributes ?? e.attributes` in each, plus an ArkivSim test that the resend path finds the existing entity. T1's M3 recorder depends on it.
+
 ## Unattended rules
 
 1. **Keep going.** When a task merges, start the next unblocked one: your next milestone, then your Friday items (before CP4, additive with no-op defaults). Never end a turn to wait.
