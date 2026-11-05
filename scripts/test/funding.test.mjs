@@ -542,3 +542,24 @@ test('identity failures stop the whole run before any network is read, naming th
     await chain.close();
   }
 });
+
+test('an unknown argument is echoed only when it is a short lower-case word', async () => {
+  const { parseArgs } = await import('../funding/logic.mjs');
+  const token = ['Ab3', 'x'.repeat(10), 'Q9', 'z'.repeat(9)].join(''); // 24 mixed characters, built at run time
+  for (const args of [[token], ['--plan', token], ['--network', token]]) {
+    let message = '';
+    try {
+      parseArgs(args);
+    } catch (error) {
+      message = String(error.message);
+    }
+    assert.ok(message !== '' && !message.includes(token), args.join(' '));
+  }
+  let typo = '';
+  try {
+    parseArgs(['--netwrok']);
+  } catch (error) {
+    typo = String(error.message);
+  }
+  assert.match(typo, /--netwrok/);
+});

@@ -14,7 +14,9 @@ const same = (a, b) => typeof a === 'string' && typeof b === 'string' && a.toLow
 
 // A command-line value is echoed only when it is a plain word, so a key pasted in
 // the wrong place never reaches the terminal.
-const shown = (value) => (/^[A-Za-z0-9_-]{1,24}$/.test(value) ? value : 'that value');
+// Only short words are echoed (a typo such as --netwrok or a plan key); anything
+// longer or with digits might be a secret pasted by mistake (generated secrets are 24+ characters).
+const shown = (value) => (/^-{0,2}[a-z][A-Za-z-]{0,15}$/.test(String(value)) ? value : 'that value');
 
 // The networks a plan funds, in NETWORKS order.
 export function planNetworks(plan, planName) {
