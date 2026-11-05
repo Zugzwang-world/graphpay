@@ -32,7 +32,8 @@
   "later": {
     "rabdi": {
       "W_SEED_M_EVENT": "8.5",
-      "W_LEDGER": "2.0"
+      "W_LEDGER": "2.0",
+      "W_DIRECTORY": "0.5"
     }
   },
   "usdt": {
