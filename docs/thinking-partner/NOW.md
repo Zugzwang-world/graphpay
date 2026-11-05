@@ -45,7 +45,7 @@ Updated 03:55 IST, Fri 6 Nov (T3).
 
 - **Where we are:** M9, the live benchmark, is done at size S and going up as a PR. Ranking the city's shops by sales takes Graph Arkiv 2 reads against plain Arkiv's 5 (6 with every page at once), because plain code must read all 490 payments. Every Graph Arkiv answer was right; acceptance D6 passes. The report also says plainly where Graph Arkiv does not win.
 - **Also this step:** Join's receipt bug is fixed and merged (PR #25, 03:23). Two bugs were found during the benchmark and fixed: a byte counter that lost counts when reads overlapped, and one read per agent where one batched read will do.
-- **Running:** nothing. The Swarm gateway check is back: uploads are open with no account, but files may vanish at any time (OPEN, next step).
+- **Running:** nothing. The Swarm gateway check is back: uploads are open with no account, but files may vanish at any time; Swarm is the next step.
 - **Blockers:** none. Size M waits for the founder's final story (D7).
 - **Next:** Swarm (Friday items 4–5), then the presence and handoff rows (item 1).
 
