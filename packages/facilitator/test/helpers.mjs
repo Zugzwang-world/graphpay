@@ -74,6 +74,9 @@ export function fakeChain(account, overrides = {}) {
     async readState() {
       return structuredClone(chain.state);
     },
+    async nodeOfWallet() {
+      return chain.state.bound;
+    },
     async estimateSettle() {
       return chain.estimate;
     },

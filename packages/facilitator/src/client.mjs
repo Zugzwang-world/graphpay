@@ -17,8 +17,12 @@ const noncesAbi = parseAbi(['function nonces(address owner) view returns (uint25
 export function graphPayOrderClient({ account, publicClient, chainId, token, permit2, payerName, mandateHash, approvalMicro = DEFAULT_APPROVAL_MICRO, now = () => Date.now() }) {
   return {
     scheme: SCHEME,
-    async createPaymentPayload(x402Version, requirements) {
+    // context.maxAmountPerPayment: x402Client's resolved spend cap for this asset (atomic units).
+    async createPaymentPayload(x402Version, requirements, context = {}) {
       const req = requirementSchema.parse(requirements);
+      if (context.maxAmountPerPayment !== undefined && BigInt(req.amount) > BigInt(context.maxAmountPerPayment)) {
+        throw new Error('graphpay-order: the amount is above the spend control for this asset');
+      }
       if (!isAddressEqual(req.asset, token.address)) throw new Error('graphpay-order: the requirement asks for another token');
       if (req.network !== `eip155:${chainId}`) throw new Error('graphpay-order: the requirement is for another network');
       const order = fromWireOrder(req.extra.order);

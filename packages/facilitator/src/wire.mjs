@@ -85,14 +85,15 @@ export function toWireOrder(o) {
   };
 }
 
-// The Order struct as viem encodes it for the contract.
+// The Order struct as viem encodes it for the contract; 32-byte fields in lower case, as the
+// chain returns them, so string comparisons with chain reads hold.
 export function fromWireOrder(w) {
   return {
-    orderId: w.orderId,
-    parentOrderId: w.parentOrderId,
-    buyerNode: w.buyerNode,
-    shopNode: w.shopNode,
-    payerNode: w.payerNode,
+    orderId: w.orderId.toLowerCase(),
+    parentOrderId: w.parentOrderId.toLowerCase(),
+    buyerNode: w.buyerNode.toLowerCase(),
+    shopNode: w.shopNode.toLowerCase(),
+    payerNode: w.payerNode.toLowerCase(),
     merchant: w.merchant,
     amountMicro: BigInt(w.amountMicro),
     deadline: BigInt(w.deadline),

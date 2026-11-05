@@ -167,13 +167,15 @@ export function createGraphPayFacilitator(deps) {
     const ctx = { order, req, payload, payer: payload.payer, amount: order.amountMicro, nowMs };
     if (agent) {
       const verdict = await gate(payload.payerName, order.amountMicro);
+      if (Number.isInteger(verdict.epoch)) ctx.epoch = verdict.epoch;
       if (!verdict.ok) refuse(verdict.reason ?? 'ENS_READ_FAILED', { record: true, ctx });
-      if (verdict.node !== order.payerNode) refuse('ENS_NODE_MISMATCH', { record: true, ctx });
+      if (String(verdict.node).toLowerCase() !== order.payerNode) refuse('ENS_NODE_MISMATCH', { record: true, ctx });
     }
 
     // 3. On-chain reads that predict the outcome.
     const state = await deps.chain.readState({ order, payer: payload.payer });
-    ctx.bound = state.bound;
+    ctx.bound = state.bound.toLowerCase();
+    ctx.epoch ??= state.policy.epoch;
     const status = STATUS[state.order.status];
     if (status === 'CREATED' && state.order.termsHash !== termsHashOf(order)) refuse('terms_mismatch', { record: true, ctx });
     if (status !== 'NONE' && status !== 'CREATED') refuse(status === 'CANCELLED' ? 'order_cancelled' : 'already_paid', { ctx });
@@ -184,7 +186,7 @@ export function createGraphPayFacilitator(deps) {
     }
     const predicted = predictPolicy({
       payerNode: order.payerNode,
-      bound: state.bound,
+      bound: ctx.bound,
       policy: { ...state.policy, payer: payload.payer },
       spentToday: state.spentToday,
       amount: order.amountMicro,
@@ -220,12 +222,22 @@ export function createGraphPayFacilitator(deps) {
 
   // A refusal record for Arkiv, attributed to the claimed node only when the paying wallet is
   // bound to it; otherwise anyone could plant refusals in another agent's history.
+  // A refusal before the chain reads (the ENS gate) looks the binding up here, off the decision path.
   function record(refusal) {
     const { ctx } = refusal;
     if (!refusal.record || !ctx || !deps.recorder) return;
     if (!rate.records.take(ctx.payer.toLowerCase())) return;
-    const attributed = ctx.order.payerNode !== ZERO32 && ctx.bound === ctx.order.payerNode;
-    const entry = {
+    Promise.resolve()
+      .then(async () => {
+        const bound = ctx.bound ?? String(await deps.chain.nodeOfWallet(ctx.payer)).toLowerCase();
+        await deps.recorder.refused(entryOf(refusal, ctx, bound));
+      })
+      .catch(() => {}); // a recorder outage never blocks or fails a payment decision
+  }
+
+  function entryOf(refusal, ctx, bound) {
+    const attributed = ctx.order.payerNode !== ZERO32 && bound === ctx.order.payerNode;
+    return {
       onchain: false,
       status: 'rejected',
       reason: refusal.reason,
@@ -233,13 +245,11 @@ export function createGraphPayFacilitator(deps) {
       payer: ctx.payer,
       payerName: attributed ? ctx.payload.payerName : '',
       payerNode: attributed ? ctx.order.payerNode : ZERO32,
+      ...(attributed && Number.isInteger(ctx.epoch) ? { payerEpoch: ctx.epoch } : {}),
       shopName: ctx.req.extra.shopName,
       amountMicro: String(ctx.amount),
-      at: clock(),
+      at: ctx.nowMs,
     };
-    Promise.resolve()
-      .then(() => deps.recorder.refused(entry))
-      .catch(() => {}); // a recorder outage never blocks or fails a payment decision
   }
 
   const asVerify = (ctx) => ({ isValid: true, payer: ctx.payer });
@@ -263,7 +273,9 @@ export function createGraphPayFacilitator(deps) {
       const payeeKey = ctx.req.payTo.toLowerCase();
       if (!rate.global.peek('all') || !rate.payer.peek(payerKey) || !rate.payee.peek(payeeKey)) refuse('rate_limited', { ctx });
       const args = [ctx.order, ctx.payload.mandateHash, permitOf(ctx), ctx.payer, ctx.payload.signature, ctx.payload.approvalPermit];
-      const estimate = await deps.chain.estimateSettle(args);
+      // A revert here (a re-order whose parent is not paid, terms changed under us) is no verdict
+      // on the payer: refuse without a record.
+      const estimate = await deps.chain.estimateSettle(args).catch(() => refuse('simulation_failed', { ctx }));
       if (estimate > limits.maxSettleGas) refuse('gas_cap', { ctx });
       const floor = limits.minSendGas > (estimate * 12n) / 10n ? limits.minSendGas : (estimate * 12n) / 10n;
       const gas = floor < limits.maxSettleGas ? floor : limits.maxSettleGas;

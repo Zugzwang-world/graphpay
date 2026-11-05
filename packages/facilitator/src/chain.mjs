@@ -50,6 +50,10 @@ export function viemChain({ publicClient, walletClient, account, checkout, token
       };
     },
 
+    nodeOfWallet(wallet) {
+      return publicClient.readContract({ ...c, functionName: 'nodeOfWallet', args: [wallet] });
+    },
+
     // estimateGas succeeds for doomed payments too (failures are events): never a verdict.
     estimateSettle(args) {
       return publicClient.estimateContractGas({ ...c, functionName: 'settleOrder', args, account });
