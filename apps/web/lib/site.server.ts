@@ -172,13 +172,12 @@ export function siteModel(): SiteModel {
   return cached;
 }
 
-// The checkout contract, once payments add it to the config (whitechain.contracts).
-export function checkoutAddress(): string | null {
-  const contracts: Loose = config.whitechain.contracts ?? {};
-  for (const [name, value] of Object.entries(contracts)) {
-    if (/checkout/i.test(name) && typeof value === 'string' && /^0x[0-9a-fA-F]{40}$/.test(value)) return value;
-  }
-  return null;
+// The checkout contract: `whitechain.contracts.checkout.address` in the infrastructure config
+// (M2's deployment record). null while no well-formed address is recorded.
+export function checkoutAddress(contracts: Loose = config.whitechain.contracts ?? {}): string | null {
+  const checkout = contracts.checkout;
+  const address = typeof checkout === 'object' && checkout !== null ? (checkout as Loose).address : null;
+  return typeof address === 'string' && /^0x[0-9a-fA-F]{40}$/.test(address) ? address : null;
 }
 
 // The token the checkout settles in: the configured test USDT unless GRAPHPAY_TOKEN

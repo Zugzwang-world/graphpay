@@ -92,3 +92,10 @@ Symptom: a watcher fork test saw no `TextUpdated` after a pause (0 events), and 
 Cause: (1) viem caches `getBlockNumber` for its polling interval (4 s), so a poll right after a write read the old head; (2) the public Sepolia RPC refuses a `getLogs` with 19 contract addresses and accepts 10; (3) fork tests that kill a name or jump time leave the fork changed for later tests.
 Fix: `getBlockNumber({ cacheTime: 0 })`; log queries chunk addresses by 8; each stateful fork test runs between `evm_snapshot` and `evm_revert`.
 Prevention: watcher polls never rely on the client's block cache; any new `getLogs` use chunks addresses; a fork test that changes state is wrapped with the snapshot helper.
+
+### P-website-1: the site read the checkout address in a shape the config never had
+When: 2026-11-06 05:25 IST · Activity: website · Cost: about 15 minutes (found by the first live read of a route that needs the contract)
+Symptom: `/api/status` reported `checkout: null` and noted "waiting for M2 deploy" on the production site after M2 was deployed; the customer state route failed with "the checkout is not deployed".
+Cause: `checkoutAddress()` (written in the shell, before M2) looked for a string value under `whitechain.contracts`; the deployment record is `whitechain.contracts.checkout.address`. Its unit tests used a stand-in shape, so nothing failed until a route used the real config.
+Fix: read `contracts.checkout.address`, with a test against the real config.
+Prevention: a helper that reads a config section is tested against the real config file at least once, not only against the shape its author expected; a first live read of every new route is part of its step.

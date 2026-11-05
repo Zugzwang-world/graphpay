@@ -25,9 +25,10 @@ Updated 23:55 IST. **M0 done; handed over to the Coordinator** (`docs/plan/sessi
 
 ## payments
 
-Updated 04:05 IST, Fri 6 Nov (T1).
-- **M3 part A ships now:** our own x402 facilitator, the shop's 402 payment API and the refusal recorder. Two reviewer passes; pass 2 found two real holes (a cached gate answer could let an agent spend past its ENS cap for 20 s; an order that failed on-chain could be resent at our gas cost), both fixed and confirmed "ship". 77 offline tests, and the fork run passes every beat.
-- **Part B is unblocked** (T2's gate merged as #34) and starting: the payment lifecycle as `rehearsal.vitalik` on the real chain through the real ENS gate (fork rehearsal first), then the qualifying payment C7 once as `acceptance.vitalik`, then the subscription.
+Updated 04:20 IST, Fri 6 Nov (T1).
+- **The first real payments are on Whitechain Sepolia.** The qualifying payment (C7, also E3) is done, once: an agent with an ENS name paid 4.80 test USDT to Kesar Kingdom through our own facilitator, with no gas of its own: [explorer](https://explorer.testnet.whitechain.io/tx/0x87505ef2457b6e925fa7378a55fd91419e83c37fb8effc06d901884700c72c00).
+- **The whole payment lifecycle ran on the real chain** through T2's real ENS gate: pay, "already paid" on a replay, refund, re-order, an over-limit payment refused before the chain, a revoked agent recorded on-chain (then restored), a human payer, and a subscription created, renewed after 2 minutes and cancelled by signature.
+- Running: the `(M3 done)` PR. Next: M4, hosting the facilitator and the shop on Vercel.
 - Blockers: none.
 
 ## identity
@@ -64,10 +65,10 @@ Updated 04:30 IST, Fri 6 Nov. **The first acceptance report is written: 18 pass,
 
 ## website
 
-Updated 05:05 IST, Fri 6 Nov (T5 Web). **On `main`:** the shell, phone views, agent run route, merchant stream and CSV, order trail, race mode. **In a PR:** the merchant's Open toggle (Friday item 9): "Open shop" also lists the shop as open on Arkiv and renews every 5 minutes while the page is open; "Close shop" takes it off at once. It needs the `W_DIRECTORY` key on Vercel; until then the phone says it is listening only.
-- Running: nothing long. M16 (checkout kit, store) waits for M4 (not merged); customer state waits for M6's reads.
-- Blockers: the Open toggle needs `W_DIRECTORY_PRIVATE_KEY` set in Vercel (Coordinator, see OPEN).
-- Next: M16 once M4 lands; the map (item 10) once Join's live hooks (item 3) write presence. Fresh start file: `docs/sessions/website/resume.md`.
+Updated 06:05 IST, Fri 6 Nov (T5 Web). **On `main`:** the shell, phone views, agent run route, merchant stream and CSV, order trail, race mode, the Open toggle, Pause and Resume. **In a PR:** the customer phone's live state: the payer agent's status (ENS and policy), cap and spend today (the checkout contract), its last order (the graph). Read live from the three chains this session: Active, 0.00 of 6.00 USDT today. Also fixes the production status chip, which showed the checkout as not deployed.
+- Running: nothing long. M16 (checkout kit, store) waits for M4 (not merged).
+- Blockers: Pause/Resume and the Open toggle need two keys in Vercel (see OPEN).
+- Next: M16 once M4 lands; the map (item 10) and the explainer lanes (item 13) as Join's live hooks (item 3) write presence. Fresh start file: `docs/sessions/website/resume.md`.
 
 ## agentpay
 

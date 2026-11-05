@@ -1,0 +1,79 @@
+{
+  "network": "whitechain",
+  "synthetic": true,
+  "beats": [
+    {
+      "beat": "pay",
+      "at": "2026-11-05T22:44:15.092Z",
+      "http": 200,
+      "amount": "4.8 USDT",
+      "approval": "none needed",
+      "gas": "237206",
+      "from": "0x1ab82871c3e1be64717269d45f08ca9d54c1ebf6",
+      "delivery": "delivered",
+      "status": "DELIVERED",
+      "tx": "https://explorer.testnet.whitechain.io/tx/0x0bb3b1d426a0faf8e388d49b5726f920fa1024140dd4373b34ea58ce8a5a98ba"
+    },
+    {
+      "beat": "replay",
+      "at": "2026-11-05T22:44:16.575Z",
+      "http": 200,
+      "alreadyPaid": true,
+      "relayerNonce": "2 before and after"
+    },
+    {
+      "beat": "refund",
+      "at": "2026-11-05T22:44:24.718Z",
+      "amount": "0.8 USDT",
+      "gas": "75335",
+      "status": "DELIVERED",
+      "tx": "https://explorer.testnet.whitechain.io/tx/0x037b201af75e8f9b5d407575907918c7ca152876a4d2983b1955a83c4bf58416"
+    },
+    {
+      "beat": "re-order",
+      "at": "2026-11-05T22:44:45.741Z",
+      "http": 200,
+      "amount": "1.2 USDT",
+      "approval": "none needed (allowance left)",
+      "gas": "244295",
+      "status": "DELIVERED",
+      "tx": "https://explorer.testnet.whitechain.io/tx/0xab0b9d6c736588e96a5164efc089e5e0dcdfafbed2562320ad9fcae32cbbc515"
+    },
+    {
+      "beat": "over the cap",
+      "at": "2026-11-05T22:44:56.090Z",
+      "http": 402,
+      "amount": "24 USDT",
+      "left": "23.99 USDT",
+      "reason": "CAP_EXCEEDED (off-chain, the ENS gate)",
+      "sent": "nothing"
+    },
+    {
+      "beat": "revoked agent",
+      "at": "2026-11-05T22:45:22.819Z",
+      "http": 402,
+      "reason": "AGENT_REVOKED (PaymentFailed on-chain)",
+      "gas": "136586",
+      "tx": "https://explorer.testnet.whitechain.io/tx/0x05e812dccf65e255f1a25ed600cdb2e39b4a56e52172b67793c55d0cb86eb7f1",
+      "revoke": "https://explorer.testnet.whitechain.io/tx/0x20f8b2dba2b0a310773383c4653c73fa4eb773790e905c63ee89b0c2cb48d493",
+      "restored": "https://explorer.testnet.whitechain.io/tx/0x63045e36f2df6ecc4e376df64e0d628cfcc9b07a2d3a722a15e7d51dd829e559"
+    },
+    {
+      "beat": "human payer",
+      "at": "2026-11-05T22:45:37.851Z",
+      "http": 200,
+      "payer": "vitalik.graphpay.eth (wallet 0x5cB23cCEFE5585ff1d9E81330AC88DbEb0119b6e)",
+      "amount": "0.4 USDT",
+      "gas": "281661",
+      "tx": "https://explorer.testnet.whitechain.io/tx/0xf4ac5a5d4d732ebd2653bd3daeea22f803b850bc863952a1a302f48bf7620c6b"
+    },
+    {
+      "beat": "totals",
+      "at": "2026-11-05T22:45:38.948Z",
+      "rehearsalPaid": "5.2 USDT",
+      "humanPaid": "0.4 USDT",
+      "payersWbt": "unchanged",
+      "refusalRecords": "CAP_EXCEEDED (rehearsal.vitalik.graphpay.eth)"
+    }
+  ]
+}

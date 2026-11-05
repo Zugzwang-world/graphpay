@@ -22,8 +22,9 @@ export type AgentStatus = 'ACTIVE' | 'PAUSED' | 'REVOKED' | 'EXPIRED' | 'UNKNOWN
 export interface OrderSummary {
   orderId: string;
   shopEns: string;
-  item: string;
-  quantity: number;
+  // The graph's edge does not carry what was bought; null until a source does.
+  item: string | null;
+  quantity: number | null;
   amountMicro: Micro;
   status: 'PAID' | 'DELIVERED' | 'REFUNDED' | 'PARTIALLY_REFUNDED' | 'FAILED';
   transaction: string;

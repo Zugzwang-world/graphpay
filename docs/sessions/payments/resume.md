@@ -1,18 +1,18 @@
-# T1 Payments: resume note (04:05 IST, Fri 6 Nov)
+# T1 Payments: resume note (04:22 IST, Fri 6 Nov)
 
 Read `docs/plan/sessions/T1-payments.md` first; this note says where the work stands.
 
 ## Done
-- **M1 merged** (#12), **M2 merged** (#15). Notes: `m1-contract.md`, `m2-deploy.md`, `txlog.jsonl`.
-- **M3 part A**: `packages/facilitator`, `packages/shop`; reviewer pass 1 and pass 2 (both blocking sets fixed, pass 2 confirmed "ship"); PR from `pay/facilitator`, "M3 part A, not M3 done". Notes: `m3-facilitator.md`.
+- **M1** (#12), **M2** (#15), **M3 part A** (#42, 04:06 IST) merged.
+- **M3 part B** on the real chain (04:13–04:18 IST), branch `pay/part-b`, PR `(M3 done)`: C7 paid once as `acceptance.vitalik` (`c7.json`; never run `usdt-ready --go` again: it refuses anyway), the lifecycle as `rehearsal.vitalik` (`m3-lifecycle.json`), the subscription created, renewed and cancelled. scout's policy restored and read back. Notes: `m3-part-b.md`.
 
 ## Next, in order
-1. Watch the part A PR until it merges.
-2. **M3 part B** on a new branch `pay/part-b` from main: `scripts/whitechain/local-pay.mjs` (the local facilitator and shop with T2's real `createEnsGate` and `createEnsReader().resolvePayee`; the gate's policy reads from the checkout) and `scripts/whitechain/lifecycle.mjs` (rehearsal.vitalik: pay, replay, refund, re-order, over-cap, scout revoked and restored, VITALIK human). Rehearse on the fork, reviewer, then `ALLOW_REAL_NETWORK=1 … --yes`.
-3. C7 once as `acceptance.vitalik` (`usdt-ready --go --yes`), before 05:30 IST if possible so tomorrow's acceptance cap is fresh.
-4. **Subscription script** on `pay/subscription` (pushed, not reviewed): review, PR, run for real.
-5. `(M3 done)` PR, then **M4** (hosted routes, recorder W_SYNC writer, quote writer, `/api/cron/renew`; decide the one-instance rule for the facilitator, see OPEN.md).
+1. Watch the `(M3 done)` PR until it merges.
+2. **M4** (`planning/PROMPTS/04-hosted-vercel.md`, E-1, E-3): hosted routes in `apps/web/app/api/{shop,facilitator,recorder}` over the packages' Fetch handlers (`facilitatorSettings`, `shopSettings`; `local-pay.mjs` shows the composition, including the gate's policy reads), the recorder's W_SYNC writer (`recordEdge`), the quote writer (`createQuote`), `/api/cron/renew` with its cron entry; one early PR for the `apps/web` dependency change; the facilitator's one-instance rule (OPEN.md). After M4, real payments go through the hosted facilitator only, and no local script uses the hosted relayer key.
+3. Friday items (`docs/plan/MASTER_PLAN.md` §4 item 6) after the story lock.
 
 ## Open threads
-- OPEN.md: CI required check; the config has no Whitechain role addresses (merchant lists from env until it does); M4 per-instance state.
-- anvil: start it detached in a subshell, `(nohup anvil --fork-url <public RPC> --port 8547 --chain-id 1874 --silent > /dev/null 2>&1 &)`; a plain background start died mid-run.
+- OPEN.md: README link for C7; CI required check; config role addresses; M4 per-instance state.
+- C4(b) as the acceptance agent is M13's (over-cap off-chain after C2 + C3).
+- anvil: start it in a subshell, `(nohup anvil --fork-url <public RPC> --port 8547 --chain-id 1874 --silent > /dev/null 2>&1 &)`.
+- Usage rule: pause at 92% weekly (Coordinator, 04:15 IST); 79% at 04:18.
