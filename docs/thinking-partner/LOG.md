@@ -34,6 +34,8 @@ One line per PR: time (IST) · activity · result · PR link. Append under your 
 
 ## website
 
+- 01:30 IST · website · opened: the website shell (stage, both phones, explainer, race, how-it-works, passcode guard and its F2 tests, status chips) · https://github.com/Zugzwang-world/graphpay/pull/10
+
 ## records
 
 ## submission

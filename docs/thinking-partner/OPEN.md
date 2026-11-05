@@ -88,6 +88,10 @@ Updated 01:20 IST. Nothing for the founder now.
 
 ## website
 
+- **Founder to-dos:** none now. Friday: the final story config goes to the Coordinator, as before.
+- **Ask of the Coordinator:** `DEMO_PASSCODE` (at least 24 characters) must be set in Vercel Production before any spending button works; without it every spending route answers 503 "spending is off". Why: the shell fails closed. Recommendation: set it with the other generated secrets (`pnpm secrets:gen`, then `pnpm secrets:vercel`).
+- **Question (default taken):** the phone screens scale to fit the screen height (up to 390 × 844) rather than a fixed 844 px, so both phones fit one laptop screen. Recommendation: keep.
+
 ## records
 
 ## submission

@@ -1,0 +1,125 @@
+// The website's data contracts: the response shapes of WEBSITE_SPEC.md §7 and the
+// agents' run log (planning/SPEC/AGENTS.md §9). Amounts are micro-USDT as decimal
+// strings (U64 in GraphQL); hashes and keys are 0x hex.
+
+export type Micro = string;
+
+// GET /api/status
+export interface StatusResponse {
+  heads: { whitechain: string | null; sepolia: string | null; rabdi: string | null };
+  mirrorLagBlocks: number | null;
+  relayerWbt: string | null;
+  token: 'usdt' | 'standin';
+  tokenAddress: string;
+  checkout: string | null;
+  // Why a value is missing (a source not live yet, or an RPC that did not answer).
+  notes: string[];
+  at: string;
+}
+
+export type AgentStatus = 'ACTIVE' | 'PAUSED' | 'REVOKED' | 'EXPIRED' | 'UNKNOWN';
+
+export interface OrderSummary {
+  orderId: string;
+  shopEns: string;
+  item: string;
+  quantity: number;
+  amountMicro: Micro;
+  status: 'PAID' | 'DELIVERED' | 'REFUNDED' | 'PARTIALLY_REFUNDED' | 'FAILED';
+  transaction: string;
+}
+
+export interface SubscriptionSummary {
+  subId: string;
+  plan: string;
+  period: string;
+  priceMicro: Micro;
+  nextChargeAt: string | null;
+  renewals: { at: string; transaction: string }[];
+  active: boolean;
+}
+
+// GET /api/state/customer
+export interface CustomerState {
+  agent: { ens: string; status: AgentStatus; epoch: number };
+  capMicro: Micro;
+  spentTodayMicro: Micro;
+  lastOrder: OrderSummary | null;
+  subscription: SubscriptionSummary | null;
+}
+
+// Agent run log events (graphpay.agent-run/v1), sequence-numbered.
+export type TraceEvent =
+  | { seq: number; type: 'message'; from: string; to: string; text: string }
+  | { seq: number; type: 'agent.start'; agent: string; role: string; task: string }
+  | { seq: number; type: 'agent.end'; agent: string; role: string; output: unknown; usageTokens?: number; error?: string }
+  | { seq: number; type: 'tool.call'; agent: string; tool: string; input: unknown }
+  | { seq: number; type: 'tool.result'; agent: string; tool: string; output: unknown; error?: string }
+  | { seq: number; type: 'guard'; guard: string; ok: boolean; detail: string };
+
+export interface RankedShop {
+  ens: string;
+  score: number;
+  eligible: boolean;
+  reasons: string[];
+}
+
+export interface RunResult {
+  status: 'paid' | 'refused' | 'no-purchase' | 'unsettled';
+  chosenShop: string | null;
+  priceUsdt: string | null;
+  receipt: { transaction: string; network: string; payer: string; payTo: string; amountUsdt: string; explorerUrl: string } | null;
+  orderId: string | null;
+  arrivesAt: string | null;
+  ranking: RankedShop[];
+  refusals: string[];
+  narrative: string;
+  synthetic: boolean;
+}
+
+// POST /api/agents/run
+export interface RunStarted {
+  runId: string;
+}
+
+// The shop's new edges (GET /api/merchant/events), as the mirror wrote them.
+export type EdgeKind = 'order' | 'pay' | 'refund' | 'deliver' | 'fail' | 'request' | 'subscribe' | 'renew';
+
+export interface MerchantEdgeEvent {
+  kind: EdgeKind;
+  from: string;
+  to: string;
+  amountMicro: Micro;
+  orderId: string | null;
+  ref: string;
+  ts: string;
+  entityKey: string | null;
+  arkivTx: string | null;
+  settlementTx: string | null;
+}
+
+// GET /api/race: one Arkiv call, then the answer.
+export interface RaceCall {
+  call: number;
+  ms: number;
+  bytes: number;
+}
+
+export interface RaceAnswer {
+  answer: unknown;
+  correct: boolean;
+  truthBasis: 'identity' | 'name';
+  calls: number;
+  bytes: number;
+}
+
+// Every spending route answers { transaction } (Whitechain), { sepoliaTx } or { arkivTx }.
+export interface TransactionResponse {
+  transaction: string;
+}
+
+// A route that is wired but whose source has not landed yet answers 503 with this.
+export interface NotLive {
+  error: 'not live yet';
+  waitingFor: string;
+}
