@@ -5,7 +5,7 @@
 // agent). Env (names only): E2E_NETWORK=real (the fork mode is not built), E2E_BUYER
 // (rehearsal by default; payer only for the counting run), AGENT_PRESET, E2E_KILL (skip),
 // ALLOW_REAL_NETWORK=1, and the role keys through the env loader. Writes the run file and
-// the transcript to integration/runs/<run id>/ and prints the calibration row (ADR-0048).
+// the transcript to docs/sessions/integration/runs/<run id>/ and prints the calibration row (ADR-0048).
 // Never run it while another process relays with FACILITATOR, or while the website demo is
 // live.
 
@@ -34,7 +34,7 @@ let values = new Map();
 installErrorBoundary(() => values);
 values = loadEnv().values;
 const env = { ...Object.fromEntries(values), ...process.env };
-const redact = redactor(values);
+let redact = redactor(values);
 const say = (l) => process.stdout.write(`${new Date().toISOString().slice(11, 19)} ${redact(l)}\n`);
 const json = (v) => JSON.stringify(v, (_, x) => (typeof x === 'bigint' ? x.toString() : x));
 
@@ -71,6 +71,7 @@ let read = null;
 // The shop writes its quote with the directory's shop key (the read hooks' discovery).
 const stack = await startStack({ env, whitechain, sepolia, directory, sync, shopKeyOf: (name) => read.shopKey(name), log: say });
 read = createReadHooks({ ens: sepolia.publicClient, arkiv, gate: stack.gate, wallets });
+redact = redactor(new Map([...values, ...stack.secrets.map((v, i) => [`E2E_RUN_SECRET_${i}`, v])]));
 const activity = batchedActivity(directory, { log: say });
 const storefront = (shopEns) => `${stack.base}/storefront/${shopEns.split('.')[0]}`;
 const hooks = {
@@ -124,7 +125,7 @@ const assertions = [
 ];
 
 // 7. The partial refund (E), as the good shop's merchant.
-if (r.status === 'paid' && r.orderId) {
+if (r.status === 'paid' && r.orderId && r.chosenShop === good.ensName) {
   const shopKey = cast.shops.find((s) => `${s.label}.${config.root.ens}` === good.ensName).key;
   const refund = await stack.merchant.refund(shopKey, r.orderId, story.order.refundMicro);
   say(`refund ${story.order.refundMicro} micro: ${whitechain.explorerTx(refund.hash)} (${refund.status})`);
@@ -150,11 +151,11 @@ const run = buildRunFile({
   assertions,
   cost: { apiCostUsd: Number(metrics.apiCostUsd.toFixed(4)), seconds: Number(metrics.seconds.toFixed(1)), tokens: metrics.tokens },
 });
-const dir = join(here, 'runs', runLog.runId);
+const dir = join(here, '..', 'docs', 'sessions', 'integration', 'runs', runLog.runId);
 mkdirSync(dir, { recursive: true });
 writeFileSync(join(dir, 'run.json'), `${redact(json(run))}\n`);
 writeFileSync(join(dir, 'e2e-food-transcript.md'), redact(transcript(run)));
 for (const a of assertions) say(`${a.id}: ${a.pass ? 'pass' : `FAIL (${a.failed.join('; ')})`}`);
 say(`calibration: | ${new Date().toLocaleTimeString('en-GB', { timeZone: 'Asia/Kolkata', hour: '2-digit', minute: '2-digit' })} IST | e2e:food real, ${buyerKey} | ${runLog.model} | ${metrics.seconds.toFixed(1)} s | $${metrics.apiCostUsd.toFixed(4)} | ${r.status} |`);
-say(`run file: ${join('integration', 'runs', runLog.runId, 'run.json')}`);
+say(`run file: ${join('docs', 'sessions', 'integration', 'runs', runLog.runId, 'run.json')}`);
 process.exit(run.pass ? 0 : 1);

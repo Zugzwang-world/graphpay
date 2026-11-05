@@ -14,7 +14,7 @@ import { createServer } from 'node:http';
 import { randomBytes } from 'node:crypto';
 import { config, story } from '@graphpay/config';
 import { checkoutAbi } from '@graphpay/contracts';
-import { createEnsReader } from '@graphpay/ens';
+import { createEnsGate, createEnsReader } from '@graphpay/ens';
 import {
   HTTPFacilitatorClient,
   attemptEdge,
@@ -82,7 +82,27 @@ export async function startStack({ env, whitechain, sepolia, directory, sync, sh
   const walletClients = Object.fromEntries(shops.map((s) => [s.key, whitechain.walletClient(key(s.walletRole))]));
   const merchant = merchantActions({ publicClient: pub, walletClients, checkout, chain: whitechain.chain });
   const relayer = key('FACILITATOR');
+  // The payer's pre-sign gate, and the facilitator's own (T1's policy semantics, as in
+  // scripts/whitechain/local-pay.mjs: a revoked policy keeps its cap, so the contract records
+  // AGENT_REVOKED itself; the spend is the policy epoch's on the contract's UTC day).
   const gate = createPayerGate({ ens: sepolia.publicClient, whitechain: pub });
+  const policy = (node) => pub.readContract({ address: checkout, abi: checkoutAbi, functionName: 'policies', args: [node] });
+  const bound = (p) => p && p.wallet.toLowerCase() !== `0x${'0'.repeat(40)}`;
+  const facilitatorGate = createEnsGate({
+    client: sepolia.publicClient,
+    expectedEpoch: async (node) => {
+      const p = await policy(node);
+      return bound(p) ? Number(p.epoch) : null;
+    },
+    policyCapMicro: async (node, epoch) => {
+      const p = await policy(node);
+      return bound(p) && Number(p.epoch) === epoch ? BigInt(p.dailyCapMicro) : null;
+    },
+    spentToday: async (node, epoch) => {
+      const block = await pub.getBlock();
+      return BigInt(await pub.readContract({ address: checkout, abi: checkoutAbi, functionName: 'spentMicro', args: [node, epoch, block.timestamp / 86_400n] }));
+    },
+  });
   const ensReader = createEnsReader({ client: sepolia.publicClient });
   const refusals = [];
 
@@ -93,7 +113,7 @@ export async function startStack({ env, whitechain, sepolia, directory, sync, sh
     checkout,
     allowedMerchants: Object.values(merchants),
     chain: viemChain({ publicClient: pub, walletClient: whitechain.walletClient(relayer), account: relayer, checkout, token, permit2, chain: whitechain.chain }),
-    ensGate: gate.ensGate,
+    ensGate: facilitatorGate.ensGate,
     recorder: {
       refused: async (r) => {
         const edge = attemptEdge(r);
@@ -184,6 +204,8 @@ export async function startStack({ env, whitechain, sepolia, directory, sync, sh
     refusals,
     orderStatus,
     relayer: relayer.address,
+    // This run's own secrets, for the caller's redactor.
+    secrets: [passcode, authToken],
     close() {
       fServer.server.close();
       sServer.server.close();
