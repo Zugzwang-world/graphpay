@@ -27,6 +27,8 @@ export function MerchantScreen() {
   const [answer, setAnswer] = useState<ApiAnswer | null>(null);
   const [pending, setPending] = useState(false);
   const [exportNote, setExportNote] = useState<string | null>(null);
+  // In-page notifications: refused payments, refunds and deliveries, newest first.
+  const [toasts, setToasts] = useState<{ id: string; tone: 'chilli' | 'pista'; text: string }[]>([]);
 
   useEffect(() => {
     if (!open) return;
@@ -43,6 +45,8 @@ export function MerchantScreen() {
         sound('settled');
       } else if (edge.kind === 'refund') sound('refund');
       else if (edge.kind === 'fail') sound('stopped');
+      const note = edge.kind === 'fail' ? { tone: 'chilli' as const, text: `Refused: ${edge.from} was stopped before paying` } : edge.kind === 'deliver' ? { tone: 'pista' as const, text: 'Marked dispatched' } : null;
+      if (note) setToasts((prev) => [{ id: `${edge.kind}-${edge.ref}`, ...note }, ...prev].slice(0, 3));
     };
 
     const connect = async () => {
@@ -139,6 +143,19 @@ export function MerchantScreen() {
         </div>
       ) : null}
       {listening.state === 'error' ? <p className="answer answer-error">Lost the order stream; reconnecting…</p> : null}
+
+      {toasts.length > 0 ? (
+        <ul className="toasts" aria-live="polite" aria-label="Notifications">
+          {toasts.map((t) => (
+            <li key={t.id} data-tone={t.tone}>
+              <span aria-hidden="true">{t.tone === 'chilli' ? '✕' : '✓'}</span> {t.text}
+              <button type="button" className="btn btn-quiet" onClick={() => setToasts((prev) => prev.filter((p) => p.id !== t.id))} aria-label="Dismiss">
+                ×
+              </button>
+            </li>
+          ))}
+        </ul>
+      ) : null}
 
       {popup ? (
         <section className="order-pop card rise-in" aria-live="assertive" aria-label="New order">
