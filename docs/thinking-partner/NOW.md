@@ -54,13 +54,13 @@ Updated 02:40 IST. **M10 is merged; the presence and handoff hooks are built** (
 - Blockers: none. Next: merge, then wait for Join's M12 counting run; re-run the live errand if time allows.
 ## integration
 
-Updated 04:10 IST, Fri 6 Nov. **The mirror runs live (since 03:13 IST); M12's signing path now has the ENS gate; the agents' presence and hand-offs can be written live.**
-- The mirror: the cast and the labelled history are on Arkiv's testnet, 2 blocks behind the chain (PR 33 merged). Retry and drop tests ran clean; they count once a payment is in the window.
-- New: before the payer signs, the same ENS gate the facilitator uses (T2's M6) checks the agent's name, its spending policy on the checkout and today's spend; a refusal signs nothing. Live: the stage payer passes under its 6.00 cap; over-cap, unknown and policy-less agents are refused.
-- New (Friday item 3): agents' "at work" rows and hand-offs go to Arkiv in one transaction per phase and never slow an agent down.
-- Running: `pnpm workers` on this Mac.
-- Blockers: the first real payment and M12's shop side wait for T1's M3. T2's watcher (M6 part 2) is next, to host in the workers.
-- Next: host the watcher; wire the shop side and signing when M3 merges; then `pnpm e2e:food`.
+Updated 04:30 IST, Fri 6 Nov. **The first acceptance report is written: 18 pass, 0 fail, 1 blocked (the big city), 29 not run yet.** The mirror is live and has mirrored T1's first real payments.
+- The mirror wrote every real checkout event exactly once: the lifecycle as rehearsal.vitalik and the qualifying 4.80 payment as acceptance.vitalik (36 events, 25 edges). D1 (one payment = one atomic Arkiv transaction) and D3 (the scores recomputed from the raw records) pass on that real data.
+- Also passing live: CI green, secret scan, no addresses or story names in code, the ENS namespace, the payment gate for every paying agent, the explorer's contract verification, the city's top 10 and discovery, the benchmark, receipts that cannot be edited.
+- New: T2's watcher (M6) is hosted in the workers process: a killed ENS name revokes its spending policy on Whitechain.
+- Running: `pnpm workers` (restarted on the new code once this PR merges).
+- Not run yet: the payment, refund and kill checks of the full errand (M12's `e2e:food`), the hosted endpoints (M4), and D2's two write tests, which need the workers stopped around a fresh payment.
+- Next: `e2e:food` on the real networks, then fill in the C, E and F rows.
 
 ## website
 

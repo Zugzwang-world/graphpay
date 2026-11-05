@@ -1,0 +1,38 @@
+{
+  "id": "D1",
+  "at": "2026-11-05T22:54:55.224Z",
+  "pass": true,
+  "what": "one payment event writes its edge and tallies in one atomic batch",
+  "measured": {
+    "pass": true,
+    "failed": [],
+    "gasUsed": 642628,
+    "gasRatioToLab": 2.069,
+    "counts": {
+      "ops": 7,
+      "edges": 1,
+      "tallies": 4,
+      "links": 1,
+      "checkpoints": 1
+    },
+    "ops": [
+      "create edge:pay",
+      "create link:pay",
+      "patch tally:all",
+      "patch tally:day:20762",
+      "patch tally:all",
+      "patch tally:day:20762",
+      "patch checkpoint"
+    ]
+  },
+  "expected": {
+    "ops": "create edge:pay, 4 tally rows (shop all and day, payer all and day), the link, patch checkpoint; one transaction",
+    "gas": "recorded, lab 310527"
+  },
+  "evidence": {
+    "ref": "1874:0x87505ef2457b6e925fa7378a55fd91419e83c37fb8effc06d901884700c72c00:4",
+    "rabdiTx": "https://rabdi.explorer.arkiv.network/tx/0x8bbd25bd26bbe31f2104c25a214245d44dc2820166bc9c75ade22c668a979f0f",
+    "arkivBlock": 266431,
+    "whitechainTx": "https://explorer.testnet.whitechain.io/tx/0x87505ef2457b6e925fa7378a55fd91419e83c37fb8effc06d901884700c72c00"
+  }
+}

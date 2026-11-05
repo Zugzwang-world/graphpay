@@ -18,9 +18,9 @@
     },
     "q3_persona_spend": {
       "ok": true,
-      "calls": 5,
-      "explainId": "02fdba9cd9fc",
-      "bytes": 23050,
+      "calls": 2,
+      "explainId": "aff058757f18",
+      "bytes": 11644,
       "shops": 2
     },
     "q5_path": {
@@ -45,7 +45,7 @@
   },
   "allOk": true,
   "httpStatus": {
-    "200": 22
+    "200": 19
   },
-  "lowestRateLimitRemaining": 4955
+  "lowestRateLimitRemaining": 4967
 }
