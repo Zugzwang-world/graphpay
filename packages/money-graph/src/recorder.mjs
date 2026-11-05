@@ -10,6 +10,8 @@ import { dayOf } from '@graphpay/arkiv-graph';
 
 export const RECORDER_KINDS = ['fail', 'request'];
 
+const same = (a, b) => typeof a === 'string' && a.toLowerCase() === String(b).toLowerCase();
+
 export function recorderEdgeValues({ ref, kind, from, to, amountMicro = 0n, ts, orderId, payload }) {
   if (!RECORDER_KINDS.includes(kind)) throw new Error(`money-graph: the recorder writes ${RECORDER_KINDS.join(' and ')} edges, not "${kind}"`);
   if (typeof ref !== 'string' || ref === '') throw new Error('money-graph: a recorder edge needs a ref');
@@ -40,7 +42,8 @@ export async function recordEdge(arkiv, edge) {
   const values = recorderEdgeValues(edge);
   const ours = async ([k]) => {
     const e = await arkiv.publicClient.getEntity(k);
-    return (e?.$attributes ?? e?.attributes)?.ref?.value === values.ref;
+    const a = e?.$attributes ?? e?.attributes;
+    return a?.ref?.value === values.ref && a?.kind?.value === values.kind && same(a?.from_node?.value, values.from_node) && same(a?.to_node?.value, values.to_node);
   };
   const { txs, createdKeys } = await arkiv.writer.send(
     { creates: [{ def: ENTITIES.edge, values, expiration: ExpirationTime.fromDays(LIFETIME.realDays) }] },

@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { u64 } from '@arkiv-network/sdk';
-import { readAll } from '@graphpay/arkiv-graph';
+import { ExpirationTime, u64 } from '@arkiv-network/sdk';
+import { entityValues, readAll } from '@graphpay/arkiv-graph';
 import { generatePrivateKey } from 'viem/accounts';
 import { encodeFunctionData } from 'viem';
 import {
@@ -13,6 +13,7 @@ import {
   createQuote,
   discoverShops,
   findQuotes,
+  quoteValues,
   newSim,
   nodeOf,
   recordEdge,
@@ -120,6 +121,31 @@ test('an uncertain send is adopted by nonce: recorder edge, quote and unstreamed
   assert.equal(out.txs[0].recovered, true);
   const edges = (await readAll(w.reader.publicClient, ENTITIES.edge, { owner: w.ledger.owner })).filter((e) => e.ref === 'p9');
   assert.equal(edges.length, 1, 'one ledger edge');
+});
+
+// Two instances share W_DIRECTORY's nonces: one's send is lost, and the other's quote
+// for the same errand (same requestId and validUntil, another shop) lands at that nonce.
+// The other instance is another process, so it sends through the SDK, outside this
+// process's writer queue. The first must not adopt that quote; both land.
+test('a quote for another shop found at the pinned nonce is not adopted', async () => {
+  const sim = newSim();
+  const privateKey = generatePrivateKey();
+  const a = await connectArkiv({ backend: 'sim', sim, role: 'W_DIRECTORY', privateKey, recoveryMs: 2_000, pollMs: 20 });
+  const b = await connectArkiv({ backend: 'sim', sim, role: 'W_DIRECTORY', privateKey });
+  const requestId = `0x${'9'.repeat(64)}`;
+  const quote = (shop) => ({ requestId, shopKey: `0x${shop.repeat(64)}`, agentEns: BUYER, price: 4_800_000n, validUntil: at(600) });
+
+  sim.injectFault({ method: 'eth_sendRawTransaction', kind: 'fail' });
+  const first = createQuote(a, quote('a'));
+  while (sim.faults.length > 0) await new Promise((r) => setTimeout(r, 5));
+  const other = { schema: ENTITIES.quote.schema, values: entityValues(ENTITIES.quote, quoteValues(quote('b'))), expiration: ExpirationTime.fromMinutes(15), flags: { readonly: true } };
+  await b.walletClient.executeBatch({ creates: [other] }, { nonce: 0 });
+  const mine = await first;
+
+  assert.equal(mine.recovered, false, 'sent again at the next nonce, not adopted');
+  const found = await findQuotes(b.publicClient, requestId, { owner: a.owner });
+  assert.equal(found.length, 2);
+  assert.equal(found.find((q) => q.key === mine.entityKey)?.shopKey, `0x${'a'.repeat(64)}`);
 });
 
 test('a receipt cannot be edited: a simulated patch of an edge reverts, a tally patch would pass', async () => {
