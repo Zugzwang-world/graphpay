@@ -214,7 +214,9 @@ const entry = (over = {}) => ({
 test('a refusal becomes one fail edge with a unique ref and the wallet on the record', () => {
   const e = attemptEdge(entry());
   assert.equal(e.kind, 'fail');
-  assert.equal(e.ref, `att:${makeOrder().orderId}:0x00000000000000000000000000000000000000aa:CAP_EXCEEDED`);
+  assert.equal(e.ref, `att:${makeOrder().orderId}:0x00000000000000000000000000000000000000aa:${keccak256(toHex('CAP_EXCEEDED')).slice(2, 10)}`);
+  // Arkiv's str limit: 128 UTF-8 bytes.
+  assert.ok(Buffer.byteLength(e.ref) <= 128);
   assert.deepEqual(e.from, { ens: AGENT_NAME, epoch: 2 });
   assert.deepEqual(e.to, { ens: 'shop.graphpay.eth', epoch: 0 });
   assert.equal(e.amountMicro, 4_800_000n);
