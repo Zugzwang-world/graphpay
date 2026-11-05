@@ -80,7 +80,14 @@
       "0x395dc742053F1D77595ED18884628B809A34f3D6",
       "0x4fD68FB630711Ef592F24c2441eA23B270C1e442"
     ],
-    "contracts": {}
+    "contracts": {
+      "checkout": {
+        "token": "usdt",
+        "address": "0x75233b7341B9e86407e4b31599f07b8936716FcA",
+        "deployBlock": 12313887,
+        "deployTx": "0x0cf2fc150261d538bf91638af813138475bb28ff9039c6183062d8461b3b01f6"
+      }
+    }
   },
   "ens": {
     "network": "sepolia",
