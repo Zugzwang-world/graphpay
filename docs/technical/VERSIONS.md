@@ -50,6 +50,17 @@ The M0 verifier's snapshot of every package in `planning/FACTS.md` §5 is in `do
 | `@modelcontextprotocol/sdk` | 1.32.2 (`latest`, 2026-10-23) | `packages/money-graph` (M7b) | verified (the pack had from-research) |
 | zod | 4.6.7 (`latest`; the MCP SDK accepts ^3.25 or ^4) | `packages/money-graph` (M7b) | verified |
 
+## T4 agents (`agents/m10-teams`, checked 2026-11-06 01:30 IST)
+
+| item | pinned | how checked | status |
+|---|---|---|---|
+| `ai` | 7.0.162 (`packages/agents`) | the lab's pin; still exists per the M0 verifier (`docs/technical/FACTS.md`, `latest` is 7.0.163); installed from the registry tarball, API names read from its shipped `dist/index.d.ts` and `docs/` (`ToolLoopAgent`, `Output.object`, `isStepCount`, `wrapLanguageModel`, `ai/test` `MockLanguageModelV4`) | verified (not the newest patch; the lab's tests ran on it) |
+| `@ai-sdk/anthropic` | 4.0.96 | same (`latest` 4.0.97); `providerOptions.anthropic.effort` and native structured output for Opus 5.5 read from its shipped docs | verified |
+| `zod` | 4.6.7 | = `latest` (FACTS.md) | verified |
+| `graphql` | 16.14.2 | same pin as `packages/arkiv-graph`; the mock MCP runs real graphql-js | verified |
+
+Not installed: `@ai-sdk/mcp` (the live MCP client is Join's wiring in M12, through the `McpLike` interface) and `@ai-sdk/xai` (Grok is optional, not built).
+
 ## Website (`apps/web`, web session, checked 2026-11-06 00:30 IST)
 
 | item | pinned | how checked | status |
