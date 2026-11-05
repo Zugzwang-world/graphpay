@@ -1,0 +1,47 @@
+# Amendment: M5 and M6 (ENS)
+
+**Applies to** `planning/PROMPTS/05-ens-namespace.md` (cited 05:L*n*), `planning/PROMPTS/06-ens-gate-kill-watcher.md` (06:L*n*) and `planning/SPEC/IDENTITY_ENS.md` (ID:L*n*). **Owner:** T2. **Sources:** `planning/EVENT_ADDENDUM.md` part B; the founder's decisions of Thursday night, D1–D9 (ADRs in `docs/decisions/`) (here D3 no ENSIP-31, ADR-0038; D6 one config file, ADR-0030; D8 the hosted MCP). Where this file and `planning/` differ, this file wins; `planning/` is never edited.
+
+## 1. Changes
+
+| # | change | supersedes or extends |
+|---|---|---|
+| 1 | **Names and addresses from one file (D6).** Every name comes from `cast` in `packages/config/graphpay.config.json` (tonight the pack's cast is the test cast; the demo cast is added on Friday). The root, every ENSv2 contract address and every published URL come from its `ens` and `site` sections. No name or address literal in `packages/ens` or `scripts/ens` (acceptance A7). The address verifier compares the `ens` section with the deployments page. Where `GRAPHPAY_ROOT_ENS` or `ENS_ALLOWED_ROOTS` is still read, it must equal the config or the service refuses to start; each signer's derived address must equal its role's address in the config. | 05:L10 ("one config file" is now this file); 05:L7, 05:L12 ("the 13 agents of `SPEC/AGENTS.md` §1" → every agent of the active cast); ID:L7; ID:L43 |
+| 2 | **`graphpay.eth` records (ENSIP-26),** seeded in R_root's deploy: `agent-context` (short Markdown: what GraphPay is, its read-only tools, "synthetic demo data, testnets only"); `agent-endpoint[mcp]` = `site.url` + `site.mcpPath`, which is `<site url>/api/mcp` (D8; T3 builds it, M7 amendment §8); `agent-endpoint[web]` = `site.url`. The texts live in the config's `ens` section. | extends ID:L67 (A1 seed calls), the records table ID:L98–L109 and 05:L12 (A) |
+| 3 | **Every agent:** `agent-context` (one line: role, principal, "synthetic demo cast", and "held by the owner's wallet" where that is so, 05:L24) and `agent-endpoint[mcp]` = `site.url` + `site.mcpPath` (the hosted tools answer for any agent by name). Both are seeded in the resolver deploy (C1). `agent-endpoint[a2a]` is dropped: the agent card is not built (`SPEC/PAYMENTS_WHITECHAIN.md` §6). | ID:L82 (C1 seeds); ID:L101 (the agent no longer writes its endpoint); ID:L102 |
+| 4 | **Whitechain receiving address,** coin type 2147485522 (`0x80000752`, `toCoinType(1874)`): each shop's resolver holds the merchant wallet its cast entry binds; each paying agent's resolver holds its own wallet. Same seeds as the pack, now required. | confirms ID:L77, ID:L82, ID:L108 |
+| 5 | **The payer resolves the payee from ENS at pay time.** `packages/ens` exports `resolvePayee(shopName)`: the gate's registry walk (REGISTERED, own resolver at offset 0, not synthetic), then `addr(2147485522)`, exactly 20 bytes. Empty or malformed → `PAYEE_UNRESOLVED` (empty is not an error, ID:§6). Cache 20 s, keyed by the exact spelling, invalidated by the watcher. Users: §2. | extends ID:L108 and ID:§7 |
+| 6 | **Key-limited permissions.** For each agent that holds its own wallet (payer, scout, rehearsal, acceptance, every disposable), the owner grants exactly two setters with `grantSetterRoles`: `setText` for `agent-context`, and `setAddress` for coin type 2147485522. Never `graphpay.cap_micro`, `graphpay.status`, `x-graphpay-accepts`, `graphpay.principal`, `graphpay.kind`, any `agent-endpoint[…]` or another coin type. Owner-held agents get no grant (their holder already has `ALL_ROLES`), so they take 2 transactions. A self-held agent stays at 3 if one grant call can carry both setters, otherwise 4. | ID:L58; ID:L84 (C3); 05:L3 ("limited to one record"); 05:L12 (C) ("`agent-endpoint[mcp]` only"); 06:L12 (`provisionDisposable`: 3 → 3–4 transactions) |
+| 7 | **D3: no ENSIP-31.** No `payment-preference` data record. Each shop's resolver seeds the **text** record `x-graphpay-accepts` = `0x0001000002075214cedfb56113143d55b2358b8cfbb0deb5ad2f55a7` (ERC-7930: test USDT on chain 1874). The encoder and parser stay: the script writes the encoder's output for the configured chain and test USDT; a unit test requires it to equal the value stored in the config byte for byte, and keeps the draft's own vectors; a malformed record is ignored whole. `packages/ens` exports `readAccepts(shopName)`. No `setData` call or ENSIP-24 read anywhere. | 05:L3; 05:L12 (B); 05:L14; ID:L77; ID:L109; ID:L111–L114 (`pickPaymentPreference` → `readAccepts`) |
+| 8 | **Tests:** unit (cast names from the config, namehash, coin type, ERC-7930 vectors, role bitmaps); fork: the agent's `setText(agent-context)` and `setAddress(2147485522)` land, while its `setText` of `graphpay.cap_micro`, `graphpay.status`, `x-graphpay-accepts` or `agent-endpoint[mcp]`, and `setAddress(60)`, revert `EACUnauthorizedAccountRoles`; both transfer reverts; the wildcard; `resolvePayee` refuses an unregistered name. | 05:L14 |
+| 9 | **Done when:** B1 and B5, the amended B3 and B4, B8's record reads (its MCP call waits for M7b) and B9 (a)'s address reads (its payee comparison waits for a payment) pass on real Sepolia (acceptance additions); `graphpay.status` reads `active` for every agent of the active cast and for the working and disposable agents. | 05:L19–L20 |
+
+## 2. Tell the other sessions
+
+- **T1 (M3, M4):** the shop API answers a 402 only if its `payTo` equals `resolvePayee(<its own shop name>)` (cached 20 s); a mismatch or a read failure → 503, logged, no 402. `SHOP_MERCHANTS` and `ALLOWED_MERCHANTS` are built from the config, never typed in. Quote writing: M7 amendment §5.
+- **T4 (M10):** in guard G5, "`payTo` = the approved shop's payout address" (`SPEC/AGENTS.md` L60) now means the value `resolvePayee(approved shop)` returns after the 402 arrives and before signing, never one captured earlier. Refusals `PAYEE_MISMATCH` and `PAYEE_UNRESOLVED`, with no signature. When the 402's token is test USDT, its network and asset must be an entry of `readAccepts(shop)`. Test USDT arrived at kickoff and carries the main flow (ADR-0045), so the check applies to every USDT payment; a stand-in payment, if T1 deploys a stand-in at all, skips it and the feed says "stand-in: accepts record not applied".
+- **Join (M12):** wire `resolvePayee` and `readAccepts` into the live hooks in `integration/`.
+- **main:** the address grep (A7) in `pnpm check`; the config's `ens` and `site` sections (the site URL is M0's Vercel production domain).
+
+## 3. What M6 must know
+
+- The gate is unchanged: status and cap stay owner-only, and B3 proves an agent cannot write them.
+- Watcher (06:L14, ID:L156–L164): `AddressUpdated` for coin type 2147485522 on a shop's resolver → invalidate `resolvePayee`'s cache; `TextUpdated` on `x-graphpay-accepts` → invalidate `readAccepts`; on a paying agent's resolver, log only. **The watcher never copies an ENS address into a policy** (the same rule as for the cap, ID:L159). `DataUpdated` is ignored.
+- `provisionDisposable()` includes the two grants. Kill timings (B6, E7) still count from the kill's receipt.
+
+## 4. On-chain ABI facts (verified at M0, `docs/technical/FACTS.md`, API notes)
+
+1. `grantSetterRoles(bytes setter, address account)` takes **one** ABI-encoded setter call per grant and scopes it by its second argument: the text key for `setText` (resource `keccak256(bytes(key))`), the coin type for `setAddress` (resource `keccak256(abi.encode(coinType))`). The name argument is discarded, so a grant covers that key on every name the resolver serves: one resolver per agent is what keeps agents apart. `grantRoles` always reverts. A self-held agent therefore takes 4 transactions (resolver, register, two grants) unless the resolver's `multicall` carries both grants: try it on the fork.
+2. Every setter takes the **DNS-encoded name** (`bytes`): `setText(bytes,string,string)` `0xc7279f88`, `setAddress(bytes,uint256,bytes)` `0xb4436dde`. Seed calls in `initialize` use the name's own encoding, never `0x00` (a default record leaks, `planning/SPEC/IDENTITY_ENS.md` §10).
+3. Events: `TextUpdated(uint256 indexed recordId, string indexed keyHash, string key, string value)`, `AddressUpdated(uint256 indexed recordId, uint256 coinType, bytes addressBytes)`, `DataUpdated` (exists; nothing listens), `Linked(uint256 indexed recordId, bytes32 indexed node, bytes name)` maps a record id to its node.
+4. An unscoped setter reverts `EACUnauthorizedAccountRoles`: confirm on the fork rehearsal.
+5. Reads: the Universal Resolver proxy `resolve(bytes name, bytes data)` reaches UniversalResolverV2 through **two** proxy hops (the address verifier must follow both); `getEnsAddress({ coinType: 2147485522 })` through it returns the 20-byte record: confirm on the fork.
+
+## 5. Settled by main (22:25 IST)
+
+1. **Stand-in against D3:** moot. Test USDT arrived (ADR-0045); the accepts check applies to every USDT payment.
+2. **The agent's endpoint write ends** (addendum B3 is newer than the pack): the owner writes `agent-endpoint[…]` at provisioning. The ENS demo moment in `planning/SPONSOR_CHECKLIST.md` becomes: "the payer agent updates its own `agent-context`; its attempt to raise its own cap reverts".
+
+## 6. ADRs
+
+Recorded at M0: ADR-0036 (key-limited permissions), ADR-0037 (ENSIP-26 records and the hosted MCP), ADR-0038 (no ENSIP-31), ADR-0046 (payee from ENS at pay time), ADR-0030 (one config file). Record any deviation you make as a new ADR.
