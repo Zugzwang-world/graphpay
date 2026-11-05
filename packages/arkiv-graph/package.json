@@ -1,0 +1,21 @@
+{
+  "name": "@graphpay/arkiv-graph",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "A graph layer over Arkiv: developer-defined nodes, edges and totals, a safe writer, owner-scoped reads and an in-memory Arkiv node for tests.",
+  "exports": {
+    ".": {
+      "types": "./index.d.ts",
+      "default": "./index.mjs"
+    }
+  },
+  "types": "./index.d.ts",
+  "scripts": {
+    "test": "node --test \"test/*.test.mjs\""
+  },
+  "dependencies": {
+    "@arkiv-network/sdk": "1.0.1",
+    "viem": "2.57.16"
+  }
+}
