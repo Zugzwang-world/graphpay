@@ -15,6 +15,9 @@ export function createPolicySink({ configured, readPolicy, writePolicy, log = ()
     if (epoch < Number(cur.epoch)) return { skipped: `the chain holds a newer epoch (${cur.epoch})` };
     // A revocation is built from the chain's own policy alone, so it never depends on the list. Anything
     // that opens a policy again needs the configured cap; the wallet is the one the chain already binds.
+    // An unregister bumps the epoch, so a label can never be live again at the epoch it was killed at: a lift
+    // at the same epoch is a replay, or someone else's revocation, and is not the watcher's to undo.
+    if (revoked === false && cur.revoked && epoch === Number(cur.epoch)) return { skipped: 'a revocation at this epoch is not lifted' };
     const cfg = configured(node);
     const isRevoked = revoked ?? Boolean(cur.revoked);
     const reopens = !isRevoked && (Boolean(cur.revoked) || epoch !== Number(cur.epoch));

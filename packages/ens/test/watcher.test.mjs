@@ -219,9 +219,10 @@ test('policy sink: never creates a policy; a revoke needs no list and writes cap
 test('policy sink: reopening takes the configured cap and never an ENS value; a plain renew keeps the cap and a never-expiring policy', async () => {
   const written = [];
   const mk = (cur, configured = () => cfg) => createPolicySink({ configured, readPolicy: async () => cur, writePolicy: async (c) => written.push(c) });
-  await mk(policy({ revoked: true, dailyCapMicro: 0n })).updatePolicy({ node: NODE, epoch: 0, revoked: false, expiry: 99n });
-  assert.deepEqual(written.pop(), { node: NODE, epoch: 0, wallet: cfg.wallet, revoked: false, capMicro: 5_000_000n, expiry: 99n });
-  assert.match((await mk(policy({ revoked: true, dailyCapMicro: 0n }), () => undefined).updatePolicy({ node: NODE, epoch: 0, revoked: false })).skipped, /no configured/);
+  assert.match((await mk(policy({ revoked: true, dailyCapMicro: 0n })).updatePolicy({ node: NODE, epoch: 0, revoked: false, expiry: 99n })).skipped, /not lifted/);
+  await mk(policy({ revoked: true, dailyCapMicro: 0n })).updatePolicy({ node: NODE, epoch: 1, revoked: false, expiry: 99n });
+  assert.deepEqual(written.pop(), { node: NODE, epoch: 1, wallet: cfg.wallet, revoked: false, capMicro: 5_000_000n, expiry: 99n });
+  assert.match((await mk(policy({ revoked: true, dailyCapMicro: 0n }), () => undefined).updatePolicy({ node: NODE, epoch: 1, revoked: false })).skipped, /no configured/);
   await mk(policy({ expiry: 50n, dailyCapMicro: 1_000_000n })).updatePolicy({ node: NODE, epoch: 0, expiry: 99n });
   assert.deepEqual(written.pop(), { node: NODE, epoch: 0, wallet: cfg.wallet, revoked: false, capMicro: 1_000_000n, expiry: 99n }); // the owner-set cap is kept
   assert.equal((await mk(policy()).updatePolicy({ node: NODE, epoch: 0, expiry: 99n })).inStep, true);
