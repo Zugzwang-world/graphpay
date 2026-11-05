@@ -164,6 +164,7 @@ The interface: `verify(paymentPayload, requirements)`, `settle(paymentPayload, r
 
 - `httpFacilitator({ url, authToken })`: the x402 facilitator HTTP API (`POST /verify`, `POST /settle`, `GET /supported`, bearer token), https only. This is the adapter for GraphPay's own facilitator.
 - `inProcessFacilitator(f)`: any object with `verify` and `settle` (an `x402Facilitator` with the graphpay-order scheme registered).
+- Both adapters are tested against GraphPay's own facilitator (`@graphpay/facilitator`) on an anvil fork: `test-fork/t1-facilitator.test.mjs`.
 - `createReferenceRelayer({ walletClient, publicClient, allowedMerchants, limits?, identity? })`: a small relayer for tests and small deployments. It checks the payload for free, recovers the signature locally, predicts the on-chain outcome (order status, Permit2 nonce, balance, allowance or approval, the pass), and sends only what will settle, one transaction at a time. Anti-drain limits (`RELAYER_DEFAULTS`): a relayer balance floor (0.1 WBT), a per-order cap (10.00), an hourly cap on count (30) and value (50.00), a per-payer rate (10 a minute) and a gas ceiling per transaction (450,000 for a settlement; the heaviest measured is 312,024).
 
 ### Interfaces

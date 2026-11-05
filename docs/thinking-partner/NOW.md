@@ -71,11 +71,11 @@ Updated 05:05 IST, Fri 6 Nov (T5 Web). **On `main`:** the shell, phone views, ag
 
 ## agentpay
 
-Updated 04:10 IST, Fri 6 Nov (T6 AgentPay). **`@graphpay/agentpay` V1 is merged (PR 38), and the first real test payment through it settled on Whitechain Sepolia:** the rehearsal agent paid the good shop 0.01 test USDT with one signature and no gas (https://explorer.testnet.whitechain.io/tx/0xfbd7d307b1b0c08f3af015b4bdb03aaeed12d0c2d18c2553432cb4679ff14c7e, 309,451 gas, order PAID on-chain).
-- Proven on an anvil fork (13 tests): payment, refusals in code, refund request and refund, CSV, relayer limits, subscription renew and cancel, both examples. 36 offline tests in CI.
-- The ride example stays on the fork: its operator is not in the cast, and the mirror would park the event (OPEN).
-- Running: nothing. Blockers: none.
-- Next: the T1 facilitator adapter test once M3 merges; a resume file by 08:00.
+Updated 04:20 IST, Fri 6 Nov (T6 AgentPay). **A4 done: the SDK's merchant now settles through GraphPay's own facilitator (T1, PR 42), not only through its reference relayer.** On an anvil fork, a gasless buyer agent paid the SDK merchant twice through T1's real pipeline: once in process, once over T1's HTTP handler with a bearer token. Both orders are PAID on-chain, sent by T1's relayer.
+- Also proven there: a wrong bearer token is refused by T1 and nothing is sent; an agent T1's ENS gate refuses fails closed before any send.
+- V1 (PR 38) and the first real test payment (PR 41, 0.01 test USDT, https://explorer.testnet.whitechain.io/tx/0xfbd7d307b1b0c08f3af015b4bdb03aaeed12d0c2d18c2553432cb4679ff14c7e) are merged. 17 fork tests, 36 offline tests in CI.
+- Running: nothing. Blockers: none. The ride stays on the fork (OPEN).
+- Next: a resume file by 08:00 (A5); npm publish waits for the founder's login.
 
 ## records
 
