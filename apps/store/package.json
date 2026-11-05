@@ -1,0 +1,29 @@
+{
+  "name": "@graphpay/store",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "A small demo store (Vercel project graphpay-store) that sells a synthetic shop's sweets through @graphpay/checkout-kit: pay from a browser wallet, a merchant view, an accountant export (M16).",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "typecheck": "tsc --noEmit",
+    "test": "node --test \"test/*.test.*\""
+  },
+  "dependencies": {
+    "@graphpay/checkout-kit": "workspace:*",
+    "@graphpay/config": "workspace:*",
+    "@graphpay/contracts": "workspace:*",
+    "next": "16.4.5",
+    "react": "19.3.1",
+    "react-dom": "19.3.1",
+    "viem": "2.57.16"
+  },
+  "devDependencies": {
+    "@types/node": "22.20.5",
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
+    "typescript": "5.9.3"
+  }
+}
