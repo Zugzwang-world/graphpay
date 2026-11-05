@@ -10,7 +10,7 @@ import { createGraphPayShop } from '@graphpay/checkout-kit';
 
 export const shop = createGraphPayShop({
   shopEns, merchant, catalog, publicClient,  // your shop's name, payout address, items, a Whitechain client
-  facilitatorUrl: process.env.FACILITATOR_URL!, facilitatorToken: process.env.FACILITATOR_TOKEN!,
+  facilitatorUrl: process.env.FACILITATOR_URL!, facilitatorToken: process.env.FACILITATOR_AUTH_TOKEN!,
   passcode: process.env.DEMO_PASSCODE,       // required (or `open: true`): the relayer pays gas, so gate who may pay
 });
 
