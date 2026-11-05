@@ -64,6 +64,7 @@ Short records, one file each (skill `adr`). Lab decisions are adopted from `plan
 | [ADR-0059](ADR-0059-non-paying-agents-publish-a-zero-cap-in-ens.md) | Non-paying agents publish a zero cap in ENS | accepted |
 | [ADR-0060](ADR-0060-hosted-graphql-and-mcp-are-thin-stateless-routes.md) | Hosted GraphQL and MCP are thin, stateless routes | accepted |
 | [ADR-0061](ADR-0061-swarm-public-content-through-the-gateway-encrypt-client-side.md) | Swarm: public content through the gateway, evidence encrypted client-side | accepted |
+| [ADR-0062](ADR-0062-pause-every-session-at-92-percent-of-the-weekly-limit.md) | Every session pauses gracefully at 92% of the weekly plan limit | accepted |
 
 ## Proposed in the pack, recorded by the owning session when taken
 

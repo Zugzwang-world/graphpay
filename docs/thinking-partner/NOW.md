@@ -1,19 +1,20 @@
 # NOW
 
-Updated 03:10 IST, Fri 6 Nov (Coordinator)
+Updated 04:45 IST, Fri 6 Nov (Coordinator)
 
 ## Summary (Coordinator only)
 
-Updated 03:10 IST, Fri 6 Nov. **Four milestones are merged: M7a (the Arkiv writer, 01:51), M1 (the checkout contract, 01:51), M10 (the agents) and M2 (the checkout deployed and verified on Whitechain).** In progress: M5 (ENS, T2), M3 (shop and facilitator, T1), M7b and the small-city seeding (T3), M11 (the mirror, Join), the website (T5) and the agent hooks (T4, PR #16).
+Updated 04:45 IST, Fri 6 Nov. **The first real payment is on-chain (04:14 IST),** and the core is nearly complete:
+- Merged: M1–M3, M5–M10, the mirror (M11) and the first acceptance report (18 pass, 0 fail, 1 blocked, 29 not yet run).
+- The payment: 4.80 test USDT, ENS-gated, gasless for the payer, through our facilitator ([the transaction](https://explorer.testnet.whitechain.io/tx/0x87505ef2457b6e925fa7378a55fd91419e83c37fb8effc06d901884700c72c00)).
+- Join is running the real `e2e:food`. T1 is on M4 (hosting), T5 on the website and the checkout kit, T6 on the AgentPay SDK, T3 on Friday items.
 
-Two risks for the founder (`OPEN.md` "Founder now"):
-- **Power and lid:** the lid closed at 02:14 and the Mac slept until 03:01, so every session lost about 47 minutes; it runs on battery.
-- **Plan usage:** 76% at 03:36, about 3.75 points an hour with seven sessions, resetting Fri 21:30 IST. The track sessions run the planned models, the busiest restart fresh at milestone boundaries, and at 03:37 the four Opus sessions stepped down from xhigh to high. Extra usage is the founder's decision.
+**Plan usage:** 79% at 04:33. The founder decided every session pauses gracefully at 92% (ADR-0062), and all track sessions run at high. The Mac is on power with the lid open.
 
 Next:
-1. M5 merges (T2), then T1's M3 part B and Join's real mirror runs.
-2. CP4 (acceptance) moves to about 06:15 IST after the lost 47 minutes.
-3. The large city waits for the founder's story lock (by Fri 08:30 for rehearsal 1, at the latest 13:00; seeding starts by 14:00).
+1. CP4: the acceptance report fills in as `e2e:food` and the live checks run (expected about 06:15).
+2. M4 hosting (T1), then the checkout kit (T5).
+3. The founder's story brief by 08:30 for rehearsal 1; the large city starts seeding by 14:00.
 
 ## foundation
 
@@ -25,11 +26,11 @@ Updated 23:55 IST. **M0 done; handed over to the Coordinator** (`docs/plan/sessi
 
 ## payments
 
-Updated 04:20 IST, Fri 6 Nov (T1).
-- **The first real payments are on Whitechain Sepolia.** The qualifying payment (C7, also E3) is done, once: an agent with an ENS name paid 4.80 test USDT to Kesar Kingdom through our own facilitator, with no gas of its own: [explorer](https://explorer.testnet.whitechain.io/tx/0x87505ef2457b6e925fa7378a55fd91419e83c37fb8effc06d901884700c72c00).
-- **The whole payment lifecycle ran on the real chain** through T2's real ENS gate: pay, "already paid" on a replay, refund, re-order, an over-limit payment refused before the chain, a revoked agent recorded on-chain (then restored), a human payer, and a subscription created, renewed after 2 minutes and cancelled by signature.
-- Running: the `(M3 done)` PR. Next: M4, hosting the facilitator and the shop on Vercel.
-- Blockers: none.
+Updated 05:05 IST, Fri 6 Nov (T1).
+- **M3 is done (#45):** real payments on Whitechain through T2's ENS gate, including the qualifying payment (C7).
+- **M4 is in its PR:** the shop, our facilitator, the refusal recorder and a renewal job every minute, as routes on the public site. Two reviews (security and correctness), both fixed. The server keys are on Vercel as Sensitive values.
+- Next: merge and deploy, then `pay:public` pays one 0.40 through the public URL. Join relays through the hosted facilitator once it is live, which ends the one-sender-per-key juggling.
+- Blockers: none. One check: the per-minute cron needs a Vercel plan that allows it, and the PR's preview build tells us.
 
 ## identity
 Updated 04:25 IST. **M6 is built: the gate is merged (PR #34); the watcher PR is open.** The watcher keeps the payment policy and the Arkiv node standing in step with ENS: a kill revokes the policy, a pause shows on the node, a lapse is caught by a 30 s ticker, and it never creates a policy or copies an ENS cap into one. Join hosts it in the workers process.
@@ -82,14 +83,13 @@ Updated 04:20 IST, Fri 6 Nov (T6 AgentPay). **A4 done: the SDK's merchant now se
 
 ## records
 
-Updated 03:20 IST. **Checked every session after the 02:14–03:01 sleep: none is hung.**
-- T3's long step (the budget test printing its calls and errors, about 39 minutes) ended when T3 did its fresh start. T3 now runs on a 150K-token context, down from 510K, and is writing its M8/M7b relay.
-- T5 restarted from its run file with its start line (fresh, 164K tokens).
-- T1 got its start line at 03:08 after a fresh start. T2, T4 and Join got theirs at 03:12; Join's gates (M2, M5) are open.
-- **M0's one failed background task:** "fast-forward the main checkout" (Thu 23:56) aborted with "Please commit your changes", because the prompt-log hook had appended M0's last prompt to its committed log. It mattered: the secret helpers, the funding script and the hook itself run from the main checkout. Fixed at 03:14: the main checkout is on `main` (2dd307d), and M0's extra line and one session's extra lines are committed here. The cause (P-records-1: every session's log was written to the main checkout) is fixed in this PR, with a reviewer pass.
-- Usage: 75% at 03:15 IST (resets Fri 21:30 IST). The founder's extra-usage decision is still open.
-- 03:30: the hook fix is live (the main checkout is on #24), and the seven old prompt logs are swept into a records PR as `*.main-checkout.jsonl`. The main checkout is clean.
-- Next: records again about 04:45.
+Updated 04:45 IST. **The Coordinator is on duty**, ticking every 20 minutes.
+- Done since 03:20:
+  - the prompt-log hook fix and its sweep (#24, #27); T6 added to the records (#28);
+  - the effort steps (#29), then all at high on the founder's instruction; ADR-0061 Swarm (#32); ADR-0062 the 92% pause (this PR);
+  - gates passed for M7a, M1, M5, M6, M3 and the first payment; T1's FACILITATOR held while Join runs `e2e:food`;
+  - the top-ups to plan targets (WALLETS §2b); three secrets set in Vercel Production for T5 (the Open toggle, Pause/Resume, the passcode).
+- Next: CP4's relay when the acceptance report is complete; records again about 06:45.
 
 ## submission
 

@@ -66,6 +66,23 @@ Plan: `scripts/funding/plan.json` (`planning/WALLETS.md` §3; plus W_DIRECTORY, 
 
 FUNDER after (22:20 IST): **2.644484 WBT** (reserve floor 0.2), **0.275894 Sepolia ETH**, **1.058367 tGLM**, **31.75208 test USDT**. OPERATOR keeps its own 0.095 Sepolia ETH for the namespace. Sepolia gas at funding time: base fee about 20 wei plus a 3 wei tip, far below the 0.5 gwei stop, so the ENS track's real run is clear.
 
+## 2b. Event top-ups and other uses (the Coordinator)
+
+| time (IST) | what | detail |
+|---|---|---|
+| Fri 04:10 | RENEWER's second use: the relayer for T6's first real AgentPay SDK payment (rehearsal.vitalik → kesar-kingdom, 0.01 test USDT, gasless, 309,451 gas) | [0xfbd7…4c7e](https://explorer.testnet.whitechain.io/tx/0xfbd7d307b1b0c08f3af015b4bdb03aaeed12d0c2d18c2553432cb4679ff14c7e) |
+| Fri 04:2x | top-up to plan targets from FUNDER (`pnpm -s funding --execute --real`): DEPLOYER 0.019635 WBT | [0xd17c…a92a](https://explorer.testnet.whitechain.io/tx/0xd17c8eb56c484e834642a46a92f7cb896d681d8d4cf0d427165799b29635a92a) |
+| Fri 04:2x | RENEWER 0.001547 WBT | [0x2029…e2ea](https://explorer.testnet.whitechain.io/tx/0x2029c2670aaa715aae59868766f1dd024c4aee7299211793c4d0455af278e2ea) |
+| Fri 04:2x | POLICY_WRITER 0.002380 WBT | [0x149c…441f](https://explorer.testnet.whitechain.io/tx/0x149cab165216f98e50b7243c9240e46d74227367bfa4b7e2ec962d1313c4441f) |
+| Fri 04:2x | SHOP_JAMUN 0.000266 WBT | [0x4b01…0291](https://explorer.testnet.whitechain.io/tx/0x4b01da9b0bb34f126cb84796105dbe709eb2335ed0b28989f4715c477df80291) |
+| Fri 04:2x | SHOP_SYRUP (back to its 0.02 target) | [0xebe2…b4bf](https://explorer.testnet.whitechain.io/tx/0xebe219aaccde6281fdd43299841860c98aebdc72eb8279be9ba2d12f3774b4bf) |
+| Fri 04:25 | after the top-up, every role on all three chains is at target; FUNDER keeps 2.618034 WBT, 0.274894 Sepolia ETH, 15.082973 tGLM | dry run, `pnpm -s funding` |
+| Fri 05:0x | DISPOSABLE_1 joins the fresh roles (config) for the kill check; `--plan usdt` for real: DISPOSABLE_1 1 test USDT | [0xfd8a…1681](https://explorer.testnet.whitechain.io/tx/0xfd8a818daf82e6dd2fcfb4bfc966429783282ea00096a8752ec55b00e69b1681) |
+| Fri 05:0x | the same run, payers back to their plan targets: ACCEPTANCE_PAYER 4.8 · PAYER 4 · VITALIK 0.4 · REHEARSAL_PAYER 6.01 test USDT | [0x4065…b419](https://explorer.testnet.whitechain.io/tx/0x406521b913687733d76b30e5e855f055cc22da9a6844173041f6456bb52fb419) · [0x4302…f60c](https://explorer.testnet.whitechain.io/tx/0x43021328c21d84df2ca37efb239d9fd520582191eef59a66e6e6982bc949f60c) · [0x7b74…c989](https://explorer.testnet.whitechain.io/tx/0x7b7465ceea17f5c1b9b1207666add57d86d178a74d501516952554396136c989) · [0xcecc…200e](https://explorer.testnet.whitechain.io/tx/0xcecc0860308dc6b54f534a10df4d89ea859a6b0ee22e3ffa375d0d978d46200e) |
+| Fri 05:1x | `--plan m0` on Whitechain for real: DISPOSABLE_1 0.005 WBT (a Permit2 lockdown) | [0x8c5c…be91](https://explorer.testnet.whitechain.io/tx/0x8c5cf941a8e6121af0b9c34df2ade23d6f10e2b6648d2859c6011378d7b4be91) |
+| Fri 05:1x | the same run: FACILITATOR 0.010329 · RENEWER 0.003496 · POLICY_WRITER 0.000565 · SHOP_KESAR 0.002134 WBT back to target | [0xdcf3…aa16](https://explorer.testnet.whitechain.io/tx/0xdcf316b63f4ff2ac2bca55bdb0bee64361078c9d8bb642b752602f600399aa16) · [0xe176…b146](https://explorer.testnet.whitechain.io/tx/0xe176a02b9505f994ba69b45a25b32a24f232ba2f2003102b48fe86e16220b146) · [0x6daa…31af](https://explorer.testnet.whitechain.io/tx/0x6daac50dd3752e41c98ad211f590dba31406cbe0f1e6cd2c06606b3e064f31af) · [0xf2df…ee83](https://explorer.testnet.whitechain.io/tx/0xf2dff636bbae900643c3d864de358d0b60b5a324010d1a8acc8f982fe735ee83) |
+| Fri 05:1x | FUNDER after both runs: 15.54208 test USDT, about 2.5946 WBT | the runs' own summaries |
+
 ## 3. Still to fund (waits on later steps)
 
 | what | who | when |

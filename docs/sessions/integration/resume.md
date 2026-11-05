@@ -25,6 +25,10 @@ Updated 05:12 IST, Fri 6 Nov. Read this first, then `docs/plan/sessions/join.md`
 - **No local RENEWER sends** from anyone: the hosted cron renews every minute when a subscription is due.
 - T1 announces its own hosted sends; wait for its "free" before a run that pays.
 
+## The website's errand runner (T5, 05:05 IST)
+
+- When wiring `apps/web/lib/agents-live.server.ts` `errandRunner()`: pass `runId: input.runId` to `runErrand` (PR 55); the explainer lanes and the map query the hand-off and presence rows by it. Use `batchedActivity(dir)` with `await activity.flush()` before the stream ends. The seam waits for M4 (the hosted facilitator and shop).
+
 ## Notes
 
 - Usage rule: pause at 92% weekly (check `get_usage` at each stopping point).
