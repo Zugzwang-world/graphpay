@@ -41,7 +41,10 @@ Not started (T3, wave 1).
 
 ## agents
 
-Not started (T4, wave 1).
+Updated 01:35 IST. **M10 built and green on mocks; the live runs on the testing preset and the reviewer pass come next.**
+- `packages/agents`: buyer team (concierge, scout, analyst, payer) and shop team (storefront, risk, dispatch), every guard in code, mock services and scripted models; 53 tests pass; two mock runs give byte-identical run logs.
+- Blocked: nothing. Join's M12 can read the interfaces in `packages/agents/index.d.ts` and `docs/sessions/agents/NOTES.md`; the "(M10 done)" PR follows the five live runs.
+- Next: reviewer findings, five live runs (calibration rows in `OPEN.md`), then the Friday presence and handoff hooks.
 
 ## integration
 

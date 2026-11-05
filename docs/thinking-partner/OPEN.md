@@ -80,6 +80,8 @@ Agents (T4) and Join add one row per full errand run, so the presets can be cali
 
 ## agents
 
+- Nothing waiting on the founder. Open for Join: the config's `whitechain.contracts` is empty, so the payer refuses every real 402 (`UNKNOWN_CONTRACT`) until T1's checkout address is in the config (recommendation: T1 adds it at M2; the payer reads every address in that section).
+
 ## integration
 
 ## website
