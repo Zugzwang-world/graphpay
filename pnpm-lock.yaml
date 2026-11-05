@@ -17,6 +17,9 @@ importers:
 
   apps/web:
     dependencies:
+      '@graphpay/city':
+        specifier: workspace:*
+        version: link:../../packages/city
       '@graphpay/config':
         specifier: workspace:*
         version: link:../../packages/config

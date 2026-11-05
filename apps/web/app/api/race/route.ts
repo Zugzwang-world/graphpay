@@ -1,8 +1,38 @@
-import { notLive } from '../../../lib/http.ts';
-import { waitingFor } from '../../../lib/routes.ts';
+// One side of race mode (WEBSITE_SPEC.md §7): the question asked of Arkiv live and
+// uncached, each read sent as a `call` event as it lands, then the `answer` with its
+// reads and bytes. The result is the number of reads, never a clock (ADR-0042).
+import { RACE_QUESTIONS } from '@graphpay/money-graph';
+import { allowed } from '../graphql/arkiv.server.ts';
+import { json } from '../../../lib/http.ts';
+import { createRaceLock, parseRaceQuery } from '../../../lib/race.ts';
+import { runRace } from '../../../lib/race.server.ts';
 
 export const dynamic = 'force-dynamic';
+export const maxDuration = 60;
 
-export async function GET(): Promise<Response> {
-  return notLive(waitingFor('/api/race'));
+const lock = createRaceLock();
+
+export async function GET(request: Request): Promise<Response> {
+  if (!allowed(request, 20)) return json({ error: 'too many requests' }, 429);
+  const query = parseRaceQuery(new URL(request.url).searchParams, RACE_QUESTIONS);
+  if ('error' in query) return json({ error: query.error }, 400);
+  const release = lock.take(query.mode);
+  if (!release) return json({ error: 'a race is already running on this side' }, 429);
+
+  const encoder = new TextEncoder();
+  const body = new ReadableStream<Uint8Array>({
+    async start(controller) {
+      const frame = (event: string, data: unknown) => controller.enqueue(encoder.encode(`event: ${event}\ndata: ${JSON.stringify(data)}\n\n`));
+      try {
+        await runRace(query, (f) => frame(f.event, f.data));
+      } catch {
+        // No internals reach the browser; the client shows that the stream stopped early.
+        frame('error', { error: 'the race could not read Arkiv; try again' });
+      } finally {
+        release();
+        controller.close();
+      }
+    },
+  });
+  return new Response(body, { headers: { 'content-type': 'text/event-stream; charset=utf-8', 'cache-control': 'no-store, no-transform', connection: 'keep-alive' } });
 }

@@ -59,6 +59,7 @@ One line per PR: time (IST) · activity · result · PR link. Append under your 
 - 03:45 IST · website · opened: the order trail page on GraphQL `order(id)`, the explain page shows each call's rows, bytes and ms · https://github.com/Zugzwang-world/graphpay/pull/26
 
 ## agentpay
+- 04:20 IST · website · opened: race mode live (Friday item 8): `/api/race` runs one side on Rabdi with per-read ticks and truth badges, the committed benchmark table under it · https://github.com/Zugzwang-world/graphpay/pull/36
 
 ## records
 
