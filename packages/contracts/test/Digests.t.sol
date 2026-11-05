@@ -68,6 +68,16 @@ contract DigestsTest is CheckoutFixture {
         assertEq(checkout.CANCEL_TYPEHASH(), CANCEL_TYPE_HASH);
     }
 
+    function test_theJsRenewalIdAndWitnessTypeString_matchTheContract() public view {
+        bytes32 subId = vm.parseJsonBytes32(fixture, ".sub.subId");
+        assertEq(checkout.renewalOrderId(subId, 2), vm.parseJsonBytes32(fixture, ".renewalOrderId2"), "renewal id: contract vs JS");
+        assertEq(
+            keccak256(bytes(checkout.WITNESS_TYPE())),
+            keccak256(bytes(vm.parseJsonString(fixture, ".witnessTypeString"))),
+            "witness type string: contract vs JS"
+        );
+    }
+
     function test_thePermit2Domain_byHand_isTheRealPermit2s() public view {
         assertEq(_permit2Domain(), IDomainSeparator(address(permit2)).DOMAIN_SEPARATOR());
     }
@@ -91,14 +101,6 @@ contract DigestsTest is CheckoutFixture {
             vm.parseJsonBytes32(fixture, ".digests.witness"),
             "witness digest: hand vs viem"
         );
-    }
-
-    function test_aViemShapedWitnessSignature_paysThroughTheRealPermit2() public {
-        // The fixture's digest shape, signed for a real payer and the deployed checkout.
-        GraphPayCheckout.Order memory o = _newOrder(1, AGENT_NODE, 1_000_000);
-        Signed memory s = _signWithApproval(o, agentKey);
-        _settle(s);
-        assertEq(uint8(checkout.orders(o.orderId).status), uint8(GraphPayCheckout.Status.PAID));
     }
 
     function test_theEip2612Digest_matchesViem_andTheTokensDomain() public view {

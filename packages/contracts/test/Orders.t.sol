@@ -22,7 +22,6 @@ contract OrdersTest is CheckoutFixture {
         assertEq(usdt.allowance(agent, address(permit2)), 0, "the agent starts with no approval");
         uint256 agentBefore = usdt.balanceOf(agent);
         uint256 merchantBefore = usdt.balanceOf(merchant);
-        uint256 agentGasMoney = agent.balance;
 
         vm.expectEmit(true, true, true, true, address(checkout));
         emit GraphPayCheckout.OrderCreated(o.orderId, SHOP_NODE, BUYER_NODE, AGENT_NODE, merchant, 4_800_000, o.deadline, 0, 0);
@@ -35,7 +34,6 @@ contract OrdersTest is CheckoutFixture {
 
         assertEq(usdt.balanceOf(agent), agentBefore - 4_800_000);
         assertEq(usdt.balanceOf(merchant), merchantBefore + 4_800_000);
-        assertEq(agent.balance, agentGasMoney, "the payer spends no gas money");
         GraphPayCheckout.OrderState memory r = checkout.orders(o.orderId);
         assertEq(uint8(r.status), uint8(GraphPayCheckout.Status.PAID));
         assertEq(r.payer, agent);

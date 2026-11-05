@@ -47,6 +47,8 @@
   "cancel": {
     "deadline": 1793000900
   },
+  "renewalOrderId2": "0x98ddadc9871dab2a08b789c5ce518d382d1f5c983541daded8c56eb8e95cdf25",
+  "witnessTypeString": "GraphPayOrder witness)GraphPayOrder(bytes32 orderId,bytes32 parentOrderId,bytes32 buyerNode,bytes32 shopNode,bytes32 payerNode,address merchant,uint64 amountMicro,uint64 deadline,uint8 kind,bytes32 mandateHash)TokenPermissions(address token,uint256 amount)",
   "digests": {
     "witnessStruct": "0xc214ba8481916653e3ee4482f8f1f00458336a54e3a587e04592a8b26ca141f4",
     "witness": "0x0f92168e0ed69696ec4897804b92560dc414d7233b2801e9d62be58cb9e171d3",

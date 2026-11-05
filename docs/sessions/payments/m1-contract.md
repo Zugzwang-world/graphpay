@@ -4,7 +4,7 @@ Built to `planning/SPEC/PAYMENTS_WHITECHAIN.md` §3–§4 in `packages/contracts
 
 ## Tests
 
-88 Foundry tests on a fork of real Whitechain Sepolia at block 12,310,000 (2026-11-06 00:49 IST), against the real test USDT and the real Permit2, both read from `packages/config/graphpay.config.json`; test USDT is moved from FUNDER on the fork. Digests are computed three ways: by hand in Solidity, by viem (`test/fixtures/digests.json`, checked by `pnpm test`), and by the contract, the token and Permit2.
+90 Foundry tests on a fork of real Whitechain Sepolia at block 12,310,000 (2026-11-06 00:49 IST), against the real test USDT and the real Permit2, both read from `packages/config/graphpay.config.json`; test USDT is moved from FUNDER on the fork. Digests are computed three ways: by hand in Solidity, by viem (`test/fixtures/digests.json`, checked by `pnpm test`), and by the contract, the token and Permit2.
 
 Gas, execution only (a receipt adds 21,000 and the calldata, about 12,000):
 
@@ -18,7 +18,7 @@ Gas, execution only (a receipt adds 21,000 and the calldata, about 12,000):
 | renew | 218,399 |
 | cancelWithSig | 43,073 |
 
-So C2's real settle should land near 351,000, inside 312,024 ±15%.
+So C2's real settle should land near 351,000, inside 312,024 ±15%. `createSubscription` with the first charge is about 518,000 on a receipt (the lab had 437,794), above `MAX_SETTLE_GAS` (450,000): M3 sends it with its own limit of 700,000.
 
 ## Where this differs from the spec, and why
 
@@ -31,6 +31,10 @@ So C2's real settle should land near 351,000, inside 312,024 ±15%.
 7. **`createSubscription` requires `nodeOfWallet(subscriber) == payerNode`**: a subscription that could never be charged, or that would charge as someone else's node, is refused at creation.
 8. **The 150k gas guard runs before the approval permit and again before the pull**, so neither can be starved into a recorded failure (a property test tries gas limits from 120k to 420k).
 9. **Additions** (additive views for the other tracks): `subscriptionCount()` and `subscriptionIdAt(i)` (the stateless renewal cron finds subscriptions without reading logs), `renewalOrderId`, `termsHash`, `cancelDigest`, and the dispute state in `orders(id)`.
+
+## Reviewer
+
+Pass 1 (02:10 IST): ship, no blocking issue. Fixed after it: a starved-gas sweep for `renew`; the JS `renewalOrderId` and witness type string compared with the contract through the fixture; two tests that promised more than they proved; the daily-cap renewal test pinned to a fixed midday; the library installer no longer leaves a half-fetched folder. Open (CI, the Coordinator's): only the `ci` job is a required check, so the `contracts` job does not gate a merge; this PR merges only after `contracts` is green.
 
 ## For the other tracks
 

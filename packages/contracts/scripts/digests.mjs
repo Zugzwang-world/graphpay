@@ -15,8 +15,10 @@ import {
   permitHash,
   permitSingleTypes,
   permitWitnessTypes,
+  renewalOrderId,
   subscribeTypes,
   tokenDomain,
+  WITNESS_TYPE_STRING,
 } from '../typed-data.mjs';
 
 const FIXTURE = new URL('../test/fixtures/digests.json', import.meta.url);
@@ -118,6 +120,8 @@ export function buildFixture() {
     permitSingle: { amount: permitSingle.details.amount, expiration: permitSingle.details.expiration, nonce: permitSingle.details.nonce, sigDeadline: permitSingle.sigDeadline },
     sub,
     cancel: { deadline: cancel.deadline },
+    renewalOrderId2: renewalOrderId(sub.subId, 2),
+    witnessTypeString: WITNESS_TYPE_STRING,
     digests,
   };
 }

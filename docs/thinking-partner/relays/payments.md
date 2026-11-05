@@ -6,7 +6,7 @@ Updated 01:55 IST, Fri 6 Nov.
 
 The shop's till is a contract on Whitechain called GraphPayCheckout. An agent with an ENS name pays a shop by signing one message; our relayer sends the transaction and pays its gas, so the agent needs no gas and no earlier approval. The signed message carries the order (shop, amount, deadline, who pays for whom), so nobody in between can change the payee or the price. The contract also keeps each agent's spending rules: a daily cap, an expiry and an off switch, tied to the agent's ENS name and its own wallet, so a stopped agent cannot pay by pretending to be a human. Refunds, re-orders, a small dispute process and subscriptions (renewed on a schedule, stopped after three failed charges, cancelled with a signature) are in the same contract. When a payment fails, the contract writes down why, so the money graph on Arkiv can show it; it never moves money twice and it never holds money itself.
 
-Tonight M1 is done in code: the contract and 88 tests that run against a copy of the real Whitechain Sepolia with the real test USDT and the real Permit2. Nothing is deployed yet (that is M2).
+Tonight M1 is done in code: the contract and 90 tests that run against a copy of the real Whitechain Sepolia with the real test USDT and the real Permit2. Nothing is deployed yet (that is M2).
 
 ## Technical
 

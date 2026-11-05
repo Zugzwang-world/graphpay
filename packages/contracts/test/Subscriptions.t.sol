@@ -361,17 +361,43 @@ contract SubscriptionsTest is CheckoutFixture {
     }
 
     function test_anAgentsCharges_countTowardItsDailyCap() public {
+        vm.warp((_now() / 1 days + 1) * 1 days + 12 hours); // a fixed midday (UTC), so both charges share a day
         vm.prank(policyWriter);
         checkout.setPolicy(AGENT_NODE, 0, agent, false, PRICE, 0); // room for exactly one charge a day
         NewSub memory n = _newSub(19, agentKey, AGENT_NODE, AGENT_NODE, _now());
         _create(n);
         assertEq(checkout.spentToday(AGENT_NODE), PRICE);
         vm.warp(_now() + PERIOD);
-        if (_now() / 1 days == (_now() - PERIOD) / 1 days) {
-            vm.expectEmit(true, true, true, true, address(checkout));
-            emit GraphPayCheckout.RenewalFailed(n.s.subId, 2, GraphPayCheckout.FailReason.SPEND_CAP);
-            _renew(n.s.subId);
+        vm.expectEmit(true, true, true, true, address(checkout));
+        emit GraphPayCheckout.RenewalFailed(n.s.subId, 2, GraphPayCheckout.FailReason.SPEND_CAP);
+        _renew(n.s.subId);
+    }
+
+    /// The gas guard on a renewal: a starved call reverts; it never records a failure (three lapse it).
+    function test_aStarvedRenewal_revertsInsteadOfRecordingAFailure() public {
+        NewSub memory n = _newSub(23, humanKey, HUMAN_NODE, bytes32(0), _now());
+        _create(n);
+        vm.warp(_now() + PERIOD);
+        bytes memory call = abi.encodeCall(GraphPayCheckout.renew, (n.s.subId));
+        bool sawGuard;
+        bool sawSuccess;
+        for (uint256 gasLimit = 60_000; gasLimit <= 320_000; gasLimit += 4_000) {
+            uint256 snap = vm.snapshotState();
+            vm.recordLogs();
+            vm.prank(renewer);
+            (bool ok, bytes memory ret) = address(checkout).call{gas: gasLimit}(call);
+            Vm.Log[] memory logs = vm.getRecordedLogs();
+            assertEq(_countLogs(logs, GraphPayCheckout.RenewalFailed.selector), 0, "starved gas recorded a failure");
+            if (ok) {
+                sawSuccess = true;
+                assertEq(checkout.subscription(n.s.subId).cycle, 2);
+            } else if (keccak256(ret) == keccak256(abi.encodeWithSelector(GraphPayCheckout.BadInput.selector, "gas"))) {
+                sawGuard = true;
+            }
+            vm.revertToState(snap);
         }
+        assertTrue(sawGuard, "the guard never tripped");
+        assertTrue(sawSuccess, "no gas limit renewed");
     }
 
     function test_theSubscriptionList_findsEverySubscription() public {

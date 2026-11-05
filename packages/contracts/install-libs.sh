@@ -25,14 +25,19 @@ install_commit() { # <github repo> <full commit> <dir>  (for a repo whose tag is
     echo "lib/$3 present"
     return
   fi
-  git init --quiet "lib/$3"
-  git -C "lib/$3" fetch --quiet --depth 1 "https://github.com/$1.git" "$2"
-  git -C "lib/$3" -c advice.detachedHead=false checkout --quiet FETCH_HEAD
-  actual=$(git -C "lib/$3" rev-parse HEAD)
-  if [ "$actual" != "$2" ]; then
-    echo "lib/$3: fetched $actual, expected $2" >&2; rm -rf "lib/$3"; exit 1
+  tmp="lib/.$3.partial"
+  rm -rf "$tmp"
+  git init --quiet "$tmp"
+  if ! git -C "$tmp" fetch --quiet --depth 1 "https://github.com/$1.git" "$2"; then
+    rm -rf "$tmp"; echo "lib/$3: fetch of $2 failed" >&2; exit 1
   fi
-  rm -rf "lib/$3/.git"
+  git -C "$tmp" -c advice.detachedHead=false checkout --quiet FETCH_HEAD
+  actual=$(git -C "$tmp" rev-parse HEAD)
+  if [ "$actual" != "$2" ]; then
+    echo "lib/$3: fetched $actual, expected $2" >&2; rm -rf "$tmp"; exit 1
+  fi
+  rm -rf "$tmp/.git"
+  mv "$tmp" "lib/$3"
   echo "lib/$3 ($2)"
 }
 
