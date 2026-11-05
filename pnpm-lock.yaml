@@ -69,9 +69,15 @@ importers:
       '@graphpay/ens':
         specifier: workspace:*
         version: link:../../packages/ens
+      '@graphpay/facilitator':
+        specifier: workspace:*
+        version: link:../../packages/facilitator
       '@graphpay/money-graph':
         specifier: workspace:*
         version: link:../../packages/money-graph
+      '@graphpay/shop':
+        specifier: workspace:*
+        version: link:../../packages/shop
       next:
         specifier: 16.4.5
         version: 16.4.5(@opentelemetry/api@1.10.0)(@types/node@22.20.5)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
