@@ -1,0 +1,15 @@
+# Placeholder Foundry project (M0) so the `contracts` job is green before M1.
+# Compiler settings follow planning/FACTS.md §2 (Blockscout verification) and §5.
+[profile.default]
+src = "src"
+test = "test"
+out = "out"
+libs = ["lib"]
+solc_version = "0.8.30"
+evm_version = "prague"
+optimizer = true
+optimizer_runs = 200
+via_ir = true
+remappings = ["forge-std/=lib/forge-std/src/"]
+# Contracts and scripts read addresses from the one config file (ADR-0030).
+fs_permissions = [{ access = "read", path = "../config" }]

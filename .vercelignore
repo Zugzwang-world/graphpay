@@ -1,0 +1,12 @@
+# Never upload secrets, keys, the agent configuration or the raw prompt log
+# (SPEC/SECURITY_AND_OPS.md §6). Deploy only commits that are on origin/main.
+.env*
+keystore/
+*.pem
+*.key
+.claude/
+prompts/raw/
+planning/
+packages/contracts/lib/
+packages/contracts/out/
+packages/contracts/cache/

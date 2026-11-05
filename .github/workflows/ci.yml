@@ -1,0 +1,55 @@
+name: ci
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  # The required check: its name must stay exactly `ci` (branch protection).
+  ci:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .node-version
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: syntax check scripts
+        run: pnpm syntax
+      - name: repo hygiene and secret scan
+        run: pnpm check
+      - run: pnpm test
+      - run: pnpm lint
+      - run: pnpm typecheck
+      - run: pnpm build
+
+  contracts:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: packages/contracts
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: foundry-rs/foundry-toolchain@v1.9.2
+        with:
+          version: v1.9.0
+      - name: install contract libraries
+        run: sh install-libs.sh
+      - run: forge build --sizes
+      - run: forge test -vv

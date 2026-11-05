@@ -1,0 +1,23 @@
+{
+  "name": "graphpay",
+  "private": true,
+  "type": "module",
+  "description": "GraphPay: ask before you pay. Agents with ENS names pay shops over x402 on Whitechain; every payment joins a money graph on Arkiv.",
+  "packageManager": "pnpm@10.34.9",
+  "engines": {
+    "node": "22.x"
+  },
+  "scripts": {
+    "prepare": "git config core.hooksPath .githooks",
+    "check": "node scripts/check.mjs",
+    "syntax": "node scripts/syntax.mjs",
+    "test": "node --test \"scripts/test/*.test.mjs\" && pnpm -r --if-present run test",
+    "lint": "pnpm -r --if-present run lint",
+    "typecheck": "pnpm -r --if-present run typecheck",
+    "build": "pnpm -r --if-present run build",
+    "contracts:libs": "sh packages/contracts/install-libs.sh"
+  },
+  "devDependencies": {
+    "viem": "2.57.16"
+  }
+}
