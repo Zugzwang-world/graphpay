@@ -8,7 +8,7 @@
     "node": "22.x"
   },
   "scripts": {
-    "prepare": "git config core.hooksPath .githooks",
+    "prepare": "node scripts/prepare.mjs",
     "check": "node scripts/check.mjs",
     "syntax": "node scripts/syntax.mjs",
     "test": "node --test \"scripts/test/*.test.mjs\" && pnpm -r --if-present run test",
