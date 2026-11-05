@@ -1,6 +1,6 @@
 # Relay: website (T5 Web)
 
-Updated 03:45 IST, Fri 6 Nov. Latest step: **order trail and explain page on the live graph** (branch `web/order-trail`; M16 still waits for M4).
+Updated 04:20 IST, Fri 6 Nov. Latest step: **race mode live** (branch `web/race`; M16 still waits for M4).
 
 ## In plain words
 
@@ -19,6 +19,8 @@ What the founder must do: nothing now. The Coordinator needs `DEMO_PASSCODE` set
 **Update (03:20 IST):** the merchant phone now listens to the real money graph. `GET /api/merchant/events` polls T3's GraphQL every 2.5 s for the shop's edges (orders and payments in; refunds and deliveries out) and streams new ones; a reconnect asks for everything after the last edge it saw, so nothing is lost between the 50 s streams. `GET /api/merchant/export.csv` builds the accountant's file from the same query: one row per order, payment, refund, delivery, subscription or renewal, with UTC and IST times, buyer and payer ENS names, a signed net amount, the settlement tx and its explorer link. Cells that start with `=`, `+`, `-` or `@` from chain data are escaped (a name could otherwise run as a spreadsheet formula); amounts are never escaped. Several open phones share one query per 2 s per server. Tested against the real graph engine on ArkivSim (8 tests); the routes were run against an empty sim (ready frame, CSV header). Gaps: the edge has no entity key, Arkiv tx or item yet (see OPEN); data is the live dataset, up to 100 edges each way.
 
 **Update (03:45 IST):** the merchant stream and CSV are merged (PR 23). The next PR makes `/order/<id>` real: it reads every edge that carries the order id through GraphQL `order(id)`, puts them oldest first (Requested, Order created, Paid, Dispatched, Refunded, with the shop's net after refunds), links each settlement transaction to the Whitechain explorer, and links to the explain page of that very answer. `/explain/<id>` now shows each Arkiv call's entity, rows, bytes and milliseconds from the engine's `reads`. Tested on ArkivSim (an empty order shows its empty state) and in the browser pane; 4 new unit tests.
+
+**Update (04:20 IST):** race mode is live. After M9 landed, `GET /api/race` runs one side (Graph Arkiv or plain) against Arkiv's live testnet on the synthetic size S city, uncached, and streams one `call` event per read as it lands, then the answer with its reads, bytes and a badge: correct by identity, or right by name but wrong by identity (plain credits a re-registered shop's earlier holder to the new one). No time is shown as a result (ADR-0042). Tried on Rabdi from this Mac: the city-wide top 10 took Graph Arkiv 2 reads (35,370 bytes) and plain 5 reads one page at a time (135,068 bytes), the same counts as the committed benchmark. Under the race, the table of all six questions comes from `bench/results/questions-S.csv` (reads, kilobytes, correctness; no time columns), including the questions where plain needs fewer reads. Safeguards: only the size S city is accepted, one race per side per server, a per-client rate limit, errors reach the browser only as a fixed line. Tests: 6 new, the live race on ArkivSim equals 2, 5 and 6 reads and is right both ways.
 
 ## Technical
 

@@ -29,7 +29,7 @@ export const SITE_ROUTES: SiteRoute[] = [
   { method: 'POST', path: '/api/merchant/dispatch', gate: 'passcode', does: 'mark the order delivered', signs: 'the merchant', waitingFor: 'M4 checkout' },
   { method: 'POST', path: '/api/merchant/refund', gate: 'passcode', does: 'partial or full refund', signs: 'the merchant', waitingFor: 'M4 checkout' },
   { method: 'GET', path: '/api/merchant/export.csv', gate: 'open', does: "the accountant's CSV from GraphQL", signs: null, waitingFor: null },
-  { method: 'GET', path: '/api/race', gate: 'rate limit', does: 'one side of the race, live and uncached (SSE)', signs: null, waitingFor: 'M9 live benchmark' },
+  { method: 'GET', path: '/api/race', gate: 'rate limit', does: 'one side of the race, live and uncached (SSE)', signs: null, waitingFor: null },
   { method: 'GET', path: '/api/status', gate: 'open', does: 'block heads, mirror lag, relayer balance, token mode', signs: null, waitingFor: null },
   { method: 'POST', path: '/api/passcode', gate: 'passcode', does: 'check the passcode (signs nothing)', signs: null, waitingFor: null },
 ];
