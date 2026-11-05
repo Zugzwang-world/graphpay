@@ -34,6 +34,11 @@ export async function startFork() {
     }
     await new Promise((r) => setTimeout(r, 200));
   }
+  // Refuse any other chain (CLAUDE.md): the fork must answer Whitechain Sepolia's id.
+  if ((await publicClient.getChainId().catch(() => null)) !== network.chainId) {
+    child.kill('SIGTERM');
+    throw new Error(`the fork did not answer chain ${network.chainId}`);
+  }
   const rpcCall = (method, params) => publicClient.request({ method, params });
   const fork = {
     url,
