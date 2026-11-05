@@ -67,10 +67,10 @@ Updated 02:05 IST. **The mirror (M11) now runs on the real Arkiv writer, in the 
 
 ## website
 
-Updated 03:03 IST, Fri 6 Nov (T5 Web). **The shell and the phone views are on `main` and live** at https://graphpay-event.vercel.app. A PR adds the agent run route: one request starts an errand and streams its events back, one errand at a time; it answers "not live yet" until Join wires the agents' live services (M12).
-- Running: nothing long. Panels needing other tracks' routes say which milestone they wait for.
-- Blockers: none; the venue network to GitHub is slow (retries).
-- Next: wire each panel as its route merges (M4, M6, M7b, M9, M12); M16 once M4 lands; Friday items 8 to 13. A fresh start file is at `docs/sessions/website/resume.md`.
+Updated 03:20 IST, Fri 6 Nov (T5 Web). **The shell, the phone views and the agent run route are on `main`.** A new PR wires the merchant phone's order stream and the accountant CSV to the live money graph on Arkiv (read through T3's GraphQL), so an order pops up on the merchant's phone as soon as the mirror writes it.
+- Running: nothing long. M16 (checkout kit, store) waits for M4 (shop, facilitator, not merged yet).
+- Blockers: none. Customer panels wait for M4 and M6, the race for M9, the agent run for M12.
+- Next: M16 once M4 lands; meanwhile Friday item 9 (Open toggle) needs T3's `shop_open`; the explain and order pages. Fresh start file: `docs/sessions/website/resume.md`.
 
 ## records
 

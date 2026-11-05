@@ -1,10 +1,11 @@
 # Website session: resume file (T5 Web)
 
-Start line: `You are T5 Web. Run docs/plan/sessions/T5-web.md. Go.` Then read this file. Written 03:03 IST, Fri 6 Nov.
+Start line: `You are T5 Web. Run docs/plan/sessions/T5-web.md. Go.` Then read this file. Updated 03:20 IST (first written 03:03), Fri 6 Nov.
 
 ## State
 - **Merged:** #10 the shell (stage, both phones, explainer, race page, how-it-works, passcode guard, F2 tests, live chain-head chips), #13 phone views (request card, spending-pass states, merchant notifications).
-- **In PR `web/wire-agents`:** the agent run route (`POST /api/agents/run` streams the errand as SSE in the same request; `GET .../:id/events` replays from memory), the one-at-a-time registry (`lib/run-registry.server.ts`), the runner seam (`lib/agents-live.server.ts`: **no runner until Join's M12**; the route answers 503 "not live yet" naming it), client streaming (`lib/sse-client.ts`, `stream()` in `components/site-context.tsx`).
+- **Merged since:** #17 (agent run route), below. **In PR `web/m16-checkout-kit`:** the merchant stream and the CSV on the live graph (`/api/merchant/events`, `/export.csv` now `waitingFor: null`). Branch off `origin/main`; the worktree needed `pnpm install --frozen-lockfile` after the merge.
+- **Agent run route (merged #17):** the agent run route (`POST /api/agents/run` streams the errand as SSE in the same request; `GET .../:id/events` replays from memory), the one-at-a-time registry (`lib/run-registry.server.ts`), the runner seam (`lib/agents-live.server.ts`: **no runner until Join's M12**; the route answers 503 "not live yet" naming it), client streaming (`lib/sse-client.ts`, `stream()` in `components/site-context.tsx`).
 - Production: https://graphpay-event.vercel.app (Vercel builds only code changes). Preview/local: `.claude/launch.json` is local (untracked): `pnpm --filter @graphpay/web exec next start -p 3917` after `pnpm build`.
 
 ## How a panel goes live (the pattern)
@@ -16,10 +17,10 @@ Each unwired route is a file under `apps/web/app/api/**/route.ts` that checks th
 | `GET /api/state/customer` | M4 checkout, M6 ENS gate | shape: `CustomerState` in `lib/contracts.ts` (add `policyExpiresAt` if the policy has it) |
 | `POST /api/customer/{reorder,subscribe,unsubscribe,refund-request}` | M4 shop, facilitator, recorder | return `{ transaction }` or `{ arkivTx }` |
 | `POST /api/customer/{pause,resume,kill-disposable}` | M6 | return `{ sepoliaTx, effectiveWithinS: 20 }` |
-| `GET /api/merchant/events` | M7b GraphQL, M11 mirror | SSE frames `ready` then `edge` (`MerchantEdgeEvent`); poll GraphQL every 2 to 3 s (ADR-0055) |
-| `POST /api/merchant/{dispatch,refund}`, `GET .../export.csv` | M4, M7b | merchant key server-side behind the passcode (E-3) |
+| `POST /api/merchant/{dispatch,refund}` | M4 | merchant key server-side behind the passcode (E-3) |
 | `GET /api/race` | M9 | SSE `call` `{call, ms, bytes}` then `answer` (`RaceAnswer`); rate limit, uncached; the table under the race only from M9's committed numbers |
-| `/explain/[id]`, `/order/[id]` | M7b | `ExplainTrace` reads `/api/explain/:id`; `OrderTrail` is a stub to wire to `order(id)` |
+| `/order/[id]` | M7b landed: wire to `order(id)` |
+| `/explain/[id]` | M7b landed: `/api/explain/:id` exists (T3) |
 
 ## Then
 M16 (checkout kit `packages/checkout-kit`, store `apps/store`; needs M4; read `planning/PROMPTS/16-checkout-kit-store.md`), then Friday items 8 to 13 (`docs/plan/MASTER_PLAN.md` §4). Items 9, 10 need T3's `shop_open` and `shops` queries.

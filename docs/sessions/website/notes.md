@@ -2,6 +2,12 @@
 
 Working notes; deviations from `planning/WEBSITE_SPEC.md` and why. Newest first.
 
+## Merchant stream and CSV (`web/m16-checkout-kit`)
+
+- Reads T3's GraphQL (`node.in/out`) through the shared engine; `lib/merchant-feed.ts` is pure (tests on ArkivSim), `lib/merchant-feed.server.ts` shares one query per 2 s per instance.
+- The stream starts 30 s back (an edge lands some seconds after its block) and reconnects with `?since=<last edge ts>`; each stream lasts 50 s.
+- **CSV deviation from §4:** no item, kind or Arkiv entity key columns (the GraphQL edge does not carry them; OPEN item for T3); a signed `net_effect_usdt` replaces refunds and net columns, one row per ledger event.
+
 ## Shell PR (`web/shell`)
 
 - **Phone height:** the phones scale to the viewport height (390 × 844 at most) so both fit one screen at 900 px high.
