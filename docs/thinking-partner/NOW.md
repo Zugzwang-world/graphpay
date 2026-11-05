@@ -1,23 +1,20 @@
 # NOW
 
-Updated 23:05 IST, Thu 5 Nov (main)
+Updated 01:20 IST, Fri 6 Nov (Coordinator)
 
-## Summary (main only)
+## Summary (Coordinator only)
 
-Updated 23:55 IST, Thu 5 Nov. **M0 is complete and merged (PRs #1–#6); ready for handover.** The founder starts all six track sessions and a fresh Coordinator from `docs/plan/sessions/README.md` (one run file each). The M0 session takes no more work.
+Updated 01:20 IST, Fri 6 Nov. **Wave 1 is running.** T1–T5 and Join started at about 00:44 IST; the Coordinator took over at 00:46 (10-minute checks, merges, records). No track has opened a PR yet; T3 is building M7a, the first gate (T1's recorder, Join's mirror and the small city wait for it).
 
-Done:
-- the repo is protected; every change goes through PRs with auto-merge;
-- every wallet funded on all three testnets (FUNDER also holds 15.76 tGLM and 31.75 test USDT for top-ups);
-- the founder's Ankr RPC is stored (in `.env` and in Vercel as Sensitive);
-- facts re-verified;
-- the one story config, the agent presets and the no-story-in-code check are on `main`;
-- the live site is https://graphpay-event.vercel.app.
+New since the handover:
+- **Usage risk:** the weekly plan limit is 71% used and resets Fri 21:30 IST. All seven sessions started on Opus 5.5 at max effort; at 01:22 the Coordinator switched the six track sessions to the planned mix (from their next turn). The Coordinator's own setting and extra usage are the founder's (`OPEN.md` "Founder now" 1).
+- **The graph layer becomes a developer SDK** (ADR-0057): T3 keeps `@graphpay/arkiv-graph` generic now, GraphPay's payment model sits in `packages/money-graph`, and on Friday after acceptance the package goes to npm (Friday item 18).
+- M0's background tasks: none failed (11 agents and 3 background commands, all completed; `relays/records.md`).
 
 Next:
-1. The founder starts T1–T5 and Join together, then the Coordinator (start lines in the index).
-2. Only the small city is seeded tonight; the large city waits for the founder's story lock, latest start Fri 14:00 (the Coordinator loads it).
-3. Acceptance targets Fri 05:00–06:00 IST; feature freeze Fri 18:00; submit by Sat 08:00.
+1. Tell T1 and Join M7a's import path when it merges; CP2 expected about 01:35.
+2. Acceptance (CP4) about 05:30 IST; the next records relay about 02:45.
+3. The large city waits for the founder's story lock (by Fri 08:30 for rehearsal 1, at the latest 13:00; seeding starts by 14:00).
 
 ## foundation
 
@@ -29,7 +26,12 @@ Updated 23:55 IST. **M0 done; handed over to the Coordinator** (`docs/plan/sessi
 
 ## payments
 
-Not started (T1, wave 1).
+Updated 02:10 IST, Fri 6 Nov (T1).
+- **M1 merged (#12). M2 is done on the real chain:** the checkout is deployed on Whitechain Sepolia for the real test USDT, verified on the explorer and set up (the renewal relayer, three shops' refund floats, five agent spending policies from the story). PR with the scripts and records is open.
+- Checkout: https://explorer.testnet.whitechain.io/address/0x75233b7341B9e86407e4b31599f07b8936716FcA (its address and deploy block are in the config for the mirror).
+- The qualifying payment's readiness check passes: the acceptance agent holds 20 test USDT and has its 6.00/day policy.
+- Next: M3 part A (our facilitator, the shop's 402 API, the recorder routes). Part B (real payments) waits for T2's M5 and M6.
+- Blockers: none.
 
 ## identity
 Updated 02:00 IST. **M5 is built and run for real; its PR is open.** The `graphpay.eth` namespace exists on Ethereum Sepolia: root, 4 owners, 16 agents (15 cast agents and `disposable-1`), the `sim` wildcard. 60 transactions, 72.7M gas.
@@ -40,23 +42,45 @@ Updated 02:00 IST. **M5 is built and run for real; its PR is open.** The `graphp
 
 ## arkiv
 
-Not started (T3, wave 1).
+Updated 01:40 IST, Fri 6 Nov (T3).
+
+- **Where we are:** M7a is built and tested; its PR is going up now. The Arkiv layer is two packages: a generic graph SDK, `@graphpay/arkiv-graph` (to be published on npm on Friday; ADR-0057), and GraphPay's own layer, `@graphpay/money-graph`, which uses the SDK only through its public API.
+- **Proven live on Arkiv's testnet:** the predicate limit (64 accepted, 65 refused), one probe money event in one atomic transaction (377,893 gas at steady state against the lab's 310,527), receipts that cannot be edited (a simulated edit reverts, a tally edit would pass), and the map query: a box around the probe shop finds it, a box beside it finds nothing.
+- **Running:** the reviewer pass on the writer.
+- **Import path for T1's recorder and Join's mirror:** `import { connectArkiv, createLedger, recordEdge, createQuote, findQuotes } from '@graphpay/money-graph'` (details in `docs/sessions/arkiv/README.md`). Join's three asks are all in (fixed nonce with NONCE_TAKEN, folding recorder edges, the heartbeat row).
+- **Blockers:** none.
+- **Next:** when M7a merges, the small test city (size S only, test story) seeds in the background; then M7b (GraphQL, explain, the hosted MCP).
 
 ## agents
 
-Not started (T4, wave 1).
+Updated 01:45 IST. **M10 built; five live errands on the testing preset all paid the good shop and never the trap.** The "(M10 done)" PR is the next merge.
+- 5 of 5 live runs: 73 to 321 s (median 94 s), $0.29 to $0.31 and about 47,000 to 52,000 tokens each, on mock services (rows in `OPEN.md`).
+- Reviewer pass done, findings fixed. Join's M12 can wire against `packages/agents/index.d.ts` and `docs/sessions/agents/NOTES.md`.
+- Next: merge, then the Friday presence and handoff hooks.
 
 ## integration
 
-Not started (Join, when M7a merges).
+Updated 01:20 IST. **Join is running: the mirror (M11) is being built on test doubles while it waits for M7a (Arkiv writer), M1 (checkout events) and M5 (the cast on ENS); none has merged yet.**
+- Done: the mirror's core in `packages/mirror`: reading checkout events, turning each into one Arkiv write, parking events whose actor is unknown, the one-writer lease, folding the recorder's refusals, the 5% labelled cast history, the local endpoints and keep-awake. 22 tests green on fakes.
+- The lab's lifecycle result reproduces on the fake ledger: the good shop's orders 5, paid 6.40, one refund of 0.80, 2 fails, 3 delivered.
+- Running: nothing on any network yet; polling merged PRs every 10 minutes.
+- Blockers: only the gates above. The Mac's DNS dropped twice (00:50 and 01:15 IST); work continues offline.
+- Next: as soon as M7a merges, run the mirror on ArkivSim with the real tally planner and writer; then M1's ABI and M5's hand-off; then the live run on Rabdi (D1–D3, D15).
 
 ## website
 
-Not started (T5, wave 1). A placeholder page is live at https://graphpay-event.vercel.app.
+Updated 01:31 IST, Fri 6 Nov (T5 Web). **The website shell is on `main` and live** at https://graphpay-event.vercel.app (the top-bar chips already show the three chains' real latest blocks). Now adding the phone views' Friday items that need no other track: the request card (budget chip, deadline countdown), the spending pass states, merchant notifications.
+- Running: nothing long. Panels that need other tracks' routes say which milestone they wait for (M4, M6, M7b, M9, M10, M11).
+- Blockers: none. The venue network to GitHub is slow (retries needed).
+- Next: wire each panel as its route merges; M16 once M4 lands; Friday items 8 to 13.
 
 ## records
 
-Not started (the Coordinator, M14, every 2 hours from about 00:45).
+Updated 01:20 IST. **The Coordinator is on duty** (`docs/plan/sessions/coordinator.md`): 10-minute ticks from 00:58, a keep-awake hold, merges, records.
+- Done: ADR-0057 and Friday item 18 (the graph SDK on npm); T3 briefed at 01:04 and adopted it in M7a; the npm name checked (free); the first M14 relay; AI usage rows for the new sessions.
+- Running: the ticks (PRs, conflicts, gates, `OPEN.md` questions, silent sessions).
+- Blockers: none. Risk: plan usage (`OPEN.md` "Founder now" 1).
+- Next: each session's prompt log written into its own worktree (P-records-1); M7a's gate messages; records again about 02:45.
 
 ## submission
 

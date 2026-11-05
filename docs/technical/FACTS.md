@@ -284,3 +284,46 @@ Each track adds its own rows here (under `### <activity>`), with source, time an
 | Wildcard | `<anything>.sim.graphpay.eth` reads `graphpay.synthetic=true`, kind `agent`, status and cap empty, with no transaction | `node scripts/ens/acceptance.mjs` on real Sepolia | 02:05 | verified-on-chain | B5 |
 | Anvil fork | `anvil --fork-url` at the latest block fails ("block not found") on the load-balanced RPC; pin `--fork-block-number` ten blocks behind the head. Anvil's default tip is 1 gwei, so impersonated signers need `anvil_setBalance` | rehearsal | 01:10 | measured | |
 
+### payments
+
+| fact | value | source | checked (IST) | status | note |
+|---|---|---|---|---|---|
+| Test USDT EIP-2612 domain | the configured domain (`Tether USD`, version `1`, chain 1874, the proxy) hashes to the token's `DOMAIN_SEPARATOR()`; both `permit` overloads approve Permit2; a permit signed under another name reverts | Foundry fork tests at block 12,310,000 (`packages/contracts/test/Digests.t.sol`) | 01:30 | verified-on-chain (fork) | the start-up check of M3 relies on it |
+| Permit2 domain | `{ name: "Permit2", chainId: 1874, verifyingContract: <Permit2> }` hashes to the deployed Permit2's `DOMAIN_SEPARATOR()` | same | 01:30 | verified-on-chain (fork) | |
+| Checkout gas (fork, execution only) | first agent settle with the gasless approval 318,377 (merchant holds a float) / 333,479 (merchant at zero); re-order 251,143; partial refund 81,275; createSubscription with first charge 482,697; renew 218,399; cancelWithSig 43,073 | `forge test -vv` gas logs | 01:45 | measured (fork) | a receipt adds about 33,000; real receipts replace these at M2/M3 |
+| GraphPayCheckout (test USDT) | `0x75233b7341B9e86407e4b31599f07b8936716FcA`, deploy block 12,313,887, tx `0x0cf2fc15…01f6` (3,873,126 gas); `USDT()` = test USDT; verified on the explorer (`is_verified` true, `is_fully_verified` false) | `scripts/whitechain/deploy-checkout.mjs`, `verify.mjs`, explorer API `/api/v2/smart-contracts/<addr>` | 01:55 | verified-on-chain | config `whitechain.contracts.checkout`; details `docs/sessions/payments/m2-deploy.md` |
+| Setup gas (real receipts) | `setRelayer` 53,196; token `approve` 53,376; `setPolicy` new 95,177–95,237 | `docs/sessions/payments/txlog.jsonl` | 01:57 | measured | the lab had 95,233 for a new policy |
+
+### arkiv (T3, M7a, 2026-11-06)
+
+| fact | value | source | checked (IST) | status | note |
+|---|---|---|---|---|---|
+| Keyed Rabdi rate limit | `ratelimit: limit=5000`, lowest remaining seen 4,916 | header read by the metered transport (smoke and probe runs) | 01:29 | verified-on-chain | no 429, every response 200 |
+| Predicate budget | 64 leaves (project, type, owner and 61 OR terms) accepted; 65 refused with JSON-RPC `-32004` | `pnpm -s --filter @graphpay/money-graph smoke` | 01:24 | verified-on-chain | matches the pack |
+| Typed literals | `u64(20398n)` renders `day = u64(20398)`; a bare `20398n` renders `day = u256(20398)` | same smoke run (SDK 1.0.1 `render`) | 01:24 | verified | the bare bigint matches nothing on a u64 column |
+| First live probe event (W_LEDGER, 7 creates: edge, 4 tallies, link, checkpoint; 1-day rows) | 1,301,681 gas, block 261502, [0xe249…1dec](https://rabdi.explorer.arkiv.network/tx/0xe2499c099a2d0b61157a07678a6ac16111bd942e498e0f871351ac1b70361dec) | `pnpm -s --filter @graphpay/money-graph probe` | 01:29 | measured | lab 977,978 for 6 creates; ours adds the checkpoint and the merged columns |
+| Steady live event (1 create, 6 patches incl. link and checkpoint) | **377,893 gas** (lab 310,527; 333,320 with the link), block 261505, [0x247a…68d0](https://rabdi.explorer.arkiv.network/tx/0x247a78a3919c679d4c2565fab59eeec4a1a433534212ec9d4fe073dd0c8a68d0) | same probe run | 01:29 | measured | the reference for M11 and the seeding estimates |
+| Readonly edge | the probe edge `0x88b9…53d0` reads back `creationFlags { readonly: true, raw: 1 }`; a simulated `amount_micro` patch from W_LEDGER reverts; a simulated tally patch passes | probe run (eth_call, nothing sent) | 01:29 | verified-on-chain | acceptance D9's mechanics |
+| Indexed attributes as written | the probe edge's `attributeSchema`: `day, from_epoch, from_node, kind, project, ref, to_epoch, to_node, ts, type` indexed; `amount_micro, dataset, from_ens, schema_v, synthetic, to_ens` stored only; the node reports `key` columns as type `bytes32` | `smoke <edge key>` (raw `arkiv_query`, `attributeSchema`) | 01:30 | verified-on-chain | ADR-0041 |
+| i32 box query | a W_DIRECTORY probe shop at the persona's point (1-day row, [0xbf9a…09aa](https://rabdi.explorer.arkiv.network/tx/0xbf9ac8f4cf76f9e14d6b0d110b31e15d5f434ca934f2cdd3e13be887845309aa)) is found by a 1 km box in 1 call; a box 0.05° north finds none | probe run | 01:29 | verified-on-chain | ADR-0058 (no u64 fallback) |
+| SDK entity address | the SDK sends every operation to its fixed entity address (the config's `arkiv.entityContract`), whatever the caller passes | SDK 1.0.1 `src/utils/arkivTransactions.ts` | 01:10 | verified | ArkivSim and the writer take it from the config |
+| 256 KiB limit through the SDK | a batch over 256 KiB fails at `eth_estimateGas` as `EntityMutationError` "Execution error without revert data", with `HttpRequestError` status 413 three causes down | ArkivSim (same viem HTTP path) | 01:15 | verified (emulated) | the writer halves on it |
+
+### website
+
+| item | value | source | time (IST) | status |
+|---|---|---|---|---|
+| Arkiv explorer routes | `/tx/<hash>`, `/entity/<key>`, `/address/<addr>`, `/blocks` (list; `/block` takes no number in the path), `/entity-explorer?q=<query>` (its query page; `/entity/<key>` itself resolves to `$key = key(<key>)` there) | the explorer's own client bundle (`rabdi.explorer.arkiv.network/assets/index-*.js`: its route table and path matchers), read 6 Nov | 01:05 | verified in code; `/entity-explorer?q=` answers 200 |
+| Whitechain explorer (Blockscout) | `/tx/<hash>`, `/address/<addr>`, `/block/<n>`, `/token/<addr>` answer 200 (a single-page app answers 200 for any path, so only the tx page was checked against a known transaction) | HTTP GET on `explorer.testnet.whitechain.io`, 6 Nov | 01:15 | verified for tx (known hash); others standard Blockscout |
+| Sepolia explorer | Etherscan `/tx/`, `/address/`, `/block/` | HTTP GET on `sepolia.etherscan.io/block/1000` → 200 | 01:15 | verified |
+| Next.js file tracing of `@graphpay/config` | its two JSON files are read at run time (`readFileSync` next to `index.mjs`) and the trace misses them; `outputFileTracingIncludes` in `apps/web/next.config.ts` adds them (the route's `.nft.json` then lists both) | local `next build` on Node 22.23.4 | 00:40 | verified locally; first Vercel deploy confirms |
+
+### records
+
+| fact | value | source | checked (IST) | status | note |
+|---|---|---|---|---|---|
+| npm name `@graphpay/arkiv-graph` | not on the registry (E404) | `npm view @graphpay/arkiv-graph name version` | Fri 01:02 | verified (free now) | ADR-0057; re-check right before publishing |
+| npm scope `graphpay` | no organisation and no user: the registry answers 404 for `/-/org/graphpay/package` and `/-/user/graphpay/package` (an existing organisation, `vercel`, and user, `sindresorhus`, answer 200); a scope search lists no packages | `curl https://registry.npmjs.org/-/org/graphpay/package`, `…/-/user/graphpay/package`, `…/-/v1/search?text=scope:graphpay` | Fri 01:05 | verified (unclaimed now) | publishing `@graphpay/…` needs the founder's npm account to own the scope (a free npm organisation `graphpay`) |
+| npm name `arkiv-graph` (unscoped) | taken: version 1.1.2, "Interactive graphs and tables for Arkiv entities, with scoped queries and optional wallet-signed Lifetime Extension", repository `github.com/SantiagoDevRel/arkiv-graph` | `npm view arkiv-graph name version description repository.url` | Fri 01:02 | verified | a different Arkiv project; our README credits it and says how ours differs (the pack's reach row already credits it) |
+| Plan usage | weekly limit, all models: 70% used at 01:08 and 01:10, 71% at 01:16 and 01:20 (about one point every 6–12 minutes); resets Fri 6 Nov 21:30 IST; Fable's own weekly limit 0%; extra usage off | the app's usage card (`get_usage`) | Fri 01:08–01:20 | measured | `docs/thinking-partner/OPEN.md` "Founder now" item 1 |
+| Session models | all seven event sessions (T1–T5, Join, Coordinator) report `claude-opus-5-5` at effort `max`; the plan has Sonnet 5.5 at high for T2, T4, T5, Opus 5.5 at xhigh for T1, T3, Join, and Opus 5.5 at high for the Coordinator | the app's session metadata (`get_session`) | Fri 01:08 | measured | switched to the plan at 01:22 by the Coordinator (`set_session_model`, `set_session_effort`), each from its next turn; the Coordinator's own setting is the founder's |

@@ -52,4 +52,6 @@ jobs:
       - name: install contract libraries
         run: sh install-libs.sh
       - run: forge build --sizes
+      - name: committed ABI matches the build
+        run: node scripts/abi.mjs --check
       - run: forge test -vv

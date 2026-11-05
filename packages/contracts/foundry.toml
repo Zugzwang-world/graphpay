@@ -1,5 +1,5 @@
-# Placeholder Foundry project (M0) so the `contracts` job is green before M1.
-# Compiler settings follow planning/FACTS.md §2 (Blockscout verification) and §5.
+# GraphPayCheckout (M1). Compiler settings follow planning/SPEC/PAYMENTS_WHITECHAIN.md §3 and
+# the Blockscout verification command in §7: no metadata hash, so "verified" is a partial match.
 [profile.default]
 src = "src"
 test = "test"
@@ -10,6 +10,20 @@ evm_version = "prague"
 optimizer = true
 optimizer_runs = 200
 via_ir = true
-remappings = ["forge-std/=lib/forge-std/src/"]
-# Contracts and scripts read addresses from the one config file (ADR-0030).
-fs_permissions = [{ access = "read", path = "../config" }]
+bytecode_hash = "none"
+cbor_metadata = false
+remappings = [
+  "forge-std/=lib/forge-std/src/",
+  "@openzeppelin/contracts/=lib/openzeppelin-contracts/contracts/",
+  "permit2/=lib/permit2/",
+]
+# Tests read addresses and the fork RPC from the one config file (ADR-0030) and the
+# digest fixture written by the viem side (test/fixtures); deployCodeTo reads ./out.
+fs_permissions = [
+  { access = "read", path = "../config" },
+  { access = "read", path = "./test/fixtures" },
+  { access = "read", path = "./out" },
+]
+
+[fuzz]
+runs = 256

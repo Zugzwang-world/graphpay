@@ -80,7 +80,14 @@
       "0x395dc742053F1D77595ED18884628B809A34f3D6",
       "0x4fD68FB630711Ef592F24c2441eA23B270C1e442"
     ],
-    "contracts": {}
+    "contracts": {
+      "checkout": {
+        "token": "usdt",
+        "address": "0x75233b7341B9e86407e4b31599f07b8936716FcA",
+        "deployBlock": 12313887,
+        "deployTx": "0x0cf2fc150261d538bf91638af813138475bb28ff9039c6183062d8461b3b01f6"
+      }
+    }
   },
   "ens": {
     "network": "sepolia",
@@ -116,7 +123,7 @@
       "synthetic": "graphpay.synthetic"
     },
     "namespace": {
-      "about": "Namespace parameters (planning/SPEC/IDENTITY_ENS.md §1 and §4, planning/PROMPTS/05-ens-namespace.md; identity owns this section). Owners and the wildcard expire with graphpay.eth; agents after agentTtlDays; disposable agents after the story's disposable.expiryDays. An agent that never pays publishes capMicroWithoutPolicy, so ENS alone already refuses it a payment (ADR-0057). Contract salts are keccak256 of '<saltPrefix>:<registry|resolver>:<name>'.",
+      "about": "Namespace parameters (planning/SPEC/IDENTITY_ENS.md §1 and §4, planning/PROMPTS/05-ens-namespace.md; identity owns this section). Owners and the wildcard expire with graphpay.eth; agents after agentTtlDays; disposable agents after the story's disposable.expiryDays. An agent that never pays publishes capMicroWithoutPolicy, so ENS alone already refuses it a payment (ADR-0059). Contract salts are keccak256 of '<saltPrefix>:<registry|resolver>:<name>'.",
       "wildcardLabel": "sim",
       "agentTtlDays": 30,
       "capMicroWithoutPolicy": 0,
@@ -136,7 +143,14 @@
   "arkiv": {
     "entityContract": "0x4400000000000000000000000000000000000044",
     "project": "graphpay",
-    "schemaVersion": 1
+    "schemaVersion": 1,
+    "writers": {
+      "W_LEDGER": "0x7DeAF022B3829C53c73031B7d28Ed9746F517665",
+      "W_SYNC": "0x7c32D2a9Cc01Fb855Ab7877E99886bE8d846ED71",
+      "W_DIRECTORY": "0x146002b43A9Fb8EB963699e77Ed18579dC30A6e4",
+      "W_SEED_EVENT": "0x9DA407FfDbF6e4dee5f972f7adcFA873D72B60D0",
+      "W_SEED_M_EVENT": "0x734Fc394248777046fb80d55AD1f0b0C142a0d64"
+    }
   },
   "site": {
     "url": "https://graphpay-event.vercel.app",

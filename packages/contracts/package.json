@@ -2,5 +2,23 @@
   "name": "@graphpay/contracts",
   "version": "0.0.0",
   "private": true,
-  "description": "GraphPayCheckout and its Foundry tests (M1). Build and test with forge, never from a package script."
+  "type": "module",
+  "description": "GraphPayCheckout: its ABI and the EIP-712 shapes its signers use (M1). Build and test the Solidity with forge (`forge build`, `forge test` in this folder), never from a package script.",
+  "exports": {
+    ".": {
+      "types": "./index.d.ts",
+      "default": "./index.mjs"
+    },
+    "./abi/GraphPayCheckout.json": "./abi/GraphPayCheckout.json"
+  },
+  "types": "./index.d.ts",
+  "scripts": {
+    "test": "node --test \"test/*.test.mjs\"",
+    "abi": "node scripts/abi.mjs",
+    "digests": "node scripts/digests.mjs"
+  },
+  "dependencies": {
+    "@graphpay/config": "workspace:*",
+    "viem": "2.57.16"
+  }
 }

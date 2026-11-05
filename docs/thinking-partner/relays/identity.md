@@ -21,7 +21,7 @@ The founder has nothing to do for this step. The final demo cast will be added o
 ## Deviations from the spec, and why
 
 - Both setter grants go in one `multicall`, so a self-held agent takes 3 transactions (the amendment allowed 4).
-- Non-paying agents publish `graphpay.cap_micro` = 0 (ADR-0057).
+- Non-paying agents publish `graphpay.cap_micro` = 0 (ADR-0059).
 - The ENS texts and the namespace parameters (30-day agent expiry, salt prefix) live in the config's `ens` section, as the amendment asked.
 - A read-after-write on the public Sepolia RPC can hit a lagging node: the provisioner retries reads and waits for post-write state (`docs/problems/PROBLEM_LOG.md` P-identity-1).
 - The `agent-endpoint[mcp]` value is the hosted MCP URL; it answers only once T3's M7b ships.

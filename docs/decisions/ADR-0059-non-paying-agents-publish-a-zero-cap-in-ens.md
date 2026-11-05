@@ -1,4 +1,4 @@
-# ADR-0057: Non-paying agents publish a zero cap in ENS
+# ADR-0059: Non-paying agents publish a zero cap in ENS
 
 Status: accepted · Date: 2026-11-06 01:55 IST · Decided by: identity (T2) under the founder's authority · Source: `packages/config/graphpay.config.json` `ens.namespace.capMicroWithoutPolicy`; `planning/SPEC/IDENTITY_ENS.md` §4 C, §7 step 7
 

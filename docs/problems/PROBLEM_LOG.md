@@ -38,4 +38,26 @@ Symptom: the real run stopped with "resolve returned no data" right after its fi
 Cause: a read seconds after a write can hit a node a block behind (the pack's pitfall 3); my one-shot checks trusted it. viem's receipt wait missed a transaction mined before its block watch started.
 Fix: the provisioner's reads retry (`retryingReads`), post-write checks wait for the value (`eventually`), and receipts are polled with `getTransactionReceipt`.
 Prevention: never assert state in the same instant as a write; poll until it shows, then fail with the name of what did not show.
+## records
+
+### P-records-1: the worktree sessions' prompt logs land in the main checkout
+When: 2026-11-06 01:00 IST · Activity: records · Cost: none yet; the logs are kept, not lost
+Symptom: `~/graphpay` shows untracked `prompts/raw/2026-11-06-*.jsonl` files and a modified M0 log; the sessions' worktrees have none, so their PRs do not carry their logs as `CLAUDE.md` asks.
+Cause: the hook writes to `$CLAUDE_PROJECT_DIR/prompts/raw/`, and for a session started on `~/graphpay` with the worktree option that is the main checkout, not the worktree.
+Fix: planned in the Coordinator's next PR: the hook writes into the session's own checkout (the git top level of its working directory), and the logs already written are swept into a records PR.
+Prevention: a hook that writes repo files resolves the checkout from the session's working directory; a test covers a worktree.
+
+### P-records-2: GitHub calls time out on the venue network
+When: 2026-11-06 00:49 IST · Activity: records · Cost: about 5 minutes
+Symptom: `git fetch` failed with "Could not resolve host: github.com"; `gh` calls failed with "TLS handshake timeout".
+Cause: slow venue Wi-Fi: name lookups took 3–7 s, the TLS handshake about 6 s, and pings to 1.1.1.1 184–256 ms; `gh` gives up on a slow handshake.
+Fix: retry the same call a few times with a pause; every call has gone through within three tries so far.
+Prevention: the ticks retry GitHub calls before reporting a failure; a session whose push fails retries rather than stopping.
+
+### P-records-3: the event sessions started on the wrong model and effort
+When: 2026-11-06 01:08 IST · Activity: records · Cost: about 25 minutes of every session at max effort; the weekly plan limit went from 70% to 71%
+Symptom: all seven sessions reported Opus 5.5 at max effort, while the plan has Sonnet 5.5 at high for T2, T4 and T5, Opus 5.5 at xhigh for T1, T3 and Join, and Opus 5.5 at high for the Coordinator; the weekly limit was at 70% with 20 hours to its reset.
+Cause: a new session takes the model and effort shown in the picker (the last ones used, M0's Opus 5.5 at max); the start lines carry no model.
+Fix: at 01:22 the Coordinator set each track session to the plan (`set_session_model`, `set_session_effort`; from each session's next turn) and asked each to end its turn at a natural stop so the change applies.
+Prevention: the Coordinator checks every session's model and effort and the plan usage at each tick; a new session's start step sets the picker before the start line is pasted.
 
