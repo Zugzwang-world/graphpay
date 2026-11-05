@@ -1,7 +1,7 @@
 // The outputs of `pnpm e2e:food` (planning/SPEC/INTEGRATION_AND_MIRROR.md §5): the machine
 // run file (`graphpay.integration-run/v1`), which the website's replay and
 // ACCEPTANCE_REPORT.md read, and the readable transcript. Only live-model runs write them
-// to integration/runs/; mock runs write elsewhere.
+// to docs/sessions/integration/runs/; mock runs write elsewhere.
 
 import { config } from '@graphpay/config';
 

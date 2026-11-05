@@ -111,12 +111,21 @@ importers:
       '@graphpay/ens':
         specifier: workspace:*
         version: link:../packages/ens
+      '@graphpay/facilitator':
+        specifier: workspace:*
+        version: link:../packages/facilitator
       '@graphpay/mirror':
         specifier: workspace:*
         version: link:../packages/mirror
       '@graphpay/money-graph':
         specifier: workspace:*
         version: link:../packages/money-graph
+      '@graphpay/shop':
+        specifier: workspace:*
+        version: link:../packages/shop
+      '@x402/core':
+        specifier: 2.30.0
+        version: 2.30.0
       ai:
         specifier: 7.0.162
         version: 7.0.162(zod@4.6.7)
