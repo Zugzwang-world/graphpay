@@ -1,20 +1,20 @@
 # NOW
 
-Updated 04:45 IST, Fri 6 Nov (Coordinator)
+Updated 05:15 IST, Fri 6 Nov (Coordinator)
 
 ## Summary (Coordinator only)
 
-Updated 04:45 IST, Fri 6 Nov. **The first real payment is on-chain (04:14 IST),** and the core is nearly complete:
-- Merged: M1–M3, M5–M10, the mirror (M11) and the first acceptance report (18 pass, 0 fail, 1 blocked, 29 not yet run).
-- The payment: 4.80 test USDT, ENS-gated, gasless for the payer, through our facilitator ([the transaction](https://explorer.testnet.whitechain.io/tx/0x87505ef2457b6e925fa7378a55fd91419e83c37fb8effc06d901884700c72c00)).
-- Join is running the real `e2e:food`. T1 is on M4 (hosting), T5 on the website and the checkout kit, T6 on the AgentPay SDK, T3 on Friday items.
+Updated 05:15 IST, Fri 6 Nov. **CP4 is met: the core is done on the real networks.**
+- **The acceptance report: 31 pass, 0 fail, 1 blocked (D7, the benchmark at size M, waiting for the locked story), 16 not yet run** (mostly the hosted endpoints, which wait for M4).
+- Done: M1–M3, M5–M12. Real payments, refunds, a subscription and the live kill switch, all on Whitechain and Sepolia.
+- The mirror has written every event exactly once through crashes and replays.
+- In progress: M4 (hosting, T1), the website and the demo store (T5), Friday items (T3).
 
-**Plan usage:** 79% at 04:33. The founder decided every session pauses gracefully at 92% (ADR-0062), and all track sessions run at high. The Mac is on power with the lid open.
+**Plan usage:** 81% at 05:12. Every session pauses gracefully at 92% (ADR-0062). Join is paused until M4 is hosted. The Mac is on power with the lid open.
 
 Next:
-1. CP4: the acceptance report fills in as `e2e:food` and the live checks run (expected about 06:15).
-2. M4 hosting (T1), then the checkout kit (T5).
-3. The founder's story brief by 08:30 for rehearsal 1; the large city starts seeding by 14:00.
+1. M4 hosted (T1), then M13's C and F rows (Join, after 05:30 IST).
+2. The founder's story brief by 08:30 for rehearsal 1; the large city starts seeding by 14:00.
 
 ## foundation
 
@@ -82,13 +82,10 @@ Updated 04:20 IST, Fri 6 Nov (T6 AgentPay). **A4 done: the SDK's merchant now se
 
 ## records
 
-Updated 04:45 IST. **The Coordinator is on duty**, ticking every 20 minutes.
-- Done since 03:20:
-  - the prompt-log hook fix and its sweep (#24, #27); T6 added to the records (#28);
-  - the effort steps (#29), then all at high on the founder's instruction; ADR-0061 Swarm (#32); ADR-0062 the 92% pause (this PR);
-  - gates passed for M7a, M1, M5, M6, M3 and the first payment; T1's FACILITATOR held while Join runs `e2e:food`;
-  - the top-ups to plan targets (WALLETS §2b); three secrets set in Vercel Production for T5 (the Open toggle, Pause/Resume, the passcode).
-- Next: CP4's relay when the acceptance report is complete; records again about 06:45.
+Updated 05:15 IST. **CP4's relay is written.**
+- Done since 04:45: DISPOSABLE_1 funded for the kill check (#59, reviewer: ship); top-ups to plan targets; T1's facilitator wallet released after Join's run; Join paused until M4.
+- One passing GitHub fault: pushes of new commits were rejected for about 4 minutes (04:52–04:56).
+- Next: Join's start line when M4 is hosted; records again about 06:45.
 
 ## submission
 
