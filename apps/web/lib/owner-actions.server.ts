@@ -30,39 +30,68 @@ export function ownerConfigured(env: Record<string, string | undefined> = proces
   return KEY_SHAPE.test(env[ownerKeyName(siteModel().payer.ens)] ?? '');
 }
 
-let built: Promise<OwnerActions> | null = null;
-function actions(): Promise<OwnerActions> {
-  built ??= (async () => {
-    const rpc = await resolveRpc(config.ens.network);
-    const chain = ensChain();
-    const client = createPublicClient({ chain, transport: http(rpc.url, { retryCount: 2, timeout: 20_000 }) });
-    // One runner per instance, so its signer's nonces are counted in order.
-    const runner = createTxRunner({ client, chainId: config.networks.sepolia.chainId, log: () => undefined });
-    const senderFor = (role: string): OwnerSender => {
-      const key = process.env[`${role}_PRIVATE_KEY`] ?? '';
-      if (!KEY_SHAPE.test(key)) throw new Error('the owner key is not set');
-      const account = privateKeyToAccount(key as `0x${string}`);
-      const wallet = createWalletClient({ account, chain, transport: http(rpc.url, { timeout: 60_000 }) });
-      return { role, address: account.address, sendTransaction: (request) => wallet.sendTransaction(request as Parameters<typeof wallet.sendTransaction>[0]) };
-    };
-    return createOwnerActions({ client, runner, senderFor, log: () => undefined });
-  })().catch((error: unknown) => {
-    built = null;
-    throw error;
-  });
-  return built;
+// The Sepolia endpoint is resolved once in a while (every candidate is probed for its chain
+// id); the runner is built for each change. Its signer's nonce is read from the chain at
+// the start of every change and counted only inside it, so a timed-out send, a second
+// instance or a script using the owner's key can never leave a stale nonce behind.
+let rpcCache: { at: number; value: Promise<Awaited<ReturnType<typeof resolveRpc>>> } | null = null;
+function sepoliaRpc() {
+  if (!rpcCache || Date.now() - rpcCache.at > 5 * 60_000) {
+    const value = resolveRpc(config.ens.network);
+    rpcCache = { at: Date.now(), value };
+    value.catch(() => {
+      if (rpcCache?.value === value) rpcCache = null;
+    });
+  }
+  return rpcCache.value;
 }
 
-// Pause and resume run one at a time (the owner's nonce), and a request for the state the
-// name is already in sends nothing.
+async function actions(): Promise<OwnerActions> {
+  const rpc = await sepoliaRpc();
+  const chain = ensChain();
+  const client = createPublicClient({ chain, transport: http(rpc.url, { retryCount: 2, timeout: 20_000 }) });
+  const runner = createTxRunner({ client, chainId: config.networks.sepolia.chainId, log: () => undefined });
+  const senderFor = (role: string): OwnerSender => {
+    const key = process.env[`${role}_PRIVATE_KEY`] ?? '';
+    if (!KEY_SHAPE.test(key)) throw new Error('the owner key is not set');
+    const account = privateKeyToAccount(key as `0x${string}`);
+    const wallet = createWalletClient({ account, chain, transport: http(rpc.url, { timeout: 60_000 }) });
+    return { role, address: account.address, sendTransaction: (request) => wallet.sendTransaction(request as Parameters<typeof wallet.sendTransaction>[0]) };
+  };
+  return createOwnerActions({ client, runner, senderFor, log: () => undefined });
+}
+
+// A short stable reason for the server log: the kind of failure, never the message (a chain
+// error's message can carry an RPC URL).
+export function failureKind(error: unknown): string {
+  const text = error instanceof Error ? `${error.name} ${error.message}` : '';
+  if (/nonce|in flight|pending/i.test(text)) return 'nonce';
+  if (/RPC reports chain|chain id/i.test(text)) return 'chain';
+  if (/revert|EACUnauthorized/i.test(text)) return 'revert';
+  if (/not visible|timeout|timed out|receipt/i.test(text)) return 'timeout';
+  if (/not set/i.test(text)) return 'key';
+  return 'error';
+}
+
+// Pause and resume run one at a time (the owner's nonce), at most MAX_PENDING waiting
+// (a client alternating the two cannot stack requests that each hold a function), and a
+// request for the state the name is already in sends nothing.
+export const MAX_PENDING = 2;
 let tail: Promise<unknown> = Promise.resolve();
+let pending = 0;
+export class Busy extends Error {}
+
 export function changeStatus(paused: boolean, { actionsFor = actions, agent = siteModel().payer.ens }: { actionsFor?: () => Promise<OwnerActions>; agent?: string } = {}): Promise<OwnerChange> {
+  if (pending >= MAX_PENDING) return Promise.reject(new Busy('busy'));
+  pending += 1;
   const task = async (): Promise<OwnerChange> => {
     const owner = await actionsFor();
     const result = await (paused ? owner.pause(agent) : owner.resume(agent));
     return { changed: result.changed, sepoliaTx: result.hash ?? null, note: result.changed ? null : (result.reason ?? 'no change') };
   };
-  const run = tail.then(task, task);
+  const run = tail.then(task, task).finally(() => {
+    pending -= 1;
+  });
   tail = run.catch(() => undefined);
   return run;
 }

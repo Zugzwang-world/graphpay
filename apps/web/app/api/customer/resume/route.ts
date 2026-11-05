@@ -3,10 +3,11 @@
 // agent is the story's payer agent, never a name from the request.
 import { json, notLive } from '../../../../lib/http.ts';
 import { requirePasscode } from '../../../../lib/passcode.ts';
-import { EFFECTIVE_WITHIN_S, OWNER_WAITING_FOR, changeStatus, ownerConfigured } from '../../../../lib/owner-actions.server.ts';
+import { Busy, EFFECTIVE_WITHIN_S, OWNER_WAITING_FOR, changeStatus, failureKind, ownerConfigured } from '../../../../lib/owner-actions.server.ts';
 
 export const dynamic = 'force-dynamic';
-export const maxDuration = 120;
+// A change waits for its Sepolia receipt (up to 180 s) and for the new state to be visible.
+export const maxDuration = 300;
 
 export async function POST(request: Request): Promise<Response> {
   const refused = requirePasscode(request);
@@ -16,8 +17,10 @@ export async function POST(request: Request): Promise<Response> {
     const change = await changeStatus(false);
     return json({ ...change, effectiveWithinS: EFFECTIVE_WITHIN_S });
   } catch (error) {
-    // The class only: a chain error can name an RPC. None reaches the browser.
-    console.error('customer resume failed:', error instanceof Error ? error.name : 'error');
-    return json({ error: 'the status could not be changed; try again' }, 502);
+    if (error instanceof Busy) return json({ error: 'another status change is still running; wait for it' }, 429);
+    // The kind only: a chain error's message can name an RPC. None reaches the browser.
+    console.error('customer resume failed:', failureKind(error));
+    // The transaction may have landed even when the wait failed: the status chip is the truth.
+    return json({ error: 'the status could not be confirmed; check the status, then try again if it did not change' }, 502);
   }
 }
