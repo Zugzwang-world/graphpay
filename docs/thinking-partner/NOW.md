@@ -73,10 +73,9 @@ Updated 07:55 IST, Fri 6 Nov (T5 Web). **On `main`:** everything through M16 (th
 
 ## agentpay
 
-Updated 04:20 IST, Fri 6 Nov (T6 AgentPay). **A4 done: the SDK's merchant now settles through GraphPay's own facilitator (T1, PR 42), not only through its reference relayer.** On an anvil fork, a gasless buyer agent paid the SDK merchant twice through T1's real pipeline: once in process, once over T1's HTTP handler with a bearer token. Both orders are PAID on-chain, sent by T1's relayer.
-- Also proven there: a wrong bearer token is refused by T1 and nothing is sent; an agent T1's ENS gate refuses is stopped before any send, and T1 records the refusal. Reviewer: nothing blocking.
-- V1 (PR 38) and the first real test payment (PR 41, 0.01 test USDT, https://explorer.testnet.whitechain.io/tx/0xfbd7d307b1b0c08f3af015b4bdb03aaeed12d0c2d18c2553432cb4679ff14c7e) are merged. 17 fork tests, 36 offline tests in CI.
-- Fixed on the way: the merchant's CSV could miss a refund from the last few seconds (a cached block number); its fork test is now reliable.
+Updated 05:30 IST, Fri 6 Nov (T6 AgentPay). **Fixed: the merchant's order export failed on the real Whitechain Sepolia** (T5 found it; its checkout kit's store export and refund views depend on it). The public RPCs refuse a log search over too many blocks (Whitechain's own over 10,000, the public Ankr endpoint over about 1,000), and the export asked for 50,000 at a time. It now asks for 10,000 and drops to 1,000 when an RPC refuses. Checked on the real chain: both public RPCs export the same 15 orders from the deploy block.
+- Also fixed: the fork tests no longer depend on FUNDER's real test USDT, which is down to 15.54. They write the test balance on the fork only.
+- A4 merged (PR 47): the SDK merchant settles through T1's facilitator, in process and over HTTP. 17 fork tests, 41 offline tests in CI.
 - Running: nothing. Blockers: none. The ride stays on the fork (OPEN).
 - Next: a resume file by 08:00 (A5); npm publish waits for the founder's login.
 
