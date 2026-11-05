@@ -1,10 +1,10 @@
 # Website session: resume file (T5 Web)
 
-Start line: `You are T5 Web. Run docs/plan/sessions/T5-web.md. Go.` Then read this file. Updated 04:20 IST (first written 03:03), Fri 6 Nov.
+Start line: `You are T5 Web. Run docs/plan/sessions/T5-web.md. Go.` Then read this file. Updated 05:05 IST (first written 03:03), Fri 6 Nov.
 
 ## State
 - **Merged:** #10 the shell (stage, both phones, explainer, race page, how-it-works, passcode guard, F2 tests, live chain-head chips), #13 phone views (request card, spending-pass states, merchant notifications).
-- **Merged since:** #17 (agent run route), #23 (merchant stream `/api/merchant/events` and `/export.csv` on the live graph; both now `waitingFor: null`). #26 (`/order/[id]` on `order(id)`, explain per-call detail). **In PR `web/race`:** `/api/race` live (M9 landed) with the committed benchmark table. Branch off `origin/main`; the worktree needed `pnpm install --frozen-lockfile` after the merge.
+- **Merged since:** #17 (agent run route), #23 (merchant stream `/api/merchant/events` and `/export.csv` on the live graph; both now `waitingFor: null`). #26 (`/order/[id]` on `order(id)`, explain per-call detail). #36 (`/api/race` live with the benchmark table). **In PR `web/open-toggle`:** Friday item 9, `POST /api/merchant/open` (needs `W_DIRECTORY_PRIVATE_KEY` in Vercel). Branch off `origin/main`; the worktree needed `pnpm install --frozen-lockfile` after the merge.
 - **Agent run route (merged #17):** the agent run route (`POST /api/agents/run` streams the errand as SSE in the same request; `GET .../:id/events` replays from memory), the one-at-a-time registry (`lib/run-registry.server.ts`), the runner seam (`lib/agents-live.server.ts`: **no runner until Join's M12**; the route answers 503 "not live yet" naming it), client streaming (`lib/sse-client.ts`, `stream()` in `components/site-context.tsx`).
 - Production: https://graphpay-event.vercel.app (Vercel builds only code changes). Preview/local: `.claude/launch.json` is local (untracked): `pnpm --filter @graphpay/web exec next start -p 3917` after `pnpm build`.
 

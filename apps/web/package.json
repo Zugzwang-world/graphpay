@@ -11,6 +11,7 @@
     "test": "node --test \"lib/**/*.test.ts\""
   },
   "dependencies": {
+    "@graphpay/arkiv-graph": "workspace:*",
     "@graphpay/city": "workspace:*",
     "@graphpay/config": "workspace:*",
     "@graphpay/ens": "workspace:*",
