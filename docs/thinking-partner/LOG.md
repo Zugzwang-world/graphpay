@@ -49,7 +49,8 @@ One line per PR: time (IST) · activity · result · PR link. Append under your 
 - 01:30 IST · website · opened: the website shell (stage, both phones, explainer, race, how-it-works, passcode guard and its F2 tests, status chips) · https://github.com/Zugzwang-world/graphpay/pull/10 (merged; production serves it)
 - 01:31 IST · website · opened: phone views, Friday items 11 and 12 that need no other track (request card with budget and deadline countdown, spending-pass states, merchant notifications) · https://github.com/Zugzwang-world/graphpay/pull/13
 - 03:03 IST · website · opened: the agent run route (one request streams the errand over SSE, one at a time, 503 until M12 wires the live agents), the run registry, client streaming · https://github.com/Zugzwang-world/graphpay/pull/17 (merged)
-- 03:20 IST · website · opened: the merchant order stream and the accountant CSV read live from the money graph through GraphQL, tested on ArkivSim · https://github.com/Zugzwang-world/graphpay/pull/23
+- 03:20 IST · website · opened: the merchant order stream and the accountant CSV read live from the money graph through GraphQL, tested on ArkivSim · https://github.com/Zugzwang-world/graphpay/pull/23 (merged)
+- 03:45 IST · website · opened: the order trail page on GraphQL `order(id)`, the explain page shows each call's rows, bytes and ms · PR link in the next line
 
 ## records
 
