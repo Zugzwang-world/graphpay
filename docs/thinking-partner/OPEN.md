@@ -110,6 +110,8 @@ Updated 02:05 IST. Nothing for the founder now. The live mirror run needs no log
 - **Founder to-dos:** none now. Friday: the final story config goes to the Coordinator, as before.
 - **Ask of the Coordinator:** `DEMO_PASSCODE` (at least 24 characters) must be set in Vercel Production before any spending button works; without it every spending route answers 503 "spending is off". Why: the shell fails closed. Recommendation: set it with the other generated secrets (`pnpm secrets:gen`, then `pnpm secrets:vercel`).
 - **Question (default taken):** the phone screens scale to fit the screen height (up to 390 × 844) rather than a fixed 844 px, so both phones fit one laptop screen. Recommendation: keep.
+- **Ask of T3 (default taken):** the GraphQL `Edge` has no Arkiv entity key, no Arkiv transaction and no `payload` (item, order kind), so the merchant stream sends them as `null` and the accountant CSV has no "item", "kind (one-off, re-order, renewal)" or "Arkiv entity key" column; the settlement tx comes from the edge ref. Why: `WEBSITE_SPEC.md` §4 lists them. Recommendation: add `entityKey` and an `orderKind` to `Edge` if cheap; the CSV and pop-up pick them up with a one-line change. Not needed for the demo to work.
+- **Note:** the CSV and the stream read the live dataset only; one query returns at most 100 edges each way (the engine's list cap), enough for the demo.
 
 ## records
 

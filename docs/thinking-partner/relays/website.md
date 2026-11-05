@@ -1,6 +1,6 @@
 # Relay: website (T5 Web)
 
-Updated 01:30 IST, Fri 6 Nov. Step: **M15 shell** (branch `web/shell`).
+Updated 03:20 IST, Fri 6 Nov. Latest step: **merchant stream and CSV on the live graph** (branch `web/m16-checkout-kit`, before M16 itself).
 
 ## In plain words
 
@@ -15,6 +15,8 @@ What the founder must do: nothing now. The Coordinator needs `DEMO_PASSCODE` set
 **Update (01:31 IST):** the shell is merged and live; the next PR adds the customer request card (budget chip, deadline countdown to 20:00 in the city's time zone), the spending pass states (Active, Used up, Expired, Paused, Revoked; a stopped agent never reads Active), and merchant in-page notifications. Pure helpers `lib/deadline.ts` and `lib/pass.ts` have tests (71 in `apps/web`).
 
 **Update (03:03 IST):** next PR: the agent run route. One request (`POST /api/agents/run`, behind the passcode) starts an errand and streams its events (`started`, `trace`, `result`); only one runs at a time (a second gets 409 "busy"); a run is limited to 280 s and an error reaches the browser only as a fixed line. It needs a runner that Join wires in M12 (the agents' live ENS, Arkiv, shop and signer hooks); until then it answers "not live yet" naming M12. The stream lives in the request that starts the run, because Vercel may serve a second request from another instance. Deviation from `WEBSITE_SPEC.md` §7: the spec's `POST` returns `{ runId }` and a separate `GET` streams; here the POST streams and the GET is a best-effort replay.
+
+**Update (03:20 IST):** the merchant phone now listens to the real money graph. `GET /api/merchant/events` polls T3's GraphQL every 2.5 s for the shop's edges (orders and payments in; refunds and deliveries out) and streams new ones; a reconnect asks for everything after the last edge it saw, so nothing is lost between the 50 s streams. `GET /api/merchant/export.csv` builds the accountant's file from the same query: one row per order, payment, refund, delivery, subscription or renewal, with UTC and IST times, buyer and payer ENS names, a signed net amount, the settlement tx and its explorer link. Cells that start with `=`, `+`, `-` or `@` from chain data are escaped (a name could otherwise run as a spreadsheet formula); amounts are never escaped. Several open phones share one query per 2 s per server. Tested against the real graph engine on ArkivSim (8 tests); the routes were run against an empty sim (ready frame, CSV header). Gaps: the edge has no entity key, Arkiv tx or item yet (see OPEN); data is the live dataset, up to 100 edges each way.
 
 ## Technical
 
