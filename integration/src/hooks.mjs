@@ -5,8 +5,9 @@
 //   directory, shopKey         discoverShops around the persona (M7 amendment §6), W_DIRECTORY
 //   findQuotes                 the errand's quote entities (M7 amendment §5), W_DIRECTORY
 //   payerWallet                the paying agent's wallet address by its role (never a key)
-// The shop side (catalog, storefront, the 402 and the settlement), x402 signing and the
-// ENS gate (ensCheck) come from M3 and M6 and are added beside these.
+//   ensCheck                   the ENS gate's ens_check (gate.mjs), when a gate is given
+// The shop side (catalog, storefront, the 402 and the settlement) and x402 signing come
+// from M3 and are added beside these; the sign hook goes through gate.gatedSign.
 
 import { activeCast, castEntries, config, disposableEntry, story } from '@graphpay/config';
 import { createEnsReader, namehash, normalizeName } from '@graphpay/ens';
@@ -27,7 +28,7 @@ export function personaBox(source = story) {
 
 // ens: a Sepolia public client (chain id checked by clientsFor). arkiv: a read connection
 // (connectArkiv). wallets: public addresses by wallet role (scripts/lib/wallets.mjs).
-export function createReadHooks({ ens, arkiv, wallets = {}, cast = activeCast(), root = config.root.ens, box = personaBox() }) {
+export function createReadHooks({ ens, arkiv, gate = null, wallets = {}, cast = activeCast(), root = config.root.ens, box = personaBox() }) {
   const reader = createEnsReader({ client: ens });
   const shopKeys = new Map();
   const pc = arkiv.publicClient;
@@ -76,6 +77,7 @@ export function createReadHooks({ ens, arkiv, wallets = {}, cast = activeCast(),
       if (!address) throw new Error(`no wallet address for the paying agent ${key}`);
       return address;
     },
+    ...(gate ? { ensCheck: gate.ensCheck } : {}),
     contracts: [config.whitechain.contracts.checkout.address],
     network: NETWORK,
   };

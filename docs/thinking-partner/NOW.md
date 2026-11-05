@@ -56,13 +56,13 @@ Updated 02:40 IST. **M10 is merged; the presence and handoff hooks are built** (
 - Blockers: none. Next: merge, then wait for Join's M12 counting run; re-run the live errand if time allows.
 ## integration
 
-Updated 03:35 IST, Fri 6 Nov. **The mirror runs live on the real networks.** The one workers process has run on this Mac since 03:13 IST, kept awake by `caffeinate`.
-- On Arkiv's testnet: the 19 cast names registered; the labelled 5% history written (1,258 synthetic events, about 0.49 test GLM); the checkout's 9 setup events read from its deploy block. It keeps up 2 blocks (about 4 s) behind the chain head.
-- Live so far: re-reading the same blocks sends nothing, and a 2-minute freeze, then a hard kill and restart, lost and repeated nothing; it took over at once and went on from the same place. These count as D2 and D15 only once a payment is in the window: until then the checks report "not run", not "pass".
-- The agents' hosted MCP endpoint answers through the new client, and its scores come from the mirror's history: kesar 97% on time, jamun 71% with 18% refunds (the trap).
-- Running: `pnpm workers` (port 8788 on this Mac only), a 30-minute lag sample.
-- Blockers: the first real payment (T1's M3, then M6) for D1, D2b/c and D3. T3 has a labelling fix to make (`OPEN.md`).
-- Next: M12's live hooks in `integration/` (the shop side once M3 merges), then the D checks on the first payment and `(M11 done)`.
+Updated 04:10 IST, Fri 6 Nov. **The mirror runs live (since 03:13 IST); M12's signing path now has the ENS gate; the agents' presence and hand-offs can be written live.**
+- The mirror: the cast and the labelled history are on Arkiv's testnet, 2 blocks behind the chain (PR 33 merged). Retry and drop tests ran clean; they count once a payment is in the window.
+- New: before the payer signs, the same ENS gate the facilitator uses (T2's M6) checks the agent's name, its spending policy on the checkout and today's spend; a refusal signs nothing. Live: the stage payer passes under its 6.00 cap; over-cap, unknown and policy-less agents are refused.
+- New (Friday item 3): agents' "at work" rows and hand-offs go to Arkiv in one transaction per phase and never slow an agent down.
+- Running: `pnpm workers` on this Mac.
+- Blockers: the first real payment and M12's shop side wait for T1's M3. T2's watcher (M6 part 2) is next, to host in the workers.
+- Next: host the watcher; wire the shop side and signing when M3 merges; then `pnpm e2e:food`.
 
 ## website
 
