@@ -80,16 +80,34 @@ if (alive.status !== 200) throw new Error('the payment while alive did not settl
 
 say(`kill: owner.mjs kill ${agent.ensName} --real`);
 const killOut = execFileSync(process.execPath, [join(here, '..', 'scripts/ens/owner.mjs'), 'kill', agent.ensName, '--real'], { encoding: 'utf8' });
+// Taken when owner.mjs returns after the receipt: a little later than the receipt itself,
+// so the 25 s window is measured slightly in the refusal's favour (noted in kill.json).
 const receiptMs = Date.now();
-out.kill = { output: redact(killOut.trim().split('\n').at(-1)), receiptAt: new Date(receiptMs).toISOString() };
+out.kill = { output: redact(killOut.trim().split('\n').at(-1)), receiptAt: new Date(receiptMs).toISOString(), timing: 'receipt time taken when owner.mjs returned (slightly late)' };
 say(out.kill.output);
 
+// From here on the kill has happened: every outcome is written to kill.json.
+const dir = join(here, '..', 'docs', 'sessions', 'integration', 'runs', `kill-${agent.ensName.split('.')[0]}`);
+const save = () => {
+  mkdirSync(dir, { recursive: true });
+  writeFileSync(join(dir, 'kill.json'), `${redact(json(out))}\n`);
+};
+process.on('exit', save);
 let refused = null;
+out.attempts = [];
 for (let i = 0; i < 14 && !refused; i += 1) {
   await new Promise((ok) => setTimeout(ok, 3_000));
-  const r = await attempt();
-  say(`after ${((Date.now() - receiptMs) / 1000).toFixed(1)} s: HTTP ${r.status} ${r.body?.reason ?? r.body?.status ?? ''}`);
-  if (r.status === 402 && r.body?.reason) refused = { ms: Date.now(), status: 402, reason: r.body.reason, orderId: r.orderId };
+  let r;
+  try {
+    r = await attempt();
+  } catch (e) {
+    r = { status: null, body: { error: e.name } };
+  }
+  const t = ((Date.now() - receiptMs) / 1000).toFixed(1);
+  out.attempts.push({ afterS: Number(t), status: r.status, reason: r.body?.reason ?? r.body?.status ?? r.body?.error ?? null });
+  say(`after ${t} s: HTTP ${r.status} ${r.body?.reason ?? r.body?.status ?? r.body?.error ?? ''}`);
+  // Only the kill's own refusal ends the loop; a transient read failure is retried.
+  if (r.status === 402 && r.body?.reason === 'ENS_EXPIRED_OR_REVOKED') refused = { ms: Date.now(), status: 402, reason: r.body.reason, orderId: r.orderId };
   else if (r.status === 200) out.paidAfterKill = (out.paidAfterKill ?? 0) + 1;
 }
 
@@ -97,18 +115,21 @@ for (let i = 0; i < 14 && !refused; i += 1) {
 let failEdge = null;
 for (let i = 0; i < 10 && refused && !failEdge; i += 1) {
   await new Promise((ok) => setTimeout(ok, 3_000));
-  failEdge = stack.refusals.find((x) => x.reason === refused.reason && x.entityKey)?.entityKey ?? null;
+  failEdge = stack.refusals.find((x) => x.entityKey && x.ref.startsWith(`att:${refused.orderId.toLowerCase()}:`))?.entityKey ?? null;
 }
 if (failEdge) await mirrorSync();
 const syncEdges = failEdge ? await readAll(arkiv.publicClient, ENTITIES.edge, { owner: writerAddresses().W_SYNC, cap: 500, truncate: true }) : [];
 stack.close();
 
 const verdict = assertKilled({ kill: { receiptMs, refusedMs: refused?.ms ?? NaN, status: refused?.status ?? null, reason: refused?.reason ?? null, failEdge } });
+// A payment that settled after the kill means the gate was slow: F does not pass silently.
+if (out.paidAfterKill) {
+  verdict.pass = false;
+  verdict.failed.push(`${out.paidAfterKill} payment(s) settled after the kill`);
+}
 out.refused = refused;
 out.failEdge = failEdge ? { entityKey: failEdge, onArkiv: syncEdges.some((e) => e.$key === failEdge) } : null;
 out.assertion = verdict;
-const dir = join(here, '..', 'docs', 'sessions', 'integration', 'runs', `kill-${agent.ensName.split('.')[0]}`);
-mkdirSync(dir, { recursive: true });
-writeFileSync(join(dir, 'kill.json'), `${redact(json(out))}\n`);
+save();
 say(`F: ${verdict.pass ? 'pass' : `FAIL (${verdict.failed.join('; ')})`}; ${join('docs/sessions/integration/runs', `kill-${agent.ensName.split('.')[0]}`, 'kill.json')}`);
 process.exit(verdict.pass ? 0 : 1);
