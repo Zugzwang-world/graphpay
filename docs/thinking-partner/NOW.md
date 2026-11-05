@@ -19,8 +19,8 @@ New tonight:
 - The stand-in token is retired: everything pays in test USDT.
 
 Next:
-1. The founder starts T1–T5 (`docs/plan/prompts/session-lines.md`).
-2. Join starts when M7a merges.
+1. The founder starts all six sessions at once (`docs/plan/prompts/session-lines.md`, written for an unattended night). Join polls for M7a.
+2. Coverage of every new item: `docs/thinking-partner/COVERAGE.md`. The test story's inputs: `story-inputs.md`.
 3. Acceptance targets Fri 05:00–06:00 IST.
 4. Feature freeze is Fri 18:00. We submit by Sat 08:00.
 
