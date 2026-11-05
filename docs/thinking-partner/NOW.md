@@ -26,11 +26,11 @@ Updated 23:55 IST. **M0 done; handed over to the Coordinator** (`docs/plan/sessi
 
 ## payments
 
-Updated 02:35 IST, Fri 6 Nov (T1).
-- **M1 (the checkout contract) is done: two reviewer passes said ship; PR #12 merges once the contract tests are green in CI.** 90 tests pass on a copy (fork) of the real Whitechain Sepolia, paying in the real test USDT through the real Permit2.
-- The first agent payment costs about 318,000 gas of execution (about 351,000 on a real receipt, inside acceptance C2's band); the payer pays no gas.
-- The contract's interface (ABI) is exported for the mirror (Join's M11).
-- Next: M2 deploys and verifies the checkout on Whitechain Sepolia and sets up roles, merchants and policies; the facilitator and shop API (M3) start alongside.
+Updated 02:10 IST, Fri 6 Nov (T1).
+- **M1 merged (#12). M2 is done on the real chain:** the checkout is deployed on Whitechain Sepolia for the real test USDT, verified on the explorer and set up (the renewal relayer, three shops' refund floats, five agent spending policies from the story). PR with the scripts and records is open.
+- Checkout: https://explorer.testnet.whitechain.io/address/0x75233b7341B9e86407e4b31599f07b8936716FcA (its address and deploy block are in the config for the mirror).
+- The qualifying payment's readiness check passes: the acceptance agent holds 20 test USDT and has its 6.00/day policy.
+- Next: M3 part A (our facilitator, the shop's 402 API, the recorder routes). Part B (real payments) waits for T2's M5 and M6.
 - Blockers: none.
 
 ## identity
@@ -50,11 +50,10 @@ Updated 01:40 IST, Fri 6 Nov (T3).
 
 ## agents
 
-Updated 01:45 IST. **M10 built; five live errands on the testing preset all paid the good shop and never the trap.** The "(M10 done)" PR is the next merge.
-- 5 of 5 live runs: 73 to 321 s (median 94 s), $0.29 to $0.31 and about 47,000 to 52,000 tokens each, on mock services (rows in `OPEN.md`).
-- Reviewer pass done, findings fixed. Join's M12 can wire against `packages/agents/index.d.ts` and `docs/sessions/agents/NOTES.md`.
-- Next: merge, then the Friday presence and handoff hooks.
-
+Updated 02:40 IST. **M10 is merged; the presence and handoff hooks are built** (Friday item 2, before CP4).
+- Agents can now announce themselves (presence, renewed every 5 min while an errand runs) and report each hand-off between agents with its explainer lane. Both are optional and do nothing until Join wires them (item 3).
+- 64 tests pass on mocks; a run log with the hooks absent or recording is byte-identical to one without.
+- Blockers: none. Next: merge, then wait for Join's M12 counting run; re-run the live errand if time allows.
 ## integration
 
 Updated 01:20 IST. **Join is running: the mirror (M11) is being built on test doubles while it waits for M7a (Arkiv writer), M1 (checkout events) and M5 (the cast on ENS); none has merged yet.**
@@ -66,10 +65,10 @@ Updated 01:20 IST. **Join is running: the mirror (M11) is being built on test do
 
 ## website
 
-Updated 01:31 IST, Fri 6 Nov (T5 Web). **The website shell is on `main` and live** at https://graphpay-event.vercel.app (the top-bar chips already show the three chains' real latest blocks). Now adding the phone views' Friday items that need no other track: the request card (budget chip, deadline countdown), the spending pass states, merchant notifications.
-- Running: nothing long. Panels that need other tracks' routes say which milestone they wait for (M4, M6, M7b, M9, M10, M11).
-- Blockers: none. The venue network to GitHub is slow (retries needed).
-- Next: wire each panel as its route merges; M16 once M4 lands; Friday items 8 to 13.
+Updated 03:03 IST, Fri 6 Nov (T5 Web). **The shell and the phone views are on `main` and live** at https://graphpay-event.vercel.app. A PR adds the agent run route: one request starts an errand and streams its events back, one errand at a time; it answers "not live yet" until Join wires the agents' live services (M12).
+- Running: nothing long. Panels needing other tracks' routes say which milestone they wait for.
+- Blockers: none; the venue network to GitHub is slow (retries).
+- Next: wire each panel as its route merges (M4, M6, M7b, M9, M12); M16 once M4 lands; Friday items 8 to 13. A fresh start file is at `docs/sessions/website/resume.md`.
 
 ## records
 

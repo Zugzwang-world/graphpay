@@ -23,6 +23,8 @@ One line per PR: time (IST) · activity · result · PR link. Append under your 
 ## payments
 
 - 01:55 IST · payments · M1 contract and 88 fork tests on the real test USDT and Permit2; two reviewer passes: ship; auto-merge after the contracts job · https://github.com/Zugzwang-world/graphpay/pull/12
+- 01:51 IST · payments · merged: M1 checkout contract and 90 fork tests (M1 done) · https://github.com/Zugzwang-world/graphpay/pull/12
+- 01:58 IST · payments · M2 on the real chain (deploy 01:54, setup 01:57): USDT checkout deployed, verified, set up; scripts and records PR · pay/deploy
 
 ## identity
 
@@ -33,6 +35,7 @@ One line per PR: time (IST) · activity · result · PR link. Append under your 
 ## agents
 
 - 01:40 IST · agents · M10 package, guards, mocks and tests, reviewer findings fixed; five live runs on the testing preset all paid the good shop · [PR 11](https://github.com/Zugzwang-world/graphpay/pull/11)
+- 02:40 IST · agents · Friday item 2: optional `presence` and `handoff` hooks, mocks and 8 tests, no-op by default · [PR 16](https://github.com/Zugzwang-world/graphpay/pull/16)
 
 ## integration
 
@@ -42,6 +45,7 @@ One line per PR: time (IST) · activity · result · PR link. Append under your 
 
 - 01:30 IST · website · opened: the website shell (stage, both phones, explainer, race, how-it-works, passcode guard and its F2 tests, status chips) · https://github.com/Zugzwang-world/graphpay/pull/10 (merged; production serves it)
 - 01:31 IST · website · opened: phone views, Friday items 11 and 12 that need no other track (request card with budget and deadline countdown, spending-pass states, merchant notifications) · https://github.com/Zugzwang-world/graphpay/pull/13
+- 03:03 IST · website · opened: the agent run route (one request streams the errand over SSE, one at a time, 503 until M12 wires the live agents), the run registry, client streaming · https://github.com/Zugzwang-world/graphpay/pull/17
 
 ## records
 

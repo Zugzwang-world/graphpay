@@ -43,7 +43,7 @@ function Row({ event }: { event: TraceEvent }) {
         <li className="feed-row feed-meta rise-in">
           <TiffinBot role={roleOf(event.agent)} size={22} title={event.agent} idle />
           <p>
-            <strong>{event.agent}</strong> <span className="muted">starts: {event.task}</span>
+            <strong>{event.agent}</strong> <span className="muted">starts: {typeof event.task === 'string' ? event.task : 'its task'}</span>
           </p>
         </li>
       );

@@ -7,7 +7,7 @@ import { createScriptedModels } from './models.mjs';
 import { createMockHooks, createMockMcp, mockGraphRows } from './services.mjs';
 
 export { createScriptedModels, readPrompt } from './models.mjs';
-export { createMockHooks, createMockMcp, createMockShopSurface, MOCK_CONTRACT, MOCK_HOST, MOCK_SDL, mockAddress, mockGraphRows, mockNode, mockTx } from './services.mjs';
+export { createMockActivity, createMockHooks, createMockMcp, createMockShopSurface, MOCK_CONTRACT, MOCK_HOST, MOCK_SDL, mockAddress, mockGraphRows, mockNode, mockTx } from './services.mjs';
 
 // A whole mock world: the graph, the shops, ENS, the quote store and the models.
 // options: { cast, now, play, faults, ens, payee, accepts, shops, graph }.

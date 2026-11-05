@@ -7,15 +7,24 @@ import { scrubDeep } from './scrub.mjs';
 
 export const RUN_SCHEMA = 'graphpay.agent-run/v1';
 
-export function createRunLog({ scrub, onEvent } = {}) {
+export function createRunLog({ scrub, onEvent, observe } = {}) {
   const events = [];
   const edges = [];
   let seq = 0;
   const clean = scrub ?? ((t) => t);
 
-  function emit(event) {
+  // `observe(entry, meta)` is the activity feed (presence, handoffs): it sees the
+  // stored entry plus facts that are not part of the log (a message's lane).
+  function emit(event, meta) {
     const entry = scrubDeep({ seq: ++seq, ...event }, clean);
     events.push(entry);
+    if (observe) {
+      try {
+        observe(entry, meta);
+      } catch {
+        // an observer never stops an errand
+      }
+    }
     if (onEvent) {
       try {
         onEvent(entry);
@@ -30,8 +39,8 @@ export function createRunLog({ scrub, onEvent } = {}) {
     events,
     edges,
     scrub: clean,
-    message(from, to, text) {
-      const entry = emit({ type: 'message', from, to, text });
+    message(from, to, text, step) {
+      const entry = emit({ type: 'message', from, to, text }, { step });
       edges.push({ seq: entry.seq, from, to });
       return entry;
     },

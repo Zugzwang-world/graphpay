@@ -33,7 +33,7 @@ const passcode = 'q'.repeat(MIN_PASSCODE_LENGTH + 4);
 async function post(path: string, headers: Record<string, string>): Promise<Response> {
   const mod = (await import(fileOf(path))) as { POST?: (r: Request) => Promise<Response> };
   assert.ok(mod.POST, `${path} has no POST handler`);
-  return mod.POST(new Request(`https://example.test${path}`, { method: 'POST', headers, body: '{}' }));
+  return mod.POST(new Request(`https://example.test${path}`, { method: 'POST', headers, body: JSON.stringify({ request: 'a valid request' }) }));
 }
 
 test('every route file is in the route table with its method', () => {

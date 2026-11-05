@@ -10,6 +10,7 @@ import { config } from '@graphpay/config';
 import { z } from 'zod';
 import { displayUsdt, fromMicro, microFrom } from './money.mjs';
 import { clip, errorText } from './scrub.mjs';
+import { STEPS } from './activity.mjs';
 import { tracedTool } from './tools.mjs';
 import { base64JsonCodec, checkPaymentRequired, header, interpretSettlement, onStorefront } from './x402.mjs';
 
@@ -177,7 +178,7 @@ export function createPayer(ctx) {
   }
 
   async function quote() {
-    log.message(payerEns, approved.agents.storefront, `quote ${approved.quantity} × ${approved.item}`);
+    log.message(payerEns, approved.agents.storefront, `quote ${approved.quantity} × ${approved.item}`, STEPS.quote);
     let res;
     try {
       res = await shopClient.quote({
@@ -212,12 +213,12 @@ export function createPayer(ctx) {
     if (!(q.validUntil * 1000 > now)) return no('QUOTE_EXPIRED', 'the shop quote has expired');
     if (!onStorefront(parsed.data.payUrl, approved.storefront)) return no('RESOURCE_MISMATCH', 'the pay URL is not on the approved storefront');
     const order = { orderId: q.orderId, priceMicro, etaMinutes: q.etaMinutes, validUntil: q.validUntil, payUrl: parsed.data.payUrl, terms: parsed.data.terms };
-    log.message(approved.agents.storefront, payerEns, `quote ${displayUsdt(priceMicro)} USDT, ${q.etaMinutes} min (SYNTHETIC)`);
+    log.message(approved.agents.storefront, payerEns, `quote ${displayUsdt(priceMicro)} USDT, ${q.etaMinutes} min (SYNTHETIC)`, STEPS.quote);
     return { ok: true, order };
   }
 
   async function challenge(order) {
-    log.message(payerEns, approved.agents.storefront, `pay order ${order.orderId}`);
+    log.message(payerEns, approved.agents.storefront, `pay order ${order.orderId}`, STEPS.pay);
     let res;
     try {
       res = await shopClient.pay({ payUrl: order.payUrl, terms: order.terms, requestId: state.requestId });
@@ -230,7 +231,7 @@ export function createPayer(ctx) {
     }
     const fromHeader = codec.decodePaymentRequired(header(res.headers, 'payment-required'));
     const paymentRequired = fromHeader ?? (res.body?.x402Version !== undefined ? res.body : null);
-    log.message(approved.agents.storefront, payerEns, '402 payment required');
+    log.message(approved.agents.storefront, payerEns, '402 payment required', STEPS.quote);
     return presignCheck({
       paymentRequired,
       approved,
@@ -276,7 +277,7 @@ export function createPayer(ctx) {
       return settle('refused', 'SIGN_FAILED', 'the signer returned no signature; nothing was sent');
     }
     log.guard('G5', true, `every check passed before signing: ${displayUsdt(amount)} USDT for order ${order.orderId} to ${approved.shopEns}`);
-    log.message(payerEns, approved.agents.storefront, 'payment signature');
+    log.message(payerEns, approved.agents.storefront, 'payment signature', STEPS.pay);
     let res = null;
     let sendError = null;
     try {
@@ -311,7 +312,7 @@ export function createPayer(ctx) {
         asset: check.requirement.asset,
         explorerUrl: explorerTx(result.settlement.transaction),
       };
-      log.message(approved.agents.storefront, payerEns, `settled ${result.settlement.transaction}`);
+      log.message(approved.agents.storefront, payerEns, `settled ${result.settlement.transaction}`, STEPS.pay);
       return settle('paid', null, 'settled', {
         ...base,
         receipt,

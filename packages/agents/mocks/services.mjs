@@ -380,3 +380,24 @@ export function createMockHooks({ cast, mcp, clock = Date.now, ens = {}, payee =
   };
   return hooks;
 }
+
+// Recording presence and handoff hooks (Friday item 2). Spread them into the mock
+// hooks: `{ ...hooks, ...createMockActivity() }`. `fail` makes a hook throw
+// ('sync') or reject ('async') with the given message; `hang` never settles.
+export function createMockActivity({ fail = null, message = 'MOCK activity hook failure', hang = false } = {}) {
+  const presences = [];
+  const handoffs = [];
+  const act = (record) => {
+    record();
+    if (hang) return new Promise(() => {});
+    if (fail === 'sync') throw new Error(message);
+    if (fail === 'async') return Promise.reject(new Error(message));
+    return undefined;
+  };
+  return {
+    presences,
+    handoffs,
+    presence: (phase, info) => act(() => presences.push({ phase, ...info })),
+    handoff: (from, to, step, info) => act(() => handoffs.push({ from, to, step, ...info })),
+  };
+}
