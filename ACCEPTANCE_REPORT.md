@@ -1,28 +1,28 @@
 # Acceptance report
 
-Written by `pnpm acceptance` at 2026-11-05T23:46:48.489Z. Checks and pass criteria: `planning/ACCEPTANCE_TESTS.md` and `docs/plan/ACCEPTANCE_ADDITIONS.md`. Only D7 may be `blocked` (C7 and E3 no longer wait on supply, ADR-0054); a check without a result is `not run`, never `pass`.
+Written by `pnpm acceptance` at 2026-11-05T23:52:24.202Z. Checks and pass criteria: `planning/ACCEPTANCE_TESTS.md` and `docs/plan/ACCEPTANCE_ADDITIONS.md`. Only D7 may be `blocked` (C7 and E3 no longer wait on supply, ADR-0054); a check without a result is `not run`, never `pass`.
 
-**33 pass, 0 fail, 1 blocked, 14 not run** (of 48).
+**38 pass, 0 fail, 1 blocked, 9 not run** (of 48).
 
 | id | check | status | note |
 |---|---|---|---|
 | A1 | CI is green (at M0 the `contracts` job runs a placeholder Foundry project) | pass |  |
 | A2 | The secret scan is clean | pass |  |
-| A3 | Deny rules block reads of `.env` | not run | no runner yet |
-| A4 | Auto-merge works | not run | no runner yet |
+| A3 | Deny rules block reads of `.env` | pass |  |
+| A4 | Auto-merge works | pass |  |
 | A5 | The event wallets are fresh, except FUNDER and OPERATOR | pass |  |
 | A6 | `planning/` and the thinking-partner folder are in place | pass |  |
 | A7 | No known address literal in code outside the config file (D6) | pass |  |
 | A8 | No story name or value in code outside the story file (ADR-0047) | pass |  |
-| A9 | The agent presets are accepted (ADR-0048) | not run | no runner yet |
-| A10 | The Whitechain RPC rules hold (ADR-0031) | not run | no runner yet |
+| A9 | The agent presets are accepted (ADR-0048) | pass |  |
+| A10 | The Whitechain RPC rules hold (ADR-0031) | pass |  |
 | B1 | The `graphpay.eth` namespace resolves; all owners and agents exist | pass |  |
 | B2 | The gate passes active agents | pass |  |
-| B3 | A scoped role stops an agent raising its own cap | not run | no runner yet |
+| B3 | A scoped role stops an agent raising its own cap | pass |  |
 | B4 | The payment preference parses | pass |  |
 | B5 | A synthetic wildcard name resolves | pass |  |
 | B6 | Killing a disposable agent makes the gate deny it | pass |  |
-| B7 | The epoch changes on re-registration (fork test) | not run | no runner yet |
+| B7 | The epoch changes on re-registration (fork test) | not run | no fork test for a new registration after a lapse or an unregister (only renew keeping the epoch); needs an anvil fork of Sepolia |
 | B8 | ENSIP-26 records exist and the MCP endpoint answers | pass |  |
 | B9 | The payee is the shop's ENS address | not run |  |
 | C1 | Contracts are verified on the explorer | pass |  |
@@ -41,7 +41,7 @@ Written by `pnpm acceptance` at 2026-11-05T23:46:48.489Z. Checks and pass criter
 | D7 | Benchmark at size M, if seeded | blocked | waiting for the locked story (the M city is seeded only after the founder locks it) |
 | D8 | The geo query returns only shops inside the box, and only from our writers | pass |  |
 | D9 | A receipt cannot be edited | pass |  |
-| D10 | An expired or missing quote is refused and the agent re-quotes | not run | no runner yet |
+| D10 | An expired or missing quote is refused and the agent re-quotes | not run | not run: (c) the quote entity's expiry on Arkiv needs a live 402 with requestId (passcode; W_DIRECTORY writes a quote) |
 | D15 | The mirror resumes after a sleep or a network drop (ADR-0056) | pass |  |
 | E1 | Vitalik's request | pass |  |
 | E2 | The agents choose Kesar Kingdom, never the trap | pass |  |
@@ -89,6 +89,77 @@ Status: **pass**.
 [
   "check: clean (590 files)"
 ]
+```
+
+## A3: Deny rules block reads of `.env`
+
+Status: **pass**.
+
+### A3 (2026-11-05T23:52:17.334Z)
+
+- What: deny rules block reads of .env
+- Pass: true
+- Expected: every rule of SPEC/SECURITY_AND_OPS.md §2 present; the self-check shows the Read of .env refused (P-foundation-3: the wording changed, the block holds)
+- Evidence: `{"settings":".claude/settings.json","spec":"planning/SPEC/SECURITY_AND_OPS.md §2","selfCheck":"docs/thinking-partner/relays/foundation.md","wording":"docs/problems/PROBLEM_LOG.md P-foundation-3"}`
+
+```json
+{
+  "listed": 30,
+  "deny": 34,
+  "missing": [],
+  "extra": [
+    "Bash(vercel project ls*)",
+    "Bash(vercel project list*)",
+    "Bash(vercel projects ls*)",
+    "Bash(vercel projects list*)"
+  ],
+  "selfCheck": "**A3 self-check.** An empty `.env` was created by a script (a direct write is refused once the deny rules load). The `Read` of `.env` was refused with: `File is in a directory that is denied by your permission settings.` The shell `cat .env` was refused with: `Permission to use Bash with command cat"
+}
+```
+
+## A4: Auto-merge works
+
+Status: **pass**.
+
+### A4 (2026-11-05T23:52:19.406Z)
+
+- What: auto-merge works
+- Pass: true
+- Expected: auto-merge on, squash only, delete-on-merge on; required check ci, admins enforced, linear history, no force-push; a docs PR merged by auto-merge after ci passed
+- Evidence: `{"cmd":"gh api repos/{owner}/{repo}; gh api repos/{owner}/{repo}/branches/main/protection; gh pr list --state merged (read-only)","pr":"https://github.com/Zugzwang-world/graphpay/pull/62"}`
+
+```json
+{
+  "repo": {
+    "allow_auto_merge": true,
+    "allow_merge_commit": false,
+    "allow_rebase_merge": false,
+    "allow_squash_merge": true,
+    "delete_branch_on_merge": true,
+    "full_name": "Zugzwang-world/graphpay"
+  },
+  "protection": {
+    "admins": true,
+    "checks": [
+      "ci"
+    ],
+    "forcePush": false,
+    "linear": true
+  },
+  "pr": {
+    "number": 62,
+    "url": "https://github.com/Zugzwang-world/graphpay/pull/62",
+    "autoMergeRequest": {
+      "mergeMethod": "SQUASH",
+      "enabledAt": "2026-11-05T23:41:27Z"
+    },
+    "mergedAt": "2026-11-05T23:43:25Z",
+    "ci": {
+      "conclusion": "SUCCESS",
+      "completedAt": "2026-11-05T23:43:16Z"
+    }
+  }
+}
 ```
 
 ## A5: The event wallets are fresh, except FUNDER and OPERATOR
@@ -162,6 +233,99 @@ Status: **pass**.
 [
   "check: clean (593 files)"
 ]
+```
+
+## A9: The agent presets are accepted (ADR-0048)
+
+Status: **pass**.
+
+### A9 (2026-11-05T23:52:19.409Z)
+
+- What: the agent presets are accepted
+- Pass: true
+- Expected: every preset of story.json's agentModels has a probe row with its model and effort, accepted, seconds and cost recorded; the live preset over three turns
+- Evidence: `{"file":"docs/thinking-partner/OPEN.md (preset calibration)","cmd":"pnpm agents:probe (recorded, not re-run)"}`
+
+```json
+[
+  {
+    "preset": "testing",
+    "want": [
+      "`claude-opus-5-5`, xhigh"
+    ],
+    "row": {
+      "time": "22:54",
+      "run": "M0 probe (one-word reply, not an errand)",
+      "model": "`claude-opus-5-5`, xhigh",
+      "seconds": "2.2",
+      "cost": "$0.0005",
+      "notes": "accepted"
+    },
+    "ok": true
+  },
+  {
+    "preset": "video",
+    "want": [
+      "`claude-opus-5-5`, xhigh"
+    ],
+    "row": {
+      "time": "22:54",
+      "run": "M0 probe (one-word reply, not an errand)",
+      "model": "`claude-opus-5-5`, xhigh",
+      "seconds": "1.6",
+      "cost": "$0.0006",
+      "notes": "accepted"
+    },
+    "ok": true
+  },
+  {
+    "preset": "live",
+    "want": [
+      "`claude-haiku-5-5`, xhigh"
+    ],
+    "row": {
+      "time": "22:54",
+      "run": "M0 probe (one word, then three short turns)",
+      "model": "`claude-haiku-5-5`, xhigh",
+      "seconds": "0.9; turns 0.9 / 0.9 / 1.9",
+      "cost": "under $0.0002 in all",
+      "notes": "accepted; no empty reply, no `max_tokens`; once the same answer in two text blocks (read the final block)"
+    },
+    "ok": true
+  }
+]
+```
+
+## A10: The Whitechain RPC rules hold (ADR-0031)
+
+Status: **pass**.
+
+### A10 (2026-11-05T23:52:20.056Z)
+
+- What: the Whitechain RPC rules hold
+- Pass: true
+- Expected: config tests pass (wrong chain and plain http refused, no URL in errors); the secret URL chosen first at 1874; the hook masks a keyed Ankr URL and the scan refuses it
+- Evidence: `{"cmd":"node --test packages/config/test/config.test.mjs; resolveRpc(whitechain) label-only (eth_chainId reads); buildLine + scanText in process on scripts/test/samples.mjs","fact":"docs/technical/FACTS.md \"Founder's Ankr RPC\"","hookAndScanM0":"docs/thinking-partner/COVERAGE.md (23:10 proof)"}`
+
+```json
+{
+  "tests": {
+    "exit": 0,
+    "pass": 13,
+    "fail": 0
+  },
+  "live": {
+    "label": "WHITECHAIN_RPC_URL (secret)",
+    "secret": true,
+    "chainId": 1874,
+    "refused": []
+  },
+  "secretFirst": "measured now",
+  "proof": {
+    "hookMasks": true,
+    "scanRefuses": true
+  }
+}
 ```
 
 ## B1: The `graphpay.eth` namespace resolves; all owners and agents exist
@@ -285,6 +449,31 @@ Status: **pass**.
 ]
 ```
 
+## B3: A scoped role stops an agent raising its own cap
+
+Status: **pass**.
+
+### B3 (2026-11-05T23:52:24.075Z)
+
+- What: a scoped role stops an agent raising its own cap
+- Pass: true
+- Expected: agent-context setText lands as the agent's own key; setAddress 2147485522 simulates ok; cap_micro, status, x-graphpay-accepts, agent-endpoint[mcp] setText and setAddress(60) revert EACUnauthorizedAccountRoles in simulation, none sent
+- Evidence: `{"tx":"https://sepolia.etherscan.io/tx/0x12f009dfe98a8a5a7b4cab317774cb4d79fc40c64a16bff8cb9093052c7e456e","name":"acceptance.vitalik.graphpay.eth","file":"docs/technical/FACTS.md \"Setter scope\" (T2, b3-real.mjs --send, 02:25 IST; not re-run)","receipt":"read again now (Sepolia, read-only)"}`
+
+```json
+{
+  "tx": {
+    "status": "success",
+    "fn": "setText",
+    "key": "agent-context",
+    "fromIsHolder": true,
+    "toIsResolver": true,
+    "gasUsed": 59046
+  },
+  "refusedRecorded": true
+}
+```
+
 ## B4: The payment preference parses
 
 Status: **pass**.
@@ -340,6 +529,26 @@ Status: **pass**.
 {
   "reason": "ENS_EXPIRED_OR_REVOKED",
   "secondsAfterKill": 9.3
+}
+```
+
+## B7: The epoch changes on re-registration (fork test)
+
+Status: **not run** (no fork test for a new registration after a lapse or an unregister (only renew keeping the epoch); needs an anvil fork of Sepolia).
+
+### B7 (2026-11-05T23:52:24.077Z)
+
+- What: the epoch changes on re-registration (fork test)
+- Pass: null
+- Expected: renew keeps e; a new registration after a lapse gets e + 1; after unregister +1 (AVAILABLE view +2)
+- Evidence: `{"dir":"packages/ens/test-fork","cmd":"pnpm --filter @graphpay/ens test:fork (not run: needs FORK_URL)"}`
+
+```json
+{
+  "epochTests": [
+    "gate.fork.test.mjs: a lapse then renew revives the same epoch; a never-registered label is the next free disposable",
+    "namespace.fork.test.mjs: B1/B2 on the fork: every name of the cast walks ok, is REGISTERED at epoch 0 with its own factory-proxy resolver"
+  ]
 }
 ```
 
@@ -431,7 +640,7 @@ null
 
 Status: **not run** (no pnpm e2e:hosted run for this row yet).
 
-### C3 (2026-11-05T23:46:48.481Z)
+### C3 (2026-11-05T23:52:24.078Z)
 
 - What: partial refund, re-order and renewal work
 - Pass: null
@@ -968,6 +1177,43 @@ Status: **pass**.
       "readonly": true
     }
   ]
+}
+```
+
+## D10: An expired or missing quote is refused and the agent re-quotes
+
+Status: **not run** (not run: (c) the quote entity's expiry on Arkiv needs a live 402 with requestId (passcode; W_DIRECTORY writes a quote)).
+
+### D10 (2026-11-05T23:52:24.196Z)
+
+- What: an expired or missing quote is refused and the agent re-quotes
+- Pass: null
+- Expected: (a) QUOTE_MISSING, one re-quote that passes; (b) QUOTE_EXPIRED, one re-quote with a new entity key that passes; no signature before the passing check; (c) owner W_DIRECTORY, expiry 15 min after creation (±2 blocks), valid_until 10 min after
+- Evidence: `{"how":"in process on the mock world (packages/agents/mocks): createPayer → presignCheck with fake 402s, quote entities and signer; no network, no model, no real signature; the one mock signature follows the passing re-quote","tests":"packages/agents/test/errand.test.mjs (D10 a, D10 b)"}`
+
+```json
+{
+  "a": {
+    "refused": true,
+    "requotes": 1,
+    "status": "paid",
+    "signed": 1,
+    "quoteKeys": 1,
+    "guards": [
+      "QUOTE_MISSING: re-quoting once (new quote, new 402)"
+    ]
+  },
+  "b": {
+    "refused": true,
+    "requotes": 1,
+    "status": "paid",
+    "signed": 1,
+    "quoteKeys": 2,
+    "guards": [
+      "QUOTE_EXPIRED: re-quoting once (new quote, new 402)"
+    ]
+  },
+  "c": null
 }
 ```
 

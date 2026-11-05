@@ -1,0 +1,18 @@
+{
+  "id": "B7",
+  "at": "2026-11-05T23:52:24.077Z",
+  "pass": null,
+  "why": "no fork test for a new registration after a lapse or an unregister (only renew keeping the epoch); needs an anvil fork of Sepolia",
+  "what": "the epoch changes on re-registration (fork test)",
+  "measured": {
+    "epochTests": [
+      "gate.fork.test.mjs: a lapse then renew revives the same epoch; a never-registered label is the next free disposable",
+      "namespace.fork.test.mjs: B1/B2 on the fork: every name of the cast walks ok, is REGISTERED at epoch 0 with its own factory-proxy resolver"
+    ]
+  },
+  "expected": "renew keeps e; a new registration after a lapse gets e + 1; after unregister +1 (AVAILABLE view +2)",
+  "evidence": {
+    "dir": "packages/ens/test-fork",
+    "cmd": "pnpm --filter @graphpay/ens test:fork (not run: needs FORK_URL)"
+  }
+}

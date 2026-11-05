@@ -1,0 +1,35 @@
+{
+  "id": "D10",
+  "at": "2026-11-05T23:52:24.196Z",
+  "pass": null,
+  "why": "not run: (c) the quote entity's expiry on Arkiv needs a live 402 with requestId (passcode; W_DIRECTORY writes a quote)",
+  "what": "an expired or missing quote is refused and the agent re-quotes",
+  "measured": {
+    "a": {
+      "refused": true,
+      "requotes": 1,
+      "status": "paid",
+      "signed": 1,
+      "quoteKeys": 1,
+      "guards": [
+        "QUOTE_MISSING: re-quoting once (new quote, new 402)"
+      ]
+    },
+    "b": {
+      "refused": true,
+      "requotes": 1,
+      "status": "paid",
+      "signed": 1,
+      "quoteKeys": 2,
+      "guards": [
+        "QUOTE_EXPIRED: re-quoting once (new quote, new 402)"
+      ]
+    },
+    "c": null
+  },
+  "expected": "(a) QUOTE_MISSING, one re-quote that passes; (b) QUOTE_EXPIRED, one re-quote with a new entity key that passes; no signature before the passing check; (c) owner W_DIRECTORY, expiry 15 min after creation (±2 blocks), valid_until 10 min after",
+  "evidence": {
+    "how": "in process on the mock world (packages/agents/mocks): createPayer → presignCheck with fake 402s, quote entities and signer; no network, no model, no real signature; the one mock signature follows the passing re-quote",
+    "tests": "packages/agents/test/errand.test.mjs (D10 a, D10 b)"
+  }
+}

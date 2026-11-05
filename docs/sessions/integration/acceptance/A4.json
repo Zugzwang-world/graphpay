@@ -1,0 +1,42 @@
+{
+  "id": "A4",
+  "at": "2026-11-05T23:52:19.406Z",
+  "pass": true,
+  "what": "auto-merge works",
+  "measured": {
+    "repo": {
+      "allow_auto_merge": true,
+      "allow_merge_commit": false,
+      "allow_rebase_merge": false,
+      "allow_squash_merge": true,
+      "delete_branch_on_merge": true,
+      "full_name": "Zugzwang-world/graphpay"
+    },
+    "protection": {
+      "admins": true,
+      "checks": [
+        "ci"
+      ],
+      "forcePush": false,
+      "linear": true
+    },
+    "pr": {
+      "number": 62,
+      "url": "https://github.com/Zugzwang-world/graphpay/pull/62",
+      "autoMergeRequest": {
+        "mergeMethod": "SQUASH",
+        "enabledAt": "2026-11-05T23:41:27Z"
+      },
+      "mergedAt": "2026-11-05T23:43:25Z",
+      "ci": {
+        "conclusion": "SUCCESS",
+        "completedAt": "2026-11-05T23:43:16Z"
+      }
+    }
+  },
+  "expected": "auto-merge on, squash only, delete-on-merge on; required check ci, admins enforced, linear history, no force-push; a docs PR merged by auto-merge after ci passed",
+  "evidence": {
+    "cmd": "gh api repos/{owner}/{repo}; gh api repos/{owner}/{repo}/branches/main/protection; gh pr list --state merged (read-only)",
+    "pr": "https://github.com/Zugzwang-world/graphpay/pull/62"
+  }
+}

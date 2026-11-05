@@ -12,6 +12,7 @@ import { clientsFor } from '../scripts/lib/chains.mjs';
 import { createPayerGate } from '../integration/src/gate.mjs';
 import { connectArkiv, createGraphEngine, ENTITIES, runGraphql, writerAddresses } from '../packages/money-graph/index.mjs';
 import { readAll } from '../packages/arkiv-graph/index.mjs';
+import { trackChecks } from './tracks.mjs';
 
 const sh = (root, cmd, args, opts = {}) => spawnSync(cmd, args, { cwd: root, encoding: 'utf8', timeout: 10 * 60_000, ...opts });
 const lastLines = (s, n = 4) => String(s ?? '').trim().split('\n').slice(-n);
@@ -59,6 +60,8 @@ export function checks(root, env) {
     return { pass: a ? a.pass : null, what, measured: a?.measured ?? null, expected, evidence: { runFile: r.f.slice(root.length + 1), startedAt: r.run.startedAt, assertion, ...(a?.note ? { note: a.note } : {}) } };
   };
   return {
+    // The other tracks' checks (A3, A4, A9, A10, B3, B7, D10), read-only.
+    ...trackChecks(root, env),
     E1: async () => {
       const r = e2e();
       if (!r) return { pass: null, why: 'no passing real e2e:food run yet', what: "the human's request", measured: null, expected: '', evidence: {} };
