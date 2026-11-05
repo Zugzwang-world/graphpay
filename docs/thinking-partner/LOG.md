@@ -34,7 +34,8 @@ One line per PR: time (IST) · activity · result · PR link. Append under your 
 - 01:40 IST · arkiv · M7a: generic `@graphpay/arkiv-graph` SDK and `@graphpay/money-graph` (model, safe writer, ArkivSim, ledger, recorder, quotes, directory); live probe on Rabdi · https://github.com/Zugzwang-world/graphpay/pull/14 (merged 01:51)
 - 03:05 IST · arkiv · M8 size S seeded on Rabdi (graph 97 txs, 0.494 tGLM; directory; plain resuming) and M7b (engine, GraphQL, explain, hosted MCP routes); live checks pass · https://github.com/Zugzwang-world/graphpay/pull/21 (merged 03:11)
 - 03:20 IST · arkiv · fix: the recorder, quotes and the ledger's check read `getEntity`'s `$attributes`, so an uncertain send is adopted, never written twice (Join's finding); ArkivSim test · https://github.com/Zugzwang-world/graphpay/pull/25 (merged 03:23)
-- 04:05 IST · arkiv · fix: a reputation is labelled synthetic when any tally row it reads is, so real cast shops with labelled history say so (Join's finding via the Coordinator); ArkivSim test · PR pending
+- 03:40 IST · arkiv · fix: a reputation is labelled synthetic when any tally row it reads is, so real cast shops with labelled history say so (Join's finding via the Coordinator); ArkivSim test · https://github.com/Zugzwang-world/graphpay/pull/30 (merged 03:41)
+- 03:42 IST · arkiv · M9 at S: live benchmark, D6 passes (Q2: Graph Arkiv 2 reads, plain 5, 6 in parallel; every answer right), race function for /api/race, batched out()/in(), byte meter fix · https://github.com/Zugzwang-world/graphpay/pull/31
 
 ## agents
 
@@ -45,6 +46,7 @@ One line per PR: time (IST) · activity · result · PR link. Append under your 
 
 - 01:20 IST · integration · opened: the mirror core on test doubles (decoding, mapping, parking, lease, recorder fold, 5% history, endpoints; 22 tests) · https://github.com/Zugzwang-world/graphpay/pull/8
 - 02:05 IST · integration · opened: the mirror on M7a's writer, the workers process, `pnpm workers` (ArkivSim with the real planner; 29 tests; reviewer: 2 blocking and 7 should-fix items, all fixed) · https://github.com/Zugzwang-world/graphpay/pull/20
+- 03:36 IST · integration · opened: the mirror live on Rabdi (history 1,258 labelled events; retry and drop tests clean, counted after the first payment), the replay tool and acceptance reads, the integration package with the live MCP client and read hooks · https://github.com/Zugzwang-world/graphpay/pull/33
 
 ## website
 
@@ -63,5 +65,6 @@ One line per PR: time (IST) · activity · result · PR link. Append under your 
 - 03:20 IST · records · after the sleep: no session hung; T3 and T5 fresh; the main checkout fast-forwarded (M0's failed step); the prompt-log hook writes to the session's own checkout (P-records-1, reviewer: ship) · https://github.com/Zugzwang-world/graphpay/pull/24
 - 03:30 IST · records · the main checkout fast-forwarded to #24, so the fixed hook is live; the seven old prompt logs swept here as `*.main-checkout.jsonl` and the main checkout left clean · https://github.com/Zugzwang-world/graphpay/pull/27
 - 03:40 IST · records · usage 76% (about 3.75 points an hour, would run out around 10:00): T1, T3, Join and T6 stepped from xhigh to high; extra usage asked again · https://github.com/Zugzwang-world/graphpay/pull/29
+- 03:50 IST · records · ADR-0061: Swarm public content (the menu) through the gateway; refund evidence encrypted client-side, last and first to cut · https://github.com/Zugzwang-world/graphpay/pull/32
 
 ## submission

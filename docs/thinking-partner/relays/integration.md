@@ -1,58 +1,57 @@
 # Relay: integration (Join)
 
-Updated 02:50 IST, Fri 6 Nov.
+Updated 03:36 IST, Fri 6 Nov.
 
 ## In plain words
 
-The mirror turns every payment on Whitechain into a line in the money graph on Arkiv. It runs as one long-lived "workers" process on the founder's Mac, and the agents read the shops' scoreboards (tallies) that it keeps before they pay.
+The mirror is the piece that turns every payment on Whitechain into a line in the money graph on Arkiv, the scoreboard the agents read before they pay. **It now runs for real.** One long-lived "workers" process started on the founder's Mac at 03:13 IST, kept awake by `caffeinate`. It works on the real test networks, not the emulator.
 
-Since the last update, the mirror is connected to the real pieces: T3's Arkiv writer (M7a) and T1's checkout contract (M1). It has been tested in T3's Arkiv emulator with the real tally rules:
-- the lab's lifecycle comes out exactly as the lab measured it: the good shop has 5 orders, 6.40 paid, one refund of 0.80, 2 failures and 3 deliveries;
-- a restart writes nothing new;
-- a refusal recorded by the website is counted once, and only against the agent whose own wallet signed it;
-- the labelled synthetic history and a real payment after it add up on the same scoreboard;
-- a second workers process is refused, and of two that start at the same moment, the later one stops itself;
-- the heartbeat keeps beating during long work, so the lease never lapses while the process writes.
+What it did on its first start:
+- registered the 19 names of the test cast (people, agents, shops) on Arkiv's testnet;
+- wrote the labelled synthetic history the story needs, so the shops have a track record before the first real errand: 1,258 events at 5% of the lab's scale, every row marked synthetic, about 0.49 test GLM;
+- read the checkout contract from the block it was deployed in. So far the contract has only its 9 setup events (relayers and the five agents' spending policies), and those need no write.
 
-`pnpm workers` starts it. Nothing has run on a real network yet: that waits for the checkout's deployment (T1, M2) and the cast's names on ENS (T2, M5). The founder needs to do nothing. W_LEDGER, the mirror's Arkiv wallet, holds 1.998 tGLM, against about 0.7–0.9 needed for the history.
+It keeps up 2 blocks (about 4 seconds) behind the chain head.
+
+What this means for the demo: the agents' scores are now real reads. Asked through the hosted MCP endpoint (the same one the agents and judges use), the graph answers from the mirror's rows. Kesar Kingdom is on time 97% of the time with 1% refunds, Syrup Street 93%, and Jamun Junction 71% with 18% refunds. Jamun is the trap the analyst should exclude. These figures are synthetic story inputs, labelled as such on Arkiv.
+
+What was proven on the live networks:
+- **No double writes on a retry:** running the mirror again over the same blocks, with its memory of progress wiped, sends nothing.
+- **It survives a drop:** the process was frozen for 2 minutes, then killed hard and restarted. It caught up 127 blocks in under 5 seconds and took over at once (the dead process's lease was released). It went on from the same place, and nothing was lost or written twice.
+
+What the founder must do: **keep the Mac's lid open and the charger in**. caffeinate stops idle sleep but not a closed lid. Nothing else: no login, no funding.
+
+Both checks count for acceptance (D2, D15) only with a payment in the window, so until then they report "not run", never "pass". Still waiting: the first real payment. It comes through T1's facilitator (M3), which needs T2's spending gate (M6). D1 (one payment = one atomic Arkiv transaction), the other two retry cases of D2, and D3 (the scores recomputed from the raw edges) run on that payment. M11 closes then.
 
 ## Technical
 
-**PRs:**
-- [PR 8](https://github.com/Zugzwang-world/graphpay/pull/8) (merged): the mirror core on test doubles.
-- This PR (link in `LOG.md`): the wiring.
+**Branch `join/m11-live` (this PR): M11 part 3.**
+- `packages/mirror/src/setup.mjs`: the connections and the mirror that `main.mjs` (the workers) and the replay share. The checkout comes from `whitechain.contracts.checkout` (M2: address and deploy block 12,313,887), Whitechain is checked as chain 1874 and Rabdi as 7794095.
+- `pnpm workers:replay` (`packages/mirror/src/replay.mjs`), one mirror pass over a block range outside the workers:
+  - `dry` and `lost-cursor` (D2a): the write ports are replaced by counters, so these modes are safe beside the running workers;
+  - `race` (D2b): two processes hold their first raw transaction until the same instant, so they send the same batch at the same nonce;
+  - `crash` (D2c): the process kills itself right after the node accepts the transaction, before any receipt.
+  The two write modes refuse while a workers heartbeat is fresh.
+- `acceptance/mirror.mjs` with `packages/mirror/src/checks.mjs`: D1 decodes the mirror's Rabdi receipt (`EntityCreated`, `EntityPatched`) and names each operation by type (edge, the four tally rows, link, checkpoint), with gas against the lab's 310,527. D2a–c run the replays. D3 runs `reputation(window: ALL, verify: true)` plus a full recount by paging. `refs` checks that every event in a window has exactly its one edge. `lag` checks the heartbeat. Each result goes to `acceptance/results/<id>.json` for M13's report.
+- `integration/` (new workspace package, for M12):
+  - `@ai-sdk/mcp` 2.0.90, verified: it shares `@ai-sdk/provider-utils` 5.0.74 with `ai` 7.0.162, whereas `latest` 2.0.91 would add a second copy. Recorded in `docs/technical/VERSIONS.md`.
+  - `src/mcp.mjs`: the agents' `McpLike` over Streamable HTTP to `https://graphpay-event.vercel.app/api/mcp`. Live, it lists `schema, ask, graphql, explain`.
+  - `src/hooks.mjs`: `resolvePayee` and `readAccepts` (the ENS reader with its 20 s cache, M5 amendment §2), `nodeOf`, `directory` and `shopKey` (`discoverShops` around the persona's point and 3 km radius, M7 amendment §6), `findQuotes` (W_DIRECTORY quotes, §5), and `payerWallet` by wallet role (public addresses only).
+- Tests: mirror 34, integration 8, money-graph 15 (after merging PR 25). `pnpm check` is clean. The reviewer runs before merge.
 
-**What was built:**
-- `src/arkiv.mjs`: the mirror's ledger port over `@graphpay/money-graph` (PR 14).
-  - It runs three `createLedger` instances on W_LEDGER's rows: the chain stream `chain:1874:<checkout>`, the `recorder` stream and the history stream. Each one plans absolute tallies from its own copy of the rows. A write through one marks the others stale, and they re-read from Arkiv before their next write. A live anchor read that differs from a ledger's copy marks that ledger stale too.
-  - Live writes pin the nonce read before the anchors (`NONCE_TAKEN` otherwise).
-  - The checkpoint carries an event's position only when it moves forward; while an earlier event is parked, the write carries no position and the ref guards it.
-- **History.** It is sent in parts that each plan into one unsplit transaction, at a pinned nonce, checked by its checkpoint if it is found by nonce. A part therefore lands whole or not at all. A shared tally or link row the history touches is labelled `synthetic=true`.
-- `src/workers.mjs`, `src/main.mjs` (`pnpm workers`):
-  - Start order: the lease, the heartbeat row, the cast, the history, then the chain source every 2 s and the recorder fold every 10 s.
-  - The heartbeat beats on a timer between writes and between the events of a long catch-up. Every beat looks for a rival, and the instance whose row was created first (by Arkiv block) keeps the lease.
-  - A claim file is taken exclusively (`wx`) and blocks a second process on this Mac while its pid is alive.
-  - Start-up writes retry a lagging-RPC nonce.
-  - The Whitechain RPC is chosen by `resolveRpc`, and Arkiv's chain id is asserted at connect.
-  - Errors and logs pass the redactor, and the endpoints listen on 127.0.0.1 only.
-- **The checkout.** The ABI and `FAIL_REASON` come from `@graphpay/contracts`. `nodeOfWallet` attributes refusals. The address and deploy block are read from `whitechain.contracts.checkout` (M2), or else from `GRAPHPAY_CONTRACT` and `DEPLOY_BLOCK`. A lab address is refused.
+**Live numbers (Rabdi, W_LEDGER `0x7DeAF022B3829C53c73031B7d28Ed9746F517665`):**
+- History stream `history:test:v1:x0.05:d20762:b7d36bb9`: 1,258 events, about 50 parts, about 13 min (03:13–03:26 IST).
+- Balance 1.998 → 1.510 tGLM.
+- The chain stream has no checkpoint yet (no checkout event has needed a write).
+- Stored all-time tallies (synthetic, from the history): kesar 241 orders, 1,156.80 paid, 3 refunds; jamun 110 orders, 20 refunds.
+- Restart: 0 nodes re-registered, the history found complete, running in 22 s.
 
-**Tests:** 29 in `packages/mirror`, all green: 22 on fakes and 7 on ArkivSim with the real planner and writer.
+**Deviations and open items:**
+- D2a and D15 ran on a window with no edge events (no payments exist yet), so they record `not run`. They are repeated with payments in M13.
+- The reviewer found 3 blocking issues, all fixed before merge: the race and crash hold never fired (viem copies the client, so the hold now sits at the transport, `packages/mirror/src/intercept.mjs`); D1 looked for `day` where the rows say `day:<n>`; the D3 recount read only one end of each edge. ArkivSim tests now run D1 on every mirrored payment and the recount on every node.
+- Known limit: a replay with its checkpoint lost (`lost-cursor`) would re-apply an old `AgentPolicySet` standing; the real mirror is protected by its checkpoint (every standing write moves it). Guarding standings by their last event is a follow-up.
+- Found: `Reputation.synthetic` (money-graph GraphQL, T3) reads only the node row, so scores from the labelled history show `synthetic: false`. Sent to the Coordinator for T3 (`OPEN.md`).
+- The killed instance's heartbeat row stays `running` until its 1-day expiry. The lease reads its age (stale after 90 s), so this is harmless, but a reader counting `running` rows must also check the age (the `lag` check does).
+- Not yet hosted in the workers: T2's ENS watcher (M6, not merged).
 
-**Reviewer:** one pass, with 2 blocking issues and 7 should-fix items, all fixed in this PR.
-- The lease could lapse during the history or a long catch-up.
-- The race tie-break ignored the order of creation.
-- History parts could land in pieces.
-- The registration check read the wrong field (`$attributes`).
-- One bad refusal could block the fold.
-- Mixed rows carried the wrong labels.
-- Start-up writes could hit a lagging RPC.
-- There were gaps in `main.mjs`, and a missing row in `VERSIONS.md`.
-
-**Found in merged code (reported to the Coordinator for T3):** `getEntity` returns the columns under `$attributes`, but money-graph's `recordEdge`, `quotes.mjs` and the ledger's unstreamed check read `e.attributes`. After an uncertain send, those checks can reject the writer's own transaction. A recorder refusal could then be sent twice, though the fold's row guard keeps it from being counted twice.
-
-**Deviations, and choices where the spec is silent:** these are the same as in PR 8 (history buyers, the held checkpoint, standing replays, the recorder's 120 s settle window). Added here:
-- history parts are atomic, rather than 25-event batches split by bytes;
-- mixed tally rows are labelled synthetic.
-
-**Next:** when M2 and M5 merge, the founder's Mac runs `pnpm workers`. That registers the cast, writes the 5% history (1,258 events, about 100 transactions, 10–15 minutes) and mirrors the lifecycle run. Then D1–D3, D15 and the 30-minute lag check. The procedure is in `docs/sessions/integration/mirror.md`.
+**Next:** M12's shop side, signing and gate once M3 and M6 merge; `pnpm e2e:food` (fork, then real with `E2E_BUYER=rehearsal`); then D1–D3 on the first real payment and the `(M11 done)` PR.

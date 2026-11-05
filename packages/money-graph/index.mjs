@@ -15,3 +15,4 @@ export { writeHeartbeat, readHeartbeats } from './src/heartbeat.mjs';
 export { openShop, closeShop, openShopKeys, markPresence, agentsOnline, recordHandoff, handoffsFor, activityHooks } from './src/activity.mjs';
 export { SDL, graphqlSchema, runGraphql, createContext, createGraphEngine, checkLimits, ownersFor, rate, usdt } from './src/graphql.mjs';
 export { MCP_TOOLS, askDocument, createMcpServer, handleMcpRequest } from './src/mcp.mjs';
+export { QUESTIONS, RACE_QUESTIONS, ask, score, plainPayRows, graphDocument, graphAnswer, callTap, raceQuestion } from './src/bench.mjs';
