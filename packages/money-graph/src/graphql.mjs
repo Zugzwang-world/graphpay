@@ -233,6 +233,27 @@ export function createContext({ engine, dataset = 'live', listCap = 100, writers
     return ids.map((id) => found.get(id));
   });
 
+  // Edges of sibling nodes (out or in): grouped by (direction, epoch, kinds, first day),
+  // one OR over the nodes per group, so a list of agents costs one read, not one each.
+  const edgeRows = new DataLoader(async (ids) => {
+    const groups = new Map();
+    for (const id of ids) {
+      const [k, dir, e, ks, since] = JSON.parse(id);
+      const g = JSON.stringify([dir, e, ks, since]);
+      if (!groups.has(g)) groups.set(g, { dir, e, ks, since, keys: [] });
+      groups.get(g).keys.push(k);
+    }
+    const found = new Map(ids.map((id) => [id, []]));
+    for (const { dir, e, ks, since, keys } of groups.values()) {
+      const where = [eq(`${dir}_epoch`, u64(BigInt(e)))];
+      if (ks) where.push(ks.length === 1 ? eq('kind', str(ks[0])) : or(ks.map((k) => eq('kind', str(k)))));
+      if (since !== null) where.push(gte('day', u64(BigInt(since))));
+      const rows = await ctx.queryAny(ENTITIES.edge, { where, terms: keys.map((k) => eq(`${dir}_node`, key(k))), owners: owners.edge });
+      for (const r of rows) found.get(JSON.stringify([String(r[`${dir}_node`]).toLowerCase(), dir, e, ks, since]))?.push(r);
+    }
+    return ids.map((id) => found.get(id));
+  });
+
   const edgeMemo = new Map();
   function edgesOf(ref, dir, args) {
     const id = JSON.stringify([ref.key, ref.pinnedEpoch, dir, args.kind ?? null, args.kinds ?? null, args.sinceDay ?? null, args.limit ?? null]);
@@ -240,13 +261,13 @@ export function createContext({ engine, dataset = 'live', listCap = 100, writers
     return edgeMemo.get(id);
   }
 
+  // Each node keeps its first `limit` edges; the batch as a whole stops at the row cap
+  // and marks the answer truncated.
   async function edgesOfUncached(ref, dir, { kind, kinds, sinceDay, limit }) {
     const e = await currentEpoch(ref);
     const ks = kinds ?? (kind ? [kind] : null);
-    const where = [eq(`${dir}_node`, key(ref.key)), eq(`${dir}_epoch`, u64(BigInt(e)))];
-    if (ks && ks.length > 0) where.push(ks.length === 1 ? eq('kind', str(ks[0])) : or(ks.map((k) => eq('kind', str(k)))));
-    if (sinceDay !== undefined && sinceDay !== null) where.push(gte('day', u64(BigInt(sinceDay))));
-    return byRef(await ctx.query(ENTITIES.edge, { where, owners: owners.edge, want: cap(limit) })).map(edgeOut);
+    const rows = await edgeRows.load(JSON.stringify([ref.key.toLowerCase(), dir, e, ks && ks.length > 0 ? ks : null, sinceDay ?? null]));
+    return byRef(rows).slice(0, cap(limit)).map(edgeOut);
   }
 
   async function verifyCounts(ref, epoch, lo, hi) {
