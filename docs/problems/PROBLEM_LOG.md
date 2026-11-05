@@ -31,3 +31,20 @@ Symptom: reviewer pass 1 showed that `secrets:import-lab` wrote a key before com
 Cause: check after write.
 Fix: the address is checked before anything is written; the other two names are validated too (PR #3, with tests).
 Prevention: helpers that write secrets validate first, write second; the reviewer runs on every helper that touches keys.
+
+## records
+
+### P-records-1: the worktree sessions' prompt logs land in the main checkout
+When: 2026-11-06 01:00 IST · Activity: records · Cost: none yet; the logs are kept, not lost
+Symptom: `~/graphpay` shows untracked `prompts/raw/2026-11-06-*.jsonl` files and a modified M0 log; the sessions' worktrees have none, so their PRs do not carry their logs as `CLAUDE.md` asks.
+Cause: the hook writes to `$CLAUDE_PROJECT_DIR/prompts/raw/`, and for a session started on `~/graphpay` with the worktree option that is the main checkout, not the worktree.
+Fix: planned in the Coordinator's next PR: the hook writes into the session's own checkout (the git top level of its working directory), and the logs already written are swept into a records PR.
+Prevention: a hook that writes repo files resolves the checkout from the session's working directory; a test covers a worktree.
+
+### P-records-2: GitHub calls time out on the venue network
+When: 2026-11-06 00:49 IST · Activity: records · Cost: about 5 minutes
+Symptom: `git fetch` failed with "Could not resolve host: github.com"; `gh` calls failed with "TLS handshake timeout".
+Cause: slow venue Wi-Fi: name lookups took 3–7 s, the TLS handshake about 6 s, and pings to 1.1.1.1 184–256 ms; `gh` gives up on a slow handshake.
+Fix: retry the same call a few times with a pause; every call has gone through within three tries so far.
+Prevention: the ticks retry GitHub calls before reporting a failure; a session whose push fails retries rather than stopping.
+

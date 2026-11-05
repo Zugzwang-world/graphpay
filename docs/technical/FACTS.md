@@ -270,3 +270,13 @@ offset(offset: number): this;
 ## Track rows
 
 Each track adds its own rows here (under `### <activity>`), with source, time and status.
+
+### records
+
+| fact | value | source | checked (IST) | status | note |
+|---|---|---|---|---|---|
+| npm name `@graphpay/arkiv-graph` | not on the registry (E404) | `npm view @graphpay/arkiv-graph name version` | Fri 01:02 | verified (free now) | ADR-0057; re-check right before publishing |
+| npm scope `graphpay` | no organisation and no user: the registry answers 404 for `/-/org/graphpay/package` and `/-/user/graphpay/package` (an existing organisation, `vercel`, and user, `sindresorhus`, answer 200); a scope search lists no packages | `curl https://registry.npmjs.org/-/org/graphpay/package`, `…/-/user/graphpay/package`, `…/-/v1/search?text=scope:graphpay` | Fri 01:05 | verified (unclaimed now) | publishing `@graphpay/…` needs the founder's npm account to own the scope (a free npm organisation `graphpay`) |
+| npm name `arkiv-graph` (unscoped) | taken: version 1.1.2, "Interactive graphs and tables for Arkiv entities, with scoped queries and optional wallet-signed Lifetime Extension", repository `github.com/SantiagoDevRel/arkiv-graph` | `npm view arkiv-graph name version description repository.url` | Fri 01:02 | verified | a different Arkiv project; our README credits it and says how ours differs (the pack's reach row already credits it) |
+| Plan usage | weekly limit, all models: 70% used, resets Fri 6 Nov 21:30 IST; Fable's own weekly limit 0%; extra usage off | the app's usage card (`get_usage`) | Fri 01:08 | measured | `docs/thinking-partner/OPEN.md` "Founder now" item 1 |
+| Session models | all seven event sessions (T1–T5, Join, Coordinator) report `claude-opus-5-5` at effort `max`; the plan has Sonnet 5.5 at high for T2, T4, T5, Opus 5.5 at xhigh for T1, T3, Join, and Opus 5.5 at high for the Coordinator | the app's session metadata (`get_session`) | Fri 01:08 | measured | `docs/plan/sessions/README.md`; `AI_USAGE.md` |

@@ -34,4 +34,6 @@ One line per PR: time (IST) · activity · result · PR link. Append under your 
 
 ## records
 
+- 01:20 IST · records · the Coordinator took over at 00:46 (10-minute ticks, keep-awake); ADR-0057 (the graph SDK, npm on Friday) and Friday item 18; T3 briefed; M0's background tasks checked (none failed); usage risk raised; first M14 relay · PR_LINK
+
 ## submission

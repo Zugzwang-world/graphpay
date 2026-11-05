@@ -1,15 +1,16 @@
 # OPEN
 
-The founder's to-dos and open questions. Each item says what, where, why and what we recommend. "Founder now" is kept by main; every session keeps its own section below.
+The founder's to-dos and open questions. Each item says what, where, why and what we recommend. "Founder now" is kept by the Coordinator; every session keeps its own section below.
 
-## Founder now (main only)
+## Founder now (Coordinator only)
 
-1. **Start the six track sessions (T1–T5 and Join) together, then a fresh Coordinator.** Where: Claude desktop app → Code → new session on `~/graphpay` with the worktree option on; model, effort and the one-line start text for each in `docs/plan/sessions/README.md` (each line just names the session and its run file). Why: M0 is merged and the M0 session takes no more work; the night runs without you. From now on, send each brief to the session that owns the work; the story brief and cross-cutting briefs go to the Coordinator.
-2. **Send ETHGlobal the written pre-event disclosure.** Where: the Hacker Dashboard or an organiser; paste-ready text in `docs/plan/DISCLOSURE_MESSAGE.md` (the README line, the disclosure table, organiser questions 1, 3 and 4, and an optional line asking them to confirm the AI answer in writing). Why: the rules require written disclosure of pre-existing work.
-3. **Lock the final story config** (the story-config brief). Where: a new `packages/config/story.json` from the thinking partner; main swaps it in. Why: the demo cast, products, prices, places and demo steps come only from it (ADR-0047), and the large city is seeded only from the locked story (ADR-0049). When: by **Fri 08:30 IST** for rehearsal 1 with the demo cast; at the latest by **Fri 13:00**, because the M seeding's latest safe start is 14:00.
-4. **Laptop on power, sleep off, online until Saturday's pitch.** Why: the mirror runs as one process on this Mac from about 01:00 (it will run under `caffeinate`).
+1. **Plan usage: the weekly limit is 70% used and resets Fri 21:30 IST, and every session runs Opus 5.5 at max effort.** What: switch the six track sessions to the planned models and efforts (Sonnet 5.5 at high for T2, T4 and T5; Opus 5.5 at xhigh for T1, T3 and Join) and the Coordinator to Opus 5.5 at high. Where: reply "switch" to the Coordinator, which changes the six track sessions from their next turn; the Coordinator's own setting only in its model menu. Why: if the weekly limit runs out, every session stops until Fri 21:30, after the 18:00 freeze; extra usage is off. Recommendation: switch now. Without an answer, the Coordinator measures the burn every tick and switches the track sessions to the plan if it would run out before Fri 18:00.
+2. **Send ETHGlobal the written pre-event disclosure, if not sent yet.** Where: the Hacker Dashboard or an organiser; paste-ready text in `docs/plan/DISCLOSURE_MESSAGE.md`. Why: the rules require written disclosure of pre-existing work.
+3. **Lock the final story config** (the story-config brief goes to the Coordinator). Why: the demo cast, products, prices, places and demo steps come only from it (ADR-0047), and the large city is seeded only from the locked story (ADR-0049). When: by **Fri 08:30 IST** for rehearsal 1; at the latest **Fri 13:00**, because the M seeding's latest safe start is 14:00.
+4. **Laptop on power, lid open, the app open and online until Saturday's pitch.** Why: all seven sessions run on this Mac, and the mirror joins them after M11 (under `caffeinate`).
+5. **Optional, before Friday's publish: claim the npm organisation `graphpay`.** Where: npmjs.com, signed in with your account → Add Organization → `graphpay`, free plan (public packages). Why: only the scope's owner can publish `@graphpay/arkiv-graph` (ADR-0057); the scope is unclaimed at 01:05 IST and anyone could take it before Friday. Recommendation: do it when convenient; the Coordinator asks for the npm login itself when the package is ready (Friday item 18).
 
-**Closed tonight:** the Ankr session's worktree and branch (removed at 23:09), the Vercel GitHub link (connected 22:42 IST; checks in `NOW.md`), the personal Ankr URL (stored, verified 22:51 IST: chain 1874, HTTPS), test USDT (150 arrived 21:54 IST; distributed, ADR-0045) and tGLM (FUNDER held 12.86; every planned wallet funded).
+**Closed tonight:** the six track sessions and the Coordinator started (00:44–00:46 IST); the Ankr session's worktree and branch (removed at 23:09), the Vercel GitHub link (connected 22:42 IST; checks in `NOW.md`), the personal Ankr URL (stored, verified 22:51 IST: chain 1874, HTTPS), test USDT (150 arrived 21:54 IST; distributed, ADR-0045) and tGLM (FUNDER held 12.86; every planned wallet funded).
 
 ## Funding check (main, 22:43 IST; nothing new since the M0 funding)
 
@@ -85,5 +86,8 @@ Agents (T4) and Join add one row per full errand run, so the presets can be cali
 ## website
 
 ## records
+
+- **npm login for the Friday publish (ADR-0057, item 18).** What: your npm login and go-ahead when the package is ready, after CP4 and T3's item 18. Where: a Terminal-panel tab the Coordinator opens; npm's sign-in and any one-time code happen there and Claude never sees them. Why: publishing needs your account, and a publish cannot be undone after 72 hours. Recommendation: nothing now; the Coordinator asks.
+- **Prompt logs land in the main checkout** (P-records-1). What: the prompt-log hook writes every session's log to `~/graphpay/prompts/raw/`, not to the session's worktree, so track PRs do not carry their logs. Recommendation: the Coordinator changes the hook to write into the session's own checkout and sweeps the logs written so far into a records PR. No founder action.
 
 ## submission

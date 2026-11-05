@@ -10,8 +10,10 @@ GraphPay was built with **Claude Code** (Anthropic), running mostly unattended i
 
 | where | what |
 |---|---|
-| main session (foundation, records, submission) | Claude Code 2.1.318, model Opus 5.5 (high effort) |
-| track sessions | Opus 5.5 for payments, Arkiv and integration; Sonnet 5.5 for identity, agents and the website (`planning/BUILD_SEQUENCE.md` §2); the session table in `docs/plan/MASTER_PLAN.md` says which ran where |
+| M0 session (foundation), Thu 21:35–23:58 IST | Claude Code 2.1.318, Opus 5.5 at max effort (the app's session metadata) |
+| track sessions T1 Payments, T2 Identity, T3 Arkiv, T4 Agents, T5 Web and Join, from Fri 00:44 IST | Opus 5.5 at max effort as started; the plan (`docs/plan/sessions/README.md`) had Sonnet 5.5 at high for identity, agents and the website and Opus 5.5 at xhigh for the rest; any switch is recorded here with its time |
+| Coordinator (records, merges, story lock, top-ups), from Fri 00:46 IST | Opus 5.5 at max effort as started (the plan: high) |
+| Submission (M17), from Fri 13:00 IST | planned: Sonnet 5.5 at high |
 | subagents | a **reviewer** (reads each branch's diff, blocking issues first) and a **verifier** (checks versions, addresses, chain ids and API names against primary sources), defined in `.claude/agents/` |
 | the product at runtime | the buyer and shop agents run on `claude-haiku-5-5` through the Anthropic API with the Vercel AI SDK (ADR-0011, ADR-0019); Grok only if a session switches to it, and then it is recorded here |
 
