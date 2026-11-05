@@ -9,6 +9,11 @@
   },
   "dependencies": {
     "@graphpay/agentpay": "workspace:*",
-    "@graphpay/config": "workspace:*"
+    "@graphpay/config": "workspace:*",
+    "@graphpay/contracts": "workspace:*",
+    "viem": "2.57.16"
+  },
+  "scripts": {
+    "real": "node real.mjs"
   }
 }

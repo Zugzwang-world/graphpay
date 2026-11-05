@@ -72,6 +72,12 @@ importers:
       '@graphpay/config':
         specifier: workspace:*
         version: link:../../packages/config
+      '@graphpay/contracts':
+        specifier: workspace:*
+        version: link:../../packages/contracts
+      viem:
+        specifier: 2.57.16
+        version: 2.57.16(typescript@5.9.3)(zod@4.6.7)
 
   integration:
     dependencies:
