@@ -1,0 +1,25 @@
+{
+  "synthetic": true,
+  "size": "S",
+  "store": "plain",
+  "owner": "0x9da407ffdbf6e4dee5f972f7adcfa873d72b60d0",
+  "dataset": "graphpay-city-v1-S",
+  "backend": "rabdi",
+  "transactions": 24,
+  "creates": 641,
+  "patches": 0,
+  "deletes": 0,
+  "gas": "105447817",
+  "tglm": "0.105449",
+  "firstTx": "0x2520fd073c00dbdc628ab9f9e80bdcff66dc01d543a4ffebf230fdd8d795270b",
+  "lastTx": "0x094383ef6d1eaecd6857313c4ea4c432453a4597f5b75c7eae5e2ff9c94439f6",
+  "started": "2026-11-05T20:36:48.091Z",
+  "finished": null,
+  "minutes": null,
+  "httpStatus": {
+    "200": 1794
+  },
+  "lowestRateLimitRemaining": 4834,
+  "status": "failed",
+  "error": "The request took too long to respond."
+}

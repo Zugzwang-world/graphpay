@@ -108,6 +108,17 @@ export function createWriter({
   // answer a confirmed count one behind right after a receipt, so the count is never
   // allowed to go back below it.
   let nextNonce = 0;
+  // Reads are retried (a slow node times out now and then); nothing is sent by them.
+  async function read(fn, tries = 4) {
+    for (let i = 1; ; i += 1) {
+      try {
+        return await fn();
+      } catch (error) {
+        if (i >= tries || classify(error) === 'revert') throw error;
+        await sleep(pollMs * i);
+      }
+    }
+  }
 
   // The SDK parameters of a batch given as { creates: [{ def, values, expiration, readonly? }],
   // patches: [{ def, key, values }], deletes: [{ key }], extensions: [{ key, expiration }] }.
@@ -167,7 +178,7 @@ export function createWriter({
   }
 
   async function adopt(hash, ops, { recovered }) {
-    const receipt = await publicClient.getTransactionReceipt({ hash });
+    const receipt = await read(() => publicClient.getTransactionReceipt({ hash }));
     if (receipt.status !== 'success') throw new WriteRevertedError(`arkiv-graph: transaction ${hash} reverted`, { txHash: hash });
     const keys = createdKeysOf(receipt);
     const creates = ops.filter((o) => o.kind === 'create').length;
@@ -187,9 +198,9 @@ export function createWriter({
   }
 
   async function findByNonce(nonce, fromBlock) {
-    const head = await publicClient.getBlockNumber();
+    const head = await read(() => publicClient.getBlockNumber());
     for (let b = fromBlock; b <= head; b += 1n) {
-      const block = await publicClient.getBlock({ blockNumber: b, includeTransactions: true });
+      const block = await read(() => publicClient.getBlock({ blockNumber: b, includeTransactions: true }));
       const tx = block.transactions.find((t) => typeof t === 'object' && t.from?.toLowerCase() === address && Number(t.nonce) === nonce);
       if (tx) return tx.hash;
     }
@@ -201,7 +212,7 @@ export function createWriter({
   async function recover(nonce, fromBlock) {
     const deadline = Date.now() + recoveryMs;
     for (;;) {
-      const confirmed = await publicClient.getTransactionCount({ address, blockTag: 'latest' });
+      const confirmed = await read(() => publicClient.getTransactionCount({ address, blockTag: 'latest' }));
       if (confirmed > nonce) {
         const hash = await findByNonce(nonce, fromBlock);
         if (hash) return hash;
@@ -234,7 +245,7 @@ export function createWriter({
   async function sendChunk(ops, split, verifyRecovered, fixedNonce = null) {
     let pinned = null;
     for (let attempt = 1; ; attempt += 1) {
-      const confirmed = await publicClient.getTransactionCount({ address, blockTag: 'latest' });
+      const confirmed = await read(() => publicClient.getTransactionCount({ address, blockTag: 'latest' }));
       if (pinned && confirmed > pinned.nonce) {
         const hash = await findByNonce(pinned.nonce, pinned.fromBlock);
         if (!hash) {
@@ -259,7 +270,7 @@ export function createWriter({
         if (confirmed < fixedNonce) throw new Error(`arkiv-graph: nonce ${fixedNonce} is ahead of the confirmed ${confirmed}; it would wait in the mempool`);
       }
       const nonce = pinned ? pinned.nonce : (fixedNonce ?? Math.max(confirmed, nextNonce));
-      const fromBlock = pinned ? pinned.fromBlock : await publicClient.getBlockNumber();
+      const fromBlock = pinned ? pinned.fromBlock : await read(() => publicClient.getBlockNumber());
       try {
         const res = await walletClient.executeBatch(sdkBatch(ops), { nonce });
         nextNonce = Math.max(nextNonce, nonce + 1);

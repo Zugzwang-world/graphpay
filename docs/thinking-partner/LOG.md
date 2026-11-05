@@ -31,7 +31,8 @@ One line per PR: time (IST) · activity · result · PR link. Append under your 
 
 ## arkiv
 
-- 01:40 IST · arkiv · M7a: generic `@graphpay/arkiv-graph` SDK and `@graphpay/money-graph` (model, safe writer, ArkivSim, ledger, recorder, quotes, directory); live probe on Rabdi · PR pending
+- 01:40 IST · arkiv · M7a: generic `@graphpay/arkiv-graph` SDK and `@graphpay/money-graph` (model, safe writer, ArkivSim, ledger, recorder, quotes, directory); live probe on Rabdi · https://github.com/Zugzwang-world/graphpay/pull/14 (merged 01:51)
+- 03:05 IST · arkiv · M8 size S seeded on Rabdi (graph 97 txs, 0.494 tGLM; directory; plain resuming) and M7b (engine, GraphQL, explain, hosted MCP routes); live checks pass · PR pending
 
 ## agents
 
