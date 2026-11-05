@@ -120,3 +120,28 @@ export function viemChain({ publicClient, walletClient, account, checkout, token
     },
   };
 }
+
+// T2's ENS gate (createEnsGate) takes three inputs; these read them from the checkout itself:
+// the epoch the policy was written for (null when the policy has no wallet: ENS_NO_POLICY), its
+// daily cap (also when revoked, so the contract records that failure within the quota; null when
+// the epoch differs) and what that epoch spent on the contract's UTC day.
+export function checkoutPolicyReads(publicClient, checkout) {
+  const policy = (node) => publicClient.readContract({ address: checkout, abi: checkoutAbi, functionName: 'policies', args: [node] });
+  const bound = (p) => p && BigInt(p.wallet) !== 0n;
+  return {
+    policy,
+    expectedEpoch: async (node) => {
+      const p = await policy(node);
+      return bound(p) ? Number(p.epoch) : null;
+    },
+    policyCapMicro: async (node, epoch) => {
+      const p = await policy(node);
+      return bound(p) && Number(p.epoch) === epoch ? BigInt(p.dailyCapMicro) : null;
+    },
+    spentToday: async (node, epoch) => {
+      const block = await publicClient.getBlock();
+      return BigInt(await publicClient.readContract({ address: checkout, abi: checkoutAbi, functionName: 'spentMicro', args: [node, epoch, block.timestamp / 86_400n] }));
+    },
+  };
+}
+

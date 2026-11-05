@@ -235,6 +235,10 @@
       {
         "role": "ACCEPTANCE_PAYER",
         "purpose": "the acceptance agent"
+      },
+      {
+        "role": "DISPOSABLE_1",
+        "purpose": "the disposable paying agent for the kill check (F, E7, B6): 1 test USDT (funded once, 05:0x IST Fri), 0.005 WBT for an emergency Permit2 lockdown"
       }
     ],
     "disposablePrefix": "DISPOSABLE_",
