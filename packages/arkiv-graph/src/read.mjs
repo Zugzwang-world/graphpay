@@ -28,15 +28,16 @@ export function trustedRows(def, owner, entities) {
   for (const e of entities) {
     const row = plainRow(e);
     if (row.$owner !== o) continue;
-    if (row.schema_v !== undefined && row.schema_v !== def.schemaVersion) continue;
+    if (row.schema_v !== def.schemaVersion) continue;
     out.push(row);
   }
   return out;
 }
 
 // Every row of a type owned by `owner` that matches `where`, paged by $key (each row
-// exactly once even while others write), up to `cap` rows.
-export async function readAll(publicClient, def, { owner, where = [], cap = 50_000 } = {}) {
+// exactly once even while others write). Past `cap` rows it throws, unless
+// `truncate` is set, in which case it stops there.
+export async function readAll(publicClient, def, { owner, where = [], cap = 50_000, truncate = false } = {}) {
   const o = checkedOwner(owner);
   const rows = [];
   let last = null;
@@ -52,7 +53,11 @@ export async function readAll(publicClient, def, { owner, where = [], cap = 50_0
       .limit(LIMITS.pageSize)
       .fetch();
     rows.push(...trustedRows(def, o, page.entities));
-    if (page.entities.length < LIMITS.pageSize || rows.length >= cap) break;
+    if (page.entities.length < LIMITS.pageSize) break;
+    if (rows.length >= cap) {
+      if (truncate) break;
+      throw new Error(`arkiv-graph: more than ${cap} ${def.type} rows; raise the cap or narrow the query`);
+    }
     last = page.entities.at(-1).$key;
   }
   return rows;

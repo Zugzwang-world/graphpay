@@ -211,52 +211,86 @@ export function createWriter({
     }
   }
 
+  // Checks a transaction found by nonce, retrying a check that fails to read. Returns
+  // true (ours), false (another writer's) or throws WriteUncertainError.
+  async function verified(verifyRecovered, tx, nonce) {
+    if (!verifyRecovered) return true;
+    let lastError;
+    for (let i = 0; i < 3; i += 1) {
+      try {
+        return Boolean(await verifyRecovered(tx.createdKeys, tx));
+      } catch (error) {
+        lastError = error;
+        await sleep(pollMs);
+      }
+    }
+    throw new WriteUncertainError(`arkiv-graph: transaction ${tx.hash} landed at nonce ${nonce} but could not be checked; re-read the state`, { cause: lastError, nonce });
+  }
+
+  // Once a send is uncertain, its nonce and first block are pinned: the chunk is only
+  // ever sent again at that same nonce (so at most one copy can land), and the search
+  // for it always starts from the first send's block. A new nonce is taken only when
+  // the transaction at the pinned nonce is positively someone else's.
   async function sendChunk(ops, split, verifyRecovered, fixedNonce = null) {
+    let pinned = null;
     for (let attempt = 1; ; attempt += 1) {
       const confirmed = await publicClient.getTransactionCount({ address, blockTag: 'latest' });
-      if (fixedNonce !== null && confirmed > fixedNonce) throw new WriteNonceTakenError(fixedNonce, confirmed);
-      const nonce = fixedNonce ?? Math.max(confirmed, nextNonce);
-      const fromBlock = await publicClient.getBlockNumber();
+      if (pinned && confirmed > pinned.nonce) {
+        const hash = await findByNonce(pinned.nonce, pinned.fromBlock);
+        if (!hash) {
+          if (attempt > maxSends * 3) throw new WriteUncertainError(`arkiv-graph: nonce ${pinned.nonce} moved but its transaction was not found; re-read the state`, { nonce: pinned.nonce });
+          await sleep(pollMs);
+          continue;
+        }
+        nextNonce = Math.max(nextNonce, pinned.nonce + 1);
+        const tx = await adopt(hash, ops, { recovered: true });
+        if (await verified(verifyRecovered, tx, pinned.nonce)) {
+          log({ event: 'recovered-by-nonce', nonce: pinned.nonce, hash });
+          return [tx];
+        }
+        log({ event: 'nonce-taken-by-another', nonce: pinned.nonce, hash });
+        if (fixedNonce !== null) throw new WriteNonceTakenError(fixedNonce, confirmed);
+        pinned = null; // our transaction can no longer land at that nonce
+        if (attempt >= maxSends) throw new WriteUncertainError(`arkiv-graph: nonces were taken by another writer ${attempt} times`, { nonce: confirmed });
+        continue;
+      }
+      if (fixedNonce !== null && !pinned) {
+        if (confirmed > fixedNonce) throw new WriteNonceTakenError(fixedNonce, confirmed);
+        if (confirmed < fixedNonce) throw new Error(`arkiv-graph: nonce ${fixedNonce} is ahead of the confirmed ${confirmed}; it would wait in the mempool`);
+      }
+      const nonce = pinned ? pinned.nonce : (fixedNonce ?? Math.max(confirmed, nextNonce));
+      const fromBlock = pinned ? pinned.fromBlock : await publicClient.getBlockNumber();
       try {
         const res = await walletClient.executeBatch(sdkBatch(ops), { nonce });
+        nextNonce = Math.max(nextNonce, nonce + 1);
         const tx = await adopt(res.txHash, ops, { recovered: false });
-        nextNonce = nonce + 1;
         return [tx];
       } catch (error) {
         if (error instanceof WriteRevertedError || error instanceof WriteUncertainError || error instanceof WriteNonceTakenError) throw error;
         const kind = classify(error);
         log({ event: 'send-failed', kind, attempt, nonce, ops: ops.length });
-        if (kind === 'too-large') {
+        if (kind === 'too-large' && !pinned) {
           if (!split || ops.length < 2) throw error;
           const half = Math.ceil(ops.length / 2);
           return [...(await sendChunk(ops.slice(0, half), split, verifyRecovered)), ...(await sendChunk(ops.slice(half), split, verifyRecovered))];
         }
         if (kind === 'revert') {
-          if (error.txHash) nextNonce = nonce + 1; // mined and reverted: the nonce is spent
+          if (error.txHash) nextNonce = Math.max(nextNonce, nonce + 1); // mined and reverted: the nonce is spent
           throw new WriteRevertedError(`arkiv-graph: the batch reverted: ${error.shortMessage ?? error.message}`, { cause: error, txHash: error.txHash });
         }
-        if (kind === 'out-of-gas') {
-          nextNonce = nonce + 1;
+        if (kind === 'out-of-gas' && !pinned) {
+          nextNonce = Math.max(nextNonce, nonce + 1);
           if (attempt >= maxSends) throw error;
-          continue; // nothing applied and the nonce moved on: send again with the next nonce
+          continue; // mined, nothing applied: send again at the next nonce
         }
-        const hash = await recover(nonce, fromBlock);
+        pinned ??= { nonce, fromBlock };
+        const hash = await recover(pinned.nonce, pinned.fromBlock);
         if (hash) {
-          log({ event: 'recovered-by-nonce', nonce, hash });
-          nextNonce = nonce + 1;
-          const tx = await adopt(hash, ops, { recovered: true });
-          // Several processes may share a wallet's nonces (create-only route writes): the
-          // transaction at this nonce may be another's, so the caller can check it is ours.
-          if (verifyRecovered && !(await verifyRecovered(tx.createdKeys))) {
-            log({ event: 'nonce-taken-by-another', nonce, hash });
-            if (fixedNonce !== null) throw new WriteNonceTakenError(fixedNonce, nonce + 1);
-            if (attempt >= maxSends) throw new WriteUncertainError(`arkiv-graph: nonce ${nonce} was taken by another writer ${attempt} times`, { cause: error, nonce });
-            continue;
-          }
-          return [tx];
+          attempt -= 1; // the next round adopts it through the pinned branch
+          continue;
         }
-        if (attempt >= maxSends) throw new WriteUncertainError(`arkiv-graph: nothing landed at nonce ${nonce} after ${attempt} sends`, { cause: error, nonce });
-        log({ event: 'resend-same-nonce', nonce, attempt });
+        if (attempt >= maxSends) throw new WriteUncertainError(`arkiv-graph: nothing landed at nonce ${pinned.nonce} after ${attempt} sends`, { cause: error, nonce: pinned.nonce });
+        log({ event: 'resend-same-nonce', nonce: pinned.nonce, attempt });
       }
     }
   }
@@ -274,6 +308,7 @@ export function createWriter({
     const parts = chunks(ops);
     if (!split && parts.length > 1) throw new Error(`arkiv-graph: the batch needs ${parts.length} transactions; only split mode cuts a batch`);
     if (nonce !== null && (split || !Number.isInteger(nonce) || nonce < 0)) throw new Error('arkiv-graph: a fixed nonce needs one unsplit transaction');
+    if (nonce !== null && !verifyRecovered) throw new Error('arkiv-graph: a fixed nonce needs verifyRecovered, so a transaction found by nonce is checked to be this batch');
     return serialised(address, async () => {
       const txs = [];
       for (const part of parts) txs.push(...(await sendChunk(part, split, verifyRecovered, nonce)));

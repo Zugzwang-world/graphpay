@@ -21,6 +21,6 @@ export async function writeHeartbeat(arkiv, { instance, state, cursorBlock, curs
 }
 
 export async function readHeartbeats(publicClient, { owner = writerAddresses().W_LEDGER } = {}) {
-  return readAll(publicClient, ENTITIES.heartbeat, { owner, cap: 100 });
+  return readAll(publicClient, ENTITIES.heartbeat, { owner, cap: 100, truncate: true });
 }
 

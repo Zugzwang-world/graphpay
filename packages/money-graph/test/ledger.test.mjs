@@ -87,7 +87,8 @@ test('recorder edges (W_SYNC) are create-only; the mirror folds them into tallie
   assert.match(r.entityKey, /^0x[0-9a-f]{64}$/);
   const ledger = createLedger({ arkiv: w.ledger, stream: 'recorder' });
   await ledger.load();
-  await ledger.foldRecorder([ev('facilitator:1', 'fail', 0n, 10)]);
+  await ledger.foldRecorder([{ ...ev('facilitator:1', 'fail', 0n, 10), position: { block: BigInt(at(10)), logIndex: 0 } }]);
+  await assert.rejects(ledger.foldRecorder([ev('facilitator:2', 'fail', 0n, 11)]), /no position/);
   const tally = (await readAll(w.reader.publicClient, ENTITIES.tally, { owner: w.ledger.owner })).find((t) => t.node === nodeOf(SHOP) && t.window === 'all');
   assert.equal(tally.fails, 1n);
   assert.equal((await readAll(w.reader.publicClient, ENTITIES.edge, { owner: w.ledger.owner })).length, 0);

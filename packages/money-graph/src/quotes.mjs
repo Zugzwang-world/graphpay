@@ -38,7 +38,7 @@ export async function createQuote(arkiv, quote) {
 export async function findQuotes(publicClient, requestId, { owner = writerAddresses().W_DIRECTORY } = {}) {
   const id = String(requestId ?? '').toLowerCase();
   if (!REQUEST_ID.test(id)) throw new Error('money-graph: a requestId is a 32-byte hex string');
-  const rows = await readAll(publicClient, ENTITIES.quote, { owner: checkedOwner(owner), where: [eq('request_id', str(id))], cap: 100 });
+  const rows = await readAll(publicClient, ENTITIES.quote, { owner: checkedOwner(owner), where: [eq('request_id', str(id))], cap: 100, truncate: true });
   return rows.map((r) => ({
     key: r.$key,
     requestId: r.request_id,

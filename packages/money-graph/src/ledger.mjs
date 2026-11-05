@@ -51,7 +51,17 @@ export function createLedger({ arkiv, stream = null, synthetic = null, lifetimeD
   const labels = synthetic ? { synthetic: true, dataset: synthetic.dataset } : { synthetic: false, dataset: 'live' };
   const days = lifetimeDays ?? (synthetic ? LIFETIME.syntheticDays : LIFETIME.realDays);
   const expiration = () => ExpirationTime.fromDays(days);
-  let state = graph.newState();
+  // null until load() succeeds, and again after a failed write until it is re-read:
+  // absolute tallies are never planned from rows that may be stale.
+  let state = null;
+  // One plan → send → commit at a time per ledger, so two writes never plan from the
+  // same rows (the second would overwrite the first's absolute counts).
+  let lock = Promise.resolve();
+  const exclusive = (fn) => {
+    const run = lock.catch(() => {}).then(fn);
+    lock = run.catch(() => {});
+    return run;
+  };
 
   // Re-adopts the owner's tally, link, node and checkpoint rows from Arkiv.
   async function load() {
@@ -78,17 +88,40 @@ export function createLedger({ arkiv, stream = null, synthetic = null, lifetimeD
     return (await findOne(arkiv.publicClient, ENTITIES.edge, { owner, where: [eq('ref', str(ref))] })) !== null;
   }
 
+  // A transaction found by nonce is ours only if it carries this plan: the stream's
+  // checkpoint names the plan's last event, or its first create is the plan's first edge.
+  function verifier(planned) {
+    const last = planned.applied.at(-1);
+    return async (createdKeys) => {
+      if (stream) {
+        const cp = await findOne(arkiv.publicClient, ENTITIES.checkpoint, { owner, where: [eq('stream', str(stream))] });
+        return cp?.last_event === last;
+      }
+      const first = planned.creates.findIndex((c) => c.def === ENTITIES.edge);
+      if (first === -1 || !createdKeys[first]) return false;
+      const e = await arkiv.publicClient.getEntity(createdKeys[first]);
+      return e?.attributes?.ref?.value === planned.applied[0];
+    };
+  }
+
   async function write(events, { split, nonce = null }) {
+    if (!state) throw new Error('money-graph: call ledger.load() first (and again after a failed write)');
     const planned = graph.plan(events, state, { stream, createNodes, labels });
     if (planned.creates.length === 0 && planned.patches.length === 0) return { skipped: planned.skipped, applied: [], txs: [], edgeKeys: {} };
     let result;
     try {
       result = await arkiv.writer.send(
         { creates: planned.creates.map((c) => ({ ...c, expiration: expiration() })), patches: planned.patches },
-        { split, nonce },
+        { split, nonce, verifyRecovered: split ? null : verifier(planned) },
       );
     } catch (error) {
-      await load(); // discard the plan and re-adopt what Arkiv holds
+      // Discard the plan and re-adopt what Arkiv holds; until that works, refuse to plan.
+      state = null;
+      try {
+        await load();
+      } catch (reload) {
+        error.reloadError = reload;
+      }
       throw error;
     }
     const edgeKeys = planned.commit(result.createdKeys);
@@ -96,34 +129,44 @@ export function createLedger({ arkiv, stream = null, synthetic = null, lifetimeD
   }
 
   // One live event: anchor and ref checks, then one atomic transaction.
-  async function apply(event, { nonce = null } = {}) {
-    const ge = toGraphEvent(event, labels);
-    if (!ge.existingEdge && (await edgeExists(ge.ref))) return { skipped: [ge.ref], applied: [], txs: [], edgeKeys: {} };
-    return write([ge], { split: false, nonce });
+  function apply(event, { nonce = null } = {}) {
+    return exclusive(async () => {
+      const ge = toGraphEvent(event, labels);
+      if (!ge.existingEdge && (await edgeExists(ge.ref))) return { skipped: [ge.ref], applied: [], txs: [], edgeKeys: {} };
+      return write([ge], { split: false, nonce });
+    });
   }
 
   // Recorder edges (W_SYNC) folded into the tallies in one transaction, no edge created.
+  // Each needs a position on the recorder stream (for example { block: ts, logIndex }), so
+  // re-reading older recorder edges after a restart is caught by the checkpoint.
   async function foldRecorder(events, { nonce = null } = {}) {
-    return write(
-      events.map((e) => toGraphEvent({ ...e, existingEdge: true }, labels)),
-      { split: false, nonce },
+    if (!stream) throw new Error('money-graph: foldRecorder needs a stream checkpoint');
+    for (const e of events) if (!e.position) throw new Error(`money-graph: recorder event ${e.ref} has no position on the stream`);
+    return exclusive(() =>
+      write(
+        events.map((e) => toGraphEvent({ ...e, existingEdge: true }, labels)),
+        { split: false, nonce },
+      ),
     );
   }
 
   // A standing change of one node row (status, cap) plus the checkpoint, same epoch only.
-  async function writeStanding({ ref, ens, epoch, status, capMicro, ts, position }, { nonce = null } = {}) {
+  function writeStanding({ ref, ens, epoch, status, capMicro, ts, position }, { nonce = null } = {}) {
     const node = nodeOf(ens);
     const values = {};
     if (status !== undefined) values.status = status;
     if (capMicro !== undefined) values.cap_micro = BigInt(capMicro);
-    return write([{ ref, ts, position, nodeUpdate: { node, epoch: BigInt(epoch ?? 0), values } }], { split: false, nonce });
+    return exclusive(() => write([{ ref, ts, position, nodeUpdate: { node, epoch: BigInt(epoch ?? 0), values } }], { split: false, nonce }));
   }
 
   // Many events (seeding): one logical batch, split by bytes.
-  async function applyBatch(events) {
-    return write(
-      events.map((e) => toGraphEvent(e, labels)),
-      { split: true },
+  function applyBatch(events) {
+    return exclusive(() =>
+      write(
+        events.map((e) => toGraphEvent(e, labels)),
+        { split: true },
+      ),
     );
   }
 
