@@ -17,7 +17,7 @@ import { castActors } from './actors.mjs';
 import { keepAwake } from './awake.mjs';
 import { historyParams } from './history.mjs';
 import { isZeroNode } from './ids.mjs';
-import { startEnsWatcher } from './ens.mjs';
+import { keepEnsWatcher } from './ens.mjs';
 import { DEFAULT_PORT, startServer } from './server.mjs';
 import { connectMirror, loadWorkersEnv } from './setup.mjs';
 import { createWorkers } from './workers.mjs';
@@ -67,9 +67,6 @@ await workers.start();
 const port = Number(env.MIRROR_PORT ?? DEFAULT_PORT);
 await startServer(workers, { port, log, redact });
 log(`workers: running as instance ${workers.state.instance}; http://127.0.0.1:${port}/status`);
-// T2's ENS watcher (M6): after the mirror runs; its failure never stops the mirror.
-try {
-  ens = await startEnsWatcher({ env, values: Object.entries(env), whitechain, checkout: address, log });
-} catch (err) {
-  log(`ens watcher: not started (${err.shortMessage ?? err.message})`);
-}
+// T2's ENS watcher (M6): after the mirror runs; retried until it starts; its failure never
+// stops the mirror.
+ens = keepEnsWatcher({ env, values: Object.entries(env), whitechain, checkout: address, log });

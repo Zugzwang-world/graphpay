@@ -18,14 +18,17 @@ import { policyPlan } from '../../../scripts/whitechain/plan.mjs';
 
 const json = (v) => JSON.stringify(v, (_, x) => (typeof x === 'bigint' ? x.toString() : x));
 
-// The names the watcher tracks: the owners, the agents and the numbered disposables (the
-// provisioned ones answer; the others stay untracked until they exist).
-export function watchedNames({ disposables = 1 } = {}) {
+// The names the watcher tracks: the owners, the agents and every numbered disposable agent
+// that has a wallet role (a policy exists only for those; an unprovisioned name is left out,
+// since it has no registry or resolver to read).
+export function watchedNames({ roles = {} } = {}) {
   const plan = namespacePlan();
-  return [...plan.owners.map((o) => o.name), ...plan.agents.map((a) => a.name), ...Array.from({ length: disposables }, (_, i) => disposableAgent(i + 1).name)];
+  const ns = Object.keys(roles).map((r) => /^DISPOSABLE_([1-9][0-9]*)$/.exec(r)?.[1]).filter(Boolean).map(Number);
+  const names = new Set([...plan.owners.map((o) => o.name), ...plan.agents.map((a) => a.name), ...ns.map((n) => disposableAgent(n).name)]);
+  return [...names];
 }
 
-// whitechain: the workers' checked clients (clientsFor). values: the loaded .env (a Map).
+// whitechain: the workers' checked clients (clientsFor). values: the loaded .env as [name, value] pairs.
 export async function startEnsWatcher({ env, values, whitechain, checkout, log }) {
   if (env.ENS_WATCHER === '0') {
     log('ens watcher: off (ENS_WATCHER=0)');
@@ -50,7 +53,11 @@ export async function startEnsWatcher({ env, values, whitechain, checkout, log }
   };
 
   const key = env.POLICY_WRITER_PRIVATE_KEY;
-  const account = key ? privateKeyToAccount(key) : null;
+  let account = key ? privateKeyToAccount(key) : null;
+  if (account && !(await whitechain.publicClient.readContract({ address: checkout, abi: checkoutAbi, functionName: 'isPolicyWriter', args: [account.address] }))) {
+    log('ens watcher: POLICY_WRITER is not a policy writer on the checkout; policy writes are logged only');
+    account = null;
+  }
   let sending = Promise.resolve();
   const writePolicy = (p) => {
     const run = sending.then(async () => {
@@ -61,7 +68,8 @@ export async function startEnsWatcher({ env, values, whitechain, checkout, log }
       const pc = whitechain.publicClient;
       const [latest, pending] = await Promise.all([pc.getTransactionCount({ address: account.address, blockTag: 'latest' }), pc.getTransactionCount({ address: account.address, blockTag: 'pending' })]);
       if (pending !== latest) throw new Error(`POLICY_WRITER has a pending transaction (nonce ${latest}); not sending`);
-      const request = { address: checkout, abi: checkoutAbi, functionName: 'setPolicy', args: [p.node, p.epoch, p.wallet, p.revoked, p.capMicro, p.expiry], account, chain: whitechain.chain, nonce: latest };
+      // The nonce is left to viem (read at send time), which narrows the window with T1's scripts.
+      const request = { address: checkout, abi: checkoutAbi, functionName: 'setPolicy', args: [p.node, p.epoch, p.wallet, p.revoked, p.capMicro, p.expiry], account, chain: whitechain.chain };
       const hash = await whitechain.walletClient(account).writeContract(request);
       log(`ens watcher: setPolicy sent ${whitechain.explorerTx(hash)} (epoch ${p.epoch}, revoked ${p.revoked})`);
       const receipt = await pc.waitForTransactionReceipt({ hash, timeout: 120_000 });
@@ -79,7 +87,7 @@ export async function startEnsWatcher({ env, values, whitechain, checkout, log }
   };
   const watcher = createEnsWatcher({
     client,
-    names: watchedNames(),
+    names: watchedNames({ roles }),
     sink,
     reader: createEnsReader({ client }),
     gate: createEnsGate({ client, expectedEpoch: async () => null, policyCapMicro: async () => null, spentToday: async () => 0n }),
@@ -90,4 +98,32 @@ export async function startEnsWatcher({ env, values, whitechain, checkout, log }
   log(`ens watcher: ${started.tracked} names from block ${started.checkpoint}${account ? '' : ' (no POLICY_WRITER key: policy writes are logged only)'}`);
   const stop = watcher.run({ pollMs: 6_000, tickMs: 30_000, onError: (e) => log(`ens watcher: ${e.shortMessage ?? e.message}`) });
   return { stop, watcher };
+}
+
+// Starts the watcher, and on failure tries again every `retryMs` until it runs: its start
+// applies revocations that happened while the workers were down, so it must not give up.
+// Returns { stop }.
+export function keepEnsWatcher(opts, { retryMs = 60_000, setTimer = setTimeout, clearTimer = clearTimeout } = {}) {
+  let running = null;
+  let timer = null;
+  let stopped = false;
+  const attempt = async () => {
+    timer = null;
+    if (stopped) return;
+    try {
+      running = await startEnsWatcher(opts);
+      if (stopped) running.stop();
+    } catch (err) {
+      opts.log(`ens watcher: start failed (${err.shortMessage ?? err.message}); trying again in ${retryMs / 1000} s`);
+      if (!stopped) timer = setTimer(attempt, retryMs);
+    }
+  };
+  attempt();
+  return {
+    stop() {
+      stopped = true;
+      if (timer) clearTimer(timer);
+      running?.stop();
+    },
+  };
 }
