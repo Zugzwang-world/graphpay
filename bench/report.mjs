@@ -27,6 +27,7 @@ export function report({ summary, questionRows, parallelRows, writeRows }) {
   const allAtOnce = par('all');
   const plainQ2 = row('Q2', 'plain');
   const notFewer = ['Q1', 'Q3', 'Q4', 'Q5', 'Q6'].filter((q) => Number(row(q, 'graph').calls) >= Number(row(q, 'plain').calls));
+  const moreBytes = Object.keys(ASKS).filter((q) => Number(row(q, 'graph').bytes) > Number(row(q, 'plain').bytes));
   const graphAllRight = questionRows.filter((r) => r.mode === 'graph').every((r) => r.correct);
   const plainAllRight = questionRows.filter((r) => r.mode === 'plain').every((r) => r.correct);
   const writes = Object.fromEntries(writeRows.map((w) => [w.store, w]));
@@ -57,6 +58,7 @@ Arkiv has no SUM. To rank the city's shops by sales, plain Arkiv code must read 
 - **${graphAllRight ? 'Every Graph Arkiv answer was right' : 'Not every Graph Arkiv answer was right (see the table)'}**, by identity: a re-registered name starts a new history. ${plainAllRight ? 'Plain code was right by name on every question' : 'Plain code was not right by name on every question'}${plainQ2.matches_identity_truth ? '.' : ", but wrong by identity on the top 10: it credits the re-registered shop's earlier holder's sales to the new holder."}
 - **Where Graph Arkiv does not need fewer reads:** ${notFewer.length ? notFewer.map((q) => `${q} (${row(q, 'graph').calls} against ${row(q, 'plain').calls})`).join(', ') : 'none at this size'}. The win is aggregates, and it grows with the data: plain's top-10 reads grow with every payment, Graph Arkiv's stay at 2. The larger city waits for the founder's final story (ADR-0049).
 
+${moreBytes.length ? `- **Where Graph Arkiv moves more bytes:** ${moreBytes.map((q) => `${q} (${kb(row(q, 'graph').bytes)} KB against ${kb(row(q, 'plain').bytes)} KB)`).join(', ')}. Its rows carry both ends' names, epochs and totals, and a window such as Q1's 90 days adds up one day-tally row per day with activity, where plain code asks \`count()\` three times.\n` : ''}
 A line that is safe to quote: *"On Arkiv's live testnet, with a synthetic city of ${summary.payRows} payment and renewal rows, the city-wide top-10 ranking takes Graph Arkiv ${graphQ2.calls} reads. Plain Arkiv code must read every row: ${seq.calls} reads one page at a time, ${allAtOnce.calls} with every page requested at once."*
 
 ## Acceptance D6 (as amended: calls exact, times recorded but not scored)

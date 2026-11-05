@@ -88,7 +88,10 @@ export function arkivTransport({ url, fetchFn = globalThis.fetch, secrets = [], 
       if (rl.remaining < rl.limit * lowWater && Number.isInteger(rl.reset)) waitUntil = Date.now() + rl.reset * 1000;
     }
     try {
-      stats.responseBytes += Buffer.byteLength(await response.clone().text());
+      // Read first, then add: `stats.responseBytes += await …` reads the total before
+      // the await, so two responses in flight would overwrite each other's count.
+      const text = await response.clone().text();
+      stats.responseBytes += Buffer.byteLength(text);
     } catch {
       // the body could not be read twice; the count stays as it is
     }
