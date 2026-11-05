@@ -26,11 +26,11 @@ Updated 23:55 IST. **M0 done; handed over to the Coordinator** (`docs/plan/sessi
 
 ## payments
 
-Updated 04:20 IST, Fri 6 Nov (T1).
-- **The first real payments are on Whitechain Sepolia.** The qualifying payment (C7, also E3) is done, once: an agent with an ENS name paid 4.80 test USDT to Kesar Kingdom through our own facilitator, with no gas of its own: [explorer](https://explorer.testnet.whitechain.io/tx/0x87505ef2457b6e925fa7378a55fd91419e83c37fb8effc06d901884700c72c00).
-- **The whole payment lifecycle ran on the real chain** through T2's real ENS gate: pay, "already paid" on a replay, refund, re-order, an over-limit payment refused before the chain, a revoked agent recorded on-chain (then restored), a human payer, and a subscription created, renewed after 2 minutes and cancelled by signature.
-- Running: the `(M3 done)` PR. Next: M4, hosting the facilitator and the shop on Vercel.
-- Blockers: none.
+Updated 05:05 IST, Fri 6 Nov (T1).
+- **M3 is done (#45):** real payments on Whitechain through T2's ENS gate, including the qualifying payment (C7).
+- **M4 is in its PR:** the shop, our facilitator, the refusal recorder and a renewal job every minute, as routes on the public site. Two reviews (security and correctness), both fixed. The server keys are on Vercel as Sensitive values.
+- Next: merge and deploy, then `pay:public` pays one 0.40 through the public URL. Join relays through the hosted facilitator once it is live, which ends the one-sender-per-key juggling.
+- Blockers: none. One check: the per-minute cron needs a Vercel plan that allows it, and the PR's preview build tells us.
 
 ## identity
 Updated 04:25 IST. **M6 is built: the gate is merged (PR #34); the watcher PR is open.** The watcher keeps the payment policy and the Arkiv node standing in step with ENS: a kill revokes the policy, a pause shows on the node, a lapse is caught by a 30 s ticker, and it never creates a policy or copies an ENS cap into one. Join hosts it in the workers process.
