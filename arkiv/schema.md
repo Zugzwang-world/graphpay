@@ -9,7 +9,7 @@ Every entity GraphPay writes to Arkiv Rabdi (chain 7794095), defined in `package
 - **Index rule (ADR-0041).** An attribute is indexed (`*` below) if and only if a shipped query filters on it; `QUERIES` in `model.mjs` lists them and a test holds the two together. ORDER BY needs no index.
 - **Nothing private** in attributes or payloads.
 - Writer addresses: `packages/config/graphpay.config.json` → `arkiv.writers`.
-- Explorer: transactions at `https://rabdi.explorer.arkiv.network/tx/<hash>` (verified on the M0 funding links). The entity page pattern is not verified yet.
+- Explorer: transactions at `https://rabdi.explorer.arkiv.network/tx/<hash>` (verified on the M0 funding links); entities at `/entity/<key>` and addresses at `/address/<addr>` (read from the explorer's own client bundle; `docs/technical/FACTS.md`, website rows).
 
 ## Entities
 
@@ -23,6 +23,9 @@ Every entity GraphPay writes to Arkiv Rabdi (chain 7794095), defined in `package
 | `heartbeat` | W_LEDGER | `instance` str, `state` str, `cursor_block` u64, `cursor_log` u64, `head_block` u64, `lag_blocks` u64, `updated_ts` u64 | the mirror's lease, the website's lag chip (read by owner and type) | no | 1 day, extended while running |
 | `shop` | W_DIRECTORY (cast and synthetic shops) | `shop_key`* key (`keccak256(abi.encode(node, uint32 epoch))`), `shop_ens` str, `category`* str, `area` str?, `city` str?, `lat`* i32, `lng`* i32 (micro-degrees), `status` str (`active`, `paused`, `delisted`), `synthetic`* bool, `dataset` str?, `payload` bytes (JSON `{ name, hours }`) | discovery: one query with both i32 ranges (ADR-0058) | no: status and payload, by the M8 script only, never while the site is live | 14 days |
 | `quote` | W_DIRECTORY | `request_id`* str (32-byte hex run id), `shop_key` key, `agent_ens` str, `price` u64 (6 decimals), `valid_until` u64 (unix s, 10 minutes) | the payer's pre-sign check by `request_id` | **yes** | 15 minutes (ADR-0035) |
+| `shop_open` | W_DIRECTORY | `shop_key`* key, `shop_ens` str, `open_until` u64 (unix s) | `shops(openNow: true)`: the live rows of the listed shops whose `open_until` is ahead (one extra read) | no: `open_until` patched and the row extended while the Open toggle is on; set to now when it goes off | 15 minutes, renewed; a renewal reads `$expiresAt` and never goes past now + 15 min |
+| `agent_presence` | W_DIRECTORY | `agent_ens`* str, `owner_ens`* str, `role` str, `session`* str (the run id) | `agentsOnline(owner, session)` | **yes** (extended, never patched) | 15 minutes, extended every 5 minutes while the agent runs |
+| `handoff` | W_DIRECTORY | `request_id`* str (the run id), `from_agent` str, `to_agent` str, `step` str (the explainer's lane) | `handoffs(requestId)`, oldest first by `$createdAt` | **yes** | 30 minutes |
 | `record` | the seed wallets (plain store) | `from_name`* str, `to_name`* str, `kind`* str, `amount_micro` u64, `day`* u64, `ts` u64, `ref` str, `synthetic` bool, `dataset` str, `payload` bytes? | the benchmark's plain baseline | yes | 14 days |
 | `profile` | the seed wallets (plain store) | `name`* str, `kind`* str, `owner_name`* str?, `synthetic` bool, `dataset` str | the plain baseline | no | 14 days |
 

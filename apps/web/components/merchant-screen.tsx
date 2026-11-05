@@ -34,11 +34,14 @@ export function MerchantScreen() {
     if (!open) return;
     const controller = new AbortController();
     let retry: ReturnType<typeof setTimeout> | undefined;
+    // The unix second of the last edge seen; a reconnect asks for everything from there.
+    let lastTs: number | null = null;
 
     const onEdge = (event: string, data: string) => {
       if (event === 'ready') return setListening({ state: 'open' });
       if (event !== 'edge') return;
       const edge = JSON.parse(data) as MerchantEdgeEvent;
+      lastTs = Math.max(lastTs ?? 0, Number(edge.ts));
       setEdges((prev) => (prev.some((p) => p.ref === edge.ref && p.kind === edge.kind) ? prev : [edge, ...prev].slice(0, 50)));
       if (edge.kind === 'pay') {
         setPopup(edge);
@@ -51,7 +54,7 @@ export function MerchantScreen() {
 
     const connect = async () => {
       setListening({ state: 'connecting' });
-      const outcome = await streamEvents('/api/merchant/events', onEdge, { signal: controller.signal });
+      const outcome = await streamEvents(lastTs === null ? '/api/merchant/events' : `/api/merchant/events?since=${lastTs}`, onEdge, { signal: controller.signal });
       if (controller.signal.aborted) return;
       const waiting = waitingForIn(outcome);
       setListening(waiting ? { state: 'waiting', waitingFor: waiting } : { state: 'error' });

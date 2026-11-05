@@ -14,7 +14,7 @@ export const ENTITY_CONTRACT = config.arkiv.entityContract;
 export const RABDI = network('rabdi');
 
 // Lifetimes (planning/DECISIONS.md E-4; ADR-0035; M7 amendment §3, §5).
-export const LIFETIME = Object.freeze({ realDays: 30, syntheticDays: 14, shopDays: 14, quoteMinutes: 15, probeDays: 1, heartbeatDays: 1 });
+export const LIFETIME = Object.freeze({ realDays: 30, syntheticDays: 14, shopDays: 14, quoteMinutes: 15, probeDays: 1, heartbeatDays: 1, openMinutes: 15, presenceMinutes: 15, handoffMinutes: 30 });
 
 export const EDGE_KINDS = ['owns', 'order', 'pay', 'refund', 'fail', 'subscribe', 'renew', 'deliver', 'late', 'cancel', 'dispute', 'request'];
 export const MONEY_KINDS = ['pay', 'refund', 'fail', 'renew'];
@@ -125,6 +125,12 @@ export const ENTITIES = {
     context,
   ),
   profile: defineEntity('profile', { columns: ['name:str/i', 'kind:str/i', 'owner_name:str/io', 'synthetic:bool', 'dataset:str'] }, context),
+  // Friday activity (EVENT_ADDENDUM 6–8, ADR-0035), all W_DIRECTORY: a shop's Open toggle
+  // (patched and extended while on), an agent at work (readonly, extended while it runs)
+  // and one agent passing work to another (readonly). Each lapses by itself.
+  shop_open: defineEntity('shop_open', { columns: ['shop_key:key/i', 'shop_ens:str', 'open_until:u64'] }, context),
+  agent_presence: defineEntity('agent_presence', { columns: ['agent_ens:str/i', 'owner_ens:str/i', 'role:str', 'session:str/i'], readonly: true }, context),
+  handoff: defineEntity('handoff', { columns: ['request_id:str/i', 'from_agent:str', 'to_agent:str', 'step:str'], readonly: true }, context),
 };
 delete ENTITIES.totals;
 
@@ -141,6 +147,9 @@ export const QUERIES = {
   shop: ['shop_key', 'category', 'lat', 'lng', 'synthetic'],
   quote: ['request_id'],
   heartbeat: [],
+  shop_open: ['shop_key'],
+  agent_presence: ['agent_ens', 'owner_ens', 'session'],
+  handoff: ['request_id'],
 };
 
 export const WRITER_ROLES = ['W_LEDGER', 'W_SYNC', 'W_DIRECTORY', 'W_SEED_EVENT', 'W_SEED_M_EVENT'];
@@ -166,6 +175,9 @@ export function trustedOwners(type, { writers = writerAddresses(), synthetic = n
       return [writers.W_LEDGER, writers.W_SYNC];
     case 'shop':
     case 'quote':
+    case 'shop_open':
+    case 'agent_presence':
+    case 'handoff':
       return [writers.W_DIRECTORY];
     default:
       throw new Error(`money-graph: no trusted writer for entity type "${type}"`);

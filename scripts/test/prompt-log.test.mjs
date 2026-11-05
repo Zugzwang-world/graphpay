@@ -1,10 +1,10 @@
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
-import { mkdtempSync, readdirSync, readFileSync, statSync } from 'node:fs';
+import { existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, realpathSync, statSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { test } from 'node:test';
-import { buildLine, MAX_PROMPT_BYTES, shortenHome } from '../hooks/prompt-log.mjs';
+import { buildLine, logRoot, MAX_PROMPT_BYTES, shortenHome } from '../hooks/prompt-log.mjs';
 import { hex, SAMPLES, twelveWords } from './samples.mjs';
 
 const HOOK = 'scripts/hooks/prompt-log.mjs';
@@ -83,4 +83,29 @@ test('malformed input prints nothing and exits 0', () => {
   const res = spawnSync(process.execPath, [HOOK], { input: 'not json', encoding: 'utf8' });
   assert.equal(res.status, 0);
   assert.equal(res.stdout, '');
+});
+
+test('a worktree session logs into its own checkout, not the project folder', () => {
+  const project = mkdtempSync(join(tmpdir(), 'gp-project-'));
+  const worktree = realpathSync(mkdtempSync(join(tmpdir(), 'gp-worktree-')));
+  assert.equal(spawnSync('git', ['init', '-q', worktree]).status, 0);
+  const sub = join(worktree, 'apps', 'web');
+  mkdirSync(sub, { recursive: true });
+  assert.equal(logRoot({ cwd: sub }, { CLAUDE_PROJECT_DIR: project }), worktree);
+  const res = spawnSync(process.execPath, [HOOK], {
+    input: JSON.stringify({ prompt: 'hello', session_id: 'wt123456', cwd: sub }),
+    env: { ...process.env, CLAUDE_PROJECT_DIR: project },
+    encoding: 'utf8',
+  });
+  assert.equal(res.status, 0);
+  assert.equal(res.stdout, '');
+  assert.equal(readdirSync(join(worktree, 'prompts', 'raw')).length, 1);
+  assert.equal(existsSync(join(project, 'prompts')), false);
+});
+
+test('outside a git checkout the log falls back to the project folder', () => {
+  const project = mkdtempSync(join(tmpdir(), 'gp-project-'));
+  const plain = mkdtempSync(join(tmpdir(), 'gp-plain-'));
+  assert.equal(logRoot({ cwd: plain }, { CLAUDE_PROJECT_DIR: project }), project);
+  assert.equal(logRoot({}, { CLAUDE_PROJECT_DIR: project }), project);
 });

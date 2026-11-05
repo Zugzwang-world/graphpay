@@ -67,8 +67,10 @@ export async function foldRecorder({ ledger, bindings, nowS = Math.floor(Date.no
     const anchor = await ledger.readCheckpoint(RECORDER_STREAM);
     if (anchor && anchor.block >= ts) continue;
     const checkpoint = { block: ts, logIndex: BLOCK_DONE, events: (anchor?.events ?? 0) + fails.length };
-    await ledger.foldRecorder(fails, { stream: RECORDER_STREAM, checkpoint, nonce });
-    out.folded += fails.length;
+    const res = await ledger.foldRecorder(fails, { stream: RECORDER_STREAM, checkpoint, nonce });
+    const noNode = res?.noNode?.length ?? 0;
+    out.folded += res?.applied ? res.applied.length : fails.length - noNode;
+    out.unattributed += noNode;
   }
   out.sinceTs = sinceTs;
   return out;

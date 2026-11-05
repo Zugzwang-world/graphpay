@@ -1,0 +1,23 @@
+{
+  "name": "@graphpay/integration",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "The live clients behind the agents' interfaces (MCP to Graph Arkiv, ENS, directory, quotes, x402 signing, the shop gateway) and pnpm e2e:food (M12).",
+  "scripts": {
+    "test": "node --test \"test/*.test.mjs\""
+  },
+  "dependencies": {
+    "@ai-sdk/mcp": "2.0.90",
+    "@graphpay/agents": "workspace:*",
+    "@graphpay/arkiv-graph": "workspace:*",
+    "@graphpay/config": "workspace:*",
+    "@graphpay/contracts": "workspace:*",
+    "@graphpay/ens": "workspace:*",
+    "@graphpay/mirror": "workspace:*",
+    "@graphpay/money-graph": "workspace:*",
+    "ai": "7.0.162",
+    "viem": "2.57.16",
+    "zod": "4.6.7"
+  }
+}

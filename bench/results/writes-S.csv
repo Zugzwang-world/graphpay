@@ -1,0 +1,5 @@
+# SYNTHETIC data: dataset graphpay-city-v1-S (size S), Arkiv rabdi, blocks 265307-265376, commit 667b236, 2026-11-05T22:08:32.296Z
+store,transactions,creates,patches,gas,tglm,minutes
+graph,97,2200,940,494005013,0.494008,8.9
+plain,43,1094,0,181346692,0.181347,1.9
+directory,1,12,0,2241503,0.002242,0.2

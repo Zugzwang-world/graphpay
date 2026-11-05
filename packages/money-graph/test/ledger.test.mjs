@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { u64 } from '@arkiv-network/sdk';
-import { readAll } from '@graphpay/arkiv-graph';
+import { ExpirationTime, u64 } from '@arkiv-network/sdk';
+import { entityValues, readAll } from '@graphpay/arkiv-graph';
 import { generatePrivateKey } from 'viem/accounts';
 import { encodeFunctionData } from 'viem';
 import {
@@ -9,14 +9,18 @@ import {
   ENTITY_CONTRACT,
   boxAround,
   connectArkiv,
+  createGraphEngine,
   createLedger,
   createQuote,
   discoverShops,
   findQuotes,
+  quoteValues,
   newSim,
   nodeOf,
   recordEdge,
+  runGraphql,
   writeHeartbeat,
+  writerAddresses,
   writeShop,
 } from '../index.mjs';
 
@@ -93,6 +97,84 @@ test('recorder edges (W_SYNC) are create-only; the mirror folds them into tallie
   assert.equal(tally.fails, 1n);
   assert.equal((await readAll(w.reader.publicClient, ENTITIES.edge, { owner: w.ledger.owner })).length, 0);
   assert.equal((await readAll(w.reader.publicClient, ENTITIES.edge, { owner: w.sync.owner })).length, 1);
+});
+
+// getEntity returns the columns under $attributes: a send that landed but was reported
+// as failed is found by nonce, read back and adopted, never sent a second time.
+test('an uncertain send is adopted by nonce: recorder edge, quote and unstreamed ledger land once', async () => {
+  const w = await wallets();
+  const uncertain = () => w.sim.injectFault({ method: 'eth_sendRawTransaction', kind: 'apply-then-fail' });
+
+  uncertain();
+  const r = await recordEdge(w.sync, { ref: 'facilitator:9', kind: 'fail', from: { ens: BUYER, epoch: 0 }, to: { ens: SHOP, epoch: 0 }, ts: at(10) });
+  assert.equal(r.recovered, true);
+  const syncEdges = await readAll(w.reader.publicClient, ENTITIES.edge, { owner: w.sync.owner });
+  assert.deepEqual(syncEdges.map((e) => e.$key), [r.entityKey], 'one recorder edge');
+
+  uncertain();
+  const requestId = `0x${'8'.repeat(64)}`;
+  const q = await createQuote(w.directory, { requestId, shopKey: `0x${'5'.repeat(64)}`, agentEns: BUYER, price: 4_800_000n, validUntil: at(600) });
+  assert.equal(q.recovered, true);
+  assert.deepEqual((await findQuotes(w.reader.publicClient, requestId, { owner: w.directory.owner })).map((f) => f.key), [q.entityKey], 'one quote');
+
+  const ledger = createLedger({ arkiv: w.ledger });
+  await ledger.load();
+  uncertain();
+  const out = await ledger.apply(ev('p9', 'pay', 4_800_000n, 20));
+  assert.equal(out.txs[0].recovered, true);
+  const edges = (await readAll(w.reader.publicClient, ENTITIES.edge, { owner: w.ledger.owner })).filter((e) => e.ref === 'p9');
+  assert.equal(edges.length, 1, 'one ledger edge');
+});
+
+// Two instances share W_DIRECTORY's nonces: one's send is lost, and the other's quote
+// for the same errand (same requestId and validUntil, another shop) lands at that nonce.
+// The other instance is another process, so it sends through the SDK, outside this
+// process's writer queue. The first must not adopt that quote; both land.
+test('a quote for another shop found at the pinned nonce is not adopted', async () => {
+  const sim = newSim();
+  const privateKey = generatePrivateKey();
+  const a = await connectArkiv({ backend: 'sim', sim, role: 'W_DIRECTORY', privateKey, recoveryMs: 2_000, pollMs: 20 });
+  const b = await connectArkiv({ backend: 'sim', sim, role: 'W_DIRECTORY', privateKey });
+  const requestId = `0x${'9'.repeat(64)}`;
+  const quote = (shop) => ({ requestId, shopKey: `0x${shop.repeat(64)}`, agentEns: BUYER, price: 4_800_000n, validUntil: at(600) });
+
+  sim.injectFault({ method: 'eth_sendRawTransaction', kind: 'fail' });
+  const first = createQuote(a, quote('a'));
+  while (sim.faults.length > 0) await new Promise((r) => setTimeout(r, 5));
+  const other = { schema: ENTITIES.quote.schema, values: entityValues(ENTITIES.quote, quoteValues(quote('b'))), expiration: ExpirationTime.fromMinutes(15), flags: { readonly: true } };
+  await b.walletClient.executeBatch({ creates: [other] }, { nonce: 0 });
+  const mine = await first;
+
+  assert.equal(mine.recovered, false, 'sent again at the next nonce, not adopted');
+  const found = await findQuotes(b.publicClient, requestId, { owner: a.owner });
+  assert.equal(found.length, 2);
+  assert.equal(found.find((q) => q.key === mine.entityKey)?.shopKey, `0x${'a'.repeat(64)}`);
+});
+
+// A real node can carry the mirror's labelled synthetic history: its tallies say
+// synthetic, so its reputation must too, in the all-time window and in a day window.
+test('reputation is labelled synthetic when any tally row it reads is, even for a real node', async () => {
+  const w = await wallets();
+  const OTHER = 'beta-sweets.sim.example.eth';
+  const now = Math.floor(Date.now() / 1000);
+  const history = createLedger({ arkiv: w.ledger, stream: 'history', synthetic: { dataset: 'history' } });
+  await history.load();
+  await history.apply({ ...ev('h1', 'order', 0n, 0), ts: now - 3_600, position: { block: 1n, logIndex: 0 } });
+  const live = createLedger({ arkiv: w.ledger, stream: 'whitechain', createNodes: true });
+  await live.load();
+  await live.apply({ ...ev('o1', 'order', 0n, 0), ts: now - 60, position: { block: 10n, logIndex: 0 } });
+  await live.apply({ ...ev('o2', 'order', 0n, 0), to: { ens: OTHER, epoch: 0, kind: 'shop' }, ts: now - 30, position: { block: 11n, logIndex: 0 } });
+
+  const writers = { ...writerAddresses(), W_LEDGER: w.ledger.owner, W_SYNC: w.sync.owner };
+  const ask = (ens) => runGraphql({ engine: createGraphEngine(w.reader), dataset: 'live', writers, query: `{ node(ens: "${ens}") { synthetic all: reputation(window: ALL) { orders synthetic } d30: reputation(window: D30) { synthetic } } }` });
+  const mixed = (await ask(SHOP)).data.node;
+  assert.equal(mixed.synthetic, false, 'the node row is real');
+  assert.equal(mixed.all.orders, '2');
+  assert.equal(mixed.all.synthetic, true);
+  assert.equal(mixed.d30.synthetic, true);
+  const real = (await ask(OTHER)).data.node;
+  assert.equal(real.all.synthetic, false);
+  assert.equal(real.d30.synthetic, false);
 });
 
 test('a receipt cannot be edited: a simulated patch of an edge reverts, a tally patch would pass', async () => {

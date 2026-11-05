@@ -58,7 +58,7 @@ The M0 verifier's snapshot of every package in `planning/FACTS.md` §5 is in `do
 
 | item | pinned | in | status |
 |---|---|---|---|
-| `@arkiv-network/sdk` | 1.0.1 (`latest`) | `packages/arkiv-graph`, `packages/money-graph` | verified |
+| `@arkiv-network/sdk` | 1.0.1 (`latest`) | `packages/arkiv-graph`, `packages/money-graph`, `packages/mirror` | verified |
 | viem | 2.57.16 (`latest`) | both | verified |
 | graphql | 16.14.2 (the pack's pin; 16.15.0 is the newest 16.x, `latest` is 17.1.0) | `packages/money-graph` (M7b) | verified; one major in the repo |
 | graphql-yoga | 5.24.6 (newest 5.x; `latest` 6.0.1 avoided) | `packages/money-graph` (M7b) | verified |
@@ -85,3 +85,10 @@ Not installed: `@ai-sdk/mcp` (the live MCP client is Join's wiring in M12, throu
 | viem | 2.57.16 (the root pin, now also a web dependency; not used by code yet) | lockfile | verified |
 | next, react, react-dom, typescript | as in the M0 placeholder section above | unchanged | verified |
 | Baloo 2 (700, 800), Mukta (400, 600) | via `next/font/google` (self-hosted at build; the spec's fonts) | `next build` fetched both | verified |
+
+## integration (Join, `integration/`, checked 2026-11-06 03:25 IST with `npm view`)
+
+| item | pinned | how checked | status |
+|---|---|---|---|
+| `@ai-sdk/mcp` | 2.0.90 (published 2026-11-03) | `npm view @ai-sdk/mcp time` and `dependencies`: 2.0.90 depends on `@ai-sdk/provider-utils` 5.0.74 and `@ai-sdk/provider` 4.0.35, the same as `ai` 7.0.162 (T4's pin), so the tools share one copy; `latest` 2.0.91 (2026-11-05) moved to provider-utils 5.0.75 and would install a second one. Live: `connectMcp()` lists `schema, ask, graphql, explain` on the production domain's `/api/mcp` and answers `schema` and `graphql` | verified |
+| `ai`, `zod`, `viem` | 7.0.162, 4.6.7, 2.57.16 | the pins already in the lockfile (T4, T3, M0) | verified |

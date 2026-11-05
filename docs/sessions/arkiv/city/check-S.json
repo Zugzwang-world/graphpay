@@ -1,0 +1,51 @@
+{
+  "synthetic": true,
+  "size": "S",
+  "end": "2026-11-05",
+  "backend": "rabdi",
+  "checks": {
+    "q2_top10": {
+      "ok": true,
+      "calls": 2,
+      "explainId": "6d02b9d6f1a0",
+      "bytes": 35370
+    },
+    "q1_good_shop": {
+      "ok": true,
+      "calls": 5,
+      "explainId": "23ef32a64c69",
+      "bytes": 5758
+    },
+    "q3_persona_spend": {
+      "ok": true,
+      "calls": 5,
+      "explainId": "02fdba9cd9fc",
+      "bytes": 23050,
+      "shops": 2
+    },
+    "q5_path": {
+      "ok": true,
+      "calls": 3,
+      "explainId": "b8e502dbd776",
+      "bytes": 119627,
+      "hops": 3
+    },
+    "re_registered_starts_empty": {
+      "ok": true,
+      "calls": 2,
+      "explainId": "7cc1ccd2bad4",
+      "bytes": 5197
+    },
+    "d8_discovery": {
+      "ok": true,
+      "real": 3,
+      "withSynthetic": 11,
+      "calls": 1
+    }
+  },
+  "allOk": true,
+  "httpStatus": {
+    "200": 22
+  },
+  "lowestRateLimitRemaining": 4955
+}

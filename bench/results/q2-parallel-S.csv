@@ -1,0 +1,8 @@
+# SYNTHETIC data: dataset graphpay-city-v1-S (size S), Arkiv rabdi, blocks 265307-265376, commit 667b236, 2026-11-05T22:08:32.296Z
+mode,in_flight,calls,bytes,median_ms,runs,correct,http_requests,non_200,n_429,lowest_remaining
+plain,1,5,135088,2126,11,true,55,0,0,4921
+plain,4,6,135172,1026,11,true,66,0,0,4950
+plain,8,6,135172,763,11,true,66,0,0,4935
+plain,16,6,135172,713,11,true,66,0,0,4922
+plain,all,6,135172,708,11,true,66,0,0,4934
+graph,,2,35378,693,11,true,22,0,0,4921

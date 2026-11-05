@@ -1,35 +1,48 @@
 # Mirror working notes (Join, M11)
 
-The interfaces `packages/mirror` expects from the other tracks, so the wiring is short when each gate lands. Owners: T3 (Arkiv), T1 (payments), T2 (identity). Updated 01:20 IST, Fri 6 Nov.
+Updated 03:36 IST, Fri 6 Nov.
 
-## From T3 (M7a; the Coordinator says the import is `@graphpay/money-graph`)
+## Wiring (done)
 
-The mirror talks to Arkiv through a small port (`Ledger` in `packages/mirror/index.d.ts`); the adapter over M7a's writer is written when it merges.
+- Arkiv: `packages/mirror/src/arkiv.mjs` implements the mirror's ledger port over `@graphpay/money-graph` (M7a, PR 14). It runs three ledgers on W_LEDGER's rows: the chain stream `chain:1874:<checkout>`, the `recorder` stream and the history stream. A write through one marks the others stale, and they re-read from Arkiv before their next write. The live writes pin the nonce read before the anchors (`NONCE_TAKEN` otherwise). The history is written in parts sized to one unsplit transaction, so each part lands whole with its checkpoint.
+- Chain: the ABI and `FAIL_REASON` come from `@graphpay/contracts` (M1, PR 12); `nodeOfWallet` attributes recorder refusals.
+- Process: `src/workers.mjs` (lease, heartbeat, history, loops) and `src/main.mjs` (`pnpm workers`).
 
-| port call | needs from the writer | why |
-|---|---|---|
-| `confirmedNonce()`, then `writeEdge(edge, { stream, checkpoint, nonce })` | a send **at a nonce the caller read before the anchors**, refusing (code `NONCE_TAKEN` or equivalent) if it is taken | §2: read the confirmed nonce before the anchors; a stale batch must not land at the next nonce |
-| `writeEdge` | one batch: the readonly edge (ADR-0034), the tally rows of both ends (`all` and the day), the link, the stream checkpoint; split by bytes only for the history | D1 |
-| `edge.counted = false` | the planner skips the tally for a `DUPLICATE` fail | §3 tally rules |
-| `writeStanding({ node, epoch, status, capMicro })` | a node-row patch plus the checkpoint, same epoch only | `AgentPolicySet` |
-| `registerActors(actors)` | node-row creates (30-day life; synthetic history buyers 14 days) | bootstrap, recognised disposables |
-| `hasRef(ref)`, `readCheckpoint(stream)`, `readActors()` | W_LEDGER-owned reads | anchors, adopt |
-| `readRecorderEdges({ sinceTs, untilTs })` | W_SYNC edges by `ts` (indexed, per the M7 amendment §9) | recorder fold |
-| `foldRecorder(edges, { stream, checkpoint, nonce })` | **tally patches for existing edges, no edge create** | refusals fold into `fails` |
-| heartbeat row | a `heartbeat` entity, owner W_LEDGER, mutable: `instance` str, `state` str, `cursor_block` u64, `cursor_log` u64, `head_block` u64, `lag_blocks` u64, `updated_ts` u64, 1-day life, extended | the lease and the website's lag chip; T3 lists it in `arkiv/schema.md` |
+## Live run (since 03:13 IST, Fri 6 Nov)
 
-## From T1 (M1, M2, M3)
+- First start: 19 cast nodes registered; history `history:test:v1:x0.05:d20762:b7d36bb9`, 1,258 events (synthetic), 03:13–03:26 IST; the chain stream from block 12,313,887: 9 setup events (OwnershipTransferred, RelayerSet, AgentPolicySet × 5, …), none needing a write; lag 2 blocks. W_LEDGER 1.998 → 1.510 tGLM.
+- D2a (`node acceptance/mirror.mjs d2a`): clean, but `not run` (no mirrored edge event yet). Both replays would send 0 batches; the nonce moved once during the first, from the running workers' heartbeat.
+- D15, first pass (no edge events in the window yet): SIGSTOP 21:57:43–21:59:43 UTC; `/health` came back within 5 s, 127 blocks caught up, no retries. SIGKILL at 21:59:54, restart: the lease was taken at once (the claim's pid had exited), 0 nodes re-registered, history done, running in 22 s, same cursor (12,314,093:0). `refs` over the window: 9 events, 0 edges, no duplicates; `not run` until a payment is in the window.
+- Still needed for `(M11 done)`: the first real payment (T1's M3 part B) for D1, D2b, D2c and D3; D15 again with payments in the window; the M6 watcher hosted in `main.mjs`; T1's recorder edge carrying the signing wallet (`payload.payer`, or the ref `att:<orderId>:<wallet>:<n>`).
 
-- The checkout ABI, exported from `packages/contracts` (the mirror decodes with it; the event list in `planning/SPEC/PAYMENTS_WHITECHAIN.md` §3.3).
-- The checkout address and its **deploy block** in `whitechain.contracts` of the config file (`DEPLOY_BLOCK` otherwise).
-- A view `nodeOfWallet(address)` (in the spec) for recorder attribution.
-- The recorder's refusal edge carries the signing wallet: `payload.payer`, or the ref `att:<orderId>:<wallet>:<n>`.
+## The D checks (`acceptance/mirror.mjs`, results in `acceptance/results/`)
 
-## From T2 (M5, M6)
+```bash
+node acceptance/mirror.mjs d1 --tx <whitechain settle tx>
+```
 
-- `docs/sessions/identity/namespace.md`: epoch per name (fresh names are epoch 0) for the bootstrap.
-- The watcher as a library this process starts and stops; its node writes go through the mirror's lock (single W_LEDGER writer).
+```bash
+node acceptance/mirror.mjs d3 --ens kesar-kingdom.graphpay.eth --ens acceptance.vitalik.graphpay.eth
+```
 
-## Decisions taken here
+- `d2a` runs beside the workers. `d2b --block N` and `d2c --block N` need the workers stopped cleanly (Ctrl-C) and an unmirrored edge event at or after block N: stop the workers before a payment, run the check, then start the workers again.
+- `refs --from N --to N` (D15's count) and `lag` (one fresh heartbeat).
 
-See `docs/thinking-partner/relays/integration.md` ("Where I chose"): the history's 12 synthetic buyers and its day spread; the checkpoint held before the earliest parked event; standing replays; the recorder's settle window (120 s).
+## Running it (founder's Mac)
+
+```bash
+fnm exec --using=22.23.4 pnpm workers
+```
+
+- The process holds `caffeinate -ims -w <pid>`. Check it with `pmset -g assertions | grep caffeinate`.
+- It refuses to start while another instance's heartbeat is under 90 s old. A clean stop (Ctrl-C) frees the lease at once.
+- Local endpoints: `curl -s 127.0.0.1:8788/status`, `curl -s -X POST 127.0.0.1:8788/sync`.
+- The first start registers the cast and writes the 5% history (1,258 events, about 100 transactions, 10–15 min). Later starts resume from the checkpoints.
+
+## D15 (resume after a drop)
+
+1. With the process running, record `/status` (checkpoint, cursor).
+2. Cut the network for 2 minutes (Wi-Fi off), or `kill -STOP <pid>`, then restore it (`kill -CONT <pid>`).
+3. Make a payment during or after the cut. `/status` shows the poll errors, then the catch-up.
+4. Force a restart (Ctrl-C, start again).
+5. Check every event in the window: `count(edge where ref = id) = 1`, and the cursor continues from the last processed block.
