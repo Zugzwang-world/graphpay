@@ -285,3 +285,12 @@ Each track adds its own rows here (under `### <activity>`), with source, time an
 | i32 box query | a W_DIRECTORY probe shop at the persona's point (1-day row, [0xbf9a…09aa](https://rabdi.explorer.arkiv.network/tx/0xbf9ac8f4cf76f9e14d6b0d110b31e15d5f434ca934f2cdd3e13be887845309aa)) is found by a 1 km box in 1 call; a box 0.05° north finds none | probe run | 01:29 | verified-on-chain | ADR-0058 (no u64 fallback) |
 | SDK entity address | the SDK sends every operation to its fixed entity address (the config's `arkiv.entityContract`), whatever the caller passes | SDK 1.0.1 `src/utils/arkivTransactions.ts` | 01:10 | verified | ArkivSim and the writer take it from the config |
 | 256 KiB limit through the SDK | a batch over 256 KiB fails at `eth_estimateGas` as `EntityMutationError` "Execution error without revert data", with `HttpRequestError` status 413 three causes down | ArkivSim (same viem HTTP path) | 01:15 | verified (emulated) | the writer halves on it |
+
+### website
+
+| item | value | source | time (IST) | status |
+|---|---|---|---|---|
+| Arkiv explorer routes | `/tx/<hash>`, `/entity/<key>`, `/address/<addr>`, `/blocks` (list; `/block` takes no number in the path), `/entity-explorer?q=<query>` (its query page; `/entity/<key>` itself resolves to `$key = key(<key>)` there) | the explorer's own client bundle (`rabdi.explorer.arkiv.network/assets/index-*.js`: its route table and path matchers), read 6 Nov | 01:05 | verified in code; `/entity-explorer?q=` answers 200 |
+| Whitechain explorer (Blockscout) | `/tx/<hash>`, `/address/<addr>`, `/block/<n>`, `/token/<addr>` answer 200 (a single-page app answers 200 for any path, so only the tx page was checked against a known transaction) | HTTP GET on `explorer.testnet.whitechain.io`, 6 Nov | 01:15 | verified for tx (known hash); others standard Blockscout |
+| Sepolia explorer | Etherscan `/tx/`, `/address/`, `/block/` | HTTP GET on `sepolia.etherscan.io/block/1000` → 200 | 01:15 | verified |
+| Next.js file tracing of `@graphpay/config` | its two JSON files are read at run time (`readFileSync` next to `index.mjs`) and the trace misses them; `outputFileTracingIncludes` in `apps/web/next.config.ts` adds them (the route's `.nft.json` then lists both) | local `next build` on Node 22.23.4 | 00:40 | verified locally; first Vercel deploy confirms |
