@@ -1,0 +1,33 @@
+{
+  "name": "@graphpay/agentpay",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "AgentPay: a two-sided SDK for agentic stablecoin payments on Whitechain. Customer agents pay a 402 with one signature and no gas under an on-chain spending pass; merchants price any route, settle through a facilitator and get paid in USDT. Identity and reputation plug in through interfaces.",
+  "license": "MIT",
+  "exports": {
+    ".": {
+      "types": "./index.d.ts",
+      "default": "./index.mjs"
+    }
+  },
+  "types": "./index.d.ts",
+  "files": [
+    "index.mjs",
+    "index.d.ts",
+    "src",
+    "README.md"
+  ],
+  "scripts": {
+    "test": "node --test \"test/*.test.mjs\"",
+    "test:fork": "node --test --test-concurrency=1 \"test-fork/*.test.mjs\""
+  },
+  "dependencies": {
+    "@graphpay/config": "workspace:*",
+    "@graphpay/contracts": "workspace:*",
+    "@modelcontextprotocol/sdk": "1.32.2",
+    "ai": "7.0.162",
+    "viem": "2.57.16",
+    "zod": "4.6.7"
+  }
+}

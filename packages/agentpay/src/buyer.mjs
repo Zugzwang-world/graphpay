@@ -1,0 +1,299 @@
+// The buyer side: a customer agent that answers an HTTP 402 with one signature and no gas,
+// under a spending pass and a mandate. The model proposes, code disposes (ADR-0019): every
+// limit is checked here, in code, before anything is signed, and the contract checks the
+// on-chain pass again at settlement.
+
+import { createHash } from 'node:crypto';
+import { getAddress, isAddressEqual } from 'viem';
+import { checkoutAbi, ORDER_STATUS } from '@graphpay/contracts';
+import { AgentPayError, assertChain, whitechainNetwork } from './network.mjs';
+import { canonicalJson, nodeOf, ZERO32, ZERO_ADDRESS } from './order.mjs';
+import { formatUsdt, toMicro } from './money.mjs';
+import { PERIOD_DAYS, readSpendingPass, spentInPeriod } from './pass.mjs';
+import { DEFAULT_APPROVAL_MICRO, signCancel, signOrderPayment, signRefundRequest, signSubscription } from './sign.mjs';
+import { HEADERS, PAYER_HEADERS, X402_VERSION, decodeHeader, encodeHeader, getHeader, orderOfPaymentRequired } from './wire.mjs';
+
+export const MANDATE_SCHEMA = 'agentpay.mandate/v1';
+
+// The human's intent ("at most 6 USDT, by 20:00"), hashed into every payment it covers.
+export function createMandate({ buyer = '', request = '', budgetMicro, deadlineMs, merchants = [], currency = 'USDT' }) {
+  const budget = toMicro(budgetMicro, 'budgetMicro');
+  if (!Number.isFinite(deadlineMs)) throw new Error('a mandate needs a deadline (ms)');
+  if (typeof request !== 'string' || request.length > 2000) throw new Error('the request is at most 2000 characters');
+  const fields = { schema: MANDATE_SCHEMA, buyer, currency, budgetMicro: budget, deadline: new Date(deadlineMs).toISOString(), merchants: [...merchants].map(String).sort(), request };
+  const hash = `0x${createHash('sha256').update(canonicalJson(fields)).digest('hex')}`;
+  return Object.freeze({ buyer, request, currency, budgetMicro: budget, deadlineMs, merchants: Object.freeze([...merchants]), hash });
+}
+
+const lowerName = (v) => String(v).toLowerCase();
+
+function merchantAllowed(list, merchant) {
+  if (!list || list.length === 0) return true;
+  return list.some((entry) => (/^0x[0-9a-fA-F]{40}$/.test(entry) ? isAddressEqual(entry, merchant.address) : lowerName(entry) === lowerName(merchant.name)));
+}
+
+// One payment at a time per agent: guards, signature and settlement run as one step, so two
+// parallel calls can never both pass the same remaining cap.
+function serial() {
+  let tail = Promise.resolve();
+  return (fn) => {
+    const run = tail.then(fn, fn);
+    tail = run.catch(() => {});
+    return run;
+  };
+}
+
+// account: a viem local account (the key never leaves it). name: the agent's ENS-style name
+// ('' for a human payer, who has no on-chain pass). pass: { capMicro, period, perPaymentMaxMicro?,
+// merchants? }. mandate: from createMandate (optional; without one the pass is the mandate).
+export function createBuyerAgent({
+  account,
+  publicClient,
+  network = whitechainNetwork(),
+  name = '',
+  buyerName,
+  pass,
+  mandate,
+  identity,
+  reputation,
+  approvalMicro = DEFAULT_APPROVAL_MICRO,
+  fetch: fetchImpl = globalThis.fetch,
+  clock = () => Date.now(),
+  onEvent = () => {},
+}) {
+  if (!account?.address || typeof account.signTypedData !== 'function') throw new Error('createBuyerAgent needs a local account that can sign typed data');
+  if (!pass || pass.capMicro === undefined) throw new Error('createBuyerAgent needs a spending pass { capMicro, period }');
+  const period = pass.period ?? 'day';
+  if (!PERIOD_DAYS[period]) throw new Error(`pass period must be one of ${Object.keys(PERIOD_DAYS).join(', ')}`);
+  const limits = Object.freeze({
+    capMicro: toMicro(pass.capMicro, 'pass.capMicro'),
+    period,
+    perPaymentMaxMicro: pass.perPaymentMaxMicro === undefined ? undefined : toMicro(pass.perPaymentMaxMicro, 'pass.perPaymentMaxMicro'),
+    merchants: Object.freeze([...(pass.merchants ?? [])]),
+  });
+  const node = nodeOf(name);
+  const buyerNode = buyerName ? nodeOf(buyerName) : node;
+  const address = getAddress(account.address);
+  const nowSec = () => Math.floor(clock() / 1000);
+  const mandateHash = mandate?.hash ?? createMandate({ buyer: buyerName ?? name, request: 'standing spending pass', budgetMicro: limits.capMicro, deadlineMs: 8_640_000_000_000_000 }).hash;
+  const ledger = { mandateSpentMicro: 0n, humanPeriod: new Map() };
+  const lock = serial();
+
+  async function passStatus() {
+    const t = nowSec();
+    if (node === ZERO32) {
+      return { human: true, address, period, capMicro: limits.capMicro, spentInPeriodMicro: humanSpent(t), merchants: limits.merchants };
+    }
+    const onchain = await readSpendingPass({ publicClient, network, node, wallet: address, nowSec: t });
+    const spent = await spentInPeriod({ publicClient, network, node, epoch: onchain.epoch, period, nowSec: t });
+    return {
+      human: false,
+      name,
+      node,
+      address,
+      period,
+      capMicro: limits.capMicro,
+      spentInPeriodMicro: spent,
+      remainingInPeriodMicro: limits.capMicro > spent ? limits.capMicro - spent : 0n,
+      perPaymentMaxMicro: limits.perPaymentMaxMicro,
+      merchants: limits.merchants,
+      onchain,
+      mandate: mandate ? { budgetMicro: mandate.budgetMicro, spentMicro: ledger.mandateSpentMicro, deadlineMs: mandate.deadlineMs } : undefined,
+    };
+  }
+
+  const periodKey = (t) => BigInt(t) / (86_400n * BigInt(PERIOD_DAYS[period]));
+  function humanSpent(t) {
+    return ledger.humanPeriod.get(periodKey(t)) ?? 0n;
+  }
+
+  // Every guard, in code, before a signature. Throws AgentPayError with the reason.
+  async function check(order, { maxMicro } = {}) {
+    const t = nowSec();
+    const amount = order.totalMicro;
+    const refuse = (code, message) => {
+      throw new AgentPayError(code, message, { orderId: order.orderId, amountMicro: amount.toString() });
+    };
+    if (order.payer.node !== node) refuse('NOT_FOR_THIS_PAYER', 'the order was built for another payer');
+    if (order.payer.address !== ZERO_ADDRESS && !isAddressEqual(order.payer.address, address)) refuse('NOT_FOR_THIS_PAYER', 'the order binds another wallet');
+    if (order.buyer.node !== buyerNode) refuse('NOT_FOR_THIS_BUYER', 'the order names another buyer');
+    if (BigInt(order.deadline) <= BigInt(t)) refuse('ORDER_EXPIRED', 'the order deadline has passed');
+    if (!merchantAllowed(limits.merchants, order.merchant)) refuse('MERCHANT_NOT_ALLOWED', `${order.merchant.name} is not on the pass allowlist`);
+    if (limits.perPaymentMaxMicro !== undefined && amount > limits.perPaymentMaxMicro) refuse('OVER_PAYMENT_MAX', `${formatUsdt(amount)} is above the per-payment maximum ${formatUsdt(limits.perPaymentMaxMicro)}`);
+    if (maxMicro !== undefined && amount > toMicro(maxMicro, 'maxMicro')) refuse('OVER_CALLER_MAX', `${formatUsdt(amount)} is above the asked maximum ${formatUsdt(maxMicro)}`);
+    if (mandate) {
+      if (clock() >= mandate.deadlineMs) refuse('MANDATE_EXPIRED', 'the mandate deadline has passed');
+      if (!merchantAllowed(mandate.merchants, order.merchant)) refuse('MERCHANT_NOT_IN_MANDATE', `${order.merchant.name} is not in the mandate`);
+      if (ledger.mandateSpentMicro + amount > mandate.budgetMicro) refuse('OVER_BUDGET', `${formatUsdt(amount)} would take the mandate over its budget ${formatUsdt(mandate.budgetMicro)}`);
+    }
+    if (identity?.verifyMerchant) {
+      const ok = await identity.verifyMerchant({ name: order.merchant.name, node: order.merchant.node, address: order.merchant.address });
+      if (!ok) refuse('MERCHANT_NOT_VERIFIED', `the identity resolver does not vouch for ${order.merchant.name} at its address`);
+    }
+    if (reputation?.assess) {
+      const r = await reputation.assess({ subject: 'merchant', name: order.merchant.name, node: order.merchant.node, address: order.merchant.address });
+      if (r?.risk === 'high') refuse('MERCHANT_HIGH_RISK', `${order.merchant.name}: ${(r.reasons ?? ['rated high risk']).join('; ')}`);
+    }
+    if (node === ZERO32) {
+      if (humanSpent(t) + amount > limits.capMicro) refuse('OVER_PERIOD_CAP', `would pass the ${period} cap ${formatUsdt(limits.capMicro)}`);
+    } else {
+      const p = await readSpendingPass({ publicClient, network, node, wallet: address, nowSec: t });
+      if (!p.exists || !isAddressEqual(p.wallet, address) || p.boundNode !== node) refuse('NO_PASS', 'no on-chain spending pass binds this wallet to this agent');
+      if (p.revoked) refuse('PASS_REVOKED', 'the spending pass is revoked');
+      if (p.expired) refuse('PASS_EXPIRED', 'the spending pass has expired');
+      if (p.spentTodayMicro + amount > p.dailyCapMicro) refuse('OVER_DAILY_CAP', `would pass the on-chain daily cap ${formatUsdt(p.dailyCapMicro)} (spent ${formatUsdt(p.spentTodayMicro)} today)`);
+      const spent = await spentInPeriod({ publicClient, network, node, epoch: p.epoch, period, nowSec: t });
+      if (spent + amount > limits.capMicro) refuse('OVER_PERIOD_CAP', `would pass the ${period} cap ${formatUsdt(limits.capMicro)} (spent ${formatUsdt(spent)})`);
+    }
+    const onchainOrder = await publicClient.readContract({ address: network.checkout, abi: checkoutAbi, functionName: 'orders', args: [order.orderId] });
+    const status = ORDER_STATUS[Number(onchainOrder.status ?? onchainOrder[6])];
+    return { status };
+  }
+
+  function identityHeaders(extra = {}) {
+    const h = { ...Object.fromEntries(new Headers(extra)), [PAYER_HEADERS.address]: address };
+    if (name) h[PAYER_HEADERS.name] = name;
+    if (buyerName) h[PAYER_HEADERS.buyer] = buyerName;
+    return h;
+  }
+
+  async function readPaymentRequired(response) {
+    const fromHeader = decodeHeader(getHeader(response.headers, HEADERS.required));
+    if (fromHeader) return fromHeader;
+    try {
+      return await response.clone().json();
+    } catch {
+      throw new AgentPayError('BAD_402', 'the 402 carries no payment requirement');
+    }
+  }
+
+  // GET (or the given request) a priced URL and read its 402 without signing anything.
+  async function quote(url, init = {}) {
+    const response = await fetchImpl(url, { ...init, headers: identityHeaders(init.headers), redirect: 'error' });
+    if (response.status !== 402) return { free: true, status: response.status, response };
+    const pr = await readPaymentRequired(response);
+    let offered;
+    try {
+      offered = orderOfPaymentRequired(pr, network);
+    } catch (e) {
+      throw new AgentPayError('BAD_402', e.message);
+    }
+    return { free: false, order: offered.order, requirement: offered.requirement, paymentRequired: offered.paymentRequired };
+  }
+
+  // Answer a 402 with one signature: guards first, then the Permit2 witness, then the retry.
+  async function pay(url, init = {}) {
+    const { maxMicro, ...requestInit } = init;
+    if (requestInit.body !== undefined && typeof requestInit.body !== 'string') throw new Error('pay(): send the body as a string, so the paid retry can repeat it');
+    return lock(async () => {
+      const q = await quote(url, requestInit);
+      if (q.free) return { status: 'free', httpStatus: q.status, response: q.response };
+      const { order, requirement, paymentRequired } = q;
+      await assertChain(publicClient, network);
+      const { status } = await check(order, { maxMicro });
+      if (status !== 'NONE' && status !== 'CREATED') {
+        // Signing again could never pay twice (the Permit2 nonce is the order id), but there is nothing to pay.
+        onEvent({ type: 'not_payable', orderId: order.orderId, orderStatus: status });
+        return { status: 'not_payable', orderStatus: status, orderId: order.orderId, order };
+      }
+      const payload = await signOrderPayment({ account, publicClient, network, requirement, payerName: name, mandateHash, approvalMicro, nowSec: nowSec() });
+      const paymentPayload = { x402Version: X402_VERSION, resource: paymentRequired.resource, accepted: requirement, payload, extensions: paymentRequired.extensions };
+      const pending = order.totalMicro;
+      if (node === ZERO32) ledger.humanPeriod.set(periodKey(nowSec()), humanSpent(nowSec()) + pending);
+      if (mandate) ledger.mandateSpentMicro += pending;
+      onEvent({ type: 'signed', orderId: order.orderId, amountMicro: pending.toString(), merchant: order.merchant.name });
+      let response;
+      try {
+        const headers = new Headers(requestInit.headers ?? {});
+        headers.set(HEADERS.signature, encodeHeader(paymentPayload));
+        response = await fetchImpl(url, { ...requestInit, headers: identityHeaders(headers), redirect: 'error' });
+      } catch (e) {
+        // The signature may still settle (the merchant has it): keep the amount reserved.
+        throw new AgentPayError('MERCHANT_UNREACHABLE', 'the paid request did not complete; the payment may still settle, retry pay() with the same order', { orderId: order.orderId });
+      }
+      const settlement = decodeHeader(getHeader(response.headers, HEADERS.response));
+      const paid = response.ok && settlement?.success !== false;
+      if (!paid && response.status !== 502) {
+        // Refused or failed on-chain with nothing moved: release the reservation.
+        if (node === ZERO32) ledger.humanPeriod.set(periodKey(nowSec()), humanSpent(nowSec()) - pending);
+        if (mandate) ledger.mandateSpentMicro -= pending;
+      }
+      const result = {
+        status: paid ? 'paid' : response.status === 502 ? 'unknown' : 'failed',
+        httpStatus: response.status,
+        orderId: order.orderId,
+        amountMicro: pending,
+        merchant: order.merchant,
+        order,
+        transaction: settlement?.transaction || undefined,
+        reason: paid ? undefined : settlement?.errorReason ?? `http ${response.status}`,
+        response,
+      };
+      onEvent({ type: result.status, orderId: order.orderId, transaction: result.transaction, reason: result.reason });
+      return result;
+    });
+  }
+
+  // Ask the merchant for a refund: the request is signed by this payer, so the merchant can
+  // check it comes from whoever paid the order. The merchant refunds on-chain itself.
+  async function requestRefund({ url, orderId, amountMicro, reason }) {
+    if (typeof reason !== 'string' || reason.length === 0 || reason.length > 280) throw new Error('a refund reason is 1 to 280 characters');
+    const signed = await signRefundRequest({ account, publicClient, network, orderId, amountMicro: toMicro(amountMicro, 'amountMicro'), reason, nowSec: nowSec() });
+    const response = await fetchImpl(url, { method: 'POST', headers: { 'content-type': 'application/json', ...identityHeaders() }, body: JSON.stringify(signed), redirect: 'error' });
+    const body = await response.json().catch(() => ({}));
+    return { ok: response.ok, httpStatus: response.status, ...body };
+  }
+
+  // Subscribe to a merchant's plan: read the offer, check it like a payment, sign the terms
+  // and a bounded Permit2 allowance, hand them to the merchant (its relayer creates it).
+  async function subscribe({ url, maxMicro }) {
+    return lock(async () => {
+      const offerRes = await fetchImpl(url, { headers: identityHeaders(), redirect: 'error' });
+      if (!offerRes.ok) throw new AgentPayError('NO_OFFER', `the plan answered ${offerRes.status}`);
+      const offer = await offerRes.json();
+      const sub = {
+        subId: offer.sub.subId,
+        subscriberNode: offer.sub.subscriberNode,
+        shopNode: offer.sub.shopNode,
+        payerNode: offer.sub.payerNode,
+        subscriber: getAddress(offer.sub.subscriber),
+        merchant: getAddress(offer.sub.merchant),
+        amountMicro: toMicro(offer.sub.amountMicro, 'amountMicro'),
+        period: Number(offer.sub.period),
+        firstChargeAt: BigInt(offer.sub.firstChargeAt),
+      };
+      const maxCycles = Number(offer.maxCycles);
+      if (!Number.isSafeInteger(maxCycles) || maxCycles < 1 || maxCycles > 520) throw new AgentPayError('BAD_OFFER', 'maxCycles must be 1 to 520');
+      if (!isAddressEqual(sub.subscriber, address) || sub.payerNode !== node || sub.subscriberNode !== buyerNode) throw new AgentPayError('NOT_FOR_THIS_PAYER', 'the offer was built for another subscriber');
+      if (nodeOf(offer.merchant?.name) !== sub.shopNode || !isAddressEqual(offer.merchant?.address ?? ZERO_ADDRESS, sub.merchant)) throw new AgentPayError('BAD_OFFER', 'the offer names a merchant that does not match its terms');
+      const merchant = { name: offer.merchant.name, address: sub.merchant };
+      if (!merchantAllowed(limits.merchants, merchant)) throw new AgentPayError('MERCHANT_NOT_ALLOWED', `${merchant.name} is not on the pass allowlist`);
+      if (limits.perPaymentMaxMicro !== undefined && sub.amountMicro > limits.perPaymentMaxMicro) throw new AgentPayError('OVER_PAYMENT_MAX', 'one charge is above the per-payment maximum');
+      if (maxMicro !== undefined && sub.amountMicro > toMicro(maxMicro, 'maxMicro')) throw new AgentPayError('OVER_CALLER_MAX', 'one charge is above the asked maximum');
+      const periodSeconds = PERIOD_DAYS[period] * 86_400;
+      // At most maxCycles charges ever (the Permit2 allowance is amount × maxCycles).
+      const chargesPerPassPeriod = Math.min(maxCycles, Math.max(1, Math.ceil(periodSeconds / sub.period)));
+      if (sub.amountMicro * BigInt(chargesPerPassPeriod) > limits.capMicro) throw new AgentPayError('OVER_PERIOD_CAP', `the plan charges more than the ${period} cap`);
+      if (node !== ZERO32) {
+        const p = await readSpendingPass({ publicClient, network, node, wallet: address, nowSec: nowSec() });
+        if (!p.active || !isAddressEqual(p.wallet, address)) throw new AgentPayError('NO_PASS', 'no active on-chain spending pass for this agent');
+      }
+      const signed = await signSubscription({ account, publicClient, network, sub, maxCycles, approvalMicro, nowSec: nowSec() });
+      const body = JSON.stringify({ sub: offer.sub, maxCycles, ...signed }, (_, v) => (typeof v === 'bigint' ? v.toString() : v));
+      const response = await fetchImpl(url, { method: 'POST', headers: { 'content-type': 'application/json', ...identityHeaders() }, body, redirect: 'error' });
+      const result = await response.json().catch(() => ({}));
+      return { ok: response.ok, httpStatus: response.status, subId: sub.subId, ...result };
+    });
+  }
+
+  // Cancel a subscription with a signature (gasless: the merchant's relayer sends cancelWithSig).
+  async function cancel({ url, subId }) {
+    const signed = await signCancel({ account, publicClient, network, subId, nowSec: nowSec() });
+    const body = JSON.stringify(signed, (_, v) => (typeof v === 'bigint' ? v.toString() : v));
+    const response = await fetchImpl(url, { method: 'POST', headers: { 'content-type': 'application/json', ...identityHeaders() }, body, redirect: 'error' });
+    const result = await response.json().catch(() => ({}));
+    return { ok: response.ok, httpStatus: response.status, subId, ...result };
+  }
+
+  return Object.freeze({ address, name, node, network, limits, mandateHash, passStatus, quote, pay, requestRefund, subscribe, cancel, check });
+}
