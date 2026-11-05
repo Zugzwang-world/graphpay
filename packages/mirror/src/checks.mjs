@@ -123,7 +123,7 @@ export function d1Verdict(tx, { shopNode, payerNode, stream }) {
 export async function refCounts(publicClient, { owner, events }) {
   const rows = [];
   for (const e of events) {
-    const n = await countRows(publicClient, ENTITIES.edge, { owner, where: [eq('ref', str(e.id))] });
+    const n = Number(await countRows(publicClient, ENTITIES.edge, { owner, where: [eq('ref', str(e.id))] }));
     const want = EDGE_EVENTS.has(e.name) ? 1 : 0;
     rows.push({ id: e.id, name: e.name, block: e.block, edges: n, want, ok: n === want });
   }

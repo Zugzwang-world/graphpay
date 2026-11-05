@@ -1,0 +1,52 @@
+{
+  "id": "D2a",
+  "at": "2026-11-05T21:57:01.645Z",
+  "pass": true,
+  "what": "the mirror step again over the same blocks sends no transaction",
+  "measured": {
+    "checkpointForgotten": {
+      "stats": {
+        "written": 0,
+        "standing": 0,
+        "skippedCheckpoint": 0,
+        "skippedRef": 0,
+        "none": 9,
+        "unknownLogs": 0,
+        "retries": 0,
+        "lastWriteAt": null
+      },
+      "wouldSend": [],
+      "nonce": {
+        "before": 128,
+        "after": 129
+      }
+    },
+    "anchorHiddenToo": {
+      "stats": {
+        "written": 0,
+        "standing": 0,
+        "skippedCheckpoint": 0,
+        "skippedRef": 0,
+        "none": 9,
+        "unknownLogs": 0,
+        "retries": 0,
+        "lastWriteAt": null
+      },
+      "wouldSend": [],
+      "nonce": {
+        "before": 129,
+        "after": 129
+      }
+    }
+  },
+  "expected": {
+    "wouldSend": 0
+  },
+  "evidence": {
+    "range": {
+      "from": 12313887,
+      "to": 12319423
+    },
+    "errors": []
+  }
+}

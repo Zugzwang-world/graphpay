@@ -61,11 +61,13 @@ async function chainEvents(from, to) {
   return { events: out, publicClient };
 }
 
+const json = (v, space) => JSON.stringify(v, (_, x) => (typeof x === 'bigint' ? x.toString() : x), space);
+
 function result(id, body) {
   const r = { id, at: new Date().toISOString(), ...body };
   mkdirSync(join(root, 'acceptance', 'results'), { recursive: true });
-  writeFileSync(join(root, 'acceptance', 'results', `${id}.json`), `${JSON.stringify(r, null, 2)}\n`);
-  process.stdout.write(`result: ${JSON.stringify(r)}\n`);
+  writeFileSync(join(root, 'acceptance', 'results', `${id}.json`), `${json(r, 2)}\n`);
+  process.stdout.write(`result: ${json(r)}\n`);
   return r;
 }
 
