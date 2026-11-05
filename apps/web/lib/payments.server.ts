@@ -8,7 +8,8 @@ import { createPublicClient, createWalletClient, defineChain, http, isAddressEqu
 import { privateKeyToAccount } from 'viem/accounts';
 import { config, network, resolveRpc } from '@graphpay/config';
 import { checkoutAbi } from '@graphpay/contracts';
-import { createEnsGate, createEnsReader, ensPublicClient } from '@graphpay/ens';
+import { after } from 'next/server.js'; // .js: the test runner resolves it too
+import { createEnsGate, createEnsReader, ensPublicClient, retryingReads } from '@graphpay/ens';
 import { connectArkiv, createQuote, identityKey, recordEdge, type ArkivConnection } from '@graphpay/money-graph';
 import {
   HTTPFacilitatorClient,
@@ -33,10 +34,11 @@ type Handler = (request: Request) => Promise<Response>;
 
 const NO_STORE = { 'cache-control': 'no-store' } as const;
 const HOSTED_FLOOR_WEI = 300_000_000_000_000_000n; // 0.3 WBT, the hosted relayer floor (E-1)
+const HOSTED_RECEIPT_MS = 30_000; // the hosted receipt wait, inside the facilitator's 60 s
 const SITE = String(config.site.url).replace(/\/+$/, '');
 
 export const log = (line: string) => console.error(line);
-const reason = (e: unknown) => (e instanceof StartupError ? e.message : ((e as Error)?.name ?? 'Error'));
+export const reason = (e: unknown) => (e instanceof StartupError ? e.message : ((e as Error)?.name ?? 'Error'));
 export const jsonNoStore = (status: number, body: unknown) => Response.json(body, { status, headers: NO_STORE });
 
 const keyAddress = (env: Env, role: string): `0x${string}` | null => {
@@ -142,15 +144,32 @@ export function route(name: string, get: () => Promise<Handler>): Handler {
   };
 }
 
-const ens = once('ens', async () => (await ensPublicClient({ env: process.env })).client);
+// Public Sepolia reads fail now and then: two quick retries before the gate fails closed.
+const ens = once('ens', async () => retryingReads((await ensPublicClient({ env: process.env })).client, { tries: 3, delayMs: 400 }));
 const wcOnce = once('whitechain', () => whitechain());
 
 // ---------------------------------------------------------------- facilitator
+
+// A refusal record is posted after the answer; after() keeps the function alive until it is sent.
+function keptAlive(client: { refused(entry: unknown): Promise<void> }) {
+  return {
+    refused(entry: unknown): Promise<void> {
+      const send = client.refused(entry).catch(() => {});
+      try {
+        after(() => send);
+      } catch {
+        // outside a request (tests): the promise runs on its own
+      }
+      return send;
+    },
+  };
+}
 
 export const facilitator = once('facilitator', async () => {
   const env = hostedEnv();
   const s = facilitatorSettings(env);
   if (s.limits.minRelayerBalanceWei < HOSTED_FLOOR_WEI) throw new StartupError('MIN_RELAYER_BALANCE_WBT is below the hosted 0.3 WBT floor');
+  if (s.limits.receiptTimeoutMs > HOSTED_RECEIPT_MS) throw new StartupError('RECEIPT_TIMEOUT_MS is above the hosted 30 s');
   const key = env.FACILITATOR_PRIVATE_KEY;
   if (!key) throw new StartupError('FACILITATOR_PRIVATE_KEY is not set');
   const relayer = privateKeyToAccount(key as Hex);
@@ -166,7 +185,7 @@ export const facilitator = once('facilitator', async () => {
     allowedMerchants: s.allowedMerchants,
     chain: viemChain({ publicClient: w.publicClient, walletClient: createWalletClient({ account: relayer, chain: w.chain, transport: w.transport }), account: relayer, checkout: s.checkout, token: s.token, permit2: s.permit2, chain: w.chain }),
     ensGate: gate.ensGate,
-    recorder: s.recorder ? recorderClient(s.recorder) : null,
+    recorder: s.recorder ? keptAlive(recorderClient(s.recorder)) : null,
     limits: s.limits,
   });
   const ready = readiness(async () => {
@@ -216,15 +235,15 @@ export const shop = once('shop', async (): Promise<ShopService> => {
   const actions = merchantActions({ publicClient: w.publicClient, walletClients, checkout: s.checkout, chain: w.chain });
   const ready = readiness(() => startupChecks({ publicClient: w.publicClient, chainId: s.chainId, checkout: s.checkout, token: s.token, ensClient, sepoliaChainId: s.sepoliaChainId }));
   const auth = { Authorization: `Bearer ${s.facilitatorToken}` };
-  // The quote entity (M7 amendment §5): keyed by the shop's identity at its ENS epoch.
-  const quoteWriter = env.W_DIRECTORY_PRIVATE_KEY
-    ? async (q: { requestId: Hex; shopName: string; agentEns: string; priceMicro: bigint; validUntil: number }) => {
-        const payee = await reader.resolvePayee(q.shopName);
-        if (!payee.ok) throw new StartupError('the shop name does not resolve');
-        const epoch = Number((payee as { epoch?: number }).epoch ?? 0);
-        return createQuote(await directory(), { requestId: q.requestId, shopKey: identityKey(namehash(q.shopName), epoch) as Hex, agentEns: q.agentEns, price: q.priceMicro, validUntil: q.validUntil });
-      }
-    : undefined;
+  // The quote entity (M7 amendment §5): keyed by the shop's identity at its ENS epoch. Without
+  // the W_DIRECTORY key a 402 step that asks for a quote answers 503, never a 402 without one.
+  const quoteWriter = async (q: { requestId: Hex; shopName: string; agentEns: string; priceMicro: bigint; validUntil: number }) => {
+    if (!env.W_DIRECTORY_PRIVATE_KEY) throw new StartupError('W_DIRECTORY_PRIVATE_KEY is not set');
+    const payee = await reader.resolvePayee(q.shopName);
+    if (!payee.ok) throw new StartupError('the shop name does not resolve');
+    const epoch = Number((payee as { epoch?: number }).epoch ?? 0);
+    return createQuote(await directory(), { requestId: q.requestId, shopKey: identityKey(namehash(q.shopName), epoch) as Hex, agentEns: q.agentEns, price: q.priceMicro, validUntil: q.validUntil });
+  };
   const handle = shopHandler({
     shops,
     merchants: s.merchants,

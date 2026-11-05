@@ -55,11 +55,12 @@ const out = { site: SITE, at: new Date().toISOString(), checks: results };
 if (flag(argv, '--recorder')) {
   const r = await post(
     '/api/recorder/attempts',
-    { onchain: false, status: 'rejected', reason: 'TEST', orderId: keccak256(toHex(`m4 recorder test ${out.at}`)), payer: relayer, payerName: '', payerNode: `0x${'0'.repeat(64)}`, shopName: shop.ensName, amountMicro: '0', at: Date.now(), test: true },
+    // Unattributed and labelled test, to a name outside the cast: no cast agent or shop gets a failure.
+    { onchain: false, status: 'rejected', reason: 'TEST', orderId: keccak256(toHex(`m4 recorder test ${out.at}`)), payer: relayer, payerName: '', payerNode: `0x${'0'.repeat(64)}`, shopName: `recorder-test.${config.root.ens}`, amountMicro: '0', at: Date.now(), test: true },
     { authorization: `Bearer ${ctx.env.RECORDER_TOKEN}` },
   );
   const body = await r.json().catch(() => ({}));
-  check('POST /api/recorder/attempts with the bearer writes one edge', r.status === 201 && /^0x[0-9a-f]{64}$/.test(body.txHash ?? ''), body.txHash ? `https://rabdi.explorer.arkiv.network/tx/${body.txHash}` : JSON.stringify(body));
+  check('POST /api/recorder/attempts with the bearer writes one edge', r.status === 201 && /^0x[0-9a-f]{64}$/.test(body.txHash ?? ''), body.txHash ? `${String(config.networks.rabdi.explorer).replace(/\/+$/, '')}/tx/${body.txHash}` : JSON.stringify(body));
   out.recorder = { status: r.status, entityKey: body.entityKey, txHash: body.txHash };
 }
 

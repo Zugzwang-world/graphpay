@@ -16,6 +16,7 @@ const SCAN = 25n; // the most recent subscriptions looked at per run (reads stay
 const PER_RUN = 3; // renewals sent per run (the cron runs every minute)
 const GAS_FLOOR = 300_000n; // renew's try/catch around the pull makes the estimate undershoot
 const MIN_BALANCE_WEI = 20_000_000_000_000_000n; // 0.02 WBT: below it the renewer stops sending
+const TIME_BUDGET_MS = 25_000; // no new send after this, well inside maxDuration 60 s
 
 export interface RenewResult {
   checked: number;
@@ -37,25 +38,37 @@ export async function renewDue(env: Record<string, string | undefined> = process
 
   const count = BigInt((await read('subscriptionCount')) as bigint);
   const now = (await w.publicClient.getBlock()).timestamp;
+  const started = Date.now();
   const result: RenewResult = { checked: 0, renewed: [], skipped: [] };
   const wallet = createWalletClient({ account: renewer, chain: w.chain, transport: w.transport });
-  for (let i = count; i > 0n && i > count - SCAN && result.renewed.length < PER_RUN; i -= 1n) {
-    const subId = (await read('subscriptionIdAt', [i - 1n])) as Hex;
-    const s = (await read('subscription', [subId])) as { status: number; nextChargeAt: bigint; retryAt: bigint };
-    result.checked += 1;
+  // The most recent SCAN subscriptions, read in parallel.
+  const indexes: bigint[] = [];
+  for (let i = count; i > 0n && i > count - SCAN; i -= 1n) indexes.push(i - 1n);
+  const subs = await Promise.all(
+    indexes.map(async (i) => {
+      const subId = (await read('subscriptionIdAt', [i])) as Hex;
+      return { subId, s: (await read('subscription', [subId])) as { status: number; nextChargeAt: bigint; retryAt: bigint } };
+    }),
+  );
+  result.checked = subs.length;
+  for (const { subId, s } of subs) {
     if (Number(s.status) !== ACTIVE || now < BigInt(s.nextChargeAt) || now < BigInt(s.retryAt)) continue;
-    // eth_chainId before every send (CLAUDE.md).
-    if ((await w.publicClient.getChainId()) !== w.chain.id) throw new StartupError('the RPC is not on Whitechain');
-    let gas: bigint;
-    try {
-      const estimate = await w.publicClient.estimateContractGas({ ...c, functionName: 'renew', args: [subId], account: renewer });
-      gas = (estimate * 12n) / 10n > GAS_FLOOR ? (estimate * 12n) / 10n : GAS_FLOOR;
-    } catch {
-      result.skipped.push({ subId, reason: 'simulation failed' }); // renewed elsewhere, or no longer due
+    if (result.renewed.length >= PER_RUN || Date.now() - started > TIME_BUDGET_MS) {
+      result.skipped.push({ subId, reason: 'next run' });
       continue;
     }
-    const tx = await wallet.writeContract({ ...c, functionName: 'renew', args: [subId], account: renewer, chain: w.chain, gas });
-    result.renewed.push({ subId, tx });
+    try {
+      // eth_chainId before every send (CLAUDE.md).
+      if ((await w.publicClient.getChainId()) !== w.chain.id) throw new StartupError('the RPC is not on Whitechain');
+      const estimate = await w.publicClient.estimateContractGas({ ...c, functionName: 'renew', args: [subId], account: renewer });
+      const gas = (estimate * 12n) / 10n > GAS_FLOOR ? (estimate * 12n) / 10n : GAS_FLOOR;
+      const tx = await wallet.writeContract({ ...c, functionName: 'renew', args: [subId], account: renewer, chain: w.chain, gas });
+      result.renewed.push({ subId, tx });
+    } catch (e) {
+      // Renewed elsewhere, no longer due, or a nonce clash: the next run looks again.
+      result.skipped.push({ subId, reason: e instanceof StartupError ? e.message : 'send failed' });
+      if (e instanceof StartupError) break;
+    }
   }
   return result;
 }

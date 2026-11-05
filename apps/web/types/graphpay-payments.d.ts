@@ -42,5 +42,6 @@ declare module '@graphpay/ens' {
     ensGate(name: string, amountMicro: bigint): Promise<{ ok: boolean; reason?: string } & Record<string, unknown>>;
   }
   export function createEnsGate(options: { client: PublicClient; expectedEpoch?: unknown; policyCapMicro?: unknown; spentToday?: unknown; ttlMs?: number }): EnsGate;
+  export function retryingReads<T>(client: T, options?: { tries?: number; delayMs?: number }): T;
   export function createEnsReader(options: { client: PublicClient; ttlMs?: number }): { resolvePayee(shopName: string): Promise<{ ok: true; payee: `0x${string}` } | { ok: false; reason: string }> };
 }

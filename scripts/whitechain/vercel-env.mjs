@@ -40,6 +40,7 @@ const NAMES = [
   'RECORDER_TOKEN',
   'RENEWER_PRIVATE_KEY',
   'CRON_SECRET',
+  'W_DIRECTORY_PRIVATE_KEY', // the shop's quote writes on the 402 step (M7 amendment §5)
   ...shopKeys, // E-3: markDelivered after a payment and the passcode-gated merchant routes
 ];
 const missing = NAMES.filter((n) => !ctx.env[n]);

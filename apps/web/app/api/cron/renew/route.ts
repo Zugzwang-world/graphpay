@@ -1,6 +1,6 @@
 // The renewal cron (apps/web/vercel.json, every minute): Vercel sends CRON_SECRET as a bearer.
 import { bearerOk } from '@graphpay/facilitator';
-import { jsonNoStore, log } from '../../../../lib/payments.server.ts';
+import { jsonNoStore, log, reason } from '../../../../lib/payments.server.ts';
 import { renewDue } from '../../../../lib/renew.server.ts';
 
 export const runtime = 'nodejs';
@@ -12,7 +12,7 @@ export async function GET(request: Request): Promise<Response> {
   try {
     return jsonNoStore(200, await renewDue());
   } catch (e) {
-    log(`cron renew: ${(e as Error)?.name ?? 'Error'}`);
+    log(`cron renew: ${reason(e)}`); // a start-up check's name, or the error's name: never a message
     return jsonNoStore(503, { error: 'renewals unavailable' });
   }
 }
