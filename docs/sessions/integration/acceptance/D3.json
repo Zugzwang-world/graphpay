@@ -1,0 +1,92 @@
+{
+  "id": "D3",
+  "at": "2026-11-05T22:53:43.852Z",
+  "pass": true,
+  "what": "tallies recomputed from edges equal the stored tallies",
+  "measured": [
+    {
+      "ens": "kesar-kingdom.graphpay.eth",
+      "kind": "shop",
+      "epoch": 0,
+      "source": "RAW_VERIFIED",
+      "reputation": {
+        "orders": "250",
+        "refunds": "4",
+        "fails": "1",
+        "delivered": "245",
+        "paidUsdt": "1168.81",
+        "refundedUsdt": "15.2",
+        "source": "RAW_VERIFIED",
+        "synthetic": true
+      },
+      "stored": {
+        "orders": "250",
+        "refunds": "4",
+        "delivered": "245",
+        "onTime": "238",
+        "paidMicro": "1168810000",
+        "refundedMicro": "15200000",
+        "fails": "1",
+        "synthetic": true
+      },
+      "counted": {
+        "edges": 751,
+        "orders": "250",
+        "refunds": "4",
+        "delivered": "245",
+        "onTime": "238",
+        "paidMicro": "1168810000",
+        "refundedMicro": "15200000"
+      },
+      "recountMatches": true,
+      "explainId": "481d3731dbf6"
+    },
+    {
+      "ens": "acceptance.vitalik.graphpay.eth",
+      "kind": "agent",
+      "epoch": 0,
+      "source": "RAW_VERIFIED",
+      "reputation": {
+        "orders": "1",
+        "refunds": "0",
+        "fails": "0",
+        "delivered": "1",
+        "paidUsdt": "4.8",
+        "refundedUsdt": "0",
+        "source": "RAW_VERIFIED",
+        "synthetic": false
+      },
+      "stored": {
+        "orders": "1",
+        "refunds": "0",
+        "delivered": "1",
+        "onTime": "1",
+        "paidMicro": "4800000",
+        "refundedMicro": "0",
+        "fails": "0",
+        "synthetic": false
+      },
+      "counted": {
+        "edges": 3,
+        "orders": "1",
+        "refunds": "0",
+        "delivered": "1",
+        "onTime": "1",
+        "paidMicro": "4800000",
+        "refundedMicro": "0"
+      },
+      "recountMatches": true,
+      "explainId": "319ccfa4b1c6"
+    }
+  ],
+  "expected": {
+    "source": "RAW_VERIFIED",
+    "recount": "orders, refunds, paid and refunded equal the all-time tally"
+  },
+  "evidence": {
+    "explainIds": [
+      "481d3731dbf6",
+      "319ccfa4b1c6"
+    ]
+  }
+}

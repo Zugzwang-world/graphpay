@@ -1,0 +1,19 @@
+{
+  "id": "D6",
+  "at": "2026-11-05T22:53:52.819Z",
+  "pass": true,
+  "what": "benchmark at size S (calls exact; times recorded, not scored)",
+  "measured": [
+    "| Graph Arkiv Q2 reads | 2 | 2 | pass |",
+    "| plain Q2, one page at a time: ceil(R / 100), R = 490 | 5 | 5 | pass |",
+    "| plain Q2 in parallel: that + 1 (the count()) | 6 | 6, 6, 6, 6 | pass |",
+    "| Graph Arkiv correct (by identity) | every run | yes | pass |",
+    "| plain correct (by name) | every run | yes | pass |"
+  ],
+  "expected": "Graph Arkiv 2; plain ceil(R/100) sequential, +1 parallel",
+  "evidence": {
+    "file": "bench/BENCHMARK-LIVE.md",
+    "run": "2026-11-05T22:08:32.320Z",
+    "by": "T3, M9 (PR 31)"
+  }
+}

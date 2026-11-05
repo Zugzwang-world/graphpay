@@ -1,0 +1,18 @@
+{
+  "id": "D15",
+  "at": "2026-11-05T22:55:11.794Z",
+  "pass": null,
+  "what": "the mirror resumes after a sleep or a network drop (ADR-0056)",
+  "measured": {
+    "pass": true,
+    "events": 36,
+    "edgeEvents": 25,
+    "wrong": []
+  },
+  "expected": "count(edge where ref = id) = 1 for every edge event, 0 for the rest",
+  "evidence": {
+    "from": 12313887,
+    "to": 12322924
+  },
+  "why": "the drop and restart (03:27\u201303:30 IST) came before the first payment; every event since the deploy is mirrored exactly once (36 events, 25 edges), but no payment fell inside a drop yet"
+}

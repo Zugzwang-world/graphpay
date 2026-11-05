@@ -1,0 +1,32 @@
+{
+  "id": "B8",
+  "at": "2026-11-05T22:52:44.693Z",
+  "pass": true,
+  "what": "ENSIP-26 records exist and the MCP endpoint answers",
+  "measured": [
+    "pass B8 graphpay.eth agent-context",
+    "pass B8 graphpay.eth agent-endpoint[mcp] = https://graphpay-event.vercel.app/api/mcp",
+    "pass B8 graphpay.eth agent-endpoint[web] = https://graphpay-event.vercel.app",
+    "pass B8 concierge.vitalik.graphpay.eth agent-context and agent-endpoint[mcp]",
+    "pass B8 scout.vitalik.graphpay.eth agent-context and agent-endpoint[mcp]",
+    "pass B8 analyst.vitalik.graphpay.eth agent-context and agent-endpoint[mcp]",
+    "pass B8 payer.vitalik.graphpay.eth agent-context and agent-endpoint[mcp]",
+    "pass B8 rehearsal.vitalik.graphpay.eth agent-context and agent-endpoint[mcp]",
+    "pass B8 acceptance.vitalik.graphpay.eth agent-context and agent-endpoint[mcp]",
+    "pass B8 storefront.kesar-kingdom.graphpay.eth agent-context and agent-endpoint[mcp]",
+    "pass B8 risk.kesar-kingdom.graphpay.eth agent-context and agent-endpoint[mcp]",
+    "pass B8 dispatch.kesar-kingdom.graphpay.eth agent-context and agent-endpoint[mcp]",
+    "pass B8 storefront.jamun-junction.graphpay.eth agent-context and agent-endpoint[mcp]",
+    "pass B8 risk.jamun-junction.graphpay.eth agent-context and agent-endpoint[mcp]",
+    "pass B8 dispatch.jamun-junction.graphpay.eth agent-context and agent-endpoint[mcp]",
+    "pass B8 storefront.syrup-street.graphpay.eth agent-context and agent-endpoint[mcp]",
+    "pass B8 risk.syrup-street.graphpay.eth agent-context and agent-endpoint[mcp]",
+    "pass B8 dispatch.syrup-street.graphpay.eth agent-context and agent-endpoint[mcp]",
+    "pass B8 https://graphpay-event.vercel.app/api/mcp: initialize and tools/list = schema, ask, graphql, explain"
+  ],
+  "expected": "every line of scripts/ens/acceptance.mjs for this id passes",
+  "evidence": {
+    "script": "scripts/ens/acceptance.mjs",
+    "exit": 0
+  }
+}

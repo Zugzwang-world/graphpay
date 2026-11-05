@@ -1,0 +1,19 @@
+{
+  "id": "A6",
+  "at": "2026-11-05T22:50:47.934Z",
+  "pass": true,
+  "what": "`planning/` and the thinking-partner folder are in place",
+  "measured": {
+    "missing": []
+  },
+  "expected": "all present",
+  "evidence": {
+    "files": [
+      "planning/README.md",
+      "planning/ACCEPTANCE_TESTS.md",
+      "docs/thinking-partner/NOW.md",
+      "docs/thinking-partner/OPEN.md",
+      "docs/thinking-partner/LOG.md"
+    ]
+  }
+}

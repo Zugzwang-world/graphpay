@@ -1,0 +1,15 @@
+{
+  "id": "C1",
+  "at": "2026-11-05T22:52:45.975Z",
+  "pass": true,
+  "what": "the checkout is verified on the explorer",
+  "measured": {
+    "is_verified": true,
+    "is_fully_verified": false,
+    "name": "GraphPayCheckout"
+  },
+  "expected": "is_verified true",
+  "evidence": {
+    "url": "https://explorer.testnet.whitechain.io/address/0x75233b7341B9e86407e4b31599f07b8936716FcA?tab=contract"
+  }
+}
