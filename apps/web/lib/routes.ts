@@ -27,6 +27,7 @@ export const SITE_ROUTES: SiteRoute[] = [
   { method: 'POST', path: '/api/customer/kill-disposable', gate: 'passcode', does: 'provision, pay with and unregister a disposable agent', signs: 'the owner, the disposable agent, the relayer', waitingFor: 'M6 ENS kill switch' },
   { method: 'GET', path: '/api/merchant/events', gate: 'open', does: "stream the shop's new edges (SSE, polled from GraphQL)", signs: null, waitingFor: null },
   { method: 'POST', path: '/api/merchant/dispatch', gate: 'passcode', does: 'mark the order delivered', signs: 'the merchant', waitingFor: 'M4 checkout' },
+  { method: 'POST', path: '/api/merchant/open', gate: 'passcode', does: "list the shop as open on Arkiv (renewed every 5 min while on) or take it off", signs: 'W_DIRECTORY (Arkiv)', waitingFor: 'the W_DIRECTORY key on this server (the Coordinator sets it in Vercel)' },
   { method: 'POST', path: '/api/merchant/refund', gate: 'passcode', does: 'partial or full refund', signs: 'the merchant', waitingFor: 'M4 checkout' },
   { method: 'GET', path: '/api/merchant/export.csv', gate: 'open', does: "the accountant's CSV from GraphQL", signs: null, waitingFor: null },
   { method: 'GET', path: '/api/race', gate: 'rate limit', does: 'one side of the race, live and uncached (SSE)', signs: null, waitingFor: null },

@@ -17,6 +17,9 @@ importers:
 
   apps/web:
     dependencies:
+      '@graphpay/arkiv-graph':
+        specifier: workspace:*
+        version: link:../../packages/arkiv-graph
       '@graphpay/city':
         specifier: workspace:*
         version: link:../../packages/city

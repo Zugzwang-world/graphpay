@@ -2,6 +2,11 @@
 
 Working notes; deviations from `planning/WEBSITE_SPEC.md` and why. Newest first.
 
+## Open toggle (`web/open-toggle`)
+
+- `POST /api/merchant/open` `{ on }`: passcode first, then 503 "not live yet" if `W_DIRECTORY_PRIVATE_KEY` is not in the server env, then `openShop`/`closeShop` from `@graphpay/money-graph` on one cached W_DIRECTORY connection per instance (`lib/open-toggle.server.ts`). The shop key is `identityKey(nodeOf(ens), epoch)` with the epoch from GraphQL `node(ens)`. Close resolves the row through `openShop` (query-before-create) then closes it; no write if the shop is not currently open.
+- The renewal is client-driven (every 5 minutes while the page is open); a closed tab lapses within 15 minutes.
+
 ## Race mode (`web/race`)
 
 - `/api/race` calls T3's `raceQuestion` per request on a new connection (`lib/race.server.ts`); truth and params from `@graphpay/city` (`generateCity` with `SEEDED_END`, a constant: the seeded city's end day, `2026-11-05`; update on a re-seed). One race per side per instance; `size` other than S is refused (ADR-0049).
