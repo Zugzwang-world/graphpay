@@ -68,7 +68,11 @@ export function fakeChain(account, overrides = {}) {
     balance: 800_000_000_000_000_000n,
     receipt: { status: 'success', fee: 330_000n * 5_000_000_001n },
     outcome: { settled: true },
-    async verifyTypedData() {
+    code: undefined, // an EOA without a delegation
+    async getCode() {
+      return chain.code;
+    },
+    async isValidSignature() {
       return false;
     },
     async readState() {
@@ -123,7 +127,7 @@ export async function signedPayment(account, order, { payerName = AGENT_NAME, al
       return functionName === 'allowance' ? allowance : tokenNonce;
     },
   };
-  const client = graphPayOrderClient({ account, publicClient, chainId: CHAIN_ID, token: TOKEN, permit2: PERMIT2, payerName, mandateHash: keccak256(toHex('mandate')), now: () => T0 });
+  const client = graphPayOrderClient({ account, publicClient, chainId: CHAIN_ID, token: TOKEN, permit2: PERMIT2, checkout: CHECKOUT, payerName, mandateHash: keccak256(toHex('mandate')), now: () => T0 });
   const req = requirementFor(order);
   const { payload } = await client.createPaymentPayload(2, req);
   return { paymentPayload: { x402Version: 2, resource: { url: 'https://shop.example/orders/1/pay' }, accepted: req, payload }, requirement: req };

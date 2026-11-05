@@ -78,6 +78,7 @@ function payerClient(account) {
     chainId: CHAIN_ID,
     token: TOKEN,
     permit2: PERMIT2,
+    checkout: CHECKOUT,
     payerName: PAYER,
     mandateHash: keccak256(toHex('mandate')),
     now: () => T0,
@@ -204,6 +205,13 @@ test('the payee must be what ENS resolves for the shop: otherwise 503 and no 402
   clock += 20_000;
   answer = async () => null;
   assert.equal((await post(w.handle, q.payUrl, q.terms)).status, 503);
+  // T2's reader shape (packages/ens createEnsReader).
+  clock += 20_000;
+  answer = async () => ({ ok: false, reason: 'PAYEE_UNRESOLVED', detail: 'no address record' });
+  assert.equal((await post(w.handle, q.payUrl, q.terms)).status, 503);
+  clock += 20_000;
+  answer = async () => ({ ok: true, payee: MERCHANT, name: SHOP.ensName });
+  assert.equal((await post(w.handle, q.payUrl, q.terms)).status, 402);
 });
 
 test('with a requestId the 402 step writes the quote first and carries its key; a failed write is 503', async () => {
@@ -216,6 +224,13 @@ test('with a requestId the 402 step writes the quote first and carries its key; 
   const [req] = (await res.json()).accepts;
   assert.equal(req.extra.quoteKey, keccak256(toHex('quote key')));
   assert.deepEqual(writes, [{ requestId, shopName: SHOP.ensName, agentEns: PAYER, priceMicro: BigInt(story.order.priceMicro), validUntil: q.validUntil }]);
+
+  // Quote writes are bounded per instance.
+  const many = world({ createQuote: async () => ({ entityKey: keccak256(toHex('k')) }) });
+  const mq = await quoteFor(many);
+  const statuses = [];
+  for (let i = 0; i < 31; i++) statuses.push((await post(many.handle, mq.payUrl, { ...mq.terms, requestId })).status);
+  assert.deepEqual([statuses.at(0), statuses.at(-1)], [402, 429]);
 
   const failing = world({ createQuote: async () => { throw new Error('nonce clash'); } });
   const fq = await quoteFor(failing);
@@ -319,6 +334,8 @@ test('a facilitator outage is 502 (retry is safe); refusals and failures are 402
   const p = await post(slow.handle, q.payUrl, q.terms, { signature });
   assert.equal(p.status, 504, 'not a 4xx: the agent must treat it as unsettled');
   assert.equal((await p.json()).status, 'pending');
+  const busy = world({ facilitator: { verify: async () => ({ isValid: true }), settle: async () => ({ success: false, errorReason: 'in_flight', transaction: '', network: NETWORK }) } });
+  assert.equal((await post(busy.handle, q.payUrl, q.terms, { signature })).status, 503);
 
   assert.equal((await post(base.handle, q.payUrl, q.terms, { signature: { 'PAYMENT-SIGNATURE': '%%%' } })).status, 400);
 });

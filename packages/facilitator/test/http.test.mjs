@@ -46,7 +46,7 @@ test('x402Client with spend controls signs a graphpay-order payment our facilita
   const chain = fakeChain(account);
   const { handle } = service({ chain });
   const publicClient = { readContract: async ({ functionName }) => (functionName === 'allowance' ? 0n : 0n) };
-  const scheme = graphPayOrderClient({ account, publicClient, chainId: CHAIN_ID, token: TOKEN, permit2: PERMIT2, payerName: AGENT_NAME, mandateHash: keccak256(toHex('m')), now: () => T0 });
+  const scheme = graphPayOrderClient({ account, publicClient, chainId: CHAIN_ID, token: TOKEN, permit2: PERMIT2, checkout: CHECKOUT, payerName: AGENT_NAME, mandateHash: keccak256(toHex('m')), now: () => T0 });
   const order = makeOrder();
   const paymentRequired = { x402Version: 2, resource: { url: 'https://shop.example/api/shop/orders/1/pay' }, accepts: [requirementFor(order)] };
 
@@ -214,7 +214,7 @@ const entry = (over = {}) => ({
 test('a refusal becomes one fail edge with a unique ref and the wallet on the record', () => {
   const e = attemptEdge(entry());
   assert.equal(e.kind, 'fail');
-  assert.equal(e.ref, `att:${makeOrder().orderId}:0x00000000000000000000000000000000000000aa:${T0}`);
+  assert.equal(e.ref, `att:${makeOrder().orderId}:0x00000000000000000000000000000000000000aa:CAP_EXCEEDED`);
   assert.deepEqual(e.from, { ens: AGENT_NAME, epoch: 2 });
   assert.deepEqual(e.to, { ens: 'shop.graphpay.eth', epoch: 0 });
   assert.equal(e.amountMicro, 4_800_000n);
@@ -240,7 +240,14 @@ test('the recorder route: bearer, 503 until the writer exists, strict schema, 20
   assert.equal(ok.status, 201);
   assert.deepEqual(await ok.json(), { entityKey: '0x01', txHash: '0x02', recovered: false });
   assert.equal(written.length, 1);
-  for (const bad of [entry({ onchain: true }), entry({ reason: 'has spaces' }), entry({ extra: 1 }), entry({ amountMicro: '-1' })]) {
+  for (const bad of [
+    entry({ onchain: true }),
+    entry({ reason: 'has spaces' }),
+    entry({ extra: 1 }),
+    entry({ amountMicro: '-1' }),
+    entry({ payerName: 'someone-else.graphpay.eth' }), // the name is not the node
+    entry({ payerNode: ZERO32 }), // unattributed, but a name given
+  ]) {
     assert.equal((await call(on, bad)).status, 400);
   }
   assert.equal((await on(new Request('https://site.example/api/recorder/requests', { method: 'POST' }))).status, 404);
@@ -295,10 +302,12 @@ test('startupChecks: chain id, the checkout token, the token domain, the ENS cha
 
 test('the client refuses a requirement for another token or network', async () => {
   const account = newAccount();
-  const client = graphPayOrderClient({ account, publicClient: { readContract: async () => 0n }, chainId: CHAIN_ID, token: TOKEN, permit2: PERMIT2, payerName: AGENT_NAME, mandateHash: keccak256(toHex('m')) });
+  const client = graphPayOrderClient({ account, publicClient: { readContract: async () => 0n }, chainId: CHAIN_ID, token: TOKEN, permit2: PERMIT2, checkout: CHECKOUT, payerName: AGENT_NAME, mandateHash: keccak256(toHex('m')) });
   const req = requirementFor(makeOrder());
   await assert.rejects(client.createPaymentPayload(2, { ...req, asset: `0x${'1'.repeat(40)}` }), /another token/);
   await assert.rejects(client.createPaymentPayload(2, { ...req, network: 'eip155:1' }), /another network/);
   await assert.rejects(client.createPaymentPayload(2, { ...req, amount: '1' }), /does not match/);
+  await assert.rejects(client.createPaymentPayload(2, { ...req, extra: { ...req.extra, contract: `0x${'2'.repeat(40)}` } }), /another contract/);
+  assert.throws(() => graphPayOrderClient({ account, publicClient: {}, chainId: CHAIN_ID, token: TOKEN, permit2: PERMIT2, payerName: '', mandateHash: keccak256(toHex('m')) }), /checkout/);
   assert.equal(namehash(AGENT_NAME), AGENT_NODE);
 });

@@ -13,8 +13,10 @@ const noncesAbi = parseAbi(['function nonces(address owner) view returns (uint25
 
 // account: a viem local account (the payer's key never leaves it). publicClient reads the
 // payer's allowance and token nonce. token: the config entry ({ address, eip712 }).
+// checkout: our contract from the config (a 402 naming another is refused before anything is signed).
 // payerName: the paying agent's ENS name ('' for a human); mandateHash: the human's intent.
-export function graphPayOrderClient({ account, publicClient, chainId, token, permit2, payerName, mandateHash, approvalMicro = DEFAULT_APPROVAL_MICRO, now = () => Date.now() }) {
+export function graphPayOrderClient({ account, publicClient, chainId, token, permit2, checkout, payerName, mandateHash, approvalMicro = DEFAULT_APPROVAL_MICRO, now = () => Date.now() }) {
+  if (!checkout) throw new Error('graphpay-order: the client needs the configured checkout');
   return {
     scheme: SCHEME,
     // context.maxAmountPerPayment: x402Client's resolved spend cap for this asset (atomic units).
@@ -30,7 +32,7 @@ export function graphPayOrderClient({ account, publicClient, chainId, token, per
       if (order.amountMicro !== amount || !isAddressEqual(order.merchant, req.payTo)) {
         throw new Error('graphpay-order: the order does not match the requirement');
       }
-      const checkout = getAddress(req.extra.contract);
+      if (!isAddressEqual(req.extra.contract, checkout)) throw new Error('graphpay-order: the requirement names another contract');
       const permit = { token: getAddress(req.asset), amount, nonce: BigInt(order.orderId), deadline: order.deadline };
       const signature = await account.signTypedData({
         domain: permit2Domain(chainId, permit2),
@@ -38,7 +40,7 @@ export function graphPayOrderClient({ account, publicClient, chainId, token, per
         primaryType: 'PermitWitnessTransferFrom',
         message: {
           permitted: { token: permit.token, amount },
-          spender: checkout,
+          spender: getAddress(checkout),
           nonce: permit.nonce,
           deadline: permit.deadline,
           witness: { ...order, mandateHash },

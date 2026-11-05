@@ -10,7 +10,7 @@
 //   5. limits checked at send time and consumed only when everything passed.
 // `settle` repeats 1–4, runs one at a time through a queue, and decides from the receipt.
 
-import { isAddressEqual, isHex, keccak256, encodeAbiParameters, namehash, recoverTypedDataAddress, decodeAbiParameters } from 'viem';
+import { isAddressEqual, keccak256, encodeAbiParameters, hashTypedData, namehash, recoverAddress, decodeAbiParameters } from 'viem';
 import { FAIL_REASON, eip2612Types, permit2Domain, permitWitnessTypes, tokenDomain } from '@graphpay/contracts';
 import { SCHEME, X402_VERSION, fromWireOrder, paymentPayloadSchema, requirementSchema, sameOrder } from './wire.mjs';
 import { DailyCounter, RateLimiter } from './limits.mjs';
@@ -18,6 +18,11 @@ import { DailyCounter, RateLimiter } from './limits.mjs';
 const ZERO32 = `0x${'0'.repeat(64)}`;
 const RENEWAL_BIT = 1n << 255n;
 const ERC6492_SUFFIX = '6492649264926492649264926492649264926492649264926492649264926492';
+const ERC8010_SUFFIX = '8010801080108010801080108010801080108010801080108010801080108010';
+const SECP256K1_HALF_N = 0x7fffffffffffffffffffffffffffffff5d576e7357a4501ddfe92f46681b20a0n;
+const INFLIGHT_MS = 10 * 60_000; // a sent order's hash is kept this long (the longest quote)
+const UNKNOWN_SEND_MS = 60_000; // a send that errored may still have been broadcast
+const RECORD_DEDUPE_MS = 15 * 60_000;
 const STATUS = ['NONE', 'CREATED', 'PAID', 'DELIVERED', 'CANCELLED', 'REFUNDED'];
 const POLICY_REFUSALS = new Set(['AGENT_REVOKED', 'AGENT_EXPIRED', 'SPEND_CAP']);
 const ORDER_TUPLE = [
@@ -50,6 +55,7 @@ export const DEFAULT_LIMITS = Object.freeze({
   queueDepth: 20,
   gateTtlMs: 20_000,
   recordsPerPayerPerMinute: 6,
+  recordsPerMinute: 30,
 });
 
 // keccak256(abi.encode(Order)): the contract's termsHash.
@@ -80,6 +86,18 @@ export function predictPolicy({ payerNode, bound, policy, spentToday, amount, no
   return 'NONE';
 }
 
+// A wallet without code, as Permit2's SignatureVerification reads it: exactly 65 bytes with v 27 or
+// 28, recovered by ecrecover. (Permit2 also takes EIP-2098's 64 bytes; our client never signs them,
+// so they are refused here, which is safe.) viem's own helpers are more lenient (v 0 or 1, ERC-6492,
+// ERC-8010 unwrapping), so they are not the rule. Returns the signer or null.
+async function eoaSigner(hash, sig, { lowS = false } = {}) {
+  if (!/^0x[0-9a-f]{130}$/.test(sig)) return null;
+  const v = Number.parseInt(sig.slice(130), 16);
+  if (v !== 27 && v !== 28) return null;
+  if (lowS && BigInt(`0x${sig.slice(66, 130)}`) > SECP256K1_HALF_N) return null;
+  return recoverAddress({ hash, signature: sig }).catch(() => null);
+}
+
 // deps: { chainId, token, permit2, checkout, allowedMerchants, chain, ensGate, recorder, limits, clock }
 //   chain: the adapter in chain.mjs (real) or a fake (tests); ensGate(name, amountMicro): T2's gate;
 //   recorder.refused(record): posts an off-chain refusal record, never throws, never awaited.
@@ -94,8 +112,12 @@ export function createGraphPayFacilitator(deps) {
     payee: new RateLimiter(limits.perPayeePerMinute, 60_000, clock),
     records: new RateLimiter(limits.recordsPerPayerPerMinute, 60_000, clock),
   };
+  rate.recordsAll = new RateLimiter(limits.recordsPerMinute, 60_000, clock);
   const recordedFailures = new DailyCounter(clock);
+  const recordedOrders = new Map(); // order id -> day: a deliberate on-chain failure at most once per order
   const gasSpent = new DailyCounter(clock);
+  const inflight = new Map(); // order id -> { hash | null, at }: sent, not yet decided
+  const recent = new Map(); // record key -> at: one refusal record per order, payer and reason
   const gateCache = new Map(); // exact spelling and amount -> { at, result }
   let queue = Promise.resolve();
   let queued = 0;
@@ -138,13 +160,17 @@ export function createGraphPayFacilitator(deps) {
       refuse('requirement_mismatch');
     }
     const nowMs = clock();
-    if (order.deadline * 1000n <= BigInt(nowMs)) refuse('EXPIRED');
+    // The transaction must land before the deadline, or the contract records EXPIRED.
+    if (order.deadline * 1000n <= BigInt(nowMs + limits.receiptTimeoutMs)) refuse('EXPIRED');
     const agent = order.payerNode !== ZERO32;
     if (agent ? namehash(payload.payerName) !== order.payerNode : payload.payerName !== '') refuse('name_mismatch');
 
-    // 2. The payer's signature, before anything costly.
-    const sig = payload.signature;
-    if (sig.toLowerCase().endsWith(ERC6492_SUFFIX)) refuse('erc6492_refused');
+    // 2. The payer's signature, before anything costly, by Permit2's rule: a wallet without code is
+    // checked by ecrecover; a wallet with code (a contract, or an EOA with an EIP-7702 delegation)
+    // is asked isValidSignature with the bytes as they are, never unwrapped.
+    const sig = payload.signature.toLowerCase();
+    if (sig.endsWith(ERC6492_SUFFIX)) refuse('erc6492_refused');
+    if (sig.endsWith(ERC8010_SUFFIX)) refuse('erc8010_refused');
     const typedData = {
       domain: permit2Domain(deps.chainId, deps.permit2),
       types: permitWitnessTypes,
@@ -157,18 +183,19 @@ export function createGraphPayFacilitator(deps) {
         witness: { ...order, mandateHash: payload.mandateHash },
       },
     };
-    let signer;
-    if (sig.length === 132) {
-      signer = await recoverTypedDataAddress({ ...typedData, signature: sig }).catch(() => null);
-      if (!signer || !isAddressEqual(signer, payload.payer)) refuse('bad_signature');
-    } else if (!(await deps.chain.verifyTypedData(payload.payer, typedData, sig))) {
-      refuse('bad_signature');
-    }
-    const ctx = { order, req, payload, payer: payload.payer, amount: order.amountMicro, nowMs };
+    const digest = hashTypedData(typedData);
+    const local = await eoaSigner(digest, sig);
+    const code = await deps.chain.getCode(payload.payer);
+    const hasCode = typeof code === 'string' && code !== '0x';
+    const valid = hasCode ? await deps.chain.isValidSignature(payload.payer, digest, sig) : Boolean(local && isAddressEqual(local, payload.payer));
+    if (!valid) refuse('bad_signature');
+    const ctx = { order, req, payload, payer: payload.payer, amount: order.amountMicro, nowMs, hasCode };
+    let gateEpoch;
     if (agent) {
       const verdict = await gate(payload.payerName, order.amountMicro);
-      if (Number.isInteger(verdict.epoch)) ctx.epoch = verdict.epoch;
-      if (!verdict.ok) refuse(verdict.reason ?? 'ENS_READ_FAILED', { record: true, ctx });
+      if (Number.isInteger(verdict.epoch)) ctx.epoch = gateEpoch = verdict.epoch;
+      // Our own read failure is no verdict on the agent: refused, never recorded.
+      if (!verdict.ok) refuse(verdict.reason ?? 'ENS_READ_FAILED', { record: verdict.reason !== undefined && verdict.reason !== 'ENS_READ_FAILED', ctx });
       if (String(verdict.node).toLowerCase() !== order.payerNode) refuse('ENS_NODE_MISMATCH', { record: true, ctx });
     }
 
@@ -176,12 +203,14 @@ export function createGraphPayFacilitator(deps) {
     const state = await deps.chain.readState({ order, payer: payload.payer });
     ctx.bound = state.bound.toLowerCase();
     ctx.epoch ??= state.policy.epoch;
+    // The name's ENS epoch must be the policy's (a killed and re-registered name is a new agent).
+    if (agent && gateEpoch !== undefined && gateEpoch !== state.policy.epoch) refuse('ENS_EPOCH_MISMATCH', { record: true, ctx });
     const status = STATUS[state.order.status];
-    if (status === 'CREATED' && state.order.termsHash !== termsHashOf(order)) refuse('terms_mismatch', { record: true, ctx });
+    if (status === 'CREATED' && state.order.termsHash !== termsHashOf(order)) refuse('terms_mismatch', { ctx });
     if (status !== 'NONE' && status !== 'CREATED') refuse(status === 'CANCELLED' ? 'order_cancelled' : 'already_paid', { ctx });
     if (state.nonceUsed) refuse('nonce_used', { record: true, ctx });
     if (state.balance < order.amountMicro) refuse('insufficient_balance', { record: true, ctx });
-    if (state.allowance < order.amountMicro && !(await approvalWillApply(payload, order.amountMicro, state, nowMs))) {
+    if (state.allowance < order.amountMicro && !(await approvalWillApply(payload, order.amountMicro, state, nowMs, hasCode))) {
       refuse('approval_invalid', { record: true, ctx });
     }
     const predicted = predictPolicy({
@@ -195,26 +224,28 @@ export function createGraphPayFacilitator(deps) {
     // 4. Send only if all pass. NODE_MISMATCH would write failures against someone else's name.
     if (predicted === 'NODE_MISMATCH') refuse('NODE_MISMATCH', { record: true, ctx });
     if (POLICY_REFUSALS.has(predicted)) {
-      if (recordedFailures.value() >= limits.recordedFailuresPerDay) refuse(predicted, { record: true, ctx });
+      const today = Math.floor(clock() / 86_400_000);
+      if (recordedFailures.value() >= limits.recordedFailuresPerDay || recordedOrders.get(order.orderId) === today) refuse(predicted, { record: true, ctx });
       return { ...ctx, action: 'record', predicted };
     }
     return { ...ctx, action: 'settle', predicted };
   }
 
-  // An included EIP-2612 approval counts only if it will really apply.
-  async function approvalWillApply(payload, amount, state, nowMs) {
-    if (payload.approvalPermit === '0x') return false;
+  // An included EIP-2612 approval counts only if it will really apply: 65 bytes, v 27 or 28 and a
+  // low s (the token's ECDSA check), from a wallet without code, against the token's current nonce.
+  async function approvalWillApply(payload, amount, state, nowMs, hasCode) {
+    if (payload.approvalPermit === '0x' || hasCode) return false;
     try {
       const [value, deadline, signature] = decodeAbiParameters([{ type: 'uint256' }, { type: 'uint256' }, { type: 'bytes' }], payload.approvalPermit);
-      if (value < amount || deadline * 1000n <= BigInt(nowMs) || !isHex(signature) || signature.length !== 132) return false;
-      const owner = await recoverTypedDataAddress({
+      if (value < amount || deadline * 1000n <= BigInt(nowMs + limits.receiptTimeoutMs)) return false;
+      const hash = hashTypedData({
         domain: tokenDomain(deps.chainId, deps.token),
         types: eip2612Types,
         primaryType: 'Permit',
         message: { owner: payload.payer, spender: deps.permit2, value, nonce: state.tokenNonce, deadline },
-        signature,
       });
-      return isAddressEqual(owner, payload.payer);
+      const owner = await eoaSigner(hash, signature.toLowerCase(), { lowS: true });
+      return Boolean(owner && isAddressEqual(owner, payload.payer));
     } catch {
       return false;
     }
@@ -226,7 +257,12 @@ export function createGraphPayFacilitator(deps) {
   function record(refusal) {
     const { ctx } = refusal;
     if (!refusal.record || !ctx || !deps.recorder) return;
-    if (!rate.records.take(ctx.payer.toLowerCase())) return;
+    const key = `${ctx.order.orderId}:${ctx.payer.toLowerCase()}:${refusal.reason}`;
+    const now = clock();
+    if (now - (recent.get(key) ?? -Infinity) < RECORD_DEDUPE_MS) return; // a replayed payload adds nothing
+    if (!rate.records.take(ctx.payer.toLowerCase()) || !rate.recordsAll.take('all')) return;
+    recent.set(key, now);
+    if (recent.size > 2000) for (const [k, at] of recent) if (now - at >= RECORD_DEDUPE_MS || recent.size > 2000) recent.delete(k);
     Promise.resolve()
       .then(async () => {
         const bound = ctx.bound ?? String(await deps.chain.nodeOfWallet(ctx.payer)).toLowerCase();
@@ -268,6 +304,13 @@ export function createGraphPayFacilitator(deps) {
     let ctx;
     try {
       ctx = await check(paymentPayload, paymentRequirements);
+      // An order sent and not yet decided (a receipt timeout, or a send that errored and may have
+      // been broadcast): wait on that transaction, never send a second one.
+      const prior = inflight.get(ctx.order.orderId);
+      if (prior && clock() - prior.at < (prior.hash ? INFLIGHT_MS : UNKNOWN_SEND_MS)) {
+        if (!prior.hash) return { success: false, errorReason: 'in_flight', transaction: '', network, payer: ctx.payer };
+        return await decide(ctx, prior.hash, prior.reserve);
+      }
       // 5. Limits at send time: checked first, consumed only when everything passed.
       const payerKey = ctx.payer.toLowerCase();
       const payeeKey = ctx.req.payTo.toLowerCase();
@@ -287,22 +330,40 @@ export function createGraphPayFacilitator(deps) {
       rate.global.take('all');
       rate.payer.take(payerKey);
       rate.payee.take(payeeKey);
-      if (ctx.action === 'record') recordedFailures.add(1);
+      if (ctx.action === 'record') {
+        recordedFailures.add(1);
+        keep(recordedOrders, ctx.order.orderId, Math.floor(clock() / 86_400_000));
+      }
       gasSpent.add(reserve);
+      keep(inflight, ctx.order.orderId, { hash: null, at: clock(), reserve });
       const hash = await deps.chain.sendSettle(args, gas);
-      const receipt = await deps.chain.waitReceipt(hash, limits.receiptTimeoutMs);
-      if (!receipt) return { success: false, errorReason: 'receipt_timeout', transaction: hash, network, payer: ctx.payer };
-      gasSpent.add(receipt.fee - reserve); // correct the reservation from the receipt
-      const outcome = deps.chain.outcomeOf(receipt, ctx.order.orderId);
-      if (outcome.settled) return { success: true, transaction: hash, network, payer: ctx.payer, amount: String(ctx.amount) };
-      const reason = outcome.failReason !== undefined ? FAIL_REASON[outcome.failReason] : 'reverted';
-      return { success: false, errorReason: reason, transaction: hash, network, payer: ctx.payer };
+      keep(inflight, ctx.order.orderId, { hash, at: clock(), reserve });
+      return await decide(ctx, hash, reserve);
     } catch (e) {
       if (!(e instanceof Refusal)) throw e;
       e.ctx = e.ctx ?? ctx;
       record(e);
       return { success: false, errorReason: e.reason, transaction: '', network, payer: e.ctx?.payer };
     }
+  }
+
+  // The verdict comes from the receipt; without one the payment is undecided and stays in flight.
+  async function decide(ctx, hash, reserve) {
+    const receipt = await deps.chain.waitReceipt(hash, limits.receiptTimeoutMs);
+    if (!receipt) return { success: false, errorReason: 'receipt_timeout', transaction: hash, network, payer: ctx.payer };
+    inflight.delete(ctx.order.orderId);
+    gasSpent.add(receipt.fee - reserve); // correct the reservation from the receipt
+    const outcome = deps.chain.outcomeOf(receipt, ctx.order.orderId);
+    if (outcome.settled) return { success: true, transaction: hash, network, payer: ctx.payer, amount: String(ctx.amount) };
+    const reason = outcome.failReason !== undefined ? FAIL_REASON[outcome.failReason] : 'reverted';
+    return { success: false, errorReason: reason, transaction: hash, network, payer: ctx.payer };
+  }
+
+  // Bounded per-instance maps: the oldest entry goes first.
+  function keep(map, key, value) {
+    map.delete(key);
+    map.set(key, value);
+    if (map.size > 1000) map.delete(map.keys().next().value);
   }
 
   function permitOf(ctx) {

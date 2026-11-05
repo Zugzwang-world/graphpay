@@ -5,7 +5,7 @@
 // bound to that node; otherwise it is written from the wallet's own reverse name.
 
 import { z } from 'zod';
-import { toHex } from 'viem';
+import { namehash, toHex } from 'viem';
 import { bearerOk, json, readJson } from './http.mjs';
 import { RateLimiter } from './limits.mjs';
 
@@ -27,7 +27,18 @@ export const attemptSchema = z
     at: z.number().int().positive(),
     test: z.boolean().optional(),
   })
-  .strict();
+  .strict()
+  // Attributed means the name hashes to the node (the facilitator checked the wallet's binding;
+  // the mirror checks it again); unattributed means both are empty.
+  .refine((e) => (e.payerNode === ZERO32 ? e.payerName === '' && e.payerEpoch === undefined : safeNamehash(e.payerName) === e.payerNode.toLowerCase()), 'attribution');
+
+function safeNamehash(name) {
+  try {
+    return namehash(name);
+  } catch {
+    return null;
+  }
+}
 
 // The facilitator's side: fire and forget, with a timeout; an outage never blocks a decision.
 export function recorderClient({ url, token, fetchImpl = fetch, timeoutMs = 5_000 }) {
@@ -45,13 +56,14 @@ export function recorderClient({ url, token, fetchImpl = fetch, timeoutMs = 5_00
   };
 }
 
-// The edge T3's recordEdge writes. ref = att:<orderId>:<payer wallet>:<ms>, so the signing wallet
-// is always on the record (Join's mirror reads it from the ref and the payload).
+// The edge T3's recordEdge writes. ref = att:<orderId>:<payer wallet>:<reason>, so the signing
+// wallet is always on the record (Join's mirror reads it from the ref and the payload) and a
+// replayed refusal is the same edge, which readers and the reconcile job de-duplicate by ref.
 export function attemptEdge(entry) {
   const payer = entry.payer.toLowerCase();
   const attributed = entry.payerNode !== ZERO32 && entry.payerName !== '';
   return {
-    ref: `att:${entry.orderId.toLowerCase()}:${payer}:${entry.at}`,
+    ref: `att:${entry.orderId.toLowerCase()}:${payer}:${entry.reason}`,
     kind: 'fail',
     from: attributed ? { ens: entry.payerName, epoch: entry.payerEpoch ?? 0 } : { ens: `${payer.slice(2)}.addr.reverse`, epoch: 0 },
     to: { ens: entry.shopName, epoch: 0 },

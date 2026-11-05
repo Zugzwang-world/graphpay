@@ -4,7 +4,7 @@
 
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { encodeAbiParameters, keccak256, namehash, toHex } from 'viem';
+import { decodeAbiParameters, encodeAbiParameters, keccak256, namehash, toHex } from 'viem';
 import { eip2612Types, tokenDomain } from '@graphpay/contracts';
 import {
   AGENT_NAME,
@@ -230,24 +230,59 @@ test('a signature by someone else is refused before any chain read', async () =>
   assert.equal(s.recorder.records.length, 0, 'an unproven payer gets no record');
 });
 
-test('an ERC-6492 wrapped signature is refused without a call', async () => {
+test('wrapped signatures (ERC-6492, ERC-8010) are refused without a call', async () => {
   const s = await setup();
   let calls = 0;
-  s.chain.verifyTypedData = async () => (calls++, true);
-  const wrapped = structuredClone(s.paymentPayload);
-  wrapped.payload.signature = `0x${'00'.repeat(96)}${'6492'.repeat(16)}`;
-  await expectRefused(s.f, s.chain, { paymentPayload: wrapped, requirement: s.requirement }, 'erc6492_refused');
+  s.chain.isValidSignature = async () => (calls++, true);
+  for (const [suffix, reason] of [
+    ['6492'.repeat(16), 'erc6492_refused'],
+    ['8010'.repeat(16), 'erc8010_refused'],
+  ]) {
+    const wrapped = structuredClone(s.paymentPayload);
+    wrapped.payload.signature = `0x${'00'.repeat(96)}${suffix}`;
+    await expectRefused(s.f, s.chain, { paymentPayload: wrapped, requirement: s.requirement }, reason);
+  }
   assert.equal(calls, 0);
 });
 
-test('a non-65-byte signature goes to ERC-1271 and is refused when the wallet says no', async () => {
+test("Permit2's rule for a wallet without code: 65 bytes, v 27 or 28; anything else is never sent", async () => {
   const s = await setup();
+  let calls = 0;
+  s.chain.isValidSignature = async () => (calls++, true);
+  const sig = s.paymentPayload.payload.signature;
+  const v = sig.slice(-2);
+  assert.ok(v === '1b' || v === '1c');
+  // viem accepts v 0 or 1 as 27 or 28; Permit2's ecrecover does not.
+  for (const bad of [`${sig.slice(0, -2)}${v === '1b' ? '00' : '01'}`, `${sig.slice(0, -2)}1d`, sig.slice(0, -2), `0x${'11'.repeat(80)}`]) {
+    const p = structuredClone(s.paymentPayload);
+    p.payload.signature = bad;
+    await expectRefused(s.f, s.chain, { paymentPayload: p, requirement: s.requirement }, 'bad_signature');
+  }
+  assert.equal(calls, 0, 'a wallet without code is never asked isValidSignature');
+  const upper = structuredClone(s.paymentPayload);
+  upper.payload.signature = `0x${sig.slice(2).toUpperCase()}`;
+  assert.equal((await s.f.verify(upper, s.requirement)).isValid, true, 'hex case does not matter');
+});
+
+test('a wallet with code (a contract, or an EOA with an EIP-7702 delegation) is asked isValidSignature with the bytes as they are', async () => {
+  const s = await setup();
+  s.chain.code = '0xef0100' + '11'.repeat(20); // a 7702 delegation designator
+  s.chain.state.allowance = 50_000_000n; // a wallet with code gets no gasless approval
   const seen = [];
-  s.chain.verifyTypedData = async (address) => (seen.push(address), false);
-  const contractSig = structuredClone(s.paymentPayload);
-  contractSig.payload.signature = `0x${'11'.repeat(80)}`;
-  await expectRefused(s.f, s.chain, { paymentPayload: contractSig, requirement: s.requirement }, 'bad_signature');
-  assert.equal(seen[0], s.account.address);
+  let answer = false;
+  s.chain.isValidSignature = async (address, hash, sig) => (seen.push({ address, hash, sig }), answer);
+  // The EOA signature recovers locally, but Permit2 would ask the delegate: so do we.
+  await expectRefused(s.f, s.chain, s, 'bad_signature');
+  assert.equal(seen[0].address, s.account.address);
+  assert.equal(seen[0].sig, s.paymentPayload.payload.signature.toLowerCase());
+  assert.match(seen[0].hash, /^0x[0-9a-f]{64}$/);
+  answer = true;
+  assert.equal((await s.f.settle(s.paymentPayload, s.requirement)).success, true);
+  // An approval from a wallet with code is never counted.
+  s.chain.state.allowance = 0n;
+  s.chain.sends = 0;
+  const p = await signedPayment(s.account, makeOrder({ salt: 5 }));
+  await expectRefused(s.f, s.chain, p, 'approval_invalid');
 });
 
 test('the ENS gate runs after the signature, fails closed and is cached 20 s by exact spelling', async () => {
@@ -337,6 +372,17 @@ test('an approval that will not apply is never sent', async () => {
   await expectRefused(s.f, s.chain, await withApproval('0x1234'), 'approval_invalid');
   await expectRefused(s.f, s.chain, await withApproval(`0x${'00'.repeat(96)}`), 'approval_invalid');
   await expectRefused(s.f, s.chain, await withApproval('0x'), 'approval_invalid');
+  // v 0 or 1, and a high s: the token's ECDSA check would refuse them.
+  const good = await approval(s.account, { value: 50_000_000n, deadline: future });
+  const [value, deadline, sig] = decodeAbiParameters([{ type: 'uint256' }, { type: 'uint256' }, { type: 'bytes' }], good);
+  const v = Number.parseInt(sig.slice(-2), 16);
+  const lowV = `${sig.slice(0, -2)}${(v - 27).toString(16).padStart(2, '0')}`;
+  const n = 0xfffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364141n;
+  const highS = `${sig.slice(0, 66)}${(n - BigInt(`0x${sig.slice(66, 130)}`)).toString(16).padStart(64, '0')}${(v === 27 ? 28 : 27).toString(16)}`;
+  for (const bad of [lowV, highS]) {
+    await expectRefused(s.f, s.chain, await withApproval(encodeAbiParameters([{ type: 'uint256' }, { type: 'uint256' }, { type: 'bytes' }], [value, deadline, bad])), 'approval_invalid');
+  }
+  assert.equal((await s.f.verify((await withApproval(good)).paymentPayload, s.requirement)).isValid, true);
   // With the allowance already in place, no approval is needed.
   s.chain.state.allowance = 50_000_000n;
   assert.equal((await s.f.settle((await withApproval('0x')).paymentPayload, s.requirement)).success, true);
@@ -583,18 +629,94 @@ test('a recorder outage never blocks or fails a decision', async () => {
   assert.equal((await hanging.settle(s.paymentPayload, s.requirement)).errorReason, 'nonce_used');
 });
 
-test('records are rate-limited per payer', async () => {
+test('records are rate-limited per payer, and a replayed refusal is recorded once', async () => {
   const s = await setup({ limits: { recordsPerPayerPerMinute: 2 } });
   s.chain.state.balance = 0n;
   for (let i = 0; i < 5; i++) await s.f.verify(s.paymentPayload, s.requirement);
   await settled();
-  assert.equal(s.recorder.records.length, 2);
+  assert.equal(s.recorder.records.length, 1, 'the same order, payer and reason: one record');
+  for (const salt of [21, 22, 23]) {
+    const p = await signedPayment(s.account, makeOrder({ salt }));
+    await s.f.verify(p.paymentPayload, p.requirement);
+  }
+  await settled();
+  assert.equal(s.recorder.records.length, 2, 'then the per-payer limit');
   const rec = s.recorder.records[0];
   assert.deepEqual(Object.keys(rec).sort(), ['amountMicro', 'at', 'onchain', 'orderId', 'payer', 'payerEpoch', 'payerName', 'payerNode', 'reason', 'shopName', 'status'].sort());
   assert.equal(rec.onchain, false);
   assert.equal(rec.status, 'rejected');
   assert.equal(rec.amountMicro, '4800000');
   assert.equal(rec.at, T0);
+});
+
+test('our own failures are refused but never recorded against the agent', async () => {
+  const down = await setup({ gate: async () => ({ ok: false, reason: 'ENS_READ_FAILED' }) });
+  await expectRefused(down.f, down.chain, down, 'ENS_READ_FAILED');
+  const thrown = await setup({ gate: async () => { throw new Error('rpc'); } });
+  await expectRefused(thrown.f, thrown.chain, thrown, 'ENS_READ_FAILED');
+  const terms = await setup();
+  terms.chain.state.order = { status: 1, termsHash: keccak256(toHex('other terms')) };
+  await expectRefused(terms.f, terms.chain, terms, 'terms_mismatch');
+  await settled();
+  assert.equal(down.recorder.records.length + thrown.recorder.records.length + terms.recorder.records.length, 0);
+});
+
+test("the gate's epoch must be the on-chain policy's", async () => {
+  const s = await setup({ gate: async () => ({ ok: true, node: AGENT_NODE, epoch: 1 }) });
+  await expectRefused(s.f, s.chain, s, 'ENS_EPOCH_MISMATCH');
+  await settled();
+  assert.equal(s.recorder.records.at(-1).reason, 'ENS_EPOCH_MISMATCH');
+});
+
+test('a deadline closer than the receipt wait is refused before sending', async () => {
+  const s = await setup({ order: { ...makeOrder(), deadline: BigInt(T0 / 1000 + 20) } });
+  await expectRefused(s.f, s.chain, s, 'EXPIRED');
+});
+
+test('a deliberate on-chain failure is sent at most once per order', async () => {
+  const s = await setup({ limits: { recordedFailuresPerDay: 20 } });
+  s.chain.state.policy.revoked = true;
+  s.chain.outcome = { settled: false, failReason: 1 };
+  assert.match((await s.f.settle(s.paymentPayload, s.requirement)).transaction, /^0x/);
+  for (let i = 0; i < 3; i++) assert.equal((await s.f.settle(s.paymentPayload, s.requirement)).transaction, '');
+  assert.equal(s.chain.sends, 1);
+  assert.equal(s.f.stats().recordedFailuresToday, 1);
+});
+
+test('after a receipt timeout a retry waits on the same transaction and never sends again', async () => {
+  const s = await setup();
+  let receipt = null;
+  const waited = [];
+  s.chain.waitReceipt = async (hash) => (waited.push(hash), receipt);
+  const first = await s.f.settle(s.paymentPayload, s.requirement);
+  assert.equal(first.errorReason, 'receipt_timeout');
+  const again = await s.f.settle(s.paymentPayload, s.requirement);
+  assert.equal(again.errorReason, 'receipt_timeout');
+  assert.equal(again.transaction, first.transaction);
+  receipt = s.chain.receipt;
+  const landed = await s.f.settle(s.paymentPayload, s.requirement);
+  assert.equal(landed.success, true);
+  assert.equal(landed.transaction, first.transaction);
+  assert.equal(s.chain.sends, 1);
+  assert.deepEqual(new Set(waited), new Set([first.transaction]));
+});
+
+test('a send that errored blocks a resend for a minute (it may have been broadcast)', async () => {
+  let clock = T0;
+  const account = newAccount();
+  const chain = fakeChain(account);
+  const f = makeFacilitator({ chain, clock: () => clock });
+  const s = await signedPayment(account, makeOrder());
+  chain.sendSettle = async () => {
+    chain.sends += 1;
+    throw new Error('socket hang up');
+  };
+  await assert.rejects(f.settle(s.paymentPayload, s.requirement));
+  assert.equal((await f.settle(s.paymentPayload, s.requirement)).errorReason, 'in_flight');
+  assert.equal(chain.sends, 1);
+  clock += 60_000;
+  await assert.rejects(f.settle(s.paymentPayload, s.requirement), 'after a minute the chain read decides again');
+  assert.equal(chain.sends, 2);
 });
 
 test('hex fields in either case are the same order', async () => {

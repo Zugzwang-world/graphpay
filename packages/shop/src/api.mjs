@@ -12,7 +12,7 @@
 import { createHash, timingSafeEqual } from 'node:crypto';
 import { isAddressEqual } from 'viem';
 import { decodePaymentSignatureHeader, encodePaymentRequiredHeader, encodePaymentResponseHeader } from '@x402/core/http';
-import { json, readJson, MAX_TIMEOUT_SECONDS, SCHEME, X402_VERSION, toWireOrder, termsHashOf } from '@graphpay/facilitator';
+import { json, readJson, MAX_TIMEOUT_SECONDS, RateLimiter, SCHEME, X402_VERSION, toWireOrder, termsHashOf } from '@graphpay/facilitator';
 import { catalogOf } from './catalog.mjs';
 import { TermsError, ZERO32, buildOrder, rebuildOrder } from './orders.mjs';
 
@@ -22,8 +22,13 @@ const PAYEE_TTL_MS = 20_000;
 const BODY_LIMIT = 8 * 1024;
 const STATUS = ['NONE', 'CREATED', 'PAID', 'DELIVERED', 'CANCELLED', 'REFUNDED'];
 const HEX32 = /^0x[0-9a-fA-F]{64}$/;
-// The facilitator could not decide (no receipt yet): the agent must treat it as unsettled.
-const UNSETTLED = new Set(['receipt_timeout']);
+// The facilitator could not decide (no receipt yet, or a send still in flight): the agent must
+// treat it as unsettled, never as a final refusal.
+const UNSETTLED = new Set(['receipt_timeout', 'in_flight']);
+// Per instance: the pay route makes the relayer and W_DIRECTORY spend, so it is bounded even
+// behind the passcode.
+const PAY_PER_MINUTE = 120;
+const QUOTE_WRITES_PER_MINUTE = 30;
 
 const digest = (v) => createHash('sha256').update(v, 'utf8').digest();
 
@@ -31,7 +36,7 @@ const digest = (v) => createHash('sha256').update(v, 'utf8').digest();
 //   shops (storyShops), merchants (shop key -> payout address), chainId, token, checkout;
 //   baseUrl: the agent-facing absolute URL of this API (x402 resource.url), never VERCEL_URL;
 //   passcode: DEMO_PASSCODE; facilitator: { verify, settle } (HTTPFacilitatorClient);
-//   orders: { readOrder } (chain.mjs); resolvePayee(shopName) -> address (T2, ADR-0046);
+//   orders: { readOrder } (chain.mjs); resolvePayee(shopName) -> { ok, payee } (T2's createEnsReader, ADR-0046);
 //   createQuote({ requestId, shopName, agentEns, priceMicro, validUntil }) -> { entityKey } (optional);
 //   deliver(shopKey, orderId) -> 'delivered'|'pending'|'not_configured' (optional);
 //   ready(): start-up checks; log(line): one redacted line; clock(): ms.
@@ -44,6 +49,8 @@ export function shopHandler(deps) {
   const network = `eip155:${chainId}`;
   const base = deps.baseUrl.replace(/\/+$/, '');
   const payees = new Map(); // exact spelling -> { at, value }
+  const payLimit = new RateLimiter(PAY_PER_MINUTE, 60_000, clock);
+  const quoteLimit = new RateLimiter(QUOTE_WRITES_PER_MINUTE, 60_000, clock);
 
   const nowSec = () => Math.floor(clock() / 1000);
   const ctx = () => ({ shops, merchants, nowSec: nowSec(), ttlSeconds });
@@ -64,7 +71,9 @@ export function shopHandler(deps) {
     if (!hit || now - hit.at >= PAYEE_TTL_MS) {
       let value = null;
       try {
-        value = await resolvePayee(shop.ensName);
+        // T2's reader answers { ok: true, payee } or { ok: false, reason }; a bare address also works.
+        const r = await resolvePayee(shop.ensName);
+        value = typeof r === 'string' ? r : r?.ok === true ? r.payee : null;
       } catch {
         value = null;
       }
@@ -144,6 +153,7 @@ export function shopHandler(deps) {
   async function pay(request, pathId, kind) {
     const refusal = passcodeRefusal(request);
     if (refusal) return refusal;
+    if (!payLimit.take('all')) return json(429, { error: 'rate limited' });
     const body = await readJson(request, BODY_LIMIT);
     if (body.error) return json(body.error, { error: 'bad request' });
     const built = rebuildOrder(body.value, ctx());
@@ -178,6 +188,7 @@ export function shopHandler(deps) {
     if (!signature) {
       let quoteKey;
       if (requestId && terms.payer !== '' && deps.createQuote) {
+        if (!quoteLimit.take('all')) return json(429, { error: 'rate limited' });
         try {
           const written = await deps.createQuote({ requestId, shopName: shop.ensName, agentEns: terms.payer, priceMicro: order.amountMicro, validUntil: terms.exp });
           quoteKey = written.entityKey;
@@ -235,7 +246,7 @@ export function shopHandler(deps) {
       return json(200, { status: 'paid', orderId: order.orderId, transaction: settled.transaction, delivery }, settlementHeader(settled));
     }
     if (UNSETTLED.has(settled.errorReason)) {
-      return json(504, { status: 'pending', reason: settled.errorReason, orderId: order.orderId, transaction: settled.transaction }, settlementHeader(settled));
+      return json(settled.errorReason === 'in_flight' ? 503 : 504, { status: 'pending', reason: settled.errorReason, orderId: order.orderId, transaction: settled.transaction }, settlementHeader(settled));
     }
     const status402 = settled.transaction ? 'failed' : 'refused';
     return json(402, { status: status402, reason: settled.errorReason, orderId: order.orderId, transaction: settled.transaction || undefined }, settlementHeader(settled));

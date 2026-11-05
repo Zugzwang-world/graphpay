@@ -7,6 +7,8 @@ import { checkoutAbi } from '@graphpay/contracts';
 
 const permit2Abi = parseAbi(['function nonceBitmap(address owner, uint256 wordPos) view returns (uint256)']);
 const noncesAbi = parseAbi(['function nonces(address owner) view returns (uint256)']);
+const erc1271Abi = parseAbi(['function isValidSignature(bytes32 hash, bytes signature) view returns (bytes4)']);
+const ERC1271_MAGIC = '0x1626ba7e';
 
 // publicClient, walletClient (the relayer's), account (the relayer's local account).
 export function viemChain({ publicClient, walletClient, account, checkout, token, permit2, chain }) {
@@ -14,8 +16,19 @@ export function viemChain({ publicClient, walletClient, account, checkout, token
   return {
     relayerAddress: account.address,
 
-    async verifyTypedData(address, typedData, signature) {
-      return publicClient.verifyTypedData({ ...typedData, address, signature }).catch(() => false);
+    // Permit2 branches on the payer's code: none → ecrecover; any (a contract, or an EOA with an
+    // EIP-7702 delegation) → isValidSignature with the bytes as they are.
+    getCode(address) {
+      return publicClient.getCode({ address });
+    },
+
+    async isValidSignature(address, hash, signature) {
+      try {
+        const magic = await publicClient.readContract({ address, abi: erc1271Abi, functionName: 'isValidSignature', args: [hash, signature] });
+        return magic.toLowerCase() === ERC1271_MAGIC;
+      } catch {
+        return false;
+      }
     },
 
     async readState({ order, payer }) {

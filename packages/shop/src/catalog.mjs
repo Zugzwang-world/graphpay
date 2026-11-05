@@ -47,6 +47,6 @@ export function catalogOf(shop) {
       };
     }),
     synthetic: true,
-    label: 'synthetic demo catalog (story config); prices in test USDT',
+    label: 'synthetic demo catalog (story config)',
   };
 }

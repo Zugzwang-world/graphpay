@@ -177,7 +177,7 @@ async function main() {
 
   // The payer agent: x402Client with spend controls (this token only, at most the budget).
   const agent = (account, payerName = agentName) => {
-    const s = graphPayOrderClient({ account, publicClient: pub, chainId: wc.chainId, token, permit2, payerName, mandateHash: keccak256(toHex('fork e2e mandate')) });
+    const s = graphPayOrderClient({ account, publicClient: pub, chainId: wc.chainId, token, permit2, checkout, payerName, mandateHash: keccak256(toHex('fork e2e mandate')) });
     const client = new x402Client().register(NETWORK, s).setSpendControls({ allowedAssets: [{ network: NETWORK, asset: token.address, maxAmountPerPayment: String(story.order.budgetMicro) }] });
     return { client, http: new x402HTTPClient(client) };
   };

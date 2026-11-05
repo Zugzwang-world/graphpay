@@ -7,3 +7,4 @@ export { facilitatorHandler, bearerOk, readJson, json, BODY_LIMIT_BYTES } from '
 export { startupChecks, networkMode, readiness, StartupError } from './src/startup.mjs';
 export { recorderClient, recorderHandler, attemptEdge, attemptSchema } from './src/recorder.mjs';
 export { RateLimiter, DailyCounter } from './src/limits.mjs';
+export { chainSettings, configMerchants, facilitatorSettings, shopSettings } from './src/settings.mjs';
