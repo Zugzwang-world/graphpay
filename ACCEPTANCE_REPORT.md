@@ -1,8 +1,8 @@
 # Acceptance report
 
-Written by `pnpm acceptance` at 2026-11-05T23:15:02.738Z. Checks and pass criteria: `planning/ACCEPTANCE_TESTS.md` and `docs/plan/ACCEPTANCE_ADDITIONS.md`. Only D7 may be `blocked` (C7 and E3 no longer wait on supply, ADR-0054); a check without a result is `not run`, never `pass`.
+Written by `pnpm acceptance` at 2026-11-05T23:28:01.884Z. Checks and pass criteria: `planning/ACCEPTANCE_TESTS.md` and `docs/plan/ACCEPTANCE_ADDITIONS.md`. Only D7 may be `blocked` (C7 and E3 no longer wait on supply, ADR-0054); a check without a result is `not run`, never `pass`.
 
-**24 pass, 0 fail, 1 blocked, 23 not run** (of 48).
+**26 pass, 0 fail, 1 blocked, 21 not run** (of 48).
 
 | id | check | status | note |
 |---|---|---|---|
@@ -21,7 +21,7 @@ Written by `pnpm acceptance` at 2026-11-05T23:15:02.738Z. Checks and pass criter
 | B3 | A scoped role stops an agent raising its own cap | not run | no runner yet |
 | B4 | The payment preference parses | pass |  |
 | B5 | A synthetic wildcard name resolves | pass |  |
-| B6 | Killing a disposable agent makes the gate deny it | not run | no runner yet |
+| B6 | Killing a disposable agent makes the gate deny it | pass |  |
 | B7 | The epoch changes on re-registration (fork test) | not run | no runner yet |
 | B8 | ENSIP-26 records exist and the MCP endpoint answers | pass |  |
 | B9 | The payee is the shop's ENS address | not run |  |
@@ -49,7 +49,7 @@ Written by `pnpm acceptance` at 2026-11-05T23:15:02.738Z. Checks and pass criter
 | E4 | The mirror writes it to Arkiv | pass |  |
 | E5 | GraphQL shows the new edge and the updated tallies | pass |  |
 | E6 | A refund updates the tallies | pass |  |
-| E7 | A killed agent is refused | not run | no runner yet |
+| E7 | A killed agent is refused | pass |  |
 | E8 | Every counting errand records its time and cost (ADR-0048) | pass |  |
 | F1 | No secrets are in the repo | not run | no runner yet |
 | F2 | Spending endpoints are passcode-gated | not run | no runner yet |
@@ -301,6 +301,24 @@ Status: **pass**.
   "pass B5 wildcard status empty",
   "pass B5 the walk says ENS_SYNTHETIC"
 ]
+```
+
+## B6: Killing a disposable agent makes the gate deny it
+
+Status: **pass**.
+
+### B6 (2026-11-05T23:26:19.713Z)
+
+- What: killing a disposable agent makes the gate deny it
+- Pass: true
+- Expected: the gate denies ENS_EXPIRED_OR_REVOKED after the owner unregisters
+- Evidence: `{"file":"docs/sessions/integration/runs/kill-disposable-1/kill.json","kill":"kill disposable-1.vitalik.graphpay.eth: done (block 12072701, tx 0x785a13f119ab77f67c1ed8dfa6f1213708fde4f43158122a357e72c018acf29f)","alive":"0x763973499f7f7eb7bdda058fa03ee3d9f9480be53d75bc4574c62d7beec84b9c"}`
+
+```json
+{
+  "reason": "ENS_EXPIRED_OR_REVOKED",
+  "secondsAfterKill": 9.3
+}
 ```
 
 ## B8: ENSIP-26 records exist and the MCP endpoint answers
@@ -832,6 +850,30 @@ Status: **pass**.
     "refundedMicro": "1600000"
   },
   "trailEnd": "refund"
+}
+```
+
+## E7: A killed agent is refused
+
+Status: **pass**.
+
+### E7 (2026-11-05T23:28:01.873Z)
+
+- What: a killed agent is refused
+- Pass: true
+- Expected: HTTP 402 ENS_EXPIRED_OR_REVOKED within 25 s of the kill's receipt; the recorder's fail edge on Arkiv; folded into fails by the mirror
+- Evidence: `{"file":"docs/sessions/integration/runs/kill-disposable-1/kill.json","kill":"kill disposable-1.vitalik.graphpay.eth: done (block 12072701, tx 0x785a13f119ab77f67c1ed8dfa6f1213708fde4f43158122a357e72c018acf29f)","alive":"0x763973499f7f7eb7bdda058fa03ee3d9f9480be53d75bc4574c62d7beec84b9c","failEdge":"0xc2d2ed3801c81500b108d904c3048c4c9c984f10d2f88c5218073e0b581e2699"}`
+
+```json
+{
+  "assertion": {
+    "status": 402,
+    "reason": "ENS_EXPIRED_OR_REVOKED",
+    "secondsToBite": 9.3,
+    "failEdge": "0xc2d2ed3801c81500b108d904c3048c4c9c984f10d2f88c5218073e0b581e2699"
+  },
+  "failed": [],
+  "foldedFails": "1"
 }
 ```
 
