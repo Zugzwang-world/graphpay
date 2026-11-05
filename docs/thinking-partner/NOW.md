@@ -66,10 +66,10 @@ Updated 05:10 IST, Fri 6 Nov. **M11 and M12 are done on the real networks. The a
 
 ## website
 
-Updated 07:55 IST, Fri 6 Nov (T5 Web). **On `main`:** everything through M16 (the checkout kit and the demo store, #51). **In a PR:** the Mumbai map (Friday item 10), our own drawing of the neighbourhoods with no tiles: every shop in the directory as a dot (the small city labelled synthetic), open shops and agents at work glowing while their heartbeat is live and fading when it lapses, every dot opening its Arkiv record. Read live this session: 13 shops (3 cast, 10 synthetic), 18 agents at work, 0 open (nobody has tapped Open shop yet).
-- Running: nothing long. The store is not deployed (needs the Vercel project and env, see OPEN).
-- Blockers: none for the map. The Open toggle and Pause/Resume are live in production once the next deploy runs and someone with the passcode tries them.
-- Next: item 13 (the explainer lanes from the handoff and quote records); the store's Sunday box if time. Fresh start file: `docs/sessions/website/resume.md`.
+Updated 05:40 IST, Fri 6 Nov (T5 Web; the Mac's clock, Coordinator's time). **On `main`:** everything through M16, the Mumbai map and the explainer's agent lanes. **M16's done-when is met on the chain:** one real 4.80 USDT payment from the persona wallet (a human payer, no gas) went through the kit's client and the hosted facilitator to kesar-kingdom and settled (order 0x0864e72a…, block 12326025, `settleOrder` success; the order reads PAID, 4.80, payer the persona wallet).
+- Running: nothing. The store is not deployed (the Coordinator creates the Vercel project in the morning; env names in OPEN).
+- Blockers: the store's CSV export waits for T6's `LOG_CHUNK` fix (the public RPCs cap `eth_getLogs` at 10,000 blocks).
+- Next: the store's Sunday box if time; the explainer lanes and map fill as Join wires the runner. Fresh start file: `docs/sessions/website/resume.md`.
 
 ## agentpay
 
