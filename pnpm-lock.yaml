@@ -239,6 +239,9 @@ importers:
       '@graphpay/contracts':
         specifier: workspace:*
         version: link:../contracts
+      '@graphpay/ens':
+        specifier: workspace:*
+        version: link:../ens
       '@graphpay/money-graph':
         specifier: workspace:*
         version: link:../money-graph
