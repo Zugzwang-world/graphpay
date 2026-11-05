@@ -44,7 +44,7 @@ Prevention: never assert state in the same instant as a write; poll until it sho
 When: 2026-11-06 01:00 IST · Activity: records · Cost: none yet; the logs are kept, not lost
 Symptom: `~/graphpay` shows untracked `prompts/raw/2026-11-06-*.jsonl` files and a modified M0 log; the sessions' worktrees have none, so their PRs do not carry their logs as `CLAUDE.md` asks.
 Cause: the hook writes to `$CLAUDE_PROJECT_DIR/prompts/raw/`, and for a session started on `~/graphpay` with the worktree option that is the main checkout, not the worktree.
-Fix: planned in the Coordinator's next PR: the hook writes into the session's own checkout (the git top level of its working directory), and the logs already written are swept into a records PR.
+Fix: 03:20 IST, the hook writes into the session's own checkout (the git top level of its working directory; `logRoot` in `scripts/hooks/prompt-log.mjs`, with tests). The logs already written in the main checkout are swept into records PRs under `<name>.main-checkout.jsonl`, so they never collide with a session's own file. M0's failed step at Thu 23:56 ("fast-forward the main checkout" refused by M0's own appended log) had the same cause; the main checkout was fast-forwarded at 03:14.
 Prevention: a hook that writes repo files resolves the checkout from the session's working directory; a test covers a worktree.
 
 ### P-records-2: GitHub calls time out on the venue network
@@ -60,4 +60,11 @@ Symptom: all seven sessions reported Opus 5.5 at max effort, while the plan has 
 Cause: a new session takes the model and effort shown in the picker (the last ones used, M0's Opus 5.5 at max); the start lines carry no model.
 Fix: at 01:22 the Coordinator set each track session to the plan (`set_session_model`, `set_session_effort`; from each session's next turn) and asked each to end its turn at a natural stop so the change applies.
 Prevention: the Coordinator checks every session's model and effort and the plan usage at each tick; a new session's start step sets the picker before the start line is pasted.
+
+### P-records-4: the Mac slept with the lid closed
+When: 2026-11-06 02:14–03:01 IST · Activity: records · Cost: about 47 minutes of every session
+Symptom: no session made progress and no tick ran from 02:14 to 03:01; `pmset -g log` shows "Entering Sleep state due to 'Clamshell Sleep'" at 02:14:20, dark wakes only, then a lid wake at 03:01:32; the Mac was on battery.
+Cause: a closed lid sleeps the Mac whatever the keep-awake holds say (the app's hold and `caffeinate` stop idle sleep only), and it was not on power.
+Fix: a push notification to the founder at 03:04 (charger in, lid open); first in "Founder now".
+Prevention: the Coordinator checks `pmset -g batt` and the lid state each tick and notifies the founder at once.
 

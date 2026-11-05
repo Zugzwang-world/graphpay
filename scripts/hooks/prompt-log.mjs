@@ -1,8 +1,9 @@
 // UserPromptSubmit hook (ADR-0001): appends each founder prompt, masked, to
-// prompts/raw/<IST date>-<session>.jsonl (one file per session, so parallel
-// sessions never conflict). It prints nothing, because a UserPromptSubmit
+// prompts/raw/<IST date>-<session>.jsonl in the session's own checkout (one
+// file per session, so parallel sessions never conflict). It prints nothing, because a UserPromptSubmit
 // hook's stdout enters the context, and it always exits 0.
 
+import { execFileSync } from 'node:child_process';
 import { appendFileSync, chmodSync, mkdirSync } from 'node:fs';
 import { homedir } from 'node:os';
 import { join } from 'node:path';
@@ -44,6 +45,26 @@ export async function buildLine(input, now = new Date()) {
   return line;
 }
 
+// A session started with the worktree option works in its own checkout while
+// CLAUDE_PROJECT_DIR still names the main one. The log belongs to the session's
+// checkout, so its PRs carry it and the main checkout stays clean (P-records-1).
+export function logRoot(input, env = process.env) {
+  const cwd = typeof input?.cwd === 'string' && input.cwd ? input.cwd : null;
+  if (cwd) {
+    try {
+      const top = execFileSync('git', ['-C', cwd, 'rev-parse', '--show-toplevel'], {
+        encoding: 'utf8',
+        stdio: ['ignore', 'pipe', 'ignore'],
+        timeout: 2000,
+      }).trim();
+      if (top) return top;
+    } catch {
+      // Not a git checkout: fall back below.
+    }
+  }
+  return env.CLAUDE_PROJECT_DIR || cwd || process.cwd();
+}
+
 async function readStdin() {
   const chunks = [];
   for await (const chunk of process.stdin) chunks.push(chunk);
@@ -55,7 +76,7 @@ async function main() {
     const input = JSON.parse(await readStdin());
     const line = await buildLine(input);
     if (!line) return;
-    const root = process.env.CLAUDE_PROJECT_DIR || input.cwd || process.cwd();
+    const root = logRoot(input);
     const dir = join(root, 'prompts', 'raw');
     mkdirSync(dir, { recursive: true, mode: 0o700 });
     chmodSync(dir, 0o700);

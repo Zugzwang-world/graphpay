@@ -1,19 +1,18 @@
 # NOW
 
-Updated 01:20 IST, Fri 6 Nov (Coordinator)
+Updated 03:10 IST, Fri 6 Nov (Coordinator)
 
 ## Summary (Coordinator only)
 
-Updated 01:20 IST, Fri 6 Nov. **Wave 1 is running.** T1–T5 and Join started at about 00:44 IST; the Coordinator took over at 00:46 (10-minute checks, merges, records). No track has opened a PR yet; T3 is building M7a, the first gate (T1's recorder, Join's mirror and the small city wait for it).
+Updated 03:10 IST, Fri 6 Nov. **Four milestones are merged: M7a (the Arkiv writer, 01:51), M1 (the checkout contract, 01:51), M10 (the agents) and M2 (the checkout deployed and verified on Whitechain).** In progress: M5 (ENS, T2), M3 (shop and facilitator, T1), M7b and the small-city seeding (T3), M11 (the mirror, Join), the website (T5) and the agent hooks (T4, PR #16).
 
-New since the handover:
-- **Usage risk:** the weekly plan limit is 71% used and resets Fri 21:30 IST. All seven sessions started on Opus 5.5 at max effort; at 01:22 the Coordinator switched the six track sessions to the planned mix (from their next turn). The Coordinator's own setting and extra usage are the founder's (`OPEN.md` "Founder now" 1).
-- **The graph layer becomes a developer SDK** (ADR-0057): T3 keeps `@graphpay/arkiv-graph` generic now, GraphPay's payment model sits in `packages/money-graph`, and on Friday after acceptance the package goes to npm (Friday item 18).
-- M0's background tasks: none failed (11 agents and 3 background commands, all completed; `relays/records.md`).
+Two risks for the founder (`OPEN.md` "Founder now"):
+- **Power and lid:** the lid closed at 02:14 and the Mac slept until 03:01, so every session lost about 47 minutes; it runs on battery.
+- **Plan usage:** 74% at 03:04, about 3 points an hour, resetting Fri 21:30 IST. The track sessions run the planned models, and the busiest ones restart with a fresh context at milestone boundaries (T4 dropped to 94K tokens).
 
 Next:
-1. Tell T1 and Join M7a's import path when it merges; CP2 expected about 01:35.
-2. Acceptance (CP4) about 05:30 IST; the next records relay about 02:45.
+1. M5 merges (T2), then T1's M3 part B and Join's real mirror runs.
+2. CP4 (acceptance) moves to about 06:15 IST after the lost 47 minutes.
 3. The large city waits for the founder's story lock (by Fri 08:30 for rehearsal 1, at the latest 13:00; seeding starts by 14:00).
 
 ## foundation
@@ -75,11 +74,13 @@ Updated 03:45 IST, Fri 6 Nov (T5 Web). **On `main`:** the shell, the phone views
 
 ## records
 
-Updated 01:20 IST. **The Coordinator is on duty** (`docs/plan/sessions/coordinator.md`): 10-minute ticks from 00:58, a keep-awake hold, merges, records.
-- Done: ADR-0057 and Friday item 18 (the graph SDK on npm); T3 briefed at 01:04 and adopted it in M7a; the npm name checked (free); the first M14 relay; AI usage rows for the new sessions.
-- Running: the ticks (PRs, conflicts, gates, `OPEN.md` questions, silent sessions).
-- Blockers: none. Risk: plan usage (`OPEN.md` "Founder now" 1).
-- Next: each session's prompt log written into its own worktree (P-records-1); M7a's gate messages; records again about 02:45.
+Updated 03:20 IST. **Checked every session after the 02:14–03:01 sleep: none is hung.**
+- T3's long step (the budget test printing its calls and errors, about 39 minutes) ended when T3 did its fresh start. T3 now runs on a 150K-token context, down from 510K, and is writing its M8/M7b relay.
+- T5 restarted from its run file with its start line (fresh, 164K tokens).
+- T1 got its start line at 03:08 after a fresh start. T2, T4 and Join got theirs at 03:12; Join's gates (M2, M5) are open.
+- **M0's one failed background task:** "fast-forward the main checkout" (Thu 23:56) aborted with "Please commit your changes", because the prompt-log hook had appended M0's last prompt to its committed log. It mattered: the secret helpers, the funding script and the hook itself run from the main checkout. Fixed at 03:14: the main checkout is on `main` (2dd307d), and M0's extra line and one session's extra lines are committed here. The cause (P-records-1: every session's log was written to the main checkout) is fixed in this PR, with a reviewer pass.
+- Usage: 75% at 03:15 IST (resets Fri 21:30 IST). The founder's extra-usage decision is still open.
+- Next: sweep the remaining main-checkout prompt logs once the hook fix is live; records again about 04:45.
 
 ## submission
 
