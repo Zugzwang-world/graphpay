@@ -4,7 +4,7 @@ Updated 05:12 IST, Fri 6 Nov. Read this first, then `docs/plan/sessions/join.md`
 
 ## Running now
 
-- `pnpm workers` (instance `2966ed62bdcddbc1`, since 05:04 IST) from this worktree (`.claude/worktrees/graphpay-join-session-272a7b`), log `workers.log` (gitignored), with T2's ENS watcher (real policy sink as POLICY_WRITER). Check: `curl -s 127.0.0.1:8788/status`, `node acceptance/mirror.mjs lag`. **Never start a second one**; if it died, start it again from this worktree (it resumes from Arkiv).
+- `pnpm workers` (instance `a0db97956035a559`, since 05:08 IST, started detached with nohup so it outlives this session) from this worktree (`.claude/worktrees/graphpay-join-session-272a7b`), log `workers.log` (gitignored), with T2's ENS watcher (real policy sink as POLICY_WRITER). Check: `curl -s 127.0.0.1:8788/status`, `node acceptance/mirror.mjs lag`. **Never start a second one**; if it died, start it again from this worktree (it resumes from Arkiv).
 
 ## Done
 
@@ -21,7 +21,9 @@ Updated 05:12 IST, Fri 6 Nov. Read this first, then `docs/plan/sessions/join.md`
 
 ## Relay key rule
 
-FACILITATOR is shared with T1: message T1 before and after any relay ("FACILITATOR is free"). T1 messages Join before its own.
+- M4 is merged (PR 58, 05:12 IST). **From now on relay only through the hosted facilitator**: `POST https://graphpay-event.vercel.app/api/facilitator/{verify,settle}` with the bearer `FACILITATOR_AUTH_TOKEN` (from .env; never printed). Switch `integration/src/stack.mjs` to an `HTTPFacilitatorClient` on that URL (keep the in-process shop, or use the hosted shop) before the next real run; no local FACILITATOR sends.
+- **No local RENEWER sends** from anyone: the hosted cron renews every minute when a subscription is due.
+- T1 announces its own hosted sends; wait for its "free" before a run that pays.
 
 ## Notes
 
