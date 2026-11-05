@@ -50,11 +50,19 @@ Not started (T4, wave 1).
 
 ## integration
 
-Not started (Join, when M7a merges).
+Updated 01:20 IST. **Join is running: the mirror (M11) is being built on test doubles while it waits for M7a (Arkiv writer), M1 (checkout events) and M5 (the cast on ENS); none has merged yet.**
+- Done: the mirror's core in `packages/mirror`: reading checkout events, turning each into one Arkiv write, parking events whose actor is unknown, the one-writer lease, folding the recorder's refusals, the 5% labelled cast history, the local endpoints and keep-awake. 22 tests green on fakes.
+- The lab's lifecycle result reproduces on the fake ledger: the good shop's orders 5, paid 6.40, one refund of 0.80, 2 fails, 3 delivered.
+- Running: nothing on any network yet; polling merged PRs every 10 minutes.
+- Blockers: only the gates above. The Mac's DNS dropped twice (00:50 and 01:15 IST); work continues offline.
+- Next: as soon as M7a merges, run the mirror on ArkivSim with the real tally planner and writer; then M1's ABI and M5's hand-off; then the live run on Rabdi (D1–D3, D15).
 
 ## website
 
-Not started (T5, wave 1). A placeholder page is live at https://graphpay-event.vercel.app.
+Updated 01:31 IST, Fri 6 Nov (T5 Web). **The website shell is on `main` and live** at https://graphpay-event.vercel.app (the top-bar chips already show the three chains' real latest blocks). Now adding the phone views' Friday items that need no other track: the request card (budget chip, deadline countdown), the spending pass states, merchant notifications.
+- Running: nothing long. Panels that need other tracks' routes say which milestone they wait for (M4, M6, M7b, M9, M10, M11).
+- Blockers: none. The venue network to GitHub is slow (retries needed).
+- Next: wire each panel as its route merges; M16 once M4 lands; Friday items 8 to 13.
 
 ## records
 

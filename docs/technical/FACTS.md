@@ -278,3 +278,12 @@ Each track adds its own rows here (under `### <activity>`), with source, time an
 | Test USDT EIP-2612 domain | the configured domain (`Tether USD`, version `1`, chain 1874, the proxy) hashes to the token's `DOMAIN_SEPARATOR()`; both `permit` overloads approve Permit2; a permit signed under another name reverts | Foundry fork tests at block 12,310,000 (`packages/contracts/test/Digests.t.sol`) | 01:30 | verified-on-chain (fork) | the start-up check of M3 relies on it |
 | Permit2 domain | `{ name: "Permit2", chainId: 1874, verifyingContract: <Permit2> }` hashes to the deployed Permit2's `DOMAIN_SEPARATOR()` | same | 01:30 | verified-on-chain (fork) | |
 | Checkout gas (fork, execution only) | first agent settle with the gasless approval 318,377 (merchant holds a float) / 333,479 (merchant at zero); re-order 251,143; partial refund 81,275; createSubscription with first charge 482,697; renew 218,399; cancelWithSig 43,073 | `forge test -vv` gas logs | 01:45 | measured (fork) | a receipt adds about 33,000; real receipts replace these at M2/M3 |
+
+### website
+
+| item | value | source | time (IST) | status |
+|---|---|---|---|---|
+| Arkiv explorer routes | `/tx/<hash>`, `/entity/<key>`, `/address/<addr>`, `/blocks` (list; `/block` takes no number in the path), `/entity-explorer?q=<query>` (its query page; `/entity/<key>` itself resolves to `$key = key(<key>)` there) | the explorer's own client bundle (`rabdi.explorer.arkiv.network/assets/index-*.js`: its route table and path matchers), read 6 Nov | 01:05 | verified in code; `/entity-explorer?q=` answers 200 |
+| Whitechain explorer (Blockscout) | `/tx/<hash>`, `/address/<addr>`, `/block/<n>`, `/token/<addr>` answer 200 (a single-page app answers 200 for any path, so only the tx page was checked against a known transaction) | HTTP GET on `explorer.testnet.whitechain.io`, 6 Nov | 01:15 | verified for tx (known hash); others standard Blockscout |
+| Sepolia explorer | Etherscan `/tx/`, `/address/`, `/block/` | HTTP GET on `sepolia.etherscan.io/block/1000` → 200 | 01:15 | verified |
+| Next.js file tracing of `@graphpay/config` | its two JSON files are read at run time (`readFileSync` next to `index.mjs`) and the trace misses them; `outputFileTracingIncludes` in `apps/web/next.config.ts` adds them (the route's `.nft.json` then lists both) | local `next build` on Node 22.23.4 | 00:40 | verified locally; first Vercel deploy confirms |

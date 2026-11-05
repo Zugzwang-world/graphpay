@@ -46,3 +46,12 @@ The M0 verifier's snapshot of every package in `planning/FACTS.md` §5 is in `do
 | Permit2 (interfaces only) | commit `cc306b601f172c51bc04334a109e98340456620b` | `gh api repos/Uniswap/permit2/git/refs/tags`: the repo's only tag, named after the canonical deployed address, points to this commit (2022-11-17); `install-libs.sh` fetches the commit and checks it | verified |
 | forge-std | v1.9.7 (`77041d2`), kept | has every cheatcode the suite uses (`getBlockTimestamp`, `snapshotState`, `keyExistsJson`, `deployCodeTo`) | verified |
 | viem (in `@graphpay/contracts`) | 2.57.16 | same as the root pin | verified |
+
+## Website (`apps/web`, web session, checked 2026-11-06 00:30 IST)
+
+| item | pinned | how checked | status |
+|---|---|---|---|
+| uqr | 0.1.3 (QR codes drawn as SVG; MIT, no dependencies) | `npm view uqr` → `latest` 0.1.3 (modified 2026-04-03); installed; its `.d.ts` read for `encode` | verified |
+| viem | 2.57.16 (the root pin, now also a web dependency; not used by code yet) | lockfile | verified |
+| next, react, react-dom, typescript | as in the M0 placeholder section above | unchanged | verified |
+| Baloo 2 (700, 800), Mukta (400, 600) | via `next/font/google` (self-hosted at build; the spec's fonts) | `next build` fetched both | verified |

@@ -1,0 +1,324 @@
+/* The visual system of WEBSITE_SPEC.md §9: one night palette, Baloo 2 for display,
+   Mukta for text, tabular numbers everywhere, monospace only for hashes and queries. */
+
+:root {
+  --night: #17143d;
+  --surface: #221e55;
+  --surface-raised: #2b2766;
+  --varq: #dadce8;
+  --varq-60: rgb(218 220 232 / 0.6);
+  --varq-30: rgb(218 220 232 / 0.3);
+  --varq-15: rgb(218 220 232 / 0.15);
+  --varq-08: rgb(218 220 232 / 0.08);
+  --kesar: #f5a524;
+  --gulab: #ec5b86;
+  --pista: #4cc38a;
+  --chilli: #ff5d4d;
+  --silver: #b8bccf;
+
+  --font-display: var(--font-baloo), 'Baloo 2', system-ui, sans-serif;
+  --font-text: var(--font-mukta), 'Mukta', system-ui, sans-serif;
+  --font-mono: ui-monospace, 'SF Mono', SFMono-Regular, Menlo, Consolas, monospace;
+
+  --radius-s: 8px;
+  --radius-m: 14px;
+  --radius-l: 22px;
+  --move: 750ms;
+  --stagger: 60ms;
+  --ease-out: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --topbar-h: 56px;
+
+  color-scheme: dark;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  min-height: 100dvh;
+  background: var(--night);
+  color: var(--varq);
+  font-family: var(--font-text);
+  font-size: 16px;
+  line-height: 1.45;
+  font-variant-numeric: tabular-nums;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  font-family: var(--font-display);
+  font-weight: 700;
+  line-height: 1.15;
+  margin: 0;
+  letter-spacing: -0.01em;
+}
+
+p {
+  margin: 0;
+}
+
+a {
+  color: inherit;
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+  color: inherit;
+}
+
+:focus-visible {
+  outline: 2px solid var(--kesar);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+code,
+.mono {
+  font-family: var(--font-mono);
+  font-size: 0.86em;
+}
+
+.muted {
+  color: var(--varq-60);
+}
+
+.num {
+  font-variant-numeric: tabular-nums;
+}
+
+.visually-hidden {
+  position: absolute !important;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+/* Buttons */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 40px;
+  padding: 8px 14px;
+  border-radius: 12px;
+  border: 1px solid var(--varq-15);
+  background: var(--surface-raised);
+  color: var(--varq);
+  font-weight: 600;
+  font-size: 15px;
+  cursor: pointer;
+  transition:
+    background 150ms ease,
+    border-color 150ms ease,
+    transform 120ms ease;
+  text-decoration: none;
+}
+
+.btn:hover {
+  border-color: var(--varq-30);
+  background: color-mix(in srgb, var(--surface-raised) 85%, var(--varq) 15%);
+}
+
+.btn:active {
+  transform: translateY(1px);
+}
+
+.btn[disabled],
+.btn[aria-disabled='true'] {
+  opacity: 0.55;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.btn-primary {
+  background: var(--kesar);
+  border-color: var(--kesar);
+  color: var(--night);
+}
+
+.btn-primary:hover {
+  background: color-mix(in srgb, var(--kesar) 88%, white 12%);
+  border-color: color-mix(in srgb, var(--kesar) 88%, white 12%);
+}
+
+.btn-danger {
+  border-color: color-mix(in srgb, var(--chilli) 60%, transparent);
+  color: var(--chilli);
+  background: color-mix(in srgb, var(--chilli) 10%, var(--surface-raised));
+}
+
+.btn-quiet {
+  background: transparent;
+  border-color: transparent;
+  color: var(--varq-60);
+}
+
+.btn-quiet:hover {
+  background: var(--varq-08);
+  color: var(--varq);
+}
+
+/* Chips */
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 28px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--varq-15);
+  background: var(--varq-08);
+  color: var(--varq);
+  font-size: 13px;
+  line-height: 1.2;
+  white-space: nowrap;
+  text-decoration: none;
+}
+
+a.chip:hover {
+  border-color: var(--varq-30);
+}
+
+.chip .dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--varq-30);
+  flex: none;
+}
+
+.chip[data-tone='live'] .dot {
+  background: var(--pista);
+}
+
+.chip[data-tone='down'] .dot {
+  background: var(--chilli);
+}
+
+.chip[data-tone='kesar'] {
+  border-color: color-mix(in srgb, var(--kesar) 55%, transparent);
+  color: var(--kesar);
+  background: color-mix(in srgb, var(--kesar) 10%, transparent);
+}
+
+.chip[data-tone='pista'] {
+  border-color: color-mix(in srgb, var(--pista) 55%, transparent);
+  color: var(--pista);
+  background: color-mix(in srgb, var(--pista) 10%, transparent);
+}
+
+.chip[data-tone='gulab'] {
+  border-color: color-mix(in srgb, var(--gulab) 55%, transparent);
+  color: var(--gulab);
+  background: color-mix(in srgb, var(--gulab) 10%, transparent);
+}
+
+.chip[data-tone='chilli'] {
+  border-color: color-mix(in srgb, var(--chilli) 55%, transparent);
+  color: var(--chilli);
+  background: color-mix(in srgb, var(--chilli) 10%, transparent);
+}
+
+.chip[data-tone='synthetic'] {
+  border-style: dashed;
+  color: var(--varq-60);
+}
+
+.chip .label {
+  color: var(--varq-60);
+}
+
+/* Cards */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--varq-08);
+  border-radius: var(--radius-m);
+  padding: 14px;
+}
+
+.waiting {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px 14px;
+  border-radius: var(--radius-m);
+  border: 1px dashed var(--varq-15);
+  color: var(--varq-60);
+  font-size: 14px;
+}
+
+.waiting strong {
+  color: var(--varq);
+  font-weight: 600;
+}
+
+/* Motion grammar: the 2 px idle bob, the ring on a written record. */
+@keyframes bob {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-2px);
+  }
+}
+
+@keyframes ring {
+  from {
+    transform: scale(0.6);
+    opacity: 0.9;
+  }
+  to {
+    transform: scale(1.8);
+    opacity: 0;
+  }
+}
+
+@keyframes rise-in {
+  from {
+    transform: translateY(8px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.bob {
+  animation: bob 2.4s ease-in-out infinite;
+}
+
+.rise-in {
+  animation: rise-in var(--move) var(--ease-out) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 1ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 1ms !important;
+    scroll-behavior: auto !important;
+  }
+}
