@@ -1,0 +1,21 @@
+{
+  "name": "@graphpay/city",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "The synthetic city generator and its seeding driver (labelled synthetic; ADR-0043, ADR-0049).",
+  "exports": {
+    ".": "./index.mjs"
+  },
+  "scripts": {
+    "test": "node --test \"test/*.test.mjs\"",
+    "seed": "node scripts/seed.mjs"
+  },
+  "dependencies": {
+    "@arkiv-network/sdk": "1.0.1",
+    "@graphpay/arkiv-graph": "workspace:*",
+    "@graphpay/config": "workspace:*",
+    "@graphpay/money-graph": "workspace:*",
+    "viem": "2.57.16"
+  }
+}

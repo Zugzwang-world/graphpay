@@ -1,0 +1,24 @@
+{
+  "synthetic": true,
+  "size": "S",
+  "store": "plain",
+  "owner": "0x9da407ffdbf6e4dee5f972f7adcfa873d72b60d0",
+  "dataset": "graphpay-city-v1-S",
+  "backend": "rabdi",
+  "transactions": 19,
+  "creates": 453,
+  "patches": 0,
+  "deletes": 0,
+  "gas": "75898875",
+  "tglm": "0.075898",
+  "firstTx": "0xc5eb55efc9ca44fa95600005f8a86a4fdd7ebc2c0cbb4e3cf8b338f3a96e1b72",
+  "lastTx": "0x9866a954503cda971e7db5665f18a322efbcc56fa752ca1c940ef807612ca2f6",
+  "started": "2026-11-05T21:32:40.768Z",
+  "finished": "2026-11-05T21:34:32.588Z",
+  "minutes": 1.9,
+  "httpStatus": {
+    "200": 301
+  },
+  "lowestRateLimitRemaining": 4962,
+  "status": "done"
+}

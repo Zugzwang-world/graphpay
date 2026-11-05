@@ -1,0 +1,167 @@
+{
+  "generated": {
+    "end": "2026-11-05",
+    "seed": 2026,
+    "story": "test"
+  },
+  "counts": {
+    "edge": 1003,
+    "node": 92,
+    "tally": 871,
+    "link": 234,
+    "record": 1003,
+    "profile": 91,
+    "shop": 12
+  },
+  "truth": {
+    "synthetic": true,
+    "dataset": "graphpay-city-v1-S",
+    "q1": {
+      "shop": "kesar-kingdom.graphpay.eth",
+      "orders": 171,
+      "refunds": 2,
+      "refundRate": 0.0116,
+      "orders90": 121
+    },
+    "q2": {
+      "identity": [
+        {
+          "ens": "kesar-kingdom.graphpay.eth",
+          "epoch": 0,
+          "paidMicro": "800400000"
+        },
+        {
+          "ens": "jamun-junction.graphpay.eth",
+          "epoch": 0,
+          "paidMicro": "231000000"
+        },
+        {
+          "ens": "syrup-street.graphpay.eth",
+          "epoch": 0,
+          "paidMicro": "172200000"
+        },
+        {
+          "ens": "shop-002.sim.graphpay.eth",
+          "epoch": 0,
+          "paidMicro": "155490000"
+        },
+        {
+          "ens": "shop-001.sim.graphpay.eth",
+          "epoch": 0,
+          "paidMicro": "107210000"
+        },
+        {
+          "ens": "shop-004.sim.graphpay.eth",
+          "epoch": 0,
+          "paidMicro": "94260000"
+        },
+        {
+          "ens": "shop-003.sim.graphpay.eth",
+          "epoch": 0,
+          "paidMicro": "75720000"
+        },
+        {
+          "ens": "shop-008.sim.graphpay.eth",
+          "epoch": 0,
+          "paidMicro": "71830000"
+        },
+        {
+          "ens": "shop-006.sim.graphpay.eth",
+          "epoch": 0,
+          "paidMicro": "57190000"
+        },
+        {
+          "ens": "shop-007.sim.graphpay.eth",
+          "epoch": 0,
+          "paidMicro": "49750000"
+        }
+      ],
+      "byName": [
+        {
+          "ens": "kesar-kingdom.graphpay.eth",
+          "paidMicro": "800400000"
+        },
+        {
+          "ens": "jamun-junction.graphpay.eth",
+          "paidMicro": "231000000"
+        },
+        {
+          "ens": "syrup-street.graphpay.eth",
+          "paidMicro": "172200000"
+        },
+        {
+          "ens": "shop-002.sim.graphpay.eth",
+          "paidMicro": "155490000"
+        },
+        {
+          "ens": "shop-001.sim.graphpay.eth",
+          "paidMicro": "107210000"
+        },
+        {
+          "ens": "shop-004.sim.graphpay.eth",
+          "paidMicro": "94260000"
+        },
+        {
+          "ens": "shop-005.sim.graphpay.eth",
+          "paidMicro": "93650000"
+        },
+        {
+          "ens": "shop-003.sim.graphpay.eth",
+          "paidMicro": "75720000"
+        },
+        {
+          "ens": "shop-008.sim.graphpay.eth",
+          "paidMicro": "71830000"
+        },
+        {
+          "ens": "shop-006.sim.graphpay.eth",
+          "paidMicro": "57190000"
+        }
+      ],
+      "payRows": 490
+    },
+    "q3": {
+      "agents": [
+        "concierge.vitalik.graphpay.eth",
+        "scout.vitalik.graphpay.eth",
+        "analyst.vitalik.graphpay.eth",
+        "payer.vitalik.graphpay.eth"
+      ],
+      "spendByShop": {
+        "kesar-kingdom.graphpay.eth": "9600000",
+        "syrup-street.graphpay.eth": "8400000"
+      }
+    },
+    "q4": {
+      "agents": []
+    },
+    "q5": {
+      "from": "payer.vitalik.graphpay.eth",
+      "to": "jamun-junction.graphpay.eth",
+      "hops": 3
+    },
+    "q6": {
+      "shop": "kesar-kingdom.graphpay.eth",
+      "nodes": [
+        "errands.person-005.sim.graphpay.eth",
+        "errands.person-006.sim.graphpay.eth",
+        "errands.person-020.sim.graphpay.eth",
+        "jamun-junction.graphpay.eth",
+        "kesar-kingdom.graphpay.eth",
+        "payer.person-006.sim.graphpay.eth",
+        "payer.person-015.sim.graphpay.eth",
+        "payer.person-017.sim.graphpay.eth",
+        "payer.person-020.sim.graphpay.eth",
+        "payer.person-022.sim.graphpay.eth",
+        "payer.person-023.sim.graphpay.eth",
+        "payer.person-025.sim.graphpay.eth",
+        "payer.person-027.sim.graphpay.eth",
+        "payer.vitalik.graphpay.eth",
+        "shop-001.sim.graphpay.eth",
+        "shop-002.sim.graphpay.eth",
+        "shop-006.sim.graphpay.eth",
+        "syrup-street.graphpay.eth"
+      ]
+    }
+  }
+}

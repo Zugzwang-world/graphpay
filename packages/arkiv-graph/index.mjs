@@ -12,3 +12,5 @@ export { createWriter, operationBytes, WriteRevertedError, WriteUncertainError, 
 export { arkivTransport, arkivChain, arkivClients, assertChain, newStats, parseRateLimit, redactError, isRequestTooLarge } from './src/transport.mjs';
 export { ArkivSim, EXECUTE_ABI, EVENTS_ABI } from './src/sim/arkivsim.mjs';
 export { parseQuery, render as renderQuery } from './src/sim/query.mjs';
+export { createEngine, createExplainStore, explainIdOf } from './src/engine.mjs';
+export { compileFilter } from './src/filter.mjs';

@@ -1,0 +1,45 @@
+{
+  "synthetic": true,
+  "size": "S",
+  "end": "2026-11-05",
+  "backend": "sim",
+  "expected": {
+    "edge": 1003,
+    "node": 92,
+    "tally": 871,
+    "link": 234,
+    "record": 1003,
+    "profile": 91,
+    "shop": 12
+  },
+  "got": {
+    "edge": 1003,
+    "node": 92,
+    "tally": 871,
+    "link": 234,
+    "record": 1003,
+    "profile": 91,
+    "shop": 12
+  },
+  "countsOk": true,
+  "q1ok": true,
+  "q2ok": true,
+  "estimateLive": {
+    "ratio": 1.196,
+    "directory": {
+      "transactions": 1,
+      "gasLive": 1835620,
+      "tglmLive": 0.0018
+    },
+    "graph": {
+      "transactions": 97,
+      "gasLive": 448919530,
+      "tglmLive": 0.4489
+    },
+    "plain": {
+      "transactions": 43,
+      "gasLive": 158859657,
+      "tglmLive": 0.1589
+    }
+  }
+}

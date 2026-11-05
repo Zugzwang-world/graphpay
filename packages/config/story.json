@@ -223,7 +223,64 @@
       "lng": 72.8777
     },
     "searchRadiusKm": 3,
-    "neighbourhoods": []
+    "neighbourhoods": [
+      {
+        "area": "Kurla West",
+        "lat": 19.0686026,
+        "lng": 72.876583,
+        "source": "https://www.openstreetmap.org/node/1366008926",
+        "checked": "2026-11-06 01:58 IST"
+      },
+      {
+        "area": "Kolivery Village",
+        "lat": 19.0787881,
+        "lng": 72.8643215,
+        "source": "https://www.openstreetmap.org/node/5907308821",
+        "checked": "2026-11-06 01:58 IST"
+      },
+      {
+        "area": "Kurla East",
+        "lat": 19.0628944,
+        "lng": 72.8825604,
+        "source": "https://www.openstreetmap.org/node/1640248215",
+        "checked": "2026-11-06 01:58 IST"
+      },
+      {
+        "area": "Bandra Kurla Complex",
+        "lat": 19.067115,
+        "lng": 72.8657245,
+        "source": "https://www.openstreetmap.org/node/1640262758",
+        "checked": "2026-11-06 01:58 IST"
+      },
+      {
+        "area": "Kalina",
+        "lat": 19.079273,
+        "lng": 72.8612672,
+        "source": "https://www.openstreetmap.org/node/1375215062",
+        "checked": "2026-11-06 01:58 IST"
+      },
+      {
+        "area": "Vidya Vihar West",
+        "lat": 19.0812972,
+        "lng": 72.894854,
+        "source": "https://www.openstreetmap.org/node/1640248218",
+        "checked": "2026-11-06 01:58 IST"
+      },
+      {
+        "area": "Vakola",
+        "lat": 19.0813635,
+        "lng": 72.853893,
+        "source": "https://www.openstreetmap.org/node/6126211462",
+        "checked": "2026-11-06 01:58 IST"
+      },
+      {
+        "area": "Bandra East",
+        "lat": 19.0616565,
+        "lng": 72.8498111,
+        "source": "https://www.openstreetmap.org/node/622267824",
+        "checked": "2026-11-06 01:58 IST"
+      }
+    ]
   },
   "syntheticCity": {
     "about": "Parameters of the synthetic city generator (planning/SPEC/ARKIV_GRAPH.md §8, planning/PROMPTS/08-city-and-seeding.md). Seeded straight into Arkiv, labelled synthetic, no real payments (ADR-0043). Tonight only size S, with the test cast, for acceptance; size M waits until the founder locks the final story and is never seeded with the test cast (ADR-0049).",
@@ -251,6 +308,49 @@
         "seed": "only after the final story is locked",
         "owner": "W_SEED_M_EVENT"
       }
+    },
+    "generator": {
+      "about": "Generator inputs (planning/SPEC/ARKIV_GRAPH.md §8 where it gives a value: Zipf s ≈ 1.1, median 4.5 USDT, 2.5% refusals, 30% errands agents, the persona's last-week purchases; the rest are T3's generator choices, synthetic, never measurements). Actor counts scale with sizes[size].approxEdges / baseEdges.",
+      "baseEdges": 1000,
+      "baseShops": 12,
+      "shopExponent": 0.52,
+      "baseHumans": 28,
+      "humanExponent": 0.75,
+      "baseSubscriptions": 3,
+      "edgesPerOrder": 2.05,
+      "simLabel": "sim",
+      "payerLabel": "payer",
+      "errandsLabel": "errands",
+      "errandsShare": 0.3,
+      "shopAgentKey": "storefront",
+      "zipfExponent": 1.1,
+      "medianAmountMicro": 4500000,
+      "amountSigma": 0.5,
+      "minAmountMicro": 500000,
+      "failRate": 0.025,
+      "refundRate": [
+        0.01,
+        0.06
+      ],
+      "jitterKm": 0.6,
+      "personaPurchases": [
+        [
+          "payer",
+          "good",
+          2
+        ],
+        [
+          "payer",
+          "runner-up",
+          1
+        ],
+        [
+          "concierge",
+          "runner-up",
+          1
+        ]
+      ],
+      "batchEvents": 25
     }
   },
   "demoScript": [

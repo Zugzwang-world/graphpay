@@ -65,3 +65,19 @@ export declare function discoverShops(client: PublicArkivClient, options: { cate
 
 export declare function writeHeartbeat(arkiv: ArkivConnection, values: { instance: string; state: string; cursorBlock: number | bigint; cursorLog: number | bigint; headBlock: number | bigint; lagBlocks: number | bigint; updatedTs: number | bigint }, options?: { key?: Hex | null; extend?: boolean }): Promise<Hex>;
 export declare function readHeartbeats(client: PublicArkivClient, options?: { owner?: string }): Promise<Row[]>;
+
+export interface ExplainTrace { explainId: string; backend: string; calls: number; queries: string[]; ms: number; bytes: number; entityKeys: Hex[]; blockNumber: string | null; warnings: string[]; notes: string[]; truncated: boolean; reads?: unknown[] }
+export interface GraphEngine { backend: string; explainStore: { get(id: string): ExplainTrace | null; put(trace: ExplainTrace): void; size(): number }; context(options?: { rowCap?: number }): unknown }
+export declare const SDL: string;
+export declare const graphqlSchema: unknown;
+export declare function createGraphEngine(arkiv: ArkivConnection, options?: { rowCap?: number }): GraphEngine;
+export declare function runGraphql(options: { engine: GraphEngine; query: string; variables?: Record<string, unknown>; dataset?: 'live' | 'S' | 'M'; limits?: { maxFields?: number; maxDepth?: number; maxChars?: number }; listCap?: number; writers?: Record<WriterRole, Hex> }): Promise<{ data?: unknown; errors?: { message: string; path?: unknown }[]; extensions?: { arkiv: Omit<ExplainTrace, 'reads'> } }>;
+export declare function checkLimits(document: unknown, limits?: { maxFields?: number; maxDepth?: number }): void;
+export declare function ownersFor(dataset?: 'live' | 'S' | 'M', writers?: Record<WriterRole, Hex>): Record<string, Hex[]>;
+export declare function rate(n: bigint | number, d: bigint | number): string;
+export declare function usdt(micro: bigint | number): string;
+export declare function createContext(options: { engine: GraphEngine; dataset?: string; listCap?: number; writers?: Record<WriterRole, Hex> }): unknown;
+export declare const MCP_TOOLS: string[];
+export declare function askDocument(args: { intent: string; ens?: string[]; order_id?: string; window?: string; verify?: boolean }): { query: string; columns: string[] };
+export declare function createMcpServer(options: { engine: GraphEngine; dataset?: 'live' | 'S' | 'M' }): unknown;
+export declare function handleMcpRequest(request: Request, options: { engine: GraphEngine; dataset?: 'live' | 'S' | 'M' }): Promise<Response>;

@@ -12,3 +12,5 @@ export { recordEdge, recorderEdgeValues, RECORDER_KINDS } from './src/recorder.m
 export { createQuote, findQuotes, quoteValues } from './src/quotes.mjs';
 export { shopValues, writeShop, discoverShops, discoveryFilters, SHOP_STATUS } from './src/directory.mjs';
 export { writeHeartbeat, readHeartbeats } from './src/heartbeat.mjs';
+export { SDL, graphqlSchema, runGraphql, createContext, createGraphEngine, checkLimits, ownersFor, rate, usdt } from './src/graphql.mjs';
+export { MCP_TOOLS, askDocument, createMcpServer, handleMcpRequest } from './src/mcp.mjs';
