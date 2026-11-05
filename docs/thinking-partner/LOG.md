@@ -27,6 +27,7 @@ One line per PR: time (IST) · activity · result · PR link. Append under your 
 - 01:58 IST · payments · M2 on the real chain (deploy 01:54, setup 01:57): USDT checkout deployed, verified, set up; scripts and records PR · pay/deploy
 
 ## identity
+- 02:00 IST · identity · M5: the ens package, ABIs from Sourcify, run script and checkers; namespace provisioned on real Sepolia (60 tx, 72.7M gas); B1/B4/B5/B8/B9a reads pass · PR link added once opened
 
 ## arkiv
 
