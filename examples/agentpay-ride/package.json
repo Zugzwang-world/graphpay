@@ -1,0 +1,14 @@
+{
+  "name": "@graphpay/example-agentpay-ride",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "AgentPay example: a fixed-fare cab ride booked and paid by a customer agent over the graphpay-order 402 on Whitechain Sepolia.",
+  "exports": {
+    ".": "./index.mjs"
+  },
+  "dependencies": {
+    "@graphpay/agentpay": "workspace:*",
+    "@graphpay/config": "workspace:*"
+  }
+}
