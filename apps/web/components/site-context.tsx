@@ -7,6 +7,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import type { SiteModel } from '@/lib/site.server';
 import { PASSCODE_HEADER } from '@/lib/passcode-header';
+import { streamEvents, type StreamOutcome } from '@/lib/sse-client';
 import { SOUND_CAPTIONS, playSound, unlockAudio, type SoundKind } from '@/lib/sound';
 import type { RunResult, TraceEvent } from '@/lib/contracts';
 
@@ -35,6 +36,8 @@ interface SiteContextValue {
   requestUnlock: () => Promise<string | null>;
   settleUnlock: (value: string | null) => void;
   post: <T>(path: string, body: unknown) => Promise<ApiAnswer<T>>;
+  // A passcode-gated POST answered as a server-sent stream; null when the user cancels the lock.
+  stream: (path: string, body: unknown, onEvent: (event: string, data: string) => void) => Promise<StreamOutcome | null>;
   soundOn: boolean;
   enableSound: () => Promise<void>;
   setSoundOn: (on: boolean) => void;
@@ -115,6 +118,18 @@ export function SiteProvider({ model, children }: { model: SiteModel; children: 
     [passcode, requestUnlock, setPasscode],
   );
 
+  const stream = useCallback(
+    async (path: string, body: unknown, onEvent: (event: string, data: string) => void): Promise<StreamOutcome | null> => {
+      let code = passcode ?? readStored();
+      if (!code) code = await requestUnlock();
+      if (!code) return null;
+      const outcome = await streamEvents(path, onEvent, { method: 'POST', body, headers: { [PASSCODE_HEADER]: code } });
+      if (outcome.kind === 'refused' && outcome.status === 401) setPasscode(null);
+      return outcome;
+    },
+    [passcode, requestUnlock, setPasscode],
+  );
+
   const sound = useCallback(
     (kind: SoundKind) => {
       setCaption({ text: SOUND_CAPTIONS[kind], at: Date.now() });
@@ -135,8 +150,8 @@ export function SiteProvider({ model, children }: { model: SiteModel; children: 
   const setRun = useCallback((update: (prev: RunState) => RunState) => setRunState(update), []);
 
   const value = useMemo<SiteContextValue>(
-    () => ({ model, passcode, setPasscode, unlockOpen, requestUnlock, settleUnlock, post, soundOn, enableSound, setSoundOn, sound, caption, run, setRun }),
-    [model, passcode, setPasscode, unlockOpen, requestUnlock, settleUnlock, post, soundOn, enableSound, setSoundOn, sound, caption, run, setRun],
+    () => ({ model, passcode, setPasscode, unlockOpen, requestUnlock, settleUnlock, post, stream, soundOn, enableSound, setSoundOn, sound, caption, run, setRun }),
+    [model, passcode, setPasscode, unlockOpen, requestUnlock, settleUnlock, post, stream, soundOn, enableSound, setSoundOn, sound, caption, run, setRun],
   );
 
   return <SiteContext.Provider value={value}>{children}</SiteContext.Provider>;

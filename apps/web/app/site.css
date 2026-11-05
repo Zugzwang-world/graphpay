@@ -1016,3 +1016,13 @@ pre.query {
   min-height: 28px;
   padding: 0 8px;
 }
+
+.refusals {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 4px;
+  color: var(--chilli);
+  font-size: 13.5px;
+}
