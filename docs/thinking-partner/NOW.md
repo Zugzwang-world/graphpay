@@ -8,7 +8,7 @@ Updated 03:10 IST, Fri 6 Nov. **Four milestones are merged: M7a (the Arkiv write
 
 Two risks for the founder (`OPEN.md` "Founder now"):
 - **Power and lid:** the lid closed at 02:14 and the Mac slept until 03:01, so every session lost about 47 minutes; it runs on battery.
-- **Plan usage:** 74% at 03:04, about 3 points an hour, resetting Fri 21:30 IST. The track sessions run the planned models, and the busiest ones restart with a fresh context at milestone boundaries (T4 dropped to 94K tokens).
+- **Plan usage:** 76% at 03:36, about 3.75 points an hour with seven sessions, resetting Fri 21:30 IST. The track sessions run the planned models, the busiest restart fresh at milestone boundaries, and at 03:37 the four Opus sessions stepped down from xhigh to high. Extra usage is the founder's decision.
 
 Next:
 1. M5 merges (T2), then T1's M3 part B and Join's real mirror runs.
