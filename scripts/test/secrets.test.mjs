@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { execFileSync, spawn, spawnSync } from 'node:child_process';
-import { mkdtempSync, readdirSync, readFileSync, statSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdtempSync, readdirSync, readFileSync, rmSync, statSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { test } from 'node:test';
@@ -313,16 +313,99 @@ test('the error boundary redacts a keyed RPC URL from a failing call (fake RPC: 
   assert.ok(!res.out.includes(secret), 'the keyed URL leaked');
 });
 
-test('secrets:vercel refuses client-exposed and unknown names and never prints a value', () => {
+// secrets:vercel runs here only with --dry-run, and with a fake `vercel` first on PATH
+// that records any call, so no test can reach the real project.
+function runVercelPush(args, envFile) {
+  const bin = mkdtempSync(join(tmpdir(), 'gp-bin-'));
+  const calls = join(bin, 'calls.log');
+  writeFileSync(join(bin, 'vercel'), `#!/bin/sh\necho called >> "${calls}"\nexit 1\n`, { mode: 0o755 });
+  const res = spawnSync(process.execPath, ['scripts/secrets/vercel-push.mjs', ...args], {
+    encoding: 'utf8',
+    env: { ...process.env, ENV_FILE: envFile, PATH: `${bin}:${process.env.PATH}` },
+  });
+  const called = existsSync(calls);
+  rmSync(bin, { recursive: true, force: true });
+  return { ...res, called };
+}
+
+test('secrets:vercel refuses client-exposed and unknown names, defaults to production only, never prints a value', () => {
   const dest = join(repo(), '.env');
   writeFileSync(dest, `RECORDER_TOKEN=${'r'.repeat(30)}\n`);
   for (const name of ['NEXT_PUBLIC_RPC', 'VITE_KEY', 'NOT_A_NAME']) {
-    const res = runScript('scripts/secrets/vercel-push.mjs', [name, '--dry-run'], dest);
+    const res = runVercelPush([name, '--dry-run'], dest);
     assert.equal(res.status, 1, name);
   }
-  const dry = runScript('scripts/secrets/vercel-push.mjs', ['RECORDER_TOKEN', '--dry-run'], dest);
+  const dry = runVercelPush(['RECORDER_TOKEN', '--dry-run'], dest);
   assert.equal(dry.status, 0);
-  assert.match(dry.stdout, /RECORDER_TOKEN → graphpay-event production \(Sensitive\): dry run/);
+  assert.equal(dry.stdout.trim(), 'RECORDER_TOKEN → graphpay-event production (Sensitive): dry run');
   assert.ok(!dry.stdout.includes('r'.repeat(30)));
-  assert.equal(runScript('scripts/secrets/vercel-push.mjs', ['CRON_SECRET', '--dry-run'], dest).status, 1); // not set
+  const both = runVercelPush(['RECORDER_TOKEN', '--env', 'production,preview', '--dry-run'], dest);
+  assert.equal(both.status, 0);
+  assert.deepEqual(both.stdout.trim().split('\n'), [
+    'RECORDER_TOKEN → graphpay-event production (Sensitive): dry run',
+    'RECORDER_TOKEN → graphpay-event preview (Sensitive): dry run',
+  ]);
+  assert.equal(runVercelPush(['CRON_SECRET', '--dry-run'], dest).status, 1); // not set
+  for (const res of [dry, both]) assert.equal(res.called, false);
+});
+
+test('secrets:vercel keeps the local-only role keys off Vercel with a name-only reason, and allows the hosted ones', () => {
+  const local = ['FUNDER', 'OPERATOR', 'DEPLOYER', 'POLICY_WRITER', 'W_LEDGER', 'W_SEED_EVENT', 'W_SEED_M_EVENT'];
+  const hosted = ['FACILITATOR', 'RENEWER', 'W_SYNC', 'W_DIRECTORY', 'VITALIK', 'SHOP_KESAR', 'SHOP_JAMUN', 'SHOP_SYRUP', 'PAYER', 'DEAL_HUNTER', 'REHEARSAL_PAYER', 'ACCEPTANCE_PAYER', 'DISPOSABLE_1', 'DISPOSABLE_2'];
+  const keys = Object.fromEntries([...local, ...hosted].map((role) => [`${role}_PRIVATE_KEY`, generatePrivateKey()]));
+  const dest = join(repo(), '.env');
+  writeFileSync(dest, `${Object.entries(keys).map(([name, key]) => `${name}=${key}`).join('\n')}\n`);
+  const leaked = (res) => Object.values(keys).some((key) => res.stdout.includes(key.slice(2)) || res.stderr.includes(key.slice(2)));
+  for (const role of local) {
+    const res = runVercelPush([`${role}_PRIVATE_KEY`, '--dry-run'], dest);
+    assert.equal(res.status, 1, role);
+    assert.match(res.stdout, new RegExp(`^${role}_PRIVATE_KEY: refused \\(this key stays on the founder's Mac; .+\\)$`, 'm'), role);
+    assert.ok(!leaked(res) && !res.called, role);
+  }
+  assert.match(runVercelPush(['W_LEDGER_PRIVATE_KEY', '--dry-run'], dest).stdout, /the single mirror writer: a second writer corrupts tallies/);
+  // One local-only key among hosted ones stops the whole run before anything is sent.
+  const mixed = runVercelPush(['PAYER_PRIVATE_KEY', 'W_LEDGER_PRIVATE_KEY', '--dry-run'], dest);
+  assert.equal(mixed.status, 1);
+  assert.ok(!mixed.stdout.includes('dry run'));
+  const ok = runVercelPush([...hosted.map((role) => `${role}_PRIVATE_KEY`), '--dry-run'], dest);
+  assert.equal(ok.status, 0, ok.stdout);
+  for (const role of hosted) assert.match(ok.stdout, new RegExp(`^${role}_PRIVATE_KEY → graphpay-event production \\(Sensitive\\): dry run$`, 'm'), role);
+  assert.ok(!leaked(ok) && !ok.called);
+});
+
+test('secrets:vercel refuses every unrecognised flag before reading or sending anything, never echoing a value', () => {
+  const dest = join(repo(), '.env');
+  writeFileSync(dest, `RECORDER_TOKEN=${'r'.repeat(30)}\n`);
+  const secret = SAMPLES['anthropic-api-key'];
+  const cases = [
+    ['--dryrun'],
+    ['--env=preview'],
+    ['--env=production,preview'],
+    ['--force'],
+    ['-n'],
+    ['--'],
+    ['--env'],
+    ['--env', 'staging'],
+    ['--env', 'production,'],
+    ['--env', 'production', '--env', 'preview'],
+    ['--env', '--dry-run'],
+    [`--token=${secret}`],
+    [`--${secret}`],
+  ];
+  for (const extra of cases) {
+    const res = runVercelPush(['RECORDER_TOKEN', '--dry-run', ...extra], dest);
+    const what = extra.join(' ').replace(secret, '<secret>');
+    assert.equal(res.status, 1, what);
+    assert.ok(!res.stdout.includes('dry run') && !res.called, what);
+    assert.ok(!`${res.stdout}${res.stderr}`.includes(secret) && !res.stdout.includes('r'.repeat(30)), what);
+  }
+  assert.match(runVercelPush(['RECORDER_TOKEN', '--dry-run', '--dryrun'], dest).stdout, /refused \(unrecognised flag --dryrun; the flags are/);
+  assert.match(runVercelPush(['RECORDER_TOKEN', '--dry-run', '--env=preview'], dest).stdout, /refused \(unrecognised flag --env=…;/);
+  assert.match(runVercelPush(['RECORDER_TOKEN', '--dry-run', `--token=${secret}`], dest).stdout, /unrecognised flag --token=…;/);
+  const named = runVercelPush([`ANTHROPIC_API_KEY=${secret}`, '--dry-run'], dest);
+  assert.equal(named.status, 1);
+  assert.ok(!`${named.stdout}${named.stderr}`.includes(secret) && !named.called);
+  // Flags are checked before .env is read: a missing ENV_FILE is not the reported problem.
+  const missing = runVercelPush(['RECORDER_TOKEN', '--dry-run', '--dryrun'], join(dirname(dest), 'absent.env'));
+  assert.match(missing.stdout, /unrecognised flag --dryrun/);
 });

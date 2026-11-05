@@ -1,5 +1,5 @@
 {
-  "about": "The infrastructure config (ADR-0030): every ENS, Whitechain and Arkiv address and URL, the networks, the wallet roles and the model pricing. Everything story-specific lives in story.json (ADR-0047). Values come from planning/FACTS.md, re-verified in docs/technical/FACTS.md. Section owners: root, networks, wallets, models, site (main); whitechain.contracts (payments); ens (identity); arkiv (arkiv).",
+  "about": "The infrastructure config (ADR-0030): every ENS, Whitechain and Arkiv address and URL, the networks, the wallet roles, the model pricing and the model API URL. Everything story-specific lives in story.json (ADR-0047). Values come from planning/FACTS.md, re-verified in docs/technical/FACTS.md. Section owners: root, networks, wallets, models, site (main); whitechain.contracts (payments); ens (identity); arkiv (arkiv).",
   "schemaVersion": 1,
   "root": {
     "ens": "graphpay.eth"
@@ -218,20 +218,30 @@
     ]
   },
   "models": {
-    "source": "Anthropic model table in the claude-api reference (cached 2026-10-06), checked 2026-11-05; cache writes are 1.25x input and cache reads 0.1x (Opus 5.5's read price is listed; Haiku 5.5's is derived). Verify on the pricing page before quoting a cost publicly.",
+    "source": "Anthropic pricing page (https://platform.claude.com/docs/en/about-claude/pricing), checked 2026-11-05; every price here is listed there. Cache writes cost 1.25x input for 5 minutes and 2x input for 1 hour; cache reads 0.1x input (0.05x on Opus 5.5). Haiku 5.5 has a second card (longPrompt) for a prompt over 100,000 tokens, counting all input tokens including cache reads and writes; it then prices every token of that request, output included. Re-check the page before quoting a cost publicly.",
+    "apiBaseUrl": "https://api.anthropic.com",
     "pricingUsdPerMTok": {
       "claude-opus-5-5": {
         "input": 4.0,
         "output": 20.0,
         "cacheWrite5m": 5.0,
+        "cacheWrite1h": 8.0,
         "cacheRead": 0.2
       },
       "claude-haiku-5-5": {
         "input": 0.1,
         "output": 0.5,
         "cacheWrite5m": 0.125,
+        "cacheWrite1h": 0.2,
         "cacheRead": 0.01,
-        "note": "prompts up to 100K tokens; 0.50 / 2.50 beyond"
+        "longPrompt": {
+          "aboveInputTokens": 100000,
+          "input": 0.5,
+          "output": 2.5,
+          "cacheWrite5m": 0.625,
+          "cacheWrite1h": 1.0,
+          "cacheRead": 0.05
+        }
       }
     },
     "effortLevels": [

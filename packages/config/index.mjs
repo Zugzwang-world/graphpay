@@ -55,24 +55,44 @@ export function disposableEntry(n, cast = activeCast(), root = config.root.ens) 
 // The model settings of an agent role under the active preset (ADR-0048).
 // AGENT_PRESET overrides the story's active preset for one run.
 export function agentPreset(role, { env = process.env, source = story } = {}) {
-  const name = env.AGENT_PRESET || source.agentModels.active;
-  const preset = source.agentModels.presets[name];
-  if (!preset) throw new Error(`agent preset "${name}" is not in the story config`);
-  const settings = preset.roles[role];
-  if (!settings) throw new Error(`agent preset "${name}" has no settings for role "${role}"`);
-  return { preset: name, role, ...settings };
+  const { active, presets } = source.agentModels;
+  const name = env.AGENT_PRESET || active;
+  // Own keys only: "constructor" or "__proto__" is no preset and no role.
+  if (!Object.hasOwn(presets, name)) throw new Error(`agent preset "${name}" is not in the story config`);
+  const { roles } = presets[name];
+  if (!Object.hasOwn(roles, role)) throw new Error(`agent preset "${name}" has no settings for role "${role}"`);
+  return { preset: name, role, ...roles[role] };
 }
 
 // API cost in USD of one response's usage, from the configured per-million-token prices.
+// A model's longPrompt card (Haiku 5.5: a prompt over 100,000 tokens, counting cache
+// reads and writes) prices every token of that request, output included. 1-hour cache
+// writes cost cacheWrite1h and 5-minute writes cacheWrite5m, from usage.cache_creation;
+// writes it does not break down are priced at the 5-minute rate.
 export function apiCostUsd(model, usage) {
-  const price = config.models.pricingUsdPerMTok[model];
-  if (!price) throw new Error(`no price for model "${model}" in the config file`);
-  const tokens = (n) => (Number.isFinite(n) ? n : 0);
+  const prices = config.models.pricingUsdPerMTok;
+  if (!Object.hasOwn(prices, model)) throw new Error(`no price for model "${model}" in the config file`);
+  const tokens = (n) => (Number.isFinite(n) && n > 0 ? n : 0);
+  const u = usage ?? {};
+  const byTtl = u.cache_creation ?? {};
+  const input = tokens(u.input_tokens);
+  const output = tokens(u.output_tokens);
+  const read = tokens(u.cache_read_input_tokens);
+  const write1h = tokens(byTtl.ephemeral_1h_input_tokens);
+  const write5m = Math.max(tokens(byTtl.ephemeral_5m_input_tokens), tokens(u.cache_creation_input_tokens) - write1h);
+  const base = prices[model];
+  const long = base.longPrompt;
+  const card = long && input + read + write5m + write1h > long.aboveInputTokens ? long : base;
+  const rate = (key) => {
+    if (!Number.isFinite(card[key])) throw new Error(`no ${key} price for model "${model}" in the config file`);
+    return card[key];
+  };
   return (
-    (tokens(usage.input_tokens) * price.input +
-      tokens(usage.output_tokens) * price.output +
-      tokens(usage.cache_creation_input_tokens) * price.cacheWrite5m +
-      tokens(usage.cache_read_input_tokens) * price.cacheRead) /
+    (input * rate('input') +
+      output * rate('output') +
+      write5m * rate('cacheWrite5m') +
+      write1h * rate('cacheWrite1h') +
+      read * rate('cacheRead')) /
     1e6
   );
 }

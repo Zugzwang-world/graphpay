@@ -68,11 +68,79 @@ test('every agent preset covers every agent role with a priced model and a valid
   assert.throws(() => agentPreset('payer', { env: { AGENT_PRESET: 'nope' } }), /not in the story config/);
 });
 
-test('API cost comes from the configured prices', () => {
-  const model = Object.keys(config.models.pricingUsdPerMTok)[0];
-  const price = config.models.pricingUsdPerMTok[model];
-  assert.equal(apiCostUsd(model, { input_tokens: 1e6, output_tokens: 1e6 }), price.input + price.output);
+test('presets, roles and prices are looked up as own keys only', () => {
+  for (const name of ['constructor', '__proto__', 'toString', 'hasOwnProperty']) {
+    assert.throws(() => agentPreset('payer', { env: { AGENT_PRESET: name } }), /not in the story config/, name);
+    assert.throws(() => agentPreset(name, { env: {} }), /has no settings for role/, name);
+    assert.throws(() => apiCostUsd(name, { input_tokens: 1 }), /no price/, name);
+  }
+});
+
+const PRICES = config.models.pricingUsdPerMTok;
+const near = (actual, expected, what) => assert.ok(Math.abs(actual - expected) < 1e-12, `${what}: ${actual} is not ${expected}`);
+const cards = () =>
+  Object.entries(PRICES).flatMap(([model, card]) => [[model, card], ...(card.longPrompt ? [[`${model} longPrompt`, card.longPrompt]] : [])]);
+
+test('every price card is complete: cache writes 1.25x input for 5 minutes and 2x for 1 hour', () => {
+  for (const [what, card] of cards()) {
+    for (const key of ['input', 'output', 'cacheWrite5m', 'cacheWrite1h', 'cacheRead']) {
+      assert.ok(Number.isFinite(card[key]) && card[key] > 0, `${what}: ${key}`);
+    }
+    near(card.cacheWrite5m, card.input * 1.25, `${what} cacheWrite5m`);
+    near(card.cacheWrite1h, card.input * 2, `${what} cacheWrite1h`);
+  }
+  assert.ok(Object.values(PRICES).some((card) => card.longPrompt), 'a long-prompt card is configured');
+  for (const card of Object.values(PRICES)) {
+    if (card.longPrompt) assert.ok(Number.isInteger(card.longPrompt.aboveInputTokens) && card.longPrompt.aboveInputTokens > 0);
+  }
+  assert.match(config.models.apiBaseUrl, /^https:\/\/[^/]+$/);
+});
+
+test('API cost: every token kind at its configured price', () => {
   assert.throws(() => apiCostUsd('not-a-model', {}), /no price/);
+  for (const [model, card] of Object.entries(PRICES)) {
+    near(apiCostUsd(model, { input_tokens: 1e4, output_tokens: 2e4 }), (1e4 * card.input + 2e4 * card.output) / 1e6, `${model} in+out`);
+    near(apiCostUsd(model, { cache_read_input_tokens: 3e4 }), (3e4 * card.cacheRead) / 1e6, `${model} read`);
+    assert.equal(apiCostUsd(model, {}), 0);
+    assert.equal(apiCostUsd(model, null), 0);
+  }
+});
+
+test('API cost: 1-hour cache writes at cacheWrite1h from usage.cache_creation, other writes at the 5-minute rate', () => {
+  for (const [model, card] of Object.entries(PRICES)) {
+    const both = { cache_creation_input_tokens: 3e4, cache_creation: { ephemeral_5m_input_tokens: 1e4, ephemeral_1h_input_tokens: 2e4 } };
+    near(apiCostUsd(model, both), (1e4 * card.cacheWrite5m + 2e4 * card.cacheWrite1h) / 1e6, `${model} by TTL`);
+    // No breakdown (or a null one): every write is a 5-minute write.
+    near(apiCostUsd(model, { cache_creation_input_tokens: 3e4 }), (3e4 * card.cacheWrite5m) / 1e6, `${model} no breakdown`);
+    near(apiCostUsd(model, { cache_creation_input_tokens: 3e4, cache_creation: null }), (3e4 * card.cacheWrite5m) / 1e6, `${model} null breakdown`);
+    // Only the 1-hour part broken down: the rest of the total is 5-minute.
+    const partial = { cache_creation_input_tokens: 3e4, cache_creation: { ephemeral_1h_input_tokens: 1e4 } };
+    near(apiCostUsd(model, partial), (2e4 * card.cacheWrite5m + 1e4 * card.cacheWrite1h) / 1e6, `${model} partial`);
+    // A breakdown without the total still counts.
+    near(apiCostUsd(model, { cache_creation: { ephemeral_1h_input_tokens: 1e4 } }), (1e4 * card.cacheWrite1h) / 1e6, `${model} no total`);
+  }
+});
+
+test('API cost: a prompt over the long-prompt threshold (cache reads and writes count) prices every token on the long card', () => {
+  for (const [model, card] of Object.entries(PRICES)) {
+    if (!card.longPrompt) continue;
+    const { aboveInputTokens: limit, ...long } = card.longPrompt;
+    const cost = (c, u) => (u.input * c.input + u.read * c.cacheRead + u.write5m * c.cacheWrite5m + u.write1h * c.cacheWrite1h + u.output * c.output) / 1e6;
+    const usage = (u) => ({
+      input_tokens: u.input,
+      output_tokens: u.output,
+      cache_read_input_tokens: u.read,
+      cache_creation_input_tokens: u.write5m + u.write1h,
+      cache_creation: { ephemeral_5m_input_tokens: u.write5m, ephemeral_1h_input_tokens: u.write1h },
+    });
+    const atLimit = { input: limit - 3000, read: 1000, write5m: 1000, write1h: 1000, output: 5000 };
+    near(apiCostUsd(model, usage(atLimit)), cost(card, atLimit), `${model} at the threshold`);
+    for (const over of [{ ...atLimit, input: atLimit.input + 1 }, { ...atLimit, read: atLimit.read + 1 }, { ...atLimit, write1h: atLimit.write1h + 1 }]) {
+      near(apiCostUsd(model, usage(over)), cost(long, over), `${model} one token over`);
+    }
+    // The fallback total counts toward the threshold too.
+    near(apiCostUsd(model, { input_tokens: 1, cache_creation_input_tokens: limit }), (long.input + limit * long.cacheWrite5m) / 1e6, `${model} write total`);
+  }
 });
 
 test('RPC candidates: the secret URL first, then public Ankr, then Whitechain public', () => {

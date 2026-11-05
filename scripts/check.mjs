@@ -14,7 +14,7 @@ export const CONFIG_FILE = 'packages/config/graphpay.config.json';
 // Real addresses we know of: the config file, the pack's facts and wallets, the event's wallets.
 const ADDRESS_SOURCES = [CONFIG_FILE, 'planning/FACTS.md', 'planning/WALLETS.md', 'docs/technical/WALLETS.md'];
 const CODE_PATH = /^(?:packages|apps|scripts|integration|acceptance|bench)\//;
-const CODE_EXT = /\.(?:[cm]?[jt]sx?|sol|json|sh|ya?ml|toml)$/;
+const CODE_EXT = /\.(?:[cm]?[jt]sx?|mdx|html?|graphql|gql|sol|json|sh|ya?ml|toml)$/;
 const NOT_CODE = /(?:^|\/)(?:node_modules|broadcast|\.next)\//;
 const ADDRESS = /(?<![0-9a-fA-F])0x[0-9a-fA-F]{40}(?![0-9a-fA-F])/g;
 const ZERO = `0x${'0'.repeat(40)}`;
@@ -49,8 +49,10 @@ export function knownAddresses(root) {
   return known;
 }
 
+const isCode = (path) => CODE_PATH.test(path) && CODE_EXT.test(path) && !NOT_CODE.test(path);
+
 export function isCodePath(path) {
-  return CODE_PATH.test(path) && CODE_EXT.test(path) && !NOT_CODE.test(path) && path !== CONFIG_FILE;
+  return isCode(path) && path !== CONFIG_FILE;
 }
 
 // Addendum B and acceptance A7: no ENS or Whitechain address literal outside the
@@ -71,10 +73,13 @@ export function addressFindings(path, text, known) {
 export const STORY_FILE = 'packages/config/story.json';
 
 // The design rule (ADR-0047): story names and values live only in the story file.
-// Distinctive literals only, matched case-sensitively: the persona's and shops'
-// labels and display names, product names and SKUs, the renewal item and plan id,
-// and the order's request text. Agent role words (scout, payer, ...) are structure,
-// and upper-case wallet role slots (VITALIK, SHOP_KESAR) are infrastructure names.
+// Distinctive literals only: the persona's and shops' labels and display names,
+// product names and SKUs, the renewal item and plan id, and the order's request
+// text. Each is matched in any case and in every spelling of its words (kebab,
+// snake, spaced, camelCase), also as a camelCase part of a longer name. A match that
+// is entirely upper case passes: wallet role slots and env names (VITALIK,
+// SHOP_KESAR_PRIVATE_KEY) are infrastructure names. Agent role words (scout,
+// payer, ...) are structure. The story file and docs are exempt.
 export function storyLiterals(root) {
   const file = join(root, STORY_FILE);
   if (!existsSync(file)) return [];
@@ -89,13 +94,69 @@ export function storyLiterals(root) {
 
 const escapeRe = (v) => v.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
-export function storyFindings(path, text, literals) {
-  const code = CODE_PATH.test(path) && CODE_EXT.test(path) && !NOT_CODE.test(path) && path !== STORY_FILE;
-  if (!code) return [];
-  const out = [];
+// The words of a literal, split at white space, '-', '_' and camelCase humps.
+export function storyWords(literal) {
+  return literal.split(/[\s_-]+|(?<=[a-z0-9])(?=[A-Z])/).filter(Boolean);
+}
+
+// The spellings a literal is matched in: itself and, when it is a name of plain words,
+// kebab, snake, spaced and camelCase. Matching ignores case, so for a shop "alpha-beta"
+// these also cover "Alpha Beta", "AlphaBeta" and "ALPHA beta".
+export function storyVariants(literal) {
+  const words = storyWords(literal);
+  if (words.length < 2 || !words.every((w) => /^[A-Za-z0-9]+$/.test(w))) return [literal];
+  const lower = words.map((w) => w.toLowerCase());
+  const camel = lower.map((w, i) => (i === 0 ? w : w[0].toUpperCase() + w.slice(1))).join('');
+  const out = new Map();
+  for (const v of [lower.join('-'), lower.join('_'), lower.join(' '), camel, literal]) {
+    if (!out.has(v.toLowerCase())) out.set(v.toLowerCase(), v);
+  }
+  return [...out.values()];
+}
+
+// One case-insensitive pattern per distinct spelling; a space matches any white space,
+// so a name wrapped across lines (JSX, HTML, MDX) still counts.
+function storyPatterns(literals) {
+  const spellings = new Map();
   for (const literal of literals) {
-    const re = new RegExp(`(?<![A-Za-z0-9_-])${escapeRe(literal)}(?![A-Za-z0-9_-])`, 'g');
-    for (const m of text.matchAll(re)) out.push({ path, line: lineOf(text, m.index), label: 'story-literal-outside-story-config' });
+    for (const v of storyVariants(literal)) spellings.set(v.toLowerCase().replace(/\s+/g, ' '), v);
+  }
+  return [...spellings.values()].map((v) => new RegExp(escapeRe(v).replace(/\s+/g, '\\s+'), 'gi'));
+}
+
+const ALNUM = /[A-Za-z0-9]/;
+const LOWER_OR_DIGIT = /[a-z0-9]/;
+const UPPER = /[A-Z]/;
+
+// A match stands alone when no letter or digit runs into it, or only across a
+// camelCase hump (a lower-case letter or digit, then an upper-case letter): for
+// "alpha-beta", `bestAlphaBetaShop` and `alpha-beta-card` count, `alpha-betas` does not.
+function standsAlone(text, start, end) {
+  const before = text[start - 1] ?? '';
+  const after = text[end] ?? '';
+  const okBefore = !ALNUM.test(before) || (LOWER_OR_DIGIT.test(before) && UPPER.test(text[start]));
+  const okAfter = !ALNUM.test(after) || (LOWER_OR_DIGIT.test(text[end - 1]) && UPPER.test(after));
+  return okBefore && okAfter;
+}
+
+export function storyFindings(path, text, literals) {
+  if (!isCode(path) || path === STORY_FILE) return [];
+  const spans = [];
+  for (const re of storyPatterns(literals)) {
+    for (const m of text.matchAll(re)) {
+      if (m[0] === m[0].toUpperCase()) continue; // an env or wallet role name: infrastructure
+      const end = m.index + m[0].length;
+      if (standsAlone(text, m.index, end)) spans.push({ start: m.index, end });
+    }
+  }
+  // One finding per occurrence: a match inside a longer one (an item inside its SKU) is the same place.
+  spans.sort((a, b) => a.start - b.start || b.end - a.end);
+  const out = [];
+  let reach = -1;
+  for (const s of spans) {
+    if (s.end <= reach) continue;
+    reach = s.end;
+    out.push({ path, line: lineOf(text, s.start), label: 'story-literal-outside-story-config' });
   }
   return out;
 }
