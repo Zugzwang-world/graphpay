@@ -26,7 +26,8 @@
     "funding": "node scripts/funding/fund.mjs",
     "agents:probe": "node scripts/agents/preset-probe.mjs",
     "agents:errand": "node scripts/agents/errand.mjs",
-    "secrets:vercel": "node scripts/secrets/vercel-push.mjs"
+    "secrets:vercel": "node scripts/secrets/vercel-push.mjs",
+    "workers": "node packages/mirror/src/main.mjs"
   },
   "devDependencies": {
     "viem": "2.57.16",

@@ -160,6 +160,8 @@ export function historyEdge(e, actors) {
     toEpoch: to.epoch,
     fromEns: from.ens,
     toEns: to.ens,
+    fromKind: from.kind,
+    toKind: to.kind,
     amountMicro: e.amountMicro,
     ts: e.ts,
     day: e.day,

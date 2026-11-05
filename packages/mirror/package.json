@@ -15,7 +15,11 @@
     "test": "node --test \"test/*.test.mjs\""
   },
   "dependencies": {
+    "@arkiv-network/sdk": "1.0.1",
+    "@graphpay/arkiv-graph": "workspace:*",
     "@graphpay/config": "workspace:*",
+    "@graphpay/contracts": "workspace:*",
+    "@graphpay/money-graph": "workspace:*",
     "viem": "2.57.16"
   }
 }
