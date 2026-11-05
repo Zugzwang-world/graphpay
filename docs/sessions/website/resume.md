@@ -16,7 +16,7 @@ Each unwired route is a file under `apps/web/app/api/**/route.ts` that checks th
 | `POST /api/agents/run` | M12 (Join): a runner from the live hooks | set it in `lib/agents-live.server.ts` (`errandRunner()`); map `ErrandResult` as is (`RunResult` matches it); the run is one request, so no cross-instance state |
 | `GET /api/state/customer` | M4 checkout, M6 ENS gate | shape: `CustomerState` in `lib/contracts.ts` (add `policyExpiresAt` if the policy has it) |
 | `POST /api/customer/{reorder,subscribe,unsubscribe,refund-request}` | M4 shop, facilitator, recorder | return `{ transaction }` or `{ arkivTx }` |
-| `POST /api/customer/{pause,resume,kill-disposable}` | M6 | return `{ sepoliaTx, effectiveWithinS: 20 }` |
+| `POST /api/customer/kill-disposable` | T2's `provisionDisposable` + a funded disposable wallet | return `{ sepoliaTx, effectiveWithinS: 20 }` (pause and resume are wired) |
 | `POST /api/merchant/{dispatch,refund}` | M4 | merchant key server-side behind the passcode (E-3) |
 
 ## Then

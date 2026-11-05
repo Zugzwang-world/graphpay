@@ -23,6 +23,9 @@ importers:
       '@graphpay/config':
         specifier: workspace:*
         version: link:../../packages/config
+      '@graphpay/ens':
+        specifier: workspace:*
+        version: link:../../packages/ens
       '@graphpay/money-graph':
         specifier: workspace:*
         version: link:../../packages/money-graph

@@ -1,0 +1,68 @@
+// The owner's pause and resume of the payer agent (WEBSITE_SPEC.md §3, §7): the owner
+// wallet sets `graphpay.status` on the agent's ENS name on Ethereum Sepolia, through
+// @graphpay/ens (M6). The agent is always the story's payer agent, never a name from the
+// request; the owner's key is read from the server's env only, by role name, and never
+// leaves this module. The gate sees the change within its 20 s cache.
+import { config, resolveRpc } from '@graphpay/config';
+import { createOwnerActions, createTxRunner, ensChain, ownerRoleOf, type OwnerActions, type OwnerSender } from '@graphpay/ens';
+import { createPublicClient, createWalletClient, http } from 'viem';
+import { privateKeyToAccount } from 'viem/accounts';
+import { siteModel } from './site.server.ts';
+
+export const OWNER_WAITING_FOR = "the owner's key on this server (the Coordinator sets it in Vercel)";
+export const EFFECTIVE_WITHIN_S = 20;
+
+export interface OwnerChange {
+  changed: boolean;
+  sepoliaTx: string | null;
+  note: string | null;
+}
+
+const KEY_SHAPE = /^0x[0-9a-fA-F]{64}$/;
+
+// The env name of the owner's key for the payer agent: `<ROLE>_PRIVATE_KEY`, the role from
+// the namespace plan (the owner of the agent), never typed here.
+export function ownerKeyName(agentName: string): string {
+  return `${ownerRoleOf(agentName)}_PRIVATE_KEY`;
+}
+
+export function ownerConfigured(env: Record<string, string | undefined> = process.env): boolean {
+  return KEY_SHAPE.test(env[ownerKeyName(siteModel().payer.ens)] ?? '');
+}
+
+let built: Promise<OwnerActions> | null = null;
+function actions(): Promise<OwnerActions> {
+  built ??= (async () => {
+    const rpc = await resolveRpc(config.ens.network);
+    const chain = ensChain();
+    const client = createPublicClient({ chain, transport: http(rpc.url, { retryCount: 2, timeout: 20_000 }) });
+    // One runner per instance, so its signer's nonces are counted in order.
+    const runner = createTxRunner({ client, chainId: config.networks.sepolia.chainId, log: () => undefined });
+    const senderFor = (role: string): OwnerSender => {
+      const key = process.env[`${role}_PRIVATE_KEY`] ?? '';
+      if (!KEY_SHAPE.test(key)) throw new Error('the owner key is not set');
+      const account = privateKeyToAccount(key as `0x${string}`);
+      const wallet = createWalletClient({ account, chain, transport: http(rpc.url, { timeout: 60_000 }) });
+      return { role, address: account.address, sendTransaction: (request) => wallet.sendTransaction(request as Parameters<typeof wallet.sendTransaction>[0]) };
+    };
+    return createOwnerActions({ client, runner, senderFor, log: () => undefined });
+  })().catch((error: unknown) => {
+    built = null;
+    throw error;
+  });
+  return built;
+}
+
+// Pause and resume run one at a time (the owner's nonce), and a request for the state the
+// name is already in sends nothing.
+let tail: Promise<unknown> = Promise.resolve();
+export function changeStatus(paused: boolean, { actionsFor = actions, agent = siteModel().payer.ens }: { actionsFor?: () => Promise<OwnerActions>; agent?: string } = {}): Promise<OwnerChange> {
+  const task = async (): Promise<OwnerChange> => {
+    const owner = await actionsFor();
+    const result = await (paused ? owner.pause(agent) : owner.resume(agent));
+    return { changed: result.changed, sepoliaTx: result.hash ?? null, note: result.changed ? null : (result.reason ?? 'no change') };
+  };
+  const run = tail.then(task, task);
+  tail = run.catch(() => undefined);
+  return run;
+}
