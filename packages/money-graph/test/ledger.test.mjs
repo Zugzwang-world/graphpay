@@ -9,6 +9,7 @@ import {
   ENTITY_CONTRACT,
   boxAround,
   connectArkiv,
+  createGraphEngine,
   createLedger,
   createQuote,
   discoverShops,
@@ -17,7 +18,9 @@ import {
   newSim,
   nodeOf,
   recordEdge,
+  runGraphql,
   writeHeartbeat,
+  writerAddresses,
   writeShop,
 } from '../index.mjs';
 
@@ -146,6 +149,32 @@ test('a quote for another shop found at the pinned nonce is not adopted', async 
   const found = await findQuotes(b.publicClient, requestId, { owner: a.owner });
   assert.equal(found.length, 2);
   assert.equal(found.find((q) => q.key === mine.entityKey)?.shopKey, `0x${'a'.repeat(64)}`);
+});
+
+// A real node can carry the mirror's labelled synthetic history: its tallies say
+// synthetic, so its reputation must too, in the all-time window and in a day window.
+test('reputation is labelled synthetic when any tally row it reads is, even for a real node', async () => {
+  const w = await wallets();
+  const OTHER = 'beta-sweets.sim.example.eth';
+  const now = Math.floor(Date.now() / 1000);
+  const history = createLedger({ arkiv: w.ledger, stream: 'history', synthetic: { dataset: 'history' } });
+  await history.load();
+  await history.apply({ ...ev('h1', 'order', 0n, 0), ts: now - 3_600, position: { block: 1n, logIndex: 0 } });
+  const live = createLedger({ arkiv: w.ledger, stream: 'whitechain', createNodes: true });
+  await live.load();
+  await live.apply({ ...ev('o1', 'order', 0n, 0), ts: now - 60, position: { block: 10n, logIndex: 0 } });
+  await live.apply({ ...ev('o2', 'order', 0n, 0), to: { ens: OTHER, epoch: 0, kind: 'shop' }, ts: now - 30, position: { block: 11n, logIndex: 0 } });
+
+  const writers = { ...writerAddresses(), W_LEDGER: w.ledger.owner, W_SYNC: w.sync.owner };
+  const ask = (ens) => runGraphql({ engine: createGraphEngine(w.reader), dataset: 'live', writers, query: `{ node(ens: "${ens}") { synthetic all: reputation(window: ALL) { orders synthetic } d30: reputation(window: D30) { synthetic } } }` });
+  const mixed = (await ask(SHOP)).data.node;
+  assert.equal(mixed.synthetic, false, 'the node row is real');
+  assert.equal(mixed.all.orders, '2');
+  assert.equal(mixed.all.synthetic, true);
+  assert.equal(mixed.d30.synthetic, true);
+  const real = (await ask(OTHER)).data.node;
+  assert.equal(real.all.synthetic, false);
+  assert.equal(real.d30.synthetic, false);
 });
 
 test('a receipt cannot be edited: a simulated patch of an edge reverts, a tally patch would pass', async () => {

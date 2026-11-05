@@ -1,6 +1,6 @@
 # Relay: arkiv (T3)
 
-Updated 03:55 IST, Fri 6 Nov. This step: M9, the live benchmark at size S (branch `arkiv/bench`). Before it: Join's `$attributes` fix ([PR #25](https://github.com/Zugzwang-world/graphpay/pull/25), merged 03:23); M8 S and M7b ([PR #21](https://github.com/Zugzwang-world/graphpay/pull/21), 03:11); M7a ([PR #14](https://github.com/Zugzwang-world/graphpay/pull/14), 01:51).
+Updated 03:42 IST, Fri 6 Nov. This step: M9, the live benchmark at size S (branch `arkiv/bench`). Before it: Join's `$attributes` fix ([PR #25](https://github.com/Zugzwang-world/graphpay/pull/25), merged 03:23); M8 S and M7b ([PR #21](https://github.com/Zugzwang-world/graphpay/pull/21), 03:11); M7a ([PR #14](https://github.com/Zugzwang-world/graphpay/pull/14), 01:51).
 
 ## In plain words
 

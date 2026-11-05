@@ -312,14 +312,18 @@ export function createContext({ engine, dataset = 'live', listCap = 100, writers
         let t;
         let lo = null;
         let hi = null;
+        // The tally rows behind the answer: a real node can carry labelled synthetic history.
+        let read = [];
         if (window === 'ALL') {
-          t = tallyOut(await tallies.load(`${n.key}|${epoch}|all`));
+          const all = await tallies.load(`${n.key}|${epoch}|all`);
+          read = all ? [all] : [];
+          t = tallyOut(all);
         } else {
           hi = dayOf(Date.now() / 1000);
           lo = hi - DAYS[window] + 1;
-          const rows = await windows.load(`${n.key}|${epoch}|${lo}|${hi}`);
+          read = await windows.load(`${n.key}|${epoch}|${lo}|${hi}`);
           t = tallyOut({});
-          for (const r of rows) for (const [k, v] of Object.entries(tallyOut(r))) if (k !== 'lastTs') t[k] += v;
+          for (const r of read) for (const [k, v] of Object.entries(tallyOut(r))) if (k !== 'lastTs') t[k] += v;
         }
         let source = 'TALLY';
         if (verify) {
@@ -341,7 +345,7 @@ export function createContext({ engine, dataset = 'live', listCap = 100, writers
           paidUsdt: usdt(t.paidMicro),
           refundedUsdt: usdt(t.refundedMicro),
           source,
-          synthetic: Boolean(row?.synthetic ?? dataset !== 'live'),
+          synthetic: Boolean(row?.synthetic ?? dataset !== 'live') || read.some((r) => r.synthetic === true),
         };
       },
     },
