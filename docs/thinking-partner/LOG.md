@@ -30,7 +30,9 @@ One line per PR: time (IST) · activity · result · PR link. Append under your 
 - 04:06 IST · payments · merged: M3 part A, the facilitator, the shop 402 API and the recorder · https://github.com/Zugzwang-world/graphpay/pull/42
 - 04:20 IST · payments · M3 part B on the real chain: C7 paid once as acceptance.vitalik, the lifecycle as rehearsal.vitalik, the subscription renewed and cancelled; reviewer: ship · https://github.com/Zugzwang-world/graphpay/pull/45
 - 04:40 IST · payments · M4 dependencies: apps/web depends on the facilitator and shop packages · https://github.com/Zugzwang-world/graphpay/pull/53
-- 05:05 IST · payments · M4 hosted routes: shop, facilitator, recorder, renewal cron; vercel-env (14 Sensitive values set) and pay:public; two reviews fixed · pay/hosted
+- 05:05 IST · payments · M4 hosted routes: shop, facilitator, recorder, renewal cron; vercel-env (14 Sensitive values set) and pay:public; two reviews fixed · https://github.com/Zugzwang-world/graphpay/pull/58
+- 05:05 IST · payments · merged: M4 part 1, the hosted routes · https://github.com/Zugzwang-world/graphpay/pull/58
+- 05:11 IST · payments · M4 live: pay:public settled 0.40 through the public URL, C6 401s, recorder edge, cron renewal (M4 done) · pay/hosted-done
 
 ## identity
 - 02:00 IST · identity · M5: the ens package, ABIs from Sourcify, run script and checkers; namespace provisioned on real Sepolia (60 tx, 72.7M gas); B1/B4/B5/B8/B9a reads pass · [PR #18](https://github.com/Zugzwang-world/graphpay/pull/18)
@@ -93,5 +95,6 @@ One line per PR: time (IST) · activity · result · PR link. Append under your 
 - 03:40 IST · records · usage 76% (about 3.75 points an hour, would run out around 10:00): T1, T3, Join and T6 stepped from xhigh to high; extra usage asked again · https://github.com/Zugzwang-world/graphpay/pull/29
 - 03:50 IST · records · ADR-0061: Swarm public content (the menu) through the gateway; refund evidence encrypted client-side, last and first to cut · https://github.com/Zugzwang-world/graphpay/pull/32
 - 04:45 IST · records · M14 relay: first real payment, the first acceptance report, ADR-0062 (92% pause), wallets §2b, the README payment link, T5's secrets set in Vercel · https://github.com/Zugzwang-world/graphpay/pull/49
+- 05:15 IST · records · CP4 met: M11 and M12 done on the real networks, acceptance at 31 pass, 0 fail, 1 blocked; CP4 relay · https://github.com/Zugzwang-world/graphpay/pull/61
 
 ## submission

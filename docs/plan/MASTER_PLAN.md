@@ -18,9 +18,9 @@ The live plan for ETHGlobal Mumbai, kept by main. Sources: `planning/BUILD_SEQUE
 | M8 city generator; seed **S only** tonight (M waits for the locked story, ADR-0049) | T3 | `08-city-and-seeding.md` + `amendments/M7-arkiv.md` §3, §8 | M7a | done: S seeded on Rabdi (PR #21); M waits for the locked story |
 | M9 live benchmark at S (reads, not speed: ADR-0042; M when seeded) | T3 | `09-live-benchmark.md` + `amendments/M7-arkiv.md` §8 | M7b, M8 | done at S (PR #31; D6 passes) |
 | M10 agents | T4 Agents | `10-agents.md` + `amendments/M5-ens.md` §2, `amendments/M7-arkiv.md` §5 | M0 | done (PR #11) |
-| M11 mirror (one workers process) | Join | `11-mirror.md` + readonly edges (`amendments/M7-arkiv.md` §4) | M1, M7a, M5 | live since 03:13 (PRs #8, #20, #33, #46) |
-| M12 `e2e:food`, fork then real | Join | `12-e2e-food.md` + payee and quote hooks | M3, M6, M7b, M10, M11 | running for real (Join, 04:31) |
-| M13 `pnpm acceptance` | Join | `13-acceptance.md` + `docs/plan/ACCEPTANCE_ADDITIONS.md` | M4, M9, M12 | first report 04:27: 18 pass, 0 fail, 1 blocked, 29 not run (PR #46) |
+| M11 mirror (one workers process) | Join | `11-mirror.md` + readonly edges (`amendments/M7-arkiv.md` §4) | M1, M7a, M5 | done on the real networks (PR #60; 47 events, each edge exactly once) |
+| M12 `e2e:food`, fork then real | Join | `12-e2e-food.md` + payee and quote hooks | M3, M6, M7b, M10, M11 | done (PR #56: A–E as payer; F, E7 and B6 by the kill on disposable-1) |
+| M13 `pnpm acceptance` | Join | `13-acceptance.md` + `docs/plan/ACCEPTANCE_ADDITIONS.md` | M4, M9, M12 | 31 pass, 0 fail, 1 blocked (D7), 16 not run (05:12 IST); C2–C6 and F2–F3 wait for M4 hosted |
 | M14 records and relay | Coordinator | `14-records-relay.md` | M13 (and every 2 h) | rolling (first relay 01:20 IST) |
 | M15 website | T5 Web | `15-website.md` + Friday items 8–13 | M0; wired after M4, M7b, M10 | in progress (shell, phones, race, Open toggle, Pause/Resume merged) |
 | M16 checkout kit + demo store (the Operate drop-in: a short snippet, ADR-0032) | T5 | `16-checkout-kit-store.md` | M4 | in progress (a thin layer over @graphpay/agentpay; needs M4) |
@@ -45,7 +45,7 @@ M0 began at 21:40 IST and closed about an hour later, so the pack's central time
 | CP1 | contract tests green; root and owners on Sepolia; one live Rabdi write; agents' mock tests green | 23:00 | about 23:50 |
 | CP2 | checkout verified; gate passes all agents; GraphQL on Rabdi S; agents 5 live runs (testing preset); S seeded (M waits for the locked story) | 00:45 | about 01:35 |
 | CP3 | `e2e:food` real mode passes A–F | 03:15 | about 04:05 |
-| CP4 | `ACCEPTANCE_REPORT.md` committed; relay written | 04:40 | about 05:30 |
+| CP4 | `ACCEPTANCE_REPORT.md` committed; relay written | 04:40 | **met 05:15** (31 pass, 0 fail, 1 blocked) |
 | CP5 | website live on real data; demo store live; rehearsal 1 | Fri 13:00 | Fri 13:00 |
 | freeze | feature freeze (ADR-0053) | — | **Fri 18:00** |
 | CP6 | sponsor files, README, AI usage, video; rehearsals; submission checklist green | Fri 21:00 | Fri evening; **submit by Sat 08:00** (hard deadline 09:00) |
