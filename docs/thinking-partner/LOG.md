@@ -22,6 +22,8 @@ One line per PR: time (IST) · activity · result · PR link. Append under your 
 
 ## payments
 
+- 01:55 IST · payments · M1 contract and 88 fork tests on the real test USDT and Permit2; PR opened for review · pay/contract
+
 ## identity
 
 ## arkiv

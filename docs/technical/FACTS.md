@@ -270,3 +270,11 @@ offset(offset: number): this;
 ## Track rows
 
 Each track adds its own rows here (under `### <activity>`), with source, time and status.
+
+### payments
+
+| fact | value | source | checked (IST) | status | note |
+|---|---|---|---|---|---|
+| Test USDT EIP-2612 domain | the configured domain (`Tether USD`, version `1`, chain 1874, the proxy) hashes to the token's `DOMAIN_SEPARATOR()`; both `permit` overloads approve Permit2; a permit signed under another name reverts | Foundry fork tests at block 12,310,000 (`packages/contracts/test/Digests.t.sol`) | 01:30 | verified-on-chain (fork) | the start-up check of M3 relies on it |
+| Permit2 domain | `{ name: "Permit2", chainId: 1874, verifyingContract: <Permit2> }` hashes to the deployed Permit2's `DOMAIN_SEPARATOR()` | same | 01:30 | verified-on-chain (fork) | |
+| Checkout gas (fork, execution only) | first agent settle with the gasless approval 318,377 (merchant holds a float) / 333,479 (merchant at zero); re-order 251,143; partial refund 81,275; createSubscription with first charge 482,697; renew 218,399; cancelWithSig 43,073 | `forge test -vv` gas logs | 01:45 | measured (fork) | a receipt adds about 33,000; real receipts replace these at M2/M3 |

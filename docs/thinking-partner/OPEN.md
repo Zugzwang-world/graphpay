@@ -74,6 +74,8 @@ Agents (T4) and Join add one row per full errand run, so the presets can be cali
 
 ## payments
 
+- Nothing for the founder from M1. Gas: a recorded failure is paid by the relayer; the facilitator refuses doomed payments before sending (M3), so FACILITATOR's 0.8 WBT covers hundreds of payments.
+
 ## identity
 
 ## arkiv

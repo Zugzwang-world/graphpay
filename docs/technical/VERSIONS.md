@@ -37,3 +37,12 @@ Every version the event code pins, with how it was checked. Each track adds the 
 ## Versions the tracks install (re-check with `npm view` before pinning)
 
 The M0 verifier's snapshot of every package in `planning/FACTS.md` §5 is in `docs/technical/FACTS.md` (Results). Changes since the pack: x402 2.30.0 is `latest` (move all four `@x402/*` packages together or keep 2.29.0); `ai` 7.0.163, `@ai-sdk/anthropic` 4.0.97, `@ai-sdk/mcp` 2.0.91; graphql 16.15.0 is the newest 16.x (`latest` is 17.1.0; keep one major); sigma `latest` is 4.0.4 (3.0.3 is the newest 3.x). Each track adds its pins here under its own heading.
+
+## M1 payments (`pay/contract`, T1, checked 2026-11-06 01:00 IST)
+
+| item | pinned | how checked | status |
+|---|---|---|---|
+| OpenZeppelin Contracts | v5.7.0, commit `cab19933c33c` | `install-libs.sh` clones the tag and checks the commit; M0 verifier: latest release | verified |
+| Permit2 (interfaces only) | commit `cc306b601f172c51bc04334a109e98340456620b` | `gh api repos/Uniswap/permit2/git/refs/tags`: the repo's only tag, named after the canonical deployed address, points to this commit (2022-11-17); `install-libs.sh` fetches the commit and checks it | verified |
+| forge-std | v1.9.7 (`77041d2`), kept | has every cheatcode the suite uses (`getBlockTimestamp`, `snapshotState`, `keyExistsJson`, `deployCodeTo`) | verified |
+| viem (in `@graphpay/contracts`) | 2.57.16 | same as the root pin | verified |
