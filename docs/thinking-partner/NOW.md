@@ -41,10 +41,10 @@ Not started (T3, wave 1).
 
 ## agents
 
-Updated 01:35 IST. **M10 built and green on mocks; the live runs on the testing preset and the reviewer pass come next.**
-- `packages/agents`: buyer team (concierge, scout, analyst, payer) and shop team (storefront, risk, dispatch), every guard in code, mock services and scripted models; 53 tests pass; two mock runs give byte-identical run logs.
-- Blocked: nothing. Join's M12 can read the interfaces in `packages/agents/index.d.ts` and `docs/sessions/agents/NOTES.md`; the "(M10 done)" PR follows the five live runs.
-- Next: reviewer findings, five live runs (calibration rows in `OPEN.md`), then the Friday presence and handoff hooks.
+Updated 01:45 IST. **M10 built; five live errands on the testing preset all paid the good shop and never the trap.** The "(M10 done)" PR is the next merge.
+- 5 of 5 live runs: 73 to 321 s (median 94 s), $0.29 to $0.31 and about 47,000 to 52,000 tokens each, on mock services (rows in `OPEN.md`).
+- Reviewer pass done, findings fixed. Join's M12 can wire against `packages/agents/index.d.ts` and `docs/sessions/agents/NOTES.md`.
+- Next: merge, then the Friday presence and handoff hooks.
 
 ## integration
 

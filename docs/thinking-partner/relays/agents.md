@@ -1,6 +1,6 @@
 # Relay: agents (M10)
 
-Updated 01:35 IST, Fri 6 Nov. **Built and green on mock models; live runs and the reviewer pass are next.**
+Updated 01:35 IST, Fri 6 Nov. **Built; reviewed; five live runs passed.**
 
 ## In plain words
 
@@ -14,7 +14,7 @@ All data is synthetic or mock and labelled so. Tonight's test story is read from
 
 - 53 tests on mock models: the trap is never paid (price-only concierge, lying analyst), the model cannot widen the limits, one payment per errand (three parallel calls), scout and analyst run in parallel, revoked, expired and paused payers are refused before any 402, a 502 after signing keeps the reservation, an `AGENT_MODE` typo never starts a paid run, a key echoed by a failing model never reaches the log.
 - Ranking reproduces 0.986 / 0.934 / 0.821, and about 0.916 / 0.863 / 0.750 for the smaller history.
-- Not yet: the five live runs on the testing preset (`claude-opus-5-5`, xhigh) and their seconds and cost in `OPEN.md`.
+- Five live errands on the testing preset (`claude-opus-5-5`, xhigh) against the mock services: all five chose and paid the good shop, never the trap. 73 to 321 s, $0.29 to $0.31, about 47,000 to 52,000 tokens each (`OPEN.md` calibration rows). A reviewer pass found three blocking issues (order swap during signing, a lost unsettled outcome, URLs in errors); all fixed with regression tests. In the live runs some analyst and risk replies had over-long reason strings and were counted as no answer; code's ranking and risk check decide anyway, and the caps are loosened.
 
 ## Technical
 

@@ -65,7 +65,7 @@ export const RankedShop = z.object({
   ens: Name,
   score: z.number(),
   eligible: z.boolean(),
-  reasons: z.array(z.string().max(200)).max(20),
+  reasons: z.array(z.string().max(600)).max(20),
 });
 
 export const Receipt = z.object({
@@ -89,14 +89,14 @@ export const Mandate = z.object({
 export const OUTPUTS = {
   concierge: z.object({ summary: Text, chosenShop: Name.nullable() }),
   scout: z.object({ offers: z.array(Quote).max(50) }),
-  analyst: z.object({ ranking: z.array(RankedShop).max(50), recommendation: Name.nullable(), notes: Text }),
+  analyst: z.object({ ranking: z.array(RankedShop).max(50), recommendation: z.string().max(600).nullable(), notes: Text }),
   payer: z.object({
     status: z.enum(['paid', 'refused', 'unsettled', 'failed']),
     reason: Text,
     receiptTransaction: z.string().max(200).nullable(),
   }),
   storefront: z.object({ quoteUsdt: Usdt.nullable(), etaMinutes: z.number().int().nonnegative().nullable(), message: Text }),
-  risk: z.object({ decision: z.enum(['approve', 'decline']), reasons: z.array(z.string().max(300)).max(20) }),
+  risk: z.object({ decision: z.enum(['approve', 'decline']), reasons: z.array(z.string().max(600)).max(20) }),
   dispatch: z.object({ confirmed: z.boolean(), orderId: z.string().max(80), etaIso: z.string().max(40), message: Text }),
 };
 
