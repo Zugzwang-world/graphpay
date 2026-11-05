@@ -59,6 +59,7 @@ Short records, one file each (skill `adr`). Lab decisions are adopted from `plan
 | [ADR-0054](ADR-0054-the-stand-in-token-is-retired.md) | The stand-in token is retired | accepted |
 | [ADR-0055](ADR-0055-live-events-poll-over-https.md) | Live events poll over HTTPS | accepted |
 | [ADR-0056](ADR-0056-the-mirror-keeps-the-mac-awake-and-resumes.md) | The mirror keeps the Mac awake and resumes | accepted |
+| [ADR-0057](ADR-0057-arkiv-graph-is-a-generic-sdk-published-on-npm.md) | arkiv-graph is a generic SDK, published as @graphpay/arkiv-graph | accepted |
 | [ADR-0058](ADR-0058-the-shop-box-query-uses-i32-ranges.md) | The shop box query uses i32 ranges | accepted |
 
 ## Proposed in the pack, recorded by the owning session when taken

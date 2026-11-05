@@ -56,6 +56,10 @@ Join builds `pnpm acceptance` and runs it for CP4 at Fri 05:00–06:00 IST. You 
 - A disposable agent: `pnpm -s wallet:gen --only DISPOSABLE_<n>`, then fund it; a fresh one before the video and the pitch.
 - New secrets: `pnpm -s secrets:gen NAME` (the Swarm wrapping key when Friday item 5 starts). Vercel: `pnpm -s secrets:vercel NAME` (Sensitive, never `NEXT_PUBLIC_`).
 
+### The npm publish (Friday item 18, ADR-0057)
+
+After CP4 and T3's item-18 PR: re-check the name (`npm view @graphpay/arkiv-graph` answers 404, and the `graphpay` scope is the founder's), run `npm publish --dry-run` from a clean `origin/main` checkout, and run the reviewer on the tarball's file list (testnet values only, no secrets or keyed URLs). Then ask the founder for the npm login and the go-ahead. Publish in a Terminal-panel tab so the founder can finish npm's sign-in or one-time code there; never read `~/.npmrc`. Check with `npm view` and record it in `docs/technical/FACTS.md`.
+
 ### Deploys
 
 Git-connected: production builds from `main`, a preview per PR; docs-only commits skip builds. A CLI deploy only from the clean detached checkout `~/graphpay-deploy` at `origin/main`.
