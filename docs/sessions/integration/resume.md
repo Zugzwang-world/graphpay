@@ -1,10 +1,10 @@
 # Join: resume after a fresh start
 
-Updated 02:50 IST, Fri 6 Nov. Read this first, then `docs/plan/sessions/join.md`.
+Updated 03:08 IST, Fri 6 Nov. Read this first, then `docs/plan/sessions/join.md`.
 
 ## Where M11 stands
 
-- Merged: PR 8 (the mirror core). The PR "the Arkiv ledger over M7a, the workers process" (M11 part 2) is PR 20 (https://github.com/Zugzwang-world/graphpay/pull/20), opened at 02:50 with auto-merge on. Check it merged, and if not, fix CI and merge `origin/main`.
+- Merged: PR 8 (the mirror core). The PR "the Arkiv ledger over M7a, the workers process" (M11 part 2) is PR 20 (https://github.com/Zugzwang-world/graphpay/pull/20), opened at 02:50 with auto-merge on. At 03:08 its `ci` run was queued on GitHub (no failure). Check it merged, and if not, fix CI and merge `origin/main`.
 - `packages/mirror`: decoding, mapping, parking, the lease and heartbeat, the recorder fold, the 5% history, the Arkiv adapter (`src/arkiv.mjs`), the process (`src/workers.mjs`, `src/main.mjs`, `pnpm workers`). 29 tests: 22 on fakes, 7 on ArkivSim with M7a's real planner.
 - Not yet run on any real network.
 
@@ -23,5 +23,6 @@ Updated 02:50 IST, Fri 6 Nov. Read this first, then `docs/plan/sessions/join.md`
 ## Notes
 
 - The reviewer runs on every money, key or writer change.
-- This Mac's DNS drops now and then. Pushes may stall, so retry.
+- This Mac's DNS drops now and then, and it slept from 02:14 to 03:01 with the lid closed. Pushes may stall, so retry. Once the live run starts, the workers process needs the Mac awake (caffeinate stops idle sleep, not a closed lid).
+- Open thread: the `$attributes` bug in money-graph's `recordEdge`, quotes and the ledger's unstreamed verifier was reported to the Coordinator for T3 at 02:55. It matters for E7 (refusals) and the quotes.
 - Budget: keep tool output short, use no polling loops inside a turn, and end the turn when blocked.
