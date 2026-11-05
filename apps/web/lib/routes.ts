@@ -17,7 +17,7 @@ export interface SiteRoute {
 export const SITE_ROUTES: SiteRoute[] = [
   { method: 'POST', path: '/api/agents/run', gate: 'passcode', does: 'start one errand (one at a time) and stream its events (SSE)', signs: 'the payer agent, then the relayer', waitingFor: 'M12 live wiring of the agents (Join)' },
   { method: 'GET', path: '/api/agents/run/:id/events', gate: 'open', does: 'replay a run held by this server (best effort; the POST streams it live)', signs: null, waitingFor: null },
-  { method: 'GET', path: '/api/state/customer', gate: 'open', does: "the payer agent's status, cap, spend, last order, subscription", signs: null, waitingFor: 'M4 checkout, M6 ENS gate' },
+  { method: 'GET', path: '/api/state/customer', gate: 'open', does: "the payer agent's status, cap, spend, last order, subscription", signs: null, waitingFor: null },
   { method: 'POST', path: '/api/customer/reorder', gate: 'passcode', does: 're-order from the same shop', signs: 'the payer agent, then the relayer', waitingFor: 'M4 shop and facilitator' },
   { method: 'POST', path: '/api/customer/refund-request', gate: 'passcode', does: 'record a refund request on Arkiv', signs: 'the recorder (W_SYNC)', waitingFor: 'M4 recorder' },
   { method: 'POST', path: '/api/customer/subscribe', gate: 'passcode', does: 'subscribe to the weekly box (or the demo period)', signs: 'the payer agent, then the relayer', waitingFor: 'M4 checkout' },
