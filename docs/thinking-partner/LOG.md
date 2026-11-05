@@ -69,6 +69,7 @@ One line per PR: time (IST) · activity · result · PR link. Append under your 
 - 05:50 IST · website · opened: the customer's Pause and Resume buttons (M6): the owner wallet sets `graphpay.status` of the payer agent on Sepolia, behind the passcode; reviewer pass · https://github.com/Zugzwang-world/graphpay/pull/43
 - 06:05 IST · website · opened: the customer phone's live state (`/api/state/customer`: status from ENS and the AgentPolicy, cap and spend from the checkout contract, last order from the graph) and the checkout address fix · https://github.com/Zugzwang-world/graphpay/pull/44
 - 07:10 IST · website · opened: M16 the checkout kit and the demo store (a shop in 17 lines, a person pays from a browser wallet, merchant view, chain-based accountant export), two reviewer passes, a bundler-safe ABI import in contracts · https://github.com/Zugzwang-world/graphpay/pull/51
+- 08:20 IST · website · opened: the explainer's agent lanes (Friday item 13) from the handoff rows, and the run id passed to the errand runner · PR link in the next line
 
 
 ## agentpay

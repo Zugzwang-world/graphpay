@@ -65,10 +65,10 @@ Updated 04:30 IST, Fri 6 Nov. **The first acceptance report is written: 18 pass,
 
 ## website
 
-Updated 07:10 IST, Fri 6 Nov (T5 Web). **On `main`:** the shell, phone views, agent run route, merchant stream and CSV, order trail, race mode, the Open toggle, Pause and Resume, the customer's live state. **In a PR:** M16, the checkout kit (`packages/checkout-kit`) and the demo store (`apps/store`): a shop mounts its catalog and a 402 order route in 17 counted lines, a person pays from a browser wallet with no gas, the merchant view lists orders, dispatch and refund sign server-side, the accountant export comes from the chain (checked against the real C7 and lifecycle payments). Two reviewer passes on the kit.
-- Running: nothing long. The store is not deployed: it needs the Vercel project `graphpay-store` and its env (see OPEN).
-- Blockers: for a live demo of the store, T1's hosted facilitator (M4) and the Vercel project (a login step).
-- Next: after the PR, the Sunday-box subscription in the store (stretch), the map (item 10) and the explainer lanes (item 13) as Join's live hooks land. Fresh start file: `docs/sessions/website/resume.md`.
+Updated 08:20 IST, Fri 6 Nov (T5 Web). **On `main`:** everything through M16 (the checkout kit and the demo store). **In PRs:** the Mumbai map (Friday item 10, #54) and the explainer's agent lanes (item 13): Ask, Check, Check back, 402 quote and Pay, filled from the handoff rows the agents write to Arkiv, every chip opening its record on the explorer, the Pay lane carrying the settlement and the order's trail.
+- Running: nothing long. The lanes fill only when an errand runs with the live hooks: the website's errand runner is not wired yet (Join's M12 wiring of `apps/web/lib/agents-live.server.ts`); it must pass `input.runId` on as the errand's `runId` (see OPEN).
+- Blockers: the store is not deployed (needs the Vercel project and env); a real errand on the site needs Join's runner.
+- Next: the store's Sunday box if time; refund-request with a photo needs T3's swarm items; help wiring the runner if Join asks. Fresh start file: `docs/sessions/website/resume.md`.
 
 ## agentpay
 
