@@ -6,6 +6,7 @@
 
 import { activeCast, config, story } from '@graphpay/config';
 import { keccak256, toHex } from 'viem';
+import { nodeOf } from './actors.mjs';
 import { DAY_S } from './ids.mjs';
 import { DEFAULT_DELIVERY_PROMISE_S } from './map.mjs';
 
@@ -141,4 +142,52 @@ export function historyDecision(existing, paramsFor) {
   const mine = historyStream(paramsFor(parsed.endDay));
   if (mine !== existing.stream) return { action: 'refuse', why: `a different history is on Arkiv (${existing.stream}); this one would be ${mine}` };
   return { action: 'resume', endDay: parsed.endDay };
+}
+
+// A history event as an edge for the ledger, with the nodes and epochs of the
+// registered actors (the cast shops and the history buyers).
+export function historyEdge(e, actors) {
+  const from = actors.get(nodeOf(e.fromEns));
+  const to = actors.get(nodeOf(e.toEns));
+  if (!from || !to) throw new Error(`history: ${from ? e.toEns : e.fromEns} is not registered`);
+  return {
+    seq: e.seq,
+    ref: e.ref,
+    kind: e.kind,
+    fromNode: from.node,
+    toNode: to.node,
+    fromEpoch: from.epoch,
+    toEpoch: to.epoch,
+    fromEns: from.ens,
+    toEns: to.ens,
+    amountMicro: e.amountMicro,
+    ts: e.ts,
+    day: e.day,
+    orderId: e.orderId,
+    payload: null,
+    counted: true,
+    synthetic: true,
+  };
+}
+
+// Writes the history in logical batches of 25 through the ledger (which splits a batch
+// by bytes, every transaction carrying the checkpoint of its own last event), resuming
+// from the stream's checkpoint. `run` serialises each batch with the other writes of
+// this wallet (the mirror's lock).
+export async function writeHistory({ ledger, plan, actors, run = (fn) => fn(), log = () => {} }) {
+  const checkpointOf = (edge) => ({ block: edge.seq, logIndex: 0, events: edge.seq + 1 });
+  const start = (await ledger.readCheckpoint(plan.stream))?.block ?? -1;
+  let written = 0;
+  for (const batch of historyBatches(plan.events.filter((e) => e.seq > start))) {
+    written += await run(async () => {
+      const nonce = await ledger.confirmedNonce();
+      const done = (await ledger.readCheckpoint(plan.stream))?.block ?? -1;
+      const edges = batch.filter((e) => e.seq > done).map((e) => historyEdge(e, actors));
+      if (edges.length === 0) return 0;
+      await ledger.writeEdges(edges, { stream: plan.stream, checkpointOf, nonce });
+      return edges.length;
+    });
+    log(`history: ${start + 1 + written} of ${plan.events.length} events`);
+  }
+  return { written, total: plan.events.length };
 }

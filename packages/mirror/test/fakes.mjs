@@ -87,6 +87,42 @@ export class FakeLedger {
     return this.edges.filter((e) => e.ref === ref).length;
   }
 
+  // A logical batch, split here into transactions of `perTx` edges as the writer splits by bytes.
+  perTx = 10;
+
+  async writeEdges(edges, { stream, checkpointOf, nonce }) {
+    let n = nonce;
+    for (let i = 0; i < edges.length; i += this.perTx) {
+      const part = edges.slice(i, i + this.perTx);
+      this.#send(n, ['edges', 'tallies', 'links', 'checkpoint'], () => {
+        this.edges.push(...part);
+        this.checkpoints.set(stream, checkpointOf(part.at(-1)));
+      });
+      n += 1;
+    }
+  }
+
+  async findStreams(prefix) {
+    return [...this.checkpoints.entries()].filter(([s]) => s.startsWith(prefix)).map(([stream, cp]) => ({ stream, ...cp }));
+  }
+
+  heartbeat = null;
+  arkivBlockNumber = 1000;
+
+  async readHeartbeat() {
+    return this.heartbeat ? { ...this.heartbeat } : null;
+  }
+
+  async arkivBlock() {
+    return this.arkivBlockNumber;
+  }
+
+  async writeHeartbeat(row, { nonce }) {
+    this.#send(nonce, ['heartbeat'], () => {
+      this.heartbeat = { ...row, updatedBlock: this.arkivBlockNumber };
+    });
+  }
+
   // The recorder's W_SYNC edges, and what the mirror folded from them.
   recorderEdges = [];
   folded = [];

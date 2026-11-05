@@ -21,7 +21,7 @@ Nothing has been written to any network yet. Nothing is needed from the founder.
 
 ## Technical
 
-**PR:** the mirror core on test doubles (link in `LOG.md`). The package is `packages/mirror` (ESM, `node --test`), with 21 tests:
+**PR:** the mirror core on test doubles (link in `LOG.md`). The package is `packages/mirror` (ESM, `node --test`), with 22 tests:
 
 | module | what |
 |---|---|

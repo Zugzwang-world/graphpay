@@ -30,7 +30,7 @@ One line per PR: time (IST) · activity · result · PR link. Append under your 
 
 ## integration
 
-- 01:20 IST · integration · opened: the mirror core on test doubles (decoding, mapping, parking, lease, recorder fold, 5% history, endpoints; 21 tests) · PR link to follow
+- 01:20 IST · integration · opened: the mirror core on test doubles (decoding, mapping, parking, lease, recorder fold, 5% history, endpoints; 22 tests) · PR link to follow
 
 ## website
 

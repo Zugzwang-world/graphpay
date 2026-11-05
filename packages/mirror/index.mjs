@@ -9,6 +9,7 @@ export {
   HISTORY_BUYERS,
   HISTORY_DAYS,
   historyBatches,
+  historyEdge,
   historyBuyers,
   historyCounts,
   historyDecision,
@@ -16,6 +17,7 @@ export {
   historyStream,
   parseHistoryStream,
   planHistory,
+  writeHistory,
 } from './src/history.mjs';
 export { atOrBefore, before, BLOCK_DONE, comparePosition, eventId, utcDay, ZERO_NODE } from './src/ids.mjs';
 export {

@@ -57,3 +57,29 @@ test('a different history on Arkiv is refused; the same one resumes on a later d
   assert.equal(historyDecision({ stream: historyStream(historyParams({ scale: 1, endDay: END_DAY })) }, paramsFor).action, 'refuse');
   assert.equal(historyDecision(null, paramsFor).action, 'write');
 });
+
+test('the history writer resumes from its checkpoint after a transaction fails mid-batch', async () => {
+  const { Actors } = await import('../src/actors.mjs');
+  const { castActors } = await import('../src/actors.mjs');
+  const { historyBuyers, writeHistory } = await import('../src/history.mjs');
+  const { FakeLedger } = await import('./fakes.mjs');
+  const plan = planHistory(historyParams({ scale: 0.05, endDay: END_DAY }));
+  const actors = new Actors();
+  for (const a of [...castActors(), ...historyBuyers()]) actors.register(a);
+  const ledger = new FakeLedger();
+  let sends = 0;
+  const send = ledger.writeEdges.bind(ledger);
+  ledger.writeEdges = async (edges, opts) => {
+    sends += 1;
+    if (sends === 3) {
+      await send(edges.slice(0, 10), opts);
+      throw Object.assign(new Error('HTTP 413'), { code: 'SEND_FAILED' });
+    }
+    return send(edges, opts);
+  };
+  await assert.rejects(writeHistory({ ledger, plan, actors }));
+  await writeHistory({ ledger, plan, actors });
+  assert.equal(ledger.edges.length, plan.events.length);
+  assert.equal(new Set(ledger.edges.map((e) => e.ref)).size, plan.events.length, 'no event twice');
+  assert.equal(ledger.checkpoints.get(plan.stream).block, plan.events.length - 1);
+});

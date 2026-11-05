@@ -2,7 +2,7 @@
 
 The interfaces `packages/mirror` expects from the other tracks, so the wiring is short when each gate lands. Owners: T3 (Arkiv), T1 (payments), T2 (identity). Updated 01:20 IST, Fri 6 Nov.
 
-## From T3 (`@graphpay/arkiv-graph`, M7a)
+## From T3 (M7a; the Coordinator says the import is `@graphpay/money-graph`)
 
 The mirror talks to Arkiv through a small port (`Ledger` in `packages/mirror/index.d.ts`); the adapter over M7a's writer is written when it merges.
 

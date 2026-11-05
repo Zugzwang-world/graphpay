@@ -32,6 +32,7 @@ export class Mirror {
   #candidates;
   #parked = new Map();
   #lock = new Lock();
+  #stale = false;
   #log;
 
   constructor({ source, ledger, actors, orders, stream, deployBlock, candidates = new Map(), deliveryPromiseS, log = () => {} }) {
@@ -100,6 +101,12 @@ export class Mirror {
 
   async #poll() {
     try {
+      // After a failed write, adopt again first (also after a network drop, when the
+      // adopt itself could not reach Arkiv).
+      if (this.#stale) {
+        await this.adopt();
+        this.#stale = false;
+      }
       this.head = await this.#source.head();
       const safe = this.head - this.#source.confirmations;
       for (const r of ranges(this.scannedTo + 1, safe)) {
@@ -112,8 +119,14 @@ export class Mirror {
       return this.status();
     } catch (err) {
       this.stats.retries += 1;
-      this.#log(`mirror: write failed (${err.code ?? err.name ?? 'error'}); re-adopting from Arkiv`);
-      await this.adopt();
+      this.#log(`mirror: poll failed (${err.code ?? err.name ?? 'error'}); re-adopting from Arkiv`);
+      this.#stale = true;
+      try {
+        await this.adopt();
+        this.#stale = false;
+      } catch {
+        // Arkiv unreachable: the next poll adopts first.
+      }
       throw err;
     }
   }
