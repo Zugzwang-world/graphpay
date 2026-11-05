@@ -63,12 +63,12 @@ if (checks.some((c) => !c.ok)) {
   await qualifyingPayment();
 }
 
-// PaymentSettled events paying for a node (payerNode is indexed), in chunks from the deploy block.
+// PaymentSettled events paying for a node (payerNode is indexed), in 1,000-block chunks from the deploy block (the RPC limit).
 async function settlementsOf(payerNode) {
   const latest = await publicClient.getBlockNumber();
   const found = [];
-  for (let from = BigInt(deployed.deployBlock); from <= latest; from += 10_000n) {
-    const to = from + 9_999n < latest ? from + 9_999n : latest;
+  for (let from = BigInt(deployed.deployBlock); from <= latest; from += 1_000n) {
+    const to = from + 999n < latest ? from + 999n : latest;
     found.push(...(await publicClient.getContractEvents({ address: deployed.address, abi: checkoutAbi, eventName: 'PaymentSettled', args: { payerNode }, fromBlock: from, toBlock: to })));
   }
   return found;
