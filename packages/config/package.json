@@ -1,0 +1,18 @@
+{
+  "name": "@graphpay/config",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "The one config file: every person, shop and agent name and every ENS, Whitechain and Arkiv address (ADR-0030).",
+  "exports": {
+    ".": {
+      "types": "./index.d.ts",
+      "default": "./index.mjs"
+    },
+    "./graphpay.config.json": "./graphpay.config.json"
+  },
+  "types": "./index.d.ts",
+  "scripts": {
+    "test": "node --test \"test/*.test.mjs\""
+  }
+}
