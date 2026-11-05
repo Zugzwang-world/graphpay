@@ -55,13 +55,14 @@ Updated 02:40 IST. **M10 is merged; the presence and handoff hooks are built** (
 - Blockers: none. Next: merge, then wait for Join's M12 counting run; re-run the live errand if time allows.
 ## integration
 
-Updated 05:00 IST, Fri 6 Nov. **M12 is done on the real networks: the errand (A–E) and the kill (F) both pass.** The acceptance report gains E7 and B6.
+Updated 05:10 IST, Fri 6 Nov. **M11 and M12 are done on the real networks. The acceptance report: 31 pass, 0 fail, 1 blocked (the big city), 16 not run** (the hosted endpoints of M4 and a few other tracks' checks).
 - The errand: the agents chose Kesar Kingdom from live reputation, paid 4.80 test USDT on Whitechain, and the shop delivered and refunded 0.80. The mirror and GraphQL show it all.
 - The kill: disposable-1 paid 0.40, then its owner killed its ENS name. 9.3 s later our facilitator refused its next payment (the rule allows 25 s), and T2's watcher revoked its spending policy on Whitechain 11 s after the kill. The refusal is recorded on Arkiv.
 - Found and fixed today: the MCP's buyer-risk table (every shop refused every buyer); the signer's header format; the refusal record's id, which was too long for Arkiv (it would also have broken M4's hosted recorder).
 - Running: `pnpm workers` with T2's watcher.
-- Not run yet: the hosted endpoints (M4: C2–C6, F2, F3), D2's two write tests and D15 with a payment inside a drop.
-- Next: the C rows from T1's real lifecycle, then the D2 and D15 write tests around the next payment.
+- The mirror's last tests passed: with the mirror frozen through a real payment, two copies racing at one nonce and a copy killed right after sending both wrote nothing twice, and after a hard restart every event since the deploy is on Arkiv exactly once.
+- Not run yet: the hosted endpoints (M4: C2–C6, F2, F3), F1's history scan, and a few other tracks' checks.
+- Next: M13's run after 05:30 IST (the acceptance payer's fresh day), once M4 is hosted.
 
 ## website
 
