@@ -1,0 +1,55 @@
+{
+  "about": "Funding targets from planning/WALLETS.md §3 (top up to at least this balance, every transfer from FUNDER). W_DIRECTORY is the addendum's directory writer (ADR-0033). 'later' runs when the founder's tGLM has reached FUNDER.",
+  "m0": {
+    "whitechain": {
+      "DEPLOYER": "0.1",
+      "FACILITATOR": "0.8",
+      "RENEWER": "0.1",
+      "POLICY_WRITER": "0.05",
+      "SHOP_KESAR": "0.05",
+      "SHOP_JAMUN": "0.02",
+      "SHOP_SYRUP": "0.02",
+      "VITALIK": "0.02",
+      "PAYER": "0.005",
+      "DEAL_HUNTER": "0.005",
+      "REHEARSAL_PAYER": "0.005",
+      "ACCEPTANCE_PAYER": "0.005"
+    },
+    "sepolia": {
+      "VITALIK": "0.002",
+      "SHOP_KESAR": "0.002",
+      "SHOP_JAMUN": "0.002",
+      "SHOP_SYRUP": "0.002",
+      "ACCEPTANCE_PAYER": "0.001"
+    },
+    "rabdi": {
+      "W_SEED_EVENT": "0.9",
+      "W_LEDGER": "1.5",
+      "W_SYNC": "0.2",
+      "W_DIRECTORY": "0.2"
+    }
+  },
+  "later": {
+    "rabdi": {
+      "W_SEED_M_EVENT": "8.5",
+      "W_LEDGER": "2.0"
+    }
+  },
+  "usdt": {
+    "about": "Test USDT on Whitechain (planning/WALLETS.md §3, the 80 plan, extended for the 150 that arrived: REHEARSAL_PAYER and DEAL_HUNTER as in the stand-in mint table; ADR-0045). FUNDER keeps the rest for disposable agents and top-ups.",
+    "whitechain": {
+      "ACCEPTANCE_PAYER": "20",
+      "PAYER": "30",
+      "SHOP_KESAR": "20",
+      "VITALIK": "10",
+      "REHEARSAL_PAYER": "40",
+      "DEAL_HUNTER": "2"
+    }
+  },
+  "funderReserve": {
+    "whitechain": "0.2",
+    "sepolia": "0.001",
+    "rabdi": "0.01"
+  },
+  "sepoliaMaxGwei": "0.5"
+}
