@@ -17,6 +17,18 @@ const arkiv = await connectArkiv({ backend: 'rabdi', env: process.env, role: 'W_
 - **Quotes (T1 writes, T4 reads):** `createQuote(directoryConn, { requestId, shopKey, agentEns, price, validUntil })`; `findQuotes(publicClient, requestId)` returns only W_DIRECTORY's live quotes.
 - **Discovery (M7b wires it into GraphQL):** `discoverShops(publicClient, { category, box, synthetic })`, `boxAround(point, km)`.
 
+## Activity (Friday item 1; T5 and T4 wire it)
+
+```js
+import { activityHooks, closeShop, connectArkiv, openShop } from '@graphpay/money-graph';
+const dir = await connectArkiv({ backend: 'rabdi', env: process.env, role: 'W_DIRECTORY' });
+const { key } = await openShop(dir, { shopKey, shopEns, key: lastKey }); // on: every 5 min while the toggle is on
+await closeShop(dir, { key });                                          // off: out of "open now" at once, gone within 15 min
+await runErrand({ ...options, hooks: activityHooks(dir) });            // presence (15 min, renewed) and handoffs (30 min)
+```
+
+GraphQL: `shops(category, box, openNow: true)` (one extra read), `agentsOnline(owner: <ens>)` or `(session: <run id>)`, `handoffs(requestId: <run id>)`. Every row has a `key` for its explorer link (`/entity/<key>`).
+
 ## Race mode (T5, M15; M9)
 
 `GET /api/race?question=Q2&size=S&mode=plain|graph&inFlight=1|8|all` (WEBSITE_SPEC §7) runs one side live and uncached. Everything is in `@graphpay/money-graph`:

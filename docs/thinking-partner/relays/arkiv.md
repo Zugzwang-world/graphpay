@@ -1,46 +1,53 @@
 # Relay: arkiv (T3)
 
-Updated 03:42 IST, Fri 6 Nov. This step: M9, the live benchmark at size S (branch `arkiv/bench`). Before it: Join's `$attributes` fix ([PR #25](https://github.com/Zugzwang-world/graphpay/pull/25), merged 03:23); M8 S and M7b ([PR #21](https://github.com/Zugzwang-world/graphpay/pull/21), 03:11); M7a ([PR #14](https://github.com/Zugzwang-world/graphpay/pull/14), 01:51).
+Updated 03:50 IST, Fri 6 Nov. This step: Friday item 1, the activity rows (branch `arkiv/activity`).
+
+Merged before it:
+- M9, the live benchmark: [PR #31](https://github.com/Zugzwang-world/graphpay/pull/31), 03:45. D6 passes. The city-wide top 10 takes Graph Arkiv 2 reads against plain's 5, or 6 in parallel. See `bench/BENCHMARK-LIVE.md`.
+- The synthetic label on reputation: [PR #30](https://github.com/Zugzwang-world/graphpay/pull/30), 03:41.
+- Join's `$attributes` fix: [PR #25](https://github.com/Zugzwang-world/graphpay/pull/25), 03:23.
+- M8 S and M7b: [PR #21](https://github.com/Zugzwang-world/graphpay/pull/21).
+- M7a: [PR #14](https://github.com/Zugzwang-world/graphpay/pull/14).
 
 ## In plain words
 
-The benchmark asks the same six money questions of the same synthetic city in two ways. One is plain Arkiv code written by hand, which can only read rows and count them. The other is Graph Arkiv, with one GraphQL question each. Then it counts how many Arkiv reads each needs. Reads are the result, not seconds, because seconds depend on the venue's network (ADR-0042).
+The map and the explainer need to show what is happening right now: which shops are open, which agents are at work, and which agent just handed the errand to which. On Arkiv, "right now" is a row that expires. Each of these is a short-lived row, written by the directory wallet. It stays alive only while something renews it, and it disappears by itself afterwards. Nobody has to clean up, and a crashed server cannot leave a shop showing "open" forever.
 
-**The headline:** ranking the city's shops by sales takes Graph Arkiv **2 reads against 5** (6 when plain asks for every page at once). Arkiv has no SUM, so plain code must read all 490 payment and renewal rows and add them up itself. Graph Arkiv keeps running totals, written with each payment. The gap grows with every payment. At this small size it is modest; the bigger city waits for the founder's final story.
+- **A shop's Open toggle:** the row lives 15 minutes and is renewed while the toggle is on. Turning it off takes the shop out of "open now" at once; the row is gone within 15 minutes.
+- **An agent at work:** the row lives 15 minutes, renewed while it runs. It cannot be edited, only extended.
+- **A handoff between two agents in one errand:** the row lives 30 minutes and cannot be edited. It feeds the explainer's agent lane.
 
-**Correctness:** every Graph Arkiv answer was right. Plain code was right by name, but wrong by identity on the ranking: it credits a re-registered shop's earlier owner's sales to the new owner. Acceptance D6 passes: the calls are exact and the answers right.
+GraphQL can now ask three new questions: which shops nearby are open now (one extra read), which agents are online for a person or a run, and the handoffs of a run in order. Every row has a key, so the website can link each dot and chip to its explorer page.
 
-**Honest limits, stated in the report:** Graph Arkiv needs no fewer reads for this week's traversals (equal on Q1, Q4 and Q6; 3 against 2 on Q3). It moves more bytes on several questions; for example, its 90-day window adds up one row per active day. Writing the graph costs more (0.494 against 0.181 tGLM). No request failed or hit the rate limit.
-
-**The website's race mode** gets a function that runs one side live and reports each read as it lands; T5 wires it into `/api/race`.
-
-**Two bugs found and fixed on the way.** First, the byte meter lost counts when reads overlapped, so parallel byte numbers came out too low; fixed, tested, and the benchmark run again. Second, GraphQL read each agent's payments separately; that is now one batched read, so the persona's spending is 3 reads, as in the lab.
+Nothing writes these rows yet. The website's Open toggle (T5) and the agent run (T4/T5) need to call them; that request is in OPEN.
 
 ## Technical
 
-- **Questions both ways** (`packages/money-graph/src/bench.mjs`, exported):
-  - Plain against the plain store (owner W_SEED_EVENT): `count()` where a count answers (Q1: 3); keyset pages of 100 one at a time, or one `count()` then offset pages with 4, 8, 16 or all in flight (Q2); profiles then one OR batch (Q3); refunds then payments into those shops (Q4); a two-ended path search expanding the smaller side (Q5); two levels of OR batches inside the 64-leaf budget (Q6). Projections everywhere, rows owner-checked.
-  - Graph Arkiv: one document each (`graphDocument`), answers normalised by `graphAnswer`.
-  - `score` is by identity for Graph Arkiv and by name for plain, plus `matchesIdentityTruth`.
-- **Truth** (`packages/city/src/bench.mjs`): `benchParams(city)` (who and which days; Q1's 90 days end on the engine's today) and `benchTruth`, built from `truthOf` (identity and name differ only on Q2).
-- **Harness** (`bench/run.mjs`, `bench/report.mjs`):
-  - one metered connection; it checks R = 490 against the generator first;
-  - a warm-up, 5 interleaved runs of Q1–Q6, and 11 rotating rounds of the six Q2 modes;
-  - CSVs with a SYNTHETIC header, commit, backend and block range: `questions-S`, `q2-parallel-S`, `writes-S`, `http-S` (status, ms, ratelimit, never the URL);
-  - `BENCHMARK-LIVE.md`, reads and bytes only.
-- **Race** (`raceQuestion`, `callTap`): Q1, Q2 and Q5; `onCall({ call, ms, bytes, status })` per read, then `{ answer, correct, truthBasis, matchesIdentityTruth, calls, bytes }`. Usage for T5 is in `docs/sessions/arkiv/README.md` ("Race mode"). The truth needs `@graphpay/city` in `apps/web` (OPEN).
-- **Engine change** (`graphql.mjs`): `out()`/`in()` of sibling nodes goes through one DataLoader, grouped by direction, epoch, kinds and first day, using `queryAny` (budget-chunked OR). Each node keeps its `limit`; the 500-row cap still marks the answer truncated.
-- **Meter fix** (`packages/arkiv-graph/src/transport.mjs`): `responseBytes += await …` was a lost update under concurrency (P-arkiv-2). It now reads the body first, then adds.
-- **Tests:**
-  - `packages/city/test/bench.test.mjs` (4, on ArkivSim): all six questions right both ways; Q2 calls exact (plain `ceil(R/100)`, parallel +1, Graph Arkiv 2); Q3 = 3; the race's per-call events add up to its totals.
-  - `packages/arkiv-graph/test/sim.test.mjs`: five overlapping reads count five bodies.
-  - Totals: arkiv-graph 24, money-graph 15, city 18; `pnpm check` clean.
-- **Against the lab:** 9 of 13 counts are the same. Q4 is 1 and 1 here (no refunds this week, so there is no second read); Q5 is plain 5 and Graph Arkiv 3 here (lab 3 and 5). The generator does not reproduce the lab's city row for row.
+- **Model** (`packages/money-graph/src/model.mjs`):
+  - `shop_open`: `shop_key`* key, `shop_ens`, `open_until` u64; mutable.
+  - `agent_presence`: `agent_ens`*, `owner_ens`*, `role`, `session`*; readonly.
+  - `handoff`: `request_id`*, `from_agent`, `to_agent`, `step`; readonly.
+  - The index lists are in `QUERIES` (ADR-0041 test). All three are trusted from W_DIRECTORY only. `LIFETIME` gains `openMinutes` and `presenceMinutes` (15) and `handoffMinutes` (30).
+- **Writes** (`src/activity.mjs`):
+  - `openShop` creates the row, or finds it by `shop_key`, then patches `open_until` and extends it. `closeShop` sets `open_until` to now.
+  - `markPresence` creates the row, or extends it by key. A lapsed row is created again.
+  - `recordHandoff` creates the row.
+  - `activityHooks(conn)` gives `runErrand` its `presence` and `handoff` hooks, with one presence row per agent and run.
+- **Renewal rule:** read `$expiresAt` and the head (uncached), and extend only if the row ends before head + lifetime. An extension sets `max(current, now + lifetime)`, so it never goes past now + 15 min.
+- **Shared wallet:** every create and renewal passes `verifyRecovered`, which checks its own values (W_DIRECTORY's nonces are shared across Vercel instances; P-arkiv-1).
+- **Reads:**
+  - `openShopKeys`, `agentsOnline`, `handoffsFor`, each owner-scoped.
+  - GraphQL `shops(openNow: true)`: one `queryAny` over `shop_key`; a shop counts only if its `open_until` is still ahead.
+  - GraphQL `agentsOnline(owner | session)` and `handoffs(requestId)`, oldest first by `$createdAt`.
+  - `Presence` and `Handoff` link to `Node`s.
+- **Bug caught by the tests:** viem caches `getBlockNumber()` for a few seconds. A renewal then saw a stale head and skipped the extension. It now reads with `cacheTime: 0`.
+- **Tests** (`test/activity.test.mjs`, 3 tests on ArkivSim):
+  - Open, renew (found by key, never past now + 15), `openNow` in 2 reads, off, lapse.
+  - Presence readonly, renewed, online by owner, gone, re-created.
+  - Handoffs ordered, readonly, a spoofed wallet's row never read, gone after 30 min; the hooks write one presence row per agent and run.
+  - Totals: money-graph 19, city 18, arkiv-graph 23, agents 64; `pnpm check` and the web typecheck clean.
+- `arkiv/schema.md` has the three rows.
 
-**Deviations, and why:**
-- No times in the report (ADR-0042; they stay in the CSVs).
-- Q1's 90-day window ends today, as the engine's does, not at the city's end.
-- Lists use the production cap of 100.
-- Size M is refused by the harness until the story is locked (D7 blocked).
+**Deviations:** none from item 1. "Agents online" takes an owner or a run id: a query must filter on something beyond the type, and both are what the explainer knows.
 
-**Next:** ship M9, then Friday items 4–5 (Swarm, gateway first; ADR-0039, ADR-0053), then 1, 6, 15, 18.
+**Next:** Swarm, per the Coordinator's decision. First the menu through the public gateway: public and unencrypted, the reference and a content hash on Arkiv, re-uploaded on a 404, no stamp of ours. Then refund evidence encrypted in our own code (AES-256-GCM, per-file key wrapped with the Swarm key). Refund evidence is the first thing cut if time runs short.

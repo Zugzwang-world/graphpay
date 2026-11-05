@@ -1,6 +1,6 @@
 # T3 Arkiv: resume here (fresh start)
 
-Updated 03:42 IST, Fri 6 Nov. Read this, then `docs/plan/sessions/T3-arkiv.md`, then `docs/sessions/arkiv/README.md` (API) and `seeding.md` (city runbook).
+Updated 03:50 IST, Fri 6 Nov. Read this, then `docs/plan/sessions/T3-arkiv.md`, then `docs/sessions/arkiv/README.md` (API) and `seeding.md` (city runbook).
 
 ## Done
 
@@ -10,9 +10,9 @@ Updated 03:42 IST, Fri 6 Nov. Read this, then `docs/plan/sessions/T3-arkiv.md`, 
 
 ## Next
 
-1. PR #25 (Join's `$attributes` fix, stronger recovery checks) merged at 03:23 IST. Production `/api/graphql` (`dataset: "S"`) and `/api/mcp` `tools/list` checked at 03:22.
-2. **M9** is on branch `arkiv/bench`: `packages/money-graph/src/bench.mjs` (Q1–Q6 plain and Graph Arkiv, `score`, `raceQuestion`, `callTap`, `plainPayRows`), `packages/city/src/bench.mjs` (`benchParams`, `benchTruth`), `bench/run.mjs` and `bench/report.mjs`, batched `out()`/`in()` in GraphQL (Q3 6 → 3 reads), and the byte meter's lost-update fix in `packages/arkiv-graph/src/transport.mjs`. Live S run: D6 passes (Graph Arkiv 2, plain 5, parallel 6; every answer right). Live run at commit 667b236 (03:38). Ship it as one PR titled `… (M9 done)`; T5 gets the race API in `docs/sessions/arkiv/README.md` ("Race mode").
-3. Friday items (MASTER_PLAN §4), in this order (ADR-0053: Swarm first): 4 (Swarm probe through the public gateway; a verifier was asked for the gateway's upload API at 03:45), 5 (Swarm entities), 1 (`shop_open`, `agent_presence`, `handoff`), 6 (demo cast `shop` rows, after the founder's names), 15 (`arkiv/` drafts), 18 (SDK publish prep after CP4), 10 (map support for T5).
+1. Merged: PR #25 (03:23), #30 (labels, 03:41), #31 (M9, 03:45). Friday item 1 is on branch `arkiv/activity` (`packages/money-graph/src/activity.mjs`, GraphQL `shops(openNow)`, `agentsOnline`, `handoffs`, `activityHooks`); ship it and watch it.
+2. **Swarm** (Coordinator, 03:4x): item 4 and the `menu` part of item 5 go through the public gateway (`api.gateway.ethswarm.org`, `POST /bytes` or `/bzz`, `swarm-postage-batch-id` = 64 zeros); public unencrypted menu JSON only, no personal data; keep the reference and a content hash on Arkiv; re-upload on 404; never send or buy a stamp of our own; no Bee node, no sBZZ. `refund_evidence` last: AES-256-GCM in our code with a per-file key, upload the ciphertext as plain bytes (64-hex ref), store the per-file key wrapped with the Swarm wrapping key (base64url); the writer refuses any 128-hex run. Ask the Coordinator for the wrapping key (`pnpm -s secrets:gen`) then. Swarm is first in the cut order (ADR-0053): drop refund_evidence before any demo-path item.
+3. Then Friday items 6 (demo cast `shop` rows, after the founder's names), 15 (`arkiv/` drafts), 18 (SDK publish prep after CP4), 10 (map support for T5).
 
 ## How to check the seeding
 

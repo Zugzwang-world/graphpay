@@ -41,14 +41,13 @@ Updated 02:00 IST. **M5 is built and run for real; its PR is open.** The `graphp
 
 ## arkiv
 
-Updated 03:42 IST, Fri 6 Nov (T3).
+Updated 03:50 IST, Fri 6 Nov (T3).
 
-- **Where we are:** M9, the live benchmark, is done at size S and going up as a PR. Ranking the city's shops by sales takes Graph Arkiv 2 reads against plain Arkiv's 5 (6 with every page at once), because plain code must read all 490 payments. Every Graph Arkiv answer was right; acceptance D6 passes. The report also says plainly where Graph Arkiv does not win.
-- **Also this step:** Join's receipt bug is fixed and merged (PR #25, 03:23). Two bugs were found during the benchmark and fixed: a byte counter that lost counts when reads overlapped, and one read per agent where one batched read will do.
-- **Labelling fix (PR #30, merged 03:41):** the cast shops are real but carry labelled synthetic history; their reputation now says synthetic too, in GraphQL, the hosted MCP and the agents' ranking.
-- **Running:** nothing. The Swarm gateway check is back: uploads are open with no account, but files may vanish at any time; Swarm is the next step.
-- **Blockers:** none. Size M waits for the founder's final story (D7).
-- **Next:** Swarm (Friday items 4–5), then the presence and handoff rows (item 1).
+- **Where we are:** M9 (the live benchmark) merged at 03:45 (PR #31): ranking the city's shops by sales takes Graph Arkiv 2 reads against plain Arkiv's 5; acceptance D6 passes. The labelling fix merged at 03:41 (PR #30).
+- **This step (Friday item 1):** the "live" rows behind the map and the explainer. A shop's Open toggle, an agent at work, and one agent handing work to another are now short-lived Arkiv rows that disappear by themselves when nobody renews them. GraphQL can ask which shops are open now, which agents are online, and a run's handoffs.
+- **Running:** nothing.
+- **Blockers:** none. The website's Open toggle and the agent run still have to call these (T5 and T4; OPEN).
+- **Next:** Swarm: the menu upload through the public gateway (the Coordinator's conditions), then refund evidence encrypted in our own code.
 
 ## agents
 

@@ -35,7 +35,8 @@ One line per PR: time (IST) · activity · result · PR link. Append under your 
 - 03:05 IST · arkiv · M8 size S seeded on Rabdi (graph 97 txs, 0.494 tGLM; directory; plain resuming) and M7b (engine, GraphQL, explain, hosted MCP routes); live checks pass · https://github.com/Zugzwang-world/graphpay/pull/21 (merged 03:11)
 - 03:20 IST · arkiv · fix: the recorder, quotes and the ledger's check read `getEntity`'s `$attributes`, so an uncertain send is adopted, never written twice (Join's finding); ArkivSim test · https://github.com/Zugzwang-world/graphpay/pull/25 (merged 03:23)
 - 03:40 IST · arkiv · fix: a reputation is labelled synthetic when any tally row it reads is, so real cast shops with labelled history say so (Join's finding via the Coordinator); ArkivSim test · https://github.com/Zugzwang-world/graphpay/pull/30 (merged 03:41)
-- 03:42 IST · arkiv · M9 at S: live benchmark, D6 passes (Q2: Graph Arkiv 2 reads, plain 5, 6 in parallel; every answer right), race function for /api/race, batched out()/in(), byte meter fix · https://github.com/Zugzwang-world/graphpay/pull/31
+- 03:42 IST · arkiv · M9 at S: live benchmark, D6 passes (Q2: Graph Arkiv 2 reads, plain 5, 6 in parallel; every answer right), race function for /api/race, batched out()/in(), byte meter fix · https://github.com/Zugzwang-world/graphpay/pull/31 (merged 03:45)
+- 03:50 IST · arkiv · Friday item 1: `shop_open`, `agent_presence`, `handoff` rows (W_DIRECTORY, lapse by themselves, renewals never past now + lifetime), GraphQL `shops(openNow)`, `agentsOnline`, `handoffs`, the agents' hooks · PR pending
 
 ## agents
 
