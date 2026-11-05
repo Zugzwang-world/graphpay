@@ -47,9 +47,14 @@ if (!deployed) {
   const policy = await read(deployed.address, checkoutAbi, 'policies', [namehash(acceptance.ensName)]);
   check(`policy for ${acceptance.ensName} on its own wallet`, isAddressEqual(policy.wallet, wallet) && !policy.revoked, `cap ${formatUnits(policy.dailyCapMicro, 6)}/day, the story's ${formatUnits(storyCap, 6)}`);
 }
+// Paid once ever, guarded twice: the record (written as pending before the payment, so a crash
+// or a receipt timeout still blocks a second run; committed with the step's PR) and the chain
+// itself (no PaymentSettled for the acceptance agent's node on this checkout since its deploy).
 const RECORD = ctx.fork ? join(tmpdir(), 'graphpay-fork-c7.json') : new URL('../../docs/sessions/payments/c7.json', import.meta.url);
 const prior = !ctx.fork && existsSync(RECORD) ? JSON.parse(readFileSync(RECORD, 'utf8')) : null;
-if (prior) check('C7 not yet paid', false, `paid once already: ${prior.explorer}`);
+if (prior) check('C7 not yet attempted', false, prior.status === 'pending' ? `an attempt is pending since ${prior.at} (order ${prior.orderId}): check the chain before touching c7.json` : `paid once already: ${prior.explorer}`);
+const settledBefore = deployed ? await settlementsOf(namehash(acceptance.ensName)) : [];
+if (settledBefore.length) check('no earlier payment by the acceptance agent on this checkout', false, ctx.explorerTx(settledBefore[0].transactionHash));
 else if (balance < BigInt(story.order.priceMicro)) check(`${acceptance.ensName} holds ${formatUnits(BigInt(story.order.priceMicro), 6)}`, false);
 for (const c of checks) console.log(`  ${c.ok ? 'ok  ' : 'FAIL'} ${c.name}${c.note ? ` (${c.note})` : ''}`);
 if (checks.some((c) => !c.ok)) {
@@ -58,7 +63,18 @@ if (checks.some((c) => !c.ok)) {
   await qualifyingPayment();
 }
 
-// C7: one 4.80 payment as the acceptance agent, through the facilitator.
+// PaymentSettled events paying for a node (payerNode is indexed), in chunks from the deploy block.
+async function settlementsOf(payerNode) {
+  const latest = await publicClient.getBlockNumber();
+  const found = [];
+  for (let from = BigInt(deployed.deployBlock); from <= latest; from += 10_000n) {
+    const to = from + 9_999n < latest ? from + 9_999n : latest;
+    found.push(...(await publicClient.getContractEvents({ address: deployed.address, abi: checkoutAbi, eventName: 'PaymentSettled', args: { payerNode }, fromBlock: from, toBlock: to })));
+  }
+  return found;
+}
+
+// C7: one payment of the story's order as the acceptance agent, through the facilitator.
 async function qualifyingPayment() {
   const lp = await localPayment(ctx);
   const agent = lp.payer(acceptance.walletRole, acceptance.ensName, { mandate: 'C7 qualifying payment' });
@@ -75,8 +91,12 @@ async function qualifyingPayment() {
     const merchantBefore = await lp.balances(lp.merchant.address);
     const q = await lp.quote(agent, { buyer: castEntries().find((e) => e.kind === 'persona').ensName, qty: story.order.quantity });
     if (q.priceMicro !== String(story.order.priceMicro)) throw new Error('the quote is not the catalog price');
+    const record = (fields) => writeFileSync(RECORD, `${JSON.stringify({ check: 'C7 (also E3)', synthetic: true, payer: agent.name, wallet: agent.address, orderId: q.orderId, ...fields }, null, 2)}\n`);
+    record({ status: 'pending', at: new Date().toISOString() });
     const paid = await lp.pay(q, agent);
-    if (paid.status !== 200 || paid.settlement?.success !== true) throw new Error(`C7 answered ${paid.status} ${JSON.stringify(paid.body)}`);
+    const sent = paid.body?.transaction || paid.settlement?.transaction;
+    if (sent) record({ status: 'pending', at: new Date().toISOString(), tx: sent, explorer: ctx.explorerTx(sent) });
+    if (paid.status !== 200 || paid.settlement?.success !== true) throw new Error(`C7 answered ${paid.status} ${JSON.stringify(paid.body)}; the record stays pending`);
     const hash = paid.body.transaction;
     const receipt = await lp.logRelayed('C7 qualifying payment', hash);
     let settled = false;
@@ -96,12 +116,8 @@ async function qualifyingPayment() {
     }
     const after = await lp.balances(agent.address);
     const result = {
-      check: 'C7 (also E3)',
-      synthetic: true,
-      payer: agent.name,
-      wallet: agent.address,
+      status: 'paid',
       shop: lp.shop.ensName,
-      orderId: q.orderId,
       amount: lp.fmt(story.order.priceMicro),
       token: token.address,
       tx: hash,
@@ -116,7 +132,7 @@ async function qualifyingPayment() {
       merchantReceivedMicro: String((await lp.balances(lp.merchant.address)).usdt - merchantBefore.usdt),
       at: new Date().toISOString(),
     };
-    writeFileSync(RECORD, `${JSON.stringify(result, null, 2)}\n`);
+    record(result);
     const ok = settled && moved === BigInt(story.order.priceMicro) && after.wbt === before.wbt && isAddressEqual(receipt.from, lp.relayer.address);
     console.log(`C7 ${ok ? 'done' : 'CHECK FAILED'}: ${result.explorer} (PaymentSettled ${settled}, transfer ${formatUnits(moved, 6)}, payer gas 0: ${after.wbt === before.wbt}, from the relayer: ${isAddressEqual(receipt.from, lp.relayer.address)})`);
     if (!ok) process.exitCode = 1;

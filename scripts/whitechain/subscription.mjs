@@ -12,6 +12,7 @@
 import { encodeAbiParameters, erc20Abi, formatUnits, keccak256, namehash, parseAbi } from 'viem';
 import { castEntries, config, story } from '../../packages/config/index.mjs';
 import { cancelTypes, checkoutAbi, checkoutDomain, eip2612Types, permit2Domain, permitHash, permitSingleTypes, renewalOrderId, subscribeTypes, SUB_STATUS, tokenDomain } from '../../packages/contracts/index.mjs';
+import { DEFAULT_APPROVAL_MICRO } from '../../packages/facilitator/index.mjs';
 import { configuredCheckout, context, option, permit2, sendTx, usdt } from './lib.mjs';
 
 // createSubscription runs a try/catch around Permit2 and the first charge: estimateGas undershoots
@@ -19,7 +20,7 @@ import { configuredCheckout, context, option, permit2, sendTx, usdt } from './li
 const CREATE_GAS_FLOOR = 700_000n;
 const RENEW_GAS_FLOOR = 300_000n;
 const ALLOWANCE_CYCLES = 3n; // the first charge, one renewal, one spare
-const APPROVAL_FLOOR_MICRO = 50_000_000n; // the same bounded approval the payer's client signs
+const APPROVAL_FLOOR_MICRO = DEFAULT_APPROVAL_MICRO; // the same bounded approval the payer's client signs
 const SIG_TTL_SECONDS = 600;
 const permit2Abi = parseAbi(['function allowance(address owner, address token, address spender) view returns (uint160 amount, uint48 expiration, uint48 nonce)']);
 const noncesAbi = parseAbi(['function nonces(address owner) view returns (uint256)']);
@@ -28,6 +29,7 @@ const argv = process.argv.slice(2);
 const mode = argv[0];
 if (!['demo', 'create', 'renew', 'cancel'].includes(mode)) throw new Error('usage: subscription.mjs demo|create|renew|cancel [--sub <subId>] [--fork <url>] [--yes]');
 const ctx = await context(argv);
+if (ctx.send && !ctx.fork && process.env.ALLOW_REAL_NETWORK !== '1') throw new Error('a real send needs ALLOW_REAL_NETWORK=1');
 const { publicClient, chain } = ctx;
 const address = configuredCheckout()?.address;
 if (!address) throw new Error('no whitechain.contracts.checkout in the config');
@@ -140,8 +142,12 @@ if (mode === 'cancel') await cancel(needSub());
 if (mode === 'demo') {
   const subId = await create();
   if (ctx.send) {
-    await renew(subId);
-    await cancel(subId);
+    // A failed renewal must not leave the subscription active with its allowance.
+    try {
+      await renew(subId);
+    } finally {
+      await cancel(subId);
+    }
   }
 }
 console.log(`network ${config.networks.whitechain.name}${ctx.fork ? ' (fork)' : ''}: done`);

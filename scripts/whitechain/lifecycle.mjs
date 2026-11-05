@@ -123,8 +123,9 @@ try {
   const p = await lp.reads.policy(sNode);
   check(!p.revoked, `${scout.ensName}'s policy is already revoked; restore it first`);
   const policyArgs = (revoked) => [sNode, p.epoch, p.wallet, revoked, p.dailyCapMicro, p.expiry];
-  const rv = await sendTx(ctx, { role: 'POLICY_WRITER', label: `lifecycle revoke ${scout.key}`, request: { address: lp.checkout, abi: checkoutAbi, functionName: 'setPolicy', args: policyArgs(true) } });
+  // Armed before the revoke is sent: a revoke that times out after broadcast is still undone.
   restoreScout = () => sendTx(ctx, { role: 'POLICY_WRITER', label: `lifecycle restore ${scout.key}`, request: { address: lp.checkout, abi: checkoutAbi, functionName: 'setPolicy', args: policyArgs(false) } });
+  const rv = await sendTx(ctx, { role: 'POLICY_WRITER', label: `lifecycle revoke ${scout.key}`, request: { address: lp.checkout, abi: checkoutAbi, functionName: 'setPolicy', args: policyArgs(true) } });
   const vq = await lp.quote(scoutAgent, { buyer, qty: 1 });
   const revoked = await lp.pay(vq, scoutAgent);
   check(revoked.status === 402 && revoked.settlement?.errorReason === 'AGENT_REVOKED' && /^0x[0-9a-f]{64}$/.test(revoked.settlement.transaction), `revoked answered ${revoked.status} ${JSON.stringify(revoked.body)}`);
