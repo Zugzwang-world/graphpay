@@ -1,0 +1,22 @@
+{
+  "name": "@graphpay/ens",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Identity on ENSv2 (Ethereum Sepolia): the graphpay.eth namespace, its records, and the payee and accepts reads (M5).",
+  "exports": {
+    ".": {
+      "types": "./index.d.ts",
+      "default": "./index.mjs"
+    }
+  },
+  "types": "./index.d.ts",
+  "scripts": {
+    "test": "node --test \"test/*.test.mjs\"",
+    "test:fork": "node --test --test-concurrency=1 \"test-fork/*.test.mjs\""
+  },
+  "dependencies": {
+    "@graphpay/config": "workspace:*",
+    "viem": "2.57.16"
+  }
+}

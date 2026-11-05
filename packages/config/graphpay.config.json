@@ -108,7 +108,29 @@
       "acceptsText": "x-graphpay-accepts",
       "agentContext": "agent-context",
       "agentEndpointMcp": "agent-endpoint[mcp]",
-      "agentEndpointWeb": "agent-endpoint[web]"
+      "agentEndpointWeb": "agent-endpoint[web]",
+      "status": "graphpay.status",
+      "capMicro": "graphpay.cap_micro",
+      "principal": "graphpay.principal",
+      "kind": "graphpay.kind",
+      "synthetic": "graphpay.synthetic"
+    },
+    "namespace": {
+      "about": "Namespace parameters (planning/SPEC/IDENTITY_ENS.md §1 and §4, planning/PROMPTS/05-ens-namespace.md; identity owns this section). Owners and the wildcard expire with graphpay.eth; agents after agentTtlDays; disposable agents after the story's disposable.expiryDays. An agent that never pays publishes capMicroWithoutPolicy, so ENS alone already refuses it a payment (ADR-0057). Contract salts are keccak256 of '<saltPrefix>:<registry|resolver>:<name>'.",
+      "wildcardLabel": "sim",
+      "agentTtlDays": 30,
+      "capMicroWithoutPolicy": 0,
+      "saltPrefix": "graphpay:v1"
+    },
+    "texts": {
+      "about": "ENSIP-26 agent-context texts written into the resolvers at provisioning (ADR-0037). Placeholders are filled from the story config: {displayName}, {role}, {principal}, {custody}.",
+      "root": "GraphPay: ask before you pay. Agents with ENS names (identify) pay shops in test USDT over x402 on Whitechain Sepolia (pay); every payment joins a money graph on Arkiv (remember) that any agent can ask before it pays, with an explain trace of every read. Read-only MCP tools: schema, ask, graphql, explain. Synthetic demo data; testnets only.",
+      "human": "{displayName}: a human principal in the synthetic demo cast; owns its agents and can pause or stop them.",
+      "shop": "{displayName}: a shop in the synthetic demo cast; receives test USDT on Whitechain Sepolia at its coin type 2147485522 address.",
+      "agent": "{displayName}: the {role} agent of {principal}. {custody} Synthetic demo cast.",
+      "custodyOwn": "Pays from its own wallet under an on-chain daily cap.",
+      "custodyOwner": "Held by the owner's wallet; never pays.",
+      "wildcard": "synthetic agent, unverified"
     }
   },
   "arkiv": {
