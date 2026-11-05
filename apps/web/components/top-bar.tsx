@@ -93,6 +93,9 @@ export function TopBar() {
         <button type="button" className="chip" aria-pressed={soundOn} onClick={() => setSoundOn(!soundOn)} title="Sounds are synthesised in the browser; captions show either way">
           {soundOn ? 'Sound on' : 'Sound off'}
         </button>
+        <Link className="chip" href="/map">
+          Map
+        </Link>
         <Link className="chip" href="/race">
           Race mode
         </Link>

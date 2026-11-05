@@ -15,6 +15,43 @@ importers:
         specifier: 2.57.16
         version: 2.57.16(typescript@5.9.3)(zod@4.6.7)
 
+  apps/store:
+    dependencies:
+      '@graphpay/checkout-kit':
+        specifier: workspace:*
+        version: link:../../packages/checkout-kit
+      '@graphpay/config':
+        specifier: workspace:*
+        version: link:../../packages/config
+      '@graphpay/contracts':
+        specifier: workspace:*
+        version: link:../../packages/contracts
+      next:
+        specifier: 16.4.5
+        version: 16.4.5(@opentelemetry/api@1.10.0)(@types/node@22.20.5)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
+      react:
+        specifier: 19.3.1
+        version: 19.3.1
+      react-dom:
+        specifier: 19.3.1
+        version: 19.3.1(react@19.3.1)
+      viem:
+        specifier: 2.57.16
+        version: 2.57.16(typescript@5.9.3)(zod@4.6.7)
+    devDependencies:
+      '@types/node':
+        specifier: 22.20.5
+        version: 22.20.5
+      '@types/react':
+        specifier: 19.3.0
+        version: 19.3.0
+      '@types/react-dom':
+        specifier: 19.3.0
+        version: 19.3.0(@types/react@19.3.0)
+      typescript:
+        specifier: 5.9.3
+        version: 5.9.3
+
   apps/web:
     dependencies:
       '@graphpay/arkiv-graph':
@@ -32,9 +69,15 @@ importers:
       '@graphpay/ens':
         specifier: workspace:*
         version: link:../../packages/ens
+      '@graphpay/facilitator':
+        specifier: workspace:*
+        version: link:../../packages/facilitator
       '@graphpay/money-graph':
         specifier: workspace:*
         version: link:../../packages/money-graph
+      '@graphpay/shop':
+        specifier: workspace:*
+        version: link:../../packages/shop
       next:
         specifier: 16.4.5
         version: 16.4.5(@opentelemetry/api@1.10.0)(@types/node@22.20.5)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
@@ -111,12 +154,21 @@ importers:
       '@graphpay/ens':
         specifier: workspace:*
         version: link:../packages/ens
+      '@graphpay/facilitator':
+        specifier: workspace:*
+        version: link:../packages/facilitator
       '@graphpay/mirror':
         specifier: workspace:*
         version: link:../packages/mirror
       '@graphpay/money-graph':
         specifier: workspace:*
         version: link:../packages/money-graph
+      '@graphpay/shop':
+        specifier: workspace:*
+        version: link:../packages/shop
+      '@x402/core':
+        specifier: 2.30.0
+        version: 2.30.0
       ai:
         specifier: 7.0.162
         version: 7.0.162(zod@4.6.7)
@@ -147,6 +199,13 @@ importers:
       zod:
         specifier: 4.6.7
         version: 4.6.7
+    devDependencies:
+      '@graphpay/facilitator':
+        specifier: workspace:*
+        version: link:../facilitator
+      '@x402/core':
+        specifier: 2.30.0
+        version: 2.30.0
 
   packages/agents:
     dependencies:
@@ -174,6 +233,25 @@ importers:
       viem:
         specifier: 2.57.16
         version: 2.57.16(typescript@5.9.3)(zod@4.6.7)
+
+  packages/checkout-kit:
+    dependencies:
+      '@graphpay/agentpay':
+        specifier: workspace:*
+        version: link:../agentpay
+      '@graphpay/contracts':
+        specifier: workspace:*
+        version: link:../contracts
+      react:
+        specifier: '>=19'
+        version: 19.3.1
+      viem:
+        specifier: 2.57.16
+        version: 2.57.16(typescript@5.9.3)(zod@4.6.7)
+    devDependencies:
+      '@graphpay/config':
+        specifier: workspace:*
+        version: link:../config
 
   packages/city:
     dependencies:

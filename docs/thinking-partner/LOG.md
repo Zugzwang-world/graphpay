@@ -56,6 +56,8 @@ One line per PR: time (IST) · activity · result · PR link. Append under your 
 - 03:36 IST · integration · opened: the mirror live on Rabdi (history 1,258 labelled events; retry and drop tests clean, counted after the first payment), the replay tool and acceptance reads, the integration package with the live MCP client and read hooks · https://github.com/Zugzwang-world/graphpay/pull/33
 - 04:10 IST · integration · opened: the ENS gate on the payer's signing path (M12) and batched live presence and hand-off hooks (Friday item 3) · https://github.com/Zugzwang-world/graphpay/pull/37
 - 04:30 IST · integration · opened: T2's watcher hosted in the workers; the first ACCEPTANCE_REPORT (18 pass, 0 fail, 1 blocked, 29 not run; D1 and D3 pass on the real payments) · https://github.com/Zugzwang-world/graphpay/pull/46
+- 05:10 IST · integration · merged: the buyer_risk fix and `pnpm e2e:food` (M12) · https://github.com/Zugzwang-world/graphpay/pull/48
+- 04:55 IST · integration · opened: the counting e2e:food run passed A–E on the real networks (paid 4.80, delivered, refunded 0.80); the signer fix; the report at 24 pass · https://github.com/Zugzwang-world/graphpay/pull/52
 
 ## website
 
@@ -68,10 +70,14 @@ One line per PR: time (IST) · activity · result · PR link. Append under your 
 - 05:05 IST · website · opened: the Open toggle (Friday item 9): `POST /api/merchant/open` writes the shop's `shop_open` row as W_DIRECTORY, renewed every 5 minutes by the merchant phone; reviewer pass · https://github.com/Zugzwang-world/graphpay/pull/39
 - 05:50 IST · website · opened: the customer's Pause and Resume buttons (M6): the owner wallet sets `graphpay.status` of the payer agent on Sepolia, behind the passcode; reviewer pass · https://github.com/Zugzwang-world/graphpay/pull/43
 - 06:05 IST · website · opened: the customer phone's live state (`/api/state/customer`: status from ENS and the AgentPolicy, cap and spend from the checkout contract, last order from the graph) and the checkout address fix · https://github.com/Zugzwang-world/graphpay/pull/44
+- 07:10 IST · website · opened: M16 the checkout kit and the demo store (a shop in 17 lines, a person pays from a browser wallet, merchant view, chain-based accountant export), two reviewer passes, a bundler-safe ABI import in contracts · https://github.com/Zugzwang-world/graphpay/pull/51
+- 07:55 IST · website · opened: the Mumbai map (Friday item 10): our own SVG of the neighbourhoods, directory dots, open shops and agents glowing, explorer links · https://github.com/Zugzwang-world/graphpay/pull/54
+
 
 ## agentpay
 - 04:05 IST · agentpay · opened: `@graphpay/agentpay` V1, the two-sided SDK (buyer pass and guards, merchant middleware, facilitator interface and reference relayer, AI SDK and MCP tools, the sweet shop and ride examples), 36 offline and 13 fork tests, reviewer's 2 blocking fixed · https://github.com/Zugzwang-world/graphpay/pull/38
-- 04:10 IST · agentpay · opened: the first real test payment through the SDK (0.01 test USDT, rehearsal agent → good shop, https://explorer.testnet.whitechain.io/tx/0xfbd7d307b1b0c08f3af015b4bdb03aaeed12d0c2d18c2553432cb4679ff14c7e), its script and tx log · (link once merged)
+- 04:10 IST · agentpay · opened: the first real test payment through the SDK (0.01 test USDT, rehearsal agent → good shop, https://explorer.testnet.whitechain.io/tx/0xfbd7d307b1b0c08f3af015b4bdb03aaeed12d0c2d18c2553432cb4679ff14c7e), its script and tx log · https://github.com/Zugzwang-world/graphpay/pull/41 (merged)
+- 04:20 IST · agentpay · opened: A4, the SDK merchant settling through T1's facilitator on a fork (in process and over HTTP; bad token and a gate refusal send nothing), 4 fork tests; the CSV's cached-head fix · https://github.com/Zugzwang-world/graphpay/pull/47
 
 ## records
 

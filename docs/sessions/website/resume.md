@@ -4,7 +4,7 @@ Start line: `You are T5 Web. Run docs/plan/sessions/T5-web.md. Go.` Then read th
 
 ## State
 - **Merged:** #10 the shell (stage, both phones, explainer, race page, how-it-works, passcode guard, F2 tests, live chain-head chips), #13 phone views (request card, spending-pass states, merchant notifications).
-- **Merged since:** #17 (agent run route), #23 (merchant stream `/api/merchant/events` and `/export.csv` on the live graph; both now `waitingFor: null`). #26 (`/order/[id]` on `order(id)`, explain per-call detail). #36 (`/api/race` live with the benchmark table). **In PR `web/open-toggle`:** Friday item 9, `POST /api/merchant/open` (needs `W_DIRECTORY_PRIVATE_KEY` in Vercel). Branch off `origin/main`; the worktree needed `pnpm install --frozen-lockfile` after the merge.
+- **Merged since:** #17 agent run route; #23 merchant stream and CSV; #26 order trail and explain detail; #36 race mode; #39 Open toggle (`POST /api/merchant/open`, needs `W_DIRECTORY_PRIVATE_KEY`, set in Vercel by the Coordinator); #43 Pause and Resume (needs `VITALIK_PRIVATE_KEY`, set); #44 customer state (`/api/state/customer`); #51 M16 (`packages/checkout-kit`, `apps/store`: not deployed, it needs the Vercel project `graphpay-store` and env, see OPEN). **In PR `web/map`:** Friday item 10, `/map` and `/api/map`. Branch off `origin/main`; after a merge run `pnpm install`.
 - **Agent run route (merged #17):** the agent run route (`POST /api/agents/run` streams the errand as SSE in the same request; `GET .../:id/events` replays from memory), the one-at-a-time registry (`lib/run-registry.server.ts`), the runner seam (`lib/agents-live.server.ts`: **no runner until Join's M12**; the route answers 503 "not live yet" naming it), client streaming (`lib/sse-client.ts`, `stream()` in `components/site-context.tsx`).
 - Production: https://graphpay-event.vercel.app (Vercel builds only code changes). Preview/local: `.claude/launch.json` is local (untracked): `pnpm --filter @graphpay/web exec next start -p 3917` after `pnpm build`.
 
@@ -20,7 +20,7 @@ Each unwired route is a file under `apps/web/app/api/**/route.ts` that checks th
 | `POST /api/merchant/{dispatch,refund}` | M4 | merchant key server-side behind the passcode (E-3) |
 
 ## Then
-M16 (checkout kit `packages/checkout-kit`, store `apps/store`; needs M4; read `planning/PROMPTS/16-checkout-kit-store.md`), then Friday items 8 to 13 (`docs/plan/MASTER_PLAN.md` §4). Items 9, 10 need T3's `shop_open` and `shops` queries.
+After M16 merges: the store's Sunday box (stretch), then Friday items 8 to 13 (`docs/plan/MASTER_PLAN.md` §4). Items 9, 10 need T3's `shop_open` and `shops` queries.
 
 ## Rules that bit
 - Story and addresses only from `@graphpay/config` (`pnpm check` fails otherwise; also in tests).

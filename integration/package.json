@@ -15,8 +15,11 @@
     "@graphpay/config": "workspace:*",
     "@graphpay/contracts": "workspace:*",
     "@graphpay/ens": "workspace:*",
+    "@graphpay/facilitator": "workspace:*",
     "@graphpay/mirror": "workspace:*",
     "@graphpay/money-graph": "workspace:*",
+    "@graphpay/shop": "workspace:*",
+    "@x402/core": "2.30.0",
     "ai": "7.0.162",
     "viem": "2.57.16",
     "zod": "4.6.7"

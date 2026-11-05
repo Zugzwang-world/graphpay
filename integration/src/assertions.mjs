@@ -44,7 +44,7 @@ export function assertChoice({ runLog, events, balances, shops }) {
 }
 
 // B: the payment settles; payer −price, good shop +price; the receipt says where.
-export function assertSettled({ runLog, events, balances, priceMicro, network }) {
+export function assertSettled({ runLog, events, balances, priceMicro, network, explorer = null }) {
   const r = runLog.result;
   const settled = events.find((e) => e.name === 'PaymentSettled' && String(e.args?.orderId ?? '').toLowerCase() === String(r.orderId ?? '').toLowerCase());
   const paid = micro(balances.before.payer) - micro(balances.after.payer);
@@ -56,10 +56,12 @@ export function assertSettled({ runLog, events, balances, priceMicro, network })
       'PaymentSettled for the order': Boolean(settled),
       'payer paid the price': paid === micro(priceMicro),
       'the good shop received it': got === micro(priceMicro),
-      'the receipt is labelled': r.receipt?.network === network,
+      // The receipt names the chain (CAIP-2) and links the configured explorer; the run file
+      // carries the WHITECHAIN or FORK label.
+      'the receipt is on the chain': r.receipt?.network === network && (!explorer || String(r.receipt?.explorerUrl ?? '').startsWith(explorer)),
     },
     { status: r.status, orderId: r.orderId, settle: settled?.id ?? null, payerDelta: `-${usdt(paid)}`, shopDelta: `+${usdt(got)}`, receipt: r.receipt?.explorerUrl ?? null },
-    `PaymentSettled; payer −${usdt(priceMicro)}, shop +${usdt(priceMicro)}; receipt ${network}`,
+    `PaymentSettled; payer −${usdt(priceMicro)}, shop +${usdt(priceMicro)}; receipt on ${network}`,
   );
 }
 

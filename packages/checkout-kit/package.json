@@ -1,0 +1,42 @@
+{
+  "name": "@graphpay/checkout-kit",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "A checkout kit for GraphPay: a shop mounts its catalog and a 402 order route in about 20 lines, and a buyer pays from a browser wallet with one signature and no gas (M16).",
+  "exports": {
+    ".": {
+      "types": "./index.d.ts",
+      "default": "./index.mjs"
+    },
+    "./client": {
+      "types": "./src/client.d.ts",
+      "default": "./src/client.mjs"
+    },
+    "./react": {
+      "types": "./src/react.d.ts",
+      "default": "./src/react.mjs"
+    }
+  },
+  "scripts": {
+    "test": "node --test \"test/*.test.mjs\""
+  },
+  "dependencies": {
+    "@graphpay/agentpay": "workspace:*",
+    "@graphpay/contracts": "workspace:*",
+    "viem": "2.57.16"
+  },
+  "peerDependencies": {
+    "react": ">=19"
+  },
+  "devDependencies": {
+    "@graphpay/config": "workspace:*"
+  },
+  "types": "./index.d.ts",
+  "files": [
+    "index.mjs",
+    "index.d.ts",
+    "src",
+    "README.md"
+  ]
+}

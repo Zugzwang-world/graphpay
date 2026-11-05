@@ -1,0 +1,21 @@
+{
+  "id": "E4",
+  "at": "2026-11-05T23:15:02.719Z",
+  "pass": true,
+  "what": "the mirror writes it to Arkiv",
+  "measured": {
+    "cursorBlock": 12324028,
+    "settleBlock": 12323999,
+    "trail": [
+      "order 1874:0xe92d009a862f7fef9cd752c69bd0ea172b003fc33c3e877dd02b6f9ffe44e791:2",
+      "pay 1874:0xe92d009a862f7fef9cd752c69bd0ea172b003fc33c3e877dd02b6f9ffe44e791:6",
+      "deliver 1874:0x8f3066b30436028438b7ab8f2d362818fa054c5b9a608ac44deffab016329dc6:0"
+    ]
+  },
+  "expected": "cursor past the settle block; trail order → pay → deliver; refs 1874:<tx>:<logIndex>",
+  "evidence": {
+    "runFile": "docs/sessions/integration/runs/run-a8d00695846884f3/run.json",
+    "startedAt": "2026-11-05T23:11:01.937Z",
+    "assertion": "C"
+  }
+}

@@ -8,7 +8,7 @@ import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { WebStandardStreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/webStandardStreamableHttp.js';
 import { z } from 'zod';
 import { normalizedName } from './identity.mjs';
-import { SDL, runGraphql } from './graphql.mjs';
+import { SDL, runGraphql, usdt } from './graphql.mjs';
 
 export const MCP_TOOLS = ['schema', 'ask', 'graphql', 'explain'];
 const MCP_LIMITS = { maxFields: 6, maxDepth: 4, maxChars: 4000 };
@@ -29,14 +29,31 @@ export function askDocument({ intent, ens = [], order_id, window = 'D90', verify
     return { query: `{ order(id: ${JSON.stringify(order_id.toLowerCase())}) { kind from { ens } to { ens } amountMicro day ref } }`, columns: ['kind', 'from', 'to', 'amount_micro', 'day', 'ref'] };
   }
   const list = names(ens);
+  if (intent === 'buyer_risk') {
+    // The buyer's standing as the shop's risk check reads it (packages/agents parseBuyerRisk):
+    // status and cap from the node row, the window's orders, cancellations and disputes, today's
+    // spend, and the principal (the owner) with its verified flag.
+    const body = list
+      .map((n, i) => `n${i}: node(ens: ${JSON.stringify(n)}) { ens status capMicro owner { ens verified } reputation(window: ${window}, verify: ${verify ? 'true' : 'false'}) { orders cancellations disputes synthetic } today: reputation(window: TODAY) { paidUsdt } }`)
+      .join(' ');
+    return { query: `{ ${body} }`, columns: BUYER_COLUMNS };
+  }
   const fields = 'orders refunds fails delivered onTime disputes refundRate onTimeRate paidUsdt refundedUsdt source synthetic';
   const body = list.map((n, i) => `n${i}: node(ens: ${JSON.stringify(n)}) { ens epoch reputation(window: ${window}, verify: ${verify ? 'true' : 'false'}) { ${fields} } }`).join(' ');
   return { query: `{ ${body} }`, columns: ['ens', 'epoch', ...fields.split(' ')] };
 }
 
-function tsv(intent, data, columns) {
+const BUYER_COLUMNS = ['ens', 'status', 'orders', 'cancellations', 'disputes', 'daily_cap_usdt', 'spend_today_usdt', 'principal', 'principal_verified', 'synthetic'];
+
+export function askTable(intent, data, columns) {
   const rows = [columns.join('\t')];
-  if (intent === 'order_trail') {
+  if (intent === 'buyer_risk') {
+    for (const n of Object.values(data ?? {})) {
+      if (!n) continue;
+      const rep = n.reputation ?? {};
+      rows.push([n.ens, n.status ?? 'unknown', rep.orders ?? 0, rep.cancellations ?? 0, rep.disputes ?? 0, usdt(n.capMicro ?? 0), n.today?.paidUsdt ?? '0', n.owner?.ens ?? '', n.owner?.verified ? 'true' : 'false', rep.synthetic ? 'true' : 'false'].join('\t'));
+    }
+  } else if (intent === 'order_trail') {
     for (const e of data.order ?? []) rows.push([e.kind, e.from?.ens ?? '', e.to?.ens ?? '', e.amountMicro, e.day, e.ref].join('\t'));
   } else {
     const list = Object.values(data ?? {});
@@ -70,7 +87,7 @@ export function createMcpServer({ engine, dataset = 'live' }) {
       }
       const r = await runGraphql({ engine, query: doc.query, dataset, listCap: 50, limits: { maxFields: 10, maxDepth: 4 }, callBudget: MCP_CALLS });
       if (r.errors) return fail(r.errors.map((e) => e.message).join('; '));
-      return text(`${tsv(args.intent, r.data, doc.columns)}\nexplain=${r.extensions.arkiv.explainId} calls=${r.extensions.arkiv.calls}`);
+      return text(`${askTable(args.intent, r.data, doc.columns)}\nexplain=${r.extensions.arkiv.explainId} calls=${r.extensions.arkiv.calls}`);
     },
   );
   server.registerTool(
