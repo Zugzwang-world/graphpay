@@ -33,10 +33,10 @@ Updated 02:10 IST, Fri 6 Nov (T1).
 - Blockers: none.
 
 ## identity
-Updated 03:50 IST. **M6 part 1 is built; PR #34 is open.** The payment gate (`ensGate`), the agents' `ens_check`, and the owner actions (pause, resume, kill, next free disposable) are written, unit-tested and fork-tested. On real Sepolia, with the real checkout policies, every paying agent passes the full gate; non-paying agents say `ENS_NO_POLICY` as designed.
-- The kill ladder holds on a fork: pause bites within 25 s of its receipt, unregister refuses at once, a `renew` after an unregister leaves the label unregistered.
-- Running: nothing. Blockers: none. T1's M3 can now call `createEnsGate` from `@graphpay/ens`.
-- Next: the watcher (M6 part 2, built and tested, waiting for its own PR and the reviewer pass), then the real kill timings (B6/B7/E7) with Join.
+Updated 04:25 IST. **M6 is built: the gate is merged (PR #34); the watcher PR is open.** The watcher keeps the payment policy and the Arkiv node standing in step with ENS: a kill revokes the policy, a pause shows on the node, a lapse is caught by a 30 s ticker, and it never creates a policy or copies an ENS cap into one. Join hosts it in the workers process.
+- Checked: 47 unit tests, 11 fork tests (including a `renew` after `unregister` that must not revive a killed agent), a dry run on real Sepolia, B8's MCP call (`initialize` and `tools/list` on the hosted endpoint).
+- Running: nothing. Blockers: none. Real kill timings (B6/B7/E7) wait for Join's workers process.
+- Next: after the merge, B6/B7/E7 with Join, then B9 (a) after T1's first settled payment, then the Friday items.
 
 ## arkiv
 
