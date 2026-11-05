@@ -1,0 +1,18 @@
+{
+  "id": "A5",
+  "at": "2026-11-05T23:29:28.194Z",
+  "pass": true,
+  "what": "the event wallets are fresh, except FUNDER and OPERATOR",
+  "measured": {
+    "roles": 21,
+    "carried": [
+      "FUNDER",
+      "OPERATOR"
+    ],
+    "sharedAddresses": 0
+  },
+  "expected": "only FUNDER and OPERATOR carried; no two roles share an address",
+  "evidence": {
+    "cmd": "pnpm -s wallets:addresses (addresses only)"
+  }
+}

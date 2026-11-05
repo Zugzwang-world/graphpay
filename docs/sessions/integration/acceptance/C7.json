@@ -1,0 +1,21 @@
+{
+  "id": "C7",
+  "at": "2026-11-05T23:29:35.237Z",
+  "pass": true,
+  "what": "the qualifying payment in test USDT",
+  "measured": {
+    "status": "success",
+    "paymentSettled": true,
+    "usdtTransferMicro": "4800000",
+    "txFrom": "0x1ab82871c3e1be64717269d45f08ca9d54c1ebf6",
+    "payerSentIt": false,
+    "gasUsed": "309483",
+    "block": 12322239
+  },
+  "expected": "PaymentSettled on the USDT checkout; a 4,800,000-unit transfer of the configured test USDT; sent by the relayer (payer gas 0)",
+  "evidence": {
+    "tx": "https://explorer.testnet.whitechain.io/tx/0x87505ef2457b6e925fa7378a55fd91419e83c37fb8effc06d901884700c72c00",
+    "payer": "acceptance.vitalik.graphpay.eth",
+    "by": "T1's usdt-ready (M3 part B)"
+  }
+}

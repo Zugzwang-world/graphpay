@@ -1,0 +1,99 @@
+{
+  "id": "D2b",
+  "at": "2026-11-05T23:33:21.225Z",
+  "pass": true,
+  "what": "the same batch sent twice at once with the same confirmed nonce: exactly one lands",
+  "measured": {
+    "window": {
+      "events": 2,
+      "edgeEvents": 2,
+      "wrong": []
+    },
+    "runs": [
+      {
+        "exit": 0,
+        "signal": null,
+        "stats": {
+          "written": 0,
+          "standing": 0,
+          "skippedCheckpoint": 3,
+          "skippedRef": 0,
+          "none": 0,
+          "unknownLogs": 0,
+          "retries": 1,
+          "lastWriteAt": null
+        },
+        "error": {
+          "code": "NONCE_TAKEN",
+          "message": "arkiv-graph: nonce 320 is taken (confirmed 321); re-read the state",
+          "recovered": true
+        },
+        "nonce": {
+          "before": 320,
+          "after": 322
+        },
+        "raw": [
+          {
+            "hash": "0x2c04c516413fd79f7805913df17ae4a5f8e9afd737eda25e5ec9fc208af142b7",
+            "nonce": 320,
+            "at": 1793921580421,
+            "error": "replacement transaction underpriced"
+          }
+        ]
+      },
+      {
+        "exit": 0,
+        "signal": null,
+        "stats": {
+          "written": 2,
+          "standing": 0,
+          "skippedCheckpoint": 1,
+          "skippedRef": 0,
+          "none": 0,
+          "unknownLogs": 0,
+          "retries": 0,
+          "lastWriteAt": 1793921589146
+        },
+        "error": null,
+        "nonce": {
+          "before": 320,
+          "after": 322
+        },
+        "raw": [
+          {
+            "hash": "0x5770c7de61da77785a77bc5d965129176ab2822c68e1435d7449e18ab8ba525f",
+            "nonce": 320,
+            "at": 1793921580367,
+            "error": null
+          },
+          {
+            "hash": "0xba04a8d033258ea473eb53f5754dce81aa9f9c61a6e82eca16a6018ec64a65ea",
+            "nonce": 321,
+            "at": 1793921586685,
+            "error": null
+          }
+        ]
+      }
+    ]
+  },
+  "expected": "both first sends at one nonce, exactly one mined; count(edge where ref = id) = 1 for every edge event up to the raced one",
+  "evidence": {
+    "event": "1874:0x8f57b92a4354f661010066b129c3a8f988b2139d12cc62ca97b53d6869bbcaaf:0",
+    "mined": [
+      "https://rabdi.explorer.arkiv.network/tx/0x5770c7de61da77785a77bc5d965129176ab2822c68e1435d7449e18ab8ba525f",
+      "https://rabdi.explorer.arkiv.network/tx/0xba04a8d033258ea473eb53f5754dce81aa9f9c61a6e82eca16a6018ec64a65ea"
+    ],
+    "firstSends": [
+      {
+        "hash": "0x2c04c516413fd79f7805913df17ae4a5f8e9afd737eda25e5ec9fc208af142b7",
+        "nonce": 320,
+        "mined": false
+      },
+      {
+        "hash": "0x5770c7de61da77785a77bc5d965129176ab2822c68e1435d7449e18ab8ba525f",
+        "nonce": 320,
+        "mined": true
+      }
+    ]
+  }
+}

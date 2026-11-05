@@ -23,6 +23,14 @@ Updated 03:36 IST, Fri 6 Nov.
 - 30 minutes of lag (03:31–04:01 IST, 31 samples): at most 4 blocks (about 8 s), at most 5.5 s since the last good poll, 0 retries.
 - T2's watcher is hosted in `main.mjs` (`src/ens.mjs`): a policy sink as POLICY_WRITER, retried until it starts.
 
+## D2b, D2c, D15 (05:00–05:05 IST): M11 done
+
+- Window: the workers frozen (SIGSTOP) 23:30:53–23:34:05 UTC; during it rehearsal.vitalik paid 0.40 to kesar and the shop delivered (tx `0x8f57b92a…bcaaf`): 3 edge events the mirror had not seen.
+- D2b: two replay processes held their first raw transaction to the same instant and sent the same batch at nonce 320 (54 ms apart): one mined, the other was refused ("replacement transaction underpriced"), re-adopted and found the winner's write; 1 edge per event.
+- D2c: a replay killed itself (SIGKILL) right after the node accepted its first transaction (nonce 322); that transaction was mined; the restart found the event behind the checkpoint and sent nothing.
+- D15: on SIGCONT the workers caught up to the head (the 3 events skipped by the checkpoint, 0 retries); then SIGKILL and a restart (lease taken at once). Every event since the deploy has its one edge: 47 events, 35 edge events.
+- With D1, D2a, D3 and the 30-minute lag sample: every M11 check passes on the real networks.
+
 ## The kill (F, E7, B6; 04:52–04:56 IST, one-shot for disposable-1)
 
 - Alive: disposable-1 paid 0.40 to kesar (HTTP 200): https://explorer.testnet.whitechain.io/tx/0x763973499f7f7eb7bdda058fa03ee3d9f9480be53d75bc4574c62d7beec84b9c

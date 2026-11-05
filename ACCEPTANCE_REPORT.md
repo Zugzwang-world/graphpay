@@ -1,8 +1,8 @@
 # Acceptance report
 
-Written by `pnpm acceptance` at 2026-11-05T23:28:01.884Z. Checks and pass criteria: `planning/ACCEPTANCE_TESTS.md` and `docs/plan/ACCEPTANCE_ADDITIONS.md`. Only D7 may be `blocked` (C7 and E3 no longer wait on supply, ADR-0054); a check without a result is `not run`, never `pass`.
+Written by `pnpm acceptance` at 2026-11-05T23:35:12.697Z. Checks and pass criteria: `planning/ACCEPTANCE_TESTS.md` and `docs/plan/ACCEPTANCE_ADDITIONS.md`. Only D7 may be `blocked` (C7 and E3 no longer wait on supply, ADR-0054); a check without a result is `not run`, never `pass`.
 
-**26 pass, 0 fail, 1 blocked, 21 not run** (of 48).
+**31 pass, 0 fail, 1 blocked, 16 not run** (of 48).
 
 | id | check | status | note |
 |---|---|---|---|
@@ -10,7 +10,7 @@ Written by `pnpm acceptance` at 2026-11-05T23:28:01.884Z. Checks and pass criter
 | A2 | The secret scan is clean | pass |  |
 | A3 | Deny rules block reads of `.env` | not run | no runner yet |
 | A4 | Auto-merge works | not run | no runner yet |
-| A5 | The event wallets are fresh, except FUNDER and OPERATOR | not run | no runner yet |
+| A5 | The event wallets are fresh, except FUNDER and OPERATOR | pass |  |
 | A6 | `planning/` and the thinking-partner folder are in place | pass |  |
 | A7 | No known address literal in code outside the config file (D6) | pass |  |
 | A8 | No story name or value in code outside the story file (ADR-0047) | pass |  |
@@ -31,9 +31,9 @@ Written by `pnpm acceptance` at 2026-11-05T23:28:01.884Z. Checks and pass criter
 | C4 | Revoked-agent and over-cap failures are recorded | not run | no runner yet |
 | C5 | A repeat request returns "already paid" | not run | no runner yet |
 | C6 | Hosted endpoints return 401 without the passcode or token | not run | no runner yet |
-| C7 | **The qualifying payment in test USDT `0xcedfB56113143d55b2358b8CFbB0dEB5Ad2f55a7`** | not run | no runner yet |
+| C7 | **The qualifying payment in test USDT `0xcedfB56113143d55b2358b8CFbB0dEB5Ad2f55a7`** | pass |  |
 | D1 | One payment event writes its edge and tallies in one atomic batch | pass |  |
-| D2 | A retry with the same nonce creates no duplicate | not run | 2 of 3 parts not run |
+| D2 | A retry with the same nonce creates no duplicate | pass |  |
 | D3 | Tallies recomputed from edges equal the stored tallies | pass |  |
 | D4 | GraphQL's top 10 matches the ground truth | pass |  |
 | D5 | The explain trace lists the reads behind each answer | pass |  |
@@ -42,10 +42,10 @@ Written by `pnpm acceptance` at 2026-11-05T23:28:01.884Z. Checks and pass criter
 | D8 | The geo query returns only shops inside the box, and only from our writers | pass |  |
 | D9 | A receipt cannot be edited | pass |  |
 | D10 | An expired or missing quote is refused and the agent re-quotes | not run | no runner yet |
-| D15 | The mirror resumes after a sleep or a network drop (ADR-0056) | not run | the drop and restart (03:27–03:30 IST) came before the first payment; every event since the deploy is mirrored exactly once (36 events, 25 edges), but no payment fell inside a drop yet |
+| D15 | The mirror resumes after a sleep or a network drop (ADR-0056) | pass |  |
 | E1 | Vitalik's request | pass |  |
 | E2 | The agents choose Kesar Kingdom, never the trap | pass |  |
-| E3 | The payment is made in USDT on Whitechain | not run | no runner yet |
+| E3 | The payment is made in USDT on Whitechain | pass |  |
 | E4 | The mirror writes it to Arkiv | pass |  |
 | E5 | GraphQL shows the new edge and the updated tallies | pass |  |
 | E6 | A refund updates the tallies | pass |  |
@@ -89,6 +89,28 @@ Status: **pass**.
 [
   "check: clean (590 files)"
 ]
+```
+
+## A5: The event wallets are fresh, except FUNDER and OPERATOR
+
+Status: **pass**.
+
+### A5 (2026-11-05T23:29:28.194Z)
+
+- What: the event wallets are fresh, except FUNDER and OPERATOR
+- Pass: true
+- Expected: only FUNDER and OPERATOR carried; no two roles share an address
+- Evidence: `{"cmd":"pnpm -s wallets:addresses (addresses only)"}`
+
+```json
+{
+  "roles": 21,
+  "carried": [
+    "FUNDER",
+    "OPERATOR"
+  ],
+  "sharedAddresses": 0
+}
 ```
 
 ## A6: `planning/` and the thinking-partner folder are in place
@@ -390,6 +412,29 @@ Status: **pass**.
 }
 ```
 
+## C7: **The qualifying payment in test USDT `0xcedfB56113143d55b2358b8CFbB0dEB5Ad2f55a7`**
+
+Status: **pass**.
+
+### C7 (2026-11-05T23:29:35.237Z)
+
+- What: the qualifying payment in test USDT
+- Pass: true
+- Expected: PaymentSettled on the USDT checkout; a 4,800,000-unit transfer of the configured test USDT; sent by the relayer (payer gas 0)
+- Evidence: `{"tx":"https://explorer.testnet.whitechain.io/tx/0x87505ef2457b6e925fa7378a55fd91419e83c37fb8effc06d901884700c72c00","payer":"acceptance.vitalik.graphpay.eth","by":"T1's usdt-ready (M3 part B)"}`
+
+```json
+{
+  "status": "success",
+  "paymentSettled": true,
+  "usdtTransferMicro": "4800000",
+  "txFrom": "0x1ab82871c3e1be64717269d45f08ca9d54c1ebf6",
+  "payerSentIt": false,
+  "gasUsed": "309483",
+  "block": 12322239
+}
+```
+
 ## D1: One payment event writes its edge and tallies in one atomic batch
 
 Status: **pass**.
@@ -428,7 +473,7 @@ Status: **pass**.
 
 ## D2: A retry with the same nonce creates no duplicate
 
-Status: **not run** (2 of 3 parts not run).
+Status: **pass**.
 
 ### D2a (2026-11-05T22:56:14.434Z)
 
@@ -483,6 +528,141 @@ Status: **not run** (2 of 3 parts not run).
       "after": 252
     }
   }
+}
+```
+
+### D2b (2026-11-05T23:33:21.225Z)
+
+- What: the same batch sent twice at once with the same confirmed nonce: exactly one lands
+- Pass: true
+- Expected: both first sends at one nonce, exactly one mined; count(edge where ref = id) = 1 for every edge event up to the raced one
+- Evidence: `{"event":"1874:0x8f57b92a4354f661010066b129c3a8f988b2139d12cc62ca97b53d6869bbcaaf:0","mined":["https://rabdi.explorer.arkiv.network/tx/0x5770c7de61da77785a77bc5d965129176ab2822c68e1435d7449e18ab8ba525f","https://rabdi.explorer.arkiv.network/tx/0xba04a8d033258ea473eb53f5754dce81aa9f9c61a6e82eca16a6018ec64a65ea"],"firstSends":[{"hash":"0x2c04c516413fd79f7805913df17ae4a5f8e9afd737eda25e5ec9fc208af142b7","nonce":320,"mined":false},{"hash":"0x5770c7de61da77785a77bc5d965129176ab2822c68e1435d7449e18ab8ba525f","nonce":320,"mined":true}]}`
+
+```json
+{
+  "window": {
+    "events": 2,
+    "edgeEvents": 2,
+    "wrong": []
+  },
+  "runs": [
+    {
+      "exit": 0,
+      "signal": null,
+      "stats": {
+        "written": 0,
+        "standing": 0,
+        "skippedCheckpoint": 3,
+        "skippedRef": 0,
+        "none": 0,
+        "unknownLogs": 0,
+        "retries": 1,
+        "lastWriteAt": null
+      },
+      "error": {
+        "code": "NONCE_TAKEN",
+        "message": "arkiv-graph: nonce 320 is taken (confirmed 321); re-read the state",
+        "recovered": true
+      },
+      "nonce": {
+        "before": 320,
+        "after": 322
+      },
+      "raw": [
+        {
+          "hash": "0x2c04c516413fd79f7805913df17ae4a5f8e9afd737eda25e5ec9fc208af142b7",
+          "nonce": 320,
+          "at": 1793921580421,
+          "error": "replacement transaction underpriced"
+        }
+      ]
+    },
+    {
+      "exit": 0,
+      "signal": null,
+      "stats": {
+        "written": 2,
+        "standing": 0,
+        "skippedCheckpoint": 1,
+        "skippedRef": 0,
+        "none": 0,
+        "unknownLogs": 0,
+        "retries": 0,
+        "lastWriteAt": 1793921589146
+      },
+      "error": null,
+      "nonce": {
+        "before": 320,
+        "after": 322
+      },
+      "raw": [
+        {
+          "hash": "0x5770c7de61da77785a77bc5d965129176ab2822c68e1435d7449e18ab8ba525f",
+          "nonce": 320,
+          "at": 1793921580367,
+          "error": null
+        },
+        {
+          "hash": "0xba04a8d033258ea473eb53f5754dce81aa9f9c61a6e82eca16a6018ec64a65ea",
+          "nonce": 321,
+          "at": 1793921586685,
+          "error": null
+        }
+      ]
+    }
+  ]
+}
+```
+
+### D2c (2026-11-05T23:33:58.469Z)
+
+- What: stopped after sending, before the receipt; the restart finds the mined transaction
+- Pass: true
+- Expected: the crash run killed after its send, that transaction mined, the restart sends no copy; one edge per event
+- Evidence: `{"event":"1874:0xf9830bccdcba70527ffdc656e4452c72277ed6eddc0da5f258de61ef95f0de4c:0","mined":["https://rabdi.explorer.arkiv.network/tx/0x5937fea4d859e8e52e02be8b12fac5e3daf1d6cc31f0906f42f8ecba457b9613"],"firstSends":[{"hash":"0x5937fea4d859e8e52e02be8b12fac5e3daf1d6cc31f0906f42f8ecba457b9613","nonce":322,"mined":true}]}`
+
+```json
+{
+  "window": {
+    "events": 3,
+    "edgeEvents": 3,
+    "wrong": []
+  },
+  "runs": [
+    {
+      "exit": null,
+      "signal": "SIGKILL",
+      "nonce": 322,
+      "raw": [
+        {
+          "hash": "0x5937fea4d859e8e52e02be8b12fac5e3daf1d6cc31f0906f42f8ecba457b9613",
+          "nonce": 322,
+          "at": 1793921628966,
+          "error": null
+        }
+      ]
+    },
+    {
+      "exit": 0,
+      "signal": null,
+      "stats": {
+        "written": 0,
+        "standing": 0,
+        "skippedCheckpoint": 1,
+        "skippedRef": 0,
+        "none": 0,
+        "unknownLogs": 0,
+        "retries": 0,
+        "lastWriteAt": null
+      },
+      "error": null,
+      "nonce": {
+        "before": 323,
+        "after": 323
+      },
+      "raw": []
+    }
+  ]
 }
 ```
 
@@ -689,20 +869,20 @@ Status: **pass**.
 
 ## D15: The mirror resumes after a sleep or a network drop (ADR-0056)
 
-Status: **not run** (the drop and restart (03:27–03:30 IST) came before the first payment; every event since the deploy is mirrored exactly once (36 events, 25 edges), but no payment fell inside a drop yet).
+Status: **pass**.
 
-### D15 (2026-11-05T22:55:11.794Z)
+### D15 (2026-11-05T23:35:03.129Z)
 
 - What: the mirror resumes after a sleep or a network drop (ADR-0056)
-- Pass: null
+- Pass: true
 - Expected: count(edge where ref = id) = 1 for every edge event, 0 for the rest
-- Evidence: `{"from":12313887,"to":12322924}`
+- Evidence: `{"from":12313887,"to":12325311,"procedure":"workers SIGSTOP 23:30:53–23:34:05 UTC (3 min 12 s); during it rehearsal.vitalik paid 0.40 and the shop delivered (tx 0x8f57b92a…bcaaf, 3 edge events, mirrored by the D2b and D2c replays); SIGCONT: caught up to the head, the 3 events skipped by the checkpoint, 0 retries; then SIGKILL 23:34:24 and a restart (lease taken at once, running 23:34:41); every event since the deploy checked once each","workersLogs":"workers-3.log, workers.log (local)"}`
 
 ```json
 {
   "pass": true,
-  "events": 36,
-  "edgeEvents": 25,
+  "events": 47,
+  "edgeEvents": 35,
   "wrong": []
 }
 ```
@@ -765,6 +945,29 @@ Status: **pass**.
     }
   ],
   "trapEvents": 0
+}
+```
+
+## E3: The payment is made in USDT on Whitechain
+
+Status: **pass**.
+
+### E3 (2026-11-05T23:29:42.411Z)
+
+- What: the payment is made in USDT on Whitechain
+- Pass: true
+- Expected: PaymentSettled on the USDT checkout; a 4,800,000-unit transfer of the configured test USDT; sent by the relayer (payer gas 0)
+- Evidence: `{"tx":"https://explorer.testnet.whitechain.io/tx/0x87505ef2457b6e925fa7378a55fd91419e83c37fb8effc06d901884700c72c00","payer":"acceptance.vitalik.graphpay.eth","by":"T1's usdt-ready (M3 part B)"}`
+
+```json
+{
+  "status": "success",
+  "paymentSettled": true,
+  "usdtTransferMicro": "4800000",
+  "txFrom": "0x1ab82871c3e1be64717269d45f08ca9d54c1ebf6",
+  "payerSentIt": false,
+  "gasUsed": "309483",
+  "block": 12322239
 }
 ```
 

@@ -1,18 +1,19 @@
 {
   "id": "D15",
-  "at": "2026-11-05T22:55:11.794Z",
-  "pass": null,
+  "at": "2026-11-05T23:35:03.129Z",
+  "pass": true,
   "what": "the mirror resumes after a sleep or a network drop (ADR-0056)",
   "measured": {
     "pass": true,
-    "events": 36,
-    "edgeEvents": 25,
+    "events": 47,
+    "edgeEvents": 35,
     "wrong": []
   },
   "expected": "count(edge where ref = id) = 1 for every edge event, 0 for the rest",
   "evidence": {
     "from": 12313887,
-    "to": 12322924
-  },
-  "why": "the drop and restart (03:27\u201303:30 IST) came before the first payment; every event since the deploy is mirrored exactly once (36 events, 25 edges), but no payment fell inside a drop yet"
+    "to": 12325311,
+    "procedure": "workers SIGSTOP 23:30:53\u201323:34:05 UTC (3 min 12 s); during it rehearsal.vitalik paid 0.40 and the shop delivered (tx 0x8f57b92a\u2026bcaaf, 3 edge events, mirrored by the D2b and D2c replays); SIGCONT: caught up to the head, the 3 events skipped by the checkpoint, 0 retries; then SIGKILL 23:34:24 and a restart (lease taken at once, running 23:34:41); every event since the deploy checked once each",
+    "workersLogs": "workers-3.log, workers.log (local)"
+  }
 }

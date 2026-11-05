@@ -1,0 +1,62 @@
+{
+  "id": "D2c",
+  "at": "2026-11-05T23:33:58.469Z",
+  "pass": true,
+  "what": "stopped after sending, before the receipt; the restart finds the mined transaction",
+  "measured": {
+    "window": {
+      "events": 3,
+      "edgeEvents": 3,
+      "wrong": []
+    },
+    "runs": [
+      {
+        "exit": null,
+        "signal": "SIGKILL",
+        "nonce": 322,
+        "raw": [
+          {
+            "hash": "0x5937fea4d859e8e52e02be8b12fac5e3daf1d6cc31f0906f42f8ecba457b9613",
+            "nonce": 322,
+            "at": 1793921628966,
+            "error": null
+          }
+        ]
+      },
+      {
+        "exit": 0,
+        "signal": null,
+        "stats": {
+          "written": 0,
+          "standing": 0,
+          "skippedCheckpoint": 1,
+          "skippedRef": 0,
+          "none": 0,
+          "unknownLogs": 0,
+          "retries": 0,
+          "lastWriteAt": null
+        },
+        "error": null,
+        "nonce": {
+          "before": 323,
+          "after": 323
+        },
+        "raw": []
+      }
+    ]
+  },
+  "expected": "the crash run killed after its send, that transaction mined, the restart sends no copy; one edge per event",
+  "evidence": {
+    "event": "1874:0xf9830bccdcba70527ffdc656e4452c72277ed6eddc0da5f258de61ef95f0de4c:0",
+    "mined": [
+      "https://rabdi.explorer.arkiv.network/tx/0x5937fea4d859e8e52e02be8b12fac5e3daf1d6cc31f0906f42f8ecba457b9613"
+    ],
+    "firstSends": [
+      {
+        "hash": "0x5937fea4d859e8e52e02be8b12fac5e3daf1d6cc31f0906f42f8ecba457b9613",
+        "nonce": 322,
+        "mined": true
+      }
+    ]
+  }
+}
