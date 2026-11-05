@@ -1,29 +1,29 @@
 # Join: resume after a fresh start
 
-Updated 04:10 IST, Fri 6 Nov. Read this first, then `docs/plan/sessions/join.md`.
+Updated 05:12 IST, Fri 6 Nov. Read this first, then `docs/plan/sessions/join.md`.
 
 ## Running now
 
-- `pnpm workers` (instance `f82114f0ed9f425b`), started 03:30 IST from this worktree (`.claude/worktrees/graphpay-join-session-272a7b`), log `workers.log` there (gitignored). Check it with `curl -s 127.0.0.1:8788/status` or `node acceptance/mirror.mjs lag`. **Never start a second one.** If it died, start it again from this worktree: it resumes from Arkiv.
-- A 30-minute lag sample to `lag-sample.log` (one line a minute).
+- `pnpm workers` (instance `2966ed62bdcddbc1`, since 05:04 IST) from this worktree (`.claude/worktrees/graphpay-join-session-272a7b`), log `workers.log` (gitignored), with T2's ENS watcher (real policy sink as POLICY_WRITER). Check: `curl -s 127.0.0.1:8788/status`, `node acceptance/mirror.mjs lag`. **Never start a second one**; if it died, start it again from this worktree (it resumes from Arkiv).
 
-## Where M11 stands
+## Done
 
-- Merged: PR 8 (core), PR 20 (the ledger and the workers). PR 33 (M11 part 3) merged: the replay tool, the acceptance reads, the integration package.
-- Live: the cast and the history are on Rabdi; D2a passes; D15 has a first pass on an empty window (`docs/sessions/integration/mirror.md`).
-- To finish: on the first real payment (T1's M3 part B), run D1, D2b and D2c (workers stopped, see `mirror.md`), D3, D15 again with payments, and 30 minutes of lag under 30 s. Host T2's M6 watcher in `main.mjs` when it merges. Then the PR titled `… (M11 done)`.
+- **M11 done** (PR 60): D1, D2a–c, D3, D15 and the 30-minute lag pass on the real networks (`docs/sessions/integration/mirror.md`).
+- **M12 done** (PRs 48, 52, 56): `pnpm e2e:food` passed A–E as payer.vitalik (04:43 IST) and `pnpm e2e:kill` passed F on disposable-1 (killed once; DISPOSABLE_2 is kept for the video).
+- **Acceptance** (`pnpm acceptance`, `ACCEPTANCE_REPORT.md`): 31 pass, 0 fail, 1 blocked (D7), 16 not run. Results in `docs/sessions/integration/acceptance/`, run files in `docs/sessions/integration/runs/`.
+- Friday item 3 (batched presence and hand-offs, `integration/src/activity.mjs`).
 
-## M12 (started)
+## Next (M13)
 
-- `integration/src/mcp.mjs` (works against the hosted MCP) and `integration/src/hooks.mjs` (ENS payee and accepts, discovery, shop keys, quotes, payer wallets).
-- Done since: `integration/src/gate.mjs` (the gate on the signing path, `ensCheck`) and `integration/src/activity.mjs` (Friday item 3, batched presence and hand-offs). E7's kill step must use the ungated sign.
-- Missing: the shop surface (catalog, storefront, 402, settlement) and x402 signing from T1's M3 (`graphPayOrderClient` in `@graphpay/facilitator`); T2's watcher (M6 part 2) hosted in `packages/mirror/src/main.mjs`. Then `pnpm e2e:food` (`planning/PROMPTS/12-e2e-food.md`).
+1. After 05:30 IST (acceptance.vitalik's fresh UTC day) and once T1's M4 hosts the facilitator and shop: C2–C6, F2, F3 through the hosted routes (`pnpm acceptance --dry-run` first; no run while the website demo is live).
+2. Wire the other tracks' checks into `acceptance/checks.mjs`: B3 (`scripts/ens/b3-real.mjs`), B7 (T2's fork test), B9, A3, A4, A9 (the probe rows in OPEN.md), A10, D10 (T4's presignCheck), F1 (history scan + Vercel env names).
+3. The website errand runner: `runId: input.runId` and `batchedActivity` + `flush()` (T5's note).
 
-## The website's errand runner (T5, 05:05 IST)
+## Relay key rule
 
-- When wiring `apps/web/lib/agents-live.server.ts` `errandRunner()`: pass `runId: input.runId` to `runErrand` (PR 55); the explainer lanes and the map query the hand-off and presence rows by it. Use `batchedActivity(dir)` with `await activity.flush()` before the stream ends. The seam waits for M4 (the hosted facilitator and shop).
+FACILITATOR is shared with T1: message T1 before and after any relay ("FACILITATOR is free"). T1 messages Join before its own.
 
 ## Notes
 
-- T3 was told (via the Coordinator, 03:29) that `Reputation.synthetic` ignores the tally rows' label.
-- The reviewer runs on every money, key or writer change. Keep tool output short; end the turn when blocked.
+- Usage rule: pause at 92% weekly (check `get_usage` at each stopping point).
+- The ENS watcher's log reads fail about 1 poll in 10 on the public Sepolia RPC (a lagging backend); the checkpoint stays put and the next poll repeats it.
