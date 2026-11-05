@@ -22,6 +22,9 @@ test('a known address is flagged in code outside the config file, nowhere else',
   assert.equal(addressFindings('packages/config/graphpay.config.json', addr, known).length, 0);
   assert.equal(addressFindings('docs/technical/FACTS.md', addr, known).length, 0);
   assert.equal(addressFindings('packages/pay/src/a.ts', `0x${'cd'.repeat(20)}`, known).length, 0);
+  // Bare and embedded forms count too (an ABI-encoded word, a hex blob).
+  assert.equal(addressFindings('packages/pay/src/b.ts', `const word = "0x${'0'.repeat(24)}${addr.slice(2)}";`, known).length, 1);
+  assert.equal(addressFindings('packages/pay/src/c.ts', `bare ${addr.slice(2).toUpperCase()}`, known).length, 1);
 });
 
 test('A2 negative check: a temporary key-shaped file is flagged by label, never echoed', () => {

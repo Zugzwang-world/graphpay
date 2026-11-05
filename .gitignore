@@ -23,6 +23,7 @@ packages/contracts/lib/
 .vercel/
 
 # local
+.claude/scheduled_tasks.lock
 .DS_Store
 *.log
 
