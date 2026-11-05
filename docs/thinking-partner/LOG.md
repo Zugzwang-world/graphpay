@@ -59,7 +59,7 @@ One line per PR: time (IST) · activity · result · PR link. Append under your 
 - 05:10 IST · integration · merged: the buyer_risk fix and `pnpm e2e:food` (M12) · https://github.com/Zugzwang-world/graphpay/pull/48
 - 04:55 IST · integration · opened: the counting e2e:food run passed A–E on the real networks (paid 4.80, delivered, refunded 0.80); the signer fix; the report at 24 pass · https://github.com/Zugzwang-world/graphpay/pull/52
 - 05:00 IST · integration · opened: the kill check F passes for real (402 after 9.3 s, the watcher revoked the policy, the fail edge on Arkiv); the recorder ref fix; (M12 done) · https://github.com/Zugzwang-world/graphpay/pull/56
-- 05:15 IST · integration · opened: acceptance A5, C7, E3 pass (the qualifying USDT payment read from its receipt); the report at 29 pass, 0 fail, 1 blocked · PR_LINK
+- 05:15 IST · integration · opened: acceptance A5, C7, E3 pass (the qualifying USDT payment read from its receipt); the report at 29 pass, 0 fail, 1 blocked · https://github.com/Zugzwang-world/graphpay/pull/57
 
 ## website
 
