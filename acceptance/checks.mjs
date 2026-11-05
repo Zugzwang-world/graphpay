@@ -76,6 +76,16 @@ export function checks(root, env) {
     E6: fromRun('E6', 'a refund updates the tallies', 'E', 'refunds +1, refunded +0.80, trail ends in refund'),
     E7: async () => killCheck(root, env, 'E7'),
     B6: async () => killCheck(root, env, 'B6'),
+    A5: async () => {
+      const r = sh(root, 'pnpm', ['-s', 'wallets:addresses']);
+      const rows = String(r.stdout).split('\n').map((l) => l.trim().split(/\s+/)).filter((p) => /^[A-Z][A-Z0-9_]+$/.test(p[0] ?? '') && /^0x[0-9a-fA-F]{40}$/.test(p[1] ?? ''));
+      const carried = rows.filter((p) => p[2] !== 'fresh').map((p) => p[0]);
+      const addrs = rows.map((p) => p[1].toLowerCase());
+      const shared = addrs.filter((a, i) => addrs.indexOf(a) !== i);
+      return { pass: rows.length > 0 && carried.every((c) => c === 'FUNDER' || c === 'OPERATOR') && shared.length === 0, what: 'the event wallets are fresh, except FUNDER and OPERATOR', measured: { roles: rows.length, carried, sharedAddresses: shared.length }, expected: 'only FUNDER and OPERATOR carried; no two roles share an address', evidence: { cmd: 'pnpm -s wallets:addresses (addresses only)' } };
+    },
+    C7: async () => qualifying(env, 'C7'),
+    E3: async () => qualifying(env, 'E3'),
     E8: async () => {
       const r = e2e();
       const open = readFileSync(join(root, 'docs/thinking-partner/OPEN.md'), 'utf8');
@@ -201,4 +211,51 @@ async function killCheck(root, env, id) {
   const a = k.assertion ?? {};
   const pass = a.pass === true && Number(t?.fails ?? 0) >= 1;
   return { pass, what: 'a killed agent is refused', measured: { assertion: a.measured ?? null, failed: a.failed ?? [], foldedFails: t?.fails ?? null }, expected: "HTTP 402 ENS_EXPIRED_OR_REVOKED within 25 s of the kill's receipt; the recorder's fail edge on Arkiv; folded into fails by the mirror", evidence: { ...evidence, failEdge: k.failEdge?.entityKey ?? null } };
+}
+
+// C7 and E3: the one qualifying payment in test USDT as the acceptance payer (made once by T1's
+// usdt-ready). Found by the mirror's pay edge from that agent, then read from its receipt.
+async function qualifying(env, id) {
+  const { decodeEventLog, erc20Abi } = await import('viem');
+  const { checkoutAbi } = await import('../packages/contracts/index.mjs');
+  const entries = castEntries(activeCast());
+  const payer = entries.find((e) => e.kind === 'buyer-agent' && e.key === 'acceptance');
+  const arkiv = await connectArkiv({ backend: 'rabdi', env: {} });
+  const { nodeOf } = await import('../packages/money-graph/index.mjs');
+  const node = nodeOf(payer.ensName).toLowerCase();
+  const edges = (await readAll(arkiv.publicClient, ENTITIES.edge, { owner: writerAddresses().W_LEDGER, cap: 2000, truncate: true })).filter((e) => e.kind === 'pay' && String(e.from_node).toLowerCase() === node && String(e.ref).startsWith(`${config.networks.whitechain.chainId}:`));
+  const what = id === 'C7' ? 'the qualifying payment in test USDT' : 'the payment is made in USDT on Whitechain';
+  if (edges.length === 0) return { pass: null, why: 'no payment by the acceptance payer yet', what, measured: null, expected: '', evidence: {} };
+  const hash = edges[0].ref.split(':')[1];
+  const wc = await clientsFor('whitechain', env);
+  const receipt = await wc.publicClient.getTransactionReceipt({ hash });
+  const tx = await wc.publicClient.getTransaction({ hash });
+  const checkout = config.whitechain.contracts.checkout.address.toLowerCase();
+  const usdt = config.whitechain.tokens.usdt.address.toLowerCase();
+  let settled = null;
+  let transfer = null;
+  for (const l of receipt.logs) {
+    try {
+      if (l.address.toLowerCase() === checkout) {
+        const d = decodeEventLog({ abi: checkoutAbi, data: l.data, topics: l.topics });
+        if (d.eventName === 'PaymentSettled') settled = d.args;
+      } else if (l.address.toLowerCase() === usdt) {
+        const d = decodeEventLog({ abi: erc20Abi, data: l.data, topics: l.topics });
+        if (d.eventName === 'Transfer' && BigInt(d.args.value) === BigInt(story.order.priceMicro)) transfer = d.args;
+      }
+    } catch {
+      // another event
+    }
+  }
+  const wallets = (await import('../scripts/lib/wallets.mjs')).roleAddresses(Object.entries(env));
+  const payerWallet = wallets[payer.walletRole]?.toLowerCase();
+  const gasless = tx.from.toLowerCase() !== payerWallet;
+  const pass = receipt.status === 'success' && Boolean(settled) && Boolean(transfer) && gasless;
+  return {
+    pass,
+    what,
+    measured: { status: receipt.status, paymentSettled: Boolean(settled), usdtTransferMicro: transfer ? String(transfer.value) : null, txFrom: tx.from, payerSentIt: !gasless, gasUsed: String(receipt.gasUsed), block: Number(receipt.blockNumber) },
+    expected: 'PaymentSettled on the USDT checkout; a 4,800,000-unit transfer of the configured test USDT; sent by the relayer (payer gas 0)',
+    evidence: { tx: `${config.networks.whitechain.explorer}/tx/${hash}`, payer: payer.ensName, by: "T1's usdt-ready (M3 part B)" },
+  };
 }
