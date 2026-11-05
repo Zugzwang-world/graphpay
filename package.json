@@ -23,11 +23,12 @@
     "secrets:import-lab": "node scripts/secrets/import-lab.mjs",
     "wallet:gen": "node scripts/secrets/gen-wallet.mjs",
     "wallets:addresses": "node scripts/wallets/addresses.mjs",
+    "funding": "node scripts/funding/fund.mjs",
     "agents:probe": "node scripts/agents/preset-probe.mjs",
     "secrets:vercel": "node scripts/secrets/vercel-push.mjs"
   },
   "devDependencies": {
-    "@anthropic-ai/sdk": "1.5.0",
-    "viem": "2.57.16"
+    "viem": "2.57.16",
+    "@anthropic-ai/sdk": "1.5.0"
   }
 }
