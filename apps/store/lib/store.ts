@@ -37,7 +37,7 @@ import { createGraphPayShop } from '@graphpay/checkout-kit';
 
 export const shop = createGraphPayShop({
   shopEns, merchant, catalog, publicClient, walletClient, // your shop's name, payout address, items
-  facilitatorUrl, facilitatorToken: process.env.FACILITATOR_TOKEN,
+  facilitatorUrl, facilitatorToken: process.env.FACILITATOR_AUTH_TOKEN,
   passcode, // the relayer pays gas: gate who may pay
 });
 // graphpay:end

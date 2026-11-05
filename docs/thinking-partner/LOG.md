@@ -80,6 +80,7 @@ One line per PR: time (IST) · activity · result · PR link. Append under your 
 - 07:10 IST · website · opened: M16 the checkout kit and the demo store (a shop in 17 lines, a person pays from a browser wallet, merchant view, chain-based accountant export), two reviewer passes, a bundler-safe ABI import in contracts · https://github.com/Zugzwang-world/graphpay/pull/51
 - 07:55 IST · website · opened: the Mumbai map (Friday item 10): our own SVG of the neighbourhoods, directory dots, open shops and agents glowing, explorer links · https://github.com/Zugzwang-world/graphpay/pull/54
 - 08:20 IST · website · opened: the explainer's agent lanes (Friday item 13) from the handoff rows, and the run id passed to the errand runner · https://github.com/Zugzwang-world/graphpay/pull/55
+- 05:40 IST · website · opened: M16 proof, one real 4.80 USDT kit payment on the hosted facilitator (tx 0xf1e76a91…), the store's facilitator env name, the export's RPC range cap logged · PR link in the next line
 
 
 ## agentpay
