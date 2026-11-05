@@ -17,12 +17,18 @@ export function plain(value) {
   return JSON.parse(JSON.stringify(value, (_, v) => (typeof v === 'bigint' ? v.toString() : v)));
 }
 
+// URLs out of any text a model will read (an RPC error can quote a keyed URL), before truncating.
+export function redact(text) {
+  return String(text).replace(/\b[a-z][a-z0-9+.-]*:\/\/[^\s"'<>)]+/gi, '[url]').slice(0, 300);
+}
+
 async function guarded(run) {
   try {
     return plain({ ok: true, ...(await run()) });
   } catch (e) {
-    if (e instanceof AgentPayError) return { ok: false, code: e.code, message: e.message, ...(e.details ? plain({ details: e.details }) : {}) };
-    return { ok: false, code: 'ERROR', message: String(e?.message ?? e).slice(0, 300) };
+    if (e instanceof AgentPayError) return { ok: false, code: e.code, message: redact(e.message), ...(e.details ? plain({ details: e.details }) : {}) };
+    // Anything else (RPC, network) reports only its name: its message may carry a keyed URL.
+    return { ok: false, code: 'ERROR', name: String(e?.name ?? 'Error').slice(0, 60) };
   }
 }
 
@@ -152,7 +158,12 @@ export function merchantToolDefinitions(merchant, { catalog, fulfilmentTypes = [
       name: 'agentpay_refund',
       description: 'Refund part or all of a paid order to its payer, on-chain. Capped in code at what is left to refund and at the merchant refund limit.',
       shape: { orderId: HEX32, amountUsdt: AMOUNT, reasonCode: z.number().int().min(0).max(255).optional() },
-      run: ({ orderId, amountUsdt, reasonCode }) => guarded(async () => ({ result: await merchant.refund(orderId, usdt(amountUsdt), { reasonCode }) })),
+      run: ({ orderId, amountUsdt, reasonCode }) =>
+        guarded(async () => {
+          // A model may refund only under a limit a person set (createMerchant maxRefundMicro).
+          if (merchant.limits?.maxRefundMicro === undefined) throw new AgentPayError('NO_REFUND_LIMIT', 'set maxRefundMicro on the merchant before a model may refund');
+          return { result: await merchant.refund(orderId, usdt(amountUsdt), { reasonCode }) };
+        }),
     },
   ];
 }

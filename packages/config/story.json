@@ -214,6 +214,26 @@
       "label": "2-minute demo period"
     }
   },
+  "agentpayExamples": {
+    "about": "Story inputs of the AgentPay SDK examples (examples/agentpay-*, T6). Synthetic. The sweet shop sells the order above; the ride is a fixed-fare cab ride between two of the neighbourhoods below. The ride operator is not in the cast yet (no ENS name, no wallet role), so the ride is paid on an anvil fork only: the mirror parks events that name an unknown actor. The real test payment of the sweet shop uses testAmountMicro, an operational test value, never a story price.",
+    "synthetic": true,
+    "testAmountMicro": 10000,
+    "ride": {
+      "operator": {
+        "key": "kaali-peeli-rides",
+        "label": "kaali-peeli-rides",
+        "displayName": "Kaali Peeli Rides",
+        "walletRole": null
+      },
+      "sku": "fixed-fare-ride",
+      "name": "fixed-fare cab ride",
+      "vehicle": "kaali-peeli taxi",
+      "from": "Kurla West",
+      "to": "Bandra Kurla Complex",
+      "fareMicro": 1500000,
+      "pickupMinutes": 6
+    }
+  },
   "locations": {
     "about": "Tonight's test points; the final story sets real neighbourhoods and landmarks (ADR-0050). The persona point is the addendum's own example coordinate; T3 places the cast shops at their scenario distances from it and adds the generator's neighbourhoods here in a PR, each with its source.",
     "persona": {

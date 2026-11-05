@@ -11,7 +11,7 @@ import { canonicalJson, nodeOf, ZERO32, ZERO_ADDRESS } from './order.mjs';
 import { formatUsdt, toMicro } from './money.mjs';
 import { PERIOD_DAYS, readSpendingPass, spentInPeriod } from './pass.mjs';
 import { DEFAULT_APPROVAL_MICRO, signCancel, signOrderPayment, signRefundRequest, signSubscription } from './sign.mjs';
-import { HEADERS, PAYER_HEADERS, X402_VERSION, decodeHeader, encodeHeader, getHeader, orderOfPaymentRequired } from './wire.mjs';
+import { HEADERS, MAX_TIMEOUT_SECONDS, PAYER_HEADERS, X402_VERSION, decodeHeader, encodeHeader, getHeader, orderOfPaymentRequired } from './wire.mjs';
 
 export const MANDATE_SCHEMA = 'agentpay.mandate/v1';
 
@@ -76,7 +76,8 @@ export function createBuyerAgent({
   const address = getAddress(account.address);
   const nowSec = () => Math.floor(clock() / 1000);
   const mandateHash = mandate?.hash ?? createMandate({ buyer: buyerName ?? name, request: 'standing spending pass', budgetMicro: limits.capMicro, deadlineMs: 8_640_000_000_000_000 }).hash;
-  const ledger = { mandateSpentMicro: 0n, humanPeriod: new Map() };
+  const ledger = { mandateSpentMicro: 0n, humanPeriod: new Map(), pendingMicro: 0n };
+  const pending = new Map();
   const lock = serial();
 
   async function passStatus() {
@@ -98,6 +99,7 @@ export function createBuyerAgent({
       perPaymentMaxMicro: limits.perPaymentMaxMicro,
       merchants: limits.merchants,
       onchain,
+      pendingMicro: ledger.pendingMicro,
       mandate: mandate ? { budgetMicro: mandate.budgetMicro, spentMicro: ledger.mandateSpentMicro, deadlineMs: mandate.deadlineMs } : undefined,
     };
   }
@@ -118,6 +120,8 @@ export function createBuyerAgent({
     if (order.payer.address !== ZERO_ADDRESS && !isAddressEqual(order.payer.address, address)) refuse('NOT_FOR_THIS_PAYER', 'the order binds another wallet');
     if (order.buyer.node !== buyerNode) refuse('NOT_FOR_THIS_BUYER', 'the order names another buyer');
     if (BigInt(order.deadline) <= BigInt(t)) refuse('ORDER_EXPIRED', 'the order deadline has passed');
+    // A signature lives until its deadline: never sign one that outlives the scheme's timeout.
+    if (BigInt(order.deadline) > BigInt(t) + BigInt(MAX_TIMEOUT_SECONDS) + 60n) refuse('DEADLINE_TOO_FAR', 'the order deadline is further out than the payment timeout');
     if (!merchantAllowed(limits.merchants, order.merchant)) refuse('MERCHANT_NOT_ALLOWED', `${order.merchant.name} is not on the pass allowlist`);
     if (limits.perPaymentMaxMicro !== undefined && amount > limits.perPaymentMaxMicro) refuse('OVER_PAYMENT_MAX', `${formatUsdt(amount)} is above the per-payment maximum ${formatUsdt(limits.perPaymentMaxMicro)}`);
     if (maxMicro !== undefined && amount > toMicro(maxMicro, 'maxMicro')) refuse('OVER_CALLER_MAX', `${formatUsdt(amount)} is above the asked maximum ${formatUsdt(maxMicro)}`);
@@ -141,9 +145,9 @@ export function createBuyerAgent({
       if (!p.exists || !isAddressEqual(p.wallet, address) || p.boundNode !== node) refuse('NO_PASS', 'no on-chain spending pass binds this wallet to this agent');
       if (p.revoked) refuse('PASS_REVOKED', 'the spending pass is revoked');
       if (p.expired) refuse('PASS_EXPIRED', 'the spending pass has expired');
-      if (p.spentTodayMicro + amount > p.dailyCapMicro) refuse('OVER_DAILY_CAP', `would pass the on-chain daily cap ${formatUsdt(p.dailyCapMicro)} (spent ${formatUsdt(p.spentTodayMicro)} today)`);
+      if (p.spentTodayMicro + ledger.pendingMicro + amount > p.dailyCapMicro) refuse('OVER_DAILY_CAP', `would pass the on-chain daily cap ${formatUsdt(p.dailyCapMicro)} (spent ${formatUsdt(p.spentTodayMicro)} today)`);
       const spent = await spentInPeriod({ publicClient, network, node, epoch: p.epoch, period, nowSec: t });
-      if (spent + amount > limits.capMicro) refuse('OVER_PERIOD_CAP', `would pass the ${period} cap ${formatUsdt(limits.capMicro)} (spent ${formatUsdt(spent)})`);
+      if (spent + ledger.pendingMicro + amount > limits.capMicro) refuse('OVER_PERIOD_CAP', `would pass the ${period} cap ${formatUsdt(limits.capMicro)} (spent ${formatUsdt(spent)})`);
     }
     const onchainOrder = await publicClient.readContract({ address: network.checkout, abi: checkoutAbi, functionName: 'orders', args: [order.orderId] });
     const status = ORDER_STATUS[Number(onchainOrder.status ?? onchainOrder[6])];
@@ -181,57 +185,118 @@ export function createBuyerAgent({
     return { free: false, order: offered.order, requirement: offered.requirement, paymentRequired: offered.paymentRequired };
   }
 
+  // Reservations: a signed payment counts against every cap from the moment it is signed
+  // until it is paid (then the chain counts it) or definitely refused (then it is released).
+  function reserve(e) {
+    e.periodKey = periodKey(nowSec());
+    ledger.pendingMicro += e.amount;
+    if (mandate) ledger.mandateSpentMicro += e.amount;
+    if (node === ZERO32) ledger.humanPeriod.set(e.periodKey, (ledger.humanPeriod.get(e.periodKey) ?? 0n) + e.amount);
+  }
+  function release(e) {
+    ledger.pendingMicro -= e.amount;
+    if (mandate) ledger.mandateSpentMicro -= e.amount;
+    if (node === ZERO32) ledger.humanPeriod.set(e.periodKey, (ledger.humanPeriod.get(e.periodKey) ?? 0n) - e.amount);
+  }
+  function confirmed(e) {
+    ledger.pendingMicro -= e.amount; // agents: now in the contract's spend record; humans: stays in the period ledger
+  }
+
+  async function orderStatus(orderId) {
+    const o = await publicClient.readContract({ address: network.checkout, abi: checkoutAbi, functionName: 'orders', args: [orderId] });
+    return ORDER_STATUS[Number(o.status ?? o[6])];
+  }
+
+  const requestKey = (url, init) => `${(init.method ?? 'GET').toUpperCase()} ${url} ${init.body ?? ''}`;
+
   // Answer a 402 with one signature: guards first, then the Permit2 witness, then the retry.
+  // A payment whose outcome is unknown (timeout, 5xx) stays pending: the next pay() of the same
+  // request re-sends the same signature for the same order, so it can never be paid twice.
   async function pay(url, init = {}) {
     const { maxMicro, ...requestInit } = init;
     if (requestInit.body !== undefined && typeof requestInit.body !== 'string') throw new Error('pay(): send the body as a string, so the paid retry can repeat it');
     return lock(async () => {
-      const q = await quote(url, requestInit);
-      if (q.free) return { status: 'free', httpStatus: q.status, response: q.response };
-      const { order, requirement, paymentRequired } = q;
-      await assertChain(publicClient, network);
-      const { status } = await check(order, { maxMicro });
-      if (status !== 'NONE' && status !== 'CREATED') {
-        // Signing again could never pay twice (the Permit2 nonce is the order id), but there is nothing to pay.
-        onEvent({ type: 'not_payable', orderId: order.orderId, orderStatus: status });
-        return { status: 'not_payable', orderStatus: status, orderId: order.orderId, order };
+      const key = requestKey(url, requestInit);
+      let entry = pending.get(key);
+      if (entry) {
+        const status = await orderStatus(entry.order.orderId);
+        if (status === 'PAID' || status === 'DELIVERED') {
+          pending.delete(key);
+          confirmed(entry);
+          return outcome(entry, { status: 'paid', httpStatus: undefined, transaction: entry.transaction, response: undefined });
+        }
+        if (entry.order.deadline <= BigInt(nowSec())) {
+          // The signature has expired unpaid: Permit2 will never accept it now.
+          pending.delete(key);
+          release(entry);
+          entry = undefined;
+        }
       }
-      const payload = await signOrderPayment({ account, publicClient, network, requirement, payerName: name, mandateHash, approvalMicro, nowSec: nowSec() });
-      const paymentPayload = { x402Version: X402_VERSION, resource: paymentRequired.resource, accepted: requirement, payload, extensions: paymentRequired.extensions };
-      const pending = order.totalMicro;
-      if (node === ZERO32) ledger.humanPeriod.set(periodKey(nowSec()), humanSpent(nowSec()) + pending);
-      if (mandate) ledger.mandateSpentMicro += pending;
-      onEvent({ type: 'signed', orderId: order.orderId, amountMicro: pending.toString(), merchant: order.merchant.name });
+      if (!entry) {
+        const q = await quote(url, requestInit);
+        if (q.free) return { status: 'free', httpStatus: q.status, response: q.response };
+        const { order, requirement, paymentRequired } = q;
+        await assertChain(publicClient, network);
+        const { status } = await check(order, { maxMicro });
+        if (status !== 'NONE' && status !== 'CREATED') {
+          // Signing again could never pay twice (the Permit2 nonce is the order id), but there is nothing to pay.
+          onEvent({ type: 'not_payable', orderId: order.orderId, orderStatus: status });
+          return { status: 'not_payable', orderStatus: status, orderId: order.orderId, order };
+        }
+        const payload = await signOrderPayment({ account, publicClient, network, requirement, payerName: name, mandateHash, approvalMicro, nowSec: nowSec() });
+        entry = { order, amount: order.totalMicro, paymentPayload: { x402Version: X402_VERSION, resource: paymentRequired.resource, accepted: requirement, payload, extensions: paymentRequired.extensions } };
+        reserve(entry);
+        pending.set(key, entry);
+        onEvent({ type: 'signed', orderId: order.orderId, amountMicro: entry.amount.toString(), merchant: order.merchant.name });
+      }
       let response;
       try {
         const headers = new Headers(requestInit.headers ?? {});
-        headers.set(HEADERS.signature, encodeHeader(paymentPayload));
+        headers.set(HEADERS.signature, encodeHeader(entry.paymentPayload));
         response = await fetchImpl(url, { ...requestInit, headers: identityHeaders(headers), redirect: 'error' });
-      } catch (e) {
-        // The signature may still settle (the merchant has it): keep the amount reserved.
-        throw new AgentPayError('MERCHANT_UNREACHABLE', 'the paid request did not complete; the payment may still settle, retry pay() with the same order', { orderId: order.orderId });
+      } catch {
+        // The merchant may have the signature: the payment may still settle. Keep it pending.
+        return outcome(entry, { status: 'unknown', reason: 'merchant_unreachable' });
       }
       const settlement = decodeHeader(getHeader(response.headers, HEADERS.response));
-      const paid = response.ok && settlement?.success !== false;
-      if (!paid && response.status !== 502) {
-        // Refused or failed on-chain with nothing moved: release the reservation.
-        if (node === ZERO32) ledger.humanPeriod.set(periodKey(nowSec()), humanSpent(nowSec()) - pending);
-        if (mandate) ledger.mandateSpentMicro -= pending;
+      if (settlement?.transaction) entry.transaction = settlement.transaction;
+      if (response.ok && settlement?.success !== false) {
+        pending.delete(key);
+        confirmed(entry);
+        return outcome(entry, { status: 'paid', httpStatus: response.status, response });
       }
-      const result = {
-        status: paid ? 'paid' : response.status === 502 ? 'unknown' : 'failed',
-        httpStatus: response.status,
-        orderId: order.orderId,
-        amountMicro: pending,
-        merchant: order.merchant,
-        order,
-        transaction: settlement?.transaction || undefined,
-        reason: paid ? undefined : settlement?.errorReason ?? `http ${response.status}`,
-        response,
-      };
-      onEvent({ type: result.status, orderId: order.orderId, transaction: result.transaction, reason: result.reason });
-      return result;
+      // Whatever the answer says, the chain decides: a paid order is paid.
+      const status = await orderStatus(entry.order.orderId).catch(() => 'UNKNOWN');
+      if (status === 'PAID' || status === 'DELIVERED') {
+        pending.delete(key);
+        confirmed(entry);
+        return outcome(entry, { status: 'paid', httpStatus: response.status, response });
+      }
+      const definite = response.status >= 400 && response.status < 500 && response.status !== 429;
+      if (definite && status !== 'UNKNOWN') {
+        pending.delete(key);
+        release(entry);
+        return outcome(entry, { status: 'failed', httpStatus: response.status, reason: settlement?.errorReason ?? `http ${response.status}`, response });
+      }
+      return outcome(entry, { status: 'unknown', httpStatus: response.status, reason: settlement?.errorReason ?? `http ${response.status}`, response });
     });
+  }
+
+  function outcome(entry, { status, httpStatus, reason, response, transaction }) {
+    const result = {
+      status,
+      httpStatus,
+      orderId: entry.order.orderId,
+      amountMicro: entry.amount,
+      merchant: entry.order.merchant,
+      order: entry.order,
+      transaction: transaction ?? entry.transaction ?? undefined,
+      reason,
+      retry: status === 'unknown' ? 'call pay() again with the same request: it re-sends the same signature' : undefined,
+      response,
+    };
+    onEvent({ type: status, orderId: entry.order.orderId, transaction: result.transaction, reason });
+    return result;
   }
 
   // Ask the merchant for a refund: the request is signed by this payer, so the merchant can

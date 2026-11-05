@@ -33,6 +33,8 @@ const ADDRESS = /^0x[0-9a-fA-F]{40}$/;
 const NO_STORE = { 'cache-control': 'no-store' };
 const bigintSafe = (_, v) => (typeof v === 'bigint' ? v.toString() : v);
 const LOG_CHUNK = 50_000n;
+// Facilitator answers that do not say whether the payment reached the chain (ours and T1's).
+const UNCERTAIN = new Set(['pending', 'in_flight', 'receipt_timeout', 'send_failed', 'busy', 'rate_limited', 'error']);
 
 export function jsonResponse(status, body, headers = {}) {
   return new Response(JSON.stringify(body, bigintSafe), { status, headers: { 'content-type': 'application/json', ...NO_STORE, ...headers } });
@@ -66,6 +68,7 @@ export function createMerchant({
   walletClient,
   network = whitechainNetwork(),
   riskCheck,
+  authorize,
   identity,
   reputation,
   quoteTtlSeconds = 300,
@@ -135,6 +138,8 @@ export function createMerchant({
       return { response: jsonResponse(402, pr, { [HEADERS.required]: encodeHeader(pr) }), order: o };
     }
 
+    // A paid retry makes the facilitator spend gas: the deployment may gate it (GraphPay: a passcode).
+    if (authorize && !(await authorize(request))) return { response: jsonResponse(401, { error: 'not authorised to pay here' }) };
     const paymentPayload = decodeHeader(signatureHeader);
     const parsed = paymentPayloadSchema.safeParse(paymentPayload);
     if (!parsed.success) return { response: jsonResponse(400, { error: 'unreadable payment signature' }) };
@@ -192,6 +197,11 @@ export function createMerchant({
     } catch (e) {
       if (e instanceof FacilitatorUnavailable) return { response: jsonResponse(502, { error: 'the facilitator is unavailable; retrying with the same signature is safe' }) };
       throw e;
+    }
+    if (!settlement?.success && UNCERTAIN.has(settlement?.errorReason)) {
+      // Maybe sent, maybe not: never a 402, which would make the payer quote a new order.
+      // The payer re-sends the same signature; the order id and Permit2 nonce stop a double payment.
+      return { response: jsonResponse(502, { status: 'pending', error: settlement.errorReason, orderId: o.orderId, transaction: settlement.transaction || undefined }, { [HEADERS.response]: encodeHeader(settlement) }) };
     }
     if (!settlement?.success) {
       emit('payment.failed', { order: o, reason: settlement?.errorReason ?? 'not_settled', transaction: settlement?.transaction });
@@ -254,7 +264,7 @@ export function createMerchant({
   async function ownOrder(orderId) {
     if (!HEX32.test(orderId)) throw new AgentPayError('BAD_ORDER_ID', 'an order id is 32-byte hex');
     const o = asOrder(await read('orders', [orderId]));
-    if (!isAddressEqual(o.merchant, merchant.address) || o.shopNode !== merchant.node) throw new AgentPayError('NOT_OUR_ORDER', 'this order belongs to another merchant');
+    if (!isAddressEqual(o.merchant, merchant.address) || String(o.shopNode).toLowerCase() !== merchant.node) throw new AgentPayError('NOT_OUR_ORDER', 'this order belongs to another merchant');
     return { ...o, status: ORDER_STATUS[Number(o.status)], amountMicro: BigInt(o.amountMicro), refundedMicro: BigInt(o.refundedMicro) };
   }
 
@@ -378,14 +388,15 @@ export function createMerchant({
           return jsonResponse(200, { agentpay: 'subscription/v1', plan: { id: plan.id, items: plan.items, amountMicro: amount.toString(), periodSeconds: period }, merchant: { name: merchant.name, address: merchant.address }, maxCycles, sub });
         }
         if (request.method !== 'POST') return jsonResponse(405, { error: 'GET or POST' });
+        if (authorize && !(await authorize(request))) return jsonResponse(401, { error: 'not authorised to subscribe here' });
         if (!facilitator.subscribe) return jsonResponse(501, { error: 'this facilitator does not create subscriptions' });
         const body = await request.json().catch(() => null);
         const s = body?.sub;
         if (!s || !HEX32.test(s.subId ?? '') || !ADDRESS.test(s.subscriber ?? '')) return jsonResponse(400, { error: 'unreadable subscription' });
-        if (s.shopNode !== merchant.node || !isAddressEqual(s.merchant, merchant.address) || String(s.amountMicro) !== amount.toString() || Number(s.period) !== period) {
+        if (!ADDRESS.test(s.merchant ?? '') || String(s.shopNode).toLowerCase() !== merchant.node || !isAddressEqual(s.merchant, merchant.address) || String(s.amountMicro) !== amount.toString() || Number(s.period) !== period) {
           return jsonResponse(400, { error: 'the subscription terms are not this plan' });
         }
-        if (Number(body.maxCycles) !== maxCycles || subIdOf(s) !== s.subId) return jsonResponse(400, { error: 'the subscription id does not match its terms' });
+        if (Number(body.maxCycles) !== maxCycles || subIdOf(s) !== s.subId.toLowerCase()) return jsonResponse(400, { error: 'the subscription id does not match its terms' });
         const firstChargeAt = BigInt(s.firstChargeAt);
         if (firstChargeAt > BigInt(nowSec()) + 60n || firstChargeAt < BigInt(nowSec()) - BigInt(quoteTtlSeconds)) return jsonResponse(400, { error: 'the offer has expired, request a new one' });
         const result = await facilitator.subscribe({ sub: s, permitSingle: body.permitSingle, permitSig: body.permitSig, subSig: body.subSig, approvalPermit: body.approvalPermit ?? '0x' });
@@ -406,10 +417,11 @@ export function createMerchant({
     return async (request) => {
       try {
         if (!facilitator.cancelSubscription) return jsonResponse(501, { error: 'this facilitator does not relay cancellations' });
+        if (authorize && !(await authorize(request))) return jsonResponse(401, { error: 'not authorised to cancel here' });
         const body = await request.json().catch(() => null);
         if (!body || !HEX32.test(body.subId ?? '') || !/^\d{1,20}$/.test(String(body.deadline ?? '')) || !/^0x[0-9a-fA-F]{130}$/.test(body.signature ?? '')) return jsonResponse(400, { error: 'unreadable cancellation' });
         const s = asSub(await read('subscription', [body.subId]));
-        if (s.shopNode !== merchant.node) return jsonResponse(404, { error: 'no such subscription at this merchant' });
+        if (String(s.shopNode).toLowerCase() !== merchant.node) return jsonResponse(404, { error: 'no such subscription at this merchant' });
         const result = await facilitator.cancelSubscription({ subId: body.subId, deadline: String(body.deadline), signature: body.signature });
         if (!result?.success) return jsonResponse(409, { error: result?.errorReason ?? 'not cancelled' });
         emit('cancelled', { subId: body.subId, transaction: result.transaction });
@@ -465,7 +477,7 @@ export function createMerchant({
       if (head < next) return;
       for (const l of await logsOf('SubscriptionRenewed', undefined, next, head)) {
         const { subId, orderId, cycle, amountMicro } = l.args;
-        if (!ours.has(subId)) ours.set(subId, asSub(await read('subscription', [subId])).shopNode === merchant.node);
+        if (!ours.has(subId)) ours.set(subId, String(asSub(await read('subscription', [subId])).shopNode).toLowerCase() === merchant.node);
         if (ours.get(subId)) emit('renewal.charged', { subId, orderId, cycle: Number(cycle), amountMicro, transaction: l.transactionHash });
       }
       next = head + 1n;
@@ -530,6 +542,7 @@ export function createMerchant({
   return Object.freeze({
     ...merchant,
     network,
+    limits: Object.freeze({ maxRefundMicro: maxRefundMicro === undefined ? undefined : toMicro(maxRefundMicro, 'maxRefundMicro'), quoteTtlSeconds }),
     on: (event, fn) => (events.on(event, fn), undefined),
     off: (event, fn) => (events.off(event, fn), undefined),
     once: (event, fn) => (events.once(event, fn), undefined),

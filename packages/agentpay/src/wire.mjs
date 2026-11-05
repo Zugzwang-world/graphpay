@@ -104,13 +104,14 @@ export function toWireOrder(o) {
 }
 
 // The Order struct as viem encodes it for the contract.
+// Hex fields lower case, as viem returns bytes32 reads, so comparisons never depend on case.
 export function fromWireOrder(w) {
   return {
-    orderId: w.orderId,
-    parentOrderId: w.parentOrderId,
-    buyerNode: w.buyerNode,
-    shopNode: w.shopNode,
-    payerNode: w.payerNode,
+    orderId: w.orderId.toLowerCase(),
+    parentOrderId: w.parentOrderId.toLowerCase(),
+    buyerNode: w.buyerNode.toLowerCase(),
+    shopNode: w.shopNode.toLowerCase(),
+    payerNode: w.payerNode.toLowerCase(),
     merchant: getAddress(w.merchant),
     amountMicro: BigInt(w.amountMicro),
     deadline: BigInt(w.deadline),

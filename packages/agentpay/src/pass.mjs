@@ -73,9 +73,15 @@ export async function spentInPeriod({ publicClient, network, node, epoch, period
 }
 
 // Issue or update a pass on-chain. Only the checkout's policy writer may (a separate key from
-// the relayer and the admin, ADR-0021); never bind an owner's or a merchant's wallet.
-export async function issueSpendingPass({ walletClient, publicClient, network, name, node = nodeOf(name), wallet, dailyCapMicro, expiry = 0n, epoch, revoked = false }) {
+// the relayer and the admin, ADR-0021). The caller must never bind an owner's or a merchant's
+// wallet: a bound wallet can no longer pay as a human. `refuseWallets` lists wallets this
+// deployment knows must stay unbound; a wallet already bound to another node is refused.
+export async function issueSpendingPass({ walletClient, publicClient, network, name, node = nodeOf(name), wallet, dailyCapMicro, expiry = 0n, epoch, revoked = false, refuseWallets = [] }) {
   if (node === ZERO32) throw new AgentPayError('NO_NODE', 'a spending pass belongs to a named agent');
+  if (refuseWallets.some((w) => w.toLowerCase() === wallet.toLowerCase())) throw new AgentPayError('WALLET_MUST_STAY_UNBOUND', 'this wallet may not be bound to an agent');
+  if (wallet.toLowerCase() === walletClient.account.address.toLowerCase()) throw new AgentPayError('WALLET_MUST_STAY_UNBOUND', 'the policy writer may not bind itself');
+  const bound = await publicClient.readContract({ address: network.checkout, abi: checkoutAbi, functionName: 'nodeOfWallet', args: [wallet] });
+  if (bound !== ZERO32 && bound.toLowerCase() !== node.toLowerCase()) throw new AgentPayError('WALLET_BOUND_ELSEWHERE', 'this wallet already backs another agent');
   await assertChain(publicClient, network);
   const writer = walletClient.account.address;
   const allowed = await publicClient.readContract({ address: network.checkout, abi: checkoutAbi, functionName: 'isPolicyWriter', args: [writer] });

@@ -28,11 +28,21 @@ export const RELAYER_DEFAULTS = Object.freeze({
   maxRenewGas: 300_000n, // renew 201,555
   maxCancelGas: 120_000n, // cancelWithSig 44,582
   receiptTimeoutMs: 30_000,
+  inFlightHoldMs: 600_000, // an unconfirmed send blocks a resend of its order for 10 minutes
 });
 
 const noncesAbi = parseAbi(['function nonces(address owner) view returns (uint256)']);
 const SIG65 = /^0x[0-9a-fA-F]{130}$/;
 const POLICY_REASONS = new Set(['AGENT_REVOKED', 'AGENT_EXPIRED', 'SPEND_CAP', 'NODE_MISMATCH']);
+
+// A transaction that may have been sent: its outcome is unknown, so it is never retried as new.
+class Pending extends Error {
+  constructor(hash, cause) {
+    super('pending');
+    this.hash = hash;
+    this.cause = cause ?? 'Error';
+  }
+}
 
 class Refusal extends Error {
   constructor(reason) {
@@ -100,6 +110,7 @@ export function createReferenceRelayer({ walletClient, publicClient, network = w
   const relayer = walletClient.account.address;
   const hourly = windowCounter(3_600_000);
   const perPayer = new Map();
+  const inFlight = new Map();
   const queue = serial();
   const stats = { verified: 0, refused: 0, settled: 0, failedOnChain: 0, gasUsed: 0n };
   const nowSec = () => Math.floor(clock() / 1000);
@@ -203,6 +214,7 @@ export function createReferenceRelayer({ walletClient, publicClient, network = w
 
   function perPayerCounter(payer) {
     const key = payer.toLowerCase();
+    if (perPayer.size > 1_000) for (const [k, c] of perPayer) if (c.count(clock()) === 0) perPayer.delete(k);
     if (!perPayer.has(key)) perPayer.set(key, windowCounter(60_000));
     return perPayer.get(key);
   }
@@ -224,6 +236,9 @@ export function createReferenceRelayer({ walletClient, publicClient, network = w
     if (payer) perPayerCounter(payer).add(now);
   }
 
+  // Sends and waits for the receipt. A send that may have reached the chain is never reported
+  // as a plain failure: a receipt timeout throws Pending with the hash, so nobody retries it
+  // as a new order (the payer would pay twice).
   async function send(functionName, args, maxGas) {
     await assertChain(publicClient, network);
     const estimate = await publicClient.estimateContractGas({ address: network.checkout, abi: checkoutAbi, functionName, args, account: walletClient.account });
@@ -232,8 +247,22 @@ export function createReferenceRelayer({ walletClient, publicClient, network = w
     let gas = (estimate * 12n) / 10n;
     if (gas < floor) gas = floor;
     if (gas > maxGas) gas = maxGas;
-    const hash = await walletClient.writeContract({ address: network.checkout, abi: checkoutAbi, functionName, args, gas, chain: walletClient.chain, account: walletClient.account });
-    const receipt = await publicClient.waitForTransactionReceipt({ hash, timeout: L.receiptTimeoutMs });
+    let hash;
+    try {
+      hash = await walletClient.writeContract({ address: network.checkout, abi: checkoutAbi, functionName, args, gas, chain: walletClient.chain, account: walletClient.account });
+    } catch (e) {
+      throw new Pending('', e?.name);
+    }
+    let receipt;
+    try {
+      receipt = await publicClient.waitForTransactionReceipt({ hash, timeout: L.receiptTimeoutMs });
+    } catch (e) {
+      throw new Pending(hash, e?.name);
+    }
+    return { hash, receipt, events: decodeReceipt(receipt) };
+  }
+
+  function decodeReceipt(receipt) {
     stats.gasUsed += receipt.gasUsed;
     const events = [];
     for (const lg of receipt.logs) {
@@ -244,7 +273,19 @@ export function createReferenceRelayer({ walletClient, publicClient, network = w
         // not one of ours
       }
     }
-    return { hash, receipt, events };
+    return events;
+  }
+
+  function settlementOf(order, payer, amount, hash, events) {
+    const same = (ev) => String(ev.args.orderId).toLowerCase() === order.orderId;
+    const settled = events.find((ev) => ev.eventName === 'PaymentSettled' && same(ev));
+    const failed = events.find((ev) => ev.eventName === 'PaymentFailed' && same(ev));
+    if (settled) {
+      stats.settled++;
+      return { success: true, payer, transaction: hash, network: network.caip2, amount: amount.toString() };
+    }
+    stats.failedOnChain++;
+    return { success: false, errorReason: failed ? FAIL_REASON[Number(failed.args.reason)] : 'not_settled', payer, transaction: hash, network: network.caip2 };
   }
 
   async function verify(paymentPayload, requirements) {
@@ -261,6 +302,15 @@ export function createReferenceRelayer({ walletClient, publicClient, network = w
 
   function settle(paymentPayload, requirements) {
     return queue(async () => {
+      // An earlier send of this order that has not confirmed yet: report it, never send again.
+      const orderId = String(paymentPayload?.payload?.order?.orderId ?? '').toLowerCase();
+      const earlier = inFlight.get(orderId);
+      if (earlier) {
+        const receipt = earlier.hash ? await publicClient.getTransactionReceipt({ hash: earlier.hash }).catch(() => null) : null;
+        if (!receipt && clock() - earlier.at < L.inFlightHoldMs) return { success: false, errorReason: 'in_flight', transaction: earlier.hash, network: network.caip2 };
+        inFlight.delete(orderId);
+        if (receipt) return settlementOf(earlier.order, earlier.payer, earlier.amount, earlier.hash, decodeReceipt(receipt));
+      }
       let checked;
       try {
         checked = await check(paymentPayload, requirements);
@@ -273,22 +323,18 @@ export function createReferenceRelayer({ walletClient, publicClient, network = w
       const { order, payload, payer, amount } = checked;
       const permit = { permitted: { token: network.token.address, amount }, nonce: BigInt(order.orderId), deadline: order.deadline };
       consume(amount, payer);
-      let sent;
       try {
-        sent = await send('settleOrder', [order, payload.mandateHash, permit, payer, payload.signature, payload.approvalPermit], L.maxSettleGas);
+        const sent = await send('settleOrder', [order, payload.mandateHash, permit, payer, payload.signature, payload.approvalPermit], L.maxSettleGas);
+        return settlementOf(order, payer, amount, sent.hash, sent.events);
       } catch (e) {
         if (e instanceof Refusal) return { success: false, errorReason: e.reason, transaction: '', network: network.caip2 };
-        log(`relayer: settle send failed (${e?.name ?? 'Error'})`); // never the message: it can quote the RPC URL
-        return { success: false, errorReason: 'send_failed', transaction: '', network: network.caip2 };
+        if (e instanceof Pending) {
+          inFlight.set(order.orderId, { hash: e.hash, at: clock(), order, payer, amount });
+          log(`relayer: settle pending (${e.cause})`); // never the message: it can quote the RPC URL
+          return { success: false, errorReason: 'pending', transaction: e.hash, network: network.caip2 };
+        }
+        throw e;
       }
-      const settled = sent.events.find((ev) => ev.eventName === 'PaymentSettled' && ev.args.orderId === order.orderId);
-      const failed = sent.events.find((ev) => ev.eventName === 'PaymentFailed' && ev.args.orderId === order.orderId);
-      if (settled) {
-        stats.settled++;
-        return { success: true, payer, transaction: sent.hash, network: network.caip2, amount: amount.toString() };
-      }
-      stats.failedOnChain++;
-      return { success: false, errorReason: failed ? FAIL_REASON[Number(failed.args.reason)] : 'not_settled', payer, transaction: sent.hash, network: network.caip2 };
     });
   }
 
@@ -344,8 +390,9 @@ export function createReferenceRelayer({ walletClient, publicClient, network = w
         return { success: Boolean(created), subId: s.subId, transaction: sent.hash, charged: Boolean(charged), chargeOrderId: charged?.args.orderId, network: network.caip2 };
       } catch (e) {
         if (e instanceof Refusal) return { success: false, errorReason: e.reason, transaction: '', network: network.caip2 };
+        if (e instanceof Pending) return { success: false, errorReason: 'pending', transaction: e.hash, network: network.caip2 };
         log(`relayer: subscribe failed (${e?.name ?? 'Error'})`);
-        return { success: false, errorReason: 'send_failed', transaction: '', network: network.caip2 };
+        return { success: false, errorReason: 'error', transaction: '', network: network.caip2 };
       }
     });
   }
@@ -370,8 +417,9 @@ export function createReferenceRelayer({ walletClient, publicClient, network = w
         return { success: false, subId, errorReason: failed ? FAIL_REASON[Number(failed.args.reason)] : 'not_renewed', transaction: sent.hash, network: network.caip2 };
       } catch (e) {
         if (e instanceof Refusal) return { success: false, subId, errorReason: e.reason, transaction: '', network: network.caip2 };
+        if (e instanceof Pending) return { success: false, subId, errorReason: 'pending', transaction: e.hash, network: network.caip2 };
         log(`relayer: renew failed (${e?.name ?? 'Error'})`);
-        return { success: false, subId, errorReason: 'send_failed', transaction: '', network: network.caip2 };
+        return { success: false, subId, errorReason: 'error', transaction: '', network: network.caip2 };
       }
     });
   }
@@ -394,8 +442,9 @@ export function createReferenceRelayer({ walletClient, publicClient, network = w
         return { success: Boolean(cancelled), subId, transaction: sent.hash, network: network.caip2 };
       } catch (e) {
         if (e instanceof Refusal) return { success: false, subId, errorReason: e.reason, transaction: '', network: network.caip2 };
+        if (e instanceof Pending) return { success: false, subId, errorReason: 'pending', transaction: e.hash, network: network.caip2 };
         log(`relayer: cancel failed (${e?.name ?? 'Error'})`);
-        return { success: false, subId, errorReason: 'send_failed', transaction: '', network: network.caip2 };
+        return { success: false, subId, errorReason: 'error', transaction: '', network: network.caip2 };
       }
     });
   }

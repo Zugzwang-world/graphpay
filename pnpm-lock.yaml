@@ -55,6 +55,24 @@ importers:
         specifier: 5.9.3
         version: 5.9.3
 
+  examples/agentpay-ride:
+    dependencies:
+      '@graphpay/agentpay':
+        specifier: workspace:*
+        version: link:../../packages/agentpay
+      '@graphpay/config':
+        specifier: workspace:*
+        version: link:../../packages/config
+
+  examples/agentpay-sweets:
+    dependencies:
+      '@graphpay/agentpay':
+        specifier: workspace:*
+        version: link:../../packages/agentpay
+      '@graphpay/config':
+        specifier: workspace:*
+        version: link:../../packages/config
+
   integration:
     dependencies:
       '@ai-sdk/mcp':
