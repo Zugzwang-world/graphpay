@@ -55,13 +55,12 @@ Updated 02:40 IST. **M10 is merged; the presence and handoff hooks are built** (
 - Blockers: none. Next: merge, then wait for Join's M12 counting run; re-run the live errand if time allows.
 ## integration
 
-Updated 04:30 IST, Fri 6 Nov. **The first acceptance report is written: 18 pass, 0 fail, 1 blocked (the big city), 29 not run yet.** The mirror is live and has mirrored T1's first real payments.
-- The mirror wrote every real checkout event exactly once: the lifecycle as rehearsal.vitalik and the qualifying 4.80 payment as acceptance.vitalik (36 events, 25 edges). D1 (one payment = one atomic Arkiv transaction) and D3 (the scores recomputed from the raw records) pass on that real data.
-- Also passing live: CI green, secret scan, no addresses or story names in code, the ENS namespace, the payment gate for every paying agent, the explorer's contract verification, the city's top 10 and discovery, the benchmark, receipts that cannot be edited.
-- New: T2's watcher (M6) is hosted in the workers process: a killed ENS name revokes its spending policy on Whitechain.
-- Running: `pnpm workers` (restarted on the new code once this PR merges).
-- Not run yet: the payment, refund and kill checks of the full errand (M12's `e2e:food`), the hosted endpoints (M4), and D2's two write tests, which need the workers stopped around a fresh payment.
-- Next: `e2e:food` on the real networks, then fill in the C, E and F rows.
+Updated 04:55 IST, Fri 6 Nov. **M12's counting run passed on the real networks; the acceptance report is at 24 pass, 0 fail, 1 blocked, 23 not run.**
+- The story's errand ran end to end. The agents chose Kesar Kingdom from live Arkiv reputation and never the trap, and paid 4.80 test USDT on Whitechain as payer.vitalik through our facilitator (the ENS gate, the payee from ENS, the quote on Arkiv first). The shop marked it delivered, then refunded 0.80. The mirror put each step on Arkiv, and GraphQL showed the new tallies. 122 s, $0.30 of model cost.
+- Two bugs found and fixed on the way: the hosted MCP's buyer-risk table (it made every shop refuse every real buyer; PR 48) and the signer's header format.
+- Running: `pnpm workers` with T2's ENS watcher (a killed name revokes its spending policy).
+- Not run yet: the kill check (E7, which needs a fresh disposable agent), the hosted endpoints (M4), D2's two write tests and D15 with payments in a drop.
+- Next: the kill check, then fill in the C and F rows with T1.
 
 ## website
 
