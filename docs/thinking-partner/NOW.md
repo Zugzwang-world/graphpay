@@ -26,11 +26,11 @@ Updated 23:55 IST. **M0 done; handed over to the Coordinator** (`docs/plan/sessi
 
 ## payments
 
-Updated 02:35 IST, Fri 6 Nov (T1).
-- **M1 (the checkout contract) is done: two reviewer passes said ship; PR #12 merges once the contract tests are green in CI.** 90 tests pass on a copy (fork) of the real Whitechain Sepolia, paying in the real test USDT through the real Permit2.
-- The first agent payment costs about 318,000 gas of execution (about 351,000 on a real receipt, inside acceptance C2's band); the payer pays no gas.
-- The contract's interface (ABI) is exported for the mirror (Join's M11).
-- Next: M2 deploys and verifies the checkout on Whitechain Sepolia and sets up roles, merchants and policies; the facilitator and shop API (M3) start alongside.
+Updated 02:55 IST, Fri 6 Nov (T1).
+- **M1 merged (#12). M2 is done on the real chain:** the checkout is deployed on Whitechain Sepolia for the real test USDT, verified on the explorer and set up (the renewal relayer, three shops' refund floats, five agent spending policies from the story). PR with the scripts and records is open.
+- Checkout: https://explorer.testnet.whitechain.io/address/0x75233b7341B9e86407e4b31599f07b8936716FcA (its address and deploy block are in the config for the mirror).
+- The qualifying payment's readiness check passes: the acceptance agent holds 20 test USDT and has its 6.00/day policy.
+- Next: M3 part A (our facilitator, the shop's 402 API, the recorder routes). Part B (real payments) waits for T2's M5 and M6.
 - Blockers: none.
 
 ## identity
