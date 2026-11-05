@@ -1,0 +1,10 @@
+{
+  "id": "C5",
+  "at": "2026-11-05T23:46:48.482Z",
+  "pass": null,
+  "why": "no pnpm e2e:hosted run for this row yet",
+  "what": "a repeat request returns \"already paid\"",
+  "measured": null,
+  "expected": "",
+  "evidence": {}
+}

@@ -61,6 +61,9 @@ function serve(handler) {
 // Arkiv connections as W_DIRECTORY and W_SYNC. shopKeyOf(shopEns): the directory's shop key.
 export async function startStack({ env, whitechain, sepolia, directory, sync, shopKeyOf, log = () => {} }) {
   if (env.ALLOW_REAL_NETWORK !== '1') throw new Error('stack: the real network needs ALLOW_REAL_NETWORK=1');
+  // Since M4 the hosted facilitator relays as FACILITATOR (integration/hosted.mjs goes through
+  // it); this local relayer would race its nonces, so it runs only on an explicit opt-in.
+  if (env.STACK_LOCAL_RELAY !== '1') throw new Error('stack: relays locally as FACILITATOR; since M4 use the hosted routes (pnpm e2e:hosted), or set STACK_LOCAL_RELAY=1 once the hosted relayer is quiet');
   const chainId = whitechain.chain.id;
   const NETWORK = `eip155:${chainId}`;
   const checkout = config.whitechain.contracts.checkout.address;

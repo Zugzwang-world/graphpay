@@ -32,7 +32,8 @@
     "workers:replay": "node packages/mirror/src/replay.mjs",
     "acceptance": "node acceptance/run.mjs",
     "e2e:food": "node integration/e2e-food.mjs",
-    "e2e:kill": "node integration/kill.mjs"
+    "e2e:kill": "node integration/kill.mjs",
+    "e2e:hosted": "node integration/hosted.mjs"
   },
   "devDependencies": {
     "viem": "2.57.16",

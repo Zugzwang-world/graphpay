@@ -1,8 +1,8 @@
 # Acceptance report
 
-Written by `pnpm acceptance` at 2026-11-05T23:35:12.697Z. Checks and pass criteria: `planning/ACCEPTANCE_TESTS.md` and `docs/plan/ACCEPTANCE_ADDITIONS.md`. Only D7 may be `blocked` (C7 and E3 no longer wait on supply, ADR-0054); a check without a result is `not run`, never `pass`.
+Written by `pnpm acceptance` at 2026-11-05T23:46:48.489Z. Checks and pass criteria: `planning/ACCEPTANCE_TESTS.md` and `docs/plan/ACCEPTANCE_ADDITIONS.md`. Only D7 may be `blocked` (C7 and E3 no longer wait on supply, ADR-0054); a check without a result is `not run`, never `pass`.
 
-**31 pass, 0 fail, 1 blocked, 16 not run** (of 48).
+**33 pass, 0 fail, 1 blocked, 14 not run** (of 48).
 
 | id | check | status | note |
 |---|---|---|---|
@@ -26,11 +26,11 @@ Written by `pnpm acceptance` at 2026-11-05T23:35:12.697Z. Checks and pass criter
 | B8 | ENSIP-26 records exist and the MCP endpoint answers | pass |  |
 | B9 | The payee is the shop's ENS address | not run |  |
 | C1 | Contracts are verified on the explorer | pass |  |
-| C2 | A payment through the facilitator costs the payer no gas | not run | no runner yet |
-| C3 | Partial refund, re-order and renewal work | not run | no runner yet |
-| C4 | Revoked-agent and over-cap failures are recorded | not run | no runner yet |
-| C5 | A repeat request returns "already paid" | not run | no runner yet |
-| C6 | Hosted endpoints return 401 without the passcode or token | not run | no runner yet |
+| C2 | A payment through the facilitator costs the payer no gas | not run | no pnpm e2e:hosted run for this row yet |
+| C3 | Partial refund, re-order and renewal work | not run | no pnpm e2e:hosted run for this row yet |
+| C4 | Revoked-agent and over-cap failures are recorded | not run | no pnpm e2e:hosted run for this row yet |
+| C5 | A repeat request returns "already paid" | not run | no pnpm e2e:hosted run for this row yet |
+| C6 | Hosted endpoints return 401 without the passcode or token | pass |  |
 | C7 | **The qualifying payment in test USDT `0xcedfB56113143d55b2358b8CFbB0dEB5Ad2f55a7`** | pass |  |
 | D1 | One payment event writes its edge and tallies in one atomic batch | pass |  |
 | D2 | A retry with the same nonce creates no duplicate | pass |  |
@@ -52,7 +52,7 @@ Written by `pnpm acceptance` at 2026-11-05T23:35:12.697Z. Checks and pass criter
 | E7 | A killed agent is refused | pass |  |
 | E8 | Every counting errand records its time and cost (ADR-0048) | pass |  |
 | F1 | No secrets are in the repo | not run | no runner yet |
-| F2 | Spending endpoints are passcode-gated | not run | no runner yet |
+| F2 | Spending endpoints are passcode-gated | pass |  |
 | F3 | The relayer's safety floor is enforced | not run | no runner yet |
 
 ## A1: CI is green (at M0 the `contracts` job runs a placeholder Foundry project)
@@ -409,6 +409,110 @@ Status: **pass**.
   "is_verified": true,
   "is_fully_verified": false,
   "name": "GraphPayCheckout"
+}
+```
+
+## C2: A payment through the facilitator costs the payer no gas
+
+Status: **not run** (no pnpm e2e:hosted run for this row yet).
+
+### C2 (2026-11-05T23:46:48.480Z)
+
+- What: a payment through the facilitator costs the payer no gas
+- Pass: null
+- Expected: 
+- Evidence: `{}`
+
+```json
+null
+```
+
+## C3: Partial refund, re-order and renewal work
+
+Status: **not run** (no pnpm e2e:hosted run for this row yet).
+
+### C3 (2026-11-05T23:46:48.481Z)
+
+- What: partial refund, re-order and renewal work
+- Pass: null
+- Expected: 
+- Evidence: `{}`
+
+```json
+null
+```
+
+## C4: Revoked-agent and over-cap failures are recorded
+
+Status: **not run** (no pnpm e2e:hosted run for this row yet).
+
+### C4 (2026-11-05T23:46:48.482Z)
+
+- What: revoked-agent and over-cap failures are recorded
+- Pass: null
+- Expected: 
+- Evidence: `{}`
+
+```json
+null
+```
+
+## C5: A repeat request returns "already paid"
+
+Status: **not run** (no pnpm e2e:hosted run for this row yet).
+
+### C5 (2026-11-05T23:46:48.482Z)
+
+- What: a repeat request returns "already paid"
+- Pass: null
+- Expected: 
+- Evidence: `{}`
+
+```json
+null
+```
+
+## C6: Hosted endpoints return 401 without the passcode or token
+
+Status: **pass**.
+
+### C6 (2026-11-05T23:46:48.483Z)
+
+- What: hosted endpoints return 401 without the passcode or token
+- Pass: true
+- Expected: every one 401; relayer nonce unchanged
+- Evidence: `{"file":"docs/sessions/integration/hosted/read-2026-11-05.json","startedAt":"2026-11-05T23:45:32.137Z","site":"https://graphpay-event.vercel.app"}`
+
+```json
+{
+  "pass": true,
+  "table": [
+    {
+      "route": "POST /api/shop/orders/:id/pay",
+      "gate": "passcode",
+      "signs": "FACILITATOR (and W_DIRECTORY writes the quote on the 402 step)",
+      "without": 401,
+      "wrong": 401
+    },
+    {
+      "route": "POST /api/facilitator/verify",
+      "gate": "bearer",
+      "signs": "FACILITATOR (verify reads only)",
+      "without": 401,
+      "wrong": 401
+    },
+    {
+      "route": "POST /api/facilitator/settle",
+      "gate": "bearer",
+      "signs": "FACILITATOR",
+      "without": 401,
+      "wrong": 401
+    }
+  ],
+  "relayerNonce": {
+    "before": 9,
+    "after": 9
+  }
 }
 ```
 
@@ -1098,6 +1202,148 @@ Status: **pass**.
     "apiCostUsd": 0.2986,
     "seconds": 122.1,
     "tokens": 52693
+  }
+}
+```
+
+## F2: Spending endpoints are passcode-gated
+
+Status: **pass**.
+
+### F2 (2026-11-05T23:46:48.483Z)
+
+- What: spending endpoints are passcode-gated
+- Pass: true
+- Expected: every spending route 401 without and with a wrong passcode or bearer; relayer nonce unchanged
+- Evidence: `{"file":"docs/sessions/integration/hosted/read-2026-11-05.json","startedAt":"2026-11-05T23:45:32.137Z","site":"https://graphpay-event.vercel.app"}`
+
+```json
+{
+  "pass": true,
+  "table": [
+    {
+      "route": "POST /api/shop/orders/:id/pay",
+      "gate": "passcode",
+      "signs": "FACILITATOR (and W_DIRECTORY writes the quote on the 402 step)",
+      "without": 401,
+      "wrong": 401
+    },
+    {
+      "route": "POST /api/shop/orders/:id/reorder",
+      "gate": "passcode",
+      "signs": "FACILITATOR",
+      "without": 401,
+      "wrong": 401
+    },
+    {
+      "route": "POST /api/facilitator/verify",
+      "gate": "bearer",
+      "signs": "FACILITATOR (verify reads only)",
+      "without": 401,
+      "wrong": 401
+    },
+    {
+      "route": "POST /api/facilitator/settle",
+      "gate": "bearer",
+      "signs": "FACILITATOR",
+      "without": 401,
+      "wrong": 401
+    },
+    {
+      "route": "POST /api/recorder/attempts",
+      "gate": "bearer",
+      "signs": "W_SYNC",
+      "without": 401,
+      "wrong": 401
+    },
+    {
+      "route": "GET /api/cron/renew",
+      "gate": "bearer",
+      "signs": "RENEWER",
+      "without": 401,
+      "wrong": 401
+    },
+    {
+      "route": "POST /api/customer/pause",
+      "gate": "passcode",
+      "signs": "an owner, merchant or payer key",
+      "without": 401,
+      "wrong": 401
+    },
+    {
+      "route": "POST /api/customer/resume",
+      "gate": "passcode",
+      "signs": "an owner, merchant or payer key",
+      "without": 401,
+      "wrong": 401
+    },
+    {
+      "route": "POST /api/customer/kill-disposable",
+      "gate": "passcode",
+      "signs": "an owner, merchant or payer key",
+      "without": 401,
+      "wrong": 401
+    },
+    {
+      "route": "POST /api/customer/subscribe",
+      "gate": "passcode",
+      "signs": "an owner, merchant or payer key",
+      "without": 401,
+      "wrong": 401
+    },
+    {
+      "route": "POST /api/customer/unsubscribe",
+      "gate": "passcode",
+      "signs": "an owner, merchant or payer key",
+      "without": 401,
+      "wrong": 401
+    },
+    {
+      "route": "POST /api/customer/reorder",
+      "gate": "passcode",
+      "signs": "an owner, merchant or payer key",
+      "without": 401,
+      "wrong": 401
+    },
+    {
+      "route": "POST /api/customer/refund-request",
+      "gate": "passcode",
+      "signs": "an owner, merchant or payer key",
+      "without": 401,
+      "wrong": 401
+    },
+    {
+      "route": "POST /api/merchant/dispatch",
+      "gate": "passcode",
+      "signs": "an owner, merchant or payer key",
+      "without": 401,
+      "wrong": 401
+    },
+    {
+      "route": "POST /api/merchant/refund",
+      "gate": "passcode",
+      "signs": "an owner, merchant or payer key",
+      "without": 401,
+      "wrong": 401
+    },
+    {
+      "route": "POST /api/merchant/open",
+      "gate": "passcode",
+      "signs": "W_DIRECTORY",
+      "without": 401,
+      "wrong": 401
+    },
+    {
+      "route": "POST /api/agents/run",
+      "gate": "passcode",
+      "signs": "an owner, merchant or payer key",
+      "without": 401,
+      "wrong": 401
+    }
+  ],
+  "relayerNonce": {
+    "before": 9,
+    "after": 9
   }
 }
 ```

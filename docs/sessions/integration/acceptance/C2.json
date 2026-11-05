@@ -1,0 +1,10 @@
+{
+  "id": "C2",
+  "at": "2026-11-05T23:46:48.480Z",
+  "pass": null,
+  "why": "no pnpm e2e:hosted run for this row yet",
+  "what": "a payment through the facilitator costs the payer no gas",
+  "measured": null,
+  "expected": "",
+  "evidence": {}
+}

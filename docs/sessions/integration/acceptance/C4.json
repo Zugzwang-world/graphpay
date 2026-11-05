@@ -1,0 +1,10 @@
+{
+  "id": "C4",
+  "at": "2026-11-05T23:46:48.482Z",
+  "pass": null,
+  "why": "no pnpm e2e:hosted run for this row yet",
+  "what": "revoked-agent and over-cap failures are recorded",
+  "measured": null,
+  "expected": "",
+  "evidence": {}
+}

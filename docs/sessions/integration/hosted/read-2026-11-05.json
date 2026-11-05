@@ -1,0 +1,185 @@
+{
+  "site": "https://graphpay-event.vercel.app",
+  "startedAt": "2026-11-05T23:45:32.137Z",
+  "payer": "acceptance.vitalik.graphpay.eth",
+  "shop": "kesar-kingdom.graphpay.eth",
+  "mode": "read-only",
+  "rows": {
+    "F2": {
+      "pass": true,
+      "table": [
+        {
+          "route": "POST /api/shop/orders/:id/pay",
+          "gate": "passcode",
+          "signs": "FACILITATOR (and W_DIRECTORY writes the quote on the 402 step)",
+          "without": 401,
+          "wrong": 401
+        },
+        {
+          "route": "POST /api/shop/orders/:id/reorder",
+          "gate": "passcode",
+          "signs": "FACILITATOR",
+          "without": 401,
+          "wrong": 401
+        },
+        {
+          "route": "POST /api/facilitator/verify",
+          "gate": "bearer",
+          "signs": "FACILITATOR (verify reads only)",
+          "without": 401,
+          "wrong": 401
+        },
+        {
+          "route": "POST /api/facilitator/settle",
+          "gate": "bearer",
+          "signs": "FACILITATOR",
+          "without": 401,
+          "wrong": 401
+        },
+        {
+          "route": "POST /api/recorder/attempts",
+          "gate": "bearer",
+          "signs": "W_SYNC",
+          "without": 401,
+          "wrong": 401
+        },
+        {
+          "route": "GET /api/cron/renew",
+          "gate": "bearer",
+          "signs": "RENEWER",
+          "without": 401,
+          "wrong": 401
+        },
+        {
+          "route": "POST /api/customer/pause",
+          "gate": "passcode",
+          "signs": "an owner, merchant or payer key",
+          "without": 401,
+          "wrong": 401
+        },
+        {
+          "route": "POST /api/customer/resume",
+          "gate": "passcode",
+          "signs": "an owner, merchant or payer key",
+          "without": 401,
+          "wrong": 401
+        },
+        {
+          "route": "POST /api/customer/kill-disposable",
+          "gate": "passcode",
+          "signs": "an owner, merchant or payer key",
+          "without": 401,
+          "wrong": 401
+        },
+        {
+          "route": "POST /api/customer/subscribe",
+          "gate": "passcode",
+          "signs": "an owner, merchant or payer key",
+          "without": 401,
+          "wrong": 401
+        },
+        {
+          "route": "POST /api/customer/unsubscribe",
+          "gate": "passcode",
+          "signs": "an owner, merchant or payer key",
+          "without": 401,
+          "wrong": 401
+        },
+        {
+          "route": "POST /api/customer/reorder",
+          "gate": "passcode",
+          "signs": "an owner, merchant or payer key",
+          "without": 401,
+          "wrong": 401
+        },
+        {
+          "route": "POST /api/customer/refund-request",
+          "gate": "passcode",
+          "signs": "an owner, merchant or payer key",
+          "without": 401,
+          "wrong": 401
+        },
+        {
+          "route": "POST /api/merchant/dispatch",
+          "gate": "passcode",
+          "signs": "an owner, merchant or payer key",
+          "without": 401,
+          "wrong": 401
+        },
+        {
+          "route": "POST /api/merchant/refund",
+          "gate": "passcode",
+          "signs": "an owner, merchant or payer key",
+          "without": 401,
+          "wrong": 401
+        },
+        {
+          "route": "POST /api/merchant/open",
+          "gate": "passcode",
+          "signs": "W_DIRECTORY",
+          "without": 401,
+          "wrong": 401
+        },
+        {
+          "route": "POST /api/agents/run",
+          "gate": "passcode",
+          "signs": "an owner, merchant or payer key",
+          "without": 401,
+          "wrong": 401
+        }
+      ],
+      "relayerNonce": {
+        "before": 9,
+        "after": 9
+      }
+    },
+    "C6": {
+      "pass": true,
+      "table": [
+        {
+          "route": "POST /api/shop/orders/:id/pay",
+          "gate": "passcode",
+          "signs": "FACILITATOR (and W_DIRECTORY writes the quote on the 402 step)",
+          "without": 401,
+          "wrong": 401
+        },
+        {
+          "route": "POST /api/facilitator/verify",
+          "gate": "bearer",
+          "signs": "FACILITATOR (verify reads only)",
+          "without": 401,
+          "wrong": 401
+        },
+        {
+          "route": "POST /api/facilitator/settle",
+          "gate": "bearer",
+          "signs": "FACILITATOR",
+          "without": 401,
+          "wrong": 401
+        }
+      ],
+      "relayerNonce": {
+        "before": 9,
+        "after": 9
+      }
+    }
+  },
+  "health": {
+    "facilitator": {
+      "startup": "ok",
+      "signer": "0x1AB82871c3E1Be64717269D45F08cA9d54C1EBf6"
+    },
+    "shop": 200
+  },
+  "plan": {
+    "spentTodayMicro": "4800000",
+    "spends": {
+      "C2": 4800000,
+      "C3": 1200000,
+      "C4b": "refused, sends nothing",
+      "refund": "not in this run"
+    },
+    "gas": "none from the payer; the hosted relayer pays"
+  },
+  "endedAt": "2026-11-05T23:45:46.458Z"
+}

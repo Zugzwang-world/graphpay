@@ -84,6 +84,12 @@ export function checks(root, env) {
       const shared = addrs.filter((a, i) => addrs.indexOf(a) !== i);
       return { pass: rows.length > 0 && carried.every((c) => c === 'FUNDER' || c === 'OPERATOR') && shared.length === 0, what: 'the event wallets are fresh, except FUNDER and OPERATOR', measured: { roles: rows.length, carried, sharedAddresses: shared.length }, expected: 'only FUNDER and OPERATOR carried; no two roles share an address', evidence: { cmd: 'pnpm -s wallets:addresses (addresses only)' } };
     },
+    C2: async () => hosted(root, 'C2'),
+    C3: async () => hosted(root, 'C3', env),
+    C4: async () => hosted(root, 'C4'),
+    C5: async () => hosted(root, 'C5'),
+    C6: async () => hosted(root, 'C6'),
+    F2: async () => hosted(root, 'F2'),
     C7: async () => qualifying(env, 'C7'),
     E3: async () => qualifying(env, 'E3'),
     E8: async () => {
@@ -258,4 +264,73 @@ async function qualifying(env, id) {
     expected: 'PaymentSettled on the USDT checkout; a 4,800,000-unit transfer of the configured test USDT; sent by the relayer (payer gas 0)',
     evidence: { tx: `${config.networks.whitechain.explorer}/tx/${hash}`, payer: payer.ensName, by: "T1's usdt-ready (M3 part B)" },
   };
+}
+
+// C2–C6 and F2: pnpm e2e:hosted's files (docs/sessions/integration/hosted/), the latest paid run
+// for the paying rows and the latest of any run for the 401 rows. C3's renewal is the hosted
+// cron's (T1's M4 evidence, docs/sessions/payments/m4-hosted.md), read again from its receipt.
+const HOSTED_WHAT = {
+  C2: 'a payment through the facilitator costs the payer no gas',
+  C3: 'partial refund, re-order and renewal work',
+  C4: 'revoked-agent and over-cap failures are recorded',
+  C5: 'a repeat request returns "already paid"',
+  C6: 'hosted endpoints return 401 without the passcode or token',
+  F2: 'spending endpoints are passcode-gated',
+};
+function latestHosted(root, paidOnly) {
+  const dir = join(root, 'docs/sessions/integration/hosted');
+  if (!existsSync(dir)) return null;
+  const files = readdirSync(dir)
+    .filter((f) => f.endsWith('.json') && (!paidOnly || f.startsWith('paid-')))
+    .map((f) => ({ f: `docs/sessions/integration/hosted/${f}`, run: JSON.parse(readFileSync(join(dir, f), 'utf8')) }))
+    .sort((a, b) => (a.run.startedAt < b.run.startedAt ? 1 : -1));
+  return files[0] ?? null;
+}
+async function hosted(root, id, env) {
+  const what = HOSTED_WHAT[id];
+  const h = latestHosted(root, !['C6', 'F2'].includes(id));
+  const row = h?.run.rows?.[id];
+  if (!row) return { pass: null, why: 'no pnpm e2e:hosted run for this row yet', what, measured: null, expected: '', evidence: {} };
+  const evidence = { file: h.f, startedAt: h.run.startedAt, site: h.run.site };
+  if (id === 'C3') {
+    const renewal = await hostedRenewal(root, env);
+    const parts = { refund: row.refund?.pass ?? null, reorder: row.reorder?.pass ?? null, renewal: renewal.pass };
+    const pass = Object.values(parts).includes(false) ? false : Object.values(parts).every((v) => v === true) ? true : null;
+    return { pass, ...(pass === null ? { why: `not run yet: ${Object.keys(parts).filter((k) => parts[k] === null).join(', ')}` } : {}), what, measured: { ...parts, refundTx: row.refund ?? null, reorderTx: row.reorder ?? null, renewalTx: renewal.measured }, expected: 'Refunded(800000, full false), payer +0.80, gas 75,344 ±15%; re-order OrderCreated(kind 1, parent) + PaymentSettled 1.20, gas 252,082 ±15%; SubscriptionRenewed(cycle 2) + PaymentSettled of a kind-2 order, gas 201,555 ±15%', evidence: { ...evidence, renewal: renewal.evidence } };
+  }
+  if (id === 'C4') {
+    const pass = row.a?.pass === false || row.b?.pass === false ? false : row.a?.pass === true && row.b?.pass === true ? true : null;
+    return { pass, ...(pass === null ? { why: `(a) ${row.a?.why ?? 'not run'}; (b) ${row.b?.pass ? 'passes' : 'not run'}` } : {}), what, measured: row, expected: '(a) PaymentFailed(AGENT_REVOKED), gas 160,525 ±15%, an on-chain fail edge; (b) 402 CAP_EXCEEDED, no transaction, an off-chain fail edge', evidence };
+  }
+  const expected = {
+    C2: 'payer WBT identical; PaymentSettled; tx.from = the relayer; gas 312,024 or 234,292–252,082, ±15%; the quote key and the ENS payee read',
+    C5: 'HTTP 200 alreadyPaid; relayer nonce and payer balance unchanged',
+    C6: 'every one 401; relayer nonce unchanged',
+    F2: 'every spending route 401 without and with a wrong passcode or bearer; relayer nonce unchanged',
+  }[id];
+  return { pass: row.pass, what, measured: row, expected, evidence };
+}
+async function hostedRenewal(root, env) {
+  const f = join(root, 'docs/sessions/payments/m4-hosted.md');
+  const line = existsSync(f) ? readFileSync(f, 'utf8').split('\n').find((l) => l.startsWith('| cron |')) : null;
+  const hash = line?.match(/renewed by the hosted cron[^[]*\[[^\]]*\]\([^)]*\/tx\/(0x[0-9a-f]{64})\)/)?.[1];
+  if (!hash) return { pass: null, measured: null, evidence: { file: 'docs/sessions/payments/m4-hosted.md' } };
+  const { decodeEventLog } = await import('viem');
+  const { checkoutAbi } = await import('../packages/contracts/index.mjs');
+  const wc = await clientsFor('whitechain', env);
+  const receipt = await wc.publicClient.getTransactionReceipt({ hash });
+  const checkout = config.whitechain.contracts.checkout.address.toLowerCase();
+  const evs = receipt.logs.filter((l) => l.address.toLowerCase() === checkout).flatMap((l) => {
+    try {
+      return [decodeEventLog({ abi: checkoutAbi, data: l.data, topics: l.topics })];
+    } catch {
+      return [];
+    }
+  });
+  const renewed = evs.find((e) => e.eventName === 'SubscriptionRenewed');
+  const created = evs.find((e) => e.eventName === 'OrderCreated');
+  const settled = evs.find((e) => e.eventName === 'PaymentSettled');
+  const gas = Number(receipt.gasUsed);
+  const pass = receipt.status === 'success' && Number(renewed?.args.cycle) === 2 && Number(created?.args.kind) === 2 && Boolean(settled) && gas >= Math.floor(201_555 * 0.85) && gas <= Math.ceil(201_555 * 1.15);
+  return { pass, measured: { cycle: renewed ? Number(renewed.args.cycle) : null, orderKind: created ? Number(created.args.kind) : null, settledMicro: settled ? String(settled.args.amountMicro) : null, gasUsed: gas, from: receipt.from }, evidence: { tx: `${config.networks.whitechain.explorer}/tx/${hash}`, by: "the hosted cron as RENEWER (T1's M4)" } };
 }
