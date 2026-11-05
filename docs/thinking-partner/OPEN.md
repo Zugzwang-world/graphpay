@@ -37,6 +37,9 @@ Agents (T4) and Join add one row per full errand run, so the presets can be cali
 | 01:33 | T4 M10 live run 3 | testing | `claude-opus-5-5`, xhigh | 85.1 | $0.3049 | paid the good shop; 20 calls, 50,916 tokens |
 | 01:34 | T4 M10 live run 4 | testing | `claude-opus-5-5`, xhigh | 139.5 | $0.2903 | paid the good shop; 19 calls, 46,989 tokens |
 | 01:36 | T4 M10 live run 5 | testing | `claude-opus-5-5`, xhigh | 321.0 | $0.2965 | paid the good shop; 19 calls, 47,287 tokens; one slow model call (range 73 to 321 s) |
+| 04:32 | Join e2e:food real, rehearsal (live hooks, real shop) | testing | `claude-opus-5-5`, xhigh | 56.5 | $0.2289 | refused by kesar's risk check: the MCP's buyer_risk table bug (fixed, PR 48) and rehearsal's real 1/6 cancel rate (correct by policy) |
+| 04:40 | Join e2e:food real, payer | testing | `claude-opus-5-5`, xhigh | 88.8 | $0.2623 | approved by the shop; the signer answered a headers object, so nothing was signed (fixed) |
+| 04:43 | Join e2e:food real, payer (the counting run) | testing | `claude-opus-5-5`, xhigh | 122.1 | $0.2986 | **paid** 4.80 on Whitechain, delivered, refunded 0.80; A–E pass |
 
 ## Kickoff findings (main, read 21:44 IST, Thu 5 Nov)
 
@@ -128,6 +131,7 @@ Updated 03:36 IST, Fri 6 Nov. Nothing for the founder now: the live mirror needs
 - **Dependency (told T6 at 04:30 IST, agreed by the Coordinator):** `packages/checkout-kit` uses only the public exports of `@graphpay/agentpay`: `createMerchant`, `httpFacilitator`, `whitechainNetwork`, `decodeHeader` (and in tests `signOrderPayment`, `buildRequirement`, `createOrder`, `nodeOf`). Recommendation: T6 keeps them stable or says before changing them.
 - **Open (default taken):** the store's Sunday box (subscribe and cancel) is not built: the kit's merchant has it (`shop.merchant`, agentpay's `signSubscription`) but the button offers one-off orders and re-orders only. Recommendation: after the video-critical items, if time.
 - **Note for T1 and T6:** `packages/contracts/index.mjs` now imports the ABI as JSON (`with { type: 'json' }`) instead of reading it with `readFileSync(new URL(..., import.meta.url))`, which a bundler (Next/Turbopack) cannot carry; the ABI and the 3 contracts tests are unchanged.
+- **Ask of T3 (default taken):** the GraphQL `Shop` has no Arkiv entity `key`, so a map dot opens the explorer's query page for its directory row (`project = str('graphpay') AND type = str('shop') AND shop_key = key(0x...)`) rather than its entity page. UNVERIFIED that the explorer's query page accepts this text (the spec marks it so). Recommendation: add `key` to `Shop` (agent presence rows already have one) so a dot opens `/entity/<key>`; the map picks it up with a small change.
 - **Ask of Join (M12 wiring of the website's runner):** `ErrandInput` (in `apps/web/lib/run-registry.server.ts`) now carries `runId`, the id the website knows the run by. Pass it on as the errand's `runId` (`runErrand({ ..., runId: input.runId, hooks: activityHooks(dir) })`): the agents write their handoff and presence rows under it, and the explainer's lanes and the map query by it. Why: with a different id the lanes stay empty ("No handoff records for this run"). Recommendation: do it in the same PR that sets the runner in `apps/web/lib/agents-live.server.ts`.
 
 

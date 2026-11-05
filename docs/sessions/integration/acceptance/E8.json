@@ -1,0 +1,18 @@
+{
+  "id": "E8",
+  "at": "2026-11-05T23:15:02.720Z",
+  "pass": true,
+  "what": "every counting errand records its time and cost",
+  "measured": {
+    "row": "| 04:43 | Join e2e:food real, payer (the counting run) | testing | `claude-opus-5-5`, xhigh | 122.1 | $0.2986 | **paid** 4.80 on Whitechain, delivered, refunded 0.80; A–E pass |",
+    "cost": {
+      "apiCostUsd": 0.2986,
+      "seconds": 122.1,
+      "tokens": 52693
+    }
+  },
+  "expected": "a row in OPEN.md's preset calibration table with the preset, seconds and apiCostUsd",
+  "evidence": {
+    "file": "docs/thinking-partner/OPEN.md"
+  }
+}
