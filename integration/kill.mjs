@@ -8,7 +8,7 @@
 // irreversible for that label. Writes docs/sessions/integration/runs/kill-<label>/kill.json.
 
 import { execFileSync } from 'node:child_process';
-import { mkdirSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { activeCast, config, disposableEntry } from '@graphpay/config';
@@ -51,7 +51,8 @@ const directory = await connectArkiv({ backend: 'rabdi', env, role: 'W_DIRECTORY
 const sync = await connectArkiv({ backend: 'rabdi', env, role: 'W_SYNC' });
 const balance = await whitechain.publicClient.readContract({ address: config.whitechain.tokens.usdt.address, abi: erc20Abi, functionName: 'balanceOf', args: [wallet] });
 const piece = BigInt(good.products[0].priceMicro) / BigInt(good.products[0].quantity);
-if (balance < piece * 2n) throw new Error(`${agent.walletRole} holds ${balance} micro USDT; it needs ${piece * 2n} (fund it first)`);
+// One piece: the payment while alive (a refused payment after the kill never reaches the chain).
+if (balance < piece) throw new Error(`${agent.walletRole} holds ${balance} micro USDT; it needs ${piece} (fund it first)`);
 
 let read = null;
 const stack = await startStack({ env, whitechain, sepolia, directory, sync, shopKeyOf: (s) => read.shopKey(s), log: say });
@@ -72,7 +73,18 @@ async function attempt() {
   return { status: res.status, body: res.body, orderId: q.orderId };
 }
 
-const out = { agent: agent.ensName, startedAt: new Date().toISOString() };
+const dir = join(here, '..', 'docs', 'sessions', 'integration', 'runs', `kill-${agent.ensName.split('.')[0]}`);
+const file = join(dir, 'kill.json');
+// A label is killed once. A run that finds it already killed (kill.json holds the kill)
+// checks only the refusal and its record; the timing stays the first run's measurement.
+const earlier = existsSync(file) ? JSON.parse(readFileSync(file, 'utf8')) : null;
+const already = Boolean(earlier?.kill?.receiptAt);
+const out = already ? { ...earlier, refusalOnly: { startedAt: new Date().toISOString() } } : { agent: agent.ensName, startedAt: new Date().toISOString() };
+let receiptMs;
+if (already) {
+  receiptMs = Date.parse(earlier.kill.receiptAt);
+  say(`already killed (${earlier.kill.output}); checking the refusal and its record only`);
+} else {
 const alive = await attempt();
 out.alive = { status: alive.status, reason: alive.body?.reason ?? null, transaction: alive.body?.transaction ?? null };
 say(`alive: HTTP ${alive.status} ${alive.body?.status ?? ''} ${alive.body?.transaction ? whitechain.explorerTx(alive.body.transaction) : ''}`);
@@ -82,19 +94,21 @@ say(`kill: owner.mjs kill ${agent.ensName} --real`);
 const killOut = execFileSync(process.execPath, [join(here, '..', 'scripts/ens/owner.mjs'), 'kill', agent.ensName, '--real'], { encoding: 'utf8' });
 // Taken when owner.mjs returns after the receipt: a little later than the receipt itself,
 // so the 25 s window is measured slightly in the refusal's favour (noted in kill.json).
-const receiptMs = Date.now();
+receiptMs = Date.now();
 out.kill = { output: redact(killOut.trim().split('\n').at(-1)), receiptAt: new Date(receiptMs).toISOString(), timing: 'receipt time taken when owner.mjs returned (slightly late)' };
 say(out.kill.output);
+}
 
 // From here on the kill has happened: every outcome is written to kill.json.
-const dir = join(here, '..', 'docs', 'sessions', 'integration', 'runs', `kill-${agent.ensName.split('.')[0]}`);
 const save = () => {
   mkdirSync(dir, { recursive: true });
-  writeFileSync(join(dir, 'kill.json'), `${redact(json(out))}\n`);
+  writeFileSync(file, `${redact(json(out))}\n`);
 };
 process.on('exit', save);
 let refused = null;
-out.attempts = [];
+const attempts = [];
+if (already) out.refusalOnly.attempts = attempts;
+else out.attempts = attempts;
 for (let i = 0; i < 14 && !refused; i += 1) {
   await new Promise((ok) => setTimeout(ok, 3_000));
   let r;
@@ -104,7 +118,7 @@ for (let i = 0; i < 14 && !refused; i += 1) {
     r = { status: null, body: { error: e.name } };
   }
   const t = ((Date.now() - receiptMs) / 1000).toFixed(1);
-  out.attempts.push({ afterS: Number(t), status: r.status, reason: r.body?.reason ?? r.body?.status ?? r.body?.error ?? null });
+  attempts.push({ afterS: Number(t), status: r.status, reason: r.body?.reason ?? r.body?.status ?? r.body?.error ?? null });
   say(`after ${t} s: HTTP ${r.status} ${r.body?.reason ?? r.body?.status ?? r.body?.error ?? ''}`);
   // Only the kill's own refusal ends the loop; a transient read failure is retried.
   if (r.status === 402 && r.body?.reason === 'ENS_EXPIRED_OR_REVOKED') refused = { ms: Date.now(), status: 402, reason: r.body.reason, orderId: r.orderId };
@@ -121,13 +135,16 @@ if (failEdge) await mirrorSync();
 const syncEdges = failEdge ? await readAll(arkiv.publicClient, ENTITIES.edge, { owner: writerAddresses().W_SYNC, cap: 500, truncate: true }) : [];
 stack.close();
 
-const verdict = assertKilled({ kill: { receiptMs, refusedMs: refused?.ms ?? NaN, status: refused?.status ?? null, reason: refused?.reason ?? null, failEdge } });
+// The bite time is the first refusal after the kill (the first run's, when already killed).
+const firstRefusedMs = already ? earlier.refused?.ms ?? NaN : refused?.ms ?? NaN;
+const verdict = assertKilled({ kill: { receiptMs, refusedMs: firstRefusedMs, status: refused?.status ?? null, reason: refused?.reason ?? null, failEdge } });
 // A payment that settled after the kill means the gate was slow: F does not pass silently.
 if (out.paidAfterKill) {
   verdict.pass = false;
   verdict.failed.push(`${out.paidAfterKill} payment(s) settled after the kill`);
 }
-out.refused = refused;
+if (already) out.refusalOnly.refused = refused;
+else out.refused = refused;
 out.failEdge = failEdge ? { entityKey: failEdge, onArkiv: syncEdges.some((e) => e.$key === failEdge) } : null;
 out.assertion = verdict;
 save();
