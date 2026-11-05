@@ -11,6 +11,7 @@ One self-contained run file per session. To start one: in the Claude desktop app
 | wave 1 | T5 Web | `T5-web.md` | Sonnet 5.5 | high | same | wave 1 |
 | wave 1 | Join | `join.md` | Opus 5.5 | xhigh | same; waits for M7a (and M1, M5) by polling | wave 1 |
 | handover | Coordinator | `coordinator.md` | Opus 5.5 | high | when main says "ready for handover" | wave 1, then Submission, until the pitch |
+| parallel | T6 AgentPay SDK | `T6-agentpay.md` (T6 writes it from the founder's brief) | Opus 5.5 | xhigh | started by the founder Fri 03:25 IST | the tracks; uses T1's and T4's public exports only |
 | Friday | Submission | `submission.md` | Sonnet 5.5 | high | Fri 13:00 IST or CP4 done, whichever is later | the Coordinator and the tracks' Friday items |
 
 ## Start lines
@@ -42,6 +43,10 @@ You are Join. Run docs/plan/sessions/join.md. Go.
 Coordinator:
 ```text
 You are Coordinator. Run docs/plan/sessions/coordinator.md. Go.
+```
+T6 AgentPay (once its run file exists):
+```text
+You are T6 AgentPay. Run docs/plan/sessions/T6-agentpay.md. Go.
 ```
 Submission:
 ```text
