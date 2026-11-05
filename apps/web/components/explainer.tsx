@@ -7,6 +7,7 @@
 import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
 import type { TraceEvent } from '@/lib/contracts';
+import { AgentLanes } from './agent-lanes';
 import { useSite } from './site-context';
 
 interface StepDef {
@@ -93,6 +94,7 @@ export function Explainer() {
           Replay the last run
         </button>
       </header>
+      <AgentLanes />
       <ol className="steps">
         {STEPS.map((step) => {
           const on = lit.has(step.id);

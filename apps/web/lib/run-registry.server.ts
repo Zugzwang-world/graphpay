@@ -20,6 +20,9 @@ export interface Run {
 }
 
 export interface ErrandInput {
+  // The run's id on this site. The runner passes it on as the errand's `runId`, so the
+  // handoff and presence rows it writes to Arkiv carry the id the explainer's lanes query by.
+  runId: string;
   request: string;
   onEvent: (event: TraceEvent) => void;
   signal: AbortSignal;
@@ -79,7 +82,7 @@ export function createRegistry({ keepMs = 5 * 60_000, maxRunMs = 280_000, now = 
         try {
           // Raced against the time limit: a runner that ignores the signal cannot pin the slot.
           const limited = new Promise<never>((_, reject) => abort.signal.addEventListener('abort', () => reject(new Error('time limit'))));
-          const result = await Promise.race([runner({ request, signal: abort.signal, onEvent: (event) => emit(run, { event: 'trace', data: event }) }), limited]);
+          const result = await Promise.race([runner({ runId: run.id, request, signal: abort.signal, onEvent: (event) => emit(run, { event: 'trace', data: event }) }), limited]);
           emit(run, { event: 'result', data: scrubSecrets(result) });
         } catch {
           // The cause can hold a URL or key: only a fixed line leaves the server.

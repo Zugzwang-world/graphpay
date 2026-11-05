@@ -117,3 +117,16 @@ test('the result is scrubbed of configured secret values', async () => {
   assert.ok(!JSON.stringify(out).includes(secret));
   assert.match(out.narrative, /\[redacted\]/);
 });
+
+test('the runner is told the run id the site knows the run by (the handoff rows are queried by it)', async () => {
+  const registry = createRegistry();
+  let seen: string | null = null;
+  const started = registry.start(async ({ runId }) => {
+    seen = runId;
+    return { status: 'no-purchase', chosenShop: null, priceUsdt: null, receipt: null, orderId: null, arrivesAt: null, ranking: [], explainId: null, refusals: [], narrative: null, modelChoice: null, mandate: null, synthetic: true };
+  }, 'a request');
+  assert.equal(started.ok, true);
+  await tick();
+  assert.equal(seen, started.ok ? started.run.id : null);
+  assert.match(String(seen), /\S/);
+});

@@ -66,10 +66,10 @@ Updated 05:10 IST, Fri 6 Nov. **M11 and M12 are done on the real networks. The a
 
 ## website
 
-Updated 07:55 IST, Fri 6 Nov (T5 Web). **On `main`:** everything through M16 (the checkout kit and the demo store, #51). **In a PR:** the Mumbai map (Friday item 10), our own drawing of the neighbourhoods with no tiles: every shop in the directory as a dot (the small city labelled synthetic), open shops and agents at work glowing while their heartbeat is live and fading when it lapses, every dot opening its Arkiv record. Read live this session: 13 shops (3 cast, 10 synthetic), 18 agents at work, 0 open (nobody has tapped Open shop yet).
-- Running: nothing long. The store is not deployed (needs the Vercel project and env, see OPEN).
-- Blockers: none for the map. The Open toggle and Pause/Resume are live in production once the next deploy runs and someone with the passcode tries them.
-- Next: item 13 (the explainer lanes from the handoff and quote records); the store's Sunday box if time. Fresh start file: `docs/sessions/website/resume.md`.
+Updated 08:20 IST, Fri 6 Nov (T5 Web). **On `main`:** everything through M16 and the Mumbai map (Friday item 10, #54). **In a PR (#55):** the explainer's agent lanes (item 13): Ask, Check, Check back, 402 quote and Pay, filled from the handoff rows the agents write to Arkiv, every chip opening its record on the explorer, the Pay lane carrying the settlement and the order's trail.
+- Running: nothing long. The lanes fill only when an errand runs with the live hooks: the website's errand runner is not wired yet (Join's M12 wiring of `apps/web/lib/agents-live.server.ts`); it must pass `input.runId` on as the errand's `runId` (see OPEN).
+- Blockers: the store is not deployed (needs the Vercel project and env); a real errand on the site needs Join's runner.
+- Next: the store's Sunday box if time; refund-request with a photo needs T3's swarm items; help wiring the runner if Join asks. Fresh start file: `docs/sessions/website/resume.md`.
 
 ## agentpay
 
