@@ -44,7 +44,7 @@ Prevention: never assert state in the same instant as a write; poll until it sho
 When: 2026-11-06 01:00 IST · Activity: records · Cost: none yet; the logs are kept, not lost
 Symptom: `~/graphpay` shows untracked `prompts/raw/2026-11-06-*.jsonl` files and a modified M0 log; the sessions' worktrees have none, so their PRs do not carry their logs as `CLAUDE.md` asks.
 Cause: the hook writes to `$CLAUDE_PROJECT_DIR/prompts/raw/`, and for a session started on `~/graphpay` with the worktree option that is the main checkout, not the worktree.
-Fix: planned in the Coordinator's next PR: the hook writes into the session's own checkout (the git top level of its working directory), and the logs already written are swept into a records PR.
+Fix: 03:20 IST, the hook writes into the session's own checkout (the git top level of its working directory; `logRoot` in `scripts/hooks/prompt-log.mjs`, with tests). The logs already written in the main checkout are swept into records PRs under `<name>.main-checkout.jsonl`, so they never collide with a session's own file. M0's failed step at Thu 23:56 ("fast-forward the main checkout" refused by M0's own appended log) had the same cause; the main checkout was fast-forwarded at 03:14.
 Prevention: a hook that writes repo files resolves the checkout from the session's working directory; a test covers a worktree.
 
 ### P-records-2: GitHub calls time out on the venue network

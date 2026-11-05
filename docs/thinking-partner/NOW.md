@@ -74,11 +74,13 @@ Updated 03:03 IST, Fri 6 Nov (T5 Web). **The shell and the phone views are on `m
 
 ## records
 
-Updated 01:20 IST. **The Coordinator is on duty** (`docs/plan/sessions/coordinator.md`): 10-minute ticks from 00:58, a keep-awake hold, merges, records.
-- Done: ADR-0057 and Friday item 18 (the graph SDK on npm); T3 briefed at 01:04 and adopted it in M7a; the npm name checked (free); the first M14 relay; AI usage rows for the new sessions.
-- Running: the ticks (PRs, conflicts, gates, `OPEN.md` questions, silent sessions).
-- Blockers: none. Risk: plan usage (`OPEN.md` "Founder now" 1).
-- Next: each session's prompt log written into its own worktree (P-records-1); M7a's gate messages; records again about 02:45.
+Updated 03:20 IST. **Checked every session after the 02:14–03:01 sleep: none is hung.**
+- T3's long step (the budget test printing its calls and errors, about 39 minutes) ended when T3 did its fresh start. T3 now runs on a 150K-token context, down from 510K, and is writing its M8/M7b relay.
+- T5 restarted from its run file with its start line (fresh, 164K tokens).
+- T1 got its start line at 03:08 after a fresh start. T2, T4 and Join got theirs at 03:12; Join's gates (M2, M5) are open.
+- **M0's one failed background task:** "fast-forward the main checkout" (Thu 23:56) aborted with "Please commit your changes", because the prompt-log hook had appended M0's last prompt to its committed log. It mattered: the secret helpers, the funding script and the hook itself run from the main checkout. Fixed at 03:14: the main checkout is on `main` (2dd307d), and M0's extra line and one session's extra lines are committed here. The cause (P-records-1: every session's log was written to the main checkout) is fixed in this PR, with a reviewer pass.
+- Usage: 75% at 03:15 IST (resets Fri 21:30 IST). The founder's extra-usage decision is still open.
+- Next: sweep the remaining main-checkout prompt logs once the hook fix is live; records again about 04:45.
 
 ## submission
 
