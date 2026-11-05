@@ -26,7 +26,12 @@ Updated 23:55 IST. **M0 done; handed over to the Coordinator** (`docs/plan/sessi
 
 ## payments
 
-Not started (T1, wave 1).
+Updated 02:35 IST, Fri 6 Nov (T1).
+- **M1 (the checkout contract) is done: two reviewer passes said ship; PR #12 merges once the contract tests are green in CI.** 90 tests pass on a copy (fork) of the real Whitechain Sepolia, paying in the real test USDT through the real Permit2.
+- The first agent payment costs about 318,000 gas of execution (about 351,000 on a real receipt, inside acceptance C2's band); the payer pays no gas.
+- The contract's interface (ABI) is exported for the mirror (Join's M11).
+- Next: M2 deploys and verifies the checkout on Whitechain Sepolia and sets up roles, merchants and policies; the facilitator and shop API (M3) start alongside.
+- Blockers: none.
 
 ## identity
 

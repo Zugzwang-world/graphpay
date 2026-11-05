@@ -80,6 +80,9 @@ Agents (T4) and Join add one row per full errand run, so the presets can be cali
 
 ## payments
 
+- **For the Coordinator (CI):** only `ci` is a required check, so the `contracts` job (forge build, ABI check, fork tests) does not gate a merge. Recommendation: an aggregator job named `ci` that needs every job and fails unless all succeeded (`needs` alone passes on a skipped job). Until then T1 enables auto-merge on contract PRs only after `contracts` is green.
+- Nothing for the founder from M1. Gas: a recorded failure is paid by the relayer; the facilitator refuses doomed payments before sending (M3), so FACILITATOR's 0.8 WBT covers hundreds of payments.
+
 ## identity
 
 ## arkiv
