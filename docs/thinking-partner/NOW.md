@@ -64,10 +64,10 @@ Updated 04:10 IST, Fri 6 Nov. **The mirror runs live (since 03:13 IST); M12's si
 
 ## website
 
-Updated 05:50 IST, Fri 6 Nov (T5 Web). **On `main`:** the shell, phone views, agent run route, merchant stream and CSV, order trail, race mode (and the Open toggle once #39 merges). **In a PR:** the customer's Pause and Resume buttons (M6 landed): the owner wallet sets the payer agent's ENS status on Sepolia; the gate sees it within 20 s. It needs the owner's key on Vercel; until then the buttons say "not live yet".
+Updated 06:05 IST, Fri 6 Nov (T5 Web). **On `main`:** the shell, phone views, agent run route, merchant stream and CSV, order trail, race mode, the Open toggle, Pause and Resume. **In a PR:** the customer phone's live state: the payer agent's status (ENS and policy), cap and spend today (the checkout contract), its last order (the graph). Read live from the three chains this session: Active, 0.00 of 6.00 USDT today. Also fixes the production status chip, which showed the checkout as not deployed.
 - Running: nothing long. M16 (checkout kit, store) waits for M4 (not merged).
 - Blockers: Pause/Resume and the Open toggle need two keys in Vercel (see OPEN).
-- Next: the customer state panel (status, cap, spent) and M16 once M4 lands. Fresh start file: `docs/sessions/website/resume.md`.
+- Next: M16 once M4 lands; the map (item 10) and the explainer lanes (item 13) as Join's live hooks (item 3) write presence. Fresh start file: `docs/sessions/website/resume.md`.
 
 ## agentpay
 

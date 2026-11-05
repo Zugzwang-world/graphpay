@@ -23,4 +23,11 @@ declare module '@graphpay/ens' {
     resume(name: string): Promise<OwnerActionResult>;
   }
   export function createOwnerActions(context: { client: PublicClient; runner: TxRunner; senderFor(role: string): OwnerSender; log?: (line: string) => void; retryReads?: boolean }): OwnerActions;
+  export function ensPublicClient(options?: { env?: Record<string, string | undefined> }): Promise<{ client: PublicClient; rpcLabel: string }>;
+  export interface EnsGate {
+    // Registry state and the public records of a name; status is never "ACTIVE" for a name that could not be read.
+    ensCheck(name: string): Promise<{ name: string; registryState: string; status: 'ACTIVE' | 'PAUSED' | 'REVOKED' | 'EXPIRED' | 'UNKNOWN'; records: Record<string, string> }>;
+    invalidate(name?: string): void;
+  }
+  export function createEnsGate(options: { client: PublicClient; expectedEpoch?: unknown; policyCapMicro?: unknown; spentToday?: unknown }): EnsGate;
 }
