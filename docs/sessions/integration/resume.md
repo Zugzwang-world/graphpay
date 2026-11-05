@@ -4,7 +4,7 @@ Updated 02:50 IST, Fri 6 Nov. Read this first, then `docs/plan/sessions/join.md`
 
 ## Where M11 stands
 
-- Merged: PR 8 (the mirror core). The PR "the Arkiv ledger over M7a, the workers process" (M11 part 2) was opened at 02:50 with auto-merge on (see `docs/thinking-partner/LOG.md`). Check it merged, and if not, fix CI and merge `origin/main`.
+- Merged: PR 8 (the mirror core). The PR "the Arkiv ledger over M7a, the workers process" (M11 part 2) is PR 20 (https://github.com/Zugzwang-world/graphpay/pull/20), opened at 02:50 with auto-merge on. Check it merged, and if not, fix CI and merge `origin/main`.
 - `packages/mirror`: decoding, mapping, parking, the lease and heartbeat, the recorder fold, the 5% history, the Arkiv adapter (`src/arkiv.mjs`), the process (`src/workers.mjs`, `src/main.mjs`, `pnpm workers`). 29 tests: 22 on fakes, 7 on ArkivSim with M7a's real planner.
 - Not yet run on any real network.
 
