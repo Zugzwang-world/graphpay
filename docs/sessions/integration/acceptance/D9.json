@@ -1,0 +1,25 @@
+{
+  "id": "D9",
+  "at": "2026-11-05T22:53:54.873Z",
+  "pass": true,
+  "what": "a receipt cannot be edited",
+  "measured": {
+    "edgesRead": 5,
+    "allReadonly": true,
+    "sample": [
+      {
+        "key": "0x008fd1bc6c03e2c2f7aba896f2db4226b54c729805232a30a8d83ef102822374",
+        "readonly": true
+      },
+      {
+        "key": "0x0092336adcc5b9fd6cc64370d13d53725d8b186cd507e5665ccec9b627046b5d",
+        "readonly": true
+      }
+    ]
+  },
+  "expected": "every W_LEDGER edge is created readonly; a patch of one reverts",
+  "evidence": {
+    "readonlyFlags": "read live now",
+    "patchReverts": "docs/technical/FACTS.md \"Readonly edge\" (M7a live probe, 01:29 IST: a simulated patch of a probe edge reverts, a tally patch passes)"
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "id": "D4",
+  "at": "2026-11-05T22:53:51.138Z",
+  "pass": true,
+  "what": "GraphQL's top 10 matches the ground truth (seeded S city, synthetic)",
+  "measured": {
+    "ok": true,
+    "calls": 2,
+    "explainId": "6d02b9d6f1a0",
+    "bytes": 35370
+  },
+  "expected": "exact order and amounts against the generator's identity truth; 2 calls",
+  "evidence": {
+    "script": "packages/city/scripts/check.mjs (read-only)",
+    "file": "docs/sessions/arkiv/city/check-S.json",
+    "exit": 0
+  }
+}

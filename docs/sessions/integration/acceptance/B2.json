@@ -1,0 +1,36 @@
+{
+  "id": "B2",
+  "at": "2026-11-05T22:52:44.691Z",
+  "pass": true,
+  "what": "the gate passes active agents",
+  "measured": [
+    {
+      "name": "scout.vitalik.graphpay.eth",
+      "ok": true,
+      "reason": null,
+      "capMicro": "1000000"
+    },
+    {
+      "name": "payer.vitalik.graphpay.eth",
+      "ok": true,
+      "reason": null,
+      "capMicro": "6000000"
+    },
+    {
+      "name": "rehearsal.vitalik.graphpay.eth",
+      "ok": true,
+      "reason": null,
+      "capMicro": "30000000"
+    },
+    {
+      "name": "acceptance.vitalik.graphpay.eth",
+      "ok": true,
+      "reason": null,
+      "capMicro": "6000000"
+    }
+  ],
+  "expected": "every paying agent of the story passes the full gate (ENS and its checkout policy)",
+  "evidence": {
+    "checkout": "0x75233b7341B9e86407e4b31599f07b8936716FcA"
+  }
+}

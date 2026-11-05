@@ -3,7 +3,7 @@
 // Runs the acceptance checks in order and writes ACCEPTANCE_REPORT.md. The ids and their
 // wording come from planning/ACCEPTANCE_TESTS.md and docs/plan/ACCEPTANCE_ADDITIONS.md
 // (the additions win where they amend), so no check can be left out. Each check that has
-// a runner here is run; its result lands in acceptance/results/<id>.json. A check without
+// a runner here is run; its result lands in docs/sessions/integration/acceptance/<id>.json. A check without
 // a runner yet is reported `not run`, never `pass`. Friday checks run only with --friday.
 // --dry-run prints the plan and runs nothing; --report-only rewrites the report from the
 // results already on disk.
@@ -14,6 +14,9 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { parseArgs } from 'node:util';
 import { activeCast, castEntries } from '../packages/config/index.mjs';
+import { loadEnv } from '../scripts/lib/env-loader.mjs';
+import { installErrorBoundary } from '../scripts/lib/redact.mjs';
+import { checks as liveChecks } from './checks.mjs';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const { values: args } = parseArgs({ options: { only: { type: 'string' }, 'dry-run': { type: 'boolean' }, friday: { type: 'boolean' }, 'report-only': { type: 'boolean' } } });
@@ -56,7 +59,7 @@ export function allChecks() {
   });
 }
 
-// The runners this repo has so far. Each is a command; its result file is acceptance/results/<file>.json.
+// The runners this repo has so far. Each is a command; its result file is docs/sessions/integration/acceptance/<file>.json.
 const node = process.execPath;
 // Names by story role, never typed here (ADR-0047): the good shop and the acceptance payer.
 const cast = activeCast();
@@ -64,7 +67,12 @@ const entries = castEntries(cast);
 const goodShop = entries.find((e) => e.kind === 'shop' && e.storyRole === 'good').ensName;
 const acceptancePayer = entries.find((e) => e.kind === 'buyer-agent' && e.key === 'acceptance').ensName;
 const mirror = (...a) => ({ cmd: [node, join(root, 'acceptance/mirror.mjs'), ...a] });
+let envValues = new Map();
+installErrorBoundary(() => envValues);
+envValues = loadEnv().values;
+const LIVE = liveChecks(root, Object.fromEntries(envValues));
 const RUNNERS = {
+  ...Object.fromEntries(Object.entries(LIVE).map(([id, fn]) => [id, { fn, files: [id] }])),
   D2: { ...mirror('d2a'), files: ['D2a', 'D2b', 'D2c'], note: 'D2b and D2c run with the workers stopped, on a fresh payment (docs/sessions/integration/mirror.md)' },
   D3: { ...mirror('d3', '--ens', goodShop, '--ens', acceptancePayer), files: ['D3'] },
 };
@@ -76,7 +84,7 @@ function selected(c) {
 }
 
 function readResult(file) {
-  const p = join(root, 'acceptance', 'results', `${file}.json`);
+  const p = join(root, 'docs', 'sessions', 'integration', 'acceptance', `${file}.json`);
   return existsSync(p) ? JSON.parse(readFileSync(p, 'utf8')) : null;
 }
 
@@ -108,6 +116,18 @@ if (!args['report-only']) {
     const r = RUNNERS[c.id];
     if (!r) continue;
     process.stdout.write(`${c.id}: running\n`);
+    if (r.fn) {
+      let body;
+      try {
+        body = await r.fn();
+      } catch (err) {
+        body = { pass: false, what: c.what, measured: { error: String(err.shortMessage ?? err.message).slice(0, 300) }, expected: 'the check runs', evidence: {} };
+      }
+      const res = { id: c.id, at: new Date().toISOString(), ...body };
+      writeFileSync(join(root, 'docs', 'sessions', 'integration', 'acceptance', `${c.id}.json`), `${JSON.stringify(res, (_, x) => (typeof x === 'bigint' ? x.toString() : x), 2)}\n`);
+      process.stdout.write(`${c.id}: ${res.pass === true ? 'pass' : res.pass === false ? 'FAIL' : 'not run'}\n`);
+      continue;
+    }
     const out = spawnSync(r.cmd[0], r.cmd.slice(1), { cwd: root, encoding: 'utf8', timeout: 15 * 60_000 });
     const line = (out.stdout ?? '').split('\n').find((l) => l.startsWith('result: '));
     process.stdout.write(`${c.id}: ${line ? (JSON.parse(line.slice(8)).pass ? 'pass' : 'FAIL') : `no result (exit ${out.status})`}\n`);
