@@ -98,8 +98,10 @@ export async function walkName(client, name, { allowedRoots = [config.root.ens] 
     let impl;
     try {
       impl = await client.readContract({ address: ENS.factory, abi: verifiableFactoryAbi, functionName: 'verifyContract', args: [leaf.resolver] });
-    } catch {
-      return refuse('ENS_RESOLVER_MISMATCH', { detail: 'not a factory proxy' });
+    } catch (e) {
+      // Only a clean contract revert (VerificationFailed) means "not a factory proxy"; an RPC error is a failed read.
+      if (e?.walk?.((x) => x?.name === 'ContractFunctionRevertedError')) return refuse('ENS_RESOLVER_MISMATCH', { detail: 'not a factory proxy' });
+      throw e;
     }
     if (!isAddressEqual(impl, ENS.resolverImpl)) return refuse('ENS_RESOLVER_MISMATCH', { detail: 'not a PermissionedResolver' });
     const s = leaf.state;
@@ -126,18 +128,27 @@ export async function walkName(client, name, { allowedRoots = [config.root.ens] 
 const readFailed = (v) => !v.ok && v.detail === 'ENS_READ_FAILED';
 function ttlCache(ttlMs, clock) {
   const map = new Map();
+  const generation = new Map();
+  const gen = (key) => generation.get(key) ?? 0;
   return {
     async get(key, load) {
       const hit = map.get(key);
       const t = clock();
       if (hit && t - hit.at < ttlMs) return hit.value;
+      const before = gen(key);
       const value = await load();
-      if (!readFailed(value)) map.set(key, { at: t, value });
+      // An invalidate that fired while the load was in flight must not be undone by its stale result.
+      if (!readFailed(value) && gen(key) === before) map.set(key, { at: t, value });
       return value;
     },
     invalidate(key) {
-      if (key === undefined) map.clear();
-      else map.delete(key);
+      if (key === undefined) {
+        for (const k of map.keys()) generation.set(k, gen(k) + 1);
+        map.clear();
+      } else {
+        generation.set(key, gen(key) + 1);
+        map.delete(key);
+      }
     },
   };
 }
@@ -158,6 +169,7 @@ export function createEnsReader({ client, ttlMs = CACHE_TTL_MS, clock = Date.now
         const { value, resolver } = await resolveRecord(client, walk.name, { functionName: 'addr', args: [walk.node, WHITECHAIN_COIN_TYPE] });
         if (!isAddressEqual(resolver, walk.resolver)) return refuse('PAYEE_UNRESOLVED', { detail: 'ENS_RESOLVER_MISMATCH' });
         if (value === '0x' || size(value) !== 20) return refuse('PAYEE_UNRESOLVED', { detail: value === '0x' ? 'no address record' : 'not 20 bytes' });
+        if (isAddressEqual(value, zeroAddress)) return refuse('PAYEE_UNRESOLVED', { detail: 'zero address' });
         return { ok: true, payee: getAddress(value), name: walk.name, node: walk.node, epoch: walk.epoch, resolver: walk.resolver };
       } catch {
         return refuse('PAYEE_UNRESOLVED', { detail: 'ENS_READ_FAILED' });

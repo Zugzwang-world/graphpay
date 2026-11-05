@@ -1,6 +1,6 @@
 # Namespace under graphpay.eth (Ethereum Sepolia, chain 11155111)
 
-Generated from `docs/sessions/identity/namespace.json` by `scripts/ens/namespace-doc.mjs`; updated 2026-11-05T20:28:14.899Z. Real run: 60 transactions, 72,668,520 gas. Names come from the story config and addresses from `packages/config/graphpay.config.json`; this file records what was created.
+Generated from `docs/sessions/identity/namespace.json` by `scripts/ens/namespace-doc.mjs`; updated 2026-11-05T20:38:33.103Z. Real run: 60 transactions, 72,668,520 gas. Names come from the story config and addresses from `packages/config/graphpay.config.json`; this file records what was created.
 
 ## Hand-off table (payments policies, Join's mirror)
 

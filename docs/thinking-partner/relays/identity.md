@@ -15,6 +15,7 @@ The founder has nothing to do for this step. The final demo cast will be added o
 - `packages/ens`: names and ids, ERC-7930 encoder/parser (the ENSIP-31 draft vectors reproduce byte for byte; the test-USDT value equals the config's), role bitmaps, the namespace plan from the story config, record builders, the registry walk with the payee and accepts reads (20 s cache, failed reads not cached), a transaction runner, and the idempotent provisioner. ABIs are generated from Sourcify by `scripts/ens/abis.mjs`.
 - `scripts/ens/real-run.mjs` (dry run, `--fork`, `--real`), `scripts/ens/acceptance.mjs` (read-only B1, B4, B5, B8, B9a), `scripts/ens/namespace-doc.mjs`.
 - Real run: 60 transactions, 72,668,520 gas, at about 19 wei. Hand-off table, resolvers, registries and every transaction link: `docs/sessions/identity/namespace.md`.
+- Acceptance on real Sepolia: B1, B4, B5, B8 (records) and B9 (a) (address records) by `scripts/ens/acceptance.mjs`, which also reads the roles; B3 by `scripts/ens/b3-real.mjs` (the agent's own `agent-context` write landed, the five refused writes revert in simulation). The reviewer found that a re-run would have rewritten status and cap on existing names; provisioning now only reports drift, and a real re-run sent 0 transactions.
 - Tests: 13 unit tests; 6 fork tests (`pnpm --filter @graphpay/ens test:fork` against an anvil fork provisioned by `real-run.mjs --fork`).
 
 ## Deviations from the spec, and why

@@ -103,21 +103,15 @@ export function createProvisioner(ctx) {
   }
   const same = (record, value) => (record.type === 'text' ? value === record.value : typeof value === 'string' && value.toLowerCase() === record.value.toLowerCase());
 
-  // Every seeded record reads back as planned; a record that differs (an orphan resolver from
-  // an earlier, different run) is rewritten by `fixer`, who holds ALL_ROLES on that resolver.
-  async function ensureRecords(step, name, resolver, records, fixer, dnsName = dnsEncode(name)) {
+  // Records are written once, in the resolver's initialize call. On a resolver that already exists
+  // they are only compared with the plan: a difference is logged as DRIFT and never rewritten, because
+  // the owner may legitimately have paused the name or changed its cap, and a re-run must not undo it.
+  async function checkRecords(step, name, resolver, records, dnsName = dnsEncode(name)) {
     const node = dnsName === DEFAULT_RECORD_NAME ? `0x${'0'.repeat(64)}` : namehash(name);
-    const wrong = [];
-    for (const r of records) if (!same(r, await readOwn(resolver, dnsName, node, r))) wrong.push(r);
-    if (wrong.length === 0) return;
-    log(`  ${step}: ${wrong.length} record(s) of ${name} differ from the plan; rewriting them`);
-    const calls = setterCalls(dnsName, wrong);
-    const data = calls.length === 1 ? calls[0] : encodeFunctionData({ abi: permissionedResolverAbi, functionName: 'multicall', args: [calls] });
-    await send(`${step} records`, name, fixer, { to: resolver, data });
-    await eventually(async () => {
-      for (const r of wrong) if (!same(r, await readOwn(resolver, dnsName, node, r))) return false;
-      return true;
-    }, { what: `${step} records` });
+    const drift = [];
+    for (const r of records) if (!same(r, await readOwn(resolver, dnsName, node, r))) drift.push(r.type === 'text' ? r.key : `addr ${r.coinType}`);
+    if (drift.length > 0) log(`  ${step}: DRIFT on ${name}: ${drift.join(', ')} differ from the plan (left as they are)`);
+    return drift;
   }
 
   const expiryOf = async (registry, label) => (await registryState(client, registry, label)).expiry;
@@ -133,7 +127,7 @@ export function createProvisioner(ctx) {
     if (!isAddressEqual(state.latestOwner, op.address)) throw new Error(`A: ${rootEntry.name} is held by ${state.latestOwner}, not OPERATOR`);
 
     const rRoot = await ensureProxy('A1', rootEntry.name, 'resolver', ENS.resolverImpl, resolverInit(op.address, setterCallsOf(rootEntry.name, rootRecords(rootEntry))));
-    await ensureRecords('A1', rootEntry.name, rRoot, rootRecords(rootEntry), op);
+    await checkRecords('A1', rootEntry.name, rRoot, rootRecords(rootEntry));
 
     if (!isAddressEqual(await readReg(ENS.ethRegistry, 'getResolver', [parentLabel]), rRoot)) {
       await send('A2', rootEntry.name, op, { to: ENS.ethRegistry, data: encodeFunctionData({ abi: permissionedRegistryAbi, functionName: 'setResolver', args: [labelId(parentLabel), rRoot] }) });
@@ -178,7 +172,7 @@ export function createProvisioner(ctx) {
     ]));
     const records = ownerRecords(owner, holder);
     const r = await ensureProxy('B2', owner.name, 'resolver', ENS.resolverImpl, resolverInit(holder, setterCallsOf(owner.name, records)));
-    await ensureRecords('B2', owner.name, r, records, senderOf(owner.walletRole));
+    await checkRecords('B2', owner.name, r, records);
 
     const s = await registryState(client, root.registry, owner.label);
     if (s.status === STATUS.AVAILABLE && s.expiry === 0n) {
@@ -216,7 +210,7 @@ export function createProvisioner(ctx) {
     log(`\nC. agent ${agent.name} (${agent.selfHeld ? `own wallet ${agent.walletRole}` : `held by ${agent.ownerWalletRole}`} ${holder}, cap ${agent.capMicro})`);
     const records = agentRecords(agent, holder);
     const r = await ensureProxy('C1', agent.name, 'resolver', ENS.resolverImpl, resolverInit(ownerWallet, setterCallsOf(agent.name, records)));
-    await ensureRecords('C1', agent.name, r, records, senderOf(agent.ownerWalletRole));
+    await checkRecords('C1', agent.name, r, records);
 
     const s = await registryState(client, ownerInfo.registry, agent.label);
     if (s.status === STATUS.AVAILABLE && s.expiry === 0n) {
@@ -277,7 +271,7 @@ export function createProvisioner(ctx) {
     const records = wildcardRecords(entry);
     const calls = setterCalls(DEFAULT_RECORD_NAME, records);
     const r = await ensureProxy('D1', entry.name, 'resolver', ENS.resolverImpl, resolverInit(op.address, calls));
-    await ensureRecords('D1', entry.name, r, records, op, DEFAULT_RECORD_NAME);
+    await checkRecords('D1', entry.name, r, records, DEFAULT_RECORD_NAME);
     const s = await registryState(client, root.registry, entry.label);
     if (s.status === STATUS.AVAILABLE && s.expiry === 0n) {
       const data = encodeFunctionData({ abi: userRegistryAbi, functionName: 'register', args: [entry.label, zeroAddress, zeroAddress, r, 0n, root.expiry] });

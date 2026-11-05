@@ -6,7 +6,7 @@
 
 import { createPublicClient, getAddress, http } from 'viem';
 import { config } from '../../packages/config/index.mjs';
-import { disposableAgent, ensChain, KEYS, namespacePlan, parseAccepts, readAddressBytes, readText, WHITECHAIN_COIN_TYPE, walkName } from '../../packages/ens/index.mjs';
+import { coinResource, disposableAgent, ensChain, KEYS, namespacePlan, parseAccepts, permissionedResolverAbi, readAddressBytes, readText, RESOLVER, retryingReads, textResource, WHITECHAIN_COIN_TYPE, walkName } from '../../packages/ens/index.mjs';
 import { clientsFor } from '../lib/chains.mjs';
 import { loadEnv } from '../lib/env-loader.mjs';
 import { roleAddresses } from '../lib/wallets.mjs';
@@ -14,7 +14,8 @@ import { roleAddresses } from '../lib/wallets.mjs';
 const fork = process.argv.includes('--fork') ? process.argv[process.argv.indexOf('--fork') + 1] : null;
 const { values } = loadEnv();
 const wallets = roleAddresses(values);
-const client = fork ? createPublicClient({ chain: ensChain(), transport: http(fork, { timeout: 120_000 }) }) : (await clientsFor(config.ens.network, Object.fromEntries(values))).publicClient;
+const rawClient = fork ? createPublicClient({ chain: ensChain(), transport: http(fork, { timeout: 120_000 }) }) : (await clientsFor(config.ens.network, Object.fromEntries(values))).publicClient;
+const client = retryingReads(rawClient);
 const plan = namespacePlan();
 const disposable = process.env.DISPOSABLE_N ? [disposableAgent(Number(process.env.DISPOSABLE_N))] : [];
 const agents = [...plan.agents, ...disposable];
@@ -48,6 +49,20 @@ for (const e of [...plan.owners, ...agents]) {
 }
 const payers = agents.filter((a) => a.pays).map((a) => getAddress(wallets[a.walletRole]));
 check('B1', new Set(payers).size === payers.length, 'no two paying agents share a wallet');
+
+// B3 on the real chain, by roles (no transaction): a paying agent holds nothing on the resolver's root
+// and exactly SET_TEXT on agent-context and SET_ADDRESS on its Whitechain coin type; nothing on the cap,
+// status, accepts, endpoint, principal or kind keys, and nothing on coin type 60.
+for (const a of agents.filter((x) => x.pays)) {
+  const w = await walkName(client, a.name);
+  if (!w.ok) continue;
+  const holder = getAddress(wallets[a.walletRole]);
+  const roles = (resource) => client.readContract({ address: w.resolver, abi: permissionedResolverAbi, functionName: 'roles', args: [resource, holder] });
+  const none = [0n, ...[KEYS.capMicro, KEYS.status, KEYS.acceptsText, KEYS.agentEndpointMcp, KEYS.principal, KEYS.kind].map(textResource), coinResource(60n)];
+  const held = await Promise.all(none.map(roles));
+  check('B3', held.every((r) => r === 0n), `${a.name}: no role on the root, cap, status, accepts, endpoint, principal, kind or coin type 60`);
+  check('B3', (await roles(textResource(KEYS.agentContext))) === RESOLVER.SET_TEXT && (await roles(coinResource(WHITECHAIN_COIN_TYPE))) === RESOLVER.SET_ADDRESS, `${a.name}: exactly SET_TEXT on agent-context and SET_ADDRESS on coin type 2147485522`);
+}
 
 // B4: accepts text on every shop.
 for (const shop of plan.owners.filter((o) => o.kind === 'shop')) {

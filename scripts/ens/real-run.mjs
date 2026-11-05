@@ -61,7 +61,7 @@ async function main() {
   let rpcLabel;
   if (mode === 'fork') {
     const url = arg('--fork');
-    if (!/^http:\/\/(?:127\.0\.0\.1|localhost):\d+\/?$/.test(url)) throw new Error('--fork takes a loopback anvil URL only');
+    if (!/^http:\/\/127\.0\.0\.1:\d+\/?$/.test(url)) throw new Error('--fork takes a loopback anvil URL only');
     client = createPublicClient({ chain: ensChain(), transport: http(url, { timeout: 120_000 }) });
     rpcLabel = `anvil fork ${url}`;
     explorerTx = (h) => `fork:${h}`;
