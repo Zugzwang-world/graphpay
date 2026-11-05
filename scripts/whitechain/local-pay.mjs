@@ -16,6 +16,7 @@ import { checkoutAbi, ORDER_STATUS } from '../../packages/contracts/index.mjs';
 import { createEnsGate, createEnsReader, ensPublicClient, retryingReads } from '../../packages/ens/index.mjs';
 import {
   HTTPFacilitatorClient,
+  checkoutPolicyReads,
   createGraphPayFacilitator,
   decodePaymentRequiredHeader,
   decodePaymentResponseHeader,
@@ -31,8 +32,6 @@ import {
 import { PASSCODE_HEADER, shopHandler, storyShops, viemOrders } from '../../packages/shop/index.mjs';
 import { configuredCheckout, logTx, sendTx, usdt } from './lib.mjs';
 
-const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000';
-const DAY = 86_400n;
 
 // A Fetch-API handler on a local loopback port.
 function serve(handler) {
@@ -49,29 +48,6 @@ function serve(handler) {
     res.end(Buffer.from(await response.arrayBuffer()));
   });
   return new Promise((resolve) => server.listen(0, '127.0.0.1', () => resolve({ server, url: `http://127.0.0.1:${server.address().port}` })));
-}
-
-// The gate's three chain inputs, from the checkout's own state: the epoch the policy was
-// written for, its daily cap (also when revoked: the contract records that failure itself,
-// within the facilitator's quota) and what that epoch spent today (the contract's UTC day).
-export function policyReads(publicClient, checkout) {
-  const policy = (node) => publicClient.readContract({ address: checkout, abi: checkoutAbi, functionName: 'policies', args: [node] });
-  const bound = (p) => p && p.wallet.toLowerCase() !== ZERO_ADDRESS;
-  return {
-    policy,
-    expectedEpoch: async (node) => {
-      const p = await policy(node);
-      return bound(p) ? Number(p.epoch) : null;
-    },
-    policyCapMicro: async (node, epoch) => {
-      const p = await policy(node);
-      return bound(p) && Number(p.epoch) === epoch ? BigInt(p.dailyCapMicro) : null;
-    },
-    spentToday: async (node, epoch) => {
-      const block = await publicClient.getBlock();
-      return BigInt(await publicClient.readContract({ address: checkout, abi: checkoutAbi, functionName: 'spentMicro', args: [node, epoch, block.timestamp / DAY] }));
-    },
-  };
 }
 
 // ctx: lib.mjs context(). Real network only with ALLOW_REAL_NETWORK=1 (the start-up rule).
@@ -99,7 +75,7 @@ export async function localPayment(ctx, { shopKey = story.order.shop } = {}) {
   const merchantRole = shop.walletRole;
   const merchant = ctx.account(merchantRole);
   const relayer = ctx.account('FACILITATOR');
-  const reads = policyReads(pub, checkout);
+  const reads = checkoutPolicyReads(pub, checkout);
   const gate = createEnsGate({ client: ensClient, expectedEpoch: reads.expectedEpoch, policyCapMicro: reads.policyCapMicro, spentToday: reads.spentToday });
   const ensReader = createEnsReader({ client: ensClient });
 
