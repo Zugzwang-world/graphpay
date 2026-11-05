@@ -67,3 +67,28 @@ export function createTxRunner({ client, chainId, explorerTx = (h) => h, log = c
 
   return { send, assertChain };
 }
+
+// A client whose reads retry on an error: the public Sepolia RPC is load balanced, and a read
+// seconds after a write can hit a node a block behind and fail or return no data (§10 pitfall 3).
+// Writes and estimates are not retried here. A real revert costs a few extra seconds, then throws.
+export function retryingReads(client, { tries = 8, delayMs = 3000 } = {}) {
+  const retried = new Set(['readContract', 'getCode', 'getBlock']);
+  return new Proxy(client, {
+    get(target, prop, receiver) {
+      const value = Reflect.get(target, prop, receiver);
+      if (!retried.has(prop) || typeof value !== 'function') return value;
+      return async (...args) => {
+        let last;
+        for (let i = 0; i < tries; i += 1) {
+          try {
+            return await value.apply(target, args);
+          } catch (e) {
+            last = e;
+            await sleep(delayMs);
+          }
+        }
+        throw last;
+      };
+    },
+  });
+}

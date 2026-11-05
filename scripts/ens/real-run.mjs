@@ -133,6 +133,7 @@ async function main() {
     runner,
     senders,
     wallets,
+    retryReads: mode === 'real',
     onTx: (step, name, hash, receipt) => {
       record.txs.push({ step, name, hash, block: Number(receipt.blockNumber), gasUsed: Number(receipt.gasUsed), at: new Date().toISOString() });
       saveRecord(outFile, record);

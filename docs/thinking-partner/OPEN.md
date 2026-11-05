@@ -75,6 +75,8 @@ Agents (T4) and Join add one row per full errand run, so the presets can be cali
 ## payments
 
 ## identity
+- **Nothing needs the founder.** Defaults taken: non-paying agents publish a zero cap in ENS (ADR-0057; recommendation: keep). The agent record `agent-endpoint[mcp]` points at `https://graphpay-event.vercel.app/api/mcp`, which T3 builds (M7b); until then it answers 404 (B8's MCP call waits for it).
+- **For T1 (policies):** read the node, epoch and wallet of each paying agent from `docs/sessions/identity/namespace.md`. A killed label is never provisioned again; `disposable-1` is the first kill target.
 
 ## arkiv
 

@@ -31,3 +31,11 @@ Symptom: reviewer pass 1 showed that `secrets:import-lab` wrote a key before com
 Cause: check after write.
 Fix: the address is checked before anything is written; the other two names are validated too (PR #3, with tests).
 Prevention: helpers that write secrets validate first, write second; the reviewer runs on every helper that touches keys.
+
+### P-identity-1: reads and receipts right after a write fail on the load-balanced Sepolia RPC
+When: 2026-11-06 01:45 IST · Activity: identity · Cost: three resumed runs of the real provisioning; no wrong state (every step is idempotent)
+Symptom: the real run stopped with "resolve returned no data" right after its first deploy, then with "points at another registry or resolver" right after a registration that had mined. On the anvil fork, viem's `waitForTransactionReceipt` timed out on a transaction that had mined.
+Cause: a read seconds after a write can hit a node a block behind (the pack's pitfall 3); my one-shot checks trusted it. viem's receipt wait missed a transaction mined before its block watch started.
+Fix: the provisioner's reads retry (`retryingReads`), post-write checks wait for the value (`eventually`), and receipts are polled with `getTransactionReceipt`.
+Prevention: never assert state in the same instant as a write; poll until it shows, then fail with the name of what did not show.
+

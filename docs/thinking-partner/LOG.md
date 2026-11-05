@@ -23,6 +23,7 @@ One line per PR: time (IST) · activity · result · PR link. Append under your 
 ## payments
 
 ## identity
+- 02:00 IST · identity · M5: the ens package, ABIs from Sourcify, run script and checkers; namespace provisioned on real Sepolia (60 tx, 72.7M gas); B1/B4/B5/B8/B9a reads pass · PR link added once opened
 
 ## arkiv
 

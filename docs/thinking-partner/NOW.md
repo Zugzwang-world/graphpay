@@ -32,8 +32,11 @@ Updated 23:55 IST. **M0 done; handed over to the Coordinator** (`docs/plan/sessi
 Not started (T1, wave 1).
 
 ## identity
-
-Not started (T2, wave 1).
+Updated 02:00 IST. **M5 is built and run for real; its PR is open.** The `graphpay.eth` namespace exists on Ethereum Sepolia: root, 4 owners, 16 agents (15 cast agents and `disposable-1`), the `sim` wildcard. 60 transactions, 72.7M gas.
+- Acceptance reads B1, B4, B5, B8 (records) and B9 (a) (address records) pass on real Sepolia; fork tests (scoped grants, both transfer reverts, wildcard, payee) pass.
+- The hand-off table (node, epoch, wallet, expiry per agent) is `docs/sessions/identity/namespace.md`.
+- Running: nothing. Blockers: none. The reviewer pass on the signing code runs before merge.
+- Next: M6 (gate, kill switch, watcher); the real policy writes wait for T1's M2, the facilitator's real gate for T1's M3. Meanwhile the gate's unit tests with fakes.
 
 ## arkiv
 

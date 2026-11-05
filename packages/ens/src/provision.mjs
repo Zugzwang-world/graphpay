@@ -34,7 +34,7 @@ import {
   OWNER_REGISTRY_ROOT_ROLES,
   RESOLVER,
 } from './roles.mjs';
-import { eventually } from './tx.mjs';
+import { eventually, retryingReads } from './tx.mjs';
 
 const DAY = 86_400n;
 
@@ -42,7 +42,8 @@ const DAY = 86_400n;
 //        log, onTx(step, name, hash, receipt) }. An owner passed to ensureAgent is
 // { name, label, registry (its own), parentRegistry (the one holding its label) }.
 export function createProvisioner(ctx) {
-  const { client, runner, senders, wallets, log = console.log, onTx = () => {} } = ctx;
+  const { runner, senders, wallets, log = console.log, onTx = () => {} } = ctx;
+  const client = ctx.retryReads === false ? ctx.client : retryingReads(ctx.client);
   const operator = () => senderOf('OPERATOR');
 
   function senderOf(role) {
@@ -188,8 +189,10 @@ export function createProvisioner(ctx) {
       if (!isAddressEqual(s.latestOwner, holder)) throw new Error(`B3: ${owner.name} is held by ${s.latestOwner}, not ${owner.walletRole}`);
       log('  B3: already registered');
     } else throw new Error(`B3: ${owner.name} is ${STATUS_NAME[s.status]} after an earlier registration; refusing to provision it again`);
-    const [sub, res] = await Promise.all([readReg(root.registry, 'getSubregistry', [owner.label]), readReg(root.registry, 'getResolver', [owner.label])]);
-    if (!isAddressEqual(sub, ur) || !isAddressEqual(res, r)) throw new Error(`B3: ${owner.name} points at another registry or resolver`);
+    await eventually(async () => {
+      const [sub, res] = await Promise.all([readReg(root.registry, 'getSubregistry', [owner.label]), readReg(root.registry, 'getResolver', [owner.label])]);
+      return isAddressEqual(sub, ur) && isAddressEqual(res, r);
+    }, { what: `B3 ${owner.name} points at its registry and resolver` });
 
     const parentOk = async () => {
       const [parent, label] = await readReg(ur, 'getParent', []);
@@ -226,7 +229,7 @@ export function createProvisioner(ctx) {
       if (!isAddressEqual(s.latestOwner, holder)) throw new Error(`C2: ${agent.name} is held by ${s.latestOwner}, not ${agent.walletRole}`);
       log('  C2: already registered');
     } else throw new Error(`C2: ${agent.name} is ${STATUS_NAME[s.status]} after an earlier registration; a killed label is never provisioned again`);
-    if (!isAddressEqual(await readReg(ownerInfo.registry, 'getResolver', [agent.label]), r)) throw new Error(`C2: ${agent.name} points at another resolver`);
+    await eventually(async () => isAddressEqual(await readReg(ownerInfo.registry, 'getResolver', [agent.label]), r), { what: `C2 ${agent.name} points at its resolver` });
 
     if (agent.selfHeld) await ensureGrants(agent, r, holder, ownerInfo);
     const st = await registryState(client, ownerInfo.registry, agent.label);
@@ -282,7 +285,7 @@ export function createProvisioner(ctx) {
       await eventually(async () => (await registryState(client, root.registry, entry.label)).status === STATUS.RESERVED, { what: 'D2 reservation' });
     } else if (s.status === STATUS.RESERVED) log('  D2: already reserved');
     else throw new Error(`D2: ${entry.name} is ${STATUS_NAME[s.status]}, not RESERVED`);
-    if (!isAddressEqual(await readReg(root.registry, 'getResolver', [entry.label]), r)) throw new Error('D2: the wildcard points at another resolver');
+    await eventually(async () => isAddressEqual(await readReg(root.registry, 'getResolver', [entry.label]), r), { what: 'D2 the wildcard points at its resolver' });
     return { name: entry.name, resolver: r };
   }
 

@@ -270,3 +270,17 @@ offset(offset: number): this;
 ## Track rows
 
 Each track adds its own rows here (under `### <activity>`), with source, time and status.
+
+### identity
+
+| fact | value | source | checked (IST) | status | note |
+|---|---|---|---|---|---|
+| ENSIP-31 vectors | USDC on Ethereum 27 bytes, USDC on Base 28, native ETH 7, the three concatenated 62 bytes; the test-USDT entry for chain 1874 is 28 bytes and equals the config's `erc7930` | https://docs.ens.domains/ensip/31 (raw `ensips/31.md`); `packages/ens/test/unit.test.mjs` | 2026-11-06 01:05 | verified (draft) | the encoder reproduces all four vectors; a malformed entry voids the whole record |
+| Real namespace run | 60 transactions, 72,668,520 gas in all, finished 2026-11-06 01:58 IST at 19 wei gas price; per step: root resolver 3.16M, owner registry 1.02M, owner resolver 1.94–2.41M, agent resolver 2.66–2.77M, agent registration 0.27–0.39M, setters 0.50M, wildcard resolver 1.38M | `docs/sessions/identity/namespace.json` | 01:58 | measured | within the pack's lab figure (77 tx, 68.4M gas, other root) |
+| Both setter grants in one transaction | `grantSetterRoles` for `agent-context` and for coin type 2147485522 go through one `multicall` on the agent's resolver: 495,925–495,949 gas; an agent with its own wallet takes 3 transactions, an owner-held agent 2 | the 5 `C3` transactions in `namespace.md`; the fork rehearsal | 01:20 | measured | closes the amendment's "3, or 4 if one call cannot carry both" |
+| Setter scope | an agent's key can `setText` `agent-context` and `setAddress` 2147485522 on its own resolver; `setText` of `graphpay.cap_micro`, `graphpay.status`, `x-graphpay-accepts`, `agent-endpoint[mcp]`, `graphpay.principal`, `graphpay.kind`, `setAddress(60)` and `setContenthash` revert `EACUnauthorizedAccountRoles` | `packages/ens/test-fork/namespace.fork.test.mjs` on an anvil fork | 01:30 | verified (fork) | the real-chain B3 write lands in the acceptance run |
+| Transfers | `safeTransferFrom` reverts `TransferUnsafeUntilRegistryIsEmancipated`; `unsafeTransfer` reverts `TransferDisallowed` | same fork test | 01:30 | verified (fork) | |
+| Registry roles | verified against `RegistryRolesLib` and `EACBaseRolesLib` source from Sourcify: `ALL_ROLES` is 64 nybbles of 1, admin = role << 128, `CAN_TRANSFER_ADMIN` = `(1<<28)<<128` | https://sourcify.dev/server/v2/contract/11155111/<UserRegistryImpl>?fields=sources | 01:00 | verified | matches `planning/SPEC/IDENTITY_ENS.md` §3 |
+| Wildcard | `<anything>.sim.graphpay.eth` reads `graphpay.synthetic=true`, kind `agent`, status and cap empty, with no transaction | `node scripts/ens/acceptance.mjs` on real Sepolia | 02:05 | verified-on-chain | B5 |
+| Anvil fork | `anvil --fork-url` at the latest block fails ("block not found") on the load-balanced RPC; pin `--fork-block-number` ten blocks behind the head. Anvil's default tip is 1 gwei, so impersonated signers need `anvil_setBalance` | rehearsal | 01:10 | measured | |
+
