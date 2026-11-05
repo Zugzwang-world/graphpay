@@ -41,10 +41,11 @@ Updated 02:00 IST. **M5 is built and run for real; its PR is open.** The `graphp
 
 ## arkiv
 
-Updated 03:20 IST, Fri 6 Nov (T3).
+Updated 04:05 IST, Fri 6 Nov (T3).
 
 - **Where we are:** M7a, M8 (size S) and M7b have merged (PR #21, 03:11). The small test city is on Arkiv's testnet and answers through GraphQL, the explain trace and the hosted MCP. All three S stores survived the Mac's sleep (each manifest says done; nothing was mid-run).
 - **This step:** a small fix that T1's recorder depends on. After a send that landed but was reported as failed, the recorder, quotes and the ledger's check now read the row back correctly, so they adopt it instead of writing a second copy. A test on the simulator proves it lands once.
+- **Labelling fix (04:05):** the cast shops are real but carry labelled synthetic history; their reputation now says synthetic too, in GraphQL, the hosted MCP and the agents' ranking.
 - **Running:** nothing.
 - **Blockers:** none.
 - **Checked on the production domain (03:22):** `/api/graphql` answers the city's top shops in 2 reads from Arkiv's testnet; `/api/mcp` lists its tools.
