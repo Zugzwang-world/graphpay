@@ -23,6 +23,15 @@ Updated 03:36 IST, Fri 6 Nov.
 - 30 minutes of lag (03:31–04:01 IST, 31 samples): at most 4 blocks (about 8 s), at most 5.5 s since the last good poll, 0 retries.
 - T2's watcher is hosted in `main.mjs` (`src/ens.mjs`): a policy sink as POLICY_WRITER, retried until it starts.
 
+## The kill (F, E7, B6; 04:52–04:56 IST, one-shot for disposable-1)
+
+- Alive: disposable-1 paid 0.40 to kesar (HTTP 200): https://explorer.testnet.whitechain.io/tx/0x763973499f7f7eb7bdda058fa03ee3d9f9480be53d75bc4574c62d7beec84b9c
+- Kill: the owner's unregister on Sepolia, block 12,072,701: https://sepolia.etherscan.io/tx/0x785a13f119ab77f67c1ed8dfa6f1213708fde4f43158122a357e72c018acf29f
+- The next payment, 9.3 s after the kill's receipt: HTTP 402 `ENS_EXPIRED_OR_REVOKED` from our facilitator's gate (the limit is 25 s).
+- The watcher (hosted in the workers) revoked the AgentPolicy 11 s after the kill: `setPolicy` epoch 0 revoked, Whitechain block 12,324,621, 36,358 gas.
+- The recorder's off-chain fail edge: the first write failed (T1's ref was 136 bytes, over Arkiv's 128-byte str), fixed (`att:<order>:<wallet>:<8 hex>`); the refusal-only re-run wrote it, `0xc2d2ed38…2699`, and the mirror folds it into the agent's `fails` after its 120 s settle window.
+- Evidence: `docs/sessions/integration/runs/kill-disposable-1/kill.json`. DISPOSABLE_2 is untouched (the video and the pitch).
+
 ## The D checks (`acceptance/mirror.mjs`, results in `docs/sessions/integration/acceptance/`)
 
 ```bash

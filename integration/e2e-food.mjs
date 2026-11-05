@@ -119,7 +119,7 @@ const orderTrail = r.orderId ? await trail(mcp, r.orderId) : { edges: [] };
 const cursor1 = await mirrorCursor();
 const assertions = [
   assertChoice({ runLog, events, balances: { before: before.balances, after: afterPay.balances }, shops: { good: good.ensName, runnerUp: runnerUp.ensName, trap: trap.ensName, trapNode: await read.nodeOf(trap.ensName) } }),
-  assertSettled({ runLog, events, balances: { before: before.balances, after: afterPay.balances }, priceMicro: story.order.priceMicro, network: 'WHITECHAIN' }),
+  assertSettled({ runLog, events, balances: { before: before.balances, after: afterPay.balances }, priceMicro: story.order.priceMicro, network: `eip155:${whitechain.chain.id}`, explorer: config.networks.whitechain.explorer }),
   assertMirrored({ trail: { edges: orderTrail.edges, cursorBlock: cursor1.scannedTo }, events }),
   assertTallies({ graph: { before: before.graph, after: afterPay.graph, explainIds: [before.graph.explainId, afterPay.graph.explainId] }, priceMicro: story.order.priceMicro }),
 ];

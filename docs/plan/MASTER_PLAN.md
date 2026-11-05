@@ -9,21 +9,21 @@ The live plan for ETHGlobal Mumbai, kept by main. Sources: `planning/BUILD_SEQUE
 | M0 foundation | main | `00-foundation.md` | — | done (CP0) |
 | M1 contract + Foundry tests | T1 Payments | `01-contract.md` | M0 | done (PR #12, 01:51 IST) |
 | M2 deploy and verify (the USDT checkout; the stand-in is retired, ADR-0054) | T1 | `02-deploy-verify.md` | M1 | done (PR #15; checkout verified on Whitechain) |
-| M3 facilitator, shop API, recorder; part B real lifecycle and the qualifying USDT payment | T1 | `03-facilitator-shop.md` + `amendments/M5-ens.md` §2, `amendments/M7-arkiv.md` §5 | M1 (part B: M2, M5, M6) | queued |
-| M4 hosted on Vercel | T1 | `04-hosted-vercel.md` | M2, M3, M6 | queued |
-| M5 ENS namespace | T2 Identity | `05-ens-namespace.md` + `amendments/M5-ens.md` | M0 | in progress |
-| M6 gate, kill, watcher | T2 | `06-ens-gate-kill-watcher.md` + `amendments/M5-ens.md` §3 | M5 | queued |
+| M3 facilitator, shop API, recorder; part B real lifecycle and the qualifying USDT payment | T1 | `03-facilitator-shop.md` + `amendments/M5-ens.md` §2, `amendments/M7-arkiv.md` §5 | M1 (part B: M2, M5, M6) | done (PR #42 part A, #45 part B: the first real payment 04:14 IST) |
+| M4 hosted on Vercel | T1 | `04-hosted-vercel.md` | M2, M3, M6 | in progress (T1) |
+| M5 ENS namespace | T2 Identity | `05-ens-namespace.md` + `amendments/M5-ens.md` | M0 | done (PR #18) |
+| M6 gate, kill, watcher | T2 | `06-ens-gate-kill-watcher.md` + `amendments/M5-ens.md` §3 | M5 | done (PR #34 gate, #40 watcher) |
 | M7a model, writer, ArkivSim (the generic SDK and GraphPay's layer, ADR-0057) | T3 Arkiv | `07a-graph-model-writer.md` + `amendments/M7-arkiv.md` | M0 | done (PR #14, 01:51 IST) |
-| M7b engine, GraphQL, explain, MCP (+ hosted `/api/mcp`) | T3 | `07b-graph-engine-graphql-mcp.md` + `amendments/M7-arkiv.md` §6, §8 | M7a | queued |
-| M8 city generator; seed **S only** tonight (M waits for the locked story, ADR-0049) | T3 | `08-city-and-seeding.md` + `amendments/M7-arkiv.md` §3, §8 | M7a | queued (both seed wallets funded) |
-| M9 live benchmark at S (reads, not speed: ADR-0042; M when seeded) | T3 | `09-live-benchmark.md` + `amendments/M7-arkiv.md` §8 | M7b, M8 | queued |
+| M7b engine, GraphQL, explain, MCP (+ hosted `/api/mcp`) | T3 | `07b-graph-engine-graphql-mcp.md` + `amendments/M7-arkiv.md` §6, §8 | M7a | done (PR #21) |
+| M8 city generator; seed **S only** tonight (M waits for the locked story, ADR-0049) | T3 | `08-city-and-seeding.md` + `amendments/M7-arkiv.md` §3, §8 | M7a | done: S seeded on Rabdi (PR #21); M waits for the locked story |
+| M9 live benchmark at S (reads, not speed: ADR-0042; M when seeded) | T3 | `09-live-benchmark.md` + `amendments/M7-arkiv.md` §8 | M7b, M8 | done at S (PR #31; D6 passes) |
 | M10 agents | T4 Agents | `10-agents.md` + `amendments/M5-ens.md` §2, `amendments/M7-arkiv.md` §5 | M0 | done (PR #11) |
-| M11 mirror (one workers process) | Join | `11-mirror.md` + readonly edges (`amendments/M7-arkiv.md` §4) | M1, M7a, M5 | Join running since 00:44; starts when M7a merges |
-| M12 `e2e:food`, fork then real | Join | `12-e2e-food.md` + payee and quote hooks | M3, M6, M7b, M10, M11 | queued |
-| M13 `pnpm acceptance` | Join | `13-acceptance.md` + `docs/plan/ACCEPTANCE_ADDITIONS.md` | M4, M9, M12 | queued |
+| M11 mirror (one workers process) | Join | `11-mirror.md` + readonly edges (`amendments/M7-arkiv.md` §4) | M1, M7a, M5 | live since 03:13 (PRs #8, #20, #33, #46) |
+| M12 `e2e:food`, fork then real | Join | `12-e2e-food.md` + payee and quote hooks | M3, M6, M7b, M10, M11 | running for real (Join, 04:31) |
+| M13 `pnpm acceptance` | Join | `13-acceptance.md` + `docs/plan/ACCEPTANCE_ADDITIONS.md` | M4, M9, M12 | first report 04:27: 18 pass, 0 fail, 1 blocked, 29 not run (PR #46) |
 | M14 records and relay | Coordinator | `14-records-relay.md` | M13 (and every 2 h) | rolling (first relay 01:20 IST) |
-| M15 website | T5 Web | `15-website.md` + Friday items 8–13 | M0; wired after M4, M7b, M10 | in progress |
-| M16 checkout kit + demo store (the Operate drop-in: a short snippet, ADR-0032) | T5 | `16-checkout-kit-store.md` | M4 | queued |
+| M15 website | T5 Web | `15-website.md` + Friday items 8–13 | M0; wired after M4, M7b, M10 | in progress (shell, phones, race, Open toggle, Pause/Resume merged) |
+| M16 checkout kit + demo store (the Operate drop-in: a short snippet, ADR-0032) | T5 | `16-checkout-kit-store.md` | M4 | in progress (a thin layer over @graphpay/agentpay; needs M4) |
 | AgentPay SDK (`packages/agentpay`, `examples/agentpay-*`; the Whitechain lane) | T6 AgentPay | the founder's brief (Fri 03:25 IST); `docs/plan/sessions/T6-agentpay.md` when written | T1's and T4's public exports; M3 for the facilitator path | in progress (started 03:25 IST) |
 | M17 sponsor files, README, AI usage, video, submission | Submission | `17-submission.md` | M13, M15, M16 | Friday from 13:00 |
 

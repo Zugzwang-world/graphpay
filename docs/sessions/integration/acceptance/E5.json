@@ -1,0 +1,35 @@
+{
+  "id": "E5",
+  "at": "2026-11-05T23:15:02.719Z",
+  "pass": true,
+  "what": "GraphQL shows the new edge and the updated tallies",
+  "measured": {
+    "goodToday": {
+      "orders": "10",
+      "refunds": "1",
+      "delivered": "5",
+      "onTime": "5",
+      "paidMicro": "16810000",
+      "refundedMicro": "800000"
+    },
+    "goodAllOrders": "251",
+    "payerToday": {
+      "orders": "1",
+      "refunds": "0",
+      "delivered": "0",
+      "onTime": "0",
+      "paidMicro": "4800000",
+      "refundedMicro": "0"
+    },
+    "explainIds": [
+      "7abbde9ee4ad",
+      "7abbde9ee4ad"
+    ]
+  },
+  "expected": "TODAY +1 order, +4.80, +1 delivered, +1 on time; all-time +1; payer TODAY +4.80",
+  "evidence": {
+    "runFile": "docs/sessions/integration/runs/run-a8d00695846884f3/run.json",
+    "startedAt": "2026-11-05T23:11:01.937Z",
+    "assertion": "D"
+  }
+}

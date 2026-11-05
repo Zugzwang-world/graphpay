@@ -5,7 +5,7 @@
 // bound to that node; otherwise it is written from the wallet's own reverse name.
 
 import { z } from 'zod';
-import { namehash, toHex } from 'viem';
+import { keccak256, namehash, toHex } from 'viem';
 import { bearerOk, json, readJson } from './http.mjs';
 import { RateLimiter } from './limits.mjs';
 
@@ -56,14 +56,15 @@ export function recorderClient({ url, token, fetchImpl = fetch, timeoutMs = 5_00
   };
 }
 
-// The edge T3's recordEdge writes. ref = att:<orderId>:<payer wallet>:<reason>, so the signing
+// The edge T3's recordEdge writes. ref = att:<orderId>:<payer wallet>:<8 hex of keccak(reason)>
+// (122 bytes: Arkiv refuses a str over 128, and the reason itself is in the payload), so the signing
 // wallet is always on the record (Join's mirror reads it from the ref and the payload) and a
 // replayed refusal is the same edge, which readers and the reconcile job de-duplicate by ref.
 export function attemptEdge(entry) {
   const payer = entry.payer.toLowerCase();
   const attributed = entry.payerNode !== ZERO32 && entry.payerName !== '';
   return {
-    ref: `att:${entry.orderId.toLowerCase()}:${payer}:${entry.reason}`,
+    ref: `att:${entry.orderId.toLowerCase()}:${payer}:${keccak256(toHex(entry.reason)).slice(2, 10)}`,
     kind: 'fail',
     from: attributed ? { ens: entry.payerName, epoch: entry.payerEpoch ?? 0 } : { ens: `${payer.slice(2)}.addr.reverse`, epoch: 0 },
     to: { ens: entry.shopName, epoch: 0 },

@@ -66,6 +66,18 @@ Plan: `scripts/funding/plan.json` (`planning/WALLETS.md` §3; plus W_DIRECTORY, 
 
 FUNDER after (22:20 IST): **2.644484 WBT** (reserve floor 0.2), **0.275894 Sepolia ETH**, **1.058367 tGLM**, **31.75208 test USDT**. OPERATOR keeps its own 0.095 Sepolia ETH for the namespace. Sepolia gas at funding time: base fee about 20 wei plus a 3 wei tip, far below the 0.5 gwei stop, so the ENS track's real run is clear.
 
+## 2b. Event top-ups and other uses (the Coordinator)
+
+| time (IST) | what | detail |
+|---|---|---|
+| Fri 04:10 | RENEWER's second use: the relayer for T6's first real AgentPay SDK payment (rehearsal.vitalik → kesar-kingdom, 0.01 test USDT, gasless, 309,451 gas) | [0xfbd7…4c7e](https://explorer.testnet.whitechain.io/tx/0xfbd7d307b1b0c08f3af015b4bdb03aaeed12d0c2d18c2553432cb4679ff14c7e) |
+| Fri 04:2x | top-up to plan targets from FUNDER (`pnpm -s funding --execute --real`): DEPLOYER 0.019635 WBT | [0xd17c…a92a](https://explorer.testnet.whitechain.io/tx/0xd17c8eb56c484e834642a46a92f7cb896d681d8d4cf0d427165799b29635a92a) |
+| Fri 04:2x | RENEWER 0.001547 WBT | [0x2029…e2ea](https://explorer.testnet.whitechain.io/tx/0x2029c2670aaa715aae59868766f1dd024c4aee7299211793c4d0455af278e2ea) |
+| Fri 04:2x | POLICY_WRITER 0.002380 WBT | [0x149c…441f](https://explorer.testnet.whitechain.io/tx/0x149cab165216f98e50b7243c9240e46d74227367bfa4b7e2ec962d1313c4441f) |
+| Fri 04:2x | SHOP_JAMUN 0.000266 WBT | [0x4b01…0291](https://explorer.testnet.whitechain.io/tx/0x4b01da9b0bb34f126cb84796105dbe709eb2335ed0b28989f4715c477df80291) |
+| Fri 04:2x | SHOP_SYRUP (back to its 0.02 target) | [0xebe2…b4bf](https://explorer.testnet.whitechain.io/tx/0xebe219aaccde6281fdd43299841860c98aebdc72eb8279be9ba2d12f3774b4bf) |
+| Fri 04:25 | after the top-up, every role on all three chains is at target; FUNDER keeps 2.618034 WBT, 0.274894 Sepolia ETH, 15.082973 tGLM | dry run, `pnpm -s funding` |
+
 ## 3. Still to fund (waits on later steps)
 
 | what | who | when |

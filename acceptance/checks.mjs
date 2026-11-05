@@ -5,9 +5,9 @@
 // workers process is the only W_LEDGER writer while it runs).
 
 import { spawnSync } from 'node:child_process';
-import { existsSync, readFileSync } from 'node:fs';
+import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { activeCast, castEntries, config } from '../packages/config/index.mjs';
+import { activeCast, castEntries, config, story } from '../packages/config/index.mjs';
 import { clientsFor } from '../scripts/lib/chains.mjs';
 import { createPayerGate } from '../integration/src/gate.mjs';
 import { connectArkiv, createGraphEngine, ENTITIES, runGraphql, writerAddresses } from '../packages/money-graph/index.mjs';
@@ -26,6 +26,19 @@ export function linesById(out) {
   return by;
 }
 
+// The latest real e2e:food run file that passed (docs/sessions/integration/runs/<id>/run.json).
+export function latestRun(root) {
+  const dir = join(root, 'docs/sessions/integration/runs');
+  if (!existsSync(dir)) return null;
+  const runs = readdirSync(dir)
+    .map((id) => join(dir, id, 'run.json'))
+    .filter((f) => existsSync(f))
+    .map((f) => ({ f, run: JSON.parse(readFileSync(f, 'utf8')) }))
+    .filter(({ run }) => run.network === 'real' && run.pass)
+    .sort((a, b) => (a.run.startedAt < b.run.startedAt ? 1 : -1));
+  return runs[0] ?? null;
+}
+
 export function checks(root, env) {
   const cast = activeCast();
   const entries = castEntries(cast);
@@ -38,7 +51,37 @@ export function checks(root, env) {
     return { pass: rows.length ? rows.every((r) => r.ok) : null, what, measured: rows.map((r) => r.line), expected: 'every line of scripts/ens/acceptance.mjs for this id passes', evidence: { script: 'scripts/ens/acceptance.mjs', exit: out.status } };
   };
 
+  const e2e = () => latestRun(root);
+  const fromRun = (id, what, assertion, expected) => async () => {
+    const r = e2e();
+    if (!r) return { pass: null, why: 'no passing real e2e:food run yet', what, measured: null, expected, evidence: {} };
+    const a = r.run.assertions.find((x) => x.id === assertion);
+    return { pass: a ? a.pass : null, what, measured: a?.measured ?? null, expected, evidence: { runFile: r.f.slice(root.length + 1), startedAt: r.run.startedAt, assertion, ...(a?.note ? { note: a.note } : {}) } };
+  };
   return {
+    E1: async () => {
+      const r = e2e();
+      if (!r) return { pass: null, why: 'no passing real e2e:food run yet', what: "the human's request", measured: null, expected: '', evidence: {} };
+      const ev = r.run.agents.events;
+      const idx = (type, role) => ev.findIndex((e) => e.type === type && e.role === role);
+      const firstEnd = Math.min(...['scout', 'analyst'].map((role) => idx('agent.end', role)).filter((i) => i >= 0));
+      const m = r.run.agents.result.mandate;
+      const request = ev.find((e) => e.type === 'message')?.text;
+      const pass = request === story.order.request && m?.budgetUsdt === (story.order.budgetMicro / 1e6).toFixed(6) && /T20:00:00/.test(m?.deadlineIso ?? '') && idx('agent.start', 'scout') < firstEnd && idx('agent.start', 'analyst') < firstEnd;
+      return { pass, what: "the human's request", measured: { request, mandate: m, scoutStart: idx('agent.start', 'scout'), analystStart: idx('agent.start', 'analyst'), firstEnd }, expected: 'the exact request; budget 6.000000, deadline 20:00 local; scout and analyst both start before either ends', evidence: { runFile: r.f.slice(root.length + 1) } };
+    },
+    E2: fromRun('E2', 'the agents choose the good shop, never the trap', 'A', 'explainId; good > runner-up, trap excluded; no trap order or payment; trap balance unchanged'),
+    E4: fromRun('E4', 'the mirror writes it to Arkiv', 'C', 'cursor past the settle block; trail order → pay → deliver; refs 1874:<tx>:<logIndex>'),
+    E5: fromRun('E5', 'GraphQL shows the new edge and the updated tallies', 'D', 'TODAY +1 order, +4.80, +1 delivered, +1 on time; all-time +1; payer TODAY +4.80'),
+    E6: fromRun('E6', 'a refund updates the tallies', 'E', 'refunds +1, refunded +0.80, trail ends in refund'),
+    E7: async () => killCheck(root, env, 'E7'),
+    B6: async () => killCheck(root, env, 'B6'),
+    E8: async () => {
+      const r = e2e();
+      const open = readFileSync(join(root, 'docs/thinking-partner/OPEN.md'), 'utf8');
+      const row = r ? open.split('\n').find((l) => l.includes('e2e:food real') && l.includes(String(r.run.cost?.seconds))) : null;
+      return { pass: r ? Boolean(row) : null, what: 'every counting errand records its time and cost', measured: { row: row ?? null, cost: r?.run.cost ?? null }, expected: "a row in OPEN.md's preset calibration table with the preset, seconds and apiCostUsd", evidence: { file: 'docs/thinking-partner/OPEN.md' } };
+    },
     A1: async () => {
       const r = sh(root, 'gh', ['run', 'list', '--branch', 'main', '--workflow', 'ci', '--limit', '1', '--json', 'conclusion,headSha,url']);
       const run = JSON.parse(r.stdout || '[]')[0];
@@ -137,4 +180,25 @@ function cityCheck(root, id) {
   const c = city.data.checks;
   if (id === 'D4') return { pass: city.run === 0 && c.q2_top10?.ok === true && c.q2_top10?.calls === 2, what: 'GraphQL\'s top 10 matches the ground truth (seeded S city, synthetic)', measured: c.q2_top10, expected: 'exact order and amounts against the generator\'s identity truth; 2 calls', evidence: { script: 'packages/city/scripts/check.mjs (read-only)', file: 'docs/sessions/arkiv/city/check-S.json', exit: city.run } };
   return { pass: city.run === 0 && c.d8_discovery?.ok === true, what: 'the geo query returns only shops inside the box, and only from our writers', measured: c.d8_discovery, expected: 'the cast shops only; synthetic ones only when opted in', evidence: { script: 'packages/city/scripts/check.mjs (read-only)', exit: city.run } };
+}
+
+// E7 and B6 from the one kill (docs/sessions/integration/runs/kill-<label>/kill.json), plus the
+// mirror's fold of the recorder's fail edge into the agent's `fails` (read live).
+async function killCheck(root, env, id) {
+  const dir = join(root, 'docs/sessions/integration/runs');
+  const name = existsSync(dir) ? readdirSync(dir).find((d) => d.startsWith('kill-')) : null;
+  if (!name) return { pass: null, why: 'no kill run yet', what: id === 'E7' ? 'a killed agent is refused' : 'killing a disposable agent makes the gate deny it', measured: null, expected: '', evidence: {} };
+  const k = JSON.parse(readFileSync(join(dir, name, 'kill.json'), 'utf8'));
+  const evidence = { file: `docs/sessions/integration/runs/${name}/kill.json`, kill: k.kill?.output, alive: k.alive?.transaction ?? null };
+  if (id === 'B6') {
+    const r = k.refused;
+    return { pass: r?.reason === 'ENS_EXPIRED_OR_REVOKED', what: 'killing a disposable agent makes the gate deny it', measured: { reason: r?.reason ?? null, secondsAfterKill: r ? Math.round((r.ms - Date.parse(k.kill.receiptAt)) / 100) / 10 : null }, expected: 'the gate denies ENS_EXPIRED_OR_REVOKED after the owner unregisters', evidence };
+  }
+  const arkiv = await connectArkiv({ backend: 'rabdi', env: {} });
+  const node = (await import('../packages/money-graph/index.mjs')).nodeOf(k.agent);
+  const tally = (await import('../packages/mirror/src/checks.mjs')).storedTally;
+  const t = await tally(arkiv.publicClient, { owner: writerAddresses().W_LEDGER, node });
+  const a = k.assertion ?? {};
+  const pass = a.pass === true && Number(t?.fails ?? 0) >= 1;
+  return { pass, what: 'a killed agent is refused', measured: { assertion: a.measured ?? null, failed: a.failed ?? [], foldedFails: t?.fails ?? null }, expected: "HTTP 402 ENS_EXPIRED_OR_REVOKED within 25 s of the kill's receipt; the recorder's fail edge on Arkiv; folded into fails by the mirror", evidence: { ...evidence, failEdge: k.failEdge?.entityKey ?? null } };
 }

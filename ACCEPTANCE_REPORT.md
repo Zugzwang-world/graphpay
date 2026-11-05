@@ -1,8 +1,8 @@
 # Acceptance report
 
-Written by `pnpm acceptance` at 2026-11-05T22:57:06.474Z. Checks and pass criteria: `planning/ACCEPTANCE_TESTS.md` and `docs/plan/ACCEPTANCE_ADDITIONS.md`. Only D7 may be `blocked` (C7 and E3 no longer wait on supply, ADR-0054); a check without a result is `not run`, never `pass`.
+Written by `pnpm acceptance` at 2026-11-05T23:28:01.884Z. Checks and pass criteria: `planning/ACCEPTANCE_TESTS.md` and `docs/plan/ACCEPTANCE_ADDITIONS.md`. Only D7 may be `blocked` (C7 and E3 no longer wait on supply, ADR-0054); a check without a result is `not run`, never `pass`.
 
-**18 pass, 0 fail, 1 blocked, 29 not run** (of 48).
+**26 pass, 0 fail, 1 blocked, 21 not run** (of 48).
 
 | id | check | status | note |
 |---|---|---|---|
@@ -21,7 +21,7 @@ Written by `pnpm acceptance` at 2026-11-05T22:57:06.474Z. Checks and pass criter
 | B3 | A scoped role stops an agent raising its own cap | not run | no runner yet |
 | B4 | The payment preference parses | pass |  |
 | B5 | A synthetic wildcard name resolves | pass |  |
-| B6 | Killing a disposable agent makes the gate deny it | not run | no runner yet |
+| B6 | Killing a disposable agent makes the gate deny it | pass |  |
 | B7 | The epoch changes on re-registration (fork test) | not run | no runner yet |
 | B8 | ENSIP-26 records exist and the MCP endpoint answers | pass |  |
 | B9 | The payee is the shop's ENS address | not run |  |
@@ -43,14 +43,14 @@ Written by `pnpm acceptance` at 2026-11-05T22:57:06.474Z. Checks and pass criter
 | D9 | A receipt cannot be edited | pass |  |
 | D10 | An expired or missing quote is refused and the agent re-quotes | not run | no runner yet |
 | D15 | The mirror resumes after a sleep or a network drop (ADR-0056) | not run | the drop and restart (03:27–03:30 IST) came before the first payment; every event since the deploy is mirrored exactly once (36 events, 25 edges), but no payment fell inside a drop yet |
-| E1 | Vitalik's request | not run | no runner yet |
-| E2 | The agents choose Kesar Kingdom, never the trap | not run | no runner yet |
+| E1 | Vitalik's request | pass |  |
+| E2 | The agents choose Kesar Kingdom, never the trap | pass |  |
 | E3 | The payment is made in USDT on Whitechain | not run | no runner yet |
-| E4 | The mirror writes it to Arkiv | not run | no runner yet |
-| E5 | GraphQL shows the new edge and the updated tallies | not run | no runner yet |
-| E6 | A refund updates the tallies | not run | no runner yet |
-| E7 | A killed agent is refused | not run | no runner yet |
-| E8 | Every counting errand records its time and cost (ADR-0048) | not run | no runner yet |
+| E4 | The mirror writes it to Arkiv | pass |  |
+| E5 | GraphQL shows the new edge and the updated tallies | pass |  |
+| E6 | A refund updates the tallies | pass |  |
+| E7 | A killed agent is refused | pass |  |
+| E8 | Every counting errand records its time and cost (ADR-0048) | pass |  |
 | F1 | No secrets are in the repo | not run | no runner yet |
 | F2 | Spending endpoints are passcode-gated | not run | no runner yet |
 | F3 | The relayer's safety floor is enforced | not run | no runner yet |
@@ -301,6 +301,24 @@ Status: **pass**.
   "pass B5 wildcard status empty",
   "pass B5 the walk says ENS_SYNTHETIC"
 ]
+```
+
+## B6: Killing a disposable agent makes the gate deny it
+
+Status: **pass**.
+
+### B6 (2026-11-05T23:26:19.713Z)
+
+- What: killing a disposable agent makes the gate deny it
+- Pass: true
+- Expected: the gate denies ENS_EXPIRED_OR_REVOKED after the owner unregisters
+- Evidence: `{"file":"docs/sessions/integration/runs/kill-disposable-1/kill.json","kill":"kill disposable-1.vitalik.graphpay.eth: done (block 12072701, tx 0x785a13f119ab77f67c1ed8dfa6f1213708fde4f43158122a357e72c018acf29f)","alive":"0x763973499f7f7eb7bdda058fa03ee3d9f9480be53d75bc4574c62d7beec84b9c"}`
+
+```json
+{
+  "reason": "ENS_EXPIRED_OR_REVOKED",
+  "secondsAfterKill": 9.3
+}
 ```
 
 ## B8: ENSIP-26 records exist and the MCP endpoint answers
@@ -686,6 +704,198 @@ Status: **not run** (the drop and restart (03:27–03:30 IST) came before the fi
   "events": 36,
   "edgeEvents": 25,
   "wrong": []
+}
+```
+
+## E1: Vitalik's request
+
+Status: **pass**.
+
+### E1 (2026-11-05T23:15:02.717Z)
+
+- What: Vitalik's request
+- Pass: true
+- Expected: the exact request; budget 6.000000, deadline 20:00 local; scout and analyst both start before either ends
+- Evidence: `{"runFile":"docs/sessions/integration/runs/run-a8d00695846884f3/run.json"}`
+
+```json
+{
+  "request": "Just landed in Mumbai. Get me the best gulab jamun near me under 6 USDT by 8 pm.",
+  "mandate": {
+    "budgetUsdt": "6.000000",
+    "deadlineIso": "2026-11-06T20:00:00+05:30",
+    "hash": "0x0c5a80df0c98786229a9427ac38c4d4a5286d6b848d8329687d2af4b8751195d"
+  },
+  "scoutStart": 6,
+  "analystStart": 12,
+  "firstEnd": 19
+}
+```
+
+## E2: The agents choose Kesar Kingdom, never the trap
+
+Status: **pass**.
+
+### E2 (2026-11-05T23:15:02.718Z)
+
+- What: the agents choose the good shop, never the trap
+- Pass: true
+- Expected: explainId; good > runner-up, trap excluded; no trap order or payment; trap balance unchanged
+- Evidence: `{"runFile":"docs/sessions/integration/runs/run-a8d00695846884f3/run.json","startedAt":"2026-11-05T23:11:01.937Z","assertion":"A"}`
+
+```json
+{
+  "explainId": "f3d1bb972a81",
+  "chosen": "kesar-kingdom.graphpay.eth",
+  "scores": [
+    {
+      "ens": "kesar-kingdom.graphpay.eth",
+      "score": 0.9152605195518567,
+      "eligible": true
+    },
+    {
+      "ens": "syrup-street.graphpay.eth",
+      "score": 0.8632476215644365,
+      "eligible": true
+    },
+    {
+      "ens": "jamun-junction.graphpay.eth",
+      "score": 0.7508551857689739,
+      "eligible": false
+    }
+  ],
+  "trapEvents": 0
+}
+```
+
+## E4: The mirror writes it to Arkiv
+
+Status: **pass**.
+
+### E4 (2026-11-05T23:15:02.719Z)
+
+- What: the mirror writes it to Arkiv
+- Pass: true
+- Expected: cursor past the settle block; trail order → pay → deliver; refs 1874:<tx>:<logIndex>
+- Evidence: `{"runFile":"docs/sessions/integration/runs/run-a8d00695846884f3/run.json","startedAt":"2026-11-05T23:11:01.937Z","assertion":"C"}`
+
+```json
+{
+  "cursorBlock": 12324028,
+  "settleBlock": 12323999,
+  "trail": [
+    "order 1874:0xe92d009a862f7fef9cd752c69bd0ea172b003fc33c3e877dd02b6f9ffe44e791:2",
+    "pay 1874:0xe92d009a862f7fef9cd752c69bd0ea172b003fc33c3e877dd02b6f9ffe44e791:6",
+    "deliver 1874:0x8f3066b30436028438b7ab8f2d362818fa054c5b9a608ac44deffab016329dc6:0"
+  ]
+}
+```
+
+## E5: GraphQL shows the new edge and the updated tallies
+
+Status: **pass**.
+
+### E5 (2026-11-05T23:15:02.719Z)
+
+- What: GraphQL shows the new edge and the updated tallies
+- Pass: true
+- Expected: TODAY +1 order, +4.80, +1 delivered, +1 on time; all-time +1; payer TODAY +4.80
+- Evidence: `{"runFile":"docs/sessions/integration/runs/run-a8d00695846884f3/run.json","startedAt":"2026-11-05T23:11:01.937Z","assertion":"D"}`
+
+```json
+{
+  "goodToday": {
+    "orders": "10",
+    "refunds": "1",
+    "delivered": "5",
+    "onTime": "5",
+    "paidMicro": "16810000",
+    "refundedMicro": "800000"
+  },
+  "goodAllOrders": "251",
+  "payerToday": {
+    "orders": "1",
+    "refunds": "0",
+    "delivered": "0",
+    "onTime": "0",
+    "paidMicro": "4800000",
+    "refundedMicro": "0"
+  },
+  "explainIds": [
+    "7abbde9ee4ad",
+    "7abbde9ee4ad"
+  ]
+}
+```
+
+## E6: A refund updates the tallies
+
+Status: **pass**.
+
+### E6 (2026-11-05T23:15:02.719Z)
+
+- What: a refund updates the tallies
+- Pass: true
+- Expected: refunds +1, refunded +0.80, trail ends in refund
+- Evidence: `{"runFile":"docs/sessions/integration/runs/run-a8d00695846884f3/run.json","startedAt":"2026-11-05T23:11:01.937Z","assertion":"E"}`
+
+```json
+{
+  "goodToday": {
+    "orders": "10",
+    "refunds": "2",
+    "delivered": "5",
+    "onTime": "5",
+    "paidMicro": "16810000",
+    "refundedMicro": "1600000"
+  },
+  "trailEnd": "refund"
+}
+```
+
+## E7: A killed agent is refused
+
+Status: **pass**.
+
+### E7 (2026-11-05T23:28:01.873Z)
+
+- What: a killed agent is refused
+- Pass: true
+- Expected: HTTP 402 ENS_EXPIRED_OR_REVOKED within 25 s of the kill's receipt; the recorder's fail edge on Arkiv; folded into fails by the mirror
+- Evidence: `{"file":"docs/sessions/integration/runs/kill-disposable-1/kill.json","kill":"kill disposable-1.vitalik.graphpay.eth: done (block 12072701, tx 0x785a13f119ab77f67c1ed8dfa6f1213708fde4f43158122a357e72c018acf29f)","alive":"0x763973499f7f7eb7bdda058fa03ee3d9f9480be53d75bc4574c62d7beec84b9c","failEdge":"0xc2d2ed3801c81500b108d904c3048c4c9c984f10d2f88c5218073e0b581e2699"}`
+
+```json
+{
+  "assertion": {
+    "status": 402,
+    "reason": "ENS_EXPIRED_OR_REVOKED",
+    "secondsToBite": 9.3,
+    "failEdge": "0xc2d2ed3801c81500b108d904c3048c4c9c984f10d2f88c5218073e0b581e2699"
+  },
+  "failed": [],
+  "foldedFails": "1"
+}
+```
+
+## E8: Every counting errand records its time and cost (ADR-0048)
+
+Status: **pass**.
+
+### E8 (2026-11-05T23:15:02.720Z)
+
+- What: every counting errand records its time and cost
+- Pass: true
+- Expected: a row in OPEN.md's preset calibration table with the preset, seconds and apiCostUsd
+- Evidence: `{"file":"docs/thinking-partner/OPEN.md"}`
+
+```json
+{
+  "row": "| 04:43 | Join e2e:food real, payer (the counting run) | testing | `claude-opus-5-5`, xhigh | 122.1 | $0.2986 | **paid** 4.80 on Whitechain, delivered, refunded 0.80; A–E pass |",
+  "cost": {
+    "apiCostUsd": 0.2986,
+    "seconds": 122.1,
+    "tokens": 52693
+  }
 }
 ```
 
