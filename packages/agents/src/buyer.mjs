@@ -12,6 +12,7 @@ import { displayUsdt, fromMicro, microFrom, toMicro } from './money.mjs';
 import { createPayer, knownContracts } from './payer.mjs';
 import { rankShops, volumeReference } from './scoring.mjs';
 import { payGuard } from './state.mjs';
+import { clip, errorText } from './scrub.mjs';
 import { tracedTool } from './tools.mjs';
 
 const MCP_TOOLS = ['schema', 'ask', 'graphql', 'explain'];
@@ -163,46 +164,55 @@ export async function runBuyerTeam(ctx) {
       log.guard(GUARD_OF[guard.reason] ?? 'G10', false, `${guard.reason}: ${guard.detail}`);
       return { status: 'refused', shop: shopEns, reason: guard.reason, detail: guard.detail };
     }
-    log.guard('G2', true, `${shopEns} is eligible in code's ranking (score ${guard.ranked.score.toFixed(3)}) and its offer fits the budget and deadline`);
-    const need = state.need;
-    const approved = Object.freeze({
-      shopEns,
-      storefront: await hooks.storefrontUrl(shopEns),
-      item: need.item,
-      quantity: need.quantity,
-      maxPriceMicro: guard.priceMicro,
-      deadlineIso: state.mandate.deadlineIso,
-      agents: cast.shopAgentNames(shopEns),
-    });
-    log.message(names.concierge, payer.ens, `pay ${shopEns}: ${need.quantity} × ${need.item}, at most ${displayUsdt(guard.priceMicro)} USDT`);
-    const executed = new Set();
-    // The shop's client; an in-process gateway (createShopGateway) shares this errand's log and models.
-    const team = { log, models, meter, sdl, clock, signal, codec: hooks.x402 };
-    const p = createPayer({
-      approved,
-      state,
-      shopClient: await hooks.shopClient(shopEns, team),
-      hooks,
-      codec: hooks.x402,
-      clock,
-      log,
-      agent: payer.ens,
-      payerEns: payer.ens,
-      buyerEns: persona,
-      wallet: await hooks.payerWallet(payer.key),
-      dryRun: ctx.dryRun === true,
-      contracts: hooks.contracts ? knownContracts(hooks.contracts) : undefined,
-      executed,
-    });
-    const task = { order: { shop: shopEns, item: need.item, quantity: need.quantity, maxPriceUsdt: displayUsdt(guard.priceMicro), deadlineIso: approved.deadlineIso } };
-    const run = await runAgent({ role: 'payer', ens: payer.ens, task, tools: p.tools, executed, ...common });
-    if (!state.payment) {
-      state.payment = { shopEns, status: 'no-purchase', reason: 'PAYER_DID_NOT_PAY', detail: run.error ?? 'the payer never called pay_order' };
-      state.refusals.push({ reason: 'PAYER_DID_NOT_PAY', detail: state.payment.detail, agent: payer.ens });
-      log.guard('G4', false, `PAYER_DID_NOT_PAY: ${state.payment.detail}; the reservation stays, so this errand pays no one`);
-    }
-    if (run.output && run.output.status !== state.payment.status) {
-      log.guard('G13', true, `the payer said ${run.output.status}; the tools say ${state.payment.status}: code keeps the tools`);
+    try {
+      log.guard('G2', true, `${shopEns} is eligible in code's ranking (score ${guard.ranked.score.toFixed(3)}) and its offer fits the budget and deadline`);
+      const need = state.need;
+      const approved = Object.freeze({
+        shopEns,
+        storefront: await hooks.storefrontUrl(shopEns),
+        item: need.item,
+        quantity: need.quantity,
+        maxPriceMicro: guard.priceMicro,
+        deadlineIso: state.mandate.deadlineIso,
+        agents: cast.shopAgentNames(shopEns),
+      });
+      log.message(names.concierge, payer.ens, `pay ${shopEns}: ${need.quantity} × ${need.item}, at most ${displayUsdt(guard.priceMicro)} USDT`);
+      const executed = new Set();
+      // The shop's client; an in-process gateway (createShopGateway) shares this errand's log and models.
+      const team = { log, models, meter, sdl, clock, signal, codec: hooks.x402 };
+      const p = createPayer({
+        approved,
+        state,
+        shopClient: await hooks.shopClient(shopEns, team),
+        hooks,
+        codec: hooks.x402,
+        clock,
+        log,
+        agent: payer.ens,
+        payerEns: payer.ens,
+        buyerEns: persona,
+        wallet: await hooks.payerWallet(payer.key),
+        dryRun: ctx.dryRun === true,
+        contracts: hooks.contracts ? knownContracts(hooks.contracts) : undefined,
+        executed,
+      });
+      const task = { order: { shop: shopEns, item: need.item, quantity: need.quantity, maxPriceUsdt: displayUsdt(guard.priceMicro), deadlineIso: approved.deadlineIso } };
+      const run = await runAgent({ role: 'payer', ens: payer.ens, task, tools: p.tools, executed, ...common });
+      if (!state.payment) {
+        state.payment = { shopEns, status: 'no-purchase', reason: 'PAYER_DID_NOT_PAY', detail: run.error ?? 'the payer never called pay_order' };
+        state.refusals.push({ reason: 'PAYER_DID_NOT_PAY', detail: state.payment.detail, agent: payer.ens });
+        log.guard('G4', false, `PAYER_DID_NOT_PAY: ${state.payment.detail}; the reservation stays, so this errand pays no one`);
+      }
+      if (run.output && run.output.status !== state.payment.status) {
+        log.guard('G13', true, `the payer said ${run.output.status}; the tools say ${state.payment.status}: code keeps the tools`);
+      }
+    } catch (error) {
+      if (!state.payment) {
+        const detail = log.scrub(clip(errorText(error)));
+        state.payment = { shopEns, status: 'refused', reason: 'HOOK_FAILED', detail };
+        state.refusals.push({ reason: 'HOOK_FAILED', detail, agent: names.concierge });
+        log.guard('G4', false, `HOOK_FAILED: ${detail}; the errand's one payment slot is used`);
+      }
     }
     const out = state.payment;
     log.message(payer.ens, names.concierge, `${out.status}${out.reason ? ` (${out.reason})` : ''}`);

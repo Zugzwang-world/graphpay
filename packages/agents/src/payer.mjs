@@ -9,7 +9,7 @@
 import { config } from '@graphpay/config';
 import { z } from 'zod';
 import { displayUsdt, fromMicro, microFrom } from './money.mjs';
-import { errorText } from './scrub.mjs';
+import { clip, errorText } from './scrub.mjs';
 import { tracedTool } from './tools.mjs';
 import { base64JsonCodec, checkPaymentRequired, header, interpretSettlement, onStorefront } from './x402.mjs';
 
@@ -104,7 +104,9 @@ export async function presignCheck({ paymentRequired, approved, pending, payerEn
   } catch (error) {
     return no('NODE_UNREADABLE', `a name could not be hashed: ${errorText(error)}`);
   }
+  if (!(now + pending.etaMinutes * 60_000 <= Date.parse(approved.deadlineIso))) return no('MISSES_DEADLINE', 'the delivery would miss the deadline at pay time');
   const sync = checkPaymentRequired(paymentRequired, {
+    now,
     approved,
     pending,
     nodes,
@@ -114,14 +116,6 @@ export async function presignCheck({ paymentRequired, approved, pending, payerEn
     budgetLeftMicro,
   });
   if (!sync.ok) return sync;
-  let payee;
-  try {
-    payee = await hooks.resolvePayee(approved.shopEns);
-  } catch (error) {
-    return no('PAYEE_UNRESOLVED', `the ENS read of ${approved.shopEns} failed: ${errorText(error)}`);
-  }
-  if (typeof payee !== 'string' || !ADDRESS.test(payee)) return no('PAYEE_UNRESOLVED', `${approved.shopEns} has no Whitechain address in ENS`);
-  if (lower(payee) !== lower(sync.requirement.payTo)) return no('PAYEE_MISMATCH', `payTo is not the ENS address of ${approved.shopEns}`);
   let accepts;
   try {
     accepts = await hooks.readAccepts(approved.shopEns);
@@ -140,6 +134,14 @@ export async function presignCheck({ paymentRequired, approved, pending, payerEn
     now,
   });
   if (!quote.ok) return quote;
+  let payee;
+  try {
+    payee = await hooks.resolvePayee(approved.shopEns);
+  } catch (error) {
+    return no('PAYEE_UNRESOLVED', `the ENS read of ${approved.shopEns} failed: ${errorText(error)}`);
+  }
+  if (typeof payee !== 'string' || !ADDRESS.test(payee)) return no('PAYEE_UNRESOLVED', `${approved.shopEns} has no Whitechain address in ENS`);
+  if (lower(payee) !== lower(sync.requirement.payTo)) return no('PAYEE_MISMATCH', `payTo is not the ENS address of ${approved.shopEns}`);
   return { ok: true, requirement: sync.requirement, amountMicro: sync.amountMicro, paymentRequired, quoteEntity: quote.entry };
 }
 
@@ -158,6 +160,7 @@ export function createPayer(ctx) {
   const contracts = ctx.contracts ?? knownContracts();
   let pending = null;
   let inFlight = false;
+  let quoting = false;
   let attempted = false;
   const outcome = { status: null, reason: null, detail: null, receipt: null, orderId: null, priceMicro: null, arrivesAt: null, dispatch: null };
 
@@ -190,11 +193,16 @@ export function createPayer(ctx) {
     } catch (error) {
       return no('QUOTE_FAILED', `the shop did not quote: ${errorText(error)}`);
     }
-    if (res?.ok === false) return no('SHOP_REFUSED', [].concat(res.reasons ?? res.refused ?? 'refused').join('; '));
+    if (res?.ok === false) return no('SHOP_REFUSED', clip([].concat(res.reasons ?? res.refused ?? 'refused').join('; ')));
     const parsed = BuyerQuote.safeParse(res);
     if (!parsed.success) return no('BAD_QUOTE', 'the shop answered with an unreadable quote');
     const q = parsed.data.quote;
-    const priceMicro = microFrom(q.priceMicro);
+    let priceMicro;
+    try {
+      priceMicro = microFrom(q.priceMicro);
+    } catch {
+      return no('BAD_QUOTE', 'the quoted price is not a valid amount');
+    }
     const now = clock();
     if (q.shop !== approved.shopEns) return no('SHOP_MISMATCH', 'the quote is from another shop');
     if (q.item !== approved.item || q.quantity !== approved.quantity) return no('ORDER_MISMATCH', 'the quote is not for the approved item and quantity');
@@ -203,22 +211,22 @@ export function createPayer(ctx) {
     if (!(now + q.etaMinutes * 60_000 <= Date.parse(approved.deadlineIso))) return no('MISSES_DEADLINE', 'the quoted delivery misses the deadline');
     if (!(q.validUntil * 1000 > now)) return no('QUOTE_EXPIRED', 'the shop quote has expired');
     if (!onStorefront(parsed.data.payUrl, approved.storefront)) return no('RESOURCE_MISMATCH', 'the pay URL is not on the approved storefront');
-    pending = { orderId: q.orderId, priceMicro, etaMinutes: q.etaMinutes, validUntil: q.validUntil, payUrl: parsed.data.payUrl, terms: parsed.data.terms };
+    const order = { orderId: q.orderId, priceMicro, etaMinutes: q.etaMinutes, validUntil: q.validUntil, payUrl: parsed.data.payUrl, terms: parsed.data.terms };
     log.message(approved.agents.storefront, payerEns, `quote ${displayUsdt(priceMicro)} USDT, ${q.etaMinutes} min (SYNTHETIC)`);
-    return { ok: true };
+    return { ok: true, order };
   }
 
-  async function challenge() {
-    log.message(payerEns, approved.agents.storefront, `pay order ${pending.orderId}`);
+  async function challenge(order) {
+    log.message(payerEns, approved.agents.storefront, `pay order ${order.orderId}`);
     let res;
     try {
-      res = await shopClient.pay({ payUrl: pending.payUrl, terms: pending.terms, requestId: state.requestId });
+      res = await shopClient.pay({ payUrl: order.payUrl, terms: order.terms, requestId: state.requestId });
     } catch (error) {
       return no('NO_402', `the shop did not answer: ${errorText(error)}`);
     }
     if (res?.status !== 402) {
       const why = res?.body && typeof res.body === 'object' ? [res.body.reason, res.body.error].find((v) => typeof v === 'string') : undefined;
-      return no(res?.status === 403 ? 'SHOP_REFUSED' : 'NO_402', why ?? `the shop answered HTTP ${res?.status} instead of 402`);
+      return no(res?.status === 403 ? 'SHOP_REFUSED' : 'NO_402', clip(why ?? `the shop answered HTTP ${res?.status} instead of 402`));
     }
     const fromHeader = codec.decodePaymentRequired(header(res.headers, 'payment-required'));
     const paymentRequired = fromHeader ?? (res.body?.x402Version !== undefined ? res.body : null);
@@ -226,7 +234,7 @@ export function createPayer(ctx) {
     return presignCheck({
       paymentRequired,
       approved,
-      pending,
+      pending: order,
       payerEns,
       buyerEns,
       requestId: state.requestId,
@@ -237,9 +245,12 @@ export function createPayer(ctx) {
     });
   }
 
-  async function signAndSend(check) {
+  async function signAndSend(check, order) {
     const amount = check.amountMicro;
-    if (amount > budgetLeft()) return settle('refused', 'OVER_BUDGET', 'the amount is above what is left of the budget');
+    if (amount > budgetLeft()) {
+      attempted = true;
+      return settle('refused', 'OVER_BUDGET', 'the amount is above what is left of the budget');
+    }
     if (ctx.dryRun) {
       attempted = true;
       log.guard('G5', true, `dry run: every check passed for ${displayUsdt(amount)} USDT, nothing signed`);
@@ -254,7 +265,7 @@ export function createPayer(ctx) {
         requirement: check.requirement,
         mandate: { budgetUsdt: state.mandate.budgetUsdt, deadlineIso: state.mandate.deadlineIso, hash: state.mandate.hash },
         payerEns,
-        approved: { shopEns: approved.shopEns, orderId: pending.orderId, amountMicro: amount },
+        approved: { shopEns: approved.shopEns, orderId: order.orderId, amountMicro: amount },
       });
     } catch (error) {
       state.reservedMicro -= amount;
@@ -264,18 +275,29 @@ export function createPayer(ctx) {
       state.reservedMicro -= amount;
       return settle('refused', 'SIGN_FAILED', 'the signer returned no signature; nothing was sent');
     }
-    log.guard('G5', true, `every check passed before signing: ${displayUsdt(amount)} USDT for order ${pending.orderId} to ${approved.shopEns}`);
+    log.guard('G5', true, `every check passed before signing: ${displayUsdt(amount)} USDT for order ${order.orderId} to ${approved.shopEns}`);
     log.message(payerEns, approved.agents.storefront, 'payment signature');
     let res = null;
     let sendError = null;
     try {
-      res = await shopClient.pay({ payUrl: pending.payUrl, terms: pending.terms, requestId: state.requestId, signature });
+      res = await shopClient.pay({ payUrl: order.payUrl, terms: order.terms, requestId: state.requestId, signature });
     } catch (error) {
       sendError = errorText(error);
     }
-    const result = sendError ? { kind: 'unsettled', reason: `send error: ${sendError}` } : interpretSettlement(res, codec);
+    let result;
+    try {
+      result = sendError ? { kind: 'unsettled', reason: `send error: ${sendError}` } : interpretSettlement(res, codec);
+      if (result.kind === 'paid') {
+        const st = result.settlement;
+        if ((st.network !== undefined && st.network !== PAYMENT_NETWORK) || (st.payer !== undefined && lower(st.payer) !== lower(wallet))) {
+          result = { kind: 'unsettled', reason: 'the receipt does not match this payment (network or payer)' };
+        }
+      }
+    } catch (error) {
+      result = { kind: 'unsettled', reason: `the settlement answer could not be read: ${clip(errorText(error))}` };
+    }
     state.reservedMicro -= amount;
-    const base = { orderId: pending.orderId, priceMicro: amount };
+    const base = { orderId: order.orderId, priceMicro: amount };
     if (result.kind === 'paid') {
       state.spentMicro += amount;
       const dispatch = Dispatch.safeParse(res.body?.dispatch);
@@ -309,16 +331,22 @@ export function createPayer(ctx) {
   async function payOrder() {
     if (inFlight) return { status: 'refused', reason: 'PAY_IN_FLIGHT', detail: 'pay_order is already running for this order' };
     if (attempted) return { status: 'refused', reason: 'ALREADY_ATTEMPTED', detail: 'this errand already made its one payment attempt' };
+    if (quoting) return { status: 'refused', reason: 'QUOTE_IN_FLIGHT', detail: 'get_quote is still running' };
     if (!pending) return { status: 'refused', reason: 'NO_QUOTE', detail: 'call get_quote first' };
     inFlight = true;
+    let order = pending; // this payment is for this order only, whatever get_quote does meanwhile
     try {
       for (let round = 0; ; round++) {
-        const check = await challenge();
-        if (check.ok) return await signAndSend(check);
+        const check = await challenge(order);
+        if (check.ok) return await signAndSend(check, order);
         if (check.requote && round === 0) {
           log.guard('G5', true, `${check.reason}: re-quoting once (new quote, new 402)`);
           const again = await quote();
-          if (again.ok) continue;
+          if (again.ok) {
+            order = again.order;
+            pending = order;
+            continue;
+          }
           attempted = true;
           return settle('refused', again.reason, again.detail);
         }
@@ -351,8 +379,16 @@ export function createPayer(ctx) {
       inputSchema: NoInput,
       executed: ctx.executed,
       execute: async () => {
+        if (attempted || inFlight || quoting) return { ok: false, reason: 'ALREADY_ATTEMPTED', detail: 'the payment for this order has already started' };
+        quoting = true;
+        let q;
+        try {
+          q = await quote();
+        } finally {
+          quoting = false;
+        }
         if (attempted || inFlight) return { ok: false, reason: 'ALREADY_ATTEMPTED', detail: 'the payment for this order has already started' };
-        const q = await quote();
+        if (q.ok) pending = q.order;
         if (!q.ok) {
           attempted = true;
           settle('refused', q.reason, q.detail);

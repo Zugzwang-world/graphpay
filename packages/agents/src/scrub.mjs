@@ -35,7 +35,15 @@ export function scrubDeep(value, scrub, depth = 0) {
   return out;
 }
 
+// A URL reduced to its origin: viem and fetch errors quote RPC URLs, and keyed ones carry secrets.
+const URL_IN_TEXT = /\b(https?|wss?):\/\/([^\s/"'`<>)\]]+)[^\s"'`<>)\]]*/gi;
+
 export function errorText(error) {
-  if (error instanceof Error) return `${error.name}: ${error.message}`;
-  return String(error);
+  const text = error instanceof Error ? `${error.name}: ${error.message}` : String(error);
+  return text.replace(URL_IN_TEXT, (_, scheme, host) => `${scheme}://${host.replace(/^[^@]*@/, '')}/<path removed>`);
+}
+
+// Shop-controlled text that enters the log and a model's context: one short line.
+export function clip(text, max = 200) {
+  return String(text ?? '').replace(/[\u0000-\u001f\u007f]+/g, ' ').trim().slice(0, max);
 }

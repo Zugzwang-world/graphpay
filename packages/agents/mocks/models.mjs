@@ -138,6 +138,7 @@ function payerScript(play, cast) {
       return answer({ status: 'paid', reason: 'MOCK wrong-shop payer claims it paid', receiptTransaction: null });
     }
     if (view.step === 0) return calls('payer', 0, [['get_quote', {}]]);
+    if (view.step === 1 && play === 'quote-race') return calls('payer', 1, [['pay_order', {}], ['get_quote', {}], ['get_quote', {}]]);
     if (view.step === 1) {
       const n = play === 'overspend' ? 3 : 1;
       return calls('payer', 1, Array.from({ length: n }, () => ['pay_order', {}]));

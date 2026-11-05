@@ -89,7 +89,7 @@ export async function runErrand(options = {}) {
   const request = options.request ?? cast.order.request;
   const runId = options.runId ?? (mode === 'mock' ? `mock-${sha256(`${request}|${now}`).slice(0, 16)}` : `run-${randomBytes(8).toString('hex')}`);
   const requestId = `0x${sha256(runId)}`;
-  const scrub = createScrubber([env.ANTHROPIC_API_KEY, env.XAI_API_KEY, ...(options.secrets ?? [])]);
+  const scrub = createScrubber([...Object.entries(env).filter(([k]) => /(?:_PRIVATE_KEY|_API_KEY|_ACCESS_KEY|_TOKEN|_SECRET|_PASSCODE|_RPC_URL)$/.test(k)).map(([, v]) => v), ...(options.secrets ?? [])]);
   const log = createRunLog({ scrub, onEvent: options.onEvent });
   const meter = createMeter();
   const started = performance.now();

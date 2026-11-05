@@ -4,7 +4,8 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { promptFor, runErrand, TAIL, teamCast } from '../index.mjs';
-import { MOCK_SDL, mockAddress, runMockErrand } from '../mocks/index.mjs';
+import { base64JsonCodec } from '../index.mjs';
+import { createMockWorld, MOCK_SDL, mockAddress, runMockErrand } from '../mocks/index.mjs';
 
 const cast = teamCast();
 const good = cast.shopByRole('good').ens;
@@ -262,4 +263,30 @@ test('E2E_BUYER picks the paying agent: the acceptance agent pays as itself', as
   assert.equal(runLog.result.status, 'paid');
   assert.equal(world.hooks.signed[0].payerEns, cast.payers.acceptance.ens);
   assert.equal(runLog.cast.buyer.paysAs, cast.payers.acceptance.ens);
+});
+
+test('a codec that throws after signing still counts the money as unsettled (G16)', async () => {
+  const world = createMockWorld({ now: NOON_IST });
+  world.hooks.x402 = { ...base64JsonCodec, decodePaymentResponse: () => { throw new Error('bad PAYMENT-RESPONSE header'); } };
+  const { runLog, state } = await runErrand({ now: NOON_IST, mode: 'mock', cast: world.cast, hooks: world.hooks, mcp: world.mcp, mockModels: world.mockModels });
+  assert.equal(runLog.result.status, 'unsettled');
+  assert.equal(state.spentMicro, 4_800_000n);
+  assert.equal(state.reservedMicro, 0n);
+});
+
+test('a keyed URL inside a hook error never reaches the run log', async () => {
+  const world = createMockWorld({ now: NOON_IST });
+  const keyed = ['https://rpc.invalid/v1', 'K'.repeat(24)].join('/');
+  world.hooks.resolvePayee = async () => { throw new Error(`HTTP request failed. URL: ${keyed}`); };
+  const { runLog } = await runErrand({ now: NOON_IST, mode: 'mock', cast: world.cast, hooks: world.hooks, mcp: world.mcp, mockModels: world.mockModels });
+  assert.deepEqual(refusals(runLog), ['PAYEE_UNRESOLVED']);
+  assert.equal(JSON.stringify(runLog).includes('K'.repeat(24)), false);
+});
+
+test('get_quote cannot swap the order while pay_order is signing it', async () => {
+  const { runLog, world } = await run({ play: { payer: 'quote-race' } });
+  assert.equal(runLog.result.status, 'paid');
+  assert.equal(world.hooks.signed.length, 1);
+  assert.equal(world.hooks.signed[0].orderId, runLog.result.orderId);
+  assert.equal(world.hooks.quotes.entries.length, 1, 'no second quote was made');
 });

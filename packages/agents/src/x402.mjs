@@ -2,6 +2,8 @@
 // §5–§6): client spend controls checked on every field of the 402 (G5), and the
 // rule for reading a settlement answer after a signature (G16).
 
+import { clip } from './scrub.mjs';
+
 const ADDRESS = /^0x[0-9a-fA-F]{40}$/;
 const HEX32 = /^0x[0-9a-fA-F]{64}$/;
 const ZERO32 = `0x${'0'.repeat(64)}`;
@@ -90,6 +92,11 @@ export function checkPaymentRequired(paymentRequired, ctx) {
   if (typeof req.amount !== 'string' || !/^\d{1,19}$/.test(req.amount)) return no('BAD_402', 'the amount is not a whole number of micro units');
   const amountMicro = BigInt(req.amount);
   if (amountMicro <= 0n) return no('BAD_402', 'the amount is zero');
+  const timeout = Number(req.maxTimeoutSeconds);
+  if (!(Number.isInteger(timeout) && timeout > 0 && timeout <= 600)) return no('BAD_402', 'maxTimeoutSeconds is not between 1 and 600');
+  if (ctx.now !== undefined && !(/^\d{1,19}$/.test(String(req.extra?.order?.deadline ?? '')) && Number(req.extra.order.deadline) * 1000 > ctx.now)) {
+    return no('ORDER_EXPIRED', "the order's deadline is missing or has passed");
+  }
   if (amountMicro > approved.maxPriceMicro) return no('OVER_APPROVED_PRICE', 'the amount is above the approved price');
   if (amountMicro > ctx.budgetLeftMicro) return no('OVER_BUDGET', 'the amount is above what is left of the budget');
   if (amountMicro !== pending.priceMicro) return no('AMOUNT_MISMATCH', 'the amount is not the quoted price');
@@ -122,13 +129,13 @@ export function interpretSettlement(response, codec) {
   }
   if (status >= 400 && status < 500 && status !== 408) {
     if (settlement && settlement.success === false) {
-      const reason = typeof settlement.errorReason === 'string' ? settlement.errorReason : 'payment failed';
+      const reason = typeof settlement.errorReason === 'string' ? clip(settlement.errorReason, 80) : 'payment failed';
       if (HEX32.test(settlement.transaction ?? '')) return { kind: 'failed', reason, transaction: settlement.transaction };
       return { kind: 'refused', reason };
     }
     if (settlement) return { kind: 'unsettled', reason: `HTTP ${status} with an unclear settlement answer` };
     const body = response.body && typeof response.body === 'object' ? response.body : {};
-    const reason = [body.reason, body.error, body.refused].find((v) => typeof v === 'string') ?? `HTTP ${status}`;
+    const reason = clip([body.reason, body.error, body.refused].find((v) => typeof v === 'string') ?? `HTTP ${status}`, 120);
     return { kind: 'refused', reason };
   }
   return { kind: 'unsettled', reason: `HTTP ${status}` };

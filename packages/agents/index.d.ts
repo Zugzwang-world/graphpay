@@ -293,7 +293,7 @@ export declare function createShopGateway(ctx: {
 export declare function presignCheck(input: {
   paymentRequired: unknown;
   approved: { shopEns: string; storefront: string; maxPriceMicro: bigint };
-  pending: { orderId: string; payUrl: string; priceMicro: bigint };
+  pending: { orderId: string; payUrl: string; priceMicro: bigint; etaMinutes: number };
   payerEns: string;
   buyerEns: string;
   requestId: string;
