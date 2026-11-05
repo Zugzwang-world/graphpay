@@ -66,6 +66,16 @@ export declare function discoverShops(client: PublicArkivClient, options: { cate
 export declare function writeHeartbeat(arkiv: ArkivConnection, values: { instance: string; state: string; cursorBlock: number | bigint; cursorLog: number | bigint; headBlock: number | bigint; lagBlocks: number | bigint; updatedTs: number | bigint }, options?: { key?: Hex | null; extend?: boolean }): Promise<Hex>;
 export declare function readHeartbeats(client: PublicArkivClient, options?: { owner?: string }): Promise<Row[]>;
 
+export declare function openShop(arkiv: ArkivConnection, shop: { shopKey: Hex; shopEns: string; now?: number; key?: Hex | null }): Promise<{ key: Hex; created: boolean }>;
+export declare function closeShop(arkiv: ArkivConnection, options: { key: Hex; now?: number }): Promise<{ closed: true; gone: boolean }>;
+export declare function openShopKeys(client: PublicArkivClient, options?: { owner?: string; now?: number }): Promise<Set<string>>;
+export interface PresenceInput { agentEns: string; ownerEns: string; role: string; session: string }
+export declare function markPresence(arkiv: ArkivConnection, presence: PresenceInput & { key?: Hex | null }): Promise<{ key: Hex; created: boolean }>;
+export declare function agentsOnline(client: PublicArkivClient, options?: { owner?: string; ownerEns?: string | null; session?: string | null }): Promise<{ key: Hex; agentEns: string; ownerEns: string; role: string; session: string; expiresAt: bigint }[]>;
+export declare function recordHandoff(arkiv: ArkivConnection, handoff: { requestId: string; fromAgent: string; toAgent: string; step: string }): Promise<{ key: Hex; txHash: Hex }>;
+export declare function handoffsFor(client: PublicArkivClient, requestId: string, options?: { owner?: string }): Promise<{ key: Hex; requestId: string; fromAgent: string; toAgent: string; step: string; createdAt: bigint | null }[]>;
+export declare function activityHooks(arkiv: ArkivConnection): { presence(phase: 'start' | 'renew', info: PresenceInput): Promise<void>; handoff(from: string, to: string, step: string, meta: { requestId: string }): Promise<void> };
+
 export interface ExplainTrace { explainId: string; backend: string; calls: number; queries: string[]; ms: number; bytes: number; entityKeys: Hex[]; blockNumber: string | null; warnings: string[]; notes: string[]; truncated: boolean; reads?: unknown[] }
 export interface GraphEngine { backend: string; explainStore: { get(id: string): ExplainTrace | null; put(trace: ExplainTrace): void; size(): number }; context(options?: { rowCap?: number }): unknown }
 export declare const SDL: string;

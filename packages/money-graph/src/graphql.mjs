@@ -31,7 +31,11 @@ type Query {
   neighborhood(ens: String!, depth: Int = 2, kind: String = "pay", sinceDay: Int): Neighborhood!
   edges(kind: String!, sinceDay: Int, untilDay: Int, limit: Int = 50): [Edge!]!
   order(id: String!): [Edge!]!
-  shops(category: String, box: Box!, synthetic: Boolean = false, limit: Int = 50): [Shop!]!
+  shops(category: String, box: Box!, synthetic: Boolean = false, openNow: Boolean = false, limit: Int = 50): [Shop!]!
+  "Agents at work now (live presence rows), for one owner's agents or one run."
+  agentsOnline(owner: String, session: String): [Presence!]!
+  "One run's handoffs between agents, oldest first."
+  handoffs(requestId: String!): [Handoff!]!
   today: Int!
 }
 
@@ -91,6 +95,9 @@ type Ranked { node: Node!, value: U64!, tally: Tally! }
 type Path { found: Boolean!, hops: Int, nodes: [Node!]! }
 type Neighborhood { nodes: [Node!]!, edges: [Edge!]! }
 
+type Presence { key: String!, agent: Node!, owner: Node!, role: String!, session: String! }
+type Handoff { key: String!, requestId: String!, from: Node!, to: Node!, step: String! }
+
 type Shop {
   ens: String!
   shopKey: String!
@@ -103,6 +110,8 @@ type Shop {
   dataset: String
   name: String
   hours: String
+  "Its Open toggle is on (a live shop_open row from W_DIRECTORY)."
+  openNow: Boolean
   node: Node!
 }
 `;
@@ -133,9 +142,9 @@ export function usdt(micro) {
 // Owners per entity type for a dataset: live data from the ledger (and the recorder for
 // edges); a synthetic city from its seed wallet alone, read only when asked for.
 export function ownersFor(dataset = 'live', writers = writerAddresses()) {
-  if (dataset === 'live') return { node: [writers.W_LEDGER], tally: [writers.W_LEDGER], link: [writers.W_LEDGER], edge: [writers.W_LEDGER, writers.W_SYNC], shop: [writers.W_DIRECTORY] };
+  if (dataset === 'live') return { node: [writers.W_LEDGER], tally: [writers.W_LEDGER], link: [writers.W_LEDGER], edge: [writers.W_LEDGER, writers.W_SYNC], shop: [writers.W_DIRECTORY], activity: [writers.W_DIRECTORY] };
   const seed = seedOwner(dataset, story, writers);
-  return { node: [seed], tally: [seed], link: [seed], edge: [seed], shop: [writers.W_DIRECTORY] };
+  return { node: [seed], tally: [seed], link: [seed], edge: [seed], shop: [writers.W_DIRECTORY], activity: [writers.W_DIRECTORY] };
 }
 
 function nodeRef(ens, epoch = null) {
@@ -383,16 +392,36 @@ export function createContext({ engine, dataset = 'live', listCap = 100, writers
         return byRef(await ctx.query(ENTITIES.edge, { where, owners: owners.edge, want: cap(limit) })).map(edgeOut);
       },
       order: async (_, { id }) => byRef(await ctx.query(ENTITIES.edge, { where: [eq('order_id', str(id))], owners: owners.edge, want: 100 })).map(edgeOut),
-      shops: async (_, { category, box, synthetic, limit }) => {
+      shops: async (_, { category, box, synthetic, openNow, limit }) => {
         const rows = await ctx.query(ENTITIES.shop, { where: discoveryFilters({ category, box, synthetic }).slice(2), owners: owners.shop, want: cap(limit) });
         const seen = new Map();
         for (const r of rows) {
           if (r.status !== 'active' || r.lat < box.latMin || r.lat > box.latMax || r.lng < box.lngMin || r.lng > box.lngMax) continue;
           if (!synthetic && r.synthetic) continue;
           const p = fromJsonBytes(r.payload) ?? {};
-          seen.set(r.shop_ens, { ens: r.shop_ens, shopKey: r.shop_key, category: r.category, area: r.area ?? null, city: r.city ?? null, lat: r.lat, lng: r.lng, synthetic: r.synthetic, dataset: r.dataset ?? null, name: p.name ?? null, hours: p.hours ?? null, node: nodeRef(r.shop_ens) });
+          seen.set(r.shop_ens, { ens: r.shop_ens, shopKey: r.shop_key, category: r.category, area: r.area ?? null, city: r.city ?? null, lat: r.lat, lng: r.lng, synthetic: r.synthetic, dataset: r.dataset ?? null, name: p.name ?? null, hours: p.hours ?? null, openNow: null, node: nodeRef(r.shop_ens) });
         }
-        return [...seen.values()];
+        const shops = [...seen.values()];
+        if (!openNow) return shops;
+        // One more read: the live Open rows of these shops, still ahead of now.
+        const now = BigInt(Math.floor(Date.now() / 1000));
+        const open = await ctx.queryAny(ENTITIES.shop_open, { terms: shops.map((x) => eq('shop_key', key(x.shopKey))), owners: owners.activity });
+        const on = new Set(open.filter((o) => BigInt(o.open_until) > now).map((o) => String(o.shop_key).toLowerCase()));
+        return shops.filter((x) => on.has(String(x.shopKey).toLowerCase())).map((x) => ({ ...x, openNow: true }));
+      },
+      agentsOnline: async (_, { owner, session }) => {
+        const where = [];
+        if (owner) where.push(eq('owner_ens', str(normalizedName(owner))));
+        if (session) where.push(eq('session', str(String(session))));
+        if (where.length === 0) throw new Error('agentsOnline: give owner or session');
+        const rows = await ctx.query(ENTITIES.agent_presence, { where, owners: owners.activity });
+        return rows.map((r) => ({ key: r.$key, agent: nodeRef(r.agent_ens), owner: nodeRef(r.owner_ens), role: r.role, session: r.session }));
+      },
+      handoffs: async (_, { requestId }) => {
+        const rows = await ctx.query(ENTITIES.handoff, { where: [eq('request_id', str(String(requestId)))], owners: owners.activity });
+        return rows
+          .sort((a, b) => (big(a.$createdAt) < big(b.$createdAt) ? -1 : big(a.$createdAt) > big(b.$createdAt) ? 1 : 0))
+          .map((r) => ({ key: r.$key, requestId: r.request_id, from: nodeRef(r.from_agent), to: nodeRef(r.to_agent), step: r.step }));
       },
       path: async (_, { from, to, maxDepth, kinds }) => {
         const depth = Math.min(3, Math.max(1, maxDepth ?? 3));
