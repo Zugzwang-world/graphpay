@@ -25,3 +25,6 @@ packages/contracts/lib/
 # local
 .DS_Store
 *.log
+
+# Next.js
+next-env.d.ts

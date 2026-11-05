@@ -17,3 +17,13 @@ Every version the event code pins, with how it was checked. Each track adds the 
 | `pnpm/action-setup` | v6 | first CI run on `main` | see the CI run |
 | `foundry-rs/foundry-toolchain` | v1.9.2 | first CI run on `main` | see the CI run |
 | BIP-39 English wordlist | `scripts/lib/bip39-english.txt` from bitcoin/bips | SHA-256 `2f5eed53a4727b4bf8880d8f3f199efc90e58503646d9ff8eff3a2ed3b24dbda`, 2,048 words; a test compares it with viem's copy | verified |
+
+## M0 web placeholder (`apps/web`, main, checked 2026-11-05 22:20 IST)
+
+| item | pinned | how checked | status |
+|---|---|---|---|
+| next | 16.4.5 | `npm view next version` (npm `latest`, published 2026-11-03); the pack pinned 16.4.4 (published 2026-11-02); `next build` passes on Node 22.23.4 | changed from the pack (newest patch of the same minor) |
+| react, react-dom | 19.3.1 | `npm view`; matches the pack | verified |
+| typescript | 5.9.3 | the pack's pin (npm `latest` is 7.0.2; Next's template major is 5) | verified |
+| @types/react, @types/react-dom | 19.3.0 | `npm view` (latest 19.x) | verified |
+| @types/node | 22.20.5 | `npm view @types/node@22` (latest 22.x, matching Node 22) | verified |
