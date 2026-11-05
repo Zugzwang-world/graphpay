@@ -61,7 +61,11 @@ export async function runAgent({ role, ens, task, tools, models, log, meter, sdl
     if (!error) {
       const parsed = OUTPUTS[role].safeParse(raw);
       if (parsed.success) output = parsed.data;
-      else error = 'no answer: the reply does not match the output schema';
+      else {
+        // Paths and codes only: a rejected value could be model prose or echoed data.
+        const why = parsed.error.issues.slice(0, 4).map((i) => `${i.path.join('.') || 'reply'}: ${i.code}`).join('; ');
+        error = `no answer: the reply does not match the output schema (${why})`;
+      }
     }
   } catch (e) {
     error = noAnswerReason(e, steps);

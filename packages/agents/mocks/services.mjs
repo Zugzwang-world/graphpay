@@ -144,7 +144,7 @@ export function createMockMcp({ cast, rows = mockGraphRows(cast) } = {}) {
     node: ({ ens }) => (byEns.has(ens) ? asNode(byEns.get(ens)) : null),
     nodes: ({ kind, category, city, ens, limit }) =>
       rows
-        .filter((r) => (kind == null || r.kind === kind) && (category == null || r.category === category) && (city == null || r.city === city) && (ens == null || ens.includes(r.ens)))
+        .filter((r) => (kind == null || r.kind === kind) && (category == null || r.category === String(category).toLowerCase()) && (city == null || r.city === String(city).toLowerCase()) && (ens == null || ens.includes(r.ens)))
         .slice(0, Math.min(limit ?? 50, 50))
         .map(asNode),
   };
