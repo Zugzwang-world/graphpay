@@ -24,6 +24,12 @@ const checkout = { address, abi: checkoutAbi };
 const read = (functionName, args = []) => publicClient.readContract({ ...checkout, functionName, args });
 let problems = 0;
 
+// The address must be our checkout before any merchant approves a float to it.
+const [code, pinned, owner] = await Promise.all([publicClient.getCode({ address }), read('USDT'), read('owner')]);
+if (!code || !isAddressEqual(pinned, usdt().address) || !isAddressEqual(owner, ctx.account('DEPLOYER').address)) {
+  throw new Error(`${address} is not our USDT checkout (code, USDT() and owner() checked); nothing sent`);
+}
+
 // 1. RENEWER as a second relayer.
 const renewer = ctx.account('RENEWER').address;
 if (await read('isRelayer', [renewer])) {
@@ -37,7 +43,8 @@ if (await read('isRelayer', [renewer])) {
 const token = usdt();
 for (const m of merchantPlan()) {
   if (!hasKey(ctx.env, m.walletRole)) {
-    console.log(`2. ${m.shop}: no key for ${m.walletRole}, skipped`);
+    console.log(`2. STOP ${m.shop}: no key for ${m.walletRole}`);
+    problems++;
     continue;
   }
   const merchant = ctx.account(m.walletRole).address;
@@ -60,7 +67,7 @@ for (const p of plan) {
   const step = policyAction(p, onChain, bound);
   const cap = `${formatUnits(p.capMicro, token.decimals)}/day`;
   if (step.action === 'skip') {
-    console.log(`3. ${p.ensName} → ${p.walletRole} (${cap}) set already`);
+    console.log(`3. ${p.ensName} → ${p.walletRole} (${cap}${step.revoked ? ', revoked' : ''}) set already`);
     continue;
   }
   if (step.action === 'stop') {
@@ -71,12 +78,12 @@ for (const p of plan) {
   if (!isAddressEqual(onChain.wallet, p.wallet) && onChain.wallet !== '0x0000000000000000000000000000000000000000') {
     console.log(`   note: ${p.ensName} moves from wallet ${onChain.wallet} to ${p.walletRole}`);
   }
-  console.log(`3. ${step.action} policy ${p.ensName} → ${p.walletRole} ${p.wallet}, epoch ${p.epoch}, cap ${cap}, expiry ${step.expiry}`);
+  console.log(`3. ${step.action} policy ${p.ensName} → ${p.walletRole} ${p.wallet}, epoch ${p.epoch}, cap ${cap}, expiry ${step.expiry}${step.revoked ? ', stays revoked' : ''}`);
   if (ctx.send) {
     await sendTx(ctx, {
       role: 'POLICY_WRITER',
       label: `setPolicy ${p.ensName}`,
-      request: { ...checkout, functionName: 'setPolicy', args: [p.node, p.epoch, p.wallet, false, p.capMicro, step.expiry] },
+      request: { ...checkout, functionName: 'setPolicy', args: [p.node, p.epoch, p.wallet, step.revoked, p.capMicro, step.expiry] },
     });
   }
 }

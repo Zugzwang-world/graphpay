@@ -24,7 +24,7 @@ One line per PR: time (IST) · activity · result · PR link. Append under your 
 
 - 01:55 IST · payments · M1 contract and 88 fork tests on the real test USDT and Permit2; two reviewer passes: ship; auto-merge after the contracts job · https://github.com/Zugzwang-world/graphpay/pull/12
 - 01:51 IST · payments · merged: M1 checkout contract and 90 fork tests (M1 done) · https://github.com/Zugzwang-world/graphpay/pull/12
-- 02:55 IST · payments · M2 on the real chain: USDT checkout deployed, verified, set up; scripts and records PR · pay/deploy
+- 01:58 IST · payments · M2 on the real chain (deploy 01:54, setup 01:57): USDT checkout deployed, verified, set up; scripts and records PR · pay/deploy
 
 ## identity
 

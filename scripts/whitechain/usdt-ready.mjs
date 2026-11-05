@@ -21,7 +21,8 @@ check('token has code', Boolean(await publicClient.getCode({ address: token.addr
 check(`decimals = ${token.decimals}`, (await read(token.address, tokenAbi, 'decimals')) === token.decimals);
 check('EIP-712 domain = DOMAIN_SEPARATOR()', (await read(token.address, tokenAbi, 'DOMAIN_SEPARATOR')) === domainSeparator({ domain: tokenDomain(ctx.chain.id, token) }));
 const funder = config.wallets.carried.FUNDER;
-check('FUNDER holds test USDT', true, `${formatUnits(await read(token.address, erc20Abi, 'balanceOf', [funder]), 6)} USDT`);
+const funderUsdt = await read(token.address, erc20Abi, 'balanceOf', [funder]);
+check('FUNDER holds test USDT for top-ups', funderUsdt > 0n, `${formatUnits(funderUsdt, 6)} USDT`);
 
 const acceptance = castEntries().find((e) => e.key === 'acceptance');
 const wallet = ctx.account(acceptance.walletRole).address;

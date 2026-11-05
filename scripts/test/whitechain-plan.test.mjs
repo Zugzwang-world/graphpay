@@ -26,7 +26,12 @@ test('one policy per paying agent, from the story, on its own wallet', () => {
 
 test('owner wallets are never bound', () => {
   const persona = { ...cast, buyerAgents: [...cast.buyerAgents, { key: 'x', label: 'x', displayName: 'X', walletRole: cast.persona.walletRole, pays: true, capMicro: 1 }] };
-  assert.throws(() => policyPlan({ roles: { ...roles, [cast.persona.walletRole]: fake(99) }, now: 0, cast: persona }), /owner wallet/);
+  assert.throws(() => policyPlan({ roles: { ...roles, [cast.persona.walletRole]: fake(99) }, now: 0, cast: persona }), /owner or infrastructure/);
+});
+
+test('infrastructure wallets are never bound, by role or by address', () => {
+  const [first] = Object.keys(roles);
+  assert.throws(() => policyPlan({ roles: { ...roles, FACILITATOR: roles[first] }, now: 0 }), /infrastructure/);
 });
 
 test('two agents on one wallet are refused, and a missing key stops', () => {
@@ -50,7 +55,11 @@ test('setPolicy runs only when the chain differs, and stops on a foreign binding
   assert.equal(policyAction(p, NO_POLICY, ZERO_NODE).action, 'create');
   const same = { epoch: 0, wallet: p.wallet, revoked: false, dailyCapMicro: p.capMicro, expiry: 0n };
   assert.equal(policyAction(p, same, p.node).action, 'skip');
-  assert.equal(policyAction(p, { ...same, revoked: true }, p.node).action, 'update');
+  const revoked = policyAction(p, { ...same, revoked: true }, p.node);
+  assert.equal(revoked.action, 'skip', 'a revoked agent is left revoked');
+  assert.equal(revoked.revoked, true);
+  const moved = policyAction({ ...p, capMicro: p.capMicro + 1n }, { ...same, revoked: true, expiry: 99n }, p.node);
+  assert.deepEqual(moved, { action: 'update', revoked: true, expiry: 99n }, 'an update keeps the revocation and the expiry');
   assert.equal(policyAction(p, NO_POLICY, namehash('other.example')).action, 'stop');
   assert.equal(policyAction(p, { ...same, epoch: 2, dailyCapMicro: 1n }, p.node).action, 'stop');
 });

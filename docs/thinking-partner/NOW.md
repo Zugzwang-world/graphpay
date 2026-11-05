@@ -26,7 +26,7 @@ Updated 23:55 IST. **M0 done; handed over to the Coordinator** (`docs/plan/sessi
 
 ## payments
 
-Updated 02:55 IST, Fri 6 Nov (T1).
+Updated 02:10 IST, Fri 6 Nov (T1).
 - **M1 merged (#12). M2 is done on the real chain:** the checkout is deployed on Whitechain Sepolia for the real test USDT, verified on the explorer and set up (the renewal relayer, three shops' refund floats, five agent spending policies from the story). PR with the scripts and records is open.
 - Checkout: https://explorer.testnet.whitechain.io/address/0x75233b7341B9e86407e4b31599f07b8936716FcA (its address and deploy block are in the config for the mirror).
 - The qualifying payment's readiness check passes: the acceptance agent holds 20 test USDT and has its 6.00/day policy.

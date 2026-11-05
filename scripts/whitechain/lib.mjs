@@ -62,14 +62,21 @@ export async function context(argv, { confirmFlag = '--yes' } = {}) {
     };
     const id = await c.publicClient.getChainId();
     if (id !== chain.id) throw new Error(`the fork reports chain ${id}, not ${chain.id}`);
+    if (!(await isAnvil(c.publicClient))) throw new Error('--fork must be a local anvil fork');
   } else {
     c = await clientsFor('whitechain', env); // refuses any candidate not on chain 1874
+    if (await isAnvil(c.publicClient)) throw new Error('the configured RPC is a local anvil, not the real chain; use --fork');
   }
   if (fork) txlog = FORK_TXLOG;
   const send = flag(argv, confirmFlag);
   const mode = fork ? 'fork' : 'real Whitechain Sepolia';
   console.log(`network: ${mode} (chain ${c.chain.id}, rpc ${c.rpcLabel}); ${send ? 'SENDING' : `dry run (add ${confirmFlag} to send)`}`);
   return { ...c, env, fork: Boolean(fork), send, account: (role) => accountOf(env, role) };
+}
+
+async function isAnvil(publicClient) {
+  const version = await publicClient.request({ method: 'web3_clientVersion' }).catch(() => '');
+  return /anvil/i.test(String(version));
 }
 
 export function accountOf(env, role) {
@@ -97,7 +104,7 @@ export function readTxLog() {
 // Sends one transaction as `role` with an explicit nonce, gas and fees, and waits for its own
 // receipt. Refuses to send while the role has a pending transaction (a timed-out send must be
 // settled first, never repeated blindly).
-export async function sendTx(ctx, { role, label, request, gasFloor = 0n }) {
+export async function sendTx(ctx, { role, label, request, gasFloor = 0n, expectedNonce }) {
   const account = ctx.account(role);
   const { publicClient } = ctx;
   const [latest, pending] = await Promise.all([
@@ -105,6 +112,7 @@ export async function sendTx(ctx, { role, label, request, gasFloor = 0n }) {
     publicClient.getTransactionCount({ address: account.address, blockTag: 'pending' }),
   ]);
   if (pending !== latest) throw new Error(`${role} has a pending transaction (nonce ${latest}); settle it first`);
+  if (expectedNonce !== undefined && latest !== expectedNonce) throw new Error(`${role}'s nonce moved to ${latest} (expected ${expectedNonce}); nothing sent`);
   const estimate = request.bytecode
     ? await publicClient.estimateGas({ account, data: request.data })
     : await publicClient.estimateContractGas({ ...request, account });
@@ -139,9 +147,10 @@ export async function sendTx(ctx, { role, label, request, gasFloor = 0n }) {
 // whitechain.contracts is this track's section of the one config file (ADR-0030). It is
 // spliced in place so the rest of the file keeps its formatting, and the result is checked:
 // only that section may change.
-export function writeContracts(contracts) {
+export function writeContracts(entries) {
   const text = readFileSync(CONFIG_FILE, 'utf8');
   const before = JSON.parse(text);
+  const contracts = { ...before.whitechain.contracts, ...entries }; // a re-record keeps the other entries
   const start = text.indexOf('"contracts":', text.indexOf('"labDoNotReuse"'));
   if (start === -1) throw new Error('whitechain.contracts not found in the config');
   let i = text.indexOf('{', start);

@@ -64,9 +64,13 @@ console.log(`  admin DEPLOYER ${deployer}, relayer FACILITATOR ${relayer}, polic
 const pending = readTxLog().filter((r) => r.label === LABEL && r.status === 'pending' && r.network === (ctx.fork ? 'fork' : 'whitechain'));
 for (const p of pending) {
   if (await publicClient.getCode({ address: p.predicted })) {
-    const sent = readTxLog().find((r) => r.label === LABEL && r.status === 'success' && r.contractAddress && isAddressEqual(r.contractAddress, p.predicted));
-    if (!sent) throw new Error(`a contract exists at the pending address ${p.predicted} but its receipt is not in the log: record it by hand`);
-    record(p.predicted, sent.block, sent.hash);
+    // The receipt may never have reached the log (a timeout): fetch it by the logged hash.
+    const sent = readTxLog().find((r) => r.label === LABEL && r.status === 'sent' && r.nonce === p.nonce);
+    const receipt = sent && (await publicClient.getTransactionReceipt({ hash: sent.hash }).catch(() => null));
+    if (!receipt || receipt.status !== 'success' || !receipt.contractAddress || !isAddressEqual(receipt.contractAddress, p.predicted)) {
+      throw new Error(`a contract exists at the pending address ${p.predicted} but its deploy receipt was not found: check the explorer`);
+    }
+    record(p.predicted, Number(receipt.blockNumber), receipt.transactionHash);
     process.exit(0);
   }
   if (nonce > p.nonce) throw new Error(`DEPLOYER's nonce ${p.nonce} was used without a contract at ${p.predicted}: check the explorer before retrying`);
@@ -82,6 +86,7 @@ const receipt = await sendTx(ctx, {
   role: 'DEPLOYER',
   label: LABEL,
   request: { abi: checkoutAbi, bytecode: artifact.bytecode.object, args, data },
+  expectedNonce: nonce, // the nonce the pending record predicted from
 });
 const address = getAddress(receipt.contractAddress);
 if (!isAddressEqual(address, predicted)) throw new Error(`deployed at ${address}, predicted ${predicted}`);

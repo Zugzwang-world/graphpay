@@ -22,3 +22,9 @@ Every transaction, with gas, fee and explorer link: `txlog.jsonl` (this folder).
 - Shared (`lib.mjs`): keys only through the env loader, chain 1874 checked (or a loopback anvil fork with `--fork`), dry run unless `--yes`, no send while the role has a pending transaction, the redacting error boundary. A fork rehearsal logs to a temporary file, never to `txlog.jsonl`.
 
 Rehearsed first on an anvil fork (deploy, setup, setup again: no-op), then run for real.
+
+## Reviewer (02:05 IST): fix first, then fixed
+
+- Blocking, fixed: a rerun of setup would have lifted a revocation (the revoked-agent beat) and cleared an expiry. Setup now carries `revoked` and a non-zero on-chain expiry forward, and a test pins it.
+- Fixed: `--fork` must answer as anvil, and a real run refuses an anvil RPC; setup checks the configured address (code, `USDT()`, `owner()` = DEPLOYER) before any float is approved; the deploy sends at exactly the nonce of its pending record, and a timed-out deploy is recovered from its logged hash; a missing shop key fails the run; the config splice merges into `whitechain.contracts`; owner and infrastructure wallets are refused by role and by address; the FUNDER check is real; record times corrected (the runs were 01:54 to 01:57 IST).
+- Kept: the 20 USDT float is a constant from the M2 brief (an operational value, not story data).
