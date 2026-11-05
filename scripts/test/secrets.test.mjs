@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { execFileSync, spawn, spawnSync } from 'node:child_process';
 import { mkdtempSync, readdirSync, readFileSync, statSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { join } from 'node:path';
+import { dirname, join } from 'node:path';
 import { test } from 'node:test';
 import { generatePrivateKey } from 'viem/accounts';
 import { EnvError, parseEnv, readEnvFile, setEnvValue } from '../lib/env-file.mjs';
@@ -192,15 +192,53 @@ test('values with # or outside printable ASCII are refused', () => {
   }
 });
 
-test('a dead writer leaves no lasting lock or temp copy', () => {
+test("a dead writer's temp copy is swept, and its lock names it instead of being broken", () => {
   const dir = repo();
   const file = join(dir, '.env');
   setEnvValue(file, 'A_NAME', 'one');
   const dead = 2147483646; // no such process
-  writeFileSync(`${file}.lock`, String(dead));
   writeFileSync(join(dir, `.env.${dead}.0123456789ab.tmp`), 'A_NAME=copy\n');
   assert.equal(setEnvValue(file, 'B_NAME', 'two'), 'new');
   assert.deepEqual(readdirSync(dir).sort(), ['.env', '.git', '.gitignore']);
+  writeFileSync(`${file}.lock`, `${dead}:token`);
+  assert.throws(() => setEnvValue(file, 'C_NAME', 'three'), /locked by pid 2147483646, not running: remove \.env\.lock/);
+  assert.equal(readEnvFile(file).get('C_NAME'), undefined);
+});
+
+test('parallel writers never lose a value', async () => {
+  const dir = repo();
+  const file = join(dir, '.env');
+  const writer = `
+    import { setEnvValue } from ${JSON.stringify(new URL('../lib/env-file.mjs', import.meta.url).href)};
+    const [name, value] = process.argv.slice(1);
+    console.log(setEnvValue(process.env.TARGET, name, value));
+  `;
+  const run = (i) =>
+    new Promise((resolveRun) => {
+      const child = spawn(process.execPath, ['--input-type=module', '-e', writer, `NAME_${i}`, `value-${i}`], { env: { ...process.env, TARGET: file } });
+      let out = '';
+      child.stdout.on('data', (d) => (out += d));
+      child.stderr.on('data', (d) => (out += d));
+      child.on('close', (status) => resolveRun({ status, out }));
+    });
+  const results = await Promise.all(Array.from({ length: 12 }, (_, i) => run(i)));
+  for (const r of results) assert.equal(r.status, 0, r.out);
+  const values = readEnvFile(file);
+  for (let i = 0; i < 12; i += 1) assert.equal(values.get(`NAME_${i}`), `value-${i}`);
+  assert.deepEqual(readdirSync(dir).sort(), ['.env', '.git', '.gitignore']);
+});
+
+test('the loader anchors on the scripts\' own checkout, not the caller\'s folder', () => {
+  const elsewhere = mkdtempSync(join(tmpdir(), 'gp-cwd-'));
+  const probe = `
+    import { locateEnvFile } from ${JSON.stringify(new URL('../lib/env-loader.mjs', import.meta.url).href)};
+    console.log(locateEnvFile({ env: {}, create: true }).path);
+  `;
+  const res = spawnSync(process.execPath, ['--input-type=module', '-e', probe], { cwd: elsewhere, encoding: 'utf8' });
+  assert.equal(res.status, 0, res.stderr);
+  const top = execFileSync('git', ['rev-parse', '--path-format=absolute', '--git-common-dir'], { encoding: 'utf8' }).trim();
+  assert.ok(res.stdout.trim().startsWith(dirname(top)) || res.stdout.trim().startsWith(process.cwd()), res.stdout);
+  assert.ok(!res.stdout.includes(elsewhere));
 });
 
 test('an argument that is not a plain name is never echoed', () => {
@@ -255,7 +293,11 @@ test('the error boundary redacts a keyed RPC URL from a failing call (fake RPC: 
     installErrorBoundary(() => values);
     const rpc = await resolveRpc('whitechain', { env: Object.fromEntries(values) });
     console.log('resolved', JSON.stringify(rpc));
-    await createPublicClient({ transport: http(rpc.url, { retryCount: 0 }) }).getBlockNumber();
+    try {
+      await createPublicClient({ transport: http(rpc.url, { retryCount: 0 }) }).getBlockNumber();
+    } catch (e) {
+      throw new Error(e.message); // the full viem message carries the URL: only the boundary can hide it
+    }
   `;
   const res = await new Promise((resolveRun) => {
     const child = spawn(process.execPath, ['--input-type=module', '-e', probe], { env: { ...process.env, ENV_FILE: dest } });

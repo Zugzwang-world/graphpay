@@ -64,6 +64,8 @@ export interface RpcCandidate extends PublicRpc {
   secret: boolean;
 }
 
+// `url` is a non-enumerable property, so logging or JSON-encoding the result never
+// shows a keyed URL; a spread or structuredClone drops it, so pass the object itself.
 export interface ResolvedRpc extends RpcCandidate {
   chainId: number;
   refused: string[];

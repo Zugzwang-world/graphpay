@@ -9,11 +9,13 @@ import {
   closeSync,
   existsSync,
   fsyncSync,
+  linkSync,
   openSync,
   readdirSync,
   readFileSync,
   renameSync,
   unlinkSync,
+  writeFileSync,
   writeSync,
 } from 'node:fs';
 import { basename, dirname, join } from 'node:path';
@@ -87,35 +89,50 @@ function sweepStaleTemps(path) {
   }
 }
 
+function lockHolder(lock) {
+  try {
+    return Number(readFileSync(lock, 'utf8').split(':')[0]) || null;
+  } catch {
+    return null;
+  }
+}
+
+// The lock appears atomically with its owner already written (a temp file holding
+// "pid:token" is hard-linked to the lock name, which fails if the lock exists).
+// A held lock is never broken: a writer waits up to 5 s, then stops and names the
+// holder, so two writers can never both be inside. Only our own lock is removed.
 function withLock(path, fn) {
   const lock = `${path}.lock`;
-  let fd;
-  for (let tries = 0; fd === undefined; tries += 1) {
-    try {
-      fd = openSync(lock, 'wx', 0o600);
-      writeSync(fd, String(process.pid));
-    } catch (error) {
-      if (error.code !== 'EEXIST') throw new EnvError(`could not lock ${basename(path)} (${error.code ?? 'error'})`);
-      let holder = NaN;
+  const token = `${process.pid}:${randomBytes(8).toString('hex')}`;
+  const tmp = `${path}.${process.pid}.${randomBytes(6).toString('hex')}.tmp`;
+  writeFileSync(tmp, token, { mode: 0o600, flag: 'wx' });
+  try {
+    for (let tries = 0; ; tries += 1) {
       try {
-        holder = Number(readFileSync(lock, 'utf8'));
-      } catch {
-        // the holder just released it
+        linkSync(tmp, lock);
+        break;
+      } catch (error) {
+        if (error.code !== 'EEXIST') throw new EnvError(`could not lock ${basename(path)} (${error.code ?? 'error'})`);
+        if (tries >= 50) {
+          const holder = lockHolder(lock);
+          const state = holder === null ? 'an unknown writer' : alive(holder) ? `pid ${holder}, still running` : `pid ${holder}, not running: remove ${basename(lock)}`;
+          throw new EnvError(`${basename(path)} is locked by ${state}`);
+        }
+        sleep(100);
       }
-      if (!Number.isNaN(holder) && !alive(holder)) {
-        unlinkSync(lock); // a dead writer's lock
-        continue;
-      }
-      if (tries >= 50) throw new EnvError(`${basename(path)} is locked by a running writer (pid ${holder})`);
-      sleep(100);
     }
+  } finally {
+    unlinkSync(tmp);
   }
   try {
     sweepStaleTemps(path);
     return fn();
   } finally {
-    closeSync(fd);
-    unlinkSync(lock);
+    try {
+      if (readFileSync(lock, 'utf8') === token) unlinkSync(lock);
+    } catch (error) {
+      if (error.code !== 'ENOENT') throw error;
+    }
   }
 }
 
