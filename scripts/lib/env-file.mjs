@@ -105,7 +105,11 @@ function withLock(path, fn) {
   const lock = `${path}.lock`;
   const token = `${process.pid}:${randomBytes(8).toString('hex')}`;
   const tmp = `${path}.${process.pid}.${randomBytes(6).toString('hex')}.tmp`;
-  writeFileSync(tmp, token, { mode: 0o600, flag: 'wx' });
+  try {
+    writeFileSync(tmp, token, { mode: 0o600, flag: 'wx' });
+  } catch (error) {
+    throw new EnvError(`could not lock ${basename(path)} (${error.code ?? 'error'})`);
+  }
   try {
     for (let tries = 0; ; tries += 1) {
       try {
@@ -115,14 +119,20 @@ function withLock(path, fn) {
         if (error.code !== 'EEXIST') throw new EnvError(`could not lock ${basename(path)} (${error.code ?? 'error'})`);
         if (tries >= 50) {
           const holder = lockHolder(lock);
-          const state = holder === null ? 'an unknown writer' : alive(holder) ? `pid ${holder}, still running` : `pid ${holder}, not running: remove ${basename(lock)}`;
-          throw new EnvError(`${basename(path)} is locked by ${state}`);
+          const state = holder === null ? 'an unknown writer' : `pid ${holder}${alive(holder) ? ', still running' : ', not running'}`;
+          throw new EnvError(
+            `${basename(path)} is locked by ${state}; if no secrets script is running, remove ${basename(lock)} in ${dirname(lock)}`,
+          );
         }
         sleep(100);
       }
     }
   } finally {
-    unlinkSync(tmp);
+    try {
+      unlinkSync(tmp);
+    } catch (error) {
+      if (error.code !== 'ENOENT') throw error;
+    }
   }
   try {
     sweepStaleTemps(path);

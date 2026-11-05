@@ -201,7 +201,7 @@ test("a dead writer's temp copy is swept, and its lock names it instead of being
   assert.equal(setEnvValue(file, 'B_NAME', 'two'), 'new');
   assert.deepEqual(readdirSync(dir).sort(), ['.env', '.git', '.gitignore']);
   writeFileSync(`${file}.lock`, `${dead}:token`);
-  assert.throws(() => setEnvValue(file, 'C_NAME', 'three'), /locked by pid 2147483646, not running: remove \.env\.lock/);
+  assert.throws(() => setEnvValue(file, 'C_NAME', 'three'), /locked by pid 2147483646, not running; if no secrets script is running, remove \.env\.lock in /);
   assert.equal(readEnvFile(file).get('C_NAME'), undefined);
 });
 
