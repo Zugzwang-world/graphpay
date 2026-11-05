@@ -34,11 +34,10 @@ Updated 02:10 IST, Fri 6 Nov (T1).
 - Blockers: none.
 
 ## identity
-Updated 02:00 IST. **M5 is built and run for real; its PR is open.** The `graphpay.eth` namespace exists on Ethereum Sepolia: root, 4 owners, 16 agents (15 cast agents and `disposable-1`), the `sim` wildcard. 60 transactions, 72.7M gas.
-- Acceptance reads B1, B4, B5, B8 (records) and B9 (a) (address records) pass on real Sepolia; fork tests (scoped grants, both transfer reverts, wildcard, payee) pass.
-- The hand-off table (node, epoch, wallet, expiry per agent) is `docs/sessions/identity/namespace.md`.
-- Running: nothing. Blockers: none. The reviewer pass on the signing code runs before merge.
-- Next: M6 (gate, kill switch, watcher); the real policy writes wait for T1's M2, the facilitator's real gate for T1's M3. Meanwhile the gate's unit tests with fakes.
+Updated 03:50 IST. **M6 part 1 is built; PR #34 is open.** The payment gate (`ensGate`), the agents' `ens_check`, and the owner actions (pause, resume, kill, next free disposable) are written, unit-tested and fork-tested. On real Sepolia, with the real checkout policies, every paying agent passes the full gate; non-paying agents say `ENS_NO_POLICY` as designed.
+- The kill ladder holds on a fork: pause bites within 25 s of its receipt, unregister refuses at once, a `renew` after an unregister leaves the label unregistered.
+- Running: nothing. Blockers: none. T1's M3 can now call `createEnsGate` from `@graphpay/ens`.
+- Next: the watcher (M6 part 2, built and tested, waiting for its own PR and the reviewer pass), then the real kill timings (B6/B7/E7) with Join.
 
 ## arkiv
 

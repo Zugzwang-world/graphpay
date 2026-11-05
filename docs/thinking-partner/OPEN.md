@@ -84,8 +84,10 @@ Agents (T4) and Join add one row per full errand run, so the presets can be cali
 - Nothing for the founder from M1. Gas: a recorded failure is paid by the relayer; the facilitator refuses doomed payments before sending (M3), so FACILITATOR's 0.8 WBT covers hundreds of payments.
 
 ## identity
-- **Nothing needs the founder.** Defaults taken: non-paying agents publish a zero cap in ENS (ADR-0059; recommendation: keep). The agent record `agent-endpoint[mcp]` points at `https://graphpay-event.vercel.app/api/mcp`, which T3 builds (M7b); until then it answers 404 (B8's MCP call waits for it).
-- **For T1 (policies):** read the node, epoch and wallet of each paying agent from `docs/sessions/identity/namespace.md`. A killed label is never provisioned again; `disposable-1` is the first kill target.
+- **Nothing needs the founder.** Defaults taken: non-paying agents publish a zero cap in ENS (ADR-0059; recommendation: keep). `agent-endpoint[mcp]` points at `https://graphpay-event.vercel.app/api/mcp` (B8's MCP call is next, now that T3's M7b is merged).
+- **For T1 (the gate):** `createEnsGate({ client, expectedEpoch, policyCapMicro, spentToday })` from `@graphpay/ens`; `ensCheck` for the risk agent. Policies: read node, epoch and wallet from `docs/sessions/identity/namespace.md`. A killed label is never provisioned again.
+- **For the Coordinator (funding, only when a new disposable agent is needed):** `disposable-2` has a key (`DISPOSABLE_2`, generated, unfunded) and is not yet on Sepolia. Before provisioning it for real: 0.005 WBT and 1 test USDT to its address (`pnpm funding`). Recommendation: do it only when the kill demo needs a fresh label; `disposable-1` is the first kill target.
+- **Decision for the founder (low stakes):** `ens_check` says ACTIVE for any status other than `paused`, as `planning/SPEC/AGENTS.md` §5 says, while the gate refuses anything but exactly `active`. Recommendation: keep the spec wording; the gate is the authority.
 
 ## arkiv
 
