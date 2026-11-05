@@ -1,0 +1,20 @@
+{
+  "name": "@graphpay/facilitator",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Our x402 facilitator for the graphpay-order scheme on Whitechain (M3): the payer's client, the five-stage verify and settle pipeline, the HTTP handler and the recorder.",
+  "exports": {
+    ".": "./index.mjs"
+  },
+  "scripts": {
+    "test": "node --test \"test/*.test.mjs\""
+  },
+  "dependencies": {
+    "@graphpay/config": "workspace:*",
+    "@graphpay/contracts": "workspace:*",
+    "@x402/core": "2.30.0",
+    "viem": "2.57.16",
+    "zod": "4.6.7"
+  }
+}

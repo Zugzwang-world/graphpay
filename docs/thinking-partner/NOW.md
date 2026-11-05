@@ -25,11 +25,9 @@ Updated 23:55 IST. **M0 done; handed over to the Coordinator** (`docs/plan/sessi
 
 ## payments
 
-Updated 02:10 IST, Fri 6 Nov (T1).
-- **M1 merged (#12). M2 is done on the real chain:** the checkout is deployed on Whitechain Sepolia for the real test USDT, verified on the explorer and set up (the renewal relayer, three shops' refund floats, five agent spending policies from the story). PR with the scripts and records is open.
-- Checkout: https://explorer.testnet.whitechain.io/address/0x75233b7341B9e86407e4b31599f07b8936716FcA (its address and deploy block are in the config for the mirror).
-- The qualifying payment's readiness check passes: the acceptance agent holds 20 test USDT and has its 6.00/day policy.
-- Next: M3 part A (our facilitator, the shop's 402 API, the recorder routes). Part B (real payments) waits for T2's M5 and M6.
+Updated 04:05 IST, Fri 6 Nov (T1).
+- **M3 part A ships now:** our own x402 facilitator, the shop's 402 payment API and the refusal recorder. Two reviewer passes; pass 2 found two real holes (a cached gate answer could let an agent spend past its ENS cap for 20 s; an order that failed on-chain could be resent at our gas cost), both fixed and confirmed "ship". 77 offline tests, and the fork run passes every beat.
+- **Part B is unblocked** (T2's gate merged as #34) and starting: the payment lifecycle as `rehearsal.vitalik` on the real chain through the real ENS gate (fork rehearsal first), then the qualifying payment C7 once as `acceptance.vitalik`, then the subscription.
 - Blockers: none.
 
 ## identity

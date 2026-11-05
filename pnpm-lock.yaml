@@ -207,6 +207,24 @@ importers:
         specifier: 2.57.16
         version: 2.57.16(typescript@5.9.3)(zod@4.6.7)
 
+  packages/facilitator:
+    dependencies:
+      '@graphpay/config':
+        specifier: workspace:*
+        version: link:../config
+      '@graphpay/contracts':
+        specifier: workspace:*
+        version: link:../contracts
+      '@x402/core':
+        specifier: 2.30.0
+        version: 2.30.0
+      viem:
+        specifier: 2.57.16
+        version: 2.57.16(typescript@5.9.3)(zod@4.6.7)
+      zod:
+        specifier: 4.6.7
+        version: 4.6.7
+
   packages/mirror:
     dependencies:
       '@arkiv-network/sdk':
@@ -251,6 +269,27 @@ importers:
       graphql-yoga:
         specifier: 5.24.6
         version: 5.24.6(graphql@16.14.2)
+      viem:
+        specifier: 2.57.16
+        version: 2.57.16(typescript@5.9.3)(zod@4.6.7)
+      zod:
+        specifier: 4.6.7
+        version: 4.6.7
+
+  packages/shop:
+    dependencies:
+      '@graphpay/config':
+        specifier: workspace:*
+        version: link:../config
+      '@graphpay/contracts':
+        specifier: workspace:*
+        version: link:../contracts
+      '@graphpay/facilitator':
+        specifier: workspace:*
+        version: link:../facilitator
+      '@x402/core':
+        specifier: 2.30.0
+        version: 2.30.0
       viem:
         specifier: 2.57.16
         version: 2.57.16(typescript@5.9.3)(zod@4.6.7)
@@ -692,6 +731,9 @@ packages:
 
   '@workflow/serde@4.1.0':
     resolution: {integrity: sha512-pav4F2BoirECWR7Nf1TKt+2eETcBj7jj4cBefQ8VXQCA6NPkaKeLfj/zMgi+3zYV5ZIBT4GuUiphsj0/b9hPQQ==}
+
+  '@x402/core@2.30.0':
+    resolution: {integrity: sha512-gvMxCum2QlNI6jI/3NL1jdrmOgtX9sWEWxSIOmeI67/5ndOJvYOtP7JZLSO8o8af+O+A+Vhhjza1NCda0yVppg==}
 
   abitype@1.2.3:
     resolution: {integrity: sha512-Ofer5QUnuUdTFsBRwARMoWKOH1ND5ehwYhJ3OJ/BQO+StkwQjHw0XyVh4vDttzHB7QOFhPHa/o413PJ82gU/Tg==}
@@ -1632,6 +1674,10 @@ snapshots:
       tslib: 2.9.1
 
   '@workflow/serde@4.1.0': {}
+
+  '@x402/core@2.30.0':
+    dependencies:
+      zod: 4.6.7
 
   abitype@1.2.3(typescript@5.9.3)(zod@4.6.7):
     optionalDependencies:
