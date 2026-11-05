@@ -82,6 +82,10 @@ Agents (T4) and Join add one row per full errand run, so the presets can be cali
 
 ## integration
 
+Updated 01:20 IST. Nothing for the founder now.
+
+- **Network drops (watch).** What: the Mac's DNS stopped answering at about 00:50 and again at 01:15 IST (GitHub, npm and the RPCs unreachable; the gateway still pinged). Where: this Mac's Wi-Fi. Why it matters: every session pushes and every live run needs it, and the mirror must resume after a drop (D15). Recommendation: if it recurs during the live runs, switch the Mac to a phone hotspot; the mirror resumes from its Arkiv checkpoint by design.
+
 ## website
 
 ## records

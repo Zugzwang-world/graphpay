@@ -1,0 +1,21 @@
+{
+  "name": "@graphpay/mirror",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "The workers process: the mirror of GraphPayCheckout events into Graph Arkiv (the single W_LEDGER writer), its heartbeat lease and its local endpoints; it also hosts the ENS watcher.",
+  "exports": {
+    ".": {
+      "types": "./index.d.ts",
+      "default": "./index.mjs"
+    }
+  },
+  "types": "./index.d.ts",
+  "scripts": {
+    "test": "node --test \"test/*.test.mjs\""
+  },
+  "dependencies": {
+    "@graphpay/config": "workspace:*",
+    "viem": "2.57.16"
+  }
+}
