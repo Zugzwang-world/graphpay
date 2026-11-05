@@ -11,3 +11,5 @@ export * from './src/reads.mjs';
 export * from './src/tx.mjs';
 export * from './src/provision.mjs';
 export * from './src/abi.generated.mjs';
+export * from './src/gate.mjs';
+export * from './src/actions.mjs';

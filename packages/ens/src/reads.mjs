@@ -77,7 +77,7 @@ export async function walkName(client, name, { allowedRoots = [config.root.ens] 
         return refuse(synthetic === 'true' ? 'ENS_SYNTHETIC' : 'ENS_NOT_FOUND');
       }
       if (state.status !== STATUS.REGISTERED || !live) {
-        if (isLeaf) return refuse(state.expiry === 0n ? 'ENS_NOT_FOUND' : 'ENS_EXPIRED_OR_REVOKED', { detail: label });
+        if (isLeaf) return refuse(state.expiry === 0n ? 'ENS_NOT_FOUND' : 'ENS_EXPIRED_OR_REVOKED', { detail: label, leaf: { status: state.status, expiry: state.expiry, latestOwner: state.latestOwner, now } });
         return refuse(state.expiry === 0n ? 'ENS_NOT_FOUND' : 'ENS_ANCESTOR_INACTIVE', { detail: label });
       }
       if (isLeaf) {
@@ -125,8 +125,9 @@ export async function walkName(client, name, { allowedRoots = [config.root.ens] 
 
 // A 20 s cache keyed by the exact spelling and stamped before the reads (§7). A failed
 // read is not cached, so an RPC blip never refuses a name for the next 20 s.
-const readFailed = (v) => !v.ok && v.detail === 'ENS_READ_FAILED';
-function ttlCache(ttlMs, clock) {
+const readFailed = (v) => !v.ok && (v.reason === 'ENS_READ_FAILED' || v.detail === 'ENS_READ_FAILED');
+const MAX_ENTRIES = 2000; // names come from requests: a flood of look-alike spellings must not grow memory without bound
+export function ttlCache(ttlMs, clock) {
   const map = new Map();
   const generation = new Map();
   const gen = (key) => generation.get(key) ?? 0;
@@ -138,7 +139,13 @@ function ttlCache(ttlMs, clock) {
       const before = gen(key);
       const value = await load();
       // An invalidate that fired while the load was in flight must not be undone by its stale result.
-      if (!readFailed(value) && gen(key) === before) map.set(key, { at: t, value });
+      if (!readFailed(value) && gen(key) === before) {
+        if (map.size >= MAX_ENTRIES) {
+          for (const [k, v] of map) if (t - v.at >= ttlMs) map.delete(k);
+          if (map.size >= MAX_ENTRIES) map.delete(map.keys().next().value);
+        }
+        map.set(key, { at: t, value });
+      }
       return value;
     },
     invalidate(key) {
