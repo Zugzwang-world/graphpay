@@ -1,0 +1,22 @@
+{
+  "check": "C7 (also E3)",
+  "synthetic": true,
+  "payer": "acceptance.vitalik.graphpay.eth",
+  "wallet": "0x1A2A5A6c6FD1a8Cff8632814EF8fa395726B837F",
+  "orderId": "0x67d947f1a58ed3a89830ac97c290ba27497125df97edb4e9bd1a3a8770756a12",
+  "status": "paid",
+  "shop": "kesar-kingdom.graphpay.eth",
+  "amount": "4.8 USDT",
+  "token": "0xcedfB56113143d55b2358b8CFbB0dEB5Ad2f55a7",
+  "tx": "0x87505ef2457b6e925fa7378a55fd91419e83c37fb8effc06d901884700c72c00",
+  "explorer": "https://explorer.testnet.whitechain.io/tx/0x87505ef2457b6e925fa7378a55fd91419e83c37fb8effc06d901884700c72c00",
+  "block": 12322239,
+  "gasUsed": 309483,
+  "txFrom": "0x1ab82871c3e1be64717269d45f08ca9d54c1ebf6",
+  "paymentSettled": true,
+  "tokenTransferMicro": "4800000",
+  "payerWbtBefore": "0.005",
+  "payerWbtAfter": "0.005",
+  "merchantReceivedMicro": "4800000",
+  "at": "2026-11-05T22:43:32.088Z"
+}

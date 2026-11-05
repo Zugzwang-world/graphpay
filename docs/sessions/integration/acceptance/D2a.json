@@ -1,0 +1,63 @@
+{
+  "id": "D2a",
+  "at": "2026-11-05T22:56:14.434Z",
+  "pass": true,
+  "what": "the mirror step again over the same blocks sends no transaction",
+  "measured": {
+    "checkpointForgotten": {
+      "stats": {
+        "written": 0,
+        "standing": 0,
+        "skippedCheckpoint": 36,
+        "skippedRef": 0,
+        "none": 0,
+        "unknownLogs": 0,
+        "retries": 0,
+        "lastWriteAt": null
+      },
+      "wouldSend": [],
+      "nonce": {
+        "before": 251,
+        "after": 251
+      }
+    },
+    "anchorHiddenToo": {
+      "stats": {
+        "written": 0,
+        "standing": 2,
+        "skippedCheckpoint": 0,
+        "skippedRef": 25,
+        "none": 9,
+        "unknownLogs": 0,
+        "retries": 0,
+        "lastWriteAt": 1793919367467
+      },
+      "wouldSend": [
+        {
+          "port": "writeStanding",
+          "ref": "1874:0x20f8b2dba2b0a310773383c4653c73fa4eb773790e905c63ee89b0c2cb48d493:0"
+        },
+        {
+          "port": "writeStanding",
+          "ref": "1874:0x63045e36f2df6ecc4e376df64e0d628cfcc9b07a2d3a722a15e7d51dd829e559:0"
+        }
+      ],
+      "edgeSends": 0,
+      "nonce": {
+        "before": 251,
+        "after": 252
+      }
+    }
+  },
+  "expected": {
+    "checkpointForgotten": "no send",
+    "anchorHiddenToo": "no edge send (standing re-applies listed)"
+  },
+  "evidence": {
+    "range": {
+      "from": 12313887,
+      "to": 12322516
+    },
+    "errors": []
+  }
+}

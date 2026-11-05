@@ -1,0 +1,13 @@
+{
+  "id": "A2",
+  "at": "2026-11-05T22:50:47.934Z",
+  "pass": true,
+  "what": "the secret scan is clean (pnpm check)",
+  "measured": [
+    "check: clean (590 files)"
+  ],
+  "expected": "check: clean",
+  "evidence": {
+    "cmd": "pnpm -s check"
+  }
+}

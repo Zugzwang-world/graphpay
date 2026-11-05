@@ -14,6 +14,8 @@
     "@graphpay/arkiv-graph": "workspace:*",
     "@graphpay/city": "workspace:*",
     "@graphpay/config": "workspace:*",
+    "@graphpay/contracts": "workspace:*",
+    "@graphpay/ens": "workspace:*",
     "@graphpay/money-graph": "workspace:*",
     "next": "16.4.5",
     "react": "19.3.1",

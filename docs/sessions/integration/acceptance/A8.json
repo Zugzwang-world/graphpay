@@ -1,0 +1,13 @@
+{
+  "id": "A8",
+  "at": "2026-11-05T22:50:48.683Z",
+  "pass": true,
+  "what": "no story name or value outside the story file (pnpm check)",
+  "measured": [
+    "check: clean (593 files)"
+  ],
+  "expected": "no story finding",
+  "evidence": {
+    "cmd": "pnpm -s check"
+  }
+}

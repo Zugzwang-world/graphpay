@@ -1,0 +1,12 @@
+{
+  "id": "B9",
+  "at": "2026-11-05T22:52:44.693Z",
+  "pass": null,
+  "what": "the payee is the shop's ENS address",
+  "measured": [],
+  "expected": "every line of scripts/ens/acceptance.mjs for this id passes",
+  "evidence": {
+    "script": "scripts/ens/acceptance.mjs",
+    "exit": 0
+  }
+}

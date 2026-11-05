@@ -8,7 +8,8 @@
 // Env (names only): W_LEDGER_PRIVATE_KEY, ARKIV_ACCESS_KEY, ARKIV_BACKEND (rabdi),
 // WHITECHAIN_RPC_URL (optional), GRAPHPAY_CONTRACT and DEPLOY_BLOCK (only when the config
 // has no whitechain.contracts.checkout), CONFIRMATIONS (2), DELIVERY_PROMISE_S (7200), E2E_HISTORY_SCALE (0.05;
-// 0 skips the history), BOOTSTRAP_FILE (epochs by ENS name), MIRROR_PORT.
+// 0 skips the history), BOOTSTRAP_FILE (epochs by ENS name), MIRROR_PORT, ENS_WATCHER (0 turns
+// T2's watcher off), POLICY_WRITER_PRIVATE_KEY (the watcher's policy sink), SEPOLIA_RPC_URL.
 
 import { readFileSync } from 'node:fs';
 import { checkoutAbi } from '@graphpay/contracts';
@@ -16,6 +17,7 @@ import { castActors } from './actors.mjs';
 import { keepAwake } from './awake.mjs';
 import { historyParams } from './history.mjs';
 import { isZeroNode } from './ids.mjs';
+import { keepEnsWatcher } from './ens.mjs';
 import { DEFAULT_PORT, startServer } from './server.mjs';
 import { connectMirror, loadWorkersEnv } from './setup.mjs';
 import { createWorkers } from './workers.mjs';
@@ -47,11 +49,13 @@ const workers = createWorkers({
 
 // Installed before the start: a Ctrl-C during the history still writes the "stopped" beat.
 let stopping = false;
+let ens = { stop: () => {} };
 for (const signal of ['SIGINT', 'SIGTERM']) {
   process.on(signal, async () => {
     if (stopping) return;
     stopping = true;
     log(`workers: ${signal}, stopping`);
+    ens.stop();
     await workers.stop();
     process.exit(0);
   });
@@ -63,3 +67,6 @@ await workers.start();
 const port = Number(env.MIRROR_PORT ?? DEFAULT_PORT);
 await startServer(workers, { port, log, redact });
 log(`workers: running as instance ${workers.state.instance}; http://127.0.0.1:${port}/status`);
+// T2's ENS watcher (M6): after the mirror runs; retried until it starts; its failure never
+// stops the mirror.
+ens = keepEnsWatcher({ env, values: Object.entries(env), whitechain, checkout: address, log });

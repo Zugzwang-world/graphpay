@@ -19,6 +19,7 @@
     "@graphpay/arkiv-graph": "workspace:*",
     "@graphpay/config": "workspace:*",
     "@graphpay/contracts": "workspace:*",
+    "@graphpay/ens": "workspace:*",
     "@graphpay/money-graph": "workspace:*",
     "viem": "2.57.16"
   }

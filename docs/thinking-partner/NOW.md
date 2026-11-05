@@ -25,9 +25,10 @@ Updated 23:55 IST. **M0 done; handed over to the Coordinator** (`docs/plan/sessi
 
 ## payments
 
-Updated 04:05 IST, Fri 6 Nov (T1).
-- **M3 part A ships now:** our own x402 facilitator, the shop's 402 payment API and the refusal recorder. Two reviewer passes; pass 2 found two real holes (a cached gate answer could let an agent spend past its ENS cap for 20 s; an order that failed on-chain could be resent at our gas cost), both fixed and confirmed "ship". 77 offline tests, and the fork run passes every beat.
-- **Part B is unblocked** (T2's gate merged as #34) and starting: the payment lifecycle as `rehearsal.vitalik` on the real chain through the real ENS gate (fork rehearsal first), then the qualifying payment C7 once as `acceptance.vitalik`, then the subscription.
+Updated 04:20 IST, Fri 6 Nov (T1).
+- **The first real payments are on Whitechain Sepolia.** The qualifying payment (C7, also E3) is done, once: an agent with an ENS name paid 4.80 test USDT to Kesar Kingdom through our own facilitator, with no gas of its own: [explorer](https://explorer.testnet.whitechain.io/tx/0x87505ef2457b6e925fa7378a55fd91419e83c37fb8effc06d901884700c72c00).
+- **The whole payment lifecycle ran on the real chain** through T2's real ENS gate: pay, "already paid" on a replay, refund, re-order, an over-limit payment refused before the chain, a revoked agent recorded on-chain (then restored), a human payer, and a subscription created, renewed after 2 minutes and cancelled by signature.
+- Running: the `(M3 done)` PR. Next: M4, hosting the facilitator and the shop on Vercel.
 - Blockers: none.
 
 ## identity
@@ -54,20 +55,20 @@ Updated 02:40 IST. **M10 is merged; the presence and handoff hooks are built** (
 - Blockers: none. Next: merge, then wait for Join's M12 counting run; re-run the live errand if time allows.
 ## integration
 
-Updated 04:10 IST, Fri 6 Nov. **The mirror runs live (since 03:13 IST); M12's signing path now has the ENS gate; the agents' presence and hand-offs can be written live.**
-- The mirror: the cast and the labelled history are on Arkiv's testnet, 2 blocks behind the chain (PR 33 merged). Retry and drop tests ran clean; they count once a payment is in the window.
-- New: before the payer signs, the same ENS gate the facilitator uses (T2's M6) checks the agent's name, its spending policy on the checkout and today's spend; a refusal signs nothing. Live: the stage payer passes under its 6.00 cap; over-cap, unknown and policy-less agents are refused.
-- New (Friday item 3): agents' "at work" rows and hand-offs go to Arkiv in one transaction per phase and never slow an agent down.
-- Running: `pnpm workers` on this Mac.
-- Blockers: the first real payment and M12's shop side wait for T1's M3. T2's watcher (M6 part 2) is next, to host in the workers.
-- Next: host the watcher; wire the shop side and signing when M3 merges; then `pnpm e2e:food`.
+Updated 04:30 IST, Fri 6 Nov. **The first acceptance report is written: 18 pass, 0 fail, 1 blocked (the big city), 29 not run yet.** The mirror is live and has mirrored T1's first real payments.
+- The mirror wrote every real checkout event exactly once: the lifecycle as rehearsal.vitalik and the qualifying 4.80 payment as acceptance.vitalik (36 events, 25 edges). D1 (one payment = one atomic Arkiv transaction) and D3 (the scores recomputed from the raw records) pass on that real data.
+- Also passing live: CI green, secret scan, no addresses or story names in code, the ENS namespace, the payment gate for every paying agent, the explorer's contract verification, the city's top 10 and discovery, the benchmark, receipts that cannot be edited.
+- New: T2's watcher (M6) is hosted in the workers process: a killed ENS name revokes its spending policy on Whitechain.
+- Running: `pnpm workers` (restarted on the new code once this PR merges).
+- Not run yet: the payment, refund and kill checks of the full errand (M12's `e2e:food`), the hosted endpoints (M4), and D2's two write tests, which need the workers stopped around a fresh payment.
+- Next: `e2e:food` on the real networks, then fill in the C, E and F rows.
 
 ## website
 
-Updated 05:05 IST, Fri 6 Nov (T5 Web). **On `main`:** the shell, phone views, agent run route, merchant stream and CSV, order trail, race mode. **In a PR:** the merchant's Open toggle (Friday item 9): "Open shop" also lists the shop as open on Arkiv and renews every 5 minutes while the page is open; "Close shop" takes it off at once. It needs the `W_DIRECTORY` key on Vercel; until then the phone says it is listening only.
-- Running: nothing long. M16 (checkout kit, store) waits for M4 (not merged); customer state waits for M6's reads.
-- Blockers: the Open toggle needs `W_DIRECTORY_PRIVATE_KEY` set in Vercel (Coordinator, see OPEN).
-- Next: M16 once M4 lands; the map (item 10) once Join's live hooks (item 3) write presence. Fresh start file: `docs/sessions/website/resume.md`.
+Updated 06:05 IST, Fri 6 Nov (T5 Web). **On `main`:** the shell, phone views, agent run route, merchant stream and CSV, order trail, race mode, the Open toggle, Pause and Resume. **In a PR:** the customer phone's live state: the payer agent's status (ENS and policy), cap and spend today (the checkout contract), its last order (the graph). Read live from the three chains this session: Active, 0.00 of 6.00 USDT today. Also fixes the production status chip, which showed the checkout as not deployed.
+- Running: nothing long. M16 (checkout kit, store) waits for M4 (not merged).
+- Blockers: Pause/Resume and the Open toggle need two keys in Vercel (see OPEN).
+- Next: M16 once M4 lands; the map (item 10) and the explainer lanes (item 13) as Join's live hooks (item 3) write presence. Fresh start file: `docs/sessions/website/resume.md`.
 
 ## agentpay
 

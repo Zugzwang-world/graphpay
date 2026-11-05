@@ -15,7 +15,15 @@ Updated 03:36 IST, Fri 6 Nov.
 - D15, first pass (no edge events in the window yet): SIGSTOP 21:57:43–21:59:43 UTC; `/health` came back within 5 s, 127 blocks caught up, no retries. SIGKILL at 21:59:54, restart: the lease was taken at once (the claim's pid had exited), 0 nodes re-registered, history done, running in 22 s, same cursor (12,314,093:0). `refs` over the window: 9 events, 0 edges, no duplicates; `not run` until a payment is in the window.
 - Still needed for `(M11 done)`: the first real payment (T1's M3 part B) for D1, D2b, D2c and D3; D15 again with payments in the window; the M6 watcher hosted in `main.mjs`; T1's recorder edge carrying the signing wallet (`payload.payer`, or the ref `att:<orderId>:<wallet>:<n>`).
 
-## The D checks (`acceptance/mirror.mjs`, results in `acceptance/results/`)
+## Real payments (from 04:00 IST)
+
+- 36 checkout events mirrored once each (25 edges: pay 7, order 8, deliver 4, refund 1, subscribe 1, renew 2, cancel 1, fail 1; 2 standings), 0 parked.
+- D1 on acceptance's qualifying 4.80 (`1874:0x87505ef2…c72c00:4`): one Rabdi transaction with the pay edge, the link, 4 tally patches and the checkpoint; 642,628 gas (2.07× the lab's 310,527, recorded).
+- D3: `RAW_VERIFIED` for kesar and acceptance.vitalik; the paged recount equals the stored all-time tallies.
+- 30 minutes of lag (03:31–04:01 IST, 31 samples): at most 4 blocks (about 8 s), at most 5.5 s since the last good poll, 0 retries.
+- T2's watcher is hosted in `main.mjs` (`src/ens.mjs`): a policy sink as POLICY_WRITER, retried until it starts.
+
+## The D checks (`acceptance/mirror.mjs`, results in `docs/sessions/integration/acceptance/`)
 
 ```bash
 node acceptance/mirror.mjs d1 --tx <whitechain settle tx>
