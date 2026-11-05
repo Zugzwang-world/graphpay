@@ -15,6 +15,10 @@ One line per PR: time (IST) · activity · result · PR link. Append under your 
 - 22:50 IST · foundation · Vercel: ignored-build step set (docs-only commits skip); W_DIRECTORY topped up to 0.5 tGLM; Ankr URL verified (chain 1874); presets probed (all accepted, $0.0012) · no PR (settings and chain); recorded in PR #5
 - 23:05 IST · foundation · records: ADR-0047 to ADR-0056 (story config, presets, big-city hold, Mumbai, tracks, wording, timeline and cut order, stand-in retired, HTTPS polling, mirror keep-awake), the two briefs, NOW and OPEN · https://github.com/Zugzwang-world/graphpay/pull/5
 - 23:25 IST · foundation · coverage table, story-inputs digest, acceptance A10, D15, E8, session lines for an unattended night (six sessions, efforts, founder moments) · https://github.com/Zugzwang-world/graphpay/pull/5
+- 23:16 IST · foundation · merged: secret helpers and the config package (three reviewer passes; the lock made atomic) · https://github.com/Zugzwang-world/graphpay/pull/3
+- 23:37 IST · foundation · merged: funding script (two reviewer passes; no double top-up, identity checks, explicit chain) · https://github.com/Zugzwang-world/graphpay/pull/4
+- 23:53 IST · foundation · merged: the one story config, agent presets, story rule, preset probe, Vercel env helper · https://github.com/Zugzwang-world/graphpay/pull/6
+- 23:55 IST · foundation · handover: one run file per session, the index, the Coordinator file with the handover state, NOW and OPEN · https://github.com/Zugzwang-world/graphpay/pull/7
 
 ## payments
 

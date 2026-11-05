@@ -96,6 +96,8 @@ Opus 5.5 at **high**: judgement on merges, records and the story lock, with litt
 
 ## Handover state
 
-- Open PRs: `<filled by main at handover>`
-- Worktrees and branches: `<filled by main at handover>`
-- Balances: `<filled by main at handover>`
+- Open PRs: none. M0 merged as PRs #1–#6 (the last, #6 story config, at 23:53 IST); this handover is PR #7.
+- Worktrees and branches: the main checkout `~/graphpay` is on `main` (clean once PR #7 merges); `~/graphpay-deploy` is a detached checkout of `origin/main` linked to `graphpay-event` for CLI deploys (`git fetch && git checkout --detach origin/main` before use); main's M0 worktrees are removed; GitHub holds only `main`.
+- Balances (23:53 IST): FUNDER 2.6427 WBT, 0.2749 Sepolia ETH, 15.7583 tGLM, 31.75 test USDT; every role at its plan target (`docs/technical/WALLETS.md`); W_SEED_M_EVENT holds 8.5 tGLM for the big city. The founder's `WHITECHAIN_RPC_URL` is in `.env` and in Vercel (Sensitive, production and preview).
+- Your 10-minute wake-up: main's has been deleted at the handover; create your own.
+- Follow-ups from M0's reviews (none blocking; take them when quiet): the funding script should sign before broadcasting (so a lost reply still logs the hash), sign Sepolia sends at the plan's gas cap, and read fees at the pinned block; the hidden setter calls Ctrl-C or Esc right after Enter "more than one line" (safe, misleading) and its drain has no upper bound; the prompt-log hook records scheduled coordinator ticks as founder prompts (noise, no secrets).
