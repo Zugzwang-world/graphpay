@@ -24,7 +24,16 @@ export async function createQuote(arkiv, quote) {
   const values = quoteValues(quote);
   const ours = async ([k]) => {
     const e = await arkiv.publicClient.getEntity(k);
-    return e?.attributes?.request_id?.value === values.request_id && BigInt(e?.attributes?.valid_until?.value ?? -1) === values.valid_until;
+    const a = e?.$attributes ?? e?.attributes;
+    // One errand's quotes share a request_id (and often valid_until): the shop, agent and
+    // price tell an instance's own quote from another's at the same nonce.
+    return (
+      a?.request_id?.value === values.request_id &&
+      String(a?.shop_key?.value ?? '').toLowerCase() === values.shop_key.toLowerCase() &&
+      a?.agent_ens?.value === values.agent_ens &&
+      BigInt(a?.price?.value ?? -1) === values.price &&
+      BigInt(a?.valid_until?.value ?? -1) === values.valid_until
+    );
   };
   const { txs, createdKeys } = await arkiv.writer.send(
     { creates: [{ def: ENTITIES.quote, values, expiration: ExpirationTime.fromMinutes(LIFETIME.quoteMinutes) }] },

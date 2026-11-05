@@ -1,19 +1,18 @@
 # NOW
 
-Updated 01:20 IST, Fri 6 Nov (Coordinator)
+Updated 03:10 IST, Fri 6 Nov (Coordinator)
 
 ## Summary (Coordinator only)
 
-Updated 01:20 IST, Fri 6 Nov. **Wave 1 is running.** T1–T5 and Join started at about 00:44 IST; the Coordinator took over at 00:46 (10-minute checks, merges, records). No track has opened a PR yet; T3 is building M7a, the first gate (T1's recorder, Join's mirror and the small city wait for it).
+Updated 03:10 IST, Fri 6 Nov. **Four milestones are merged: M7a (the Arkiv writer, 01:51), M1 (the checkout contract, 01:51), M10 (the agents) and M2 (the checkout deployed and verified on Whitechain).** In progress: M5 (ENS, T2), M3 (shop and facilitator, T1), M7b and the small-city seeding (T3), M11 (the mirror, Join), the website (T5) and the agent hooks (T4, PR #16).
 
-New since the handover:
-- **Usage risk:** the weekly plan limit is 71% used and resets Fri 21:30 IST. All seven sessions started on Opus 5.5 at max effort; at 01:22 the Coordinator switched the six track sessions to the planned mix (from their next turn). The Coordinator's own setting and extra usage are the founder's (`OPEN.md` "Founder now" 1).
-- **The graph layer becomes a developer SDK** (ADR-0057): T3 keeps `@graphpay/arkiv-graph` generic now, GraphPay's payment model sits in `packages/money-graph`, and on Friday after acceptance the package goes to npm (Friday item 18).
-- M0's background tasks: none failed (11 agents and 3 background commands, all completed; `relays/records.md`).
+Two risks for the founder (`OPEN.md` "Founder now"):
+- **Power and lid:** the lid closed at 02:14 and the Mac slept until 03:01, so every session lost about 47 minutes; it runs on battery.
+- **Plan usage:** 74% at 03:04, about 3 points an hour, resetting Fri 21:30 IST. The track sessions run the planned models, and the busiest ones restart with a fresh context at milestone boundaries (T4 dropped to 94K tokens).
 
 Next:
-1. Tell T1 and Join M7a's import path when it merges; CP2 expected about 01:35.
-2. Acceptance (CP4) about 05:30 IST; the next records relay about 02:45.
+1. M5 merges (T2), then T1's M3 part B and Join's real mirror runs.
+2. CP4 (acceptance) moves to about 06:15 IST after the lost 47 minutes.
 3. The large city waits for the founder's story lock (by Fri 08:30 for rehearsal 1, at the latest 13:00; seeding starts by 14:00).
 
 ## foundation
@@ -42,13 +41,14 @@ Updated 02:00 IST. **M5 is built and run for real; its PR is open.** The `graphp
 
 ## arkiv
 
-Updated 03:05 IST, Fri 6 Nov (T3).
+Updated 03:20 IST, Fri 6 Nov (T3).
 
-- **Where we are:** M7a merged (01:51). The small test city (size S, test story) is on Arkiv's testnet: 91 actors, 12 shops, 1,003 events, all labelled synthetic. Graph store and shop directory done; the plain copy (the benchmark's baseline) is finishing. GraphQL, the explain trace and the hosted MCP endpoint (M7b) are built; the PR goes up when the plain copy is done.
-- **Proven live:** asked through GraphQL, the seeded city answers the benchmark questions exactly as the generator's truth says. The city-wide top 10 takes 2 reads; the map query returns exactly the three cast shops (eleven with synthetic shops opted in).
-- **Running:** the plain store, resumed after an RPC timeout (detached; `docs/sessions/arkiv/seeding.md`).
+- **Where we are:** M7a, M8 (size S) and M7b have merged (PR #21, 03:11). The small test city is on Arkiv's testnet and answers through GraphQL, the explain trace and the hosted MCP. All three S stores survived the Mac's sleep (each manifest says done; nothing was mid-run).
+- **This step:** a small fix that T1's recorder depends on. After a send that landed but was reported as failed, the recorder, quotes and the ledger's check now read the row back correctly, so they adopt it instead of writing a second copy. A test on the simulator proves it lands once.
+- **Running:** nothing.
 - **Blockers:** none.
-- **Next:** ship M8 and M7b, check the routes on the production domain, then M9 (the live benchmark: reads, not speed).
+- **Checked on the production domain (03:22):** `/api/graphql` answers the city's top shops in 2 reads from Arkiv's testnet; `/api/mcp` lists its tools.
+- **Next:** M9, the live benchmark (reads, not speed).
 
 ## agents
 
@@ -67,18 +67,20 @@ Updated 02:05 IST. **The mirror (M11) now runs on the real Arkiv writer, in the 
 
 ## website
 
-Updated 03:03 IST, Fri 6 Nov (T5 Web). **The shell and the phone views are on `main` and live** at https://graphpay-event.vercel.app. A PR adds the agent run route: one request starts an errand and streams its events back, one errand at a time; it answers "not live yet" until Join wires the agents' live services (M12).
-- Running: nothing long. Panels needing other tracks' routes say which milestone they wait for.
-- Blockers: none; the venue network to GitHub is slow (retries).
-- Next: wire each panel as its route merges (M4, M6, M7b, M9, M12); M16 once M4 lands; Friday items 8 to 13. A fresh start file is at `docs/sessions/website/resume.md`.
+Updated 03:45 IST, Fri 6 Nov (T5 Web). **On `main`:** the shell, the phone views, the agent run route, and (PR 23) the merchant order stream and accountant CSV on the live money graph. A new PR wires the order trail page (`/order/<id>`) to GraphQL and makes the explain page show each call's rows, bytes and milliseconds.
+- Running: nothing long. M16 (checkout kit, store) waits for M4 (shop, facilitator; not merged).
+- Blockers: none. Customer panels wait for M4 and M6, the race for M9, the agent run for M12.
+- Next: M16 once M4 lands; Friday item 9 (Open toggle) once T3's `shop_open` lands. Fresh start file: `docs/sessions/website/resume.md`.
 
 ## records
 
-Updated 01:20 IST. **The Coordinator is on duty** (`docs/plan/sessions/coordinator.md`): 10-minute ticks from 00:58, a keep-awake hold, merges, records.
-- Done: ADR-0057 and Friday item 18 (the graph SDK on npm); T3 briefed at 01:04 and adopted it in M7a; the npm name checked (free); the first M14 relay; AI usage rows for the new sessions.
-- Running: the ticks (PRs, conflicts, gates, `OPEN.md` questions, silent sessions).
-- Blockers: none. Risk: plan usage (`OPEN.md` "Founder now" 1).
-- Next: each session's prompt log written into its own worktree (P-records-1); M7a's gate messages; records again about 02:45.
+Updated 03:20 IST. **Checked every session after the 02:14–03:01 sleep: none is hung.**
+- T3's long step (the budget test printing its calls and errors, about 39 minutes) ended when T3 did its fresh start. T3 now runs on a 150K-token context, down from 510K, and is writing its M8/M7b relay.
+- T5 restarted from its run file with its start line (fresh, 164K tokens).
+- T1 got its start line at 03:08 after a fresh start. T2, T4 and Join got theirs at 03:12; Join's gates (M2, M5) are open.
+- **M0's one failed background task:** "fast-forward the main checkout" (Thu 23:56) aborted with "Please commit your changes", because the prompt-log hook had appended M0's last prompt to its committed log. It mattered: the secret helpers, the funding script and the hook itself run from the main checkout. Fixed at 03:14: the main checkout is on `main` (2dd307d), and M0's extra line and one session's extra lines are committed here. The cause (P-records-1: every session's log was written to the main checkout) is fixed in this PR, with a reviewer pass.
+- Usage: 75% at 03:15 IST (resets Fri 21:30 IST). The founder's extra-usage decision is still open.
+- Next: sweep the remaining main-checkout prompt logs once the hook fix is live; records again about 04:45.
 
 ## submission
 

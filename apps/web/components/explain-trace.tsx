@@ -56,6 +56,8 @@ export function ExplainTrace({ explainId }: { explainId: string }) {
 
   const trace = loaded.trace;
   const queries = asArray(trace.queries);
+  // The engine's `reads` carry each call's entity, rows, bytes and milliseconds; `queries` is the bare text.
+  const reads = asArray(trace.reads);
   const keys = asArray(trace.entityKeys).filter((k): k is string => typeof k === 'string');
   return (
     <div className="trace">
@@ -66,8 +68,8 @@ export function ExplainTrace({ explainId }: { explainId: string }) {
       {text(trace.note) ? <p className="muted">{text(trace.note)}</p> : null}
       <ol className="trace-calls">
         {queries.map((raw, i) => {
-          const q = (raw ?? {}) as Record<string, unknown>;
-          const query = text(q.query) ?? text(q.readable) ?? text(q.readableQuery) ?? JSON.stringify(q);
+          const q = { ...(typeof raw === 'object' && raw !== null ? raw : {}), ...((reads[i] ?? {}) as Record<string, unknown>) } as Record<string, unknown>;
+          const query = typeof raw === 'string' ? raw : (text(q.query) ?? text(q.readable) ?? text(q.readableQuery) ?? JSON.stringify(q));
           return (
             <li key={i} className="card">
               <p className="small muted">
@@ -75,6 +77,7 @@ export function ExplainTrace({ explainId }: { explainId: string }) {
                 {text(q.entity) ? ` on ${text(q.entity)}` : ''}
                 {text(q.rows) ? `, ${text(q.rows)} rows` : ''}
                 {text(q.bytes) ? `, ${text(q.bytes)} bytes` : ''}
+                {text(q.ms) ? `, ${text(q.ms)} ms` : ''}
               </p>
               <pre className="mono query">{query}</pre>
             </li>
