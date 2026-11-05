@@ -1026,3 +1026,33 @@ pre.query {
   color: var(--chilli);
   font-size: 13.5px;
 }
+
+/* The Mumbai map: our own drawing, no tiles. The glow fades when a heartbeat lapses and only
+   pulses when motion is welcome. */
+.map-svg { width: 100%; height: auto; max-height: 78vh; display: block; }
+.map-bg { fill: var(--surface); stroke: var(--varq-15); }
+.map-area circle { fill: var(--varq-08); stroke: var(--varq-15); }
+.map-area text { fill: var(--varq-60); font-size: 12px; font-family: var(--font-text); }
+.map-area:hover circle { fill: var(--varq-15); }
+.map-persona circle { fill: var(--kesar); }
+.map-persona .map-radius { fill: none; stroke: var(--kesar); stroke-dasharray: 4 6; opacity: 0.5; }
+.map-persona text { fill: var(--kesar); font-size: 12px; font-family: var(--font-text); }
+.map-shop .map-dot { fill: var(--silver); transition: fill var(--move) var(--ease-out); }
+.map-shop text { fill: var(--varq); font-size: 12px; font-family: var(--font-text); }
+.map-shop[data-synthetic='true'] .map-dot { fill: var(--varq-60); }
+.map-shop[data-open='true'] .map-dot { fill: var(--pista); }
+.map-glow { fill: var(--pista); opacity: 0; transition: opacity 1500ms ease-out; pointer-events: none; }
+.map-shop[data-open='true'] .map-glow { opacity: 0.35; }
+.map-agent .map-glow { fill: var(--gulab); opacity: 0.35; }
+.map-agent .map-bot { fill: var(--gulab); }
+.map a:focus-visible, .map-svg a:focus-visible { outline: 2px solid var(--kesar); outline-offset: 2px; }
+@media (prefers-reduced-motion: no-preference) {
+  .map-shop[data-open='true'] .map-glow, .map-agent .map-glow { animation: map-pulse 2.4s ease-in-out infinite; }
+}
+@keyframes map-pulse { 0%, 100% { opacity: 0.2; } 50% { opacity: 0.5; } }
+@media (prefers-reduced-motion: reduce) { .map-glow { transition: none; } }
+.map-legend { list-style: none; padding: 0; margin: 0.75rem 0 0; display: flex; flex-wrap: wrap; gap: 0.5rem 1.25rem; }
+.map-key { display: inline-block; width: 0.8rem; height: 0.8rem; border-radius: 50%; margin-right: 0.35rem; vertical-align: -0.1rem; background: var(--silver); }
+.map-key[data-kind='open'] { background: var(--pista); box-shadow: 0 0 0 4px rgb(76 195 138 / 0.3); }
+.map-key[data-kind='synthetic'] { background: var(--varq-60); width: 0.5rem; height: 0.5rem; }
+.map-key[data-kind='agent'] { background: var(--gulab); box-shadow: 0 0 0 4px rgb(236 91 134 / 0.3); }

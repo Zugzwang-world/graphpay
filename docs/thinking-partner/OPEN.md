@@ -128,6 +128,7 @@ Updated 03:36 IST, Fri 6 Nov. Nothing for the founder now: the live mirror needs
 - **Dependency (told T6 at 04:30 IST, agreed by the Coordinator):** `packages/checkout-kit` uses only the public exports of `@graphpay/agentpay`: `createMerchant`, `httpFacilitator`, `whitechainNetwork`, `decodeHeader` (and in tests `signOrderPayment`, `buildRequirement`, `createOrder`, `nodeOf`). Recommendation: T6 keeps them stable or says before changing them.
 - **Open (default taken):** the store's Sunday box (subscribe and cancel) is not built: the kit's merchant has it (`shop.merchant`, agentpay's `signSubscription`) but the button offers one-off orders and re-orders only. Recommendation: after the video-critical items, if time.
 - **Note for T1 and T6:** `packages/contracts/index.mjs` now imports the ABI as JSON (`with { type: 'json' }`) instead of reading it with `readFileSync(new URL(..., import.meta.url))`, which a bundler (Next/Turbopack) cannot carry; the ABI and the 3 contracts tests are unchanged.
+- **Ask of T3 (default taken):** the GraphQL `Shop` has no Arkiv entity `key`, so a map dot opens the explorer's query page for its directory row (`project = str('graphpay') AND type = str('shop') AND shop_key = key(0x...)`) rather than its entity page. UNVERIFIED that the explorer's query page accepts this text (the spec marks it so). Recommendation: add `key` to `Shop` (agent presence rows already have one) so a dot opens `/entity/<key>`; the map picks it up with a small change.
 
 
 ## agentpay
