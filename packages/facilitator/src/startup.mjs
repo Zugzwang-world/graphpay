@@ -12,7 +12,13 @@ export class StartupError extends Error {}
 
 // rpcUrl: only its host is read, to tell a loopback fork from a real network.
 export function networkMode({ rpcUrl, allowRealNetwork, ensStub, hosted = false }) {
-  const { protocol, hostname } = new URL(rpcUrl);
+  let parsed;
+  try {
+    parsed = new URL(rpcUrl);
+  } catch {
+    throw new StartupError('the RPC URL does not parse'); // a TypeError would carry the URL in .input
+  }
+  const { protocol, hostname } = parsed;
   const loopback = LOOPBACK.has(hostname);
   if (!loopback && allowRealNetwork !== '1') throw new StartupError('a non-loopback RPC needs ALLOW_REAL_NETWORK=1');
   if (!loopback && ensStub) throw new StartupError('the ENS stub is refused on a real network');

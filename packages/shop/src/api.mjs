@@ -10,11 +10,11 @@
 // is safe: the order id is the Permit2 nonce, so it can never be paid twice).
 
 import { createHash, timingSafeEqual } from 'node:crypto';
-import { isAddressEqual } from 'viem';
+import { isAddress, isAddressEqual } from 'viem';
 import { decodePaymentSignatureHeader, encodePaymentRequiredHeader, encodePaymentResponseHeader } from '@x402/core/http';
 import { json, readJson, MAX_TIMEOUT_SECONDS, RateLimiter, SCHEME, X402_VERSION, toWireOrder, termsHashOf } from '@graphpay/facilitator';
 import { catalogOf } from './catalog.mjs';
-import { TermsError, ZERO32, buildOrder, rebuildOrder } from './orders.mjs';
+import { TermsError, ZERO32, ZERO_ADDRESS, buildOrder, rebuildOrder } from './orders.mjs';
 
 export const PASSCODE_HEADER = 'x-demo-passcode';
 const MIN_PASSCODE_LENGTH = 24;
@@ -64,7 +64,8 @@ export function shopHandler(deps) {
   }
 
   // The payee comes from ENS (ADR-0046): our configured payout address must be what the shop's
-  // name resolves to, or no 402 is offered. Cached 20 s by the exact spelling, stamped first.
+  // name resolves to, or no 402 is offered. An answer is cached 20 s by the exact spelling,
+  // stamped first; a failed read is not (T2's reader keeps its own cache).
   async function payeeHolds(shop, merchant) {
     const now = clock();
     let hit = payees.get(shop.ensName);
@@ -78,7 +79,7 @@ export function shopHandler(deps) {
         value = null;
       }
       hit = { at: now, value };
-      payees.set(shop.ensName, hit);
+      if (value) payees.set(shop.ensName, hit);
     }
     if (!hit.value) {
       log(`shop: payee unresolved for ${shop.key}`);
@@ -214,6 +215,11 @@ export function shopHandler(deps) {
     }
     // The quote key is informational and set only on the 402 step; carry it over so the
     // requirement equals what the payer accepted.
+    // The quote names the paying wallet (it is hashed into the order id): no other may pay it.
+    const signer = paymentPayload?.payload?.payer;
+    if (terms.wallet !== ZERO_ADDRESS && (typeof signer !== 'string' || !isAddress(signer, { strict: false }) || !isAddressEqual(signer, terms.wallet))) {
+      return json(400, { error: 'the payment is not from the quoted wallet' });
+    }
     const echoedKey = paymentPayload?.accepted?.extra?.quoteKey;
     const requirement = requirementOf(order, shop, typeof echoedKey === 'string' && HEX32.test(echoedKey) ? echoedKey : undefined);
 

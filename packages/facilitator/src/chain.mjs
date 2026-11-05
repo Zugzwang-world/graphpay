@@ -3,6 +3,7 @@
 // offline tests replace it with a fake.
 
 import { decodeEventLog, erc20Abi, isAddressEqual, parseAbi } from 'viem';
+import { network } from '@graphpay/config';
 import { checkoutAbi } from '@graphpay/contracts';
 
 const permit2Abi = parseAbi(['function nonceBitmap(address owner, uint256 wordPos) view returns (uint256)']);
@@ -11,10 +12,16 @@ const erc1271Abi = parseAbi(['function isValidSignature(bytes32 hash, bytes sign
 const ERC1271_MAGIC = '0x1626ba7e';
 
 // publicClient, walletClient (the relayer's), account (the relayer's local account).
+// chain: the viem chain the relayer signs for; it must be Whitechain's, and the RPC is asked
+// eth_chainId again before every send.
 export function viemChain({ publicClient, walletClient, account, checkout, token, permit2, chain }) {
+  const expected = network('whitechain').chainId;
+  if (chain?.id !== expected) throw new Error(`viemChain: the relayer signs for chain ${expected} only`);
   const c = { address: checkout, abi: checkoutAbi };
+  const chainOk = async () => (await publicClient.getChainId()) === expected;
   return {
     relayerAddress: account.address,
+    chainOk,
 
     // Permit2 branches on the payer's code: none → ecrecover; any (a contract, or an EOA with an
     // EIP-7702 delegation) → isValidSignature with the bytes as they are.
@@ -24,7 +31,9 @@ export function viemChain({ publicClient, walletClient, account, checkout, token
 
     async isValidSignature(address, hash, signature) {
       try {
-        const magic = await publicClient.readContract({ address, abi: erc1271Abi, functionName: 'isValidSignature', args: [hash, signature] });
+        // Called from Permit2, as the transfer will be: a wallet that answers differently by
+        // caller cannot pass here and fail on-chain.
+        const magic = await publicClient.readContract({ address, abi: erc1271Abi, functionName: 'isValidSignature', args: [hash, signature], account: permit2 });
         return magic.toLowerCase() === ERC1271_MAGIC;
       } catch {
         return false;
@@ -80,7 +89,8 @@ export function viemChain({ publicClient, walletClient, account, checkout, token
       return publicClient.getBalance({ address: account.address });
     },
 
-    sendSettle(args, gas) {
+    async sendSettle(args, gas) {
+      if (!(await chainOk())) throw new Error('sendSettle: the RPC is not on the relayer chain');
       return walletClient.writeContract({ ...c, functionName: 'settleOrder', args, account, chain, gas });
     },
 

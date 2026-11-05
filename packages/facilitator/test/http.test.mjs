@@ -45,7 +45,7 @@ test('x402Client with spend controls signs a graphpay-order payment our facilita
   const account = newAccount();
   const chain = fakeChain(account);
   const { handle } = service({ chain });
-  const publicClient = { readContract: async ({ functionName }) => (functionName === 'allowance' ? 0n : 0n) };
+  const publicClient = { getChainId: async () => CHAIN_ID, readContract: async ({ functionName }) => (functionName === 'allowance' ? 0n : 0n) };
   const scheme = graphPayOrderClient({ account, publicClient, chainId: CHAIN_ID, token: TOKEN, permit2: PERMIT2, checkout: CHECKOUT, payerName: AGENT_NAME, mandateHash: keccak256(toHex('m')), now: () => T0 });
   const order = makeOrder();
   const paymentRequired = { x402Version: 2, resource: { url: 'https://shop.example/api/shop/orders/1/pay' }, accepts: [requirementFor(order)] };

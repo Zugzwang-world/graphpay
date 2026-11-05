@@ -53,7 +53,8 @@ export const DEFAULT_LIMITS = Object.freeze({
   perPayerPerMinute: 10,
   perPayeePerMinute: 30,
   queueDepth: 20,
-  gateTtlMs: 20_000,
+  gateTtlMs: 20_000, // T2's gate's own cache (createEnsGate ttlMs); the pipeline keeps none
+  failuresPerPayerPerDay: 3,
   recordsPerPayerPerMinute: 6,
   recordsPerMinute: 30,
 });
@@ -118,25 +119,26 @@ export function createGraphPayFacilitator(deps) {
   const gasSpent = new DailyCounter(clock);
   const inflight = new Map(); // order id -> { hash | null, at }: sent, not yet decided
   const recent = new Map(); // record key -> at: one refusal record per order, payer and reason
-  const gateCache = new Map(); // exact spelling and amount -> { at, result }
+  const failedOrders = new Map(); // order id -> day: sent, failed on-chain, never sent again that day
+  const payerFailures = new Map(); // payer -> { day, count } of unexpected on-chain failures
   let queue = Promise.resolve();
   let queued = 0;
 
+  // No cache here: T2's gate caches its ENS reads (and the watcher can invalidate them), while the
+  // cap check must see every payment of the day. A throw is a read failure, never cached.
   async function gate(name, amount) {
-    const key = `${name}\u0000${amount}`;
-    const hit = gateCache.get(key);
-    const now = clock();
-    if (hit && now - hit.at < limits.gateTtlMs) return hit.result;
-    let result;
     try {
-      result = await deps.ensGate(name, amount);
+      return await deps.ensGate(name, amount);
     } catch {
-      result = { ok: false, reason: 'ENS_READ_FAILED' }; // fail closed
+      return { ok: false, reason: 'ENS_READ_FAILED' }; // fail closed
     }
-    gateCache.set(key, { at: now, result });
-    if (gateCache.size > 1000) gateCache.delete(gateCache.keys().next().value);
-    return result;
   }
+
+  const dayOf = () => Math.floor(clock() / 86_400_000);
+  const failuresOf = (payer) => {
+    const f = payerFailures.get(payer.toLowerCase());
+    return f && f.day === dayOf() ? f.count : 0;
+  };
 
   // Stages 1–4. Returns the parsed payment and what sending would do ('settle' or 'record').
   async function check(paymentPayload, paymentRequirements) {
@@ -155,7 +157,7 @@ export function createGraphPayFacilitator(deps) {
     if (!sameOrder(payload.order, wire) || !isAddressEqual(req.payTo, wire.merchant)) refuse('requirement_mismatch');
     if (req.amount !== wire.amountMicro || payload.permit.amount !== wire.amountMicro) refuse('requirement_mismatch');
     const order = fromWireOrder(wire);
-    if (BigInt(order.orderId) & RENEWAL_BIT || order.orderId === ZERO32) refuse('invalid_payload');
+    if (BigInt(order.orderId) & RENEWAL_BIT || order.orderId === ZERO32 || order.amountMicro === 0n) refuse('invalid_payload');
     if (BigInt(payload.permit.nonce) !== BigInt(order.orderId) || BigInt(payload.permit.deadline) !== order.deadline) {
       refuse('requirement_mismatch');
     }
@@ -190,6 +192,11 @@ export function createGraphPayFacilitator(deps) {
     const valid = hasCode ? await deps.chain.isValidSignature(payload.payer, digest, sig) : Boolean(local && isAddressEqual(local, payload.payer));
     if (!valid) refuse('bad_signature');
     const ctx = { order, req, payload, payer: payload.payer, amount: order.amountMicro, nowMs, hasCode };
+    // An order that already failed on-chain today is not sent again (its Permit2 nonce stays
+    // unused, so every check would pass again), and a payer with repeated unexpected failures
+    // is stopped for the day: neither may drain the relayer's gas budget.
+    if (failedOrders.get(order.orderId) === dayOf()) refuse('order_failed', { ctx });
+    if (failuresOf(payload.payer) >= limits.failuresPerPayerPerDay) refuse('payer_failures', { ctx });
     let gateEpoch;
     if (agent) {
       const verdict = await gate(payload.payerName, order.amountMicro);
@@ -224,8 +231,7 @@ export function createGraphPayFacilitator(deps) {
     // 4. Send only if all pass. NODE_MISMATCH would write failures against someone else's name.
     if (predicted === 'NODE_MISMATCH') refuse('NODE_MISMATCH', { record: true, ctx });
     if (POLICY_REFUSALS.has(predicted)) {
-      const today = Math.floor(clock() / 86_400_000);
-      if (recordedFailures.value() >= limits.recordedFailuresPerDay || recordedOrders.get(order.orderId) === today) refuse(predicted, { record: true, ctx });
+      if (recordedFailures.value() >= limits.recordedFailuresPerDay || recordedOrders.get(order.orderId) === dayOf()) refuse(predicted, { record: true, ctx });
       return { ...ctx, action: 'record', predicted };
     }
     return { ...ctx, action: 'settle', predicted };
@@ -315,6 +321,8 @@ export function createGraphPayFacilitator(deps) {
       const payerKey = ctx.payer.toLowerCase();
       const payeeKey = ctx.req.payTo.toLowerCase();
       if (!rate.global.peek('all') || !rate.payer.peek(payerKey) || !rate.payee.peek(payeeKey)) refuse('rate_limited', { ctx });
+      // eth_chainId before every send (CLAUDE.md): the start-up check alone is cached.
+      if (deps.chain.chainOk && !(await deps.chain.chainOk().catch(() => false))) refuse('wrong_chain', { ctx });
       const args = [ctx.order, ctx.payload.mandateHash, permitOf(ctx), ctx.payer, ctx.payload.signature, ctx.payload.approvalPermit];
       // A revert here (a re-order whose parent is not paid, terms changed under us) is no verdict
       // on the payer: refuse without a record.
@@ -332,7 +340,7 @@ export function createGraphPayFacilitator(deps) {
       rate.payee.take(payeeKey);
       if (ctx.action === 'record') {
         recordedFailures.add(1);
-        keep(recordedOrders, ctx.order.orderId, Math.floor(clock() / 86_400_000));
+        keep(recordedOrders, ctx.order.orderId, dayOf());
       }
       gasSpent.add(reserve);
       keep(inflight, ctx.order.orderId, { hash: null, at: clock(), reserve });
@@ -355,6 +363,13 @@ export function createGraphPayFacilitator(deps) {
     gasSpent.add(receipt.fee - reserve); // correct the reservation from the receipt
     const outcome = deps.chain.outcomeOf(receipt, ctx.order.orderId);
     if (outcome.settled) return { success: true, transaction: hash, network, payer: ctx.payer, amount: String(ctx.amount) };
+    // Decided and failed: never send this order again today. A failure we did not send on purpose
+    // also counts against the daily quota and the payer's own failure cap.
+    keep(failedOrders, ctx.order.orderId, dayOf());
+    if (ctx.action !== 'record') {
+      recordedFailures.add(1);
+      keep(payerFailures, ctx.payer.toLowerCase(), { day: dayOf(), count: failuresOf(ctx.payer) + 1 });
+    }
     const reason = outcome.failReason !== undefined ? FAIL_REASON[outcome.failReason] : 'reverted';
     return { success: false, errorReason: reason, transaction: hash, network, payer: ctx.payer };
   }

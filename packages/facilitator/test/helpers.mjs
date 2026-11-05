@@ -123,6 +123,7 @@ export function makeFacilitator({ chain, gate, recorder, limits, clock = () => T
 // Signs a payment the way an agent does: witness plus, while the allowance is short, an approval.
 export async function signedPayment(account, order, { payerName = AGENT_NAME, allowance = 0n, tokenNonce = 0n } = {}) {
   const publicClient = {
+    getChainId: async () => CHAIN_ID,
     async readContract({ functionName }) {
       return functionName === 'allowance' ? allowance : tokenNonce;
     },

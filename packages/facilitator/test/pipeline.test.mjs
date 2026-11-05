@@ -285,29 +285,29 @@ test('a wallet with code (a contract, or an EOA with an EIP-7702 delegation) is 
   await expectRefused(s.f, s.chain, p, 'approval_invalid');
 });
 
-test('the ENS gate runs after the signature, fails closed and is cached 20 s by exact spelling', async () => {
+test('the ENS gate runs after the signature on every check (no cache of ours) and fails closed', async () => {
   let calls = 0;
   let verdict = { ok: true, node: AGENT_NODE, epoch: 3 };
-  let clock = T0;
   const account = newAccount();
   const chain = fakeChain(account);
   const recorder = memoryRecorder();
-  const f = makeFacilitator({ chain, recorder, gate: async () => (calls++, verdict), clock: () => clock });
+  const f = makeFacilitator({ chain, recorder, gate: async () => (calls++, verdict) });
   const s = await signedPayment(account, makeOrder());
   await f.verify(s.paymentPayload, s.requirement);
   await f.verify(s.paymentPayload, s.requirement);
-  assert.equal(calls, 1, 'cached');
-  clock += 20_000;
+  assert.equal(calls, 2, 'asked each time: the cap must see every payment, a pause must not wait on a second cache');
   verdict = { ok: false, reason: 'CAP_EXCEEDED', node: AGENT_NODE, epoch: 3 };
   const v = await f.verify(s.paymentPayload, s.requirement);
-  assert.equal(calls, 2, 'expired after 20 s');
-  assert.equal(v.invalidReason, 'CAP_EXCEEDED');
+  assert.equal(v.invalidReason, 'CAP_EXCEEDED', 'a new verdict applies at once');
   await settled();
   assert.equal(recorder.records.at(-1).reason, 'CAP_EXCEEDED');
   assert.equal(recorder.records.at(-1).payerEpoch, 3, 'the epoch comes from the gate');
 
-  const thrower = makeFacilitator({ chain, recorder, gate: async () => { throw new Error('rpc down'); } });
+  let throws = 0;
+  const thrower = makeFacilitator({ chain, recorder, gate: async () => { throws++; throw new Error('rpc down'); } });
   assert.equal((await thrower.verify(s.paymentPayload, s.requirement)).invalidReason, 'ENS_READ_FAILED');
+  assert.equal((await thrower.verify(s.paymentPayload, s.requirement)).invalidReason, 'ENS_READ_FAILED');
+  assert.equal(throws, 2, 'a read failure is never cached');
   const elsewhere = makeFacilitator({ chain, recorder, gate: async () => ({ ok: true, node: namehash('x.graphpay.eth'), epoch: 0 }) });
   assert.equal((await elsewhere.verify(s.paymentPayload, s.requirement)).invalidReason, 'ENS_NODE_MISMATCH');
   assert.equal(chain.sends, 0);
@@ -588,6 +588,42 @@ test('a reverted receipt and an on-chain failure both report success false with 
   const failed = await s.f.settle(p.paymentPayload, p.requirement);
   assert.equal(failed.errorReason, 'TRANSFER_FAILED');
   assert.match(failed.transaction, /^0x/);
+});
+
+test('an order that failed on-chain is never sent again that day, and a payer with repeated failures is stopped', async () => {
+  const s = await setup({ limits: { failuresPerPayerPerDay: 2 } });
+  s.chain.outcome = { settled: false, failReason: 3 }; // TRANSFER_FAILED: not predicted, not sent on purpose
+  assert.equal((await s.f.settle(s.paymentPayload, s.requirement)).errorReason, 'TRANSFER_FAILED');
+  for (let i = 0; i < 3; i++) {
+    const again = await s.f.settle(s.paymentPayload, s.requirement);
+    assert.equal(again.errorReason, 'order_failed');
+    assert.equal(again.transaction, '');
+  }
+  assert.equal(s.chain.sends, 1, 'the order went out once');
+  assert.equal(s.f.stats().recordedFailuresToday, 1, 'an unexpected failure counts against the daily quota');
+  const second = await signedPayment(s.account, makeOrder({ salt: 7 }));
+  assert.equal((await s.f.settle(second.paymentPayload, second.requirement)).errorReason, 'TRANSFER_FAILED');
+  const third = await signedPayment(s.account, makeOrder({ salt: 8 }));
+  assert.equal((await s.f.verify(third.paymentPayload, third.requirement)).invalidReason, 'payer_failures');
+  assert.equal((await s.f.settle(third.paymentPayload, third.requirement)).errorReason, 'payer_failures');
+  assert.equal(s.chain.sends, 2, 'the payer is stopped after its cap of failures');
+});
+
+test('eth_chainId is asked before every send; another chain sends nothing', async () => {
+  const s = await setup();
+  let id = 1874;
+  s.chain.chainOk = async () => id === 1874;
+  id = 1;
+  const r = await s.f.settle(s.paymentPayload, s.requirement);
+  assert.equal(r.errorReason, 'wrong_chain');
+  assert.equal(s.chain.sends, 0);
+  id = 1874;
+  assert.equal((await s.f.settle(s.paymentPayload, s.requirement)).success, true);
+});
+
+test('a zero amount is refused in stage 1', async () => {
+  const s = await setup({ order: makeOrder({ amountMicro: 0n }) });
+  await expectRefused(s.f, s.chain, s, 'invalid_payload');
 });
 
 test('settle runs one at a time, and a full queue answers busy', async () => {

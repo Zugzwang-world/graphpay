@@ -74,7 +74,7 @@ async function quoteFor(w, over) {
 function payerClient(account) {
   const scheme = graphPayOrderClient({
     account,
-    publicClient: { readContract: async () => 0n },
+    publicClient: { getChainId: async () => CHAIN_ID, readContract: async () => 0n },
     chainId: CHAIN_ID,
     token: TOKEN,
     permit2: PERMIT2,
@@ -212,6 +212,12 @@ test('the payee must be what ENS resolves for the shop: otherwise 503 and no 402
   clock += 20_000;
   answer = async () => ({ ok: true, payee: MERCHANT, name: SHOP.ensName });
   assert.equal((await post(w.handle, q.payUrl, q.terms)).status, 402);
+  // A failed read is not cached: the next request asks again at once.
+  clock += 20_000;
+  answer = async () => ({ ok: false, reason: 'PAYEE_UNRESOLVED', detail: 'ENS_READ_FAILED' });
+  assert.equal((await post(w.handle, q.payUrl, q.terms)).status, 503);
+  answer = async () => MERCHANT;
+  assert.equal((await post(w.handle, q.payUrl, q.terms)).status, 402, 'no wait after a failed read');
 });
 
 test('with a requestId the 402 step writes the quote first and carries its key; a failed write is 503', async () => {
@@ -269,6 +275,17 @@ test('quote -> 402 -> sign -> 200 with PAYMENT-RESPONSE -> replay is alreadyPaid
   const again402 = await post(w.handle, q.payUrl, q.terms);
   assert.equal(again402.status, 200, 'a paid order offers no new 402');
   assert.equal(w.chain.sends, 1);
+});
+
+test('a quote for one wallet cannot be paid from another', async () => {
+  const w = world();
+  const q = await quoteFor(w, { wallet: newAccount().address });
+  const r402 = await post(w.handle, q.payUrl, q.terms);
+  const { client, http } = payerClient(w.payerAccount);
+  const payload = await client.createPaymentPayload(decodePaymentRequiredHeader(r402.headers.get('payment-required')));
+  const res = await post(w.handle, q.payUrl, q.terms, { signature: http.encodePaymentSignatureHeader(payload) });
+  assert.equal(res.status, 400);
+  assert.equal(w.chain.sends, 0);
 });
 
 test('a re-order follows a paid parent of the same buyer at the same shop', async () => {

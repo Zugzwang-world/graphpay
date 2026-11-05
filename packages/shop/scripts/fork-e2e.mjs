@@ -8,7 +8,7 @@
 // through anvil impersonation, and funded with test USDT moved from FUNDER on the fork only.
 // The ENS gate and the payee lookup are stubs, allowed on a loopback fork only.
 //
-//   anvil --fork-url https://rpc.testnet.whitechain.io --port 8547 --chain-id 1874
+//   anvil --fork-url <the public Whitechain RPC in the config> --port 8547 --chain-id 1874
 //   node scripts/fork-e2e.mjs [--fork http://127.0.0.1:8547]
 
 import { createServer } from 'node:http';

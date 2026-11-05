@@ -33,6 +33,8 @@ export function graphPayOrderClient({ account, publicClient, chainId, token, per
         throw new Error('graphpay-order: the order does not match the requirement');
       }
       if (!isAddressEqual(req.extra.contract, checkout)) throw new Error('graphpay-order: the requirement names another contract');
+      // eth_chainId before signing: the reads below (allowance, token nonce) must be this chain's.
+      if ((await publicClient.getChainId()) !== chainId) throw new Error('graphpay-order: the RPC is not on the configured chain');
       const permit = { token: getAddress(req.asset), amount, nonce: BigInt(order.orderId), deadline: order.deadline };
       const signature = await account.signTypedData({
         domain: permit2Domain(chainId, permit2),
