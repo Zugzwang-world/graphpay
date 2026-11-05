@@ -36,6 +36,8 @@ So C2's real settle should land near 351,000, inside 312,024 ±15%. `createSubsc
 
 Pass 1 (02:10 IST): ship, no blocking issue. Fixed after it: a starved-gas sweep for `renew`; the JS `renewalOrderId` and witness type string compared with the contract through the fixture; two tests that promised more than they proved; the daily-cap renewal test pinned to a fixed midday; the library installer no longer leaves a half-fetched folder. Open (CI, the Coordinator's): only the `ci` job is a required check, so the `contracts` job does not gate a merge; this PR merges only after `contracts` is green.
 
+Pass 2 (02:35 IST, on the fix commit): ship, no blocking issue. A red `contracts` job from an RPC timeout is rerun, never merged past.
+
 ## For the other tracks
 
 `import { checkoutAbi, permitWitnessTypes, permit2Domain, tokenDomain, FAIL_REASON, renewalOrderId } from '@graphpay/contracts'`. The ABI is `packages/contracts/abi/GraphPayCheckout.json` (CI checks it against the build). The deployed address and deploy block go in `whitechain.contracts` at M2.
