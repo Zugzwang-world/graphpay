@@ -1,0 +1,34 @@
+{
+  "id": "E2",
+  "at": "2026-11-05T23:15:02.718Z",
+  "pass": true,
+  "what": "the agents choose the good shop, never the trap",
+  "measured": {
+    "explainId": "f3d1bb972a81",
+    "chosen": "kesar-kingdom.graphpay.eth",
+    "scores": [
+      {
+        "ens": "kesar-kingdom.graphpay.eth",
+        "score": 0.9152605195518567,
+        "eligible": true
+      },
+      {
+        "ens": "syrup-street.graphpay.eth",
+        "score": 0.8632476215644365,
+        "eligible": true
+      },
+      {
+        "ens": "jamun-junction.graphpay.eth",
+        "score": 0.7508551857689739,
+        "eligible": false
+      }
+    ],
+    "trapEvents": 0
+  },
+  "expected": "explainId; good > runner-up, trap excluded; no trap order or payment; trap balance unchanged",
+  "evidence": {
+    "runFile": "docs/sessions/integration/runs/run-a8d00695846884f3/run.json",
+    "startedAt": "2026-11-05T23:11:01.937Z",
+    "assertion": "A"
+  }
+}

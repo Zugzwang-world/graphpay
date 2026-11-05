@@ -1,69 +1,72 @@
-# Relay: records (the Coordinator), 03:10 IST, Fri 6 Nov
+# Relay: records (the Coordinator), 04:45 IST, Fri 6 Nov
 
 ## Where we are
 
-Four milestones are on `main`:
+**GraphPay's first real payment is on-chain (04:14 IST).** T1 sent 4.80 test USDT from `acceptance.vitalik.graphpay.eth` to `kesar-kingdom.graphpay.eth` through our own x402 facilitator on Whitechain Sepolia. T2's ENS gate checked the agent first, the payee came from ENS, and the payer paid no gas ([the transaction](https://explorer.testnet.whitechain.io/tx/0x87505ef2457b6e925fa7378a55fd91419e83c37fb8effc06d901884700c72c00)). T1 then ran the whole lifecycle on the real chain:
+- refund, re-order, an over-cap refusal and a revoked agent;
+- a payment by the human persona;
+- a subscription that is renewed by RENEWER and cancelled by signature.
 
-| milestone | PR |
-|---|---|
-| M7a, the Arkiv writer: the generic `@graphpay/arkiv-graph` SDK plus GraphPay's `money-graph` layer | #14, 01:51 IST |
-| M1, the checkout contract | #12, 01:51 IST |
-| M10, the agents | #11 |
-| M2, the USDT checkout deployed, verified and set up on Whitechain Sepolia | #15 |
+Merged since 03:10:
 
-Also on `main`: Join's mirror core (#8) and T5's website shell and phone views (#10, #13).
+| milestone | PRs | what |
+|---|---|---|
+| M3 | #42, #45 | the facilitator, the shop's 402 API, the recorder |
+| M5 | #18 | the ENS namespace |
+| M6 | #34, #40 | the gate and the watcher |
+| M7b and M8 | #21 | the engine and the small city on Rabdi |
+| M9 | #31 | 2 reads against 5, every answer right |
+| M11 | #20, #33, #46 | the mirror, live since 03:13 |
 
-In progress:
-- M5 ENS (T2), which gates T1's M3 part B and Join's real mirror runs;
-- M3 part A (T1);
-- the small-city seeding and M7b (T3);
-- M11 (Join);
-- the website (T5);
-- the agent hooks (T4, #16).
-
-**The Mac slept from 02:14 to 03:01 IST** because the lid was closed, and it was on battery. Every session lost about 47 minutes, so CP4 (acceptance) moves to about 06:15 IST.
+Also merged: T6's AgentPay SDK, with its own first real gasless payment (#38, #41), and T5's race mode, the Open toggle, and Pause/Resume with live customer state (#36, #39, #43, #44). **The first acceptance report** (#46) has 18 pass, 0 fail, 1 blocked and 29 not yet run. Join is running the real `e2e:food` now, so CP4 is expected about 06:15.
 
 ## What the founder needs to do
 
 | what | where | why |
 |---|---|---|
-| Plug in the charger and keep the lid open | the Mac | A closed lid always sleeps, and an empty battery stops everything |
-| Decide on extra usage with a cap; set the Coordinator to Opus 5.5 at high | Claude account settings; the Coordinator's model menu | The weekly limit is 74% used (03:04) and climbs about 3 points an hour, but resets only at Fri 21:30 IST |
-| Send the disclosure if not sent yet; the story brief by 08:30 | Hacker Dashboard; the Coordinator | The rules require the disclosure; rehearsal 1 and the large city need the story |
+| Keep the charger in and the lid open | the Mac | A closed lid sleeps everything (02:14–03:01 tonight) |
+| Send the story brief by 08:30 | the Coordinator | Rehearsal 1 with the demo cast; the large city must start seeding by 14:00 |
+| Optional: set the Coordinator to Opus 5.5 high | its model menu | A session cannot change its own effort |
+| Optional: claim the npm organisation `graphpay` | npmjs.com | For Friday's `@graphpay/arkiv-graph` publish |
+| Read the stage passcode from `.env` yourself | your Mac | `DEMO_PASSCODE` unlocks the spending buttons on the site; it is never shown in chat |
 
-## Done since 01:20
+## Decisions
 
-- PR #9 merged: ADR-0057 (the graph SDK, npm on Friday as item 18), the master plan, the run files and the first relay.
-- At 01:22 the six track sessions were switched to the planned models: Sonnet 5.5 at high for T2, T4 and T5; Opus 5.5 at xhigh for T1, T3 and Join.
-- Gate messages: M7a to T1, Join and T3; M1 to Join. Join's three writer asks were forwarded to T3 and are all in M7a; its contract asks went to T1 (the ABI export is in M1, the deploy block in M2).
-- T3's #14 conflicted with `main` twice. The second time, the cause was everyone appending at the end of `FACTS.md`. Track rows now go under activity headings, in activity order.
-- **Fresh starts.** The biggest cost is context size, because each tool call re-reads the whole conversation (T1 and T3 were near 500K tokens). At milestone boundaries each session pushes, writes `docs/sessions/<activity>/resume.md`, clears its conversation and restarts from its run file. T4 went from hundreds of thousands of tokens to 94K. T1, T3, T5 and Join are asked to do the same.
+- **ADR-0062 (the founder, 04:15):** every session pauses gracefully at 92% of the weekly limit, and extra usage stays off. At about 04:20 every track session was set to high.
+- **ADR-0061:** the Swarm menu goes through the public gateway (nothing signed or spent). The refund evidence is encrypted client-side and done last.
+- **The checkout kit (M16)** is a thin layer over `@graphpay/agentpay`, using public exports only.
 
-## Usage (from the app's usage card)
+## Usage (the app's usage card)
 
 | time | percent |
 |---|---|
-| 01:08 | 70% |
-| 01:16 | 71% |
-| 01:43 | 72% |
-| 01:58 | 73% |
 | 03:04 | 74% |
+| 03:36 | 76% |
+| 03:56 | 78% |
+| 04:12–04:33 | 79% |
 
-The 03:04 point includes the 47 minutes of sleep. While awake the burn is about 3 points an hour, and the limit resets Fri 21:30 IST. If fresh starts don't bring it down, the next step is one effort level lower on every track session.
+The burn slowed after the step-downs and the fresh starts. At 92% the Coordinator confirms every session has paused, notifies the founder and stops ticking. The mirror keeps running.
 
-## Problems
+## Problems and fixes
 
-- **P-records-3:** the sessions started on the wrong model and effort; fixed at 01:22.
-- **P-records-4:** the Mac slept with the lid closed; the founder was notified at 03:04.
-- **P-records-1:** prompt logs land in the main checkout; the fix is planned.
-- **P-records-2:** the venue network to GitHub is slow; retries work.
+- **The funding run:** it topped up five roles, not just RENEWER. The dry run had been read through a filter, and the real run's output was cut short with `head`. A fresh dry run showed every role at target and nothing in flight. Lesson: read the whole dry run, and never pipe a real run.
+- **Session clocks:** some sessions misreport the time in their messages (06:15 and 04:52 at 04:23 and 04:31). The records use `date`.
+
+## Wallets and secrets
+
+- **RENEWER's second use:** the relayer for T6's real SDK payment.
+- **Top-ups:** DEPLOYER, RENEWER, POLICY_WRITER and both small shops are back at their targets (`docs/technical/WALLETS.md` §2b). FUNDER keeps 2.618 WBT, 0.275 Sepolia ETH and 15.08 tGLM.
+- **Vercel Production, Sensitive:** `W_DIRECTORY_PRIVATE_KEY` (the Open toggle), `VITALIK_PRIVATE_KEY` (Pause/Resume) and `DEMO_PASSCODE`, all through `pnpm -s secrets:vercel`. They take effect with the next deployment.
 
 ## Questions for the thinking partner
 
 | question | recommendation |
 |---|---|
-| Is turning on extra usage with a cap worth the cost? | Yes. A stop before the 18:00 freeze would cost the Friday programme |
+| Should the 8% held back at 92% go to Friday's rehearsal and the video, or to more building? | Rehearsal 1 and the story swap first: they need the founder awake, and the reset at 21:30 brings full budget for the evening |
 
 ## Next
 
-On every tick: start lines after fresh starts, gate messages when M5 merges, stalled auto-merges, and power and usage checks. Records again about 04:45 IST.
+- CP4's relay as soon as the acceptance report is complete.
+- Tell T1 when Join's `e2e:food` is done, so FACILITATOR is free again.
+- The founder's story brief at 08:30.
+- Records again about 06:45.

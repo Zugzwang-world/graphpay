@@ -6,6 +6,8 @@ AI agents with ENS names pay shops over x402 on Whitechain through our own facil
 
 **Status:** being built live. This README grows as the tracks land; the live state is in `docs/thinking-partner/NOW.md` and the plan in `docs/plan/MASTER_PLAN.md`.
 
+**First real payment (Fri 6 Nov, 04:14 IST):** 4.80 test USDT from `acceptance.vitalik.graphpay.eth` to `kesar-kingdom.graphpay.eth` through our own x402 facilitator on Whitechain Sepolia. The ENS gate checked the agent first, the payee came from ENS, and the payer paid no gas: [the transaction](https://explorer.testnet.whitechain.io/tx/0x87505ef2457b6e925fa7378a55fd91419e83c37fb8effc06d901884700c72c00).
+
 ## Repository map
 
 | path | what |

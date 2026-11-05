@@ -1,0 +1,1206 @@
+{
+  "schema": "graphpay.integration-run/v1",
+  "label": "test errand, real networks (SYNTHETIC story)",
+  "network": "real",
+  "receipts": "WHITECHAIN",
+  "synthetic": true,
+  "model": "testing: claude-opus-5-5 @ xhigh",
+  "startedAt": "2026-11-05T23:11:01.937Z",
+  "endedAt": "2026-11-05T23:13:39.433Z",
+  "seconds": 157.5,
+  "cost": {
+    "apiCostUsd": 0.2986,
+    "seconds": 122.1,
+    "tokens": 52693
+  },
+  "agents": {
+    "schema": "graphpay.agent-run/v1",
+    "label": "test errand, real networks (SYNTHETIC story)",
+    "runId": "run-a8d00695846884f3",
+    "mode": "anthropic",
+    "model": "testing: claude-opus-5-5 @ xhigh",
+    "synthetic": true,
+    "cast": {
+      "story": "test",
+      "root": "graphpay.eth",
+      "persona": "vitalik.graphpay.eth",
+      "buyer": {
+        "concierge": "concierge.vitalik.graphpay.eth",
+        "scout": "scout.vitalik.graphpay.eth",
+        "analyst": "analyst.vitalik.graphpay.eth",
+        "payer": "payer.vitalik.graphpay.eth",
+        "paysAs": "payer.vitalik.graphpay.eth"
+      },
+      "shops": [
+        {
+          "ens": "kesar-kingdom.graphpay.eth",
+          "displayName": "Kesar Kingdom",
+          "storyRole": "good",
+          "agents": {
+            "storefront": "storefront.kesar-kingdom.graphpay.eth",
+            "risk": "risk.kesar-kingdom.graphpay.eth",
+            "dispatch": "dispatch.kesar-kingdom.graphpay.eth"
+          }
+        },
+        {
+          "ens": "jamun-junction.graphpay.eth",
+          "displayName": "Jamun Junction",
+          "storyRole": "trap",
+          "agents": {
+            "storefront": "storefront.jamun-junction.graphpay.eth",
+            "risk": "risk.jamun-junction.graphpay.eth",
+            "dispatch": "dispatch.jamun-junction.graphpay.eth"
+          }
+        },
+        {
+          "ens": "syrup-street.graphpay.eth",
+          "displayName": "Syrup Street",
+          "storyRole": "runner-up",
+          "agents": {
+            "storefront": "storefront.syrup-street.graphpay.eth",
+            "risk": "risk.syrup-street.graphpay.eth",
+            "dispatch": "dispatch.syrup-street.graphpay.eth"
+          }
+        }
+      ]
+    },
+    "request": "Just landed in Mumbai. Get me the best gulab jamun near me under 6 USDT by 8 pm.",
+    "edges": [
+      {
+        "seq": 1,
+        "from": "vitalik.graphpay.eth",
+        "to": "concierge.vitalik.graphpay.eth"
+      },
+      {
+        "seq": 6,
+        "from": "concierge.vitalik.graphpay.eth",
+        "to": "scout.vitalik.graphpay.eth"
+      },
+      {
+        "seq": 9,
+        "from": "concierge.vitalik.graphpay.eth",
+        "to": "analyst.vitalik.graphpay.eth"
+      },
+      {
+        "seq": 21,
+        "from": "scout.vitalik.graphpay.eth",
+        "to": "concierge.vitalik.graphpay.eth"
+      },
+      {
+        "seq": 28,
+        "from": "analyst.vitalik.graphpay.eth",
+        "to": "concierge.vitalik.graphpay.eth"
+      },
+      {
+        "seq": 32,
+        "from": "concierge.vitalik.graphpay.eth",
+        "to": "payer.vitalik.graphpay.eth"
+      },
+      {
+        "seq": 35,
+        "from": "payer.vitalik.graphpay.eth",
+        "to": "storefront.kesar-kingdom.graphpay.eth"
+      },
+      {
+        "seq": 36,
+        "from": "storefront.kesar-kingdom.graphpay.eth",
+        "to": "risk.kesar-kingdom.graphpay.eth"
+      },
+      {
+        "seq": 46,
+        "from": "risk.kesar-kingdom.graphpay.eth",
+        "to": "storefront.kesar-kingdom.graphpay.eth"
+      },
+      {
+        "seq": 51,
+        "from": "storefront.kesar-kingdom.graphpay.eth",
+        "to": "payer.vitalik.graphpay.eth"
+      },
+      {
+        "seq": 54,
+        "from": "payer.vitalik.graphpay.eth",
+        "to": "storefront.kesar-kingdom.graphpay.eth"
+      },
+      {
+        "seq": 55,
+        "from": "storefront.kesar-kingdom.graphpay.eth",
+        "to": "payer.vitalik.graphpay.eth"
+      },
+      {
+        "seq": 57,
+        "from": "payer.vitalik.graphpay.eth",
+        "to": "storefront.kesar-kingdom.graphpay.eth"
+      },
+      {
+        "seq": 62,
+        "from": "dispatch.kesar-kingdom.graphpay.eth",
+        "to": "payer.vitalik.graphpay.eth"
+      },
+      {
+        "seq": 63,
+        "from": "storefront.kesar-kingdom.graphpay.eth",
+        "to": "payer.vitalik.graphpay.eth"
+      },
+      {
+        "seq": 66,
+        "from": "payer.vitalik.graphpay.eth",
+        "to": "concierge.vitalik.graphpay.eth"
+      }
+    ],
+    "events": [
+      {
+        "seq": 1,
+        "type": "message",
+        "from": "vitalik.graphpay.eth",
+        "to": "concierge.vitalik.graphpay.eth",
+        "text": "Just landed in Mumbai. Get me the best gulab jamun near me under 6 USDT by 8 pm."
+      },
+      {
+        "seq": 2,
+        "type": "guard",
+        "guard": "G1",
+        "ok": true,
+        "detail": "mandate from the human's words: at most 6.000000 USDT, by 2026-11-06T20:00:00+05:30 (hash 0x0c5a80df0c98786229a9427ac38c4d4a5286d6b848d8329687d2af4b8751195d)"
+      },
+      {
+        "seq": 3,
+        "type": "agent.start",
+        "agent": "concierge.vitalik.graphpay.eth",
+        "role": "concierge",
+        "task": {
+          "request": "Just landed in Mumbai. Get me the best gulab jamun near me under 6 USDT by 8 pm.",
+          "buyer": "vitalik.graphpay.eth",
+          "now": "2026-11-06T04:41:08+05:30",
+          "timezone": "Asia/Kolkata (UTC+05:30)",
+          "defaults": {
+            "food": {
+              "quantity": 12,
+              "item": "gulab jamun"
+            }
+          }
+        }
+      },
+      {
+        "seq": 4,
+        "type": "tool.call",
+        "agent": "concierge.vitalik.graphpay.eth",
+        "tool": "scout",
+        "input": {
+          "need": {
+            "need": "food",
+            "item": "gulab jamun",
+            "quantity": 12,
+            "budgetUsdt": "6",
+            "deadlineIso": "2026-11-06T20:00:00+05:30",
+            "city": "Mumbai"
+          }
+        }
+      },
+      {
+        "seq": 5,
+        "type": "guard",
+        "guard": "G1",
+        "ok": true,
+        "detail": "concierge.vitalik.graphpay.eth: the need matches the human's words"
+      },
+      {
+        "seq": 6,
+        "type": "message",
+        "from": "concierge.vitalik.graphpay.eth",
+        "to": "scout.vitalik.graphpay.eth",
+        "text": "find 12 × gulab jamun in Mumbai"
+      },
+      {
+        "seq": 7,
+        "type": "agent.start",
+        "agent": "scout.vitalik.graphpay.eth",
+        "role": "scout",
+        "task": {
+          "need": {
+            "need": "food",
+            "item": "gulab jamun",
+            "category": "sweets",
+            "quantity": 12,
+            "budgetUsdt": "6.000000",
+            "deadlineIso": "2026-11-06T20:00:00+05:30",
+            "city": "Mumbai",
+            "buyer": "vitalik.graphpay.eth"
+          }
+        }
+      },
+      {
+        "seq": 8,
+        "type": "tool.call",
+        "agent": "concierge.vitalik.graphpay.eth",
+        "tool": "analyst",
+        "input": {
+          "need": {
+            "need": "food",
+            "item": "gulab jamun",
+            "quantity": 12,
+            "budgetUsdt": "6",
+            "deadlineIso": "2026-11-06T20:00:00+05:30",
+            "city": "Mumbai"
+          }
+        }
+      },
+      {
+        "seq": 9,
+        "type": "message",
+        "from": "concierge.vitalik.graphpay.eth",
+        "to": "analyst.vitalik.graphpay.eth",
+        "text": "rank shops for gulab jamun in Mumbai by trust"
+      },
+      {
+        "seq": 10,
+        "type": "tool.call",
+        "agent": "scout.vitalik.graphpay.eth",
+        "tool": "directory_list",
+        "input": {
+          "category": "sweets",
+          "city": "Mumbai"
+        }
+      },
+      {
+        "seq": 11,
+        "type": "tool.result",
+        "agent": "scout.vitalik.graphpay.eth",
+        "tool": "directory_list",
+        "output": {
+          "shops": [
+            "jamun-junction.graphpay.eth",
+            "syrup-street.graphpay.eth",
+            "kesar-kingdom.graphpay.eth"
+          ],
+          "synthetic": true
+        }
+      },
+      {
+        "seq": 12,
+        "type": "guard",
+        "guard": "G2",
+        "ok": true,
+        "detail": "ranking recomputed in code from its own 90-day query (explain f3d1bb972a81): kesar-kingdom.graphpay.eth 0.915 > syrup-street.graphpay.eth 0.863 > jamun-junction.graphpay.eth 0.751 excluded (refund rate 18.2% is above 10.0% (90 days); on-time rate 70.9% is below 80.0% (90 days))"
+      },
+      {
+        "seq": 13,
+        "type": "agent.start",
+        "agent": "analyst.vitalik.graphpay.eth",
+        "role": "analyst",
+        "task": {
+          "need": {
+            "need": "food",
+            "item": "gulab jamun",
+            "category": "sweets",
+            "quantity": 12,
+            "budgetUsdt": "6.000000",
+            "deadlineIso": "2026-11-06T20:00:00+05:30",
+            "city": "Mumbai",
+            "buyer": "vitalik.graphpay.eth"
+          },
+          "window": "D90"
+        }
+      },
+      {
+        "seq": 14,
+        "type": "tool.call",
+        "agent": "scout.vitalik.graphpay.eth",
+        "tool": "catalog_read",
+        "input": {
+          "shopEns": "jamun-junction.graphpay.eth"
+        }
+      },
+      {
+        "seq": 15,
+        "type": "tool.call",
+        "agent": "scout.vitalik.graphpay.eth",
+        "tool": "catalog_read",
+        "input": {
+          "shopEns": "syrup-street.graphpay.eth"
+        }
+      },
+      {
+        "seq": 16,
+        "type": "tool.call",
+        "agent": "scout.vitalik.graphpay.eth",
+        "tool": "catalog_read",
+        "input": {
+          "shopEns": "kesar-kingdom.graphpay.eth"
+        }
+      },
+      {
+        "seq": 17,
+        "type": "tool.result",
+        "agent": "scout.vitalik.graphpay.eth",
+        "tool": "catalog_read",
+        "output": {
+          "offers": [
+            {
+              "shop": "jamun-junction.graphpay.eth",
+              "sku": "gulab-jamun-12",
+              "item": "gulab jamun",
+              "quantity": 12,
+              "priceUsdt": "3.300000",
+              "etaMinutes": 25,
+              "distanceKm": 0.9
+            }
+          ],
+          "synthetic": true
+        }
+      },
+      {
+        "seq": 18,
+        "type": "tool.result",
+        "agent": "scout.vitalik.graphpay.eth",
+        "tool": "catalog_read",
+        "output": {
+          "offers": [
+            {
+              "shop": "syrup-street.graphpay.eth",
+              "sku": "gulab-jamun-12",
+              "item": "gulab jamun",
+              "quantity": 12,
+              "priceUsdt": "4.200000",
+              "etaMinutes": 50,
+              "distanceKm": 1.4
+            }
+          ],
+          "synthetic": true
+        }
+      },
+      {
+        "seq": 19,
+        "type": "tool.result",
+        "agent": "scout.vitalik.graphpay.eth",
+        "tool": "catalog_read",
+        "output": {
+          "offers": [
+            {
+              "shop": "kesar-kingdom.graphpay.eth",
+              "sku": "gulab-jamun-12",
+              "item": "gulab jamun",
+              "quantity": 12,
+              "priceUsdt": "4.800000",
+              "etaMinutes": 45,
+              "distanceKm": 2.1
+            }
+          ],
+          "synthetic": true
+        }
+      },
+      {
+        "seq": 20,
+        "type": "agent.end",
+        "agent": "scout.vitalik.graphpay.eth",
+        "role": "scout",
+        "output": {
+          "offers": [
+            {
+              "shop": "jamun-junction.graphpay.eth",
+              "sku": "gulab-jamun-12",
+              "item": "gulab jamun",
+              "quantity": 12,
+              "priceUsdt": "3.300000",
+              "etaMinutes": 25,
+              "distanceKm": 0.9
+            },
+            {
+              "shop": "syrup-street.graphpay.eth",
+              "sku": "gulab-jamun-12",
+              "item": "gulab jamun",
+              "quantity": 12,
+              "priceUsdt": "4.200000",
+              "etaMinutes": 50,
+              "distanceKm": 1.4
+            },
+            {
+              "shop": "kesar-kingdom.graphpay.eth",
+              "sku": "gulab-jamun-12",
+              "item": "gulab jamun",
+              "quantity": 12,
+              "priceUsdt": "4.800000",
+              "etaMinutes": 45,
+              "distanceKm": 2.1
+            }
+          ]
+        },
+        "usageTokens": 5399,
+        "model": "claude-opus-5-5"
+      },
+      {
+        "seq": 21,
+        "type": "message",
+        "from": "scout.vitalik.graphpay.eth",
+        "to": "concierge.vitalik.graphpay.eth",
+        "text": "3 offers (SYNTHETIC)"
+      },
+      {
+        "seq": 22,
+        "type": "tool.result",
+        "agent": "concierge.vitalik.graphpay.eth",
+        "tool": "scout",
+        "output": {
+          "offers": [
+            {
+              "shop": "jamun-junction.graphpay.eth",
+              "sku": "gulab-jamun-12",
+              "item": "gulab jamun",
+              "quantity": 12,
+              "priceUsdt": "3.300000",
+              "etaMinutes": 25,
+              "distanceKm": 0.9
+            },
+            {
+              "shop": "syrup-street.graphpay.eth",
+              "sku": "gulab-jamun-12",
+              "item": "gulab jamun",
+              "quantity": 12,
+              "priceUsdt": "4.200000",
+              "etaMinutes": 50,
+              "distanceKm": 1.4
+            },
+            {
+              "shop": "kesar-kingdom.graphpay.eth",
+              "sku": "gulab-jamun-12",
+              "item": "gulab jamun",
+              "quantity": 12,
+              "priceUsdt": "4.800000",
+              "etaMinutes": 45,
+              "distanceKm": 2.1
+            }
+          ],
+          "synthetic": true
+        }
+      },
+      {
+        "seq": 23,
+        "type": "tool.call",
+        "agent": "analyst.vitalik.graphpay.eth",
+        "tool": "graphql",
+        "input": {
+          "query": "query { nodes(kind: \"shop\", category: \"sweets\", city: \"Mumbai\", limit: 50) { ens kind verified synthetic dataset category city status reputation(window: D90) { orders refunds fails delivered onTime cancellations disputes refundRate onTimeRate paidUsdt refundedUsdt source synthetic } } }"
+        }
+      },
+      {
+        "seq": 24,
+        "type": "tool.result",
+        "agent": "analyst.vitalik.graphpay.eth",
+        "tool": "graphql",
+        "output": {
+          "content": [
+            {
+              "type": "text",
+              "text": "{\"data\":{\"nodes\":[]},\"extensions\":{\"arkiv\":{\"calls\":1,\"explainId\":\"14afe599e92e\",\"entityKeys\":[]}}}"
+            }
+          ],
+          "isError": false
+        }
+      },
+      {
+        "seq": 25,
+        "type": "tool.call",
+        "agent": "analyst.vitalik.graphpay.eth",
+        "tool": "explain",
+        "input": {
+          "explainId": "14afe599e92e"
+        }
+      },
+      {
+        "seq": 26,
+        "type": "tool.result",
+        "agent": "analyst.vitalik.graphpay.eth",
+        "tool": "explain",
+        "output": {
+          "content": [
+            {
+              "type": "text",
+              "text": "{\"calls\":1,\"queries\":[\"project = str('graphpay') AND type = str('node') AND kind = str('shop') AND category = str('sweets') AND city = str('Mumbai') AND $owner = addr(0x7DeAF022B3829C53c73031B7d28Ed9746F517665) LIMIT 50 OFFSET 0\"],\"entityKeys\":[],\"blockNumber\":\"267260\",\"note\":\"complete\"}"
+            }
+          ],
+          "isError": false
+        }
+      },
+      {
+        "seq": 27,
+        "type": "agent.end",
+        "agent": "analyst.vitalik.graphpay.eth",
+        "role": "analyst",
+        "output": {
+          "ranking": [],
+          "recommendation": null,
+          "notes": "I found no shops to rank, so I'm not recommending one. I asked the GraphPay graph once, as instructed: nodes(kind: \"shop\", category: \"sweets\", city: \"Mumbai\") with each shop's D90 reputation. It came back empty. Explain id 14afe599e92e shows the single Arkiv read behind it: project = 'graphpay' AND type = 'node' AND kind = 'shop' AND category = 'sweets' AND city = 'Mumbai' AND $owner = 0x7DeAF022B3829C53c73031B7d28Ed9746F517665, LIMIT 50, at block 267260. It matched 0 entities and the trace says the read was complete. That means the graph has no 'sweets' shop listed under the city 'Mumbai' to sell 12 gulab jamun to vitalik.graphpay.eth within the 6.000000 USDT budget by 2026-11-06 20:00 IST. With no data, I couldn't check any shop's 90-day refund rate (the limit is 10%) or on-time rate (the minimum is 80%), so no shop is marked eligible. I didn't make up any shop, price or rate. All data here is synthetic or mock. Possible next steps, which would need another query I didn't run: search by map area with shops(category: \"sweets\", box: <Mumbai lat/lng bounds>, synthetic: true), since some shops may only be listed by location or have a slightly different city or category label; or try a related category such as 'mithai' or 'bakery'."
+        },
+        "usageTokens": 11594,
+        "model": "claude-opus-5-5"
+      },
+      {
+        "seq": 28,
+        "type": "message",
+        "from": "analyst.vitalik.graphpay.eth",
+        "to": "concierge.vitalik.graphpay.eth",
+        "text": "best eligible: kesar-kingdom.graphpay.eth"
+      },
+      {
+        "seq": 29,
+        "type": "tool.result",
+        "agent": "concierge.vitalik.graphpay.eth",
+        "tool": "analyst",
+        "output": {
+          "ranking": [
+            {
+              "ens": "kesar-kingdom.graphpay.eth",
+              "score": 0.9152605195518567,
+              "eligible": true,
+              "reasons": []
+            },
+            {
+              "ens": "syrup-street.graphpay.eth",
+              "score": 0.8632476215644365,
+              "eligible": true,
+              "reasons": []
+            },
+            {
+              "ens": "jamun-junction.graphpay.eth",
+              "score": 0.7508551857689739,
+              "eligible": false,
+              "reasons": [
+                "refund rate 18.2% is above 10.0% (90 days)",
+                "on-time rate 70.9% is below 80.0% (90 days)"
+              ]
+            }
+          ],
+          "explainId": "f3d1bb972a81",
+          "analystExplainId": null,
+          "analystView": {
+            "recommendation": null,
+            "notes": "I found no shops to rank, so I'm not recommending one. I asked the GraphPay graph once, as instructed: nodes(kind: \"shop\", category: \"sweets\", city: \"Mumbai\") with each shop's D90 reputation. It came back empty. Explain id 14afe599e92e shows the single Arkiv read behind it: project = 'graphpay' AND type = 'node' AND kind = 'shop' AND category = 'sweets' AND city = 'Mumbai' AND $owner = 0x7DeAF022B3829C53c73031B7d28Ed9746F517665, LIMIT 50, at block 267260. It matched 0 entities and the trace says the read was complete. That means the graph has no 'sweets' shop listed under the city 'Mumbai' to sell 12 gulab jamun to vitalik.graphpay.eth within the 6.000000 USDT budget by 2026-11-06 20:00 IST. With no data, I couldn't check any shop's 90-day refund rate (the limit is 10%) or on-time rate (the minimum is 80%), so no shop is marked eligible. I didn't make up any shop, price or rate. All data here is synthetic or mock. Possible next steps, which would need another query I didn't run: search by map area with shops(category: \"sweets\", box: <Mumbai lat/lng bounds>, synthetic: true), since some shops may only be listed by location or have a slightly different city or category label; or try a related category such as 'mithai' or 'bakery'."
+          },
+          "synthetic": true
+        }
+      },
+      {
+        "seq": 30,
+        "type": "tool.call",
+        "agent": "concierge.vitalik.graphpay.eth",
+        "tool": "pay_shop",
+        "input": {
+          "shopEns": "kesar-kingdom.graphpay.eth"
+        }
+      },
+      {
+        "seq": 31,
+        "type": "guard",
+        "guard": "G2",
+        "ok": true,
+        "detail": "kesar-kingdom.graphpay.eth is eligible in code's ranking (score 0.915) and its offer fits the budget and deadline"
+      },
+      {
+        "seq": 32,
+        "type": "message",
+        "from": "concierge.vitalik.graphpay.eth",
+        "to": "payer.vitalik.graphpay.eth",
+        "text": "pay kesar-kingdom.graphpay.eth: 12 × gulab jamun, at most 4.80 USDT"
+      },
+      {
+        "seq": 33,
+        "type": "agent.start",
+        "agent": "payer.vitalik.graphpay.eth",
+        "role": "payer",
+        "task": {
+          "order": {
+            "shop": "kesar-kingdom.graphpay.eth",
+            "item": "gulab jamun",
+            "quantity": 12,
+            "maxPriceUsdt": "4.80",
+            "deadlineIso": "2026-11-06T20:00:00+05:30"
+          }
+        }
+      },
+      {
+        "seq": 34,
+        "type": "tool.call",
+        "agent": "payer.vitalik.graphpay.eth",
+        "tool": "get_quote",
+        "input": {}
+      },
+      {
+        "seq": 35,
+        "type": "message",
+        "from": "payer.vitalik.graphpay.eth",
+        "to": "storefront.kesar-kingdom.graphpay.eth",
+        "text": "quote 12 × gulab jamun"
+      },
+      {
+        "seq": 36,
+        "type": "message",
+        "from": "storefront.kesar-kingdom.graphpay.eth",
+        "to": "risk.kesar-kingdom.graphpay.eth",
+        "text": "vet payer.vitalik.graphpay.eth"
+      },
+      {
+        "seq": 37,
+        "type": "agent.start",
+        "agent": "risk.kesar-kingdom.graphpay.eth",
+        "role": "risk",
+        "task": {
+          "buyerAgent": "payer.vitalik.graphpay.eth",
+          "buyer": "vitalik.graphpay.eth",
+          "orderUsdt": "4.80",
+          "shop": "kesar-kingdom.graphpay.eth"
+        }
+      },
+      {
+        "seq": 38,
+        "type": "tool.call",
+        "agent": "risk.kesar-kingdom.graphpay.eth",
+        "tool": "graphql",
+        "input": {
+          "query": "{ today node(ens: \"payer.vitalik.graphpay.eth\") { ens kind status capMicro synthetic verified owner { ens } all: tally(window: \"all\") { orders paidMicro cancels disputes refunds fails lastTs } todayTally: tally(window: \"today\") { orders paidMicro cancels disputes } reputation(window: D90) { orders cancellations disputes refundRate paidUsdt source synthetic } } }"
+        }
+      },
+      {
+        "seq": 39,
+        "type": "tool.call",
+        "agent": "risk.kesar-kingdom.graphpay.eth",
+        "tool": "ens_check",
+        "input": {
+          "name": "payer.vitalik.graphpay.eth"
+        }
+      },
+      {
+        "seq": 40,
+        "type": "tool.result",
+        "agent": "risk.kesar-kingdom.graphpay.eth",
+        "tool": "ens_check",
+        "output": {
+          "name": "payer.vitalik.graphpay.eth",
+          "registryState": "REGISTERED",
+          "status": "ACTIVE",
+          "records": {
+            "agent-context": "Payer: the payer agent of vitalik.graphpay.eth. Pays from its own wallet under an on-chain daily cap. Synthetic demo cast.",
+            "agent-endpoint[mcp]": "https://graphpay-event.vercel.app/api/mcp",
+            "graphpay.status": "active",
+            "graphpay.cap_micro": "6000000",
+            "graphpay.principal": "vitalik.graphpay.eth",
+            "graphpay.kind": "agent"
+          }
+        }
+      },
+      {
+        "seq": 41,
+        "type": "tool.result",
+        "agent": "risk.kesar-kingdom.graphpay.eth",
+        "tool": "graphql",
+        "output": {
+          "content": [
+            {
+              "type": "text",
+              "text": "{\"data\":{\"today\":20762,\"node\":{\"ens\":\"payer.vitalik.graphpay.eth\",\"kind\":\"agent\",\"status\":\"active\",\"capMicro\":\"6000000\",\"synthetic\":false,\"verified\":true,\"owner\":{\"ens\":\"vitalik.graphpay.eth\"},\"all\":null,\"todayTally\":null,\"reputation\":{\"orders\":\"0\",\"cancellations\":\"0\",\"disputes\":\"0\",\"refundRate\":\"0.0000\",\"paidUsdt\":\"0\",\"source\":\"TALLY\",\"synthetic\":false}}},\"extensions\":{\"arkiv\":{\"calls\":5,\"explainId\":\"fbd01f094c2e\",\"entityKeys\":[\"0x0bc8bf97118043501457a610e90d81fbc978d4ea79c6bb1f3dba059b4064cf72\",\"0x4b2942fbfeda7d7f5b04d8924146dffd6870068d040344c7a85b5ed81000c9d0\"]}}}"
+            }
+          ],
+          "isError": false
+        }
+      },
+      {
+        "seq": 42,
+        "type": "tool.call",
+        "agent": "risk.kesar-kingdom.graphpay.eth",
+        "tool": "graphql",
+        "input": {
+          "query": "{ node(ens: \"payer.vitalik.graphpay.eth\") { ens out(sinceDay: 20762, limit: 50) { kind amountMicro day ts orderId synthetic to { ens } } } edges(kind: \"pay\", sinceDay: 20762, untilDay: 20762, limit: 50) { kind amountMicro day orderId synthetic from { ens } to { ens } } }"
+        }
+      },
+      {
+        "seq": 43,
+        "type": "tool.result",
+        "agent": "risk.kesar-kingdom.graphpay.eth",
+        "tool": "graphql",
+        "output": {
+          "content": [
+            {
+              "type": "text",
+              "text": "{\"data\":{\"node\":{\"ens\":\"payer.vitalik.graphpay.eth\",\"out\":[]},\"edges\":[{\"kind\":\"pay\",\"amountMicro\":\"1000000\",\"day\":20762,\"orderId\":null,\"synthetic\":true,\"from\":{\"ens\":\"payer.probe.sim.graphpay.eth\"},\"to\":{\"ens\":\"shop.probe.sim.graphpay.eth\"}},{\"kind\":\"pay\",\"amountMicro\":\"1000000\",\"day\":20762,\"orderId\":null,\"synthetic\":true,\"from\":{\"ens\":\"payer.probe.sim.graphpay.eth\"},\"to\":{\"ens\":\"shop.probe.sim.graphpay.eth\"}},{\"kind\":\"pay\",\"amountMicro\":\"10000\",\"day\":20762,\"orderId\":\"0x7ea049f04bda705a828b600422443ed3c1dc86d0cc91689ff90034627c73f70a\",\"synthetic\":false,\"from\":{\"ens\":\"rehearsal.vitalik.graphpay.eth\"},\"to\":{\"ens\":\"kesar-kingdom.graphpay.eth\"}},{\"kind\":\"pay\",\"amountMicro\":\"4800000\",\"day\":20762,\"orderId\":\"0x67d947f1a58ed3a89830ac97c290ba27497125df97edb4e9bd1a3a8770756a12\",\"synthetic\":false,\"from\":{\"ens\":\"acceptance.vitalik.graphpay.eth\"},\"to\":{\"ens\":\"kesar-kingdom.graphpay.eth\"}},{\"kind\":\"pay\",\"amountMicro\":\"4800000\",\"day\":20762,\"orderId\":\"0x3ca796b5ba205f9ba70991d142a0dc890d204133d97cc40beb8fa736fbbbfd9c\",\"synthetic\":false,\"from\":{\"ens\":\"rehearsal.vitalik.graphpay.eth\"},\"to\":{\"ens\":\"kesar-kingdom.graphpay.eth\"}},{\"kind\":\"pay\",\"amountMicro\":\"1200000\",\"day\":20762,\"orderId\":\"0x4ac042c7285a40c36db6939cdaa1e780b9274501c9c82eb7006382dd00fb4561\",\"synthetic\":false,\"from\":{\"ens\":\"rehearsal.vitalik.graphpay.eth\"},\"to\":{\"ens\":\"kesar-kingdom.graphpay.eth\"}},{\"kind\":\"pay\",\"amountMicro\":\"400000\",\"day\":20762,\"orderId\":\"0x1c568b15f44384dc649cc26046bf0d48fdf80aecd062689c6e0b3ddc82d36f3b\",\"synthetic\":false,\"from\":{\"ens\":\"vitalik.graphpay.eth\"},\"to\":{\"ens\":\"kesar-kingdom.graphpay.eth\"}},{\"kind\":\"pay\",\"amountMicro\":\"400000\",\"day\":20762,\"orderId\":\"0xf3d3384107a8a0a566e4513671b83674b8c7e18e9585b1b76eeba463dc13b398\",\"synthetic\":false,\"from\":{\"ens\":\"rehearsal.vitalik.graphpay.eth\"},\"to\":{\"ens\":\"kesar-kingdom.graphpay.eth\"}},{\"kind\":\"pay\",\"amountMicro\":\"400000\",\"day\":20762,\"orderId\":\"0x9c1db11b7db036559cb9ca7eb6e14fa34b4924968bbc2da52c5dd8103f71f122\",\"synthetic\":false,\"from\":{\"ens\":\"rehearsal.vitalik.graphpay.eth\"},\"to\":{\"ens\":\"kesar-kingdom.graphpay.eth\"}}]},\"extensions\":{\"arkiv\":{\"calls\":5,\"explainId\":\"74ca61b91420\",\"entityKeys\":[\"0x0bc8bf97118043501457a610e90d81fbc978d4ea79c6bb1f3dba059b4064cf72\",\"0x6c204fd17d4e0e23eadc1c6b967a8fbdd971db9c2769568114d1acf9eb80a49d\",\"0x88b92caa91d5b5540d075f8851599fbbaab993dda180e91a1a9d9e6a100153d0\",\"0x56f63fdb6f0633a4f4c1af9fb71893fd5653b57b0ecbd26960f715a7c3886c31\",\"0xcc3775c438be8b2bd6ec8f31ae168bf23c7bc23538eed32df32b04ccd6869d97\",\"0x6c13ac5708bc62525f24bed77c5654a306432f2e931f39417de6520b5bea2c73\",\"0x514463aa0b1d055bb943d89b264e4b0139dfb7a68c2af81bdb1a20c3ab0a61c6\",\"0xbb56deb9c9f88c1afca82beafe1157d78ccf8cb30bf530a260346ccbccfbd34a\",\"0x0876738a8dff8556438853f1ee1c1ad513ca56db82cb0f04917cb08e6571b8b7\",\"0x38c76ff7cfce42fe1092d718b40ff67899d04602dde25d68d63038f551f71661\"]}}}"
+            }
+          ],
+          "isError": false
+        }
+      },
+      {
+        "seq": 44,
+        "type": "agent.end",
+        "agent": "risk.kesar-kingdom.graphpay.eth",
+        "role": "risk",
+        "output": {
+          "decision": "approve",
+          "reasons": [
+            "All figures here come from synthetic/mock demo data. The ENS record itself says 'Synthetic demo cast.'",
+            "ENS name: ens_check shows payer.vitalik.graphpay.eth as REGISTERED with status ACTIVE. It isn't revoked or expired, and its principal is vitalik.graphpay.eth.",
+            "Standing: GraphQL shows a verified agent with status 'active', owned by vitalik.graphpay.eth (explain fbd01f094c2e).",
+            "Cancel rate: the D90 reputation has 0 orders and 0 cancellations, so the rate is 0%, well under 15%. The all-time tally came back null, so this check rests on the D90 figures only.",
+            "Disputes: 0 in the D90 reputation, under the limit of 5.",
+            "Daily cap: capMicro is 6000000 (6.00 USDT). The tally for today came back null, and listing the agent's outgoing edges since day 20762 (today) returned nothing, so I counted today's spend as 0 (explain 74ca61b91420). 0 + 4.80 = 4.80 USDT, which is within the 6.00 USDT cap.",
+            "Note: the agent has no D90 order history, so the cancel and dispute checks pass because there's no track record yet, not because of a proven good one.",
+            "Note: other vitalik.graphpay.eth agents and the owner name paid kesar-kingdom.graphpay.eth today (e.g. two 4.80 USDT payments from rehearsal. and acceptance.vitalik.graphpay.eth). The policy checks this buyer agent's own cap, and payer.vitalik.graphpay.eth spent nothing today, so those payments don't count toward it."
+          ]
+        },
+        "usageTokens": 15246,
+        "model": "claude-opus-5-5"
+      },
+      {
+        "seq": 45,
+        "type": "guard",
+        "guard": "G9",
+        "ok": true,
+        "detail": "approved payer.vitalik.graphpay.eth (code and the risk agent)"
+      },
+      {
+        "seq": 46,
+        "type": "message",
+        "from": "risk.kesar-kingdom.graphpay.eth",
+        "to": "storefront.kesar-kingdom.graphpay.eth",
+        "text": "approve"
+      },
+      {
+        "seq": 47,
+        "type": "agent.start",
+        "agent": "storefront.kesar-kingdom.graphpay.eth",
+        "role": "storefront",
+        "task": {
+          "item": "gulab jamun",
+          "quantity": 12,
+          "buyerAgent": "payer.vitalik.graphpay.eth"
+        }
+      },
+      {
+        "seq": 48,
+        "type": "tool.call",
+        "agent": "storefront.kesar-kingdom.graphpay.eth",
+        "tool": "catalog_quote",
+        "input": {
+          "item": "gulab jamun",
+          "quantity": 12
+        }
+      },
+      {
+        "seq": 49,
+        "type": "tool.result",
+        "agent": "storefront.kesar-kingdom.graphpay.eth",
+        "tool": "catalog_quote",
+        "output": {
+          "ok": true,
+          "shop": "kesar-kingdom.graphpay.eth",
+          "item": "gulab jamun",
+          "quantity": 12,
+          "priceUsdt": "4.80",
+          "etaMinutes": 45,
+          "synthetic": true
+        }
+      },
+      {
+        "seq": 50,
+        "type": "agent.end",
+        "agent": "storefront.kesar-kingdom.graphpay.eth",
+        "role": "storefront",
+        "output": {
+          "quoteUsdt": "4.80",
+          "etaMinutes": 45,
+          "message": "Quote from kesar-kingdom.graphpay.eth for payer.vitalik.graphpay.eth: 12 gulab jamun come to 4.80 USDT, with an estimated delivery time of 45 minutes. This is the shop's binding price with no discount. Note: this price and delivery time are synthetic mock data from the shop's catalog tool."
+        },
+        "usageTokens": 2370,
+        "model": "claude-opus-5-5"
+      },
+      {
+        "seq": 51,
+        "type": "message",
+        "from": "storefront.kesar-kingdom.graphpay.eth",
+        "to": "payer.vitalik.graphpay.eth",
+        "text": "quote 4.80 USDT, 45 min (SYNTHETIC)"
+      },
+      {
+        "seq": 52,
+        "type": "tool.result",
+        "agent": "payer.vitalik.graphpay.eth",
+        "tool": "get_quote",
+        "output": {
+          "ok": true,
+          "shop": "kesar-kingdom.graphpay.eth",
+          "item": "gulab jamun",
+          "quantity": 12,
+          "priceUsdt": "4.80",
+          "etaMinutes": 45,
+          "orderId": "0x42c45886d0a16bb7e37cdc04294a3e229c88198fcc0fb72ae2c73bbf7fc9b638",
+          "synthetic": true
+        }
+      },
+      {
+        "seq": 53,
+        "type": "tool.call",
+        "agent": "payer.vitalik.graphpay.eth",
+        "tool": "pay_order",
+        "input": {}
+      },
+      {
+        "seq": 54,
+        "type": "message",
+        "from": "payer.vitalik.graphpay.eth",
+        "to": "storefront.kesar-kingdom.graphpay.eth",
+        "text": "pay order 0x42c45886d0a16bb7e37cdc04294a3e229c88198fcc0fb72ae2c73bbf7fc9b638"
+      },
+      {
+        "seq": 55,
+        "type": "message",
+        "from": "storefront.kesar-kingdom.graphpay.eth",
+        "to": "payer.vitalik.graphpay.eth",
+        "text": "402 payment required"
+      },
+      {
+        "seq": 56,
+        "type": "guard",
+        "guard": "G5",
+        "ok": true,
+        "detail": "every check passed before signing: 4.80 USDT for order 0x42c45886d0a16bb7e37cdc04294a3e229c88198fcc0fb72ae2c73bbf7fc9b638 to kesar-kingdom.graphpay.eth"
+      },
+      {
+        "seq": 57,
+        "type": "message",
+        "from": "payer.vitalik.graphpay.eth",
+        "to": "storefront.kesar-kingdom.graphpay.eth",
+        "text": "payment signature"
+      },
+      {
+        "seq": 58,
+        "type": "agent.start",
+        "agent": "dispatch.kesar-kingdom.graphpay.eth",
+        "role": "dispatch",
+        "task": {
+          "item": "gulab jamun",
+          "quantity": 12,
+          "deadlineIso": "2026-11-06T20:00:00+05:30",
+          "orderId": "0x42c45886d0a16bb7e37cdc04294a3e229c88198fcc0fb72ae2c73bbf7fc9b638"
+        }
+      },
+      {
+        "seq": 59,
+        "type": "tool.call",
+        "agent": "dispatch.kesar-kingdom.graphpay.eth",
+        "tool": "dispatch_confirm",
+        "input": {
+          "item": "gulab jamun",
+          "quantity": 12,
+          "deadlineIso": "2026-11-06T20:00:00+05:30",
+          "orderId": "0x42c45886d0a16bb7e37cdc04294a3e229c88198fcc0fb72ae2c73bbf7fc9b638"
+        }
+      },
+      {
+        "seq": 60,
+        "type": "tool.result",
+        "agent": "dispatch.kesar-kingdom.graphpay.eth",
+        "tool": "dispatch_confirm",
+        "output": {
+          "confirmed": true,
+          "orderId": "0x42c45886d0a16bb7e37cdc04294a3e229c88198fcc0fb72ae2c73bbf7fc9b638",
+          "etaIso": "2026-11-05T23:57:56.645Z",
+          "meetsDeadline": true,
+          "courier": "SYNTHETIC courier"
+        }
+      },
+      {
+        "seq": 61,
+        "type": "agent.end",
+        "agent": "dispatch.kesar-kingdom.graphpay.eth",
+        "role": "dispatch",
+        "output": {
+          "confirmed": true,
+          "orderId": "0x42c45886d0a16bb7e37cdc04294a3e229c88198fcc0fb72ae2c73bbf7fc9b638",
+          "etaIso": "2026-11-05T23:57:56.645Z",
+          "message": "Delivery is confirmed for 12 gulab jamun. This is SYNTHETIC/MOCK data, and the courier is listed as 'SYNTHETIC courier'. The estimated arrival is 2026-11-05T23:57:56.645Z, which is before your deadline of 2026-11-06T20:00:00+05:30 (2026-11-06T14:30:00Z). The tool also says the order meets the deadline."
+        },
+        "usageTokens": 2997,
+        "model": "claude-opus-5-5"
+      },
+      {
+        "seq": 62,
+        "type": "message",
+        "from": "dispatch.kesar-kingdom.graphpay.eth",
+        "to": "payer.vitalik.graphpay.eth",
+        "text": "dispatched 0x42c45886d0a16bb7e37cdc04294a3e229c88198fcc0fb72ae2c73bbf7fc9b638, arrives 2026-11-05T23:57:56.645Z"
+      },
+      {
+        "seq": 63,
+        "type": "message",
+        "from": "storefront.kesar-kingdom.graphpay.eth",
+        "to": "payer.vitalik.graphpay.eth",
+        "text": "settled 0xe92d009a862f7fef9cd752c69bd0ea172b003fc33c3e877dd02b6f9ffe44e791"
+      },
+      {
+        "seq": 64,
+        "type": "tool.result",
+        "agent": "payer.vitalik.graphpay.eth",
+        "tool": "pay_order",
+        "output": {
+          "status": "paid",
+          "amountUsdt": "4.80",
+          "transaction": "0xe92d009a862f7fef9cd752c69bd0ea172b003fc33c3e877dd02b6f9ffe44e791",
+          "explorerUrl": "https://explorer.testnet.whitechain.io/tx/0xe92d009a862f7fef9cd752c69bd0ea172b003fc33c3e877dd02b6f9ffe44e791",
+          "orderId": "0x42c45886d0a16bb7e37cdc04294a3e229c88198fcc0fb72ae2c73bbf7fc9b638",
+          "arrivesAt": "2026-11-05T23:57:56.645Z",
+          "synthetic": true
+        }
+      },
+      {
+        "seq": 65,
+        "type": "agent.end",
+        "agent": "payer.vitalik.graphpay.eth",
+        "role": "payer",
+        "output": {
+          "status": "paid",
+          "reason": "Paid once for the exact order: 12 gulab jamun from kesar-kingdom.graphpay.eth. All figures are SYNTHETIC/MOCK. The shop quoted 4.80 USDT, which equals the 4.80 USDT cap. pay_order settled 4.80 USDT for order 0x42c45886d0a16bb7e37cdc04294a3e229c88198fcc0fb72ae2c73bbf7fc9b638 on testnet. Expected arrival is 2026-11-05T23:57:56.645Z, which is before the deadline of 2026-11-06T20:00:00+05:30.",
+          "receiptTransaction": "0xe92d009a862f7fef9cd752c69bd0ea172b003fc33c3e877dd02b6f9ffe44e791"
+        },
+        "usageTokens": 4492,
+        "model": "claude-opus-5-5"
+      },
+      {
+        "seq": 66,
+        "type": "message",
+        "from": "payer.vitalik.graphpay.eth",
+        "to": "concierge.vitalik.graphpay.eth",
+        "text": "paid"
+      },
+      {
+        "seq": 67,
+        "type": "tool.result",
+        "agent": "concierge.vitalik.graphpay.eth",
+        "tool": "pay_shop",
+        "output": {
+          "status": "paid",
+          "shop": "kesar-kingdom.graphpay.eth",
+          "amountUsdt": "4.80",
+          "transaction": "0xe92d009a862f7fef9cd752c69bd0ea172b003fc33c3e877dd02b6f9ffe44e791",
+          "explorerUrl": "https://explorer.testnet.whitechain.io/tx/0xe92d009a862f7fef9cd752c69bd0ea172b003fc33c3e877dd02b6f9ffe44e791",
+          "orderId": "0x42c45886d0a16bb7e37cdc04294a3e229c88198fcc0fb72ae2c73bbf7fc9b638",
+          "arrivesAt": "2026-11-05T23:57:56.645Z",
+          "synthetic": true
+        }
+      },
+      {
+        "seq": 68,
+        "type": "agent.end",
+        "agent": "concierge.vitalik.graphpay.eth",
+        "role": "concierge",
+        "output": {
+          "summary": "Done. I paid kesar-kingdom.graphpay.eth 4.80 USDT for a box of 12 gulab jamun (all data is SYNTHETIC/MOCK). The order went through on testnet. Transaction: 0xe92d009a862f7fef9cd752c69bd0ea172b003fc33c3e877dd02b6f9ffe44e791. Order ID: 0x42c45886d0a16bb7e37cdc04294a3e229c88198fcc0fb72ae2c73bbf7fc9b638. Expected arrival is 2026-11-05T23:57:56Z, which is about 05:28 IST on Nov 6, well before your 8 pm deadline. Why this shop: the analyst ranked it the most trusted eligible shop (score 0.915). Its price is under your 6 USDT budget, it is 2.1 km away and the scout's delivery estimate was 45 minutes. Why the others lost: syrup-street.graphpay.eth was also eligible and cheaper at 4.20 USDT, but it ranked lower on trust (0.863) and its estimate was 50 minutes. jamun-junction.graphpay.eth was the cheapest (3.30 USDT, 0.9 km, 25 minutes), but the analyst ruled it out. Over the last 90 days its refund rate was 18.2%, above the 10% limit, and its on-time rate was 70.9%, below the 80% minimum. One problem with the analyst's report: its written note contradicted its own ranking. The note said a graph search found no Mumbai sweets shops, so it had marked none as eligible. I went with the structured ranking (explain ID f3d1bb972a81) instead, and the payment guard, which checks eligibility, budget and deadline in code, then approved the payment.",
+          "chosenShop": "kesar-kingdom.graphpay.eth"
+        },
+        "usageTokens": 10595,
+        "model": "claude-opus-5-5"
+      }
+    ],
+    "result": {
+      "status": "paid",
+      "chosenShop": "kesar-kingdom.graphpay.eth",
+      "priceUsdt": "4.800000",
+      "receipt": {
+        "success": true,
+        "transaction": "0xe92d009a862f7fef9cd752c69bd0ea172b003fc33c3e877dd02b6f9ffe44e791",
+        "network": "eip155:1874",
+        "payer": "0x5b00CC8F9aF2eC91f6461613589d0d0dEbF16321",
+        "payTo": "0x26940565cb470e25B06F5a39cB4E3B98b3e0d03E",
+        "amountUsdt": "4.800000",
+        "asset": "0xcedfB56113143d55b2358b8CFbB0dEB5Ad2f55a7",
+        "explorerUrl": "https://explorer.testnet.whitechain.io/tx/0xe92d009a862f7fef9cd752c69bd0ea172b003fc33c3e877dd02b6f9ffe44e791"
+      },
+      "orderId": "0x42c45886d0a16bb7e37cdc04294a3e229c88198fcc0fb72ae2c73bbf7fc9b638",
+      "arrivesAt": "2026-11-05T23:57:56.645Z",
+      "ranking": [
+        {
+          "ens": "kesar-kingdom.graphpay.eth",
+          "score": 0.9152605195518567,
+          "eligible": true,
+          "reasons": []
+        },
+        {
+          "ens": "syrup-street.graphpay.eth",
+          "score": 0.8632476215644365,
+          "eligible": true,
+          "reasons": []
+        },
+        {
+          "ens": "jamun-junction.graphpay.eth",
+          "score": 0.7508551857689739,
+          "eligible": false,
+          "reasons": [
+            "refund rate 18.2% is above 10.0% (90 days)",
+            "on-time rate 70.9% is below 80.0% (90 days)"
+          ]
+        }
+      ],
+      "explainId": "f3d1bb972a81",
+      "refusals": [],
+      "narrative": "Done. I paid kesar-kingdom.graphpay.eth 4.80 USDT for a box of 12 gulab jamun (all data is SYNTHETIC/MOCK). The order went through on testnet. Transaction: 0xe92d009a862f7fef9cd752c69bd0ea172b003fc33c3e877dd02b6f9ffe44e791. Order ID: 0x42c45886d0a16bb7e37cdc04294a3e229c88198fcc0fb72ae2c73bbf7fc9b638. Expected arrival is 2026-11-05T23:57:56Z, which is about 05:28 IST on Nov 6, well before your 8 pm deadline. Why this shop: the analyst ranked it the most trusted eligible shop (score 0.915). Its price is under your 6 USDT budget, it is 2.1 km away and the scout's delivery estimate was 45 minutes. Why the others lost: syrup-street.graphpay.eth was also eligible and cheaper at 4.20 USDT, but it ranked lower on trust (0.863) and its estimate was 50 minutes. jamun-junction.graphpay.eth was the cheapest (3.30 USDT, 0.9 km, 25 minutes), but the analyst ruled it out. Over the last 90 days its refund rate was 18.2%, above the 10% limit, and its on-time rate was 70.9%, below the 80% minimum. One problem with the analyst's report: its written note contradicted its own ranking. The note said a graph search found no Mumbai sweets shops, so it had marked none as eligible. I went with the structured ranking (explain ID f3d1bb972a81) instead, and the payment guard, which checks eligibility, budget and deadline in code, then approved the payment.",
+      "modelChoice": "kesar-kingdom.graphpay.eth",
+      "mandate": {
+        "budgetUsdt": "6.000000",
+        "deadlineIso": "2026-11-06T20:00:00+05:30",
+        "hash": "0x0c5a80df0c98786229a9427ac38c4d4a5286d6b848d8329687d2af4b8751195d"
+      },
+      "synthetic": true
+    },
+    "usageTokens": 52693,
+    "apiCostUsd": 0.298596
+  },
+  "chain": [
+    {
+      "id": "1874:0xe92d009a862f7fef9cd752c69bd0ea172b003fc33c3e877dd02b6f9ffe44e791:2",
+      "name": "OrderCreated",
+      "block": 12323999,
+      "tx": "0xe92d009a862f7fef9cd752c69bd0ea172b003fc33c3e877dd02b6f9ffe44e791",
+      "explorer": "https://explorer.testnet.whitechain.io/tx/0xe92d009a862f7fef9cd752c69bd0ea172b003fc33c3e877dd02b6f9ffe44e791"
+    },
+    {
+      "id": "1874:0xe92d009a862f7fef9cd752c69bd0ea172b003fc33c3e877dd02b6f9ffe44e791:6",
+      "name": "PaymentSettled",
+      "block": 12323999,
+      "tx": "0xe92d009a862f7fef9cd752c69bd0ea172b003fc33c3e877dd02b6f9ffe44e791",
+      "explorer": "https://explorer.testnet.whitechain.io/tx/0xe92d009a862f7fef9cd752c69bd0ea172b003fc33c3e877dd02b6f9ffe44e791"
+    },
+    {
+      "id": "1874:0x8f3066b30436028438b7ab8f2d362818fa054c5b9a608ac44deffab016329dc6:0",
+      "name": "OrderDelivered",
+      "block": 12324002,
+      "tx": "0x8f3066b30436028438b7ab8f2d362818fa054c5b9a608ac44deffab016329dc6",
+      "explorer": "https://explorer.testnet.whitechain.io/tx/0x8f3066b30436028438b7ab8f2d362818fa054c5b9a608ac44deffab016329dc6"
+    },
+    {
+      "id": "1874:0x739c8a29bd122b6e9ecd46ad5a5c300c9d1c046de4fc4228eef5fa3725d3fab0:2",
+      "name": "Refunded",
+      "block": 12324034,
+      "tx": "0x739c8a29bd122b6e9ecd46ad5a5c300c9d1c046de4fc4228eef5fa3725d3fab0",
+      "explorer": "https://explorer.testnet.whitechain.io/tx/0x739c8a29bd122b6e9ecd46ad5a5c300c9d1c046de4fc4228eef5fa3725d3fab0"
+    }
+  ],
+  "mirror": [],
+  "graphql": [
+    {
+      "what": "tallies before",
+      "explainId": "7abbde9ee4ad"
+    },
+    {
+      "what": "tallies after the payment",
+      "explainId": "7abbde9ee4ad"
+    },
+    {
+      "what": "the order trail",
+      "explainId": "edafe8731d9c"
+    }
+  ],
+  "kill": null,
+  "assertions": [
+    {
+      "id": "A",
+      "pass": true,
+      "failed": [],
+      "measured": {
+        "explainId": "f3d1bb972a81",
+        "chosen": "kesar-kingdom.graphpay.eth",
+        "scores": [
+          {
+            "ens": "kesar-kingdom.graphpay.eth",
+            "score": 0.9152605195518567,
+            "eligible": true
+          },
+          {
+            "ens": "syrup-street.graphpay.eth",
+            "score": 0.8632476215644365,
+            "eligible": true
+          },
+          {
+            "ens": "jamun-junction.graphpay.eth",
+            "score": 0.7508551857689739,
+            "eligible": false
+          }
+        ],
+        "trapEvents": 0
+      },
+      "expected": "good > runner-up, trap excluded, no trap order or payment, trap balance unchanged"
+    },
+    {
+      "id": "B",
+      "pass": true,
+      "failed": [],
+      "measured": {
+        "status": "paid",
+        "orderId": "0x42c45886d0a16bb7e37cdc04294a3e229c88198fcc0fb72ae2c73bbf7fc9b638",
+        "settle": "1874:0xe92d009a862f7fef9cd752c69bd0ea172b003fc33c3e877dd02b6f9ffe44e791:6",
+        "payerDelta": "-4.80",
+        "shopDelta": "+4.80",
+        "receipt": "https://explorer.testnet.whitechain.io/tx/0xe92d009a862f7fef9cd752c69bd0ea172b003fc33c3e877dd02b6f9ffe44e791",
+        "receiptNetwork": "eip155:1874"
+      },
+      "expected": "PaymentSettled; payer −4.80, shop +4.80; receipt on eip155:1874",
+      "note": "Re-evaluated at 04:50 IST from this run file: the first evaluation compared the receipt network (eip155:1874) with the run label WHITECHAIN; the criterion now checks the chain id and the explorer. Deltas and the settle event are the run's own measurements."
+    },
+    {
+      "id": "C",
+      "pass": true,
+      "failed": [],
+      "measured": {
+        "cursorBlock": 12324028,
+        "settleBlock": 12323999,
+        "trail": [
+          "order 1874:0xe92d009a862f7fef9cd752c69bd0ea172b003fc33c3e877dd02b6f9ffe44e791:2",
+          "pay 1874:0xe92d009a862f7fef9cd752c69bd0ea172b003fc33c3e877dd02b6f9ffe44e791:6",
+          "deliver 1874:0x8f3066b30436028438b7ab8f2d362818fa054c5b9a608ac44deffab016329dc6:0"
+        ]
+      },
+      "expected": "cursor ≥ settle block; trail order → pay → deliver; refs 1874:<tx>:<logIndex>"
+    },
+    {
+      "id": "D",
+      "pass": true,
+      "failed": [],
+      "measured": {
+        "goodToday": {
+          "orders": "10",
+          "refunds": "1",
+          "delivered": "5",
+          "onTime": "5",
+          "paidMicro": "16810000",
+          "refundedMicro": "800000"
+        },
+        "goodAllOrders": "251",
+        "payerToday": {
+          "orders": "1",
+          "refunds": "0",
+          "delivered": "0",
+          "onTime": "0",
+          "paidMicro": "4800000",
+          "refundedMicro": "0"
+        },
+        "explainIds": [
+          "7abbde9ee4ad",
+          "7abbde9ee4ad"
+        ]
+      },
+      "expected": "TODAY +1 order, +4.80, +1 delivered, +1 on time; all-time +1; payer TODAY +4.80"
+    },
+    {
+      "id": "E",
+      "pass": true,
+      "failed": [],
+      "measured": {
+        "goodToday": {
+          "orders": "10",
+          "refunds": "2",
+          "delivered": "5",
+          "onTime": "5",
+          "paidMicro": "16810000",
+          "refundedMicro": "1600000"
+        },
+        "trailEnd": "refund"
+      },
+      "expected": "refunds +1, refunded +0.80, trail ends in refund"
+    }
+  ],
+  "pass": true
+}

@@ -17,7 +17,7 @@ const runLog = {
       { ens: shops.runnerUp, score: 0.863, eligible: true },
       { ens: shops.trap, score: 0.75, eligible: false },
     ],
-    receipt: { network: 'WHITECHAIN', explorerUrl: 'https://explorer.example/tx/0x1' },
+    receipt: { network: 'eip155:1874', explorerUrl: 'https://explorer.example/tx/0x1' },
   },
 };
 const events = [
@@ -30,7 +30,8 @@ test('A–C pass on a clean run and fail on a paid trap or a short trail', () =>
   assert.equal(assertChoice({ runLog, events, balances, shops }).pass, true);
   const paidTrap = [...events, { id: ref(3), name: 'PaymentSettled', block: 101, args: { shopNode: shops.trapNode } }];
   assert.deepEqual(assertChoice({ runLog, events: paidTrap, balances, shops }).failed, ['no trap order or payment on-chain']);
-  assert.equal(assertSettled({ runLog, events, balances, priceMicro: 4_800_000n, network: 'WHITECHAIN' }).pass, true);
+  assert.equal(assertSettled({ runLog, events, balances, priceMicro: 4_800_000n, network: 'eip155:1874', explorer: 'https://explorer.example' }).pass, true);
+  assert.deepEqual(assertSettled({ runLog, events, balances, priceMicro: 4_800_000n, network: 'eip155:1' }).failed, ['the receipt is on the chain']);
   const trail = { cursorBlock: 102, edges: [{ kind: 'order', ref: ref(1) }, { kind: 'pay', ref: ref(2) }, { kind: 'deliver', ref: ref(4) }] };
   assert.equal(assertMirrored({ trail, events }).pass, true);
   assert.deepEqual(assertMirrored({ trail: { ...trail, cursorBlock: 99 }, events }).failed, ['cursor at or past the settle block']);

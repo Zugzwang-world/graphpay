@@ -1,0 +1,23 @@
+{
+  "id": "E6",
+  "at": "2026-11-05T23:15:02.719Z",
+  "pass": true,
+  "what": "a refund updates the tallies",
+  "measured": {
+    "goodToday": {
+      "orders": "10",
+      "refunds": "2",
+      "delivered": "5",
+      "onTime": "5",
+      "paidMicro": "16810000",
+      "refundedMicro": "1600000"
+    },
+    "trailEnd": "refund"
+  },
+  "expected": "refunds +1, refunded +0.80, trail ends in refund",
+  "evidence": {
+    "runFile": "docs/sessions/integration/runs/run-a8d00695846884f3/run.json",
+    "startedAt": "2026-11-05T23:11:01.937Z",
+    "assertion": "E"
+  }
+}

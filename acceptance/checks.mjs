@@ -5,9 +5,9 @@
 // workers process is the only W_LEDGER writer while it runs).
 
 import { spawnSync } from 'node:child_process';
-import { existsSync, readFileSync } from 'node:fs';
+import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { activeCast, castEntries, config } from '../packages/config/index.mjs';
+import { activeCast, castEntries, config, story } from '../packages/config/index.mjs';
 import { clientsFor } from '../scripts/lib/chains.mjs';
 import { createPayerGate } from '../integration/src/gate.mjs';
 import { connectArkiv, createGraphEngine, ENTITIES, runGraphql, writerAddresses } from '../packages/money-graph/index.mjs';
@@ -26,6 +26,19 @@ export function linesById(out) {
   return by;
 }
 
+// The latest real e2e:food run file that passed (docs/sessions/integration/runs/<id>/run.json).
+export function latestRun(root) {
+  const dir = join(root, 'docs/sessions/integration/runs');
+  if (!existsSync(dir)) return null;
+  const runs = readdirSync(dir)
+    .map((id) => join(dir, id, 'run.json'))
+    .filter((f) => existsSync(f))
+    .map((f) => ({ f, run: JSON.parse(readFileSync(f, 'utf8')) }))
+    .filter(({ run }) => run.network === 'real' && run.pass)
+    .sort((a, b) => (a.run.startedAt < b.run.startedAt ? 1 : -1));
+  return runs[0] ?? null;
+}
+
 export function checks(root, env) {
   const cast = activeCast();
   const entries = castEntries(cast);
@@ -38,7 +51,35 @@ export function checks(root, env) {
     return { pass: rows.length ? rows.every((r) => r.ok) : null, what, measured: rows.map((r) => r.line), expected: 'every line of scripts/ens/acceptance.mjs for this id passes', evidence: { script: 'scripts/ens/acceptance.mjs', exit: out.status } };
   };
 
+  const e2e = () => latestRun(root);
+  const fromRun = (id, what, assertion, expected) => async () => {
+    const r = e2e();
+    if (!r) return { pass: null, why: 'no passing real e2e:food run yet', what, measured: null, expected, evidence: {} };
+    const a = r.run.assertions.find((x) => x.id === assertion);
+    return { pass: a ? a.pass : null, what, measured: a?.measured ?? null, expected, evidence: { runFile: r.f.slice(root.length + 1), startedAt: r.run.startedAt, assertion, ...(a?.note ? { note: a.note } : {}) } };
+  };
   return {
+    E1: async () => {
+      const r = e2e();
+      if (!r) return { pass: null, why: 'no passing real e2e:food run yet', what: "the human's request", measured: null, expected: '', evidence: {} };
+      const ev = r.run.agents.events;
+      const idx = (type, role) => ev.findIndex((e) => e.type === type && e.role === role);
+      const firstEnd = Math.min(...['scout', 'analyst'].map((role) => idx('agent.end', role)).filter((i) => i >= 0));
+      const m = r.run.agents.result.mandate;
+      const request = ev.find((e) => e.type === 'message')?.text;
+      const pass = request === story.order.request && m?.budgetUsdt === (story.order.budgetMicro / 1e6).toFixed(6) && /T20:00:00/.test(m?.deadlineIso ?? '') && idx('agent.start', 'scout') < firstEnd && idx('agent.start', 'analyst') < firstEnd;
+      return { pass, what: "the human's request", measured: { request, mandate: m, scoutStart: idx('agent.start', 'scout'), analystStart: idx('agent.start', 'analyst'), firstEnd }, expected: 'the exact request; budget 6.000000, deadline 20:00 local; scout and analyst both start before either ends', evidence: { runFile: r.f.slice(root.length + 1) } };
+    },
+    E2: fromRun('E2', 'the agents choose the good shop, never the trap', 'A', 'explainId; good > runner-up, trap excluded; no trap order or payment; trap balance unchanged'),
+    E4: fromRun('E4', 'the mirror writes it to Arkiv', 'C', 'cursor past the settle block; trail order → pay → deliver; refs 1874:<tx>:<logIndex>'),
+    E5: fromRun('E5', 'GraphQL shows the new edge and the updated tallies', 'D', 'TODAY +1 order, +4.80, +1 delivered, +1 on time; all-time +1; payer TODAY +4.80'),
+    E6: fromRun('E6', 'a refund updates the tallies', 'E', 'refunds +1, refunded +0.80, trail ends in refund'),
+    E8: async () => {
+      const r = e2e();
+      const open = readFileSync(join(root, 'docs/thinking-partner/OPEN.md'), 'utf8');
+      const row = r ? open.split('\n').find((l) => l.includes('e2e:food real') && l.includes(String(r.run.cost?.seconds))) : null;
+      return { pass: r ? Boolean(row) : null, what: 'every counting errand records its time and cost', measured: { row: row ?? null, cost: r?.run.cost ?? null }, expected: "a row in OPEN.md's preset calibration table with the preset, seconds and apiCostUsd", evidence: { file: 'docs/thinking-partner/OPEN.md' } };
+    },
     A1: async () => {
       const r = sh(root, 'gh', ['run', 'list', '--branch', 'main', '--workflow', 'ci', '--limit', '1', '--json', 'conclusion,headSha,url']);
       const run = JSON.parse(r.stdout || '[]')[0];
