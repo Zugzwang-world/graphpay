@@ -38,6 +38,22 @@ Symptom: the real run stopped with "resolve returned no data" right after its fi
 Cause: a read seconds after a write can hit a node a block behind (the pack's pitfall 3); my one-shot checks trusted it. viem's receipt wait missed a transaction mined before its block watch started.
 Fix: the provisioner's reads retry (`retryingReads`), post-write checks wait for the value (`eventually`), and receipts are polled with `getTransactionReceipt`.
 Prevention: never assert state in the same instant as a write; poll until it shows, then fail with the name of what did not show.
+## arkiv
+
+### P-arkiv-1: a send that landed but was reported as failed was written a second time
+When: 2026-11-06 03:10 IST · Activity: arkiv · Cost: about 25 minutes; the risk was a refusal or quote receipt written twice (no tally was wrong: the mirror's fold guard counts a ref once)
+Symptom: Join's mirror (PR #20) saw that after an uncertain send, `recordEdge` sent the same refusal again at a new nonce, giving one ref two edges.
+Cause: the recovery checks of `recordEdge`, `createQuote` and the unstreamed ledger read `e.attributes`, but SDK 1.0.1's `getEntity(key)` returns a flat row with the columns under `$attributes` (`dist/index.d.ts`, `FullEntity`). Every "is this ours?" check said no, so the writer took its own transaction for another writer's. With the checks working, the reviewer then found the quote check too weak: one errand's quotes share a `request_id`, so an instance could adopt another instance's quote for a different shop.
+Fix: read `e.$attributes ?? e.attributes`; the quote check also matches the shop, agent and price; the recorder also matches the kind and both ends; the ledger compares its first edge's own ref. ArkivSim tests in both directions (an uncertain send lands once; a second instance's quote at the pinned nonce is not adopted), each failing on the code it guards against: https://github.com/Zugzwang-world/graphpay/pull/25
+Prevention: every `verifyRecovered` check has an ArkivSim test that goes through the stock SDK client (never a hand-built entity), plus a negative case where another writer's transaction holds the nonce.
+
+### P-arkiv-2: the byte meter lost responses when reads overlapped
+When: 2026-11-06 03:40 IST · Activity: arkiv · Cost: about 15 minutes and one benchmark re-run; the risk was wrong byte numbers in the public benchmark report
+Symptom: the first full live run showed plain Q2 at 8 requests in flight moving 105.6 KB, against 132 KB at 4, 16 and "all", though at 5 pages all four send the same requests. A repeat gave 78 to 132 KB for identical runs. Call counts and answers were right every time.
+Cause: `stats.responseBytes += Buffer.byteLength(await response.clone().text())` in `packages/arkiv-graph/src/transport.mjs`. JavaScript reads the left side before the `await`, so two responses in flight both added to the same old total and one count was lost. Sequential reads were never affected.
+Fix: read the body first, then add; an ArkivSim test sends five reads at once and expects five bodies counted (the old code counted one). The benchmark was re-run on the fixed commit (arkiv/bench PR).
+Prevention: no `+=` with an `await` on its right side in shared counters; any number from a parallel mode is checked against the same requests sent one at a time before it is reported.
+
 ## records
 
 ### P-records-1: the worktree sessions' prompt logs land in the main checkout

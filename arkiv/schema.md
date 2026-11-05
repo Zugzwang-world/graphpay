@@ -9,7 +9,7 @@ Every entity GraphPay writes to Arkiv Rabdi (chain 7794095), defined in `package
 - **Index rule (ADR-0041).** An attribute is indexed (`*` below) if and only if a shipped query filters on it; `QUERIES` in `model.mjs` lists them and a test holds the two together. ORDER BY needs no index.
 - **Nothing private** in attributes or payloads.
 - Writer addresses: `packages/config/graphpay.config.json` → `arkiv.writers`.
-- Explorer: transactions at `https://rabdi.explorer.arkiv.network/tx/<hash>` (verified on the M0 funding links). The entity page pattern is not verified yet.
+- Explorer: transactions at `https://rabdi.explorer.arkiv.network/tx/<hash>` (verified on the M0 funding links); entities at `/entity/<key>` and addresses at `/address/<addr>` (read from the explorer's own client bundle; `docs/technical/FACTS.md`, website rows).
 
 ## Entities
 

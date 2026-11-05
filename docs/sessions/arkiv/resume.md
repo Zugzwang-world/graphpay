@@ -1,6 +1,6 @@
 # T3 Arkiv: resume here (fresh start)
 
-Updated 03:20 IST, Fri 6 Nov. Read this, then `docs/plan/sessions/T3-arkiv.md`, then `docs/sessions/arkiv/README.md` (API) and `seeding.md` (city runbook).
+Updated 03:50 IST, Fri 6 Nov. Read this, then `docs/plan/sessions/T3-arkiv.md`, then `docs/sessions/arkiv/README.md` (API) and `seeding.md` (city runbook).
 
 ## Done
 
@@ -10,10 +10,9 @@ Updated 03:20 IST, Fri 6 Nov. Read this, then `docs/plan/sessions/T3-arkiv.md`, 
 
 ## Next
 
-1. PR #21 (M8 S + M7b) merged at 03:11 IST; the seeding survived the 02:14–03:01 sleep (all three manifests `done`). Join's `$attributes` fix (run file, Open items) ships as branch `arkiv/attributes`; watch it until it merges.
-2. Done 03:22: production `/api/graphql` (`dataset: "S"`, top shops in 2 calls) and `/api/mcp` `tools/list` both answer.
-3. **M9** (`planning/PROMPTS/09-live-benchmark.md`, M7 amendment §8: reads, not speed): `bench/` harness, plain baseline Q1–Q6 against the plain store (records/profiles under W_SEED_EVENT), Q2 race function for the website (`/api/race` belongs to T5; give them a function), CSVs and `bench/BENCHMARK-LIVE.md`. Expected plain Q2 at S: `ceil(490 / 100)` = 5 calls sequential, 6 in parallel; Graph Arkiv 2.
-4. Friday items (MASTER_PLAN §4): 1 (heartbeat-like `shop_open`, `agent_presence`, `handoff`), 4–5 (Swarm), 6 (demo cast `shop` rows), 10, 15, 18 (SDK publish prep: README, API reference, leaderboard example).
+1. PR #25 (Join's `$attributes` fix, stronger recovery checks) merged at 03:23 IST. Production `/api/graphql` (`dataset: "S"`) and `/api/mcp` `tools/list` checked at 03:22.
+2. **M9** is on branch `arkiv/bench`: `packages/money-graph/src/bench.mjs` (Q1–Q6 plain and Graph Arkiv, `score`, `raceQuestion`, `callTap`, `plainPayRows`), `packages/city/src/bench.mjs` (`benchParams`, `benchTruth`), `bench/run.mjs` and `bench/report.mjs`, batched `out()`/`in()` in GraphQL (Q3 6 → 3 reads), and the byte meter's lost-update fix in `packages/arkiv-graph/src/transport.mjs`. Live S run: D6 passes (Graph Arkiv 2, plain 5, parallel 6; every answer right). Live run at commit 667b236 (03:38). Ship it as one PR titled `… (M9 done)`; T5 gets the race API in `docs/sessions/arkiv/README.md` ("Race mode").
+3. Friday items (MASTER_PLAN §4), in this order (ADR-0053: Swarm first): 4 (Swarm probe through the public gateway; a verifier was asked for the gateway's upload API at 03:45), 5 (Swarm entities), 1 (`shop_open`, `agent_presence`, `handoff`), 6 (demo cast `shop` rows, after the founder's names), 15 (`arkiv/` drafts), 18 (SDK publish prep after CP4), 10 (map support for T5).
 
 ## How to check the seeding
 
@@ -23,9 +22,7 @@ Updated 03:20 IST, Fri 6 Nov. Read this, then `docs/plan/sessions/T3-arkiv.md`, 
 
 ## Open threads
 
-- The `arkiv` LOG line of 03:20 carries PR #25's link: in the next PR, add its merge time.
 - Story `syntheticCity.reRegisteredShop.epoch` is 2 while fresh names start at epoch 0 (the spec says +1). The generator uses the story value; flagged in OPEN for the Coordinator.
 - `graphql-yoga` is a dependency but unused (GraphQL runs on graphql-js; ADR-0060).
-- The benchmark-only MCP tool `arkiv_query` (parse and re-render before adding the owner) is not built yet: M9.
-- The explorer's entity page URL pattern is unverified (`arkiv/schema.md`).
-- Q4 (agents that paid a shop this week that later refunded someone else) has an empty truth at S; fine, but say so in the benchmark report.
+- The benchmark-only MCP tool `arkiv_query` is not built: the M7 amendment keeps it out of the hosted MCP, and M9 did not need it.
+- Q4's truth is empty at S (no refunds this week); the report says so. Graph Arkiv's Q1 moves about 110 KB (70 day-tally rows for the 90-day window) against plain's 1.3 KB; reads are equal. Projections in the engine's reads would cut it (not done).
