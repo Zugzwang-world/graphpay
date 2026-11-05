@@ -21,5 +21,17 @@
 
 - No `--token` switch (the stand-in is retired, ADR-0054) and no `--deploy`: deploys come from `main` through the Vercel Git integration.
 - `SEPOLIA_RPC_URL` is not in `.env`: ENS reads use the public Sepolia RPCs with two retries.
-- The one-minute cron needs a Vercel plan that allows it; this PR's preview build shows it (a plan without it refuses the deploy). Auto-merge only after that check.
+- The one-minute cron: the production deploy of #58 accepted it (the PR's own preview was skipped by the ignored-build step on a docs-only head).
 - Per-instance state (in-flight, failure counts, nonces): two instances can clash on a relayer nonce (no double payment). Join's local runs also relay as FACILITATOR and deliver as SHOP_KESAR: one sender per key at a time until Join relays through the hosted facilitator.
+
+## Live on the production domain (#58 merged 05:05 IST)
+
+| check | result |
+|---|---|
+| `GET /api/facilitator/health`, `GET /api/shop/health` | 200, startup ok, signer FACILITATOR `0x1AB8…EBf6`, relayer 0.8 WBT, the 0.3 floor and the 0.05 WBT daily budget reported |
+| C6 | 401: the pay step without and with a wrong passcode; `/api/facilitator/verify` and `/settle` without the bearer; `/api/cron/renew` without `CRON_SECRET`; `/api/recorder/attempts` without its bearer |
+| `pay:public` | 0.40 as the persona (human payer) through the public URL, sent by FACILITATOR, payer WBT unchanged, 226,480 gas: [0x06d4…6e01](https://explorer.testnet.whitechain.io/tx/0x06d43ca9a501342a1177d3a48383dc1611505863bab15a396aa38bc02aee6e01); the repeat answered `alreadyPaid` |
+| recorder | one unattributed `fail` edge labelled `test`, to a non-cast name, written as W_SYNC: [0x48d4…aad7](https://rabdi.explorer.arkiv.network/tx/0x48d4e17ad87df2094f3e463671dc84da96edc66bf3ff2e4c7fe0b2af02d9aad7) |
+| cron | a 120 s demo subscription created locally as RENEWER ([0x1ab6…279d](https://explorer.testnet.whitechain.io/tx/0x1ab6813fbbe718bc964041b9a67aa287c3d3cd03a99b171b3e14c4d8278a279d)), renewed by the hosted cron as RENEWER 150 s later, cycle 2, 222,881 gas: [0x48b1…480f](https://explorer.testnet.whitechain.io/tx/0x48b14aa45f56d487dee743721416a359fed96296b3ad0ababf546838f55e480f); then cancelled with the subscriber's signature ([0x6934…20e7](https://explorer.testnet.whitechain.io/tx/0x69348c75e75c6dc65153dd342741d2508b129206df8fa2ab3f2a1b51a7e120e7)) |
+
+Results file: `m4-public.json`. From here on real payments go through the hosted facilitator only (Join switched); RENEWER belongs to the hosted cron.

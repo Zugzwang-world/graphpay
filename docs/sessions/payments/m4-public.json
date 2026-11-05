@@ -1,0 +1,98 @@
+{
+  "site": "https://graphpay-event.vercel.app",
+  "at": "2026-11-05T23:36:43.385Z",
+  "checks": [
+    {
+      "name": "GET /api/facilitator/health is 200",
+      "ok": true,
+      "detail": "startup ok"
+    },
+    {
+      "name": "the facilitator's signer is our FACILITATOR",
+      "ok": true,
+      "detail": "0x1AB82871c3E1Be64717269D45F08cA9d54C1EBf6"
+    },
+    {
+      "name": "GET /api/shop/health is 200",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "GET /api/shop/quote is 200",
+      "ok": true,
+      "detail": "400000 micro"
+    },
+    {
+      "name": "C6: the pay step without the passcode is 401",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "C6: the pay step with a wrong passcode is 401",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "C6: /api/facilitator/verify without the bearer is 401",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "C6: /api/facilitator/settle without the bearer is 401",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "/api/cron/renew without CRON_SECRET is 401",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "/api/recorder/attempts without the bearer is 401",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "POST /api/recorder/attempts with the bearer writes one edge",
+      "ok": true,
+      "detail": "https://rabdi.explorer.arkiv.network/tx/0x48d4e17ad87df2094f3e463671dc84da96edc66bf3ff2e4c7fe0b2af02d9aad7"
+    },
+    {
+      "name": "the pay step with the passcode is 402",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "the human payment settles through the public URL",
+      "ok": true,
+      "detail": "https://explorer.testnet.whitechain.io/tx/0x06d43ca9a501342a1177d3a48383dc1611505863bab15a396aa38bc02aee6e01"
+    },
+    {
+      "name": "sent by our FACILITATOR",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "no payer gas",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "the repeat answers alreadyPaid",
+      "ok": true,
+      "detail": ""
+    }
+  ],
+  "recorder": {
+    "status": 201,
+    "entityKey": "0x8e05c13e302fd05859a87f3f9600db73a3b238a9c44f4b82f28ed4e06e18d2db",
+    "txHash": "0x48d4e17ad87df2094f3e463671dc84da96edc66bf3ff2e4c7fe0b2af02d9aad7"
+  },
+  "payment": {
+    "tx": "0x06d43ca9a501342a1177d3a48383dc1611505863bab15a396aa38bc02aee6e01",
+    "explorer": "https://explorer.testnet.whitechain.io/tx/0x06d43ca9a501342a1177d3a48383dc1611505863bab15a396aa38bc02aee6e01",
+    "gasUsed": 226480,
+    "amountMicro": "400000",
+    "orderId": "0x4794712d9103b96b4812e1fc6c46fc4ca0e4ceebb5e27c8742f8de5ab5b272f3"
+  }
+}
