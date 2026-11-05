@@ -8,6 +8,9 @@ Additions to `planning/ACCEPTANCE_TESTS.md` from `planning/EVENT_ADDENDUM.md` (i
 |---|---|---|---|---|
 | A7 | No known address literal in code outside the config file (D6) | `pnpm check` on `main`; then a negative check: a temporary source file holding one config address, built at run time, scanned, deleted | the check takes every 20-byte hex value in the config file and finds none of them (any case, with or without `0x`, also inside longer hex) in code or test files elsewhere: exit 0; the negative check is flagged and exits non-zero. Not scanned: `planning/`, Markdown docs (`docs/`, `arkiv/`, README, reports) and lockfiles, which must list addresses | output (labels and paths only) |
 
+| A8 | No story name or value in code outside the story file (ADR-0047) | `pnpm check`; a negative check: a temporary source file holding a story label built at run time | the check takes the distinctive story literals (persona and shop labels and display names, products and SKUs, the renewal item and plan id, the request text) and finds none in code or tests outside `packages/config/story.json`: exit 0; the negative check is flagged | output (labels and paths only) |
+| A9 | The agent presets are accepted (ADR-0048) | `pnpm agents:probe` | every preset's model and effort answer with a non-empty final text block and `stop_reason` `end_turn` (the live preset also over a three-turn exchange); seconds and cost recorded | the probe table (M0: all accepted, $0.0012 in all) |
+
 ## B. ENS (real Ethereum Sepolia)
 
 | id | checks | how to run | pass criteria | evidence |
@@ -38,7 +41,7 @@ Additions to `planning/ACCEPTANCE_TESTS.md` from `planning/EVENT_ADDENDUM.md` (i
 | B4 | (D3) Read each cast shop's text record `x-graphpay-accepts` (`getEnsText`), parse it, parse a malformed copy, run the ERC-7930 encoder test. Pass: the value is `0x0001000002075214cedfb56113143d55b2358b8cfbb0deb5ad2f55a7` (28 bytes) and equals the config's value; parse gives `{ chainId: 1874, token: <configured test USDT> }`; the malformed copy gives no preference; no `payment-preference` data record is read or written. Evidence: the value, the parse output, the test output. |
 | C2 | Evidence also lists the quote entity key and the ENS payee read that the payer checked before signing. |
 | D6 | Calls stay exact as written. "Times" becomes "recorded in the CSV, not a pass criterion" (D2), and the `fail (network)` clause is dropped. |
-| D7 | As D6, at size M. |
+| D7 | As D6, at size M; `blocked: waiting for the locked story` until the founder locks it (ADR-0049). |
 | E2 | The shop names come from the cast's roles (good, trap, runner-up); with the test cast these are kesar-kingdom, jamun-junction and syrup-street. |
 | F2 | The route list includes every route that makes W_DIRECTORY sign (the 402 step that writes a quote; on Friday, the Open toggle). |
 

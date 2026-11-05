@@ -24,7 +24,7 @@ Short records, one file each (skill `adr`). Lab decisions are adopted from `plan
 | [ADR-0019](ADR-0019-guards-in-code-the-model-proposes-code-disposes.md) | Guards in code: the model proposes, code disposes | adopted (lab) |
 | [ADR-0020](ADR-0020-one-arkiv-layer.md) | One Arkiv layer | adopted (lab) |
 | [ADR-0021](ADR-0021-checkout-roles-split.md) | Checkout roles split | adopted (lab) |
-| [ADR-0022](ADR-0022-a-labelled-stand-in-token-until-test-usdt-exists.md) | A labelled stand-in token until test USDT exists | adopted (lab) · amended |
+| [ADR-0022](ADR-0022-a-labelled-stand-in-token-until-test-usdt-exists.md) | A labelled stand-in token until test USDT exists | adopted (lab) · superseded by ADR-0054 |
 | [ADR-0023](ADR-0023-arkiv-writes-anchors-one-serialised-writer-find-by-nonce.md) | Arkiv writes: anchors, one serialised writer, find by nonce | adopted (lab) |
 | [ADR-0024](ADR-0024-fresh-event-wallets.md) | Fresh event wallets | accepted |
 | [ADR-0025](ADR-0025-the-pack-is-committed-as-planning-frozen.md) | The pack is committed as planning/, frozen | accepted |
@@ -49,6 +49,16 @@ Short records, one file each (skill `adr`). Lab decisions are adopted from `plan
 | [ADR-0044](ADR-0044-remaining-booth-questions-closed-with-defaults.md) | Remaining booth questions closed with defaults | accepted |
 | [ADR-0045](ADR-0045-test-usdt-arrived-it-carries-the-main-flow.md) | Test USDT arrived: it carries the main flow | accepted |
 | [ADR-0046](ADR-0046-the-payee-comes-from-ens-at-pay-time.md) | The payee comes from ENS at pay time | accepted |
+| [ADR-0047](ADR-0047-one-story-config-nothing-story-specific-in-code.md) | One story config: nothing story-specific in code | accepted |
+| [ADR-0048](ADR-0048-agent-model-presets-in-the-story-config.md) | Agent model presets in the story config | accepted |
+| [ADR-0049](ADR-0049-the-big-city-waits-for-the-locked-story.md) | The big city waits for the locked story | accepted |
+| [ADR-0050](ADR-0050-mumbai-real-places-fictional-shops.md) | Mumbai: real places, fictional shops | accepted |
+| [ADR-0051](ADR-0051-prize-tracks.md) | Prize tracks | accepted |
+| [ADR-0052](ADR-0052-pitch-frame-and-wording.md) | Pitch frame and wording | accepted |
+| [ADR-0053](ADR-0053-timeline-and-cut-order.md) | Timeline and cut order | accepted |
+| [ADR-0054](ADR-0054-the-stand-in-token-is-retired.md) | The stand-in token is retired | accepted |
+| [ADR-0055](ADR-0055-live-events-poll-over-https.md) | Live events poll over HTTPS | accepted |
+| [ADR-0056](ADR-0056-the-mirror-keeps-the-mac-awake-and-resumes.md) | The mirror keeps the Mac awake and resumes | accepted |
 
 ## Proposed in the pack, recorded by the owning session when taken
 
@@ -62,7 +72,7 @@ Short records, one file each (skill `adr`). Lab decisions are adopted from `plan
 | E-6 | USDT checkout as soon as test USDT exists (taken early: ADR-0045) | M2 | payments |
 | E-8 | Sunday sweets box with a labelled 2-minute demo period | M15 | website |
 | E-9 | Pause = graphpay.status paused; the hard kill on a disposable agent | M6, M15 | identity, website |
-| E-10 | Agents on claude-haiku-5-5 by default | M10 | agents |
+| E-10 | Agents on claude-haiku-5-5 by default (superseded by ADR-0048: presets) | M10 | agents |
 | E-11 | Per-agent caps in AgentPolicy and ENS; the watcher never copies the ENS cap | M5, M2, M6 | identity, payments |
 | E-12 | The demo store is a separate Vercel project graphpay-store (see ADR-0032) | M16 | website |
 | E-13 | Race and benchmark numbers only from live runs at the event (see ADR-0042) | M9, M15 | arkiv, website |

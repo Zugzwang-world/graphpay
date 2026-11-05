@@ -1,6 +1,6 @@
 # MASTER PLAN (event repo)
 
-The live plan for ETHGlobal Mumbai, kept by main. Sources: `planning/BUILD_SEQUENCE.md` (milestones, estimates, critical path), `planning/EVENT_RUNBOOK.md`, `planning/EVENT_ADDENDUM.md`, and the event's own records: `docs/plan/amendments/`, `docs/plan/ACCEPTANCE_ADDITIONS.md`, `docs/decisions/`. Deadline: **Sat 7 Nov 09:00 IST, no late submissions**; submit by Fri 21:30.
+The live plan for ETHGlobal Mumbai, kept by main. Sources: `planning/BUILD_SEQUENCE.md` (milestones, estimates, critical path), `planning/EVENT_RUNBOOK.md`, `planning/EVENT_ADDENDUM.md`, and the event's own records: `docs/plan/amendments/`, `docs/plan/ACCEPTANCE_ADDITIONS.md`, `docs/decisions/`. Deadline: **Sat 7 Nov 09:00 IST, no late submissions**; we submit by **Sat 08:00** (ADR-0053); presentation Sat 09:30.
 
 ## 1. Where we are (main updates this table)
 
@@ -8,15 +8,15 @@ The live plan for ETHGlobal Mumbai, kept by main. Sources: `planning/BUILD_SEQUE
 |---|---|---|---|---|
 | M0 foundation | main | `00-foundation.md` | — | done (CP0) |
 | M1 contract + Foundry tests | T1 Payments | `01-contract.md` | M0 | wave 1 |
-| M2 deploy and verify (USDT checkout first, ADR-0045) | T1 | `02-deploy-verify.md` | M1 | queued |
+| M2 deploy and verify (the USDT checkout; the stand-in is retired, ADR-0054) | T1 | `02-deploy-verify.md` | M1 | queued |
 | M3 facilitator, shop API, recorder; part B real lifecycle and the qualifying USDT payment | T1 | `03-facilitator-shop.md` + `amendments/M5-ens.md` §2, `amendments/M7-arkiv.md` §5 | M1 (part B: M2, M5, M6) | queued |
 | M4 hosted on Vercel | T1 | `04-hosted-vercel.md` | M2, M3, M6 | queued |
 | M5 ENS namespace | T2 Identity | `05-ens-namespace.md` + `amendments/M5-ens.md` | M0 | wave 1 |
 | M6 gate, kill, watcher | T2 | `06-ens-gate-kill-watcher.md` + `amendments/M5-ens.md` §3 | M5 | queued |
 | M7a model, writer, ArkivSim | T3 Arkiv | `07a-graph-model-writer.md` + `amendments/M7-arkiv.md` | M0 | wave 1 |
 | M7b engine, GraphQL, explain, MCP (+ hosted `/api/mcp`) | T3 | `07b-graph-engine-graphql-mcp.md` + `amendments/M7-arkiv.md` §6, §8 | M7a | queued |
-| M8 city generator, seeding S then M | T3 | `08-city-and-seeding.md` + `amendments/M7-arkiv.md` §3, §8 | M7a | queued (both seed wallets funded) |
-| M9 live benchmark (reads, not speed: ADR-0042) | T3 | `09-live-benchmark.md` + `amendments/M7-arkiv.md` §8 | M7b, M8 | queued |
+| M8 city generator; seed **S only** tonight (M waits for the locked story, ADR-0049) | T3 | `08-city-and-seeding.md` + `amendments/M7-arkiv.md` §3, §8 | M7a | queued (both seed wallets funded) |
+| M9 live benchmark at S (reads, not speed: ADR-0042; M when seeded) | T3 | `09-live-benchmark.md` + `amendments/M7-arkiv.md` §8 | M7b, M8 | queued |
 | M10 agents | T4 Agents | `10-agents.md` + `amendments/M5-ens.md` §2, `amendments/M7-arkiv.md` §5 | M0 | wave 1 |
 | M11 mirror (one workers process) | Join | `11-mirror.md` + readonly edges (`amendments/M7-arkiv.md` §4) | M1, M7a, M5 | wave 2 (when M7a merges) |
 | M12 `e2e:food`, fork then real | Join | `12-e2e-food.md` + payee and quote hooks | M3, M6, M7b, M10, M11 | queued |
@@ -26,13 +26,13 @@ The live plan for ETHGlobal Mumbai, kept by main. Sources: `planning/BUILD_SEQUE
 | M16 checkout kit + demo store (the Operate drop-in: a short snippet, ADR-0032) | T5 | `16-checkout-kit-store.md` | M4 | queued |
 | M17 sponsor files, README, AI usage, video, submission | main | `17-submission.md` | M13, M15, M16 | Friday |
 
-**Changes against the pack, all recorded:** test USDT arrived at kickoff (153.75 at FUNDER, distributed; ADR-0045), so M2 deploys the USDT checkout first and C7/E3 no longer wait on supply; the founder's tGLM arrived, so both seed wallets are funded and M seeding can follow S at once; a new directory writer W_DIRECTORY (ADR-0033); the addendum's tonight items are folded into M5 and M7 (`docs/plan/amendments/`); every booth question is closed with the founder's defaults (ADR-0038 to ADR-0044); all names and addresses come from `packages/config/graphpay.config.json` (ADR-0030).
+**Changes against the pack, all recorded:** everything story-specific comes from `packages/config/story.json` (ADR-0047) and the agents' models are presets there (`testing` active tonight; ADR-0048); test USDT arrived at kickoff (153.75 at FUNDER, distributed; ADR-0045), so the stand-in token is retired (ADR-0054) and C7/E3 no longer wait on supply; the large city waits for the locked story (ADR-0049); the founder's tGLM arrived, so both seed wallets are funded and M seeding can follow S at once; a new directory writer W_DIRECTORY (ADR-0033); the addendum's tonight items are folded into M5 and M7 (`docs/plan/amendments/`); every booth question is closed with the founder's defaults (ADR-0038 to ADR-0044); all names and addresses come from `packages/config/graphpay.config.json` (ADR-0030).
 
 ## 2. Sessions, worktrees and owned folders
 
 As `planning/BUILD_SEQUENCE.md` §5, plus: **T3 also owns `apps/web/app/api/{graphql,explain,mcp}`** (thin routes over `packages/arkiv-graph`; ADR-0037); **main owns `packages/config/`** (sessions add their own section in a PR and say so: `whitechain.contracts` by T1, `ens` texts by T2, `arkiv` writer addresses by T3); everyone owns their sections of `docs/thinking-partner/`. The secret helpers (`pnpm secrets:*`, `pnpm wallet:gen --only ROLE`) and the funding script (`pnpm funding`, dry run unless `--execute --real`) are main's; ask main for a top-up.
 
-**Waves.** Wave 1 (T1–T5) starts together as soon as M0 has merged. Wave 2 (Join) starts when M7a has merged. **Seeding (M8) starts as soon as M7a has merged**: S first, then M straight after (both seed wallets already hold their tGLM).
+**Waves.** Wave 1 (T1–T5) starts together as soon as M0 has merged. Wave 2 (Join) starts when M7a has merged. **Seeding (M8) starts as soon as M7a has merged, with size S only** (the test story, for acceptance). Size M waits until the founder locks the final story (ADR-0049).
 
 ## 3. Checkpoints (moved to tonight's real start)
 
@@ -42,11 +42,28 @@ M0 began at 21:40 IST and closed about an hour later, so the pack's central time
 |---|---|---|---|
 | CP0 | A1–A6, facts re-verified, keys present, wallets funded, Vercel linked, `planning/` and `docs/thinking-partner/` committed | 21:55 | done about 22:45 |
 | CP1 | contract tests green; root and owners on Sepolia; one live Rabdi write; agents' mock tests green | 23:00 | about 23:50 |
-| CP2 | checkout verified; gate passes all agents; GraphQL on Rabdi S; agents 5 live runs; S seeded, M seeding | 00:45 | about 01:35 |
+| CP2 | checkout verified; gate passes all agents; GraphQL on Rabdi S; agents 5 live runs (testing preset); S seeded (M waits for the locked story) | 00:45 | about 01:35 |
 | CP3 | `e2e:food` real mode passes A–F | 03:15 | about 04:05 |
 | CP4 | `ACCEPTANCE_REPORT.md` committed; relay written | 04:40 | about 05:30 |
-| CP5 | website live on real data; demo store live; rehearsal 1 | Fri 13:00 | Fri 13:00 (unchanged) |
-| CP6 | sponsor files, README, AI usage, video; submission checklist green | Fri 21:00 | Fri 21:00 (unchanged) |
+| CP5 | website live on real data; demo store live; rehearsal 1 | Fri 13:00 | Fri 13:00 |
+| freeze | feature freeze (ADR-0053) | — | **Fri 18:00** |
+| CP6 | sponsor files, README, AI usage, video; rehearsals; submission checklist green | Fri 21:00 | Fri evening; **submit by Sat 08:00** (hard deadline 09:00) |
+
+## 3b. Timeline and cut order (ADR-0053)
+
+Acceptance tests Fri 05:00–06:00 IST; the demo product Friday daytime; **feature freeze Fri 18:00**; rehearsals Friday evening; the video in the founder's own voice, a Mac screen recording at real speed; submit by **Sat 08:00** (hard 09:00); presentation Sat 09:30.
+
+**Cut order if short:** Swarm, map heartbeats, the renewal, package polish. **Never cut:** the real USDT payment, the live kill switch and the refused cap change, the 48-against-2 race, both phone views, the sponsor files, the video.
+
+## 3c. The large city (ADR-0049)
+
+| item | value | source |
+|---|---|---|
+| tGLM for one M seeding | about 6.3–8.5 (merged model); W_SEED_M_EVENT already holds 8.5; a second seeding needs another faucet claim (FUNDER keeps 0.76) | `planning/WALLETS.md` §2; lab G-5 (pre-merge M: 4.622 graph + 1.704 plain = 6.33 tGLM) |
+| wall-clock for one M seeding | about 100–130 minutes (lab: 79.2 graph + 20.5 plain = 99.7 minutes before the merged columns, plus about 30%) | `planning/FACTS.md` §4; `planning/BUILD_SEQUENCE.md` §2 |
+| latest safe start | **Fri 14:00 IST**: 130 minutes of seeding, 30 minutes for the M benchmark and the race check, and 60 minutes of margin before the 18:00 freeze | arithmetic on the rows above |
+| story fields the seed reads | `syntheticCity` (seed, days, sizes, popularity, amounts, subscriptions, the re-registered shop), the cast (`persona`, `shops` with their scenario rates, `buyerAgents`), `products`, `renewal`, `locations` (neighbourhoods and coordinates), `city` | `packages/config/story.json`; `planning/PROMPTS/08-city-and-seeding.md` |
+| seed the background city before the cast is final? | **No.** The pack's generator places the cast shops at popularity ranks 1–3 and writes the persona's recent purchases, so M depends on the featured cast; a cast-free background city would need a different generator and would break the benchmark's questions. The founder decided to wait | `planning/PROMPTS/08-city-and-seeding.md` |
 
 ## 4. Friday plan (addendum A6–A11, C, D)
 

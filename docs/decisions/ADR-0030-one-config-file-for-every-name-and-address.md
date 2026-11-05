@@ -1,6 +1,6 @@
 # ADR-0030: One config file for every name and address
 
-Status: accepted · Date: 2026-11-05 · Decided by: founder (chat, 21:40 IST)
+Status: accepted · cast part superseded by ADR-0047 (the story config) · Date: 2026-11-05 · Decided by: founder (chat, 21:40 IST)
 
 ## Decision
 

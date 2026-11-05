@@ -11,7 +11,9 @@ One line per PR: time (IST) · activity · result · PR link. Append under your 
 - 22:22 IST · foundation · merged: `prepare` is a no-op outside git (fixes the first Vercel deploy) · https://github.com/Zugzwang-world/graphpay/pull/2
 - 22:35 IST · foundation · opened: secret helpers, env loader and the one config file (reviewer pass 1 fixed; pass 2 running) · https://github.com/Zugzwang-world/graphpay/pull/3
 - 22:36 IST · foundation · opened: funding script (used for 29 transfers; reviewer pass running) · https://github.com/Zugzwang-world/graphpay/pull/4
-- 22:45 IST · foundation · records: facts, wallets, plan, amendments, acceptance additions, ADRs, AI usage, README, the A7 check · this PR
+- 22:45 IST · foundation · records: facts, wallets, plan, amendments, acceptance additions, ADRs, AI usage, README, the A7 check · https://github.com/Zugzwang-world/graphpay/pull/5
+- 22:50 IST · foundation · Vercel: ignored-build step set (docs-only commits skip); W_DIRECTORY topped up to 0.5 tGLM; Ankr URL verified (chain 1874); presets probed (all accepted, $0.0012) · no PR (settings and chain); recorded in PR #5
+- 23:05 IST · foundation · records: ADR-0047 to ADR-0056 (story config, presets, big-city hold, Mumbai, tracks, wording, timeline and cut order, stand-in retired, HTTPS polling, mirror keep-awake), the two briefs, NOW and OPEN · https://github.com/Zugzwang-world/graphpay/pull/5
 
 ## payments
 

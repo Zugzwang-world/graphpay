@@ -1,6 +1,6 @@
 # Relay: foundation (M0)
 
-Updated 22:45 IST, Thu 5 Nov. **CP0 holds:** acceptance A1 to A6 pass, the facts are re-verified, the keys are in place, every wallet is funded, Vercel is linked, and `planning/` and this folder are committed.
+Updated 23:05 IST, Thu 5 Nov. **CP0 holds:** acceptance A1 to A6 pass, the facts are re-verified, the keys are in place, every wallet is funded, Vercel is linked, and `planning/` and this folder are committed.
 
 ## In plain words
 
@@ -81,3 +81,18 @@ FUNDER keeps 2.64 WBT, 0.276 ETH, 1.06 tGLM and 31.75 USDT. One Sepolia send was
 - `x-graphpay-accepts` replaces ENSIP-31, by the founder's default.
 - Agents get `agent-context` plus the Whitechain address as their only setters, following the addendum.
 - Every `shop` row comes from W_DIRECTORY, so discovery is one query.
+
+## After CP0 (22:42 to 23:05 IST)
+
+- **The founder's rules** are now ADRs:
+  - ADR-0047: one story config, and `pnpm check` fails on story values in code.
+  - ADR-0048: agent model presets, with seconds and cost recorded per errand.
+  - ADR-0049: the big city waits for the locked story.
+  - ADR-0050 to ADR-0053: Mumbai realism, tracks, the pitch wording, the timeline and the cut order.
+  - ADR-0054: the stand-in token is retired.
+  - ADR-0055: live events poll over HTTPS.
+  - ADR-0056: the mirror keeps the Mac awake and resumes after a sleep.
+- **Vercel:** connected by the founder at 22:42 IST. The ignored-build step is set, only `ci` is required on `main`, and the public link is https://graphpay-event.vercel.app. The full check list is in `NOW.md`.
+- **Founder's Ankr URL:** stored; it answers chain 1874 over HTTPS.
+- **Presets:** the probe accepted all three; per-errand calibration rows are in `OPEN.md`.
+- **Funding:** nothing new had arrived since M0. W_DIRECTORY was topped up to 0.5 tGLM, and there is no shortfall at today's gas.

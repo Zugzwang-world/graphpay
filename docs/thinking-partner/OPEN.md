@@ -4,13 +4,33 @@ The founder's to-dos and open questions. Each item says what, where, why and wha
 
 ## Founder now (main only)
 
-1. **Start the wave-1 sessions (T1–T5).** Where: Claude desktop app → Code → new session on `~/graphpay` with the worktree option on; the model and the line to paste for each are in `docs/plan/prompts/session-lines.md`. Why: the tracks run in parallel; nothing else blocks them. Recommendation: start all five together now. Join comes later, when M7a has merged (main will say).
-2. **Grant Vercel's GitHub app access to the repo.** Where: vercel.com → team Hrizzup → Settings → Git → Adjust GitHub App Permissions → add `Zugzwang-world/graphpay`. **Grant only, do not import a project** (that would create a second project; `graphpay-event` already exists). Why: preview deployments per PR (CLI deploys work meanwhile). Then say "done".
-3. **Your personal Ankr testnet URL.** Where: the hidden prompt open in the app's Terminal panel (tab "Ankr URL (hidden)"); paste, then Enter. Why: higher RPC limits; the public URLs stay as fallbacks, so nothing waits on it. Recommendation: paste it when convenient.
-4. **Send ETHGlobal the written pre-event disclosure** (the README line and the table in `planning/DISCLOSURE.md`). Where: the Hacker Dashboard or an organiser. Why: the rules require written disclosure of pre-existing work to the ETHGlobal team. If you can, ask organiser questions 1, 3 and 4 at the same time (question 2, AI, is answered).
-5. **Laptop on power, sleep off, online until Saturday's pitch.** Why: the mirror runs as one process on this Mac from about 01:00.
+1. **Start the wave-1 sessions (T1–T5)** as soon as main says M0 has merged. Where: Claude desktop app → Code → new session on `~/graphpay` with the worktree option on; model and line for each in `docs/plan/prompts/session-lines.md`. Why: the tracks run in parallel. Recommendation: all five together; Join later, when M7a has merged (main will say).
+2. **Send ETHGlobal the written pre-event disclosure.** Where: the Hacker Dashboard or an organiser; paste-ready text in `docs/plan/DISCLOSURE_MESSAGE.md` (the README line, the disclosure table, organiser questions 1, 3 and 4, and an optional line asking them to confirm the AI answer in writing). Why: the rules require written disclosure of pre-existing work.
+3. **Lock the final story config** (the story-config brief). Where: a new `packages/config/story.json` from the thinking partner; main swaps it in. Why: the demo cast, products, prices, places and demo steps come only from it (ADR-0047), and the large city is seeded only from the locked story (ADR-0049). When: by **Fri 08:30 IST** for rehearsal 1 with the demo cast; at the latest by **Fri 13:00**, because the M seeding's latest safe start is 14:00.
+4. **Laptop on power, sleep off, online until Saturday's pitch.** Why: the mirror runs as one process on this Mac from about 01:00 (it will run under `caffeinate`).
 
-Closed tonight: **test USDT** arrived (150 at 21:54 IST; distributed, ADR-0045) and the **tGLM** arrived (FUNDER held 12.86; the M city and the mirror are funded).
+**Closed tonight:** the Vercel GitHub link (connected 22:42 IST; checks in `NOW.md`), the personal Ankr URL (stored, verified 22:51 IST: chain 1874, HTTPS), test USDT (150 arrived 21:54 IST; distributed, ADR-0045) and tGLM (FUNDER held 12.86; every planned wallet funded).
+
+## Funding check (main, 22:43 IST; nothing new since the M0 funding)
+
+FUNDER holds **2.6427 WBT, 0.2749 Sepolia ETH, 0.7583 tGLM** (after W_DIRECTORY's top-up to 0.5) and **31.75 test USDT**. Every role in the plan is at its target (`docs/technical/WALLETS.md`).
+
+| asset | shortfall | detail |
+|---|---|---|
+| **Sepolia ETH** | **none at today's gas** | base fee about 21 wei plus a 3 wei tip. OPERATOR's 0.095 ETH covers the namespace (about 80M gas) up to about 1.1 gwei; the owners' 0.002 each and ACCEPTANCE_PAYER's 0.001 cover their few transactions many times over. If gas goes above 0.5 gwei, main sends 0.1 ETH from FUNDER (which holds 0.27) to OPERATOR, so no faucet trip is needed |
+| WBT | none | FACILITATOR 0.8 (about 300 payments before the 0.3 floor); FUNDER keeps 2.64 for top-ups and disposable agents (0.005 each) |
+| tGLM | none tonight | S city 0.9, mirror 2.0, recorder 0.2, directory 0.5; the M city's 8.5 waits in W_SEED_M_EVENT. A second M seeding or a larger final city needs another faucet claim |
+| test USDT | none | payers hold 102, the good shop's refund float 20, FUNDER 31.75 (disposable agents take 1 each) |
+
+## Preset calibration (seconds and API cost per full errand; every test run adds a row)
+
+Agents (T4) and Join add one row per full errand run, so the presets can be calibrated on Friday (ADR-0048). Cost comes from `apiCostUsd` and the prices in the config.
+
+| time (IST) | run | preset | model, effort | seconds per errand | API cost per errand | notes |
+|---|---|---|---|---|---|---|
+| 22:54 | M0 probe (one-word reply, not an errand) | testing | `claude-opus-5-5`, xhigh | 2.2 | $0.0005 | accepted |
+| 22:54 | M0 probe (one-word reply, not an errand) | video | `claude-opus-5-5`, xhigh | 1.6 | $0.0006 | accepted |
+| 22:54 | M0 probe (one word, then three short turns) | live | `claude-haiku-5-5`, xhigh | 0.9; turns 0.9 / 0.9 / 1.9 | under $0.0002 in all | accepted; no empty reply, no `max_tokens`; once the same answer in two text blocks (read the final block) |
 
 ## Kickoff findings (main, read 21:44 IST, Thu 5 Nov)
 
@@ -50,7 +70,7 @@ Closed tonight: **test USDT** arrived (150 at 21:54 IST; distributed, ADR-0045) 
 
 ## foundation
 
-- Nothing waiting on the founder beyond "Founder now" items 2 and 3.
+- Nothing waiting on the founder beyond "Founder now".
 
 ## payments
 

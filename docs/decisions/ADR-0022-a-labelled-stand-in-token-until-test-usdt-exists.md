@@ -1,6 +1,6 @@
 # ADR-0022: A labelled stand-in token until test USDT exists
 
-Status: adopted from the lab (planning/DECISIONS.md part A) · Date: 2026-11-05 · Decided by: founder (pre-event) · Source: `planning/DECISIONS.md` part A, row 0022
+Status: adopted from the lab (planning/DECISIONS.md part A) · superseded by ADR-0054 · Date: 2026-11-05 · Decided by: founder (pre-event) · Source: `planning/DECISIONS.md` part A, row 0022
 
 ## Decision
 
