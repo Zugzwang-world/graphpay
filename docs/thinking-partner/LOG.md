@@ -61,6 +61,6 @@ One line per PR: time (IST) · activity · result · PR link. Append under your 
 - 03:10 IST · records · records after the 02:14–03:01 sleep: four milestones merged (M7a, M1, M10, M2), power and lid first in "Founder now", usage 74%, fresh starts under way · https://github.com/Zugzwang-world/graphpay/pull/19
 - 03:20 IST · records · after the sleep: no session hung; T3 and T5 fresh; the main checkout fast-forwarded (M0's failed step); the prompt-log hook writes to the session's own checkout (P-records-1, reviewer: ship) · https://github.com/Zugzwang-world/graphpay/pull/24
 - 03:30 IST · records · the main checkout fast-forwarded to #24, so the fixed hook is live; the seven old prompt logs swept here as `*.main-checkout.jsonl` and the main checkout left clean · https://github.com/Zugzwang-world/graphpay/pull/27
-- 03:40 IST · records · usage 76% (about 3.75 points an hour, would run out around 10:00): T1, T3, Join and T6 stepped from xhigh to high; extra usage asked again · PR_LINK
+- 03:40 IST · records · usage 76% (about 3.75 points an hour, would run out around 10:00): T1, T3, Join and T6 stepped from xhigh to high; extra usage asked again · https://github.com/Zugzwang-world/graphpay/pull/29
 
 ## submission
