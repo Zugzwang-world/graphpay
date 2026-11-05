@@ -14,6 +14,8 @@ What the founder must do: nothing now. The Coordinator needs `DEMO_PASSCODE` set
 
 **Update (01:31 IST):** the shell is merged and live; the next PR adds the customer request card (budget chip, deadline countdown to 20:00 in the city's time zone), the spending pass states (Active, Used up, Expired, Paused, Revoked; a stopped agent never reads Active), and merchant in-page notifications. Pure helpers `lib/deadline.ts` and `lib/pass.ts` have tests (71 in `apps/web`).
 
+**Update (03:03 IST):** next PR: the agent run route. One request (`POST /api/agents/run`, behind the passcode) starts an errand and streams its events (`started`, `trace`, `result`); only one runs at a time (a second gets 409 "busy"); a run is limited to 280 s and an error reaches the browser only as a fixed line. It needs a runner that Join wires in M12 (the agents' live ENS, Arkiv, shop and signer hooks); until then it answers "not live yet" naming M12. The stream lives in the request that starts the run, because Vercel may serve a second request from another instance. Deviation from `WEBSITE_SPEC.md` §7: the spec's `POST` returns `{ runId }` and a separate `GET` streams; here the POST streams and the GET is a best-effort replay.
+
 ## Technical
 
 - **Pages** (`apps/web/app`): `/`, `/customer`, `/merchant`, `/explain`, `/explain/[explainId]`, `/order/[orderId]`, `/race`, `/how`. Components in `apps/web/components`, pure code in `apps/web/lib`.

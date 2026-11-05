@@ -27,18 +27,24 @@ export function parseFrames(buffer: string): { frames: { event: string; data: st
 export async function streamEvents(
   url: string,
   onEvent: (event: string, data: string) => void,
-  { signal, headers = {} }: { signal?: AbortSignal; headers?: Record<string, string> } = {},
+  { signal, headers = {}, method = 'GET', body }: { signal?: AbortSignal; headers?: Record<string, string>; method?: 'GET' | 'POST'; body?: unknown } = {},
 ): Promise<StreamOutcome> {
   let res: Response;
   try {
-    res = await fetch(url, { headers: { accept: 'text/event-stream', ...headers }, signal, cache: 'no-store' });
+    res = await fetch(url, {
+      method,
+      headers: { accept: 'text/event-stream', ...(body === undefined ? {} : { 'content-type': 'application/json' }), ...headers },
+      body: body === undefined ? undefined : JSON.stringify(body),
+      signal,
+      cache: 'no-store',
+    });
   } catch {
     return { kind: 'failed' };
   }
   const type = res.headers.get('content-type') ?? '';
   if (!res.ok || !type.includes('text/event-stream') || !res.body) {
-    const body: unknown = await res.json().catch(() => null);
-    return { kind: 'refused', status: res.status, body };
+    const answer: unknown = await res.json().catch(() => null);
+    return { kind: 'refused', status: res.status, body: answer };
   }
   const reader = res.body.pipeThrough(new TextDecoderStream()).getReader();
   let buffer = '';

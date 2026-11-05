@@ -65,10 +65,10 @@ Updated 01:20 IST. **Join is running: the mirror (M11) is being built on test do
 
 ## website
 
-Updated 01:31 IST, Fri 6 Nov (T5 Web). **The website shell is on `main` and live** at https://graphpay-event.vercel.app (the top-bar chips already show the three chains' real latest blocks). Now adding the phone views' Friday items that need no other track: the request card (budget chip, deadline countdown), the spending pass states, merchant notifications.
-- Running: nothing long. Panels that need other tracks' routes say which milestone they wait for (M4, M6, M7b, M9, M10, M11).
-- Blockers: none. The venue network to GitHub is slow (retries needed).
-- Next: wire each panel as its route merges; M16 once M4 lands; Friday items 8 to 13.
+Updated 03:03 IST, Fri 6 Nov (T5 Web). **The shell and the phone views are on `main` and live** at https://graphpay-event.vercel.app. A PR adds the agent run route: one request starts an errand and streams its events back, one errand at a time; it answers "not live yet" until Join wires the agents' live services (M12).
+- Running: nothing long. Panels needing other tracks' routes say which milestone they wait for.
+- Blockers: none; the venue network to GitHub is slow (retries).
+- Next: wire each panel as its route merges (M4, M6, M7b, M9, M12); M16 once M4 lands; Friday items 8 to 13. A fresh start file is at `docs/sessions/website/resume.md`.
 
 ## records
 

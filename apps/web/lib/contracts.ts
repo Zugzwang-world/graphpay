@@ -50,11 +50,12 @@ export interface CustomerState {
   subscription: SubscriptionSummary | null;
 }
 
-// Agent run log events (graphpay.agent-run/v1), sequence-numbered.
+// Agent run log events (graphpay.agent-run/v1, planning/SPEC/AGENTS.md §9; the shapes
+// match packages/agents), sequence-numbered.
 export type TraceEvent =
   | { seq: number; type: 'message'; from: string; to: string; text: string }
-  | { seq: number; type: 'agent.start'; agent: string; role: string; task: string }
-  | { seq: number; type: 'agent.end'; agent: string; role: string; output: unknown; usageTokens?: number; error?: string }
+  | { seq: number; type: 'agent.start'; agent: string; role: string; task: unknown }
+  | { seq: number; type: 'agent.end'; agent: string; role: string; output: unknown; usageTokens?: number; model?: string; error?: string }
   | { seq: number; type: 'tool.call'; agent: string; tool: string; input: unknown }
   | { seq: number; type: 'tool.result'; agent: string; tool: string; output: unknown; error?: string }
   | { seq: number; type: 'guard'; guard: string; ok: boolean; detail: string };
@@ -66,20 +67,28 @@ export interface RankedShop {
   reasons: string[];
 }
 
+// The errand's result (ErrandResult in packages/agents). Prices, receipts and rankings
+// come from tool data; `narrative` is model prose and is never shown as a figure.
 export interface RunResult {
   status: 'paid' | 'refused' | 'no-purchase' | 'unsettled';
   chosenShop: string | null;
   priceUsdt: string | null;
-  receipt: { transaction: string; network: string; payer: string; payTo: string; amountUsdt: string; explorerUrl: string } | null;
+  receipt: { success: boolean; transaction: string; network: string; payer: string; payTo: string; amountUsdt: string; asset: string; explorerUrl: string } | null;
   orderId: string | null;
   arrivesAt: string | null;
   ranking: RankedShop[];
-  refusals: string[];
-  narrative: string;
-  synthetic: boolean;
+  explainId: string | null;
+  refusals: { reason: string; detail: string; agent?: string }[];
+  narrative: string | null;
+  modelChoice: string | null;
+  mandate: { budgetUsdt: string; deadlineIso: string; hash: string } | null;
+  synthetic: true;
+  error?: string;
 }
 
-// POST /api/agents/run
+// POST /api/agents/run answers a server-sent stream: `started`, then `trace` for every
+// event, then `result` (or `failed`). The run lives in the request that started it, so
+// no instance ever has to find another instance's run.
 export interface RunStarted {
   runId: string;
 }

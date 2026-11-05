@@ -4,13 +4,14 @@
 // today, the request, the agents' live feed, the result, and the actions. Every
 // figure comes from a route; until a route is live the screen says what it waits for.
 
+import Link from 'next/link';
 import { useEffect, useRef, useState } from 'react';
 import type { CustomerState, RunResult, RunStarted, TraceEvent } from '@/lib/contracts';
 import { txUrl } from '@/lib/explorer';
 import { countdown, nextDeadline } from '@/lib/deadline';
 import { formatMicro } from '@/lib/money';
 import { passState, remainingMicro, type PassState } from '@/lib/pass';
-import { streamEvents, waitingForIn } from '@/lib/sse-client';
+import { waitingForIn } from '@/lib/sse-client';
 import { usePoll, waitingForOf } from '@/lib/use-poll';
 import { ActionAnswer } from './action-answer';
 import { AgentFeed } from './agent-feed';
@@ -41,7 +42,7 @@ function useNow(): Date | null {
 type ActionKey = 'refund' | 'reorder' | 'subscribe' | 'unsubscribe' | 'pause' | 'resume' | 'kill';
 
 export function CustomerScreen() {
-  const { model, post, run, setRun, sound } = useSite();
+  const { model, post, stream, run, setRun, sound } = useSite();
   const root = useRef<HTMLDivElement>(null);
   const state = usePoll<CustomerState>('/api/state/customer', 5000, root);
   const live = state.status === 'ok' ? state.data : null;
@@ -65,25 +66,35 @@ export function CustomerScreen() {
   const send = async () => {
     setSending(true);
     setRunAnswer(null);
-    const answer = await post<RunStarted>('/api/agents/run', { request });
-    setRunAnswer(answer);
-    setSending(false);
-    if (!answer.ok || !answer.body?.runId) return;
-    const runId = answer.body.runId;
-    setRun(() => ({ runId, events: [], result: null, startedAt: Date.now() }));
-    const outcome = await streamEvents(`/api/agents/run/${encodeURIComponent(runId)}/events`, (event, data) => {
-      if (event === 'trace') {
+    let runId: string | null = null;
+    const outcome = await stream('/api/agents/run', { request }, (event, data) => {
+      try {
+      if (event === 'started') {
+        runId = (JSON.parse(data) as RunStarted).runId;
+        const id = runId;
+        setRun(() => ({ runId: id, events: [], result: null, startedAt: Date.now() }));
+      } else if (event === 'trace') {
         const trace = JSON.parse(data) as TraceEvent;
         setRun((prev) => (prev.runId === runId ? { ...prev, events: [...prev.events, trace] } : prev));
       } else if (event === 'result') {
         const result = JSON.parse(data) as RunResult;
         setRun((prev) => (prev.runId === runId ? { ...prev, result } : prev));
         if (result.status === 'paid') sound('settled');
+      } else if (event === 'failed') {
+        setRunAnswer({ ok: false, status: 0, body: null, waitingFor: null, error: (JSON.parse(data) as { error: string }).error });
+      }
+      } catch {
+        // a frame that is not JSON is skipped; the stream goes on
       }
     });
-    if (outcome.kind !== 'ended') {
+    setSending(false);
+    if (!outcome) return setRunAnswer({ ok: false, status: 0, body: null, waitingFor: null, error: 'locked: enter the passcode to use this button' });
+    if (outcome.kind === 'refused') {
+      const body = outcome.body as { error?: unknown; waitingFor?: unknown } | null;
       const waiting = waitingForIn(outcome);
-      setRunAnswer({ ok: false, status: outcome.kind === 'refused' ? outcome.status : 0, body: null, waitingFor: waiting, error: waiting ? null : 'Lost the run’s live feed.' });
+      setRunAnswer({ ok: false, status: outcome.status, body: null, waitingFor: waiting, error: waiting ? null : typeof body?.error === 'string' ? body.error : `HTTP ${outcome.status}` });
+    } else if (outcome.kind === 'failed' && !runId) {
+      setRunAnswer({ ok: false, status: 0, body: null, waitingFor: null, error: 'the site did not answer; try again' });
     }
   };
 
@@ -165,7 +176,7 @@ export function CustomerScreen() {
             {sending ? 'Starting…' : 'Send'}
           </button>
         </div>
-        <ActionAnswer answer={runAnswer?.ok ? null : runAnswer} pending={false} />
+        <ActionAnswer answer={runAnswer} pending={false} />
       </form>
 
       {run.events.length > 0 ? <AgentFeed events={run.events} /> : null}
@@ -188,6 +199,22 @@ export function CustomerScreen() {
               </li>
             ))}
           </ol>
+          {result.refusals.length > 0 ? (
+            <ul className="refusals">
+              {result.refusals.map((r, i) => (
+                <li key={i}>
+                  <span aria-hidden="true">✕ </span>
+                  <span className="visually-hidden">Refused: </span>
+                  {r.detail}
+                </li>
+              ))}
+            </ul>
+          ) : null}
+          {result.explainId ? (
+            <Link className="chip" href={`/explain/${result.explainId}`}>
+              the exact reads <span className="mono">{result.explainId.slice(0, 6)}…</span>
+            </Link>
+          ) : null}
           {result.receipt ? <ExplorerChip href={txUrl(model.explorers, 'whitechain', result.receipt.transaction)} label="Receipt" value={result.receipt.transaction} tone="pista" /> : null}
         </section>
       ) : null}
