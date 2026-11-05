@@ -47,6 +47,13 @@ The M0 verifier's snapshot of every package in `planning/FACTS.md` §5 is in `do
 | forge-std | v1.9.7 (`77041d2`), kept | has every cheatcode the suite uses (`getBlockTimestamp`, `snapshotState`, `keyExistsJson`, `deployCodeTo`) | verified |
 | viem (in `@graphpay/contracts`) | 2.57.16 | same as the root pin | verified |
 
+## M3 payments (`pay/facilitator`, T1, checked 2026-11-06 03:20 IST)
+
+| item | pinned | how checked | status |
+|---|---|---|---|
+| `@x402/core` | 2.30.0 (`latest`; only this one of the four `@x402/*` packages is used) | `packages/facilitator`, `packages/shop`; API names read from the installed `dist/esm/*.d.mts` and `.mjs`. They match `planning/SPEC/PAYMENTS_WHITECHAIN.md` §5 (written against 2.29.0) with three notes: `SchemeNetworkClient.createPaymentPayload(x402Version, requirements, context?)` returns only `{ x402Version, payload }` (x402Client adds `accepted`, `resource` and `extensions`) and receives `context.maxAmountPerPayment`, the resolved spend cap, which our client also enforces; `HTTPFacilitatorClient` uses the global `fetch` with `redirect: "follow"`, a timeout, and throws on any non-2xx answer (the shop turns that into a 502); `createAuthHeaders` must return headers keyed by path (`{ verify, settle, supported }`), a flat object throws. `setSpendControls({ allowedAssets: [{ network, asset, maxAmountPerPayment }] })` is required for the token (a test shows the default refuses it) | verified |
+| viem, zod | 2.57.16, 4.6.7 | the repo's pins | verified |
+
 ## arkiv (T3, M7a, checked 2026-11-06 00:58 IST with `npm view`)
 
 | item | pinned | in | status |

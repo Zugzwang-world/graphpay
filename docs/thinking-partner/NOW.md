@@ -26,11 +26,11 @@ Updated 23:55 IST. **M0 done; handed over to the Coordinator** (`docs/plan/sessi
 
 ## payments
 
-Updated 02:10 IST, Fri 6 Nov (T1).
-- **M1 merged (#12). M2 is done on the real chain:** the checkout is deployed on Whitechain Sepolia for the real test USDT, verified on the explorer and set up (the renewal relayer, three shops' refund floats, five agent spending policies from the story). PR with the scripts and records is open.
-- Checkout: https://explorer.testnet.whitechain.io/address/0x75233b7341B9e86407e4b31599f07b8936716FcA (its address and deploy block are in the config for the mirror).
-- The qualifying payment's readiness check passes: the acceptance agent holds 20 test USDT and has its 6.00/day policy.
-- Next: M3 part A (our facilitator, the shop's 402 API, the recorder routes). Part B (real payments) waits for T2's M5 and M6.
+Updated 04:20 IST, Fri 6 Nov (T1).
+- **M2 merged (#15):** the checkout is live on Whitechain Sepolia for the real test USDT, verified and set up.
+- **M3 part A is in review:** our own x402 facilitator (every drain check runs before the relayer sends anything), the shop's 402 payment API and the refusal recorder. 73 offline tests, and a full run on a local copy of Whitechain against the real contract and test USDT: paid 4.80 with no gas from the agent, a replay answered "already paid", refund 0.80, re-order 1.20, a forged signature never sent, a revoked agent recorded on-chain.
+- Running: the `pay/facilitator` PR. Reviewer pass 1 found three blocking issues (the sharpest: a signature form the chain rejects would have passed our check), all fixed; pass 2 is running, then auto-merge.
+- Next: M4 groundwork (the hosted routes) while part B (real payments as `rehearsal.vitalik`, the subscription, the qualifying payment C7) waits for T2's M5 and M6.
 - Blockers: none.
 
 ## identity
