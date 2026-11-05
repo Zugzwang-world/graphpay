@@ -1,66 +1,30 @@
 # Relay: arkiv (T3)
 
-Updated 03:05 IST, Fri 6 Nov. Steps: M8 (the synthetic city, size S) and M7b (GraphQL, explain, hosted MCP). M7a merged at 01:51 ([PR #14](https://github.com/Zugzwang-world/graphpay/pull/14)).
+Updated 03:20 IST, Fri 6 Nov. This step: a fix to the merged money graph (Join's finding). Before it: M8 (the synthetic city, size S) and M7b (GraphQL, explain, hosted MCP), merged at 03:11 ([PR #21](https://github.com/Zugzwang-world/graphpay/pull/21)); M7a merged at 01:51 ([PR #14](https://github.com/Zugzwang-world/graphpay/pull/14)).
 
-## In plain words
+## This step: a send that landed is adopted, not written twice
 
-GraphPay's agents ask Arkiv questions before they pay ("is this shop good?"). To show that this works at a realistic size, without paying for thousands of real orders, we built a labelled synthetic city and wrote it straight into Arkiv's testnet. Tonight that is the small city only, with the test story. The big city waits until the founder locks the final story (ADR-0049).
+**In plain words.** Several server instances share one Arkiv wallet, so when a write is reported as failed, the writer looks up what actually landed at that transaction slot and asks "is this ours?" before trying again. For the recorder (refusals and refund requests), for quotes and for the ledger's check, that question read the row in the wrong shape and always answered "no". The writer then sent the same row again, so one refusal could get two receipts. Join's mirror already counted it once, so no tally was wrong, but T1's recorder needs it fixed. Now the check reads the row the way Arkiv's SDK returns it and compares enough of it (for a quote: the shop, agent and price too) that another instance's row is never taken for ours. Simulator tests prove both directions.
 
-The small city has 91 people, agents and shops and 1,003 events: orders, payments, refusals, partial refunds and weekly subscriptions over 120 days. The three demo shops are the most popular, with their story refund rates. The persona's agents buy only in the last week and never from the trap shop. One generated shop re-registers its name 30 days before the end, so its history starts again. The shops sit in real Mumbai neighbourhoods near the persona's starting point, taken from OpenStreetMap. The shop names are fictional and every row is labelled synthetic.
+**Technical.** `publicClient.getEntity(key)` in `@arkiv-network/sdk` 1.0.1 returns a flat row with the columns under `$attributes` (`dist/index.d.ts`, `getEntity`; `FullEntity`). `recordEdge` (`src/recorder.mjs`), `createQuote` (`src/quotes.mjs`) and the unstreamed ledger verifier (`src/ledger.mjs`) read `e.attributes`, so `verifyRecovered` returned false and the writer took the pinned nonce as another writer's and sent again at a new nonce. All three now read `e.$attributes ?? e.attributes`, as the mirror already did. Once the checks really ran, the reviewer found the quote check too weak: one errand's quotes share a `request_id`, so an instance could adopt another instance's quote for a different shop. The quote check now also matches `shop_key`, `agent_ens` and `price`; the recorder also matches `kind` and both ends; the ledger compares its first edge's own ref. Two tests in `packages/money-graph/test/ledger.test.mjs`: an `apply-then-fail` fault (applied, reported as failed) on each path lands once and is adopted; and a second instance's quote for another shop at the pinned nonce is not adopted, so both quotes land. Each fails on the code it guards against. Tests: money-graph 15, arkiv-graph 23, mirror 29, city 14; `pnpm check` clean.
 
-The second half is the part agents talk to. One GraphQL question goes in and the answer comes back with a trace of every Arkiv read behind it, plus an id. The same question always gets the same id. The same questions are available to any AI agent over MCP at `/api/mcp`, with four read-only tools.
+## M8 and M7b (merged in PR #21)
 
-What was proven on the live testnet:
+### In plain words
 
-- **Every check matched the generator's truth.** We asked the seeded city through GraphQL and compared each answer with what the generator says is true.
-- **The city-wide top 10 takes 2 reads.** That is the claim the benchmark (M9) will race against plain Arkiv code. Plain code needs 5 reads here, because it must read all 490 payment rows.
-- **The map query works.** It returns exactly the three demo shops, or eleven when synthetic shops are opted in.
-- **Totals are verifiable.** A shop's totals were recounted from the raw receipts and agreed.
+Agents ask Arkiv questions before they pay ("is this shop good?"). To show that this works at a realistic size, we wrote a labelled synthetic city straight into Arkiv's testnet: tonight the small city only, with the test story; the big city waits for the founder's final story (ADR-0049). It has 91 people, agents and shops and 1,003 events over 120 days (orders, payments, refusals, partial refunds, weekly subscriptions), in real Mumbai neighbourhoods from OpenStreetMap, with fictional shop names, every row labelled synthetic.
 
-## Technical
+Agents ask through GraphQL, and each answer comes back with a trace of every Arkiv read behind it and an id (the same question always gets the same id). The same questions are open to any AI agent over MCP at `/api/mcp`, with four read-only tools. Proven on the live testnet: every check matched the generator's truth; the city-wide top 10 takes 2 reads (plain code needs 5 here, because it must read all 490 payment rows); the map query returns exactly the three demo shops (eleven with synthetic shops opted in); a shop's totals recount from the raw receipts and agree.
 
-**Generator** (`packages/city/src/generate.mjs`): mulberry32 with seed 2026 from the story. Every parameter, name and place comes from `story.json`: `syntheticCity`, the new `syntheticCity.generator` block, the cast, `locations.neighbourhoods` and `renewal`. Zipf with s = 1.1; log-normal amounts with a median of 4.5 USDT; 2.5% refusals; partial refunds at each shop's rate. Ground truth for the six questions is in `docs/sessions/arkiv/city/truth-S.json` (identity truth and by-name truth).
+### Technical
 
-**Seeding** (`packages/city/src/seed.mjs`, driver `scripts/seed.mjs`):
-- The graph store goes through the same ledger and tally planner as the mirror: 25 events per batch, split by bytes.
-- The plain store has one record per event and one profile per actor.
-- The directory rows come from W_DIRECTORY.
-- Safeguards: an owner that already holds a store is refused; size M is refused while the story is unlocked; there is a wipe; the plain store can `--resume`.
-- On ArkivSim first: the counts equal a direct load, and Q1 and Q2 equal the truth.
+- **Generator** (`packages/city/src/generate.mjs`): mulberry32, seed 2026; every parameter, name and place from `story.json`. Truth for the six questions in `docs/sessions/arkiv/city/truth-S.json`.
+- **Seeding** (`packages/city/src/seed.mjs`, driver `scripts/seed.mjs`): the graph store through the mirror's ledger and planner (25 events per batch, split by bytes); the plain store one record per event and one profile per actor; directory rows from W_DIRECTORY. Refuses an owner that already holds a store and size M while the story is unlocked; has a wipe and `--resume`.
+- **Live (Rabdi):** graph store 97 transactions (2,200 creates, 940 patches), 0.494 tGLM, 8.9 minutes; directory 12 rows in 1 transaction; plain store 43 transactions, 0.181 tGLM, after one resume. Numbers in `docs/technical/FACTS.md` (T3 rows).
+- **Engine** (`packages/arkiv-graph/src/engine.mjs`, generic): one call per trusted owner, rows owner-checked; OR lists chunked to the predicate budget; pages of 100 to a 500-row cap with `truncated`; explain id = sha256 of the backend and the sorted queries.
+- **GraphQL and MCP** (`packages/money-graph/src/graphql.mjs`, `mcp.mjs`): reputation from current-epoch tallies, `top` as one ORDER BY plus one node lookup, `path` over pair links; 8 fields and depth 8 (MCP 6 and 4); no mutations; a per-request call budget (60; MCP 25). Routes `/api/graphql`, `/api/explain/[id]`, `/api/mcp` (ADR-0060).
+- **Deviations:** graphql-js directly rather than Yoga (ADR-0060); the benchmark-only `arkiv_query` tool moves to M9; the story's re-registration epoch is 2, not the spec's +1 (OPEN).
 
-**Live (Rabdi):**
-- Graph store: 97 transactions, 2,200 creates and 940 patches, 0.494 tGLM, 8.9 minutes.
-- Directory: 12 rows in 1 transaction.
-- Plain store: the first run stopped after 24 transactions on an RPC read timeout before a send; it was resumed.
-- All 1,432 graph-store responses were HTTP 200, and the lowest rate-limit headroom was 4,834 of 5,000.
-- Numbers and links are in `docs/technical/FACTS.md` (T3 rows).
+**Checked on production (03:22 IST):** `POST /api/graphql` with `dataset: "S"` returns the top shops in 2 calls (backend rabdi, not truncated); `/api/mcp` answers `tools/list`.
 
-**Engine** (`packages/arkiv-graph/src/engine.mjs`, generic):
-- One call per trusted owner, merged by `$key`, with every row owner-checked.
-- OR lists are chunked to the predicate budget and halved and retried on `-32004`.
-- Pages of 100 up to a 500-row cap, with `truncated` when the cap bites.
-- The explain trace keeps the last 200 per instance; `explainId` = sha256 of the backend and the sorted queries.
-- The filter compiler rejects everything §4 lists.
-
-**GraphQL** (`packages/money-graph/src/graphql.mjs`): the §5 fields, plus `shops(box)` and lazy Node references.
-- Reputation is computed from tallies of the current epoch, with windows over day tallies, `verify` by `count()` of the same epoch, and `TRUNCATED` when a cap bites.
-- `top` is one ORDER BY over tallies plus one batched node lookup.
-- `path` is a two-ended search over pair links.
-- Limits: 8 top-level fields and depth 8 through fragments; the MCP tool allows 6 fields and depth 4. No mutations.
-
-**MCP** (`mcp.mjs`): the tools `schema`, `ask` (shop_reputation, buyer_risk, compare_shops, order_trail; TSV plus `explain=… calls=…`), `graphql` and `explain`. A server and a stateless web-standard Streamable HTTP transport are created per request.
-
-**Routes** (T3's): `/api/graphql` (GET cached 5 s, POST uncached), `/api/explain/[id]` and `/api/mcp`, rate-limited per instance (ADR-0060).
-
-**Tests:**
-- 9 M7b tests on the simulated S city: Q2 in 2 calls, the same explain id twice, Q1 verified, three shops in 2 calls, the re-registered name empty, Q3 and Q5, TRUNCATED, the limits, the MCP tool list.
-- The city tests: determinism, last-week purchases, the re-registration.
-- The writer now retries its reads.
-
-**Deviations, and why:**
-- GraphQL runs on graphql-js directly rather than Yoga (simpler, and it gives the same answers): ADR-0060.
-- The benchmark-only `arkiv_query` tool moves to M9.
-- `top` reads up to twice the limit so that superseded epochs can be dropped and still leave 10.
-- The story's re-registration epoch is 2 rather than the spec's +1 (OPEN).
-
-**Next:** after the PR merges, check `/api/graphql` and `/api/mcp` on `graphpay-event.vercel.app`, then M9, the live benchmark: plain against Graph Arkiv, reads and bytes, CSVs and the report.
+**Next:** M9, the live benchmark: plain against Graph Arkiv, reads and bytes, CSVs and the report.

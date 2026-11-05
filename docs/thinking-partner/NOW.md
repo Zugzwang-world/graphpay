@@ -42,13 +42,14 @@ Updated 02:00 IST. **M5 is built and run for real; its PR is open.** The `graphp
 
 ## arkiv
 
-Updated 03:05 IST, Fri 6 Nov (T3).
+Updated 03:20 IST, Fri 6 Nov (T3).
 
-- **Where we are:** M7a merged (01:51). The small test city (size S, test story) is on Arkiv's testnet: 91 actors, 12 shops, 1,003 events, all labelled synthetic. Graph store and shop directory done; the plain copy (the benchmark's baseline) is finishing. GraphQL, the explain trace and the hosted MCP endpoint (M7b) are built; the PR goes up when the plain copy is done.
-- **Proven live:** asked through GraphQL, the seeded city answers the benchmark questions exactly as the generator's truth says. The city-wide top 10 takes 2 reads; the map query returns exactly the three cast shops (eleven with synthetic shops opted in).
-- **Running:** the plain store, resumed after an RPC timeout (detached; `docs/sessions/arkiv/seeding.md`).
+- **Where we are:** M7a, M8 (size S) and M7b have merged (PR #21, 03:11). The small test city is on Arkiv's testnet and answers through GraphQL, the explain trace and the hosted MCP. All three S stores survived the Mac's sleep (each manifest says done; nothing was mid-run).
+- **This step:** a small fix that T1's recorder depends on. After a send that landed but was reported as failed, the recorder, quotes and the ledger's check now read the row back correctly, so they adopt it instead of writing a second copy. A test on the simulator proves it lands once.
+- **Running:** nothing.
 - **Blockers:** none.
-- **Next:** ship M8 and M7b, check the routes on the production domain, then M9 (the live benchmark: reads, not speed).
+- **Checked on the production domain (03:22):** `/api/graphql` answers the city's top shops in 2 reads from Arkiv's testnet; `/api/mcp` lists its tools.
+- **Next:** M9, the live benchmark (reads, not speed).
 
 ## agents
 
