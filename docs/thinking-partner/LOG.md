@@ -28,6 +28,8 @@ One line per PR: time (IST) · activity · result · PR link. Append under your 
 
 ## agents
 
+- 01:40 IST · agents · M10 package, guards, mocks and tests, reviewer findings fixed; five live runs on the testing preset all paid the good shop · [PR 11](https://github.com/Zugzwang-world/graphpay/pull/11)
+
 ## integration
 
 - 01:20 IST · integration · opened: the mirror core on test doubles (decoding, mapping, parking, lease, recorder fold, 5% history, endpoints; 22 tests) · https://github.com/Zugzwang-world/graphpay/pull/8

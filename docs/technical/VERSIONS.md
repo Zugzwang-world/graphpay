@@ -38,6 +38,17 @@ Every version the event code pins, with how it was checked. Each track adds the 
 
 The M0 verifier's snapshot of every package in `planning/FACTS.md` §5 is in `docs/technical/FACTS.md` (Results). Changes since the pack: x402 2.30.0 is `latest` (move all four `@x402/*` packages together or keep 2.29.0); `ai` 7.0.163, `@ai-sdk/anthropic` 4.0.97, `@ai-sdk/mcp` 2.0.91; graphql 16.15.0 is the newest 16.x (`latest` is 17.1.0; keep one major); sigma `latest` is 4.0.4 (3.0.3 is the newest 3.x). Each track adds its pins here under its own heading.
 
+## T4 agents (`agents/m10-teams`, checked 2026-11-06 01:30 IST)
+
+| item | pinned | how checked | status |
+|---|---|---|---|
+| `ai` | 7.0.162 (`packages/agents`) | the lab's pin; still exists per the M0 verifier (`docs/technical/FACTS.md`, `latest` is 7.0.163); installed from the registry tarball, API names read from its shipped `dist/index.d.ts` and `docs/` (`ToolLoopAgent`, `Output.object`, `isStepCount`, `wrapLanguageModel`, `ai/test` `MockLanguageModelV4`) | verified (not the newest patch; the lab's tests ran on it) |
+| `@ai-sdk/anthropic` | 4.0.96 | same (`latest` 4.0.97); `providerOptions.anthropic.effort` and native structured output for Opus 5.5 read from its shipped docs | verified |
+| `zod` | 4.6.7 | = `latest` (FACTS.md) | verified |
+| `graphql` | 16.14.2 | same pin as `packages/arkiv-graph`; the mock MCP runs real graphql-js | verified |
+
+Not installed: `@ai-sdk/mcp` (the live MCP client is Join's wiring in M12, through the `McpLike` interface) and `@ai-sdk/xai` (Grok is optional, not built).
+
 ## Website (`apps/web`, web session, checked 2026-11-06 00:30 IST)
 
 | item | pinned | how checked | status |

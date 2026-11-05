@@ -41,7 +41,10 @@ Not started (T3, wave 1).
 
 ## agents
 
-Not started (T4, wave 1).
+Updated 01:45 IST. **M10 built; five live errands on the testing preset all paid the good shop and never the trap.** The "(M10 done)" PR is the next merge.
+- 5 of 5 live runs: 73 to 321 s (median 94 s), $0.29 to $0.31 and about 47,000 to 52,000 tokens each, on mock services (rows in `OPEN.md`).
+- Reviewer pass done, findings fixed. Join's M12 can wire against `packages/agents/index.d.ts` and `docs/sessions/agents/NOTES.md`.
+- Next: merge, then the Friday presence and handoff hooks.
 
 ## integration
 
