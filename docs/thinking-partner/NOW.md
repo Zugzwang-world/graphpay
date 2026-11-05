@@ -65,10 +65,10 @@ Updated 04:10 IST, Fri 6 Nov. **The mirror runs live (since 03:13 IST); M12's si
 
 ## website
 
-Updated 04:20 IST, Fri 6 Nov (T5 Web). **On `main`:** the shell, phone views, agent run route, merchant stream and CSV, order trail. **In a PR:** race mode goes live (Friday item 8): both sides ask Arkiv's testnet the same question live, reads tick per call, the answer is badged correct by identity or by name, and the committed benchmark table sits under it (reads and bytes, no times). Tried live on Rabdi: Graph Arkiv 2 reads, plain 5 or 6.
-- Running: nothing long. M16 (checkout kit, store) waits for M4 (not merged); customer state waits for M6.
-- Blockers: none. Open toggle waits for T3's `shop_open`.
-- Next: M16 once M4 lands; the customer panels as M4 and M6 land. Fresh start file: `docs/sessions/website/resume.md`.
+Updated 05:50 IST, Fri 6 Nov (T5 Web). **On `main`:** the shell, phone views, agent run route, merchant stream and CSV, order trail, race mode (and the Open toggle once #39 merges). **In a PR:** the customer's Pause and Resume buttons (M6 landed): the owner wallet sets the payer agent's ENS status on Sepolia; the gate sees it within 20 s. It needs the owner's key on Vercel; until then the buttons say "not live yet".
+- Running: nothing long. M16 (checkout kit, store) waits for M4 (not merged).
+- Blockers: Pause/Resume and the Open toggle need two keys in Vercel (see OPEN).
+- Next: the customer state panel (status, cap, spent) and M16 once M4 lands. Fresh start file: `docs/sessions/website/resume.md`.
 
 ## agentpay
 
