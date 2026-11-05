@@ -1,6 +1,6 @@
 # Relay: agentpay (T6 AgentPay SDK)
 
-Updated 04:20 IST, Fri 6 Nov. V1 merged in https://github.com/Zugzwang-world/graphpay/pull/38; the real test payment in https://github.com/Zugzwang-world/graphpay/pull/41; A4 (T1's facilitator) in this step's PR.
+Updated 04:20 IST, Fri 6 Nov. V1 merged in https://github.com/Zugzwang-world/graphpay/pull/38; the real test payment in https://github.com/Zugzwang-world/graphpay/pull/41; A4 (T1's facilitator) in https://github.com/Zugzwang-world/graphpay/pull/47.
 
 ## In plain words
 
