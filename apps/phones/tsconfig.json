@@ -3,11 +3,24 @@
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
-      "@/*": ["../../frontend/src/*"],
-      "*": ["../../frontend/node_modules/@types/*", "../../frontend/node_modules/*"]
+      "@/*": [
+        "../../frontend/src/*"
+      ],
+      "*": [
+        "../../frontend/node_modules/@types/*",
+        "../../frontend/node_modules/*"
+      ]
     },
-    "typeRoots": ["../../frontend/node_modules/@types"],
-    "types": ["node"]
+    "typeRoots": [
+      "../../frontend/node_modules/@types"
+    ],
+    "types": [
+      "node"
+    ],
+    "allowImportingTsExtensions": true
   },
-  "include": ["src", "../../frontend/node_modules/vite/client.d.ts"]
+  "include": [
+    "src",
+    "../../frontend/node_modules/vite/client.d.ts"
+  ]
 }

@@ -21,6 +21,15 @@ export interface ApiAnswer<T = unknown> {
   error: string | null;
 }
 
+// A chip of the stage's "This run": what happened, on which network, with its record.
+export interface RunChip {
+  key: string;
+  label: string;
+  network: string;
+  href: string;
+  at: number;
+}
+
 export interface RunState {
   runId: string | null;
   events: TraceEvent[];
@@ -45,6 +54,8 @@ interface SiteContextValue {
   caption: { text: string; at: number } | null;
   run: RunState;
   setRun: (update: (prev: RunState) => RunState) => void;
+  chips: RunChip[];
+  setChips: (chips: RunChip[]) => void;
 }
 
 const SiteContext = createContext<SiteContextValue | null>(null);
@@ -66,6 +77,8 @@ export function SiteProvider({ model, children }: { model: SiteModel; children: 
   const [soundOn, setSoundOnState] = useState(false);
   const [caption, setCaption] = useState<{ text: string; at: number } | null>(null);
   const [run, setRunState] = useState<RunState>({ runId: null, events: [], result: null, startedAt: null });
+  const [chips, setChipsState] = useState<RunChip[]>([]);
+  const setChips = useCallback((next: RunChip[]) => setChipsState((prev) => (JSON.stringify(prev) === JSON.stringify(next) ? prev : next)), []);
 
   const setPasscode = useCallback((value: string | null) => {
     setPasscodeState(value);
@@ -151,8 +164,8 @@ export function SiteProvider({ model, children }: { model: SiteModel; children: 
   const setRun = useCallback((update: (prev: RunState) => RunState) => setRunState(update), []);
 
   const value = useMemo<SiteContextValue>(
-    () => ({ model, passcode, setPasscode, unlockOpen, requestUnlock, settleUnlock, post, stream, soundOn, enableSound, setSoundOn, sound, caption, run, setRun }),
-    [model, passcode, setPasscode, unlockOpen, requestUnlock, settleUnlock, post, stream, soundOn, enableSound, setSoundOn, sound, caption, run, setRun],
+    () => ({ model, passcode, setPasscode, unlockOpen, requestUnlock, settleUnlock, post, stream, soundOn, enableSound, setSoundOn, sound, caption, run, setRun, chips, setChips }),
+    [model, passcode, setPasscode, unlockOpen, requestUnlock, settleUnlock, post, stream, soundOn, enableSound, setSoundOn, sound, caption, run, setRun, chips, setChips],
   );
 
   return <SiteContext.Provider value={value}>{children}</SiteContext.Provider>;

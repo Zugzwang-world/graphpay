@@ -1,112 +1,151 @@
 'use client';
 
-// The top bar's live chips (WEBSITE_SPEC.md §2): the three chains' heads, mirror
-// lag, relayer balance, the token, the passcode lock, sound, and race mode. Each
-// number links to where it came from.
+// The stage's top bar (final website brief §4), left to right: the wordmark; labelled links to
+// GraphPay's own public records (ENS, Whitechain, Arkiv, Swarm, the facilitator); Proofs, the live
+// features that are not in the demo; This run, a chip for each record the demo makes, with its
+// network and age; and the repository. Every link is a public page, opened in a new tab.
 
-import Link from 'next/link';
-import { useEffect, useState } from 'react';
-import type { StatusResponse } from '@/lib/contracts';
-import { blockUrl, tokenUrl } from '@/lib/explorer';
-import { usePoll } from '@/lib/use-poll';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
+import { addressUrl } from '@/lib/explorer';
+import { ago } from '@/lib/stage/format';
+import { proofs } from '@/lib/stage/proofs';
 import { useSite } from './site-context';
 
-const fmt = (n: string) => Number(n).toLocaleString('en-US');
+interface SwarmLinks {
+  menus?: Record<string, string>;
+}
+
+function Menu({ label, children, wide = false }: { label: ReactNode; children: ReactNode; wide?: boolean }) {
+  const [open, setOpen] = useState(false);
+  const root = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!open) return;
+    const close = (e: MouseEvent) => {
+      if (!root.current?.contains(e.target as Node)) setOpen(false);
+    };
+    const esc = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setOpen(false);
+    };
+    document.addEventListener('mousedown', close);
+    document.addEventListener('keydown', esc);
+    return () => {
+      document.removeEventListener('mousedown', close);
+      document.removeEventListener('keydown', esc);
+    };
+  }, [open]);
+  return (
+    <div className="bar-menu" ref={root}>
+      <button type="button" className="bar-link" aria-expanded={open} onClick={() => setOpen((v) => !v)}>
+        {label}
+      </button>
+      {open ? <div className={`bar-pop${wide ? ' is-wide' : ''}`}>{children}</div> : null}
+    </div>
+  );
+}
+
+const ext = { target: '_blank', rel: 'noopener noreferrer' } as const;
 
 export function TopBar() {
-  const { model, passcode, setPasscode, requestUnlock, soundOn, setSoundOn, caption } = useSite();
-  const status = usePoll<StatusResponse>('/api/status', 3000);
-  const data = status.status === 'ok' ? status.data : null;
-  const [showCaption, setShowCaption] = useState(false);
-
+  const { model, chips } = useSite();
+  const [swarm, setSwarm] = useState<SwarmLinks | null>(null);
+  const [now, setNow] = useState(() => Date.now());
   useEffect(() => {
-    if (!caption) return;
-    setShowCaption(true);
-    const t = setTimeout(() => setShowCaption(false), 2600);
-    return () => clearTimeout(t);
-  }, [caption]);
-
-  const head = (key: 'whitechain' | 'sepolia' | 'rabdi', label: string) => {
-    const value = data?.heads[key] ?? null;
-    const href = value ? blockUrl(model.explorers, key, value) : null;
-    const tone = data ? (value ? 'live' : 'down') : undefined;
-    const body = (
-      <>
-        <span className="dot" aria-hidden="true" />
-        <span className="label">{label}</span> {value ? fmt(value) : '—'}
-      </>
-    );
-    return href ? (
-      <a className="chip" data-tone={tone} href={href} target="_blank" rel="noopener noreferrer" title={`${label}: latest block`}>
-        {body}
-      </a>
-    ) : (
-      <span className="chip" data-tone={tone} title={`${label}: no answer yet`}>
-        {body}
-      </span>
-    );
-  };
+    fetch('/phones/swarm.json', { cache: 'no-store' })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((j: SwarmLinks | null) => setSwarm(j))
+      .catch(() => setSwarm(null));
+    const t = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(t);
+  }, []);
+  const l = model.links;
+  const ens = l.ensApp ? `${l.ensApp.replace(/\/+$/, '')}/${model.root}` : null;
+  const checkout = addressUrl(model.explorers, 'whitechain', l.checkout);
+  const writers = [
+    { label: 'The money mirror', href: addressUrl(model.explorers, 'rabdi', l.writers.mirror) },
+    { label: 'The shop directory', href: addressUrl(model.explorers, 'rabdi', l.writers.directory) },
+    { label: 'The sync writer', href: addressUrl(model.explorers, 'rabdi', l.writers.sync) },
+  ].filter((w): w is { label: string; href: string } => w.href !== null);
+  const menus = Object.entries(swarm?.menus ?? {}).map(([shop, href]) => ({ label: model.shops.find((s) => s.ens === shop)?.displayName ?? shop, href }));
+  const list = proofs(model);
+  const latest = [...chips].sort((a, b) => b.at - a.at);
+  const shown = latest.slice(0, 3);
+  const rest = latest.slice(3);
 
   return (
     <header className="topbar">
-      <Link href="/" className="brand" aria-label="GraphPay, the stage">
+      <a href="/" className="brand" aria-label="GraphPay, the stage">
         <span className="brand-name">GraphPay</span>
-        <span className="brand-line">Ask before you pay</span>
-      </Link>
-      <nav className="topbar-chips" aria-label="Live status">
-        {head('whitechain', model.networks.whitechain.name)}
-        {head('sepolia', model.networks.sepolia.name)}
-        {head('rabdi', model.networks.rabdi.name)}
-        <span className="chip" title={data?.mirrorLagBlocks == null ? 'Mirror lag: waiting for the mirror' : 'Blocks between the chain head and the mirror'}>
-          <span className="label">Mirror lag</span> {data?.mirrorLagBlocks == null ? '—' : `${data.mirrorLagBlocks} blocks`}
-        </span>
-        <span className="chip" title={data?.relayerWbt == null ? 'Relayer balance: waiting for the facilitator' : 'The relayer pays every gas fee'}>
-          <span className="label">Relayer</span> {data?.relayerWbt == null ? '—' : `${data.relayerWbt} ${model.networks.whitechain.nativeSymbol}`}
-        </span>
-        {data ? (
-          <a
-            className="chip"
-            data-tone={data.token === 'usdt' ? 'pista' : 'chilli'}
-            href={tokenUrl(model.explorers, data.tokenAddress) ?? undefined}
-            target="_blank"
-            rel="noopener noreferrer"
-            title="The token every payment settles in"
-          >
-            {data.token === 'usdt' ? model.token.symbol : 'stand-in (not USDT)'}
+      </a>
+      <nav className="bar-records" aria-label="GraphPay’s public records">
+        {ens ? (
+          <a className="bar-link" href={ens} {...ext}>
+            ENS
           </a>
         ) : null}
+        {checkout ? (
+          <a className="bar-link" href={checkout} {...ext}>
+            Whitechain
+          </a>
+        ) : null}
+        {writers.length ? (
+          <Menu label="Arkiv">
+            {writers.map((w) => (
+              <a key={w.href} href={w.href} {...ext}>
+                {w.label}
+              </a>
+            ))}
+          </Menu>
+        ) : null}
+        {menus.length ? (
+          <Menu label="Swarm">
+            {menus.map((m) => (
+              <a key={m.href} href={m.href} {...ext}>
+                {m.label}’s menu
+              </a>
+            ))}
+          </Menu>
+        ) : null}
+        <a className="bar-link" href="/api/facilitator/health" {...ext}>
+          Facilitator
+        </a>
+        <Menu label="Proofs" wide>
+          {list.map((p) => (
+            <div key={p.key} className="bar-proof">
+              <p className="bar-proof-title">{p.title}</p>
+              <p className="bar-proof-by">{p.activity}</p>
+              <div className="bar-proof-links">
+                {p.links.map((x) => (
+                  <a key={x.href} href={x.href} {...ext}>
+                    {x.label}
+                  </a>
+                ))}
+              </div>
+            </div>
+          ))}
+        </Menu>
       </nav>
-      <div className="topbar-actions">
-        {/* No lock for visitors under public access (ADR-0069). */}
-        {model.publicAccess ? null : <button
-          type="button"
-          className="chip lock"
-          data-tone={passcode ? 'pista' : undefined}
-          onClick={() => (passcode ? setPasscode(null) : void requestUnlock())}
-          aria-label={passcode ? 'Unlocked: click to lock the spending buttons again' : 'Locked: click to enter the demo passcode'}
-        >
-          <svg viewBox="0 0 16 16" width="13" height="13" aria-hidden="true">
-            <rect x="3" y="7" width="10" height="7.5" rx="1.6" fill="currentColor" />
-            <path d={passcode ? 'M5.2 7V5.2a2.8 2.8 0 0 1 5.5-.8' : 'M5.2 7V5.2a2.8 2.8 0 0 1 5.6 0V7'} fill="none" stroke="currentColor" strokeWidth="1.5" />
-          </svg>
-          {passcode ? 'Unlocked' : 'Locked'}
-        </button>}
-        <button type="button" className="chip" aria-pressed={soundOn} onClick={() => setSoundOn(!soundOn)} title="Sounds are synthesised in the browser; captions show either way">
-          {soundOn ? 'Sound on' : 'Sound off'}
-        </button>
-        <Link className="chip" href="/map">
-          Map
-        </Link>
-        <Link className="chip" href="/race">
-          Race mode
-        </Link>
-        <Link className="chip" href="/how">
-          How it works
-        </Link>
+      <div className="bar-run" aria-label="This run" aria-live="polite">
+        {shown.length ? <span className="bar-run-label">This run</span> : null}
+        {shown.map((c) => (
+          <a key={c.key} className="run-chip" href={c.href} {...ext}>
+            {c.label}: {c.network}, {ago(c.at, now)}
+          </a>
+        ))}
+        {rest.length ? (
+          <Menu label={`${rest.length} more`}>
+            {rest.map((c) => (
+              <a key={c.key} href={c.href} {...ext}>
+                {c.label}: {c.network}, {ago(c.at, now)}
+              </a>
+            ))}
+          </Menu>
+        ) : null}
       </div>
-      <p className="caption" role="status" aria-live="polite" data-show={showCaption ? 'true' : 'false'}>
-        {caption ? `♪ ${caption.text}` : ''}
-      </p>
+      {l.repo ? (
+        <a className="bar-link bar-repo" href={l.repo} {...ext}>
+          GitHub
+        </a>
+      ) : null}
     </header>
   );
 }

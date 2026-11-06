@@ -12,6 +12,8 @@ export interface ModelAgent {
   ens: string;
   pays: boolean;
   capMicro: string | null;
+  // Grok's figurine, `<avatar>-<state>.png` (idle, thinking, talking, success, refused).
+  avatar: string | null;
 }
 
 export interface ModelProduct {
@@ -29,11 +31,21 @@ export interface ModelShop {
   storyRole: string;
   category: string;
   products: ModelProduct[];
-  agents: { key: string; displayName: string; ens: string }[];
+  agents: { key: string; displayName: string; ens: string; avatar: string | null }[];
 }
 
 export interface SiteModel {
   siteUrl: string;
+  // The stage's own public records (final website brief §4): the ENS app's name pages, the checkout
+  // contract, the Arkiv writers, the Swarm gateway, the repository and the two npm packages.
+  links: {
+    ensApp: string | null;
+    checkout: string | null;
+    writers: { mirror: string | null; directory: string | null; sync: string | null };
+    swarmGateway: string;
+    repo: string | null;
+    packages: { key: string; name: string; readme: string }[];
+  };
   // Visitors meet no passcode (ADR-0069; the config's site.publicAccess).
   publicAccess: boolean;
   root: string;
@@ -119,7 +131,7 @@ export function siteModel(): SiteModel {
     storyRole: shop.storyRole,
     category: shop.category,
     products: shop.products.map((p) => ({ ...p, priceMicro: String(p.priceMicro) })),
-    agents: cast.shopAgents.map((a) => ({ key: a.key, displayName: a.displayName, ens: ensOf('shop-agent', `${shop.key}/${a.key}`) })),
+    agents: cast.shopAgents.map((a) => ({ key: a.key, displayName: a.displayName, ens: ensOf('shop-agent', `${shop.key}/${a.key}`), avatar: typeof (a as unknown as Loose).avatar === 'string' ? ((a as unknown as Loose).avatar as string) : null })),
   }));
   const merchantKey = field(order, 'shop', isString, 'order');
   const merchant = shops.find((s) => s.key === merchantKey);
@@ -131,6 +143,7 @@ export function siteModel(): SiteModel {
     ens: ensOf('buyer-agent', a.key),
     pays: a.pays,
     capMicro: a.capMicro === undefined ? null : String(a.capMicro),
+    avatar: typeof (a as unknown as Loose).avatar === 'string' ? ((a as unknown as Loose).avatar as string) : null,
   }));
   const payer = buyerAgents.find((a) => a.key === 'payer');
   if (!payer) throw new Error('story config: the buyer team has no payer agent');
@@ -141,8 +154,18 @@ export function siteModel(): SiteModel {
     return { name: n.name, chainId: n.chainId, nativeSymbol: n.nativeSymbol };
   };
 
+  const writers = (config.arkiv?.writers ?? {}) as Record<string, string>;
+  const site = config.site as Loose;
   cached = {
     siteUrl: config.site.url,
+    links: {
+      ensApp: typeof (network('sepolia') as unknown as Loose).ensApp === 'string' ? ((network('sepolia') as unknown as Loose).ensApp as string) : null,
+      checkout: checkoutAddress(),
+      writers: { mirror: writers.W_LEDGER ?? null, directory: writers.W_DIRECTORY ?? null, sync: writers.W_SYNC ?? null },
+      swarmGateway: config.swarm.gateway,
+      repo: typeof site.repo === 'string' ? site.repo : null,
+      packages: Array.isArray(site.packages) ? (site.packages as { key: string; name: string; readme: string }[]) : [],
+    },
     publicAccess: publicAccess(),
     root,
     storyName: story.name,

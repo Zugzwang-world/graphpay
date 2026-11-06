@@ -76,7 +76,7 @@ function ShopChoiceCard({ choice }: { choice: ShopChoice }) {
     <Photo src={shopPhoto(choice.shop.ens)} className="-mx-3 -mt-3 mb-2 h-16 w-[calc(100%+1.5rem)] rounded-t-card object-cover" />
     <div className="flex items-start justify-between gap-2"><h3 className="font-heading text-section font-bold">{choice.shop.name}</h3>{choice.verdict !== 'considered' && <StatusChip status={choice.verdict} />}</div>
     <div className="mt-1 flex items-center gap-2"><Photo src={dishPhoto(choice.shop.ens)} className="h-12 w-12 shrink-0 rounded-input object-cover" /><MoneyAmount amount={choice.price} /></div>
-    <p className="mt-2 text-caption text-muted">{fill(copy.customer.desk.shopFacts, { distance: choice.distanceKm, paid: choice.paidOrders.toLocaleString('en-IN'), refunds: choice.refundRate, repeat: choice.repeatBuyers.toLocaleString('en-IN') })}</p>
+    <p className="mt-2 text-caption text-muted">{fill(copy.customer.desk.shopFacts, { distance: choice.distanceKm, paid: choice.paidOrders.toLocaleString('en-IN'), refunds: choice.refundRate, repeat: choice.repeatBuyers?.toLocaleString('en-IN') ?? '' })}</p>
     {choice.reason && <p className="mt-2 text-caption font-bold text-bad">{fill(copy.customer.desk.rejectedReason, { reason: choice.reason })}</p>}
   </article>;
 }

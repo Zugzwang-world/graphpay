@@ -272,6 +272,7 @@
   "order": {
     "synthetic": true,
     "request": "Just landed in Mumbai. Get me the best masala dosa near BKC under 6 USDT, delivered within an hour.",
+    "area": "BKC",
     "shop": "kesar-kingdom",
     "sku": "filter-and-fold-masala-dosa-combo",
     "item": "masala dosa",

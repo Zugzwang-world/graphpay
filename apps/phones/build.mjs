@@ -6,7 +6,7 @@
 //   node apps/phones/build.mjs          (apps/web's build runs it before next build)
 
 import { execFileSync } from 'node:child_process';
-import { cpSync, existsSync, rmSync } from 'node:fs';
+import { cpSync, existsSync, rmSync, writeFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
@@ -39,13 +39,20 @@ const react = (await load('@vitejs/plugin-react')).default;
 const tailwindcss = (await load('@tailwindcss/vite')).default;
 
 const projection = projectStory(story);
-// A product with no image in the story gets its menu image from Swarm, read through its Arkiv row.
+// Every photo's Swarm link, read through its shop's menu row on Arkiv: the phones show the photo
+// with its link, and a product with no image in the story shows the Swarm copy itself.
+let swarmLinks = { menus: {}, storefronts: {}, dishes: {} };
 try {
   const links = await menuImages(projection.shops.map((s) => s.ens));
-  for (const p of projection.products) p.image ??= links.get(`${p.shop}|${p.id}`) ?? null;
-  console.log(`apps/phones: ${links.size} menu image(s) from Swarm`);
+  for (const p of projection.products) {
+    p.swarm = links.get(`${p.shop}|${p.id}`) ?? null;
+    p.image ??= p.swarm;
+  }
+  for (const s of projection.shops) s.swarm = links.storefronts.get(s.ens) ?? null;
+  swarmLinks = { menus: Object.fromEntries(links.menus), storefronts: Object.fromEntries(links.storefronts), dishes: Object.fromEntries(links) };
+  console.log(`apps/phones: ${links.size} menu image(s) and ${links.storefronts.size} storefront(s) from Swarm`);
 } catch {
-  console.warn('apps/phones: the menu images could not be read; products stay without images');
+  console.warn('apps/phones: the menu images could not be read; the photos show without their Swarm links');
 }
 const projected = JSON.stringify(projection, null, 2);
 
@@ -80,4 +87,6 @@ await build({
 });
 // Grok's resized figurines and photos (apps/phones/grok-images.mjs), served from our own site.
 if (existsSync(join(here, 'static/grok'))) cpSync(join(here, 'static/grok'), join(outDir, 'grok'), { recursive: true });
+// The same Swarm links for the stage's top bar and scenes (public references only).
+writeFileSync(join(outDir, 'swarm.json'), `${JSON.stringify({ about: 'Read at build time from each shop menu row on Arkiv (apps/phones/menu-images.mjs).', ...swarmLinks }, null, 2)}\n`);
 console.log(`apps/phones: built the customer and merchant phones into ${outDir.slice(repo.length + 1)}/`);

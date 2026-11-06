@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { amountToMicro, csvCells, foldOrders, itemsFor, microToAmount, parentName, rowFromEdge, rowsFromCsv, type FoldContext } from '../src/orders.ts';
+import { amountToMicro, csvCells, foldOrders, itemsFor, microToAmount, parentName, refusedAttempts, rowFromEdge, rowsFromCsv, type FoldContext } from '../src/orders.ts';
 
 const SHOP = 'shop-a.example.eth';
 const PERSONA = 'owner.example.eth';
@@ -93,4 +93,18 @@ test('a refund request recorded on Arkiv (no transaction) joins its order as req
   assert.equal(order?.refunds[0]?.status, 'requested');
   assert.deepEqual(order?.refunds[0]?.amount, { amount: '0.80', currency: 'USDT' });
   assert.deepEqual(foldOrders([request], ctx), [], 'a request alone is no order');
+});
+
+test('a decline closes the open request, and a refused attempt is listed apart', () => {
+  const edge = (kind: string, from: string, to: string, amountMicro: string, ref: string, ts: number) => rowFromEdge({ kind, from, to, amountMicro, orderId: ORDER, ref, ts: String(ts), settlementTx: null }, SHOP);
+  const rows = [
+    rowFromEdge({ kind: 'pay', from: PAYER, to: SHOP, amountMicro: '4800000', orderId: ORDER, ref: `1874:${TX(1)}:3`, ts: '100', settlementTx: TX(1) }, SHOP),
+    edge('request', PAYER, SHOP, '800000', `req:${ORDER}:2`, 120),
+    edge('request', SHOP, PAYER, '800000', `dec:${ORDER}:2`, 180),
+    edge('fail', PAYER, SHOP, '800000', `att:${ORDER}:0x1:abc`, 240),
+  ];
+  const [o] = foldOrders(rows, ctx);
+  assert.equal(o!.refunds.length, 1);
+  assert.equal(o!.refunds[0]!.status, 'declined');
+  assert.deepEqual(refusedAttempts(rows).map((a) => a.ref), [`att:${ORDER}:0x1:abc`]);
 });
