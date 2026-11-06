@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { Explainer } from '@/components/explainer';
+import { MiddleSwitch } from '@/components/middle-switch';
 import { LiveRunBridge } from '@/components/live-run-bridge';
 import { QrCode } from '@/components/qr-code';
 import { siteModel } from '@/lib/site.server';
@@ -25,14 +25,14 @@ export default function LiveStagePage() {
           <iframe className="live-phone" src="/phones/customer.html" title={customerLabel} />
         </div>
         <div className="stage-middle">
-          <Explainer />
+          <MiddleSwitch />
           <aside className="phone-links" aria-label="Open the phone views on your own phone">
             <figure>
-              <QrCode url={`${model.siteUrl}/phones/customer.html`} size={88} label={`QR code for ${customerLabel}`} />
+              <QrCode url={`${model.siteUrl}/phones/customer.html`} size={56} label={`QR code for ${customerLabel}`} />
               <figcaption className="small">{customerLabel}</figcaption>
             </figure>
             <figure>
-              <QrCode url={`${model.siteUrl}/phones/merchant.html`} size={88} label={`QR code for ${merchantLabel}`} />
+              <QrCode url={`${model.siteUrl}/phones/merchant.html`} size={56} label={`QR code for ${merchantLabel}`} />
               <figcaption className="small">{merchantLabel}</figcaption>
             </figure>
             <p className="small muted">Scan to follow along on your own phone. Testnets only; no personal data collected.</p>
