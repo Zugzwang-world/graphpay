@@ -14,8 +14,8 @@ Two MIT packages, each for one partner's network and testnet only. GraphPay itse
 
 | package | version | what it does |
 |---|---|---|
-| [`@graphpay_ethglobal/arkiv-graph`](https://www.npmjs.com/package/@graphpay_ethglobal/arkiv-graph) | 0.1.0 | A generic graph on Arkiv: you define the nodes, edges and totals, and every read comes with an explain trace. Source: [`packages/arkiv-graph`](packages/arkiv-graph). |
-| [`@graphpay_ethglobal/agentpay`](https://www.npmjs.com/package/@graphpay_ethglobal/agentpay) | 0.1.0 | Agent payments in test USDT on Whitechain Sepolia. An AI agent pays an HTTP 402 with one signature and no gas, under an on-chain spending pass. A merchant prices any route and settles through its own relayer, with the anti-drain limits on. Source: [`packages/agentpay`](packages/agentpay). |
+| [`@graphpay_ethglobal/arkiv-graph`](https://www.npmjs.com/package/@graphpay_ethglobal/arkiv-graph) | 0.1.1 | A generic graph on Arkiv: you define the nodes, edges and totals, and every read comes with an explain trace. Source: [`packages/arkiv-graph`](packages/arkiv-graph). |
+| [`@graphpay_ethglobal/agentpay`](https://www.npmjs.com/package/@graphpay_ethglobal/agentpay) | 0.1.1 | Agent payments in test USDT on Whitechain Sepolia. An AI agent pays an HTTP 402 with one signature and no gas, under an on-chain spending pass. A merchant prices any route and settles through its own relayer, with the anti-drain limits on. Source: [`packages/agentpay`](packages/agentpay). |
 
 Each README has a five-minute quickstart. Feedback goes to GitHub issues labelled `arkiv-graph` or `agentpay`, plus `feedback`. The published versions are frozen from the submission until judging ends.
 
