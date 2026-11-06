@@ -1,6 +1,6 @@
 # NOW
 
-Updated 16:20 IST, Fri 6 Nov (Coordinator)
+Updated 16:40 IST, Fri 6 Nov (Coordinator)
 
 ## Summary (Coordinator only)
 
@@ -16,7 +16,15 @@ Updated 13:32 IST, Fri 6 Nov. **Standing rule (ADR-0066): no target times.** Onl
 - **Public access is live** (#117, ADR-0069): visitors meet no passcode, and the keys between our own servers stay.
 - **Phase 1 is live at `/live`:** the team's phones around the explainer (#111).
   - Production deploys had failed from #111 until #116 fixed the build (Vercel had skipped the phones' build tools). Production now runs `ff12990`.
-- **Phase 2 is live** (#122, deployed 16:17 IST as `fd10734`): on `/live`, Vitalik's ask on the customer phone runs the real errand. The phones and T5's explainer follow it, and the payment settles from the payer's pass. The founder tests it next. It has been checked against a replay of a recorded paid errand; the founder's test is its first live run from `/live`.
+- **Phase 2 works end to end** (#122):
+  - An errand asked from `/live` at 16:34 IST paid 4.80 to Kesar Kingdom in about 107 s ([tx](https://explorer.testnet.whitechain.io/tx/0x89acd9521341763f6f6a37893eec921c9548d7a0b5984597d56088a5f5d5b990)).
+  - Vitalik's phone showed the agents' steps, the three shops (the trap rejected, with reasons) and the quote going from signed to paid. Kesar's phone showed the order, and the explainer showed the lanes.
+  - Rough edges:
+    - Kimi's closing line said "mock" (being removed);
+    - the repeat-buyers count shows a dash (no data);
+    - there is no Dispatch button on a fresh order (the shop delivers itself).
+- **Phase 3 is live** (#124): the money buttons that exist are wired live. The Integration session is testing each one once.
+- **A visitor paused the payer** at 15:45 IST. Pause is public now. On the founder's go the Coordinator resumed it at 16:33 IST. The payer is active, with 19.20 of 100 spent today.
 - **Join next:** C6 and F2 rewritten for public access.
 - **Idle until the founder's run:**
   - the story swap;
