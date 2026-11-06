@@ -20,6 +20,7 @@ One line per PR: time (IST) · activity · result · PR link. Append under your 
 - 09:47 IST · payments · F3: relayer floor enforced on the production build (refused as relayer_floor, nothing sent) · https://github.com/Zugzwang-world/graphpay/pull/78
 - 10:56 IST · payments · the hosted shop retries an uncertain W_DIRECTORY quote write (nonce clashes across instances), within 45 s; reviewer: ship · https://github.com/Zugzwang-world/graphpay/pull/96
 - 11:12 IST · payments · error logs name the cause chain (class names and plain codes, never messages), after a live settle's send failed with an unexplained ContractFunctionExecutionError · pay/error-chain
+- 12:46 IST · payments · payer.vitalik's daily cap 100 test USDT on-chain (founder's 1240 brief, story #105): one setPolicy, tx 0x7bc34acb…cfbde · pay/policy-cap
 
 ## identity
 - 04:25 IST · identity · M6 done: the ENS watcher library and policy sink (reviewed twice), B8's MCP call in the acceptance script · [PR #40](https://github.com/Zugzwang-world/graphpay/pull/40)
