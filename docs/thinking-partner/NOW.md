@@ -85,11 +85,15 @@ Updated 00:26 IST, Sat 7 Nov (W1 Identity, session `local_45f7cf5d-c31e-4dbf-b84
 
 ## w2-city
 
-Updated 00:20 IST, Sat 7 Nov (W2 City, session `local_da212093-3d02-4768-9314-ab7be179eb86`).
-- **Step 1 is done** (#167): Filter & Fold, Idli Index and Tawa Tangle are on Arkiv under their own names, at epoch 0, category `south-indian`, with their full labelled 90-day history. The analyst's own query reads 241, 60 and 110 orders with the story's rates, and Tawa Tangle is vetoed. The workers restarted after it; W1's flip changes `shops[].label` and `shops[].category` together.
-- **Step 2 is done (this PR):** the three menus are on Swarm, every item with its dish image (12 images, the phones' own photos). Each menu has its `menu` row on Arkiv, and every hash checked out on read-back.
-- **Fixed on the way:** two W_DIRECTORY writes took the live site's own transactions for theirs. Now a transaction found by nonce counts only if it holds the write's own row.
-- **Running:** the big city M seeding on Rabdi (batch 55 of 400 at 00:15 IST; about 2 hours in all). Then D7 and race mode at M.
+Updated 01:15 IST, Sat 7 Nov (W2 City, session `local_da212093-3d02-4768-9314-ab7be179eb86`).
+- **Steps 1 and 2 are done and live:**
+  - the dosa shops on Arkiv under their own names, with their history (#167);
+  - the three menus on Swarm, every item with its dish photo (#181), and now each with its storefront photo (this PR).
+
+  Every file was checked by its hash on read-back.
+- **The big city M was trimmed by the founder to what was seeded** (ADR-0080): 3,175 events, 123 shops (the final cast and 120 synthetic places), 1,387 payment rows, graph store only. The seeding has stopped.
+- **Race mode stays at S** (Q2: 2 reads against 5, measured). Its plain side needs M's plain store, which was never written. That is the founder's call (OPEN).
+- **In review:** #186, race mode for any seeded size, the seeder's recovery, M as seeded.
 
 ## w3-payments
 
