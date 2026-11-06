@@ -4,17 +4,15 @@ The founder's to-dos and open questions. Each item says what, where, why and wha
 
 ## Founder now (Coordinator only)
 
-Updated 09:35 IST, Fri 6 Nov.
+**Standing rule (ADR-0066): no target times.** Every task starts the moment it's given and is reported when done. Only the submission (Sat 09:00 IST) and the presentation (Sat 09:30 IST) are fixed.
 
-1. **Lock the story: overdue against 08:30.** Send the story brief to the Coordinator. Why: the demo cast (item 6), rehearsal 1 at 12:00, and the large city, whose seeding must start by 14:00, all depend on it. The latest is **13:00**.
-2. **npm login when the packages are ready** (ADR-0063). The Coordinator tells you when `@graphpay_ethglobal/arkiv-graph` and `@graphpay_ethglobal/agentpay` pass pack, install and quickstart, by about 12:00. You run `npm login` in a Terminal tab and approve the prompts; the Coordinator publishes with `pnpm publish --access public`.
-3. **Plan usage: 83% at 09:12, every session pauses at 92% (ADR-0062), and the reset is Fri 21:30 IST.** Extra usage with a cap is still the way to rule out a stop before the reset. Recommendation: the story swap, both phone views, the SDK publish and rehearsal 1 first.
-4. **The front-end team (ADR-0065).**
-   - PR #70 (ajatshatru01) puts the UI in a root `frontend/` folder with its own npm lockfile. Ask them to move it to `apps/demo-ui` as a pnpm workspace app, and confirm every committer is on the ETHGlobal team.
-   - `FRONTEND_HANDOVER.md` doesn't exist yet. Recommendation: T5 writes it from `apps/web`'s routes and the GraphQL and MCP APIs (about 30 minutes on Sonnet). Say "yes" and the Coordinator asks T5.
-5. **Test USDT at FUNDER: 15.54.** Today's known real runs need 2: DISPOSABLE_2 for the video and DISPOSABLE_3 for the pitch, 1 each, so it's covered. If the locked story renames the paying agents, each new paying wallet needs its plan amount (payer 30, acceptance 20, persona 10, deal hunter 2; up to about 62 for a set), and that needs a test-USDT top-up. Recommendation: keep the test cast's wallet labels for the paying agents (E-14).
+1. **Lock the story.** The moment it locks, the demo cast is provisioned (T2 names, T1 policies, Join's bootstrap, T3's `shop` rows) and the large city starts seeding. Rehearsal 1 runs once the demo cast is in.
+2. **npm login, the moment both SDKs are ready** (ADR-0063). `@graphpay_ethglobal/arkiv-graph` is ready (#74). The Coordinator pings you the moment T6's `@graphpay_ethglobal/agentpay` passes too. You then run `npm login` in a Terminal tab and approve the prompts, and the Coordinator publishes both with `pnpm publish --access public`.
+3. **Plan usage:** 83%. Every session pauses gracefully at 92% (ADR-0062), and the weekly reset comes after that. Extra usage with a cap is still the way to rule out a stop.
+4. **The front-end team (ADR-0065).** PR #70 (ajatshatru01) belongs in `apps/demo-ui`, not a root `frontend/` folder with its own npm lockfile. Confirm every committer is on the ETHGlobal team. `FRONTEND_HANDOVER.md` doesn't exist yet. Recommendation: T5 writes it; say "yes".
+5. **Test USDT at FUNDER: 15.54.** The two disposables still to come (the video and the pitch, 1 each) are covered. A new set of paying wallets, needed only if the story renames the paying agents, would need a top-up.
 6. **Send ETHGlobal the written pre-event disclosure, if not sent yet** (`docs/plan/DISCLOSURE_MESSAGE.md`).
-7. **Keep the charger in and the lid open** until Saturday's pitch.
+7. **Keep the charger in and the lid open** until the presentation.
 
 **Closed 09:30:** "ADR-0059 appears twice" was a wrong reference: the npm line in the records section said ADR-0059 instead of ADR-0057, and there is only one ADR-0059 (T2's zero cap). Fixed; the npm publish is now ADR-0063. **Closed tonight:** the six track sessions and the Coordinator started (00:44–00:46 IST); the Ankr session's worktree and branch (removed at 23:09), the Vercel GitHub link (connected 22:42 IST; checks in `NOW.md`), the personal Ankr URL (stored, verified 22:51 IST: chain 1874, HTTPS), test USDT (150 arrived 21:54 IST; distributed, ADR-0045) and tGLM (FUNDER held 12.86; every planned wallet funded).
 
