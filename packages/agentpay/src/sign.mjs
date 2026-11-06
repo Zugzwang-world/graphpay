@@ -15,7 +15,7 @@ import {
   permitWitnessTypes,
   subscribeTypes,
   tokenDomain,
-} from '@graphpay/contracts';
+} from './vendor/index.mjs';
 import { assertChain } from './network.mjs';
 import { fromWireOrder } from './wire.mjs';
 

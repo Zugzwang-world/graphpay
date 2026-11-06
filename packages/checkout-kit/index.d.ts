@@ -40,7 +40,7 @@ type Handler = (request: Request, context?: unknown) => Response | Promise<Respo
 
 export interface GraphPayShop {
   shopEns: string;
-  // The @graphpay/agentpay merchant: refunds, delivery marks, subscriptions, exportCsv.
+  // The @graphpay_ethglobal/agentpay merchant: refunds, delivery marks, subscriptions, exportCsv.
   merchant: {
     deliver(orderId: string): Promise<{ transaction: string }>;
     refund(orderId: string, amountMicro: bigint | string, options?: { reasonCode?: number; note?: string }): Promise<{ transaction: string; amountMicro: bigint; full: boolean }>;

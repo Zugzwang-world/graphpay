@@ -10,7 +10,7 @@
 // a payment the allowlist let through. An on-chain allowlist and periods other than a UTC
 // day need a contract change: V2.
 
-import { checkoutAbi } from '@graphpay/contracts';
+import { checkoutAbi } from './vendor/index.mjs';
 import { AgentPayError, assertChain } from './network.mjs';
 import { ZERO32, nodeOf } from './order.mjs';
 import { MAX_U64 } from './money.mjs';

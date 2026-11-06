@@ -10,8 +10,8 @@
 
 import { decodeAbiParameters, decodeEventLog, erc20Abi, isAddressEqual, parseAbi, recoverAddress, recoverTypedDataAddress } from 'viem';
 import { namehash, normalize } from 'viem/ens';
-import { FAIL_REASON, ORDER_STATUS, RENEWAL_BIT, SUB_STATUS, cancelTypes, checkoutAbi, checkoutDomain, eip2612Types, permit2Domain, permitWitnessTypes, tokenDomain } from '@graphpay/contracts';
-import { assertChain, whitechainNetwork } from './network.mjs';
+import { FAIL_REASON, ORDER_STATUS, RENEWAL_BIT, SUB_STATUS, cancelTypes, checkoutAbi, checkoutDomain, eip2612Types, permit2Domain, permitWitnessTypes, tokenDomain } from './vendor/index.mjs';
+import { assertChain, assertClientChain, whitechainNetwork } from './network.mjs';
 import { ZERO32 } from './order.mjs';
 import { permit2Abi } from './sign.mjs';
 import { SCHEME, X402_VERSION, fromWireOrder, paymentPayloadSchema, requirementSchema, sameWireOrder } from './wire.mjs';
@@ -100,13 +100,28 @@ const asPolicy = (p) =>
     ? { epoch: Number(p[0]), wallet: p[1], revoked: p[2], dailyCapMicro: BigInt(p[3]), expiry: BigInt(p[4]) }
     : { epoch: Number(p.epoch), wallet: p.wallet, revoked: p.revoked, dailyCapMicro: BigInt(p.dailyCapMicro), expiry: BigInt(p.expiry) };
 
+// The anti-drain limits are always on: a developer may loosen or tighten one with a finite number
+// (or bigint) above zero, but an unknown name, undefined, NaN, Infinity, zero or a negative value
+// is refused rather than switching a limit off.
+export function resolveLimits(overrides = {}) {
+  const L = { ...RELAYER_DEFAULTS };
+  for (const [key, value] of Object.entries(overrides ?? {})) {
+    if (!(key in RELAYER_DEFAULTS)) throw new Error(`createReferenceRelayer: unknown limit "${key}"`);
+    const ok = typeof value === 'bigint' ? value > 0n : typeof value === 'number' && Number.isFinite(value) && value > 0;
+    if (!ok) throw new Error(`createReferenceRelayer: limit "${key}" must be a finite number above zero (the limits cannot be switched off)`);
+    L[key] = typeof RELAYER_DEFAULTS[key] === 'bigint' ? BigInt(value) : Number(value);
+  }
+  return L;
+}
+
 // walletClient: a viem wallet client whose account holds the checkout's relayer role (gas only,
 // never USDT). allowedMerchants: the payees this relayer will pay gas for. identity: an optional
 // IdentityResolver whose verifyPayer({ name, node, address }) must vouch for a named payer.
 export function createReferenceRelayer({ walletClient, publicClient, network = whitechainNetwork(), allowedMerchants, identity, limits = {}, clock = () => Date.now(), log = () => {} }) {
   if (!walletClient?.account?.address) throw new Error('createReferenceRelayer needs a wallet client with an account');
   if (!Array.isArray(allowedMerchants) || allowedMerchants.length === 0) throw new Error('createReferenceRelayer needs a merchant allowlist');
-  const L = { ...RELAYER_DEFAULTS, ...limits };
+  assertClientChain(publicClient, network);
+  const L = resolveLimits(limits);
   const relayer = walletClient.account.address;
   const hourly = windowCounter(3_600_000);
   const perPayer = new Map();

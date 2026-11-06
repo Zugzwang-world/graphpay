@@ -7,8 +7,8 @@
 import { EventEmitter } from 'node:events';
 import { randomBytes } from 'node:crypto';
 import { encodeAbiParameters, erc20Abi, getAddress, isAddressEqual, keccak256, recoverTypedDataAddress, stringToHex } from 'viem';
-import { ORDER_STATUS, SUB_STATUS, checkoutAbi } from '@graphpay/contracts';
-import { AgentPayError, assertChain, explorerTx, whitechainNetwork } from './network.mjs';
+import { ORDER_STATUS, SUB_STATUS, checkoutAbi } from './vendor/index.mjs';
+import { AgentPayError, assertChain, assertClientChain, explorerTx, whitechainNetwork } from './network.mjs';
 import { ZERO32, createOrder, nodeOf } from './order.mjs';
 import { formatUsdt, toMicro } from './money.mjs';
 import { FacilitatorUnavailable } from './facilitator.mjs';
@@ -93,6 +93,7 @@ export function createMerchant({
   log = () => {},
 }) {
   if (!name) throw new Error('createMerchant needs a name');
+  assertClientChain(publicClient, network);
   let chunk = BigInt(logChunk);
   if (chunk < LOG_CHUNK_MIN) throw new Error(`createMerchant: logChunk must be at least ${LOG_CHUNK_MIN}`);
   if (!address || !ADDRESS.test(address)) throw new Error('createMerchant needs a payout address');

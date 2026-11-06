@@ -51,8 +51,12 @@ export function knownAddresses(root) {
 
 const isCode = (path) => CODE_PATH.test(path) && CODE_EXT.test(path) && !NOT_CODE.test(path);
 
+// Files generated from the config file, with a test that fails when they drift from it (the npm
+// package carries the public Whitechain Sepolia defaults inline: packages/agentpay/scripts/vendor.mjs).
+export const GENERATED_FROM_CONFIG = ['packages/agentpay/src/vendor/defaults.mjs'];
+
 export function isCodePath(path) {
-  return isCode(path) && path !== CONFIG_FILE;
+  return isCode(path) && path !== CONFIG_FILE && !GENERATED_FROM_CONFIG.includes(path);
 }
 
 // Addendum B and acceptance A7: no ENS or Whitechain address literal outside the
