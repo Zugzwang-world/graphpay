@@ -26,7 +26,7 @@ Each unwired route is a file under `apps/web/app/api/**/route.ts` that checks th
 | route | state |
 |---|---|
 | `POST /api/agents/run` | seam set by Join's M12 wiring (`lib/agents-live.server.ts`; `ErrandInput.runId` is passed) |
-| `POST /api/customer/refund-request` | live (503 until W_SYNC's key is set)
+| `POST /api/customer/refund-request` | live (503 until W_SYNC's key is set) |
 | `POST /api/customer/{reorder,subscribe,unsubscribe}` | not live (item 2 above) |
 | `POST /api/customer/kill-disposable` | not live (T2 provisioning) |
 | everything else in `lib/routes.ts` | live |
