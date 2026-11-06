@@ -94,12 +94,11 @@ Updated 00:00 IST, Sat 7 Nov (W1 Identity, session `local_45f7cf5d-c31e-4dbf-b84
 
 ## w2-city
 
-Updated 00:15 IST, Sat 7 Nov (W2 City, session `local_da212093-3d02-4768-9314-ab7be179eb86`).
-- **Step 1 is done:** Filter & Fold, Idli Index and Tawa Tangle are on Arkiv under their own names, at epoch 0, category `south-indian`, with their full labelled 90-day history (1,258 of 1,258 events). The analyst's own query reads 241, 60 and 110 orders, with the story's refund and on-time rates; Tawa Tangle is vetoed.
-- **The flip, in order:** the workers restart first (W5, now), then W1's flip changes `shops[].label` and `shops[].category` together.
-- **Fixed:** race mode's Q2 at S and acceptance D4 (each seeded city keeps its own cast, ADR-0077).
-- **Running:** the big city M seeding on Rabdi (batch 30 of 400 at 00:08 IST; about 2 hours). The menus are on Swarm with their dish images (in their PR).
-- **Learned:** Arkiv's keyless endpoint meters queries on a window that every process on this Mac shares. Retries that reload all of W_LEDGER's rows spent it twice tonight; my scripts now keep 40% of it free.
+Updated 00:20 IST, Sat 7 Nov (W2 City, session `local_da212093-3d02-4768-9314-ab7be179eb86`).
+- **Step 1 is done** (#167): Filter & Fold, Idli Index and Tawa Tangle are on Arkiv under their own names, at epoch 0, category `south-indian`, with their full labelled 90-day history. The analyst's own query reads 241, 60 and 110 orders with the story's rates, and Tawa Tangle is vetoed. The workers restarted after it; W1's flip changes `shops[].label` and `shops[].category` together.
+- **Step 2 is done (this PR):** the three menus are on Swarm, every item with its dish image (12 images, the phones' own photos). Each menu has its `menu` row on Arkiv, and every hash checked out on read-back.
+- **Fixed on the way:** two W_DIRECTORY writes took the live site's own transactions for theirs. Now a transaction found by nonce counts only if it holds the write's own row.
+- **Running:** the big city M seeding on Rabdi (batch 55 of 400 at 00:15 IST; about 2 hours in all). Then D7 and race mode at M.
 
 ## w3-payments
 
