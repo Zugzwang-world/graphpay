@@ -1,22 +1,20 @@
 # NOW
 
-Updated 06:55 IST, Fri 6 Nov (Coordinator)
+Updated 08:30 IST, Fri 6 Nov (Coordinator)
 
 ## Summary (Coordinator only)
 
-Updated 06:55 IST, Fri 6 Nov. **The core is complete on the real networks, and acceptance is at 42 pass, 0 fail, 1 blocked (D7), 5 not run.**
-- Done: M1–M13, except D7 (the benchmark at size M, waiting for the locked story) and five checks that wait on other tracks (B7, F1, F3, D10, B9).
-- M4 is live on the production domain: the hosted facilitator, shop, recorder and renewal cron.
-- M16 is proved with one real payment from the checkout kit.
-- The mirror has run under caffeinate since 05:38, and every event is written exactly once.
-- Merged Friday items: 1 (the open, online and handoff rows), 2 (the agent hooks), 3 (the live hooks), 8 (race mode), 9 (the Open toggle), 10 (the map), 13 (the explainer lanes), plus the phones' Pause/Resume and merchant actions.
+Updated 08:30 IST, Fri 6 Nov. **Good morning. The core works end to end on the real testnets, and the night's work is merged.**
+- Acceptance: **42 pass, 0 fail**, 1 blocked (D7, the benchmark at size M, waiting for your story), 5 not run (B7, F1, F3, D10 and B9 wait on other tracks).
+- Live on https://graphpay-event.vercel.app: the hosted facilitator, shop and recorder, the renewal cron, the website with both phones, the race, the map and the explainer lanes.
+- Done with real payments: the ENS gate and the kill switch, the mirror, and the checkout kit with its demo store (the store's own Vercel project comes next).
 
-**Plan usage:** 82% and holding since 05:31; most sessions are idle. Every session pauses gracefully at 92% (ADR-0062).
+**Plan usage:** 82%, unchanged since 05:31; the sessions have been idle overnight, waiting for you. Every session pauses gracefully at 92% (ADR-0062); the reset is Fri 21:30 IST.
 
-**The founder at 08:30:**
-1. Send the story brief (the demo cast, then the large city's seeding by 14:00).
-2. Decide which Friday items get the remaining budget (see `relays/records.md`).
-3. Type anything in the Coordinator session, so it can wake the idle sessions (the app caps its messages until the founder types).
+**What's needed from you now** (details in `OPEN.md` and `relays/records.md`):
+1. **The story brief** to the Coordinator. It drives the demo cast (item 6) and the large city's seeding (latest start 14:00).
+2. **Any message in the Coordinator session.** The app caps its messages until you type, and it has to wake the idle sessions (T5 first).
+3. **Your call on the remaining ~10 points of budget.** The recommendation, in order: the story swap and the demo cast, both phone views, rehearsal 1 at 12:00, the `arkiv/` files and the sponsor files (Submission from 13:00). The video, rehearsal 2 and the npm publish come after the 21:30 reset.
 
 ## foundation
 
