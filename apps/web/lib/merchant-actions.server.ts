@@ -19,7 +19,7 @@ const HEX32 = /^0x[0-9a-fA-F]{64}$/;
 export const MERCHANT_REFUND_REASON = 1;
 
 // A refusal the merchant can act on (shown as its code); anything else is a failure of the chain.
-export type RefusalCode = 'NO_SUCH_ORDER' | 'NOT_OURS' | 'NOT_THE_STORY_BUYER' | 'TOO_SOON' | 'NOT_DELIVERABLE' | 'NOT_REFUNDABLE' | 'BAD_AMOUNT' | 'OVER_REFUNDABLE' | 'FLOAT_LOW' | 'STILL_PENDING';
+export type RefusalCode = 'NO_SUCH_ORDER' | 'NOT_OURS' | 'NOT_THE_STORY_BUYER' | 'TOO_SOON' | 'NOT_DELIVERABLE' | 'NOT_REFUNDABLE' | 'BAD_AMOUNT' | 'OVER_REFUNDABLE' | 'FLOAT_LOW' | 'STILL_PENDING' | 'GAS_LOW';
 export class Refusal extends Error {
   code: RefusalCode;
   status: number;
@@ -41,7 +41,7 @@ export interface OrderState {
 }
 
 export interface Chain {
-  publicClient: Pick<PublicClient, 'readContract' | 'simulateContract' | 'waitForTransactionReceipt' | 'getTransactionReceipt' | 'getChainId'>;
+  publicClient: Pick<PublicClient, 'readContract' | 'simulateContract' | 'waitForTransactionReceipt' | 'getTransactionReceipt' | 'getChainId' | 'getBalance'>;
   // The token the checkout pays refunds in (the merchant's float).
   token: `0x${string}`;
   walletClient: Pick<WalletClient, 'writeContract'> & { account: { address: `0x${string}` } };
@@ -102,7 +102,32 @@ export interface Sent {
   status: 'confirmed' | 'pending';
 }
 
+// Named so a log line (errorNames: class names only, never a message) says what happened.
+export class ChainRefused extends Error {
+  constructor() {
+    super('the RPC reports another chain');
+    this.name = 'ChainRefused';
+  }
+}
+export class Reverted extends Error {
+  constructor() {
+    super('the transaction reverted');
+    this.name = 'Reverted';
+  }
+}
+
+// A send that failed after it may have reached the node (the transport retries once, so the transaction
+// can be pending or mined with no hash returned): the order is locked for a while, so a "try again" cannot
+// send a second partial refund. Per instance, like inFlight.
+export const UNSURE_MS = 120_000;
+const unsure = new Map<string, number>();
+
 async function settled(chain: Chain, orderId: string): Promise<void> {
+  const at = unsure.get(orderId);
+  if (at !== undefined) {
+    if (Date.now() - at < UNSURE_MS) throw new Refusal('STILL_PENDING');
+    unsure.delete(orderId);
+  }
   const hash = inFlight.get(orderId);
   if (!hash) return;
   const receipt = await chain.publicClient.getTransactionReceipt({ hash: hash as Hex }).catch(() => null);
@@ -113,20 +138,31 @@ async function settled(chain: Chain, orderId: string): Promise<void> {
 async function send(chain: Chain, orderId: string, functionName: 'markDelivered' | 'refund', args: readonly unknown[]): Promise<Sent> {
   // eth_chainId before every signing step (CLAUDE.md): any other chain is refused.
   const id = await chain.publicClient.getChainId();
-  if (id !== chain.chainId) throw new Error(`refused: the RPC reports chain ${id}, not ${chain.chainId}; nothing signed`);
+  if (id !== chain.chainId) throw new ChainRefused();
+  // No native coin, no gas: say so instead of a generic failure.
+  if ((await chain.publicClient.getBalance({ address: chain.walletClient.account.address })) === 0n) throw new Refusal('GAS_LOW');
   const { request } = await chain.publicClient.simulateContract({ address: chain.checkout, abi: checkoutAbi, functionName, args: args as never, account: chain.walletClient.account.address });
-  const hash = await chain.walletClient.writeContract(request as never);
+  // The request simulateContract returns carries the account it was simulated from. Given an address, that is a
+  // node-managed (json-rpc) account, and viem would call eth_sendTransaction, which public RPCs refuse. The
+  // shop's own key signs here, so the wallet's local account replaces it.
+  let hash: Hex;
+  try {
+    hash = await chain.walletClient.writeContract({ ...request, account: chain.walletClient.account } as never);
+  } catch (error) {
+    unsure.set(orderId, Date.now());
+    throw error;
+  }
   inFlight.set(orderId, hash);
   try {
     const receipt = await chain.publicClient.waitForTransactionReceipt({ hash, timeout: 60_000 });
     if (receipt.status !== 'success') {
       inFlight.delete(orderId);
-      throw new Error(`${functionName} reverted`);
+      throw new Reverted();
     }
     inFlight.delete(orderId);
     return { transaction: hash, status: 'confirmed' };
   } catch (error) {
-    if (error instanceof Error && /reverted/.test(error.message)) throw error;
+    if (error instanceof Reverted) throw error;
     // No receipt in time: the hash is returned (it is not a secret), never lost, and the order stays
     // locked against a second send until a receipt shows.
     console.error(`merchant ${functionName} pending: ${hash}`);

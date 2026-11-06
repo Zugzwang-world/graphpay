@@ -33,6 +33,7 @@ const REASONS: Record<string, string> = {
   OVER_DAILY_CAP: 'That would pass the agent\'s daily cap. Nothing was paid.',
   PASS_REVOKED: 'The agent\'s spending pass is revoked. Nothing was paid.',
   PASS_EXPIRED: 'The agent\'s spending pass has expired. Nothing was paid.',
+  GAS_LOW: 'The shop wallet has no gas coin left.',
   STILL_PENDING: 'The last send for this order is still confirming. Check the explorer before trying again.',
 };
 

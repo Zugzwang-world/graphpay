@@ -3,7 +3,7 @@
 import { json, notLive, readJsonObject } from '../../../../lib/http.ts';
 import { requirePasscode } from '../../../../lib/passcode.ts';
 import { Busy, Refusal, SHOP_KEY_WAITING_FOR, isOrderId, markDispatched, shopKeyConfigured } from '../../../../lib/merchant-actions.server.ts';
-import { failureKind } from '../../../../lib/owner-actions.server.ts';
+import { errorNames } from '@graphpay/facilitator';
 
 export const dynamic = 'force-dynamic';
 // A send waits for its receipt (up to 60 s).
@@ -30,7 +30,7 @@ export async function POST(request: Request): Promise<Response> {
     if (error instanceof Refusal) return json({ error: error.code }, error.status);
     if (error instanceof Busy) return json({ error: 'another signing is still running; wait for it' }, 429);
     // The kind only: a chain error's message can name an RPC. None reaches the browser.
-    console.error('merchant dispatch failed:', failureKind(error));
+    console.error('merchant dispatch failed:', errorNames(error));
     return json({ error: 'the order could not be marked dispatched; check its state, then try again once' }, 502);
   }
 }
