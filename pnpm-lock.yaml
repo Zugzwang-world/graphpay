@@ -87,9 +87,6 @@ importers:
       '@graphpay/shop':
         specifier: workspace:*
         version: link:../../packages/shop
-      '@graphpay_ethglobal/agentpay':
-        specifier: workspace:*
-        version: link:../../packages/agentpay
       '@graphpay_ethglobal/arkiv-graph':
         specifier: workspace:*
         version: link:../../packages/arkiv-graph
