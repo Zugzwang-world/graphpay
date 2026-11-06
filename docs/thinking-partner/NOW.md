@@ -126,19 +126,17 @@ Updated 01:20 IST, Sat 7 Nov (W4 Agents, session `local_3404db4e-486c-4f86-8b3a-
 
 ## w5-ops
 
-Updated 00:35 IST, Sat 7 Nov (W5 Ops).
-- **The payer is ACTIVE**, with a 300 test USDT pass for tonight (117.2 spent at 00:30 IST) (#152).
-- **The shop (Filter & Fold) is open.**
-- **Live since 00:06 IST: Pause per agent and self-healing** (#172).
-  - Only Payer and Scout can be paused; Concierge and Analyst answer why not.
-  - A paused agent resumes by itself about 2 minutes after the pause. Proven on the Scout and the Payer, with the cron's own transactions.
-  - A closed shop is open again within 5 minutes.
-  - The phones still pause only the payer until they send the tapped agent (OPEN, "frontend").
-- **The mirror** waits out Arkiv's shared rate-limit window at times. That is what the 22:02, 23:29 and 00:23 IST stalls were. It resumes by itself.
-  - A watchdog keeps the workers running and restarts them only after 30 minutes with no progress.
-  - The real fix is the founder's new Arkiv key.
-- **Acceptance** (#188, in review): B2, C7 and E3 now pass. C3 waits for a fresh hosted run after 05:30 IST, E1 for a fresh errand after W1's label flip, and D4 and D8 for a full run.
-- **Next:** restart the workers on W1's flip, run one errand to prove the mirror on the new shops, then the full acceptance run.
+Updated 01:30 IST, Sat 7 Nov (W5 Ops).
+- **The payer is ACTIVE**, with a 300 test USDT pass for tonight (#152).
+- **The shop (Filter & Fold) is open.** The heal cron reopened it under its new name at 00:32 IST, right after the label flip, and renews its listing.
+- **Pause per agent and self-healing are live** (#172). A paused agent resumes by itself after 2 minutes; a closed shop is back within 5.
+- **The mirror follows the new names** (restarted at 00:51 IST on #189, #191 and #194).
+  - Proven by a live errand: 4.80 to filter-and-fold.graphpay.eth at 01:07 IST ([payment](https://explorer.testnet.whitechain.io/tx/0xcc69b7bb16eb17c9dede32da4765a90ca15a6af18397011efae6a9eb599e5cb5)), written under filter-and-fold and shown on Filter & Fold's phone.
+  - The two pre-flip payments stay under kesar-kingdom.
+  - W1 verified independently; ENS reads: 101 pass.
+- **Arkiv:** this Mac's free query allowance (10,000 per minute) runs out at times. Then the mirror waits, or re-reads and re-scans. The founder's new Arkiv key is the fix. In this PR, the checkpoint no longer waits on the kit's anonymous payment, so a re-scan is short.
+- **Funding:** PAYER is topped up from the shop's takings (this PR's script, reviewed).
+- **Acceptance** (#188): B1, B2, C7 and E3 pass. E1 needs a fresh errand (next). C3 needs a fresh hosted run after 05:30 IST. D4 and D8 need the full run.
 
 ## w6-sdk
 

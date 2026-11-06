@@ -177,8 +177,11 @@ export async function fundNative({ c, funder, targets, addresses, reserve, maxGw
 }
 
 // Test USDT top-ups on Whitechain: an ERC-20 transfer from FUNDER per role; FUNDER
-// pays the WBT gas. Returns { stops } like fundNative.
-export async function fundUsdt({ c, funder, targets, addresses, token, reserve, real, log = console.log }) {
+// pays the WBT gas. Returns { stops } like fundNative. maxNeed (optional, role → units): a
+// ceiling a caller planned from its own earlier read; a send above it stops the run, so a
+// balance that moved in between (or a node that has not seen an earlier transfer) never
+// raises the send (scripts/ops/payer-topup.mjs).
+export async function fundUsdt({ c, funder, targets, addresses, token, reserve, real, log = console.log, maxNeed = {} }) {
   const pc = c.publicClient;
   const symbol = c.chain.nativeCurrency.symbol;
   const { stops, stop } = stopper(log);
@@ -210,6 +213,7 @@ export async function fundUsdt({ c, funder, targets, addresses, token, reserve, 
       log(`${line}: ${row.action === 'dust' ? 'within 1% of target: ' : ''}nothing to send`);
       continue;
     }
+    if (maxNeed[row.role] !== undefined && row.need > maxNeed[row.role]) return stop(`${row.role} would get ${fmtUsdt(row.need)} USDT, more than the ${fmtUsdt(maxNeed[row.role])} planned (a balance moved since the plan was read); nothing sent`);
     const estimate = await pc.estimateContractGas({
       account: funder.address,
       address: token.address,

@@ -141,6 +141,24 @@ test('events of an unknown actor are parked; the checkpoint never passes them; r
   assert.equal(ledger.checkpoints.get(STREAM).block, 130, 'the checkpoint moves on once nothing is parked');
 });
 
+test('a payment from the zero node (a checkout-kit wallet with no ENS name) is passed, never parked: the checkpoint moves on', async () => {
+  const { t, ledger } = setup();
+  const zero = `0x${'0'.repeat(64)}`;
+  const o = hash('kit-order');
+  const events = [
+    ...t.events.filter((e) => e.block <= 110),
+    ev('OrderCreated', { orderId: o, shopNode: t.nodes.shop, buyerNode: zero, payerNode: zero, merchant: '0x', amountMicro: 4_800_000n, deadline: 0n, parentOrderId: hash('none'), kind: 0 }, 115),
+    ...t.events.filter((e) => e.block > 110 && e.block <= 130),
+  ];
+  const src = fakeSource(events);
+  const make = () => new Mirror({ source: src, ledger, actors: new Actors(), orders: new OrderBook(), stream: STREAM, deployBlock: DEPLOY_BLOCK });
+  const m = await started(make, t.c.actors);
+  await m.poll();
+  assert.equal(m.status().parked.length, 0, 'nothing parked');
+  assert.ok(!ledger.edges.some((e) => e.orderId === o || e.ref.includes(o)), 'nothing written for it');
+  assert.equal(ledger.checkpoints.get(STREAM).block, 130, 'the checkpoint passes it');
+});
+
 test('a numbered disposable agent is recognised by its node and registered with the policy epoch', async () => {
   const { t, ledger } = setup();
   const candidates = candidateNames({ cast: t.c.cast, disposableMax: 3 });
