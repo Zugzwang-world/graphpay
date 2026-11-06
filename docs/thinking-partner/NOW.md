@@ -1,30 +1,22 @@
 # NOW
 
-Updated 09:35 IST, Fri 6 Nov (Coordinator)
+Updated 09:46 IST, Fri 6 Nov (Coordinator)
 
 ## Summary (Coordinator only)
 
-Updated 09:35 IST, Fri 6 Nov.
+Updated 09:46 IST, Fri 6 Nov.
 
-**The core is done on the real testnets.** Acceptance: **42 pass, 0 fail**, 1 blocked (D7, the benchmark at size M, waiting for the story), 5 not run (B7, F1, F3, D10 and B9 wait on other tracks). Live on https://graphpay-event.vercel.app: the hosted facilitator, shop and recorder, the renewal cron, the website with both phones, the race, the map and the explainer lanes. The checkout kit and demo store are proved with a real payment.
+**Standing rule (the founder, ADR-0066): no target times.** Every task starts the moment it's given, runs as fast as it can, and is reported when done. Fixed: the submission, Sat 09:00 IST, and the presentation, Sat 09:30 IST. Everything else is an event.
 
-**The SDK publish, in progress (ADR-0063, by about 13:00):**
-- `@graphpay_ethglobal/arkiv-graph` (T3) and `@graphpay_ethglobal/agentpay` (T6), both on Sonnet 5.5 and doing fresh starts.
-- The names are free on npm, and the `graphpay_ethglobal` organisation is the founder's.
-- The issue labels `arkiv-graph`, `agentpay` and `feedback`, and an issue template per package, are in place.
-- Next: the founder's `npm login` when both pass pack, install and quickstart (about 12:00).
-
-**The story lock: overdue** against 08:30. The latest is 13:00, because the large city must start seeding by 14:00.
-
-**Plan usage:** 83% at 09:12; every session pauses at 92% (ADR-0062); the reset is Fri 21:30 IST.
-
-**Open founder items** (`OPEN.md`, "Founder now"):
-- the story brief;
-- the npm login at publish time;
-- the front-end team's PR #70, which belongs in `apps/demo-ui` (ADR-0065), and who writes `FRONTEND_HANDOVER.md`;
-- the disclosure, if not sent.
-
-**Blocked:** T5 (both phone views) is idle until the Coordinator wakes it, which it does now that the founder has typed. D7 and item 6 wait for the story.
+- **The core is done on the real testnets.** Acceptance: 42 pass, 0 fail, 1 blocked (D7: the large city), 5 not run (other tracks' items).
+- **The SDKs (ADR-0063):**
+  - `@graphpay_ethglobal/arkiv-graph` 0.1.0 is ready (#74: pack, install and quickstart pass);
+  - `@graphpay_ethglobal/agentpay` is being finished by T6 now;
+  - the founder's npm login comes the moment both are ready, and then the publish.
+- **The story lock** starts the demo cast and the large city's seeding the moment it happens.
+- **Running:** T6 (agentpay), T3 (the `arkiv/` write-ups), T5 (both phone views). The others wait for the story lock or for unblocked items.
+- **Plan usage:** 83%; every session pauses at 92% (ADR-0062).
+- **Open founder items** (`OPEN.md`): the story lock; npm login when both SDKs are ready; PR #70 belongs in `apps/demo-ui`; who writes `FRONTEND_HANDOVER.md`; the disclosure, if not sent.
 
 ## foundation
 
