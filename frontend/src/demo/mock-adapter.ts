@@ -885,9 +885,10 @@ export class MockAdapter implements DemoAdapter {
   csvRows(range: { from: string; to: string }): string[][] {
     const out: { at: number; row: string[] }[] = [];
     for (const o of this.state.orders) {
+      if (o.shop.ens !== this.state.shop.ref.ens) continue;
       if (o.paidAt && inRange(o.paidAt, range)) {
         const link = o.links[0];
-        out.push({ at: o.paidAt, row: [formatDateTime(o.paidAt), o.kind === 'renewal' ? 'Renewal' : 'Order', o.number, o.buyer.ens, o.total.amount, o.status, link?.url ?? '', String(Boolean(link?.mock))] });
+        out.push({ at: o.paidAt, row: [formatDateTime(o.paidAt), 'Order', o.number, o.buyer.ens, o.total.amount, o.status, link?.url ?? '', String(Boolean(link?.mock))] });
       }
       for (const r of o.refunds) {
         if (r.status === 'refunded' && r.settledAt && inRange(r.settledAt, range)) {

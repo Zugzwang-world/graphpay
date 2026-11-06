@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useState } from 'react';
 import clsx from 'clsx';
 import { ArrowRight, Package, RotateCcw, Store, Truck } from 'lucide-react';
 import { AgentAvatar } from '@/components/shared/AgentAvatar';
@@ -10,31 +10,8 @@ import type { Order } from '@/demo/contract';
 import { copy, fill, pick } from '@/copy';
 import { formatAmount, formatMoney, toCents, usdt } from '@/lib/money';
 import { formatTime } from '@/lib/time';
-import { usePrefersReducedMotion } from '@/lib/useViewport';
+import { useCountUp } from '@/lib/useCountUp';
 import { merchantDay } from './homeData';
-
-function useCountUp(value: number): number {
-  const reduced = usePrefersReducedMotion();
-  const [shown, setShown] = useState(value);
-  const current = useRef(value);
-  useEffect(() => {
-    if (reduced) { current.current = value; setShown(value); return; }
-    const from = current.current;
-    const start = performance.now();
-    let frame = 0;
-    const step = (now: number) => {
-      const progress = Math.min(1, (now - start) / 400);
-      const eased = 1 - Math.pow(1 - progress, 3);
-      const next = Math.round(from + (value - from) * eased);
-      current.current = next;
-      setShown(next);
-      if (progress < 1) frame = requestAnimationFrame(step);
-    };
-    frame = requestAnimationFrame(step);
-    return () => cancelAnimationFrame(frame);
-  }, [value, reduced]);
-  return shown;
-}
 
 function Stat({ label, value, money = false, sub }: { label: string; value: number; money?: boolean; sub?: string }) {
   const shown = useCountUp(value);

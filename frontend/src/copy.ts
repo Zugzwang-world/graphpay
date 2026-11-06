@@ -248,6 +248,7 @@ export const copy = {
       refundPending: 'A refund request is already in progress',
       declinedNote: 'The shop said: “{note}”',
       reordering: 'Asking for a new quote…',
+      reorderBusy: 'Your agents are finishing another request. Try again in a moment.',
     },
     refund: {
       title: 'Request a refund',
@@ -306,6 +307,7 @@ export const copy = {
     },
     agents: {
       title: 'Your agents',
+      empty: 'No agents yet',
       cannotSpend: 'Cannot spend',
       passUsed: '{used} of {cap} USDT used today',
       perDay: 'per day',
@@ -323,6 +325,9 @@ export const copy = {
       capRefusedTitle: 'Cap change refused',
       capRefusedBody: 'The agent tried to raise its cap to {amount}. Only {customer} can change this cap',
       refusedAttempt: 'Refused attempt',
+      remaining: '{amount} remaining',
+      working: 'Recording this change…',
+      capUnavailable: 'Cap changes are unavailable in this adapter',
       mainAgent: 'Main agent',
       manages: 'Managed by {main}',
     },
@@ -426,6 +431,10 @@ export const copy = {
     },
     payouts: {
       title: 'Payouts',
+      periodLabel: 'Period',
+      summary: 'Payout summary',
+      log: 'Transaction log',
+      invalidRange: 'Choose a From date on or before the To date.',
       periods: { today: 'Today', week: 'This week', month: 'This month', custom: 'Custom range' },
       received: 'Received',
       refunded: 'Refunded',
@@ -461,6 +470,7 @@ export const copy = {
       above_max: 'The most you can enter is {max}',
     },
     allowedMax: 'Allowed: up to {max}',
+    allowedPositive: 'Enter an amount greater than 0.00 USDT',
     confirmedLine: '{label} {amount}',
   },
 
