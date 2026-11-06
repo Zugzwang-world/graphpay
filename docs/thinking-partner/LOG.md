@@ -129,7 +129,8 @@ One line per PR: time (IST) · activity · result · PR link. Append under your 
 - 23:32 IST · w7-submission · WHITECHAIN_FEEDBACK.md (gas measured on the event build, friction ranked by cost) and docs/submission/ENS.md (what ENS decides, with evidence); two README claims made exact · https://github.com/Zugzwang-world/graphpay/pull/161
 - 23:38 IST · w7-submission · docs/submission/ETHGLOBAL.md: the form text ready to paste, every claim linked, every URL checked · https://github.com/Zugzwang-world/graphpay/pull/164
 - 23:43 IST · w7-submission · the video shot list and the submission checklist (docs/submission/VIDEO.md, CHECKLIST.md); wording fixes; the README links the disclosure · https://github.com/Zugzwang-world/graphpay/pull/166
-- 23:46 IST · w7-submission · keep current: AI_USAGE.md records W4's effort split (#162); the README notes W1's new shop names on Sepolia (#158) · this PR
+- 23:46 IST · w7-submission · keep current: AI_USAGE.md records W4's effort split (#162); the README notes W1's new shop names on Sepolia (#158) · https://github.com/Zugzwang-world/graphpay/pull/170
+- 00:13 IST · w7-submission · an independent audit's 17 findings fixed across the submission files (exact claims: the kit payment by script, the first facilitator payment, receipts lapse at 30 days, the Swarm photo stored not shown); #172 and #173 folded in · this PR
 
 ## w1-identity
 
