@@ -65,6 +65,7 @@ One line per PR: time (IST) · activity · result · PR link. Append under your 
 - 05:00 IST · integration · opened: the kill check F passes for real (402 after 9.3 s, the watcher revoked the policy, the fail edge on Arkiv); the recorder ref fix; (M12 done) · https://github.com/Zugzwang-world/graphpay/pull/56
 - 05:15 IST · integration · opened: acceptance A5, C7, E3 pass (the qualifying USDT payment read from its receipt); the report at 29 pass, 0 fail, 1 blocked · https://github.com/Zugzwang-world/graphpay/pull/57
 - 05:10 IST · integration · opened: D2b, D2c and D15 pass live (a frozen mirror, a raced nonce, a crash after send); the report at 31 pass (M11 done) · https://github.com/Zugzwang-world/graphpay/pull/60
+- 05:33 IST · integration · opened: M13's hosted run passes C2, C3, C5, C6, F2 and C4(b) on the production domain (4.80 paid, 0.80 refunded, 1.20 re-order, over-cap refused); A3, A4, A9, A10, B3 wired; the report at 41 pass, 0 fail · PR_LINK
 
 ## website
 

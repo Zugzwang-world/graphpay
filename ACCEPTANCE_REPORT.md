@@ -1,8 +1,8 @@
 # Acceptance report
 
-Written by `pnpm acceptance` at 2026-11-05T23:52:24.202Z. Checks and pass criteria: `planning/ACCEPTANCE_TESTS.md` and `docs/plan/ACCEPTANCE_ADDITIONS.md`. Only D7 may be `blocked` (C7 and E3 no longer wait on supply, ADR-0054); a check without a result is `not run`, never `pass`.
+Written by `pnpm acceptance` at 2026-11-06T00:03:12.292Z. Checks and pass criteria: `planning/ACCEPTANCE_TESTS.md` and `docs/plan/ACCEPTANCE_ADDITIONS.md`. Only D7 may be `blocked` (C7 and E3 no longer wait on supply, ADR-0054); a check without a result is `not run`, never `pass`.
 
-**38 pass, 0 fail, 1 blocked, 9 not run** (of 48).
+**41 pass, 0 fail, 1 blocked, 6 not run** (of 48).
 
 | id | check | status | note |
 |---|---|---|---|
@@ -26,10 +26,10 @@ Written by `pnpm acceptance` at 2026-11-05T23:52:24.202Z. Checks and pass criter
 | B8 | ENSIP-26 records exist and the MCP endpoint answers | pass |  |
 | B9 | The payee is the shop's ENS address | not run |  |
 | C1 | Contracts are verified on the explorer | pass |  |
-| C2 | A payment through the facilitator costs the payer no gas | not run | no pnpm e2e:hosted run for this row yet |
-| C3 | Partial refund, re-order and renewal work | not run | no pnpm e2e:hosted run for this row yet |
-| C4 | Revoked-agent and over-cap failures are recorded | not run | no pnpm e2e:hosted run for this row yet |
-| C5 | A repeat request returns "already paid" | not run | no pnpm e2e:hosted run for this row yet |
+| C2 | A payment through the facilitator costs the payer no gas | pass |  |
+| C3 | Partial refund, re-order and renewal work | pass |  |
+| C4 | Revoked-agent and over-cap failures are recorded | not run | (a) needs a POLICY_WRITER revoke of the scout agent while the workers hold that key; (b) passes |
+| C5 | A repeat request returns "already paid" | pass |  |
 | C6 | Hosted endpoints return 401 without the passcode or token | pass |  |
 | C7 | **The qualifying payment in test USDT `0xcedfB56113143d55b2358b8CFbB0dEB5Ad2f55a7`** | pass |  |
 | D1 | One payment event writes its edge and tallies in one atomic batch | pass |  |
@@ -623,74 +623,167 @@ Status: **pass**.
 
 ## C2: A payment through the facilitator costs the payer no gas
 
-Status: **not run** (no pnpm e2e:hosted run for this row yet).
+Status: **pass**.
 
-### C2 (2026-11-05T23:46:48.480Z)
+### C2 (2026-11-06T00:03:11.096Z)
 
 - What: a payment through the facilitator costs the payer no gas
-- Pass: null
-- Expected: 
-- Evidence: `{}`
+- Pass: true
+- Expected: payer WBT identical; PaymentSettled; tx.from = the relayer; gas 312,024 or 234,292–252,082, ±15%; the quote key and the ENS payee read
+- Evidence: `{"file":"docs/sessions/integration/hosted/paid-2026-11-06T00-00-52-957Z.json","startedAt":"2026-11-06T00:00:52.957Z","site":"https://graphpay-event.vercel.app"}`
 
 ```json
-null
+{
+  "pass": true,
+  "tx": "0x7c6b60e23cd92cc4efb4e0557df9d455aa093ea89ed35dc4f2f7429d64afa0c8",
+  "explorer": "https://explorer.testnet.whitechain.io/tx/0x7c6b60e23cd92cc4efb4e0557df9d455aa093ea89ed35dc4f2f7429d64afa0c8",
+  "gasUsed": 254294,
+  "wbt": {
+    "before": "5000000000000000",
+    "after": "5000000000000000"
+  },
+  "from": "0x1ab82871c3e1be64717269d45f08ca9d54c1ebf6",
+  "relayer": "0x1AB82871c3E1Be64717269D45F08cA9d54C1EBf6",
+  "settled": {
+    "amountMicro": "4800000",
+    "orderId": "0x2c3b4236932c802cdd548d8ce3ea877d343a99e2a135b2f10460870778fb6844"
+  },
+  "delivery": "delivered",
+  "quoteKey": "0x79848ec90f9b711352dd29789cc74549bcae6859eefab10627e411a2e85bd8cf",
+  "payeeRead": {
+    "payee": "0x26940565cb470e25B06F5a39cB4E3B98b3e0d03E",
+    "node": "0xb70f38151e07566a895abd7d378d9a50fe295893cb665172c1162bedacd25a9c",
+    "epoch": 0
+  },
+  "payerGate": {
+    "ok": true
+  }
+}
 ```
 
 ## C3: Partial refund, re-order and renewal work
 
-Status: **not run** (no pnpm e2e:hosted run for this row yet).
+Status: **pass**.
 
-### C3 (2026-11-05T23:52:24.078Z)
+### C3 (2026-11-06T00:03:12.274Z)
 
 - What: partial refund, re-order and renewal work
-- Pass: null
-- Expected: 
-- Evidence: `{}`
+- Pass: true
+- Expected: Refunded(800000, full false), payer +0.80, gas 75,344 ±15%; re-order OrderCreated(kind 1, parent) + PaymentSettled 1.20, gas 252,082 ±15%; SubscriptionRenewed(cycle 2) + PaymentSettled of a kind-2 order, gas 201,555 ±15%
+- Evidence: `{"file":"docs/sessions/integration/hosted/paid-2026-11-06T00-00-52-957Z.json","startedAt":"2026-11-06T00:00:52.957Z","site":"https://graphpay-event.vercel.app","renewal":{"tx":"https://explorer.testnet.whitechain.io/tx/0x48b14aa45f56d487dee743721416a359fed96296b3ad0ababf546838f55e480f","by":"the hosted cron as RENEWER (T1's M4)","subscription":"the rehearsal agent's 120 s demo subscription (C3 asks only for cycle 2 and a kind-2 PaymentSettled)"}}`
 
 ```json
-null
+{
+  "refund": true,
+  "reorder": true,
+  "renewal": true,
+  "refundTx": {
+    "tx": "0x0d04220e9a26243f919715e649d85681439dc4f2a492618bb1f1a916df9fe33f",
+    "explorer": "https://explorer.testnet.whitechain.io/tx/0x0d04220e9a26243f919715e649d85681439dc4f2a492618bb1f1a916df9fe33f",
+    "gasUsed": 75323,
+    "amountMicro": "800000",
+    "full": false,
+    "payerDelta": "800000",
+    "pass": true
+  },
+  "reorderTx": {
+    "tx": "0xb77851de876e39556a5c690e938e8fda69e5aa69ef5079a20b85aadcdf27e3d2",
+    "explorer": "https://explorer.testnet.whitechain.io/tx/0xb77851de876e39556a5c690e938e8fda69e5aa69ef5079a20b85aadcdf27e3d2",
+    "gasUsed": 244343,
+    "kind": 1,
+    "parent": "0x2c3b4236932c802cdd548d8ce3ea877d343a99e2a135b2f10460870778fb6844",
+    "amountMicro": "1200000",
+    "quoteKey": "0x0b0e824396410493214b17f5aaf78f5a3076777b8d56ad504b8949d545b5b118",
+    "pass": true
+  },
+  "renewalTx": {
+    "cycle": 2,
+    "orderKind": 2,
+    "settledMicro": "400000",
+    "gasUsed": 222881,
+    "from": "0x4dcb3564ede867001179ba695ef298e73005869c",
+    "fromIsRelayer": true
+  }
+}
 ```
 
 ## C4: Revoked-agent and over-cap failures are recorded
 
-Status: **not run** (no pnpm e2e:hosted run for this row yet).
+Status: **not run** ((a) needs a POLICY_WRITER revoke of the scout agent while the workers hold that key; (b) passes).
 
-### C4 (2026-11-05T23:46:48.482Z)
+### C4 (2026-11-06T00:03:12.276Z)
 
 - What: revoked-agent and over-cap failures are recorded
 - Pass: null
-- Expected: 
-- Evidence: `{}`
+- Expected: (a) PaymentFailed(AGENT_REVOKED), gas 160,525 ±15%, an on-chain fail edge; (b) 402 CAP_EXCEEDED, no transaction, an off-chain fail edge
+- Evidence: `{"file":"docs/sessions/integration/hosted/paid-2026-11-06T00-00-52-957Z.json","startedAt":"2026-11-06T00:00:52.957Z","site":"https://graphpay-event.vercel.app"}`
 
 ```json
-null
+{
+  "b": {
+    "pass": true,
+    "status": 402,
+    "reason": "CAP_EXCEEDED",
+    "relayerNonce": {
+      "before": 12,
+      "after": 12
+    },
+    "failEdge": {
+      "entityKey": "0x1bd8324c4e695b5add4941ed96c90f933f639d0e0e3b2fdffd120bed963b54b7",
+      "kind": "fail",
+      "ref": "att:0x2d43695c83fd381d83edba571049cf18e6749f431a3681a5d66774e9b7a9c712:0x1a2a5a6c6fd1a8cff8632814ef8fa395726b837f:d354975b",
+      "reason": null
+    }
+  },
+  "a": {
+    "pass": null,
+    "why": "needs a POLICY_WRITER revoke of the scout agent while the workers hold that key"
+  }
+}
 ```
 
 ## C5: A repeat request returns "already paid"
 
-Status: **not run** (no pnpm e2e:hosted run for this row yet).
+Status: **pass**.
 
-### C5 (2026-11-05T23:46:48.482Z)
+### C5 (2026-11-06T00:03:12.276Z)
 
 - What: a repeat request returns "already paid"
-- Pass: null
-- Expected: 
-- Evidence: `{}`
+- Pass: true
+- Expected: HTTP 200 alreadyPaid; relayer nonce and payer balance unchanged
+- Evidence: `{"file":"docs/sessions/integration/hosted/paid-2026-11-06T00-00-52-957Z.json","startedAt":"2026-11-06T00:00:52.957Z","site":"https://graphpay-event.vercel.app"}`
 
 ```json
-null
+{
+  "pass": true,
+  "status": 200,
+  "body": {
+    "status": "paid",
+    "alreadyPaid": true,
+    "orderId": "0x2c3b4236932c802cdd548d8ce3ea877d343a99e2a135b2f10460870778fb6844",
+    "chainStatus": "DELIVERED"
+  },
+  "relayerNonce": {
+    "before": 11,
+    "after": 11
+  },
+  "payerUsdt": {
+    "before": "15200000",
+    "after": "15200000"
+  }
+}
 ```
 
 ## C6: Hosted endpoints return 401 without the passcode or token
 
 Status: **pass**.
 
-### C6 (2026-11-05T23:46:48.483Z)
+### C6 (2026-11-06T00:03:12.278Z)
 
 - What: hosted endpoints return 401 without the passcode or token
 - Pass: true
 - Expected: every one 401; relayer nonce unchanged
-- Evidence: `{"file":"docs/sessions/integration/hosted/read-2026-11-05.json","startedAt":"2026-11-05T23:45:32.137Z","site":"https://graphpay-event.vercel.app"}`
+- Evidence: `{"file":"docs/sessions/integration/hosted/paid-2026-11-06T00-00-52-957Z.json","startedAt":"2026-11-06T00:00:52.957Z","site":"https://graphpay-event.vercel.app"}`
 
 ```json
 {
@@ -719,8 +812,8 @@ Status: **pass**.
     }
   ],
   "relayerNonce": {
-    "before": 9,
-    "after": 9
+    "before": 10,
+    "after": 10
   }
 }
 ```
@@ -1456,12 +1549,12 @@ Status: **pass**.
 
 Status: **pass**.
 
-### F2 (2026-11-05T23:46:48.483Z)
+### F2 (2026-11-06T00:03:12.278Z)
 
 - What: spending endpoints are passcode-gated
 - Pass: true
 - Expected: every spending route 401 without and with a wrong passcode or bearer; relayer nonce unchanged
-- Evidence: `{"file":"docs/sessions/integration/hosted/read-2026-11-05.json","startedAt":"2026-11-05T23:45:32.137Z","site":"https://graphpay-event.vercel.app"}`
+- Evidence: `{"file":"docs/sessions/integration/hosted/paid-2026-11-06T00-00-52-957Z.json","startedAt":"2026-11-06T00:00:52.957Z","site":"https://graphpay-event.vercel.app"}`
 
 ```json
 {
@@ -1588,8 +1681,13 @@ Status: **pass**.
     }
   ],
   "relayerNonce": {
-    "before": 9,
-    "after": 9
+    "before": 10,
+    "after": 10
+  },
+  "merchantNonce": {
+    "role": "SHOP_KESAR",
+    "before": 11,
+    "after": 11
   }
 }
 ```

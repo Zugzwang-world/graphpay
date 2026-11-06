@@ -1,10 +1,49 @@
 {
   "id": "C3",
-  "at": "2026-11-05T23:52:24.078Z",
-  "pass": null,
-  "why": "no pnpm e2e:hosted run for this row yet",
+  "at": "2026-11-06T00:03:12.274Z",
+  "pass": true,
   "what": "partial refund, re-order and renewal work",
-  "measured": null,
-  "expected": "",
-  "evidence": {}
+  "measured": {
+    "refund": true,
+    "reorder": true,
+    "renewal": true,
+    "refundTx": {
+      "tx": "0x0d04220e9a26243f919715e649d85681439dc4f2a492618bb1f1a916df9fe33f",
+      "explorer": "https://explorer.testnet.whitechain.io/tx/0x0d04220e9a26243f919715e649d85681439dc4f2a492618bb1f1a916df9fe33f",
+      "gasUsed": 75323,
+      "amountMicro": "800000",
+      "full": false,
+      "payerDelta": "800000",
+      "pass": true
+    },
+    "reorderTx": {
+      "tx": "0xb77851de876e39556a5c690e938e8fda69e5aa69ef5079a20b85aadcdf27e3d2",
+      "explorer": "https://explorer.testnet.whitechain.io/tx/0xb77851de876e39556a5c690e938e8fda69e5aa69ef5079a20b85aadcdf27e3d2",
+      "gasUsed": 244343,
+      "kind": 1,
+      "parent": "0x2c3b4236932c802cdd548d8ce3ea877d343a99e2a135b2f10460870778fb6844",
+      "amountMicro": "1200000",
+      "quoteKey": "0x0b0e824396410493214b17f5aaf78f5a3076777b8d56ad504b8949d545b5b118",
+      "pass": true
+    },
+    "renewalTx": {
+      "cycle": 2,
+      "orderKind": 2,
+      "settledMicro": "400000",
+      "gasUsed": 222881,
+      "from": "0x4dcb3564ede867001179ba695ef298e73005869c",
+      "fromIsRelayer": true
+    }
+  },
+  "expected": "Refunded(800000, full false), payer +0.80, gas 75,344 ±15%; re-order OrderCreated(kind 1, parent) + PaymentSettled 1.20, gas 252,082 ±15%; SubscriptionRenewed(cycle 2) + PaymentSettled of a kind-2 order, gas 201,555 ±15%",
+  "evidence": {
+    "file": "docs/sessions/integration/hosted/paid-2026-11-06T00-00-52-957Z.json",
+    "startedAt": "2026-11-06T00:00:52.957Z",
+    "site": "https://graphpay-event.vercel.app",
+    "renewal": {
+      "tx": "https://explorer.testnet.whitechain.io/tx/0x48b14aa45f56d487dee743721416a359fed96296b3ad0ababf546838f55e480f",
+      "by": "the hosted cron as RENEWER (T1's M4)",
+      "subscription": "the rehearsal agent's 120 s demo subscription (C3 asks only for cycle 2 and a kind-2 PaymentSettled)"
+    }
+  }
 }

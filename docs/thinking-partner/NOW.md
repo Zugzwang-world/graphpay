@@ -55,14 +55,13 @@ Updated 02:40 IST. **M10 is merged; the presence and handoff hooks are built** (
 - Blockers: none. Next: merge, then wait for Join's M12 counting run; re-run the live errand if time allows.
 ## integration
 
-Updated 05:10 IST, Fri 6 Nov. **M11 and M12 are done on the real networks. The acceptance report: 31 pass, 0 fail, 1 blocked (the big city), 16 not run** (the hosted endpoints of M4 and a few other tracks' checks).
-- The errand: the agents chose Kesar Kingdom from live reputation, paid 4.80 test USDT on Whitechain, and the shop delivered and refunded 0.80. The mirror and GraphQL show it all.
-- The kill: disposable-1 paid 0.40, then its owner killed its ENS name. 9.3 s later our facilitator refused its next payment (the rule allows 25 s), and T2's watcher revoked its spending policy on Whitechain 11 s after the kill. The refusal is recorded on Arkiv.
-- Found and fixed today: the MCP's buyer-risk table (every shop refused every buyer); the signer's header format; the refusal record's id, which was too long for Arkiv (it would also have broken M4's hosted recorder).
-- Running: `pnpm workers` with T2's watcher.
-- The mirror's last tests passed: with the mirror frozen through a real payment, two copies racing at one nonce and a copy killed right after sending both wrote nothing twice, and after a hard restart every event since the deploy is on Arkiv exactly once.
-- Not run yet: the hosted endpoints (M4: C2–C6, F2, F3), F1's history scan, and a few other tracks' checks.
-- Next: M13's run after 05:30 IST (the acceptance payer's fresh day), once M4 is hosted.
+Updated 05:33 IST, Fri 6 Nov. **M13's hosted run passed on the production domain. The acceptance report: 41 pass, 0 fail, 1 blocked (the big city), 6 not run.**
+- As the acceptance agent, through the hosted shop and our hosted facilitator: paid 4.80 with no gas of its own, and the shop delivered. The same request again answered "already paid" and sent nothing. The shop refunded 0.80, and the agent re-ordered 3 for 1.20. One more 0.40 was refused for being over its 6.00 daily cap: nothing was sent, and the refusal is recorded on Arkiv.
+- All 17 spending routes refuse a caller without the passcode or token (401), and nothing is sent.
+- Also wired: five other tracks' checks from their recorded evidence (A3, A4, A9, A10, B3).
+- Running: `pnpm workers` with T2's watcher. Local scripts no longer relay; every payment goes through the hosted facilitator.
+- Not run yet: C4(a) (a policy revoke by the policy writer, whose key the workers hold), B7 (T2's fork test does not cover re-registration), D10's quote-expiry part, F1 (history scan), F3 (a preview deployment with the relayer floor raised; T1's).
+- Next: F1, D10(c), then C4(a) with the Coordinator's go for the policy-writer key.
 
 ## website
 

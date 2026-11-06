@@ -1,10 +1,30 @@
 {
   "id": "C5",
-  "at": "2026-11-05T23:46:48.482Z",
-  "pass": null,
-  "why": "no pnpm e2e:hosted run for this row yet",
+  "at": "2026-11-06T00:03:12.276Z",
+  "pass": true,
   "what": "a repeat request returns \"already paid\"",
-  "measured": null,
-  "expected": "",
-  "evidence": {}
+  "measured": {
+    "pass": true,
+    "status": 200,
+    "body": {
+      "status": "paid",
+      "alreadyPaid": true,
+      "orderId": "0x2c3b4236932c802cdd548d8ce3ea877d343a99e2a135b2f10460870778fb6844",
+      "chainStatus": "DELIVERED"
+    },
+    "relayerNonce": {
+      "before": 11,
+      "after": 11
+    },
+    "payerUsdt": {
+      "before": "15200000",
+      "after": "15200000"
+    }
+  },
+  "expected": "HTTP 200 alreadyPaid; relayer nonce and payer balance unchanged",
+  "evidence": {
+    "file": "docs/sessions/integration/hosted/paid-2026-11-06T00-00-52-957Z.json",
+    "startedAt": "2026-11-06T00:00:52.957Z",
+    "site": "https://graphpay-event.vercel.app"
+  }
 }

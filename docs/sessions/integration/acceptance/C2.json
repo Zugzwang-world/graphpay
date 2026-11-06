@@ -1,10 +1,38 @@
 {
   "id": "C2",
-  "at": "2026-11-05T23:46:48.480Z",
-  "pass": null,
-  "why": "no pnpm e2e:hosted run for this row yet",
+  "at": "2026-11-06T00:03:11.096Z",
+  "pass": true,
   "what": "a payment through the facilitator costs the payer no gas",
-  "measured": null,
-  "expected": "",
-  "evidence": {}
+  "measured": {
+    "pass": true,
+    "tx": "0x7c6b60e23cd92cc4efb4e0557df9d455aa093ea89ed35dc4f2f7429d64afa0c8",
+    "explorer": "https://explorer.testnet.whitechain.io/tx/0x7c6b60e23cd92cc4efb4e0557df9d455aa093ea89ed35dc4f2f7429d64afa0c8",
+    "gasUsed": 254294,
+    "wbt": {
+      "before": "5000000000000000",
+      "after": "5000000000000000"
+    },
+    "from": "0x1ab82871c3e1be64717269d45f08ca9d54c1ebf6",
+    "relayer": "0x1AB82871c3E1Be64717269D45F08cA9d54C1EBf6",
+    "settled": {
+      "amountMicro": "4800000",
+      "orderId": "0x2c3b4236932c802cdd548d8ce3ea877d343a99e2a135b2f10460870778fb6844"
+    },
+    "delivery": "delivered",
+    "quoteKey": "0x79848ec90f9b711352dd29789cc74549bcae6859eefab10627e411a2e85bd8cf",
+    "payeeRead": {
+      "payee": "0x26940565cb470e25B06F5a39cB4E3B98b3e0d03E",
+      "node": "0xb70f38151e07566a895abd7d378d9a50fe295893cb665172c1162bedacd25a9c",
+      "epoch": 0
+    },
+    "payerGate": {
+      "ok": true
+    }
+  },
+  "expected": "payer WBT identical; PaymentSettled; tx.from = the relayer; gas 312,024 or 234,292–252,082, ±15%; the quote key and the ENS payee read",
+  "evidence": {
+    "file": "docs/sessions/integration/hosted/paid-2026-11-06T00-00-52-957Z.json",
+    "startedAt": "2026-11-06T00:00:52.957Z",
+    "site": "https://graphpay-event.vercel.app"
+  }
 }

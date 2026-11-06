@@ -1,10 +1,34 @@
 {
   "id": "C4",
-  "at": "2026-11-05T23:46:48.482Z",
+  "at": "2026-11-06T00:03:12.276Z",
   "pass": null,
-  "why": "no pnpm e2e:hosted run for this row yet",
+  "why": "(a) needs a POLICY_WRITER revoke of the scout agent while the workers hold that key; (b) passes",
   "what": "revoked-agent and over-cap failures are recorded",
-  "measured": null,
-  "expected": "",
-  "evidence": {}
+  "measured": {
+    "b": {
+      "pass": true,
+      "status": 402,
+      "reason": "CAP_EXCEEDED",
+      "relayerNonce": {
+        "before": 12,
+        "after": 12
+      },
+      "failEdge": {
+        "entityKey": "0x1bd8324c4e695b5add4941ed96c90f933f639d0e0e3b2fdffd120bed963b54b7",
+        "kind": "fail",
+        "ref": "att:0x2d43695c83fd381d83edba571049cf18e6749f431a3681a5d66774e9b7a9c712:0x1a2a5a6c6fd1a8cff8632814ef8fa395726b837f:d354975b",
+        "reason": null
+      }
+    },
+    "a": {
+      "pass": null,
+      "why": "needs a POLICY_WRITER revoke of the scout agent while the workers hold that key"
+    }
+  },
+  "expected": "(a) PaymentFailed(AGENT_REVOKED), gas 160,525 ±15%, an on-chain fail edge; (b) 402 CAP_EXCEEDED, no transaction, an off-chain fail edge",
+  "evidence": {
+    "file": "docs/sessions/integration/hosted/paid-2026-11-06T00-00-52-957Z.json",
+    "startedAt": "2026-11-06T00:00:52.957Z",
+    "site": "https://graphpay-event.vercel.app"
+  }
 }

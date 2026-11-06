@@ -139,7 +139,7 @@ const passcode = { [PASSCODE_HEADER]: env.DEMO_PASSCODE };
 
 // One payment through the hosted shop: 402 (the quote written) → sign → 200.
 async function payOnce(q, path, { mandate, max, payee, gated = true }) {
-  const r402 = await post(path, { ...q.terms, requestId: `m13-${q.orderId.slice(2, 14)}` }, passcode);
+  const r402 = await post(path, { ...q.terms, requestId: keccak256(toHex(`M13 request ${q.orderId}`)) }, passcode);
   if (r402.status !== 402) return { stage: '402', status: r402.status, body: await r402.json().catch(() => null) };
   const required = decodePaymentRequiredHeader(r402.headers.get('payment-required'));
   const quoteKey = required.accepts?.[0]?.extra?.quoteKey ?? null;

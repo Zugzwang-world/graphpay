@@ -1,6 +1,6 @@
 {
   "id": "F2",
-  "at": "2026-11-05T23:46:48.483Z",
+  "at": "2026-11-06T00:03:12.278Z",
   "pass": true,
   "what": "spending endpoints are passcode-gated",
   "measured": {
@@ -127,14 +127,19 @@
       }
     ],
     "relayerNonce": {
-      "before": 9,
-      "after": 9
+      "before": 10,
+      "after": 10
+    },
+    "merchantNonce": {
+      "role": "SHOP_KESAR",
+      "before": 11,
+      "after": 11
     }
   },
   "expected": "every spending route 401 without and with a wrong passcode or bearer; relayer nonce unchanged",
   "evidence": {
-    "file": "docs/sessions/integration/hosted/read-2026-11-05.json",
-    "startedAt": "2026-11-05T23:45:32.137Z",
+    "file": "docs/sessions/integration/hosted/paid-2026-11-06T00-00-52-957Z.json",
+    "startedAt": "2026-11-06T00:00:52.957Z",
     "site": "https://graphpay-event.vercel.app"
   }
 }
