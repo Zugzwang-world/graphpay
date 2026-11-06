@@ -1,39 +1,47 @@
-# Relay: W3 Payments, 00:00 IST, Sat 7 Nov
+# Relay: W3 Payments, 00:25 IST, Sat 7 Nov
 
 ## In plain words
 
-- Tonight's payments stream: every money action in the story works live, with its explorer link and its Arkiv record (brief `briefs/2258-w3-payments.md`).
-- **1. Re-order, done:** "Another coffee" re-orders the filter coffee for 0.80, the story's re-order (ADR-0073), instead of the 4.80 combo. It paid live at 23:34 IST, and its order, pay and deliver edges are on Arkiv.
-- **2. Subscriptions, reviewed and in their PR:** Vitalik subscribes to the Sunday breakfast at 2.40, on the labelled 2-minute demo clock. 2.40 is stored on chain.
-  - The payer agent signs, and pays no gas. The first box is charged at once; the renewal job charges the next ones.
-  - The payer agent cancels with its own signature.
+- **The brief:** every money action in the story works live, each with its explorer link and its Arkiv record (`briefs/2258-w3-payments.md`). All of it is live except the owner's cap change, which waits for W1's watcher.
+- **1. Re-order, done:** "Another coffee" re-orders the filter coffee for 0.80 (ADR-0073), instead of the 4.80 combo.
+- **2. Subscriptions, done:** Vitalik subscribes to the Sunday breakfast at 2.40, on the labelled 2-minute demo clock, and 2.40 is what the chain stores.
+  - The payer agent signs and pays no gas, and the first box is charged at once.
+  - The renewal job charged the next one by itself, and the payer agent cancelled with its own signature.
   - Each subscription can pull at most 3 charges (7.20), so the demo never eats the pass.
-- **3. Refund decline, in review (#163):** the shop can decline a refund request. The decline is recorded on Arkiv as the shop's answer to the payer agent. No money moves.
-- **4. Limits, in review (#169):** a payment over the pass ("dosas for everyone") is refused and recorded; the agent's attempt to raise its own cap in ENS is refused, with its revert reason. The owner's cap change waits for the Coordinator.
+- **3. Refund decline, done:** the shop declines a refund request. The decline is recorded on Arkiv as the shop's answer to that request, and no money moves.
+- **4. Limits:**
+  - **over the pass, done:** "Dosas for everyone at the hackathon" (100 dosas, 480) against a 300 pass is refused before anything is sent, and the refusal is recorded;
+  - **the agent's own cap raise, done:** ENS refuses it, with the revert reason. It was simulated, so nothing was sent, and the attempt is recorded;
+  - **the owner's cap change, built:** the owner writes the ENS cap, and the spending policy follows through the watcher on the Mac, never above the configured cap (ADR-0078). It is live once W1's watcher change is merged and W5 restarts the workers.
 
 ## Technical
 
 - **Re-order (#155):**
-  - `order.reorder` gains `sku` and `item`, at 800000.
-  - The quote asks for that sku, and the signed terms must name it.
-  - A refunded order may be re-ordered; the checkout and the shop accept it.
-- **Subscriptions (`pay/w3-subscriptions`):**
-  - Routes: `POST /api/customer/subscribe` and `/unsubscribe`, in `lib/subscription.server.ts` and `lib/subscription-live.server.ts`.
-  - The payer's wallet signs three things: a Permit2 `PermitSingle` for price × `renewal.demoPeriod.maxCharges`, the `Subscribe` terms, and an EIP-2612 approval of Permit2 when it is short.
-  - RENEWER (E-1) simulates, then sends `createSubscription`, then `cancelWithSig`.
-  - The subscriber node is the persona, so a cancel never raises the paying agent's cancel rate (the shops' risk check refuses one above 15%).
-  - The cron skips three cases: a charge the signed allowance or the token approval cannot cover, and a story agent paused in ENS.
-  - `/api/state/customer` reports the payer's subscription from the checkout.
-  - Fork run: subscribe, two renewals, the third skipped, cancel, then subscribe again.
-  - Hardened after review: no new subscription while any of the payer wallet's is active, since they share one Permit2 allowance; only the transaction's own receipt counts; the payee is confirmed by the shop key; 180 s between subscriptions, read from the chain.
-- **Decline (`pay/w3-refund-decline`):**
-  - Route: `POST /api/merchant/refund-decline`.
-  - It writes a W_SYNC `request` edge, shop to payer, ref `dec:<order>:<minute>`, and only against a `req:` request on the record. A `fail` edge touching the shop would count against it, so it is not one.
-- **Limits (#169):** `POST /api/customer/over-pass` signs the story's `order.overPass` only when it is over what is left of min(ENS cap, policy cap). The facilitator refuses with `CAP_EXCEEDED` and its recorder writes the `fail` edge. `POST /api/customer/raise-cap` simulates the agent's own `setText(graphpay.cap_micro)`: it reverts `EACUnauthorizedAccountRoles`, nothing is sent, and a `request` edge records it.
-- **The mirror stall** (about 23:29 IST) was fixed by W5's restart at 23:43; it caught up at 23:49.
+  - `order.reorder.sku` and `item`, at 800000. The quote asks for that sku, and the signed terms must name it.
+  - A refunded parent order may be re-ordered.
+  - Live: [tx](https://explorer.testnet.whitechain.io/tx/0xf1d7cb5654de6cc09ede0a404818a009f7429d9d149e3e564222d4a4d3ae2b4a), with OrderCreated kind 1 and the parent's id.
+- **Subscriptions (#173):** `POST /api/customer/subscribe` and `/unsubscribe`.
+  - What the payer's wallet signs: a Permit2 `PermitSingle` for price × `renewal.demoPeriod.maxCharges`, the `Subscribe` terms, and an EIP-2612 approval when short.
+  - RENEWER (E-1) simulates, then sends. The persona is the subscriber node, so a cancel never raises the paying agent's cancel rate.
+  - Subscribe is refused while any of the payer wallet's subscriptions is active (they share one allowance), and within 180 s of the last one (read from the chain).
+  - The cron skips three cases: the allowance or token approval is spent, or the agent is paused in ENS.
+  - `/api/state/customer` reports the subscription.
+  - Live: [subscribe](https://explorer.testnet.whitechain.io/tx/0xf3f7586090fb37cf4b04963216dabc7b89915f02afb19f71fb81ca138e53c393), the cron's [renew](https://explorer.testnet.whitechain.io/tx/0x8d40d556382f40313dafaf712d3c174d7cc8365176c8813f04e849f93338de83), [cancel](https://explorer.testnet.whitechain.io/tx/0x70ed2b3ffa63b81fa426631c70cb39591f8b80c077455930d05e63de04077b42), and [Arkiv](https://graphpay-event.vercel.app/api/explain/23281094e730).
+- **Decline (#163):** `POST /api/merchant/refund-decline`.
+  - It writes a W_SYNC `request` edge, shop to payer, ref `dec:<order>:<request minute>`.
+  - It waits while the chain shows a refund the graph doesn't yet. The `/order` page words it "Refund declined".
+  - Notes and reasons refuse contact details.
+  - Live: [explain](https://graphpay-event.vercel.app/api/explain/033a073bd39e).
+- **Limits (#169):**
+  - `POST /api/customer/over-pass` signs `order.overPass` only when it is above the whole pass, and sends it to our facilitator's verify step only (never settled). It got `CAP_EXCEEDED` and a [fail edge](https://rabdi.explorer.arkiv.network/entity/0x49163142476bc996134f3a4b0cac473f9698fa0781f39895206b138cfab1dc19).
+  - `POST /api/customer/raise-cap` runs an eth_call of `setText` from the agent's address and gets `EACUnauthorizedAccountRoles`, at a stated block. Its [record](https://rabdi.explorer.arkiv.network/tx/0xabc41f475312767e363e073ec872c3ff4b3556883901201dca53f1dafd444144) is a `request` edge with amount 0.
+  - A repeat within a minute gets the last answer.
+- **Owner cap (#179, in review):** `POST /api/customer/cap`. The owner (VITALIK) runs `setCap` on Sepolia; the route waits up to 45 s for the policy and writes an `own:` record. Anything above `buyerAgents.payer.capMicro` is refused.
+- **Every PR had a reviewer pass:** no blocking issues remain. The decline's two blocking items were fixed and confirmed.
+- **Frontend:** every new route and event is listed in OPEN under "frontend".
 
 ## State
 
-- Running: the subscriptions PR, and the reviews of #163 and #169.
-- Next: live subscribe, renew and cancel, then the decline and the two limits, each once on production with its links. Then the owner's cap change, once the Coordinator decides the policy half.
+- Running: #179's review; W1's watcher PR, then W5's restart.
+- Next: prove the owner's cap change live once (300 → 250 → 300).
 - Blockers: none.
