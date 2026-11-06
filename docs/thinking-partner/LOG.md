@@ -108,7 +108,8 @@ One line per PR: time (IST) · activity · result · PR link. Append under your 
 - 23:33 IST · records · NOW and TRACKER: the Mac charging, W7's README (#154), W1's new names on ENS (#158), W4's run-log metrics (#157) · https://github.com/Zugzwang-world/graphpay/pull/160
 - 23:45 IST · records · NOW and TRACKER after W3's coffee re-order, W4's low effort and W7's submission files; the mirror's pause explained; ADR-0067 amended and CLAUDE.md's model line to match #162 · https://github.com/Zugzwang-world/graphpay/pull/165
 - 23:52 IST · records · NOW and TRACKER: the mirror back (W5's restart, 23:43 IST), Join archived with its last prompt log and run record, W7's brief done, W2's and W3's PRs in flight · https://github.com/Zugzwang-world/graphpay/pull/171
-- 00:12 IST · records · NOW and TRACKER: W5's per-agent pause and self-healing (#172) replace the bridge loop; W3's subscriptions (#173); W6's arkiv-graph 1.0.0 (#174); the mirror held for W2's history · coord/night-records-5
+- 00:12 IST · records · NOW and TRACKER: W5's per-agent pause and self-healing (#172) replace the bridge loop; W3's subscriptions (#173); W6's arkiv-graph 1.0.0 (#174); the mirror held for W2's history · https://github.com/Zugzwang-world/graphpay/pull/176
+- 00:24 IST · records · NOW rewritten by stream (W1 kill live and flip cleared, W2 step 1 done, W3 limits live, W4 routine in code, W5 self-healing proven, W6 1.0.0 merged, W7 done); TRACKER to match · coord/night-records-6
 
 ## booth
 
@@ -130,12 +131,14 @@ One line per PR: time (IST) · activity · result · PR link. Append under your 
 - 23:38 IST · w7-submission · docs/submission/ETHGLOBAL.md: the form text ready to paste, every claim linked, every URL checked · https://github.com/Zugzwang-world/graphpay/pull/164
 - 23:43 IST · w7-submission · the video shot list and the submission checklist (docs/submission/VIDEO.md, CHECKLIST.md); wording fixes; the README links the disclosure · https://github.com/Zugzwang-world/graphpay/pull/166
 - 23:46 IST · w7-submission · keep current: AI_USAGE.md records W4's effort split (#162); the README notes W1's new shop names on Sepolia (#158) · https://github.com/Zugzwang-world/graphpay/pull/170
-- 00:13 IST · w7-submission · an independent audit's 17 findings fixed across the submission files (exact claims: the kit payment by script, the first facilitator payment, receipts lapse at 30 days, the Swarm photo stored not shown); #172 and #173 folded in · this PR
+- 00:13 IST · w7-submission · an independent audit's 17 findings fixed across the submission files (exact claims: the kit payment by script, the first facilitator payment, receipts lapse at 30 days, the Swarm photo stored not shown); #172 and #173 folded in · https://github.com/Zugzwang-world/graphpay/pull/178
+- 00:18 IST · w7-submission · keep current: the live 0.80 coffee re-order and the live Sunday-box subscription (subscribe, cron renewal, cancel) in the README and the form text; the kill on /customer (#175); the refund Decline route (#163) · this PR
 
 ## w1-identity
 
 - 23:35 IST · w1-identity · the new shop names filter-and-fold, idli-index and tawa-tangle on Sepolia, each with its three agents, on the old shops' wallets (30 txs; ENS acceptance reads 100 pass) · https://github.com/Zugzwang-world/graphpay/pull/158
 - 00:00 IST · w1-identity · the kill: POST /api/customer/kill-disposable (owner unregisters a ready spare, the watcher revokes, the next payment refused and recorded), the spare keeper and its workers hook; spare disposable-2 live and funded; spare keys 2–9 in Vercel · https://github.com/Zugzwang-world/graphpay/pull/175
+- 00:20 IST · w1-identity · the kill proven on production: disposable-2 unregistered by the site (00:16), its pass revoked by the watcher 9 s later, its next payment refused ENS_EXPIRED_OR_REVOKED and recorded on Arkiv, fresh spare disposable-3 ready (00:19); evidence kill-disposable-2.json · https://github.com/Zugzwang-world/graphpay/pull/183
 
 ## w4-agents
 
@@ -143,6 +146,9 @@ One line per PR: time (IST) · activity · result · PR link. Append under your 
 - 23:21 IST · w4-agents · item 2: each agent's end event carries its model calls (tokens in, cached, out, reasoning, cost, tools; seconds on live runs); a script runs one live site errand and prints the table · https://github.com/Zugzwang-world/graphpay/pull/157
 - 23:30 IST · w4-agents · the live baseline on the site: paid 4.80 in 91.4 s, 19 model calls, 33,287 tokens, $0.1455 (tx 0xeac3…abe6) · no PR (a live run)
 - 23:35 IST · w4-agents · item 3, first cut: routine agents at low effort, short tool replies for the model, the concierge gets code's limits · https://github.com/Zugzwang-world/graphpay/pull/162
+- 23:49 IST · w4-agents · the first cut live on the site: paid 4.80 in 87.6 s, 19 calls, 33,346 tokens, $0.1435 (tx 0xd4fd…9d2f): 4% faster, so the calls themselves must go · no PR (a live run)
+- 23:52 IST · w4-agents · item 3, second cut: the routine steps in code, one model call each for the concierge, analyst and risk agent (3 calls in all; Kimi on mocks 14 s, $0.027) · https://github.com/Zugzwang-world/graphpay/pull/182
+- 00:15 IST · w4-agents · the second cut proven live before merging (local runner, production services): paid 4.80 in 55.2 s, 3 calls, 2,886 tokens, $0.0247 (tx 0xfe0a…70d5); the reviewer says ship · https://github.com/Zugzwang-world/graphpay/pull/182
 
 ## w5-ops
 
@@ -155,7 +161,7 @@ One line per PR: time (IST) · activity · result · PR link. Append under your 
 - 00:00 IST · w3-payments · in PR: feat(pay): subscribe and cancel the Sunday box on the demo clock; the cron renews within the signed allowance
 - 23:45 IST · w3-payments · in PR: feat(pay): the shop can decline a refund request, recorded on Arkiv (reviewer's two blocking items fixed: a refund the graph has not shown yet stops a decline; the order page words it "Refund declined") · https://github.com/Zugzwang-world/graphpay/pull/163
 - 23:55 IST · w3-payments · in PR: feat(pay): the limits live: over the pass refused and recorded; the agent's own cap raise refused, with its revert reason (after review: the attempt goes to the facilitator's verify step only, never settled) · https://github.com/Zugzwang-world/graphpay/pull/169
-- 00:15 IST · w3-payments · in PR: feat(pay): the owner changes the payer's cap in ENS, and the policy follows through the watcher, never above the configured cap (ADR-0078)
+- 00:15 IST · w3-payments · in PR: feat(pay): the owner changes the payer's cap in ENS, and the policy follows through the watcher, never above the configured cap (ADR-0079)
 
 ## w2-city
 

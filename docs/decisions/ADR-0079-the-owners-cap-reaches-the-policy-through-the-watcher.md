@@ -1,4 +1,4 @@
-# ADR-0078: The owner's cap reaches the spending policy through the watcher, never above the configured cap
+# ADR-0079: The owner's cap reaches the spending policy through the watcher, never above the configured cap
 Status: accepted · Date: 2026-11-07 00:10 IST · Decided by: the night Coordinator, under the founder's authority (W3 brief, item 4b) · Source: the W3 brief `docs/thinking-partner/briefs/2258-w3-payments.md`; NOW, "Decided tonight (Coordinator)", 00:00 IST; the Coordinator's approval to W3 with these bounds. Amends `planning/SPEC/IDENTITY_ENS.md` §8; cites ADR-0021
 
 ## Decision

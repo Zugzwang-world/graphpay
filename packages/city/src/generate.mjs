@@ -4,7 +4,8 @@
 // the cast shops at popularity ranks 1–3) plus generated people and shops under
 // sim.<root>; 120 days ending at a fixed UTC midnight; orders, payments or refusals,
 // partial refunds, weekly subscriptions; the persona's agents buy only in the last
-// week and never from the trap shop; one generated shop re-registers late in the city.
+// week and never from the trap shop; one generated shop re-registers late in the city. Size M
+// takes its background shops from the story's places (the Grok pack's) instead of generating them.
 
 import { castEntries, config } from '@graphpay/config';
 import { castOfSize } from './cast.mjs';
@@ -77,8 +78,24 @@ export function generateCity({ story, size, end, root = config.root.ens }) {
   }
   const categories = [...new Set(cast.shops.map((s) => s.category))];
 
+  // A size with places (syntheticCity.places, M) lists them as its background shops, in an order
+  // the seed shuffles, each at its own place; ranks follow that order.
+  if (sizeSpec.places) {
+    const places = [...(sc.places?.list ?? [])];
+    if (places.length === 0) throw new Error(`city: size ${size} takes its shops from syntheticCity.places, which is empty`);
+    for (let i = places.length - 1; i > 0; i -= 1) {
+      const j = rnd.int(i + 1);
+      [places[i], places[j]] = [places[j], places[i]];
+    }
+    const lo = gen.refundRate[0];
+    const hi = gen.refundRate[1];
+    places.forEach((p, i) => {
+      shops.push(add({ ens: `${p.label}.${simRoot}`, kind: 'shop', category: categories[(i + 1) % categories.length], city: cityName, refundRate: lo + rnd.next() * (hi - lo), priceMicro: null, lat: p.lat, lng: p.lng, area: p.area, displayName: p.name }));
+    });
+  }
+
   // Generated shops at the story's neighbourhoods (or around the persona's point).
-  const shopCount = Math.max(castShops.length + 1, Math.round(gen.baseShops * scale ** gen.shopExponent)) - castShops.length;
+  const shopCount = sizeSpec.places ? 0 : Math.max(castShops.length + 1, Math.round(gen.baseShops * scale ** gen.shopExponent)) - castShops.length;
   const hoods = story.locations.neighbourhoods ?? [];
   for (let i = 1; i <= shopCount; i += 1) {
     const hood = hoods.length > 0 ? hoods[(i - 1) % hoods.length] : null;
@@ -107,8 +124,8 @@ export function generateCity({ story, size, end, root = config.root.ens }) {
     }
   }
 
-  // The re-registered shop: a generated one in the middle of the ranking.
-  const reShop = shops[castShops.length + Math.floor(shopCount / 2)];
+  // The re-registered shop: a background one in the middle of the ranking.
+  const reShop = shops[castShops.length + Math.floor((shops.length - castShops.length) / 2)];
   const reTs = endTs - sc.reRegisteredShop.daysBeforeEnd * DAY;
   const epochOf = (ens, ts) => (reShop && ens === reShop.ens && ts >= reTs ? sc.reRegisteredShop.epoch : 0);
 

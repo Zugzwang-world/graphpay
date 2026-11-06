@@ -22,7 +22,7 @@
 | The facilitator's health page; the gas and drain section | (Scale, not entered) | done anyway | [health](https://graphpay-event.vercel.app/api/facilitator/health); [README, Whitechain](../../README.md#whitechain-payments) |
 | `WHITECHAIN_FEEDBACK.md` from the event build's runs | Whitechain | done | [`WHITECHAIN_FEEDBACK.md`](../../WHITECHAIN_FEEDBACK.md) |
 | The root name, registries, resolvers and agents on Sepolia | ENS | done | [`docs/sessions/identity/namespace.md`](../sessions/identity/namespace.md); [`ENS.md`](ENS.md) |
-| The ENS moments rehearsed on the live URL | ENS | partly | Pause and resume run from the phones; the kill and the refused cap write are proven by acceptance (B3, B6, E7) but have no phone button yet |
+| The ENS moments rehearsed on the live URL | ENS | mostly | Pause and resume run from the phones; the kill is a button on `/customer` since #175 (when a spare agent is ready); the refused cap write is proven by acceptance (B3) and has no button |
 | The live demo opens for judges | ENS, all | done | public, no passcode (ADR-0069): https://graphpay-event.vercel.app |
 | `AI_USAGE.md` and the disclosure, linked from the README | all | done | [`AI_USAGE.md`](../../AI_USAGE.md); the README's "How this was built" |
 | A public repo: commits through the event, a license, no secrets | all | done | MIT [`LICENSE`](../../LICENSE); acceptance A2 and F1 pass ([`ACCEPTANCE_REPORT.md`](../../ACCEPTANCE_REPORT.md)) |
