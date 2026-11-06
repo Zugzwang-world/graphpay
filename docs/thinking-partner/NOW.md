@@ -122,10 +122,10 @@ Updated 23:50 IST, Fri 6 Nov (W5 Ops).
 
 ## w6-sdk
 
-Updated 23:55 IST, Fri 6 Nov (W6 SDK, session `local_b6205da6-b613-4662-872a-6d4879c66faf`; relay `relays/w6-sdk.md`).
-- **Both SDKs go to 1.0.0, with no new features.** No tester feedback arrived (no issues), so W6 audited each README against its code. It found 5 bugs in arkiv-graph and 7 in agentpay; all are fixed, with tests. Both READMEs start with the quickstart and link the live demo and its source.
-- **This step:** arkiv-graph 1.0.0. The live site's tests pass; the read fix changes nothing unless the SDK skips a row.
-- **Next:** agentpay 1.0.0 (its own PR), then the publish. The publish needs the founder's npm login and web approval at the browser (about 5 minutes).
+Updated 00:12 IST, Sat 7 Nov (W6 SDK, session `local_b6205da6-b613-4662-872a-6d4879c66faf`; relay `relays/w6-sdk.md`).
+- **arkiv-graph 1.0.0 is merged** ([#174](https://github.com/Zugzwang-world/graphpay/pull/174)): five bugs fixed, with tests. The live site's tests pass, and its reads are unchanged unless the SDK skips a row.
+- **This step: agentpay 1.0.0.** Seven bugs fixed. Two reviewer passes found one regression, now fixed, and nothing blocking remains. The live errand does not use this package.
+- **Next: the publish.** It needs the founder's npm sign-in and web approval at the browser (about 10 minutes); W6 asks in its own chat once this PR is merged.
 
 ## w7-submission
 
