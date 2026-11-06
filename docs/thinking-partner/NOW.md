@@ -86,15 +86,15 @@ Updated 01:16 IST, Sat 7 Nov (W1 Identity, session `local_45f7cf5d-c31e-4dbf-b84
 
 ## w2-city
 
-Updated 01:25 IST, Sat 7 Nov (W2 City, session `local_da212093-3d02-4768-9314-ab7be179eb86`).
-- **Steps 1 and 2 are done and live:**
-  - the dosa shops on Arkiv under their own names, with their history (#167);
-  - the three menus on Swarm, every item with its dish photo (#181), and now each with its storefront photo (this PR).
-
-  Every file was checked by its hash on read-back.
-- **The big city M was trimmed by the founder to what was seeded** (ADR-0080): 3,175 events, 123 shops (the final cast and 120 synthetic places), 1,387 payment rows, graph store only. The seeding has stopped.
-- **Race mode stays at S, by the founder's decision** (Q2: 2 reads against 5, measured). M has no plain store, so it is not raced.
-- **In review:** #186, race mode for any seeded size, the seeder's recovery, M as seeded.
+Updated 01:45 IST, Sat 7 Nov (W2 City, session `local_da212093-3d02-4768-9314-ab7be179eb86`).
+- **W2 City is done: all four items are closed.**
+  - The dosa shops are on Arkiv under their own names, with their history (#167).
+  - The menus are on Swarm, with the dish and storefront photos (#181, #201).
+  - The big city M, as the founder trimmed it (ADR-0080): 3,175 events, 123 shops (the cast and 120 synthetic places), 1,387 payment rows. Graph store only; 1.65 tGLM.
+  - Race mode stays at S, by the founder's decision: 1,003 events, 490 payment rows. Q2 measured at 2 reads against 5. The lab's 48 stays labelled "lab".
+  - The seeder's recovery and race mode for any seeded size (#186, reviewed).
+- **Running:** nothing. **Blockers:** none.
+- **Next (optional, in OPEN):** delist the old shops' rows after D8 leaves S; write M's plain store only if the founder asks.
 
 ## w3-payments
 

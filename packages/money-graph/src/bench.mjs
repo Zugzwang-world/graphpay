@@ -294,7 +294,9 @@ export function score(question, mode, answer, truth) {
 
 // One Arkiv connection's calls as they land: pass `tap.log` as the connection's `log`
 // (connectArkiv), then `tap.listen(arkiv.stats, onCall)` before a race. Each call gives
-// onCall({ call, ms, bytes, status }); the URL never appears.
+// onCall({ call, ms, bytes, status }); the URL never appears. A transport event (the
+// fallback after a keyed endpoint's spent quota) is not a call: its bytes go to the call it
+// belongs to, so the frames count what the answer counts.
 export function callTap() {
   let stats = null;
   let listener = null;
@@ -303,7 +305,7 @@ export function callTap() {
   const total = () => stats.requestBytes + stats.responseBytes;
   return {
     log(e) {
-      if (!listener || !e?.method) return;
+      if (!listener || !e?.method || e.event) return;
       n += 1;
       const now = total();
       listener({ call: n, ms: e.ms, bytes: now - last, status: e.status });

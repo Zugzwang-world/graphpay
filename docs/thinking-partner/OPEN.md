@@ -191,7 +191,7 @@ Updated 23:38 IST, Fri 6 Nov (W7 Submission).
 
 ## w2-city
 
-- Closed 01:24 IST: race mode stays at S, by the founder's decision. M stays graph-only as seeded (3,175 events, ADR-0080), and D7 stays blocked with no plain store at M.
+- Closed 01:24 IST: race mode stays at S, by the founder's decision. S is 1,003 events and 490 payment rows; Q2 was measured at 2 reads against 5 (`bench/results/questions-S.csv`). M stays graph-only as seeded (ADR-0080): 3,175 events, 123 shops, 1,387 payment rows. D7 stays blocked, with no plain store at M. If the race at M is wanted: estimate M's plain store on ArkivSim first (`seed.mjs --size M --backend sim`), then write it, run `bench/d7.mjs --size M`, and set `raceSize: "M"`.
 - **After the flip, delist the old shops' directory rows** (owner: W2). What: kesar-kingdom, syrup-street and jamun-junction stay listed under their new display names, so the map shows each name twice. Why: acceptance D8 still runs at S, where they are the cast. Recommendation: delist them once D8 moves off S (`node packages/city/scripts/cast.mjs --execute --store delist-test`, in #186).
 - **`arkiv/swarm.md` names the old menus** (owner: W7). What: its worked example is Kesar Kingdom's menu. The final cast's menus, now version 2 with their storefront photos, are in `docs/sessions/arkiv/swarm-menus.json`: entity, transaction, reference, link, and each image's reference and hash. Recommendation: use Filter & Fold's as the example ([menu.json](https://api.gateway.ethswarm.org/bzz/3f26da16d819311ceca5fde8e4af8077b497c272292df78d7f3292433df2dc76/menu.json)).
 - Closed 00:31 IST: W1's flip changed the labels and the category together, after the history and the workers' restart (#189).
@@ -225,7 +225,7 @@ Updated 23:38 IST, Fri 6 Nov (W7 Submission).
 - **Race mode's size and its 429** (from w2-city; owner: the frontend pass). What:
   - `/api/race` reads any seeded size (`size`); without one it takes `syntheticCity.raceSize`. Race mode stays at S (the founder's decision): M has no plain store.
   - On a city of more than 1,000 payment rows a plain race starts once every 10 minutes per server, and inside that gap it answers 429 with `{ error }` saying when the next can start. `components/race-view.tsx` shows every 429 as "Another race is running".
-  - The deck's "48 reads" is the lab's 10,000-event city; label it "lab", or show the measured S numbers (2 against 5).
+  - The deck's "48 reads" is the lab's 10,000-event city (the founder: keep it labelled "lab"). Its tiles say "(lab)", but the chart in `apps/web/public/deck/index.html` (line 638) says "measured live" under "48 reads"; make that "measured in the lab". Or show the measured S numbers (2 against 5).
 
   Recommendation: show the 429's `error` text.
 
