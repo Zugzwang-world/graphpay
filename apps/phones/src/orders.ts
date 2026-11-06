@@ -20,6 +20,7 @@ export interface LedgerRow {
 }
 
 export interface FoldProduct {
+  id?: string;
   shop: string;
   name: string;
   short: string;
@@ -131,18 +132,22 @@ export const rowKey = (r: Pick<LedgerRow, 'kind' | 'ref'>): string => `${r.kind}
 export function itemsFor(shop: string, total: bigint, products: FoldProduct[]): Order['items'] {
   const own = products.filter((p) => p.shop === shop);
   const exact = own.find((p) => p.priceMicro === total);
-  if (exact) return [{ name: exact.name, qty: 1, price: usdt(total) }];
+  if (exact) return [{ name: exact.name, qty: 1, price: usdt(total), ...(exact.id ? { productId: exact.id } : {}) }];
   for (const p of own) {
     const unit = p.priceMicro / BigInt(p.quantity);
-    if (unit > 0n && total % unit === 0n) return [{ name: p.unitName, qty: Number(total / unit), price: usdt(unit) }];
+    if (unit > 0n && total % unit === 0n) return [{ name: p.unitName, qty: Number(total / unit), price: usdt(unit), ...(p.id ? { productId: p.id } : {}) }];
   }
   return [];
 }
 
-// Every order in the rows, oldest first. Rows without an order id or a settlement
-// transaction (the seeded history) are left out.
+// A row of the live ledger: a chain event (it has a settlement transaction) or a refund request
+// recorded on Arkiv (`req:` ref, no transaction). The seeded history has neither.
+export const isLive = (r: Pick<LedgerRow, 'tx' | 'ref' | 'kind'>): boolean => r.tx !== null || (r.kind === 'request' && r.ref.startsWith('req:'));
+
+// Every order in the rows, oldest first. Rows without an order id, and the seeded history,
+// are left out; an order needs at least one chain event.
 export function foldOrders(rows: LedgerRow[], ctx: FoldContext, isNew: (orderId: string) => boolean = () => false): Order[] {
-  const real = rows.filter((r) => r.orderId && r.tx).sort((a, b) => a.ts - b.ts || (a.ref < b.ref ? -1 : 1));
+  const real = rows.filter((r) => r.orderId && isLive(r)).sort((a, b) => a.ts - b.ts || (a.ref < b.ref ? -1 : 1));
   const byOrder = new Map<string, LedgerRow[]>();
   for (const r of real) byOrder.set(r.orderId!, [...(byOrder.get(r.orderId!) ?? []), r]);
 
@@ -158,8 +163,8 @@ export function foldOrders(rows: LedgerRow[], ctx: FoldContext, isNew: (orderId:
 
   const orders: Order[] = [];
   for (const [orderId, trail] of byOrder) {
-    // A subscription row alone is a plan, not an order.
-    if (!trail.some((r) => r.kind === 'order' || r.kind === 'pay' || r.kind === 'renew')) continue;
+    // A subscription row alone is a plan, not an order; a request alone has no order to refund yet.
+    if (!trail.some((r) => r.tx && (r.kind === 'order' || r.kind === 'pay' || r.kind === 'renew'))) continue;
     const first = trail[0]!;
     const pay = trail.find((r) => r.kind === 'pay' || r.kind === 'renew');
     const total = pay?.amountMicro ?? trail.find((r) => r.kind === 'order')?.amountMicro ?? 0n;

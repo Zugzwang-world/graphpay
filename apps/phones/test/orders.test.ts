@@ -85,3 +85,12 @@ test('a stream edge becomes a row from the buyer agent, whichever way it points'
   assert.equal(order?.isNew, true);
   assert.equal(order?.refunds[0]?.status, 'refunded');
 });
+
+test('a refund request recorded on Arkiv (no transaction) joins its order as requested', () => {
+  const pay = rowFromEdge({ kind: 'pay', from: PAYER, to: SHOP, amountMicro: '4800000', orderId: ORDER, ref: `1874:${TX(1)}:3`, ts: '1793944000', settlementTx: TX(1) }, SHOP);
+  const request = rowFromEdge({ kind: 'request', from: PAYER, to: SHOP, amountMicro: '800000', orderId: ORDER, ref: `req:${ORDER}:1`, ts: '1793944100', settlementTx: null }, SHOP);
+  const [order] = foldOrders([pay, request], ctx);
+  assert.equal(order?.refunds[0]?.status, 'requested');
+  assert.deepEqual(order?.refunds[0]?.amount, { amount: '0.80', currency: 'USDT' });
+  assert.deepEqual(foldOrders([request], ctx), [], 'a request alone is no order');
+});

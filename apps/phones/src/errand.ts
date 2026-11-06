@@ -217,10 +217,10 @@ export class ErrandMapper {
   }
 
   private result(r: Json): DemoEvent[] {
+    // The narrative is the model's own prose (RunResult.narrative); the phones show only the
+    // agents' code-built messages and the tools' figures, so it is left out.
     const events: DemoEvent[] = [];
-    const concierge = this.story.agents.find((a) => a.main);
     const narrative = typeof r.narrative === 'string' && r.narrative.trim() ? r.narrative.trim() : null;
-    if (concierge && narrative) events.push({ type: 'agent.message', agent: this.agent(concierge.ens)!, text: narrative, at: Date.now(), errandId: this.errandId });
     if (this.done) return events;
     const receipt = isObj(r.receipt) ? r.receipt : null;
     if (r.status === 'paid' && receipt && typeof receipt.transaction === 'string' && typeof r.orderId === 'string') {
