@@ -1,0 +1,43 @@
+{
+  "site": "https://graphpay-event.vercel.app",
+  "startedAt": "2026-11-06T19:41:11.514Z",
+  "request": null,
+  "http": null,
+  "status": null,
+  "receipt": null,
+  "givenTx": "0xcc69b7bb16eb17c9dede32da4765a90ca15a6af18397011efae6a9eb599e5cb5",
+  "shopEns": "filter-and-fold.graphpay.eth",
+  "checks": {
+    "settled": {
+      "orderId": "0x305c26583e4e1f47049b8d6f15753bdad42ab36a09fe5c4c311d6ae23dffb8b4",
+      "shopNode": "0xc82a07d8a94558e9c674da7dcff543682d8b80d29787bda4616890ed93dc07d6",
+      "expectedNode": "0xc82a07d8a94558e9c674da7dcff543682d8b80d29787bda4616890ed93dc07d6",
+      "merchant": "0x26940565cb470e25B06F5a39cB4E3B98b3e0d03E",
+      "shopWallet": "0x26940565cb470e25B06F5a39cB4E3B98b3e0d03E",
+      "ok": true
+    },
+    "mirrored": {
+      "edge": {
+        "kind": "pay",
+        "ref": "1874:0xcc69b7bb16eb17c9dede32da4765a90ca15a6af18397011efae6a9eb599e5cb5:3",
+        "to": {
+          "ens": "filter-and-fold.graphpay.eth"
+        },
+        "amountMicro": "4800000"
+      },
+      "ok": true
+    },
+    "tally": {
+      "before": {
+        "orders": "241",
+        "paidMicro": "1156800000"
+      },
+      "after": {
+        "orders": "242",
+        "paidMicro": "1161600000"
+      }
+    }
+  },
+  "about": "W1: the first live errand after the post-flip workers restart (01:00 IST, main ff67dac) paid Filter & Fold through filter-and-fold.graphpay.eth; checked by W1 from the chain and from Arkiv through the site. ENS acceptance reads after the flip: 101 pass, 0 fail, B9a for filter-and-fold on this order.",
+  "paidAt": "01:07:48 IST, Whitechain block 12397500"
+}
