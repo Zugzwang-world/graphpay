@@ -155,10 +155,14 @@ The kickoff rules (the deadline Sat 09:00 IST; AI use documented; spec files in 
 
 Updated 23:38 IST, Fri 6 Nov (W7 Submission).
 - **Submit by 08:00 IST** (what: the title, the descriptions, the links and three partner prizes; where: [`docs/submission/ETHGLOBAL.md`](../submission/ETHGLOBAL.md), one block per form field; why: the form closes at 09:00 IST; recommendation: paste from the file after W7's final pass, and tick its "Before you press Submit" list).
-- **The video** (what: 2 to 4 minutes in your own voice, every party shown; where: its link goes in the form's video field; why: Whitechain's qualification and ETHGlobal's rules; recommendation: record after the night streams land, with the payer active and the shop open).
+- **The video** (what: 2 to 4 minutes in your own voice, every party shown, from the shot list [`docs/submission/VIDEO.md`](../submission/VIDEO.md); where: its link goes in the form's video field; why: Whitechain's qualification and ETHGlobal's rules; recommendation: record after the night streams land, with the payer active and the shop open).
 - **Review the README and the partner files** (what: the "verify each claim" table, the persona note, the Team section, `arkiv/`, `WHITECHAIN_FEEDBACK.md`, `docs/submission/ENS.md`; why: judges open them first; recommendation: tell W7 any change before 07:00 IST).
 - **The team list** (what: the README names `Zugzwang-world` and `ajatshatru01` by GitHub handle; why: no other member is recorded in the repo; recommendation: add names or anyone missing, and confirm each is on the ETHGlobal project).
-- Closed: the README (#154), AI_USAGE.md and the Arkiv files (#159), the Whitechain and ENS notes (#161), the form text (this PR).
+- Closed: the README (#154), AI_USAGE.md and the Arkiv files (#159), the Whitechain and ENS notes (#161), the form text (#164); the shot list and the checklist (this PR).
+
+## w3-payments
+
+- **Acceptance follows the 0.80 re-order** (owner: W5). What: `integration/hosted.mjs` C3 quotes `story.order.sku` against the re-order's 0.80, and `acceptance/checks.mjs` C3 expects 1.20. Why: C3 is refused before signing on every fresh run. Recommendation: quote `story.order.reorder.sku` and take the amount from `order.reorder.priceMicro` (W5 is told).
 
 ## w3-payments
 
@@ -170,11 +174,62 @@ Updated 23:38 IST, Fri 6 Nov (W7 Submission).
 
 ## w2-city
 
-- **W1's flip changes the labels and the category together** (owner: W1; the Coordinator times it). What: in `packages/config/story.json`, set `shops[].label` to the final cast's labels by story role (good → `filter-and-fold`, runner-up → `idli-index`, trap → `tawa-tangle`) and every `shops[].category` to `south-indian`, in one PR. Why: the analyst ranks `nodes(category)`, and the new rows are `south-indian`; a labels-only flip would rank the old shops. A test in `packages/city` fails it. Recommendation: one PR, after the new shops' ENS names resolve.
+- **The flip waits for the restart that follows the history** (owner: the Coordinator, who times it; W5 restarts the workers). What, in order:
+  1. W2's history for the new shops is complete (1,258 of 1,258 events);
+  2. then W5 restarts the workers;
+  3. then W1's flip merges.
+
+  Why: a mirror that read the new shops' tallies part-way would plan their first live payment from stale counts and overwrite their totals (reviewer finding, ADR-0077). Recommendation: keep that order. A mirror started after the history is fine; W5's restart on W2's "done" is that restart.
+- **W1's flip changes the labels and the category together** (owner: W1). What: in `packages/config/story.json`, set `shops[].label` to the final cast's labels by story role and every `shops[].category` to `south-indian`, in one PR:
+  - good → `filter-and-fold`;
+  - runner-up → `idli-index`;
+  - trap → `tawa-tangle`.
+
+  Why: the analyst ranks `nodes(category)`, and the new rows are `south-indian`; a labels-only flip would rank the old shops. A test in `packages/city` fails it. Recommendation: one PR.
 - **After the flip, delist the old shops' directory rows** (owner: W2). What: kesar-kingdom, syrup-street and jamun-junction stay listed under their new display names, so until then the map shows each name twice. Why: the old rows feed acceptance D8 at S until acceptance moves to M. Recommendation: W2 delists them once acceptance checks M.
+
+## w6-sdk
+
+- **npm's web approval for both SDKs at 1.0.0** (owner: the founder). What: W6 runs `npm login` (the sign-in link), then publishes both packages one after the other (one approval link, which lasts about 5 minutes; last time npm reused it for the second package). Where: the links come in this chat and as a notification; open them in the browser signed in to npm as the owner of `graphpay_ethglobal`. Why: the brief's done-when is both packages on npm at 1.0.0. Recommendation: about 10 minutes at the browser, as soon as both PRs are merged.
 
 ## frontend
 
+- **Kill a disposable agent** (from w1-identity; owner: the frontend pass). What: the route is live once W1's kill PR is deployed.
+  - `GET /api/customer/kill-disposable` answers `{ spare: { label, name, epoch } | null, live, pool }`. Show the button only while `spare` is set: it is set only when the spare's name and its spending pass are both live. After a kill, the next spare appears within a few minutes.
+  - `POST` (no body) takes 40 to 110 s. It answers `{ label, name, txs: [{ chain: 'sepolia' | 'whitechain', what: 'unregister' | 'revoke', hash }], revoked, payment: { outcome: 'refused' | 'paid' | 'unknown' | 'not-sent', http, reason, orderId, transaction }, recorded: { ref } | null, nextSpare, incomplete }`.
+  - The beat is `payment.outcome` `refused` with `reason` `ENS_EXPIRED_OR_REVOKED`, plus `recorded`. A step that failed after the kill is named in `incomplete`, and the kill stands.
+  - Other answers: `409` while another kill runs, `503` when no spare is ready yet, `502` when the outcome is unclear (then check GET).
+  - Why: the stage's kill beat (demo script step 7, the ENS kill switch). The story is the owner unregistering the agent's name, the watcher revoking its pass, and its next payment refused and recorded on Arkiv.
+  - Recommendation: one presenter-facing button on Vitalik's phone, in an "advanced" corner, since each tap ends one name for good. Show a countdown, then three links: the Sepolia unregister, the Whitechain revoke and the refusal.
 - **/customer's "By 23:59" chip** (from w4-agents; owner: the frontend pass). What: `apps/web/components/customer-screen.tsx` shows `order.deadlineLocal`, but the request is now relative. Why: the chip and the request disagree. Recommendation: show "within an hour", or the run's deadline from the result frame (`result.mandate.deadlineIso`); no new route or event is needed.
 - **The deck's errand text** (from w4-agents; owner: the frontend pass). What: `apps/web/public/deck/index.html` keeps a hand copy of the request that still says "by 11:59 pm". Recommendation: copy the new request from `packages/config/story.json` (`order.request`).
 - **Re-order is "another coffee"** (from w3-payments; owner: the frontend pass). What: `POST /api/customer/reorder` (body `{ parentOrderId }`, unchanged) pays the story's re-order, the filter coffee at 0.80; the answer is `{ status: 'paid', orderId, parentOrderId, amountMicro, transaction }`, or `202` with `status: 'pending'`. Recommendation: label the button from `order.reorder.item` and `order.reorder.priceMicro`; no new event.
+- **Subscribe to the Sunday box** (from w3-payments; owner: the frontend pass). What: `POST /api/customer/subscribe`, body `{}` or `{ plan }`, where `plan` must be the story's. The persona subscribes and the payer agent pays 2.40 (`renewal.priceMicro`) on the labelled 2-minute demo clock (`renewal.demoPeriod`). The first box is charged in the same transaction, and the cron charges the next ones, at most `maxCharges` (3) in all.
+  - Answer: `{ status: 'active' | 'pending', subId, plan, item, sku, shopEns, priceMicro, periodSeconds, period, maxCharges, allowanceMicro, firstChargeAt, nextChargeAt, transaction, firstCharge: { orderId, charged, failReason } }`.
+  - Refusals: `ALREADY_SUBSCRIBED` (with `subId`), `TOO_SOON` (within 3 min of the last one), `PAYER_NOT_ACTIVE`, `OVER_PASS`, `BALANCE_LOW`, `PAYEE_MISMATCH`, `RENEWER_LOW`, `CHECKOUT_REFUSED` (with `revert`).
+  - Recommendation: wire `startRenewal` to the route and emit `renewal.created` with the first charge's explorer link. Use `renewal.sku` for its product; `story-projection.mjs` still uses `order.sku`.
+- **Cancel the subscription** (from w3-payments; owner: the frontend pass). What: `POST /api/customer/unsubscribe`, body `{}` or `{ subId }`, where `subId` must be the payer's own. The payer agent's own signature, gasless. Answer: `{ status: 'cancelled' | 'pending', subId, transaction, effectiveAt }`. Refusals: `NO_SUBSCRIPTION`, `NOT_THIS_SUBSCRIPTION`, `NOT_ACTIVE`. Recommendation: wire `cancelRenewal` and emit `renewal.cancelled`.
+- **The subscription in the customer state** (from w3-payments; owner: the frontend pass). What: `GET /api/state/customer` now fills `subscription`: `{ subId, plan, period, priceMicro, nextChargeAt, renewals: [{ at, transaction }], active, status, cycle, periodSeconds, chargesLeft, item, shopEns }`, newest charge first. Events: each charge is a `renew` edge plus a `pay` edge in the merchant stream. The subscription itself is a `subscribe` edge, and a cancel is a `cancel` edge, both from the persona. Recommendation: fill `snapshot.renewals` from it; when `active` and `chargesLeft` is 0, offer Cancel, since the demo plan has used its charges and a new subscribe waits for the cancel.
+- **Pause and Resume on the tapped card** (from w5-ops; owner: the frontend pass). What: `/api/customer/pause` and `/api/customer/resume` now act on `{ agent: <ENS name> }`; with no agent they still mean the payer. `apps/phones/src/live-adapter.ts` `pauseAgent(ens)` and `resumeAgent(ens)` send `{}` and report every change as the payer's. Why: the W5 brief, "act on the agent whose card was tapped". Recommendation: send `{ agent: ens }`, and emit `agent.permission` for that agent. A card without a spending pass (Concierge, Analyst) gets HTTP 409, `reason: "NO_PASS"`, with an `error` sentence to show as it is; or hide Pause on those cards.
+- **Self-healing on the phones** (from w5-ops; owner: the frontend pass). What: a paused agent resumes by itself after 2 minutes; a closed shop reopens after 5 (the cron `/api/cron/heal`). The pause answer carries `resumesAfterS`. `GET /api/state/heal` gives each pausable agent's `status`, `pausedAt` and `resumesAt`, and the shop's `open`, `openUntil`, `closedAt` and `reopensAt` (ISO times). Why: `/api/state/customer` covers only the payer, and the merchant phone keeps its own Open state, so it shows Closed after the cron reopens the shop. Recommendation: poll `/api/state/heal` with the customer state; show "resumes by itself at …" and "reopens at …".
+
+## w5-ops
+
+- **Presenter-only Pause** (owner: the founder; from Founder now). What: a visitor's Pause now heals itself after 2 minutes, and a Close after 5. Why: the open question was whether to make Pause presenter-only after a visitor paused the payer for 96 minutes. Recommendation: keep Pause public; self-healing bounds the damage.
+- **W_DIRECTORY's tGLM** (owner: W5). What: the cron renews the shop's listing about every 5 minutes when no merchant page is open; W_DIRECTORY held 0.417 tGLM at 23:15 IST. Recommendation: W5 watches the balance overnight and tops it up from FUNDER (15.08 tGLM) if it runs low.
+- **Decline a refund request** (from w3-payments; owner: the frontend pass).
+  - What: `POST /api/merchant/refund-decline`, body `{ orderId, note? }`. The note is plain text, at most 140 characters, with no `@ / :` and no run of six digits (no contact details on a public graph). The request's reason follows the same rule now.
+  - Answer: `{ orderId, decision: 'declined', amountMicro, requestRef, ref, note, arkivTx, entityKey }`. `arkivTx` is null when the decline was already on the record.
+  - Refusals: `NO_REQUEST`, `ALREADY_DECIDED`, `STILL_PENDING` (the chain shows a refund the graph does not yet), `NOT_REFUNDABLE`, `NOT_THE_STORY_BUYER`, `NOT_OURS`, `NO_SUCH_ORDER`, `BAD_ORDER`, `BAD_NOTE`, `TRAIL_TOO_LONG`, `TOO_SOON`.
+  - Event: a `request` edge in `/api/merchant/events` *from the shop to the payer agent*, ref `dec:<orderId>:<the request's minute>`, one per request. A refund request is the same kind the other way round (payer to shop, ref `req:`). The note is in the route's answer only; the graph's edges carry no payload.
+  - Recommendation: wire `declineRefund` to the route. In `apps/phones/src/orders.ts`, `isLive` drops `dec:` rows today, so nothing changes on the phones yet. When it is widened, add a `dec:` branch where `request` rows are folded (refund status `declined`), or the decline becomes a second pending request and rings `refund_request`. The `/order/<id>` page already words it "Refund declined" (`lib/order-trail.ts`). The unlinked `/merchant` page still says "Refund requested by" the shop.
+- **Over the pass, "for everyone"** (from w3-payments; owner: the frontend pass).
+  - What: `POST /api/customer/over-pass`, empty body. The payer agent signs the story's `order.overPass` order: 100 of the combo, 480 test USDT. The signed attempt goes to our facilitator's verify step only, which never sends. It refuses (`CAP_EXCEEDED`, the lower of the ENS cap and the policy cap), and its recorder writes the refusal to Arkiv. Only an attempt above the whole pass is ever signed.
+  - Answer: `{ refused, reason, sent: false, request, item, quantity, attemptedMicro, passMicro, spentTodayMicro, leftMicro, orderId, arkiv: { ref, entityKey }, repeated? }`. A second tap within a minute gets the same answer with `repeated: true`, and no new record. `NOT_OVER_PASS` means the order fits the pass, so nothing is signed.
+  - Event: a `fail` edge from the payer agent to the shop, ref `att:<orderId>:…`, in the merchant stream.
+  - Recommendation: a "Dosas for everyone" chip (its text is `order.overPass.request`) that calls the route and shows a refused attempt (`RefusedAttempt` kind `payment`, reason `cap`) with the Arkiv entity link.
+- **The agent tries to raise its own cap** (from w3-payments; owner: the frontend pass).
+  - What: `POST /api/customer/raise-cap`, body `{ capMicro? }`; the default is double the ENS cap. The route simulates `setText(graphpay.cap_micro)` from the payer agent's address on Sepolia, at a stated block, and the resolver reverts `EACUnauthorizedAccountRoles`. Nothing is sent, and only that revert is recorded.
+  - Answer: `{ refused: true, sent: false, simulated: true, revert, agent, owner, key, attemptedMicro, currentMicro, resolver, block, arkivTx, entityKey, repeated? }`.
+  - Event: a `request` edge from the payer agent to the persona, ref `cap:<node>:<minute>`, amount 0 (the figure is in its payload). It is not in the shop's stream.
+  - Recommendation: wire `tryRaiseCap` to the route and show `cap.change.refused` with the revert reason and the Arkiv link.

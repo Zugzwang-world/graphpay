@@ -29,3 +29,11 @@ test('the net is what the shop kept: payments and renewals less refunds', () => 
 test('an unknown edge kind is shown as itself, not hidden', () => {
   assert.equal(kindWord('dispute'), 'dispute');
 });
+
+test('the shop\'s decline of a refund request reads as a decline and shows no amount', () => {
+  const steps = trailOf([
+    { kind: 'request', from: { ens: 'payer.example.eth' }, to: { ens: 'shop.example.eth' }, amountMicro: '800000', ts: '10', ref: 'req:0xab:1', synthetic: false },
+    { kind: 'request', from: { ens: 'shop.example.eth' }, to: { ens: 'payer.example.eth' }, amountMicro: '800000', ts: '20', ref: 'dec:0xab:1', synthetic: false },
+  ]);
+  assert.deepEqual(steps.map((s) => [s.word, s.amountMicro]), [['Requested', '800000'], ['Refund declined', null]]);
+});

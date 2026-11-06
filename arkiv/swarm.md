@@ -1,6 +1,6 @@
 # Swarm in GraphPay
 
-**Status: menus and one dish photo live on Swarm and referenced from Arkiv; the encrypted refund photo is not built.** The three cast shops' menus (synthetic story data) are public files on Swarm, uploaded through the public gateway, each pointed to by a `menu` row on Arkiv with its content hash. The phones' build reads them and shows the Swarm photo wherever the dosa combo appears. The encrypted refund photo was dropped on purpose: Swarm is first in the cut order (ADR-0053), and the refund request's photo stays on the phone. Nothing below claims otherwise. Drafted by T3 on Fri 6 Nov; finished by the Submission stream (W7) that night, with every link below fetched and its hash checked at about 23:25 IST.
+**Status: menus and one dish photo live on Swarm and referenced from Arkiv; the encrypted refund photo is not built.** The three cast shops' menus (synthetic story data) are public files on Swarm, uploaded through the public gateway, each pointed to by a `menu` row on Arkiv with its content hash. The phones' build reads them keyless and would use a Swarm image for any product without a photo of its own; today every product has the site's own copy of the Grok photo, so the phones show that, and the Swarm copy is the one anyone can check by hash. The encrypted refund photo was dropped on purpose: Swarm is first in the cut order (ADR-0053), and the refund request's photo stays on the phone. Nothing below claims otherwise. Drafted by T3 on Fri 6 Nov; finished by the Submission stream (W7) that night, with every link below fetched and its hash checked at about 23:25 IST.
 
 The seven items below follow the Swarm section of the event addendum.
 
@@ -23,14 +23,14 @@ The other two cast shops' menus (Tawa Tangle and Idli Index) are in [`docs/sessi
 
 ## 3. Batch ID, buyer wallet, node or service
 
-Decided (ADR-0061, ADR-0039): the upload goes through the **public gateway** (`api.gateway.ethswarm.org`) anonymously, with the all-zero postage batch id. We buy no stamp, run no Bee node, hold no sBZZ, and no signing step touches mainnet. The gateway's operator pays for the storage. So there is **no buyer wallet and no batch of our own**.
+Decided (ADR-0061, ADR-0039): the upload goes through the **public gateway** (`api.gateway.ethswarm.org`) without an account, with the all-zero postage batch id. We buy no stamp, run no Bee node, hold no sBZZ, and no signing step touches mainnet. The gateway's operator pays for the storage. So there is **no buyer wallet and no batch of our own**.
 
 ## 4. The upload and read files
 
-- `packages/money-graph/src/swarm.mjs`: the gateway client (upload, read, link). Anonymous, the all-zero batch id, never encrypted; a reference that is not 64 hex digits is refused.
+- `packages/money-graph/src/swarm.mjs`: the gateway client (upload, read, link). No account, the all-zero batch id, never encrypted; a reference that is not 64 hex digits is refused.
 - `packages/money-graph/src/menu.mjs`: `menuDocument`, `writeMenu` (upload, read back, check the hash, then create or patch the `menu` row) and `readMenu` (row, bytes from the gateway, hash check; uploads again if the gateway has lost it, which gives the same reference).
 - `packages/money-graph/scripts/menus.mjs`: the run script. Tests: `packages/money-graph/test/menu.test.mjs` (an in-memory stand-in for the gateway and ArkivSim).
-- `apps/phones/menu-images.mjs`: the phones' build reads each shop's menu keyless, checks it, and passes each item's Swarm link into the product the phones show.
+- `apps/phones/menu-images.mjs`: the phones' build reads each shop's menu keyless, checks it, and gives its Swarm image link to any product that has no image of its own (`apps/phones/build.mjs`).
 
 ## 5. Run steps
 
@@ -48,7 +48,7 @@ Filled in once the video is recorded, if a Swarm moment is in it; the form text 
 ## 7. What got in the way, and what to know
 
 - **The public gateway is for testing.** It stores on Swarm's main network, keeps data for a limited time, and its operator, not us, pays. That is why only public content goes there and why Arkiv keeps a content hash: a reader checks the bytes against it, and if the reference stops answering, the menu is uploaded again and comes back under the same reference.
-- **It worked on the first try, anonymously.** A probe (Fri 04:19 UTC, a 76-byte labelled test file) went to `POST /bytes` and came back with HTTP 201 and a 64-hex reference; reading it back returned the same bytes (matching sha-256). The menus use `POST /bzz?name=menu.json` instead, so the link opens as a file.
+- **It worked on the first try, with no account.** A probe (Fri 04:19 UTC, a 76-byte labelled test file) went to `POST /bytes` and came back with HTTP 201 and a 64-hex reference; reading it back returned the same bytes (matching sha-256). The menus use `POST /bzz?name=menu.json` instead, so the link opens as a file.
 - **A raw reference does not open in a browser by itself.** `GET /bzz/<reference>` without a file name answered a 302 to a "forbidden" page on `bzz.link`; `GET /bzz/<reference>/menu.json` answers 200 with the JSON. So our links always carry the file name. We do not know why the bare path is redirected.
 - **We do not let the gateway encrypt for us.** Per the Bee documentation, an encrypting node's operator would hold the key. A refund photo (not built) would be encrypted first (AES-256-GCM, one key per file) and only the ciphertext uploaded; a menu row refuses any reference that is not 64 hex digits, so an encrypted 128-hex reference can never land in a public row by mistake. The design is kept for anyone who builds it.
 - **No stamp, node or wallet of ours.** The gateway's operator pays; no signing step touches mainnet (testnets only).

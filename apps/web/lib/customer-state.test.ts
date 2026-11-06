@@ -47,6 +47,7 @@ const sources = (over: Partial<Sources> = {}): Sources => ({
   spentToday: async () => 1_500_000n,
   payments: async () => [pay(NOW - 60, '0xorder')],
   trail: async () => [{ kind: 'pay', amountMicro: '4800000', ts: String(NOW - 60), ref: `1874:${tx}:0`, orderId: '0xorder' }],
+  subscription: async () => null,
   ...over,
 });
 
@@ -69,6 +70,14 @@ test('a paused name is Paused on the phone; no payments is no last order', async
 
 test('one source failing fails the whole answer (no half-known agent is shown as active)', async () => {
   await assert.rejects(readCustomerState(sources({ policy: async () => Promise.reject(new Error('rpc down')) }), NOW), /rpc down/);
+});
+
+test('the subscription comes from its own source, and an unreadable one is no subscription, never a failed state', async () => {
+  const summary = { subId: `0x${'cd'.repeat(32)}`, plan: 'p', period: 'demo', priceMicro: '2400000', nextChargeAt: null, renewals: [], active: false, status: 'CANCELLED' as const, cycle: 1, periodSeconds: 120, chargesLeft: 0, item: 'box', shopEns: 'shop.example.eth' };
+  assert.deepEqual((await readCustomerState(sources({ subscription: async () => summary }), NOW)).subscription, summary);
+  const state = await readCustomerState(sources({ subscription: async () => Promise.reject(new Error('rpc down')) }), NOW);
+  assert.equal(state.subscription, null);
+  assert.equal(state.agent.status, 'ACTIVE');
 });
 
 test('the checkout address is read from the deployment record (whitechain.contracts.checkout.address)', async () => {

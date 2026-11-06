@@ -64,6 +64,38 @@ test('watcher: an unregister revokes the existing policy at the stored epoch and
   assert.deepEqual(w.invalidated, [agent.name]);
 });
 
+test('watcher: onRevoked runs once after a revocation was applied, never when the sink failed, and its failure is only logged', async () => {
+  const calls = [];
+  const lines = [];
+  const mk = (w, onRevoked) => createEnsWatcher({ client: w.client, names: [agent.name], sink: w.sink, reader: w.reader, gate: w.gate, checkpoint: w.checkpoint, now: async () => w.nowTs, log: (l) => lines.push(l), onRevoked });
+  const killed = { status: STATUS.AVAILABLE, expiry: 1_500n, latestOwner: zeroAddress, tokenId: TOKEN, resource: 9n };
+  // the sink fails first: no mark, no hook; the repeated event applies it and runs the hook once
+  const w = world();
+  const watcher = mk(w, (c) => calls.push(c));
+  await watcher.start();
+  w.state = killed;
+  w.failPolicy = true;
+  await assert.rejects(watcher.handle([log('LabelUnregistered', { tokenId: TOKEN })]));
+  await new Promise((r) => setImmediate(r));
+  assert.equal(calls.length, 0);
+  w.failPolicy = false;
+  await watcher.handle([log('LabelUnregistered', { tokenId: TOKEN })]);
+  await watcher.handle([log('LabelUnregistered', { tokenId: TOKEN })]); // a replay: already revoked
+  await new Promise((r) => setImmediate(r));
+  assert.deepEqual(calls, [{ name: agent.name, node: NODE, epoch: 0, why: 'unregistered' }]);
+  // a hook that throws: the revocation stands and the line is logged
+  const w2 = world();
+  const watcher2 = mk(w2, () => {
+    throw new Error('spare keeper down');
+  });
+  await watcher2.start();
+  w2.state = killed;
+  await watcher2.handle([log('LabelUnregistered', { tokenId: TOKEN })]);
+  await new Promise((r) => setImmediate(r));
+  assert.equal(watcher2.tracked()[0].revoked, true);
+  assert.ok(lines.some((l) => /spare keeper down/.test(l)));
+});
+
 test('watcher: a renew after an unregister leaves the label RESERVED and does not un-revoke', async () => {
   const w = world();
   const watcher = watcherOf(w);

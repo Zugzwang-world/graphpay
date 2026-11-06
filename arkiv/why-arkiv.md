@@ -17,7 +17,7 @@ GraphPay's agents ask a money graph before they pay: has this shop delivered, re
 
 ## 3. Receipts that cannot be edited
 
-Every edge, payments included, is created readonly (ADR-0034): a simulated patch of a receipt's `amount_micro` reverts while a tally patch passes (acceptance D9). The owner could still delete or extend a readonly row (the SDK's own types say so), so we say "cannot be edited", not "permanent".
+Every edge, payments included, is created readonly (ADR-0034): a simulated patch of a receipt's `amount_micro` reverts while a tally patch passes (acceptance D9). The owner could still delete or extend a readonly row (the SDK's own types say so), so we say "cannot be edited", not "cannot be removed". Receipts also lapse after 30 days, like every ledger row; the payment stays on Whitechain, and the receipt can be rebuilt from it.
 
 ## 4. Expiry as policy
 
@@ -28,7 +28,7 @@ Arkiv rows expire on their own, and GraphPay uses that as product logic, with no
 | `shop_open` | 15 minutes, renewed while the shop's Open switch is on | a shop is "open now" only while someone keeps it open; a crashed server cannot leave it open |
 | `agent_presence` | 15 minutes, renewed while an errand runs | the map shows an agent at work only while it works |
 | `quote` | 15 minutes (valid for 10) | the payer refuses a missing or expired quote and asks again (acceptance D10) |
-| day tallies, synthetic rows | 30 days, 14 days | the graph forgets old days and test data by itself |
+| every ledger row, receipts included; synthetic rows | 30 days; 14 days | the graph forgets old data by itself; a lapsed receipt can be rebuilt from its Whitechain transaction, named in its `ref` |
 
 With Postgres each of these is a cron job that can fail silently (ADR-0035).
 

@@ -64,9 +64,12 @@ function serially<T>(task: () => Promise<T>): Promise<T> {
   return run;
 }
 
-export function setShopOpen({ arkiv, shopKey, shopEns, on, nowS = Math.floor(Date.now() / 1000) }: { arkiv: ArkivConnection; shopKey: `0x${string}`; shopEns: string; on: boolean; nowS?: number }): Promise<OpenState> {
+// onlyIf: a write decided earlier (the self-healing cron's) is checked again in its turn, so a
+// Close queued before it is never undone at once; it writes nothing when no longer due.
+export function setShopOpen({ arkiv, shopKey, shopEns, on, nowS = Math.floor(Date.now() / 1000), onlyIf }: { arkiv: ArkivConnection; shopKey: `0x${string}`; shopEns: string; on: boolean; nowS?: number; onlyIf?: () => Promise<boolean> }): Promise<OpenState & { skipped?: true }> {
   return serially(async () => {
     const live = await liveRows(arkiv, shopKey, nowS);
+    if (onlyIf && !(await onlyIf())) return { open: live.length > 0, openUntil: live[0]?.openUntil ?? null, entityKey: live[0]?.key ?? null, skipped: true };
     if (on) {
       const fresh = live[0];
       if (fresh && fresh.openUntil >= nowS + FRESH_S) return { open: true, openUntil: fresh.openUntil, entityKey: fresh.key };

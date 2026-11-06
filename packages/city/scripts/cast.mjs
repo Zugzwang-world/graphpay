@@ -70,6 +70,7 @@ const arkivLog = (e) => {
   if (e.event) log(`arkiv: ${e.event}${e.nonce !== undefined ? ` nonce ${e.nonce}` : ''}${e.kind ? ` ${e.kind}` : ''}`);
   else if (e.status && e.status !== 200) log(`arkiv: HTTP ${e.status} on ${e.method}`);
 };
+// The endpoint's header shows whichever window is tighter: the query window only once it is low.
 async function withinQueryBudget() {
   if (queries.limit === null || queries.remaining >= queries.limit * 0.4 || Date.now() >= queries.resetAt) return;
   log(`pausing ${Math.ceil((queries.resetAt - Date.now()) / 1000)} s: ${queries.remaining} of ${queries.limit} queries left in this window`);
@@ -95,20 +96,21 @@ async function betweenBeats() {
 
 // The mirror's own rule: a nonce another write took is retried after a pause. One more case is
 // the same event seen from the writer's recovery: the transaction found at our pinned nonce
-// created no entity where ours creates some (the mirror's heartbeat took the nonce; a signed
-// transaction lands only at its own nonce, so ours never will). And the keyless endpoint's
-// transient failures (a timeout, a failed request). Every retry re-reads the checkpoint and the
-// rows and sends at the confirmed nonce, so at most one copy of a part can land.
+// created other entities than ours would (the mirror's heartbeat or a live payment took the
+// nonce; a part lands whole or not at all, and a signed transaction only at its own nonce). And
+// the keyless endpoint's transient failures (a timeout, a failed request). Every history part
+// carries its stream's checkpoint, and every retry re-reads it and sends at the confirmed nonce,
+// so a part that did land is skipped and at most one copy of a part can land.
 const retryable = (err) =>
   err?.code === 'NONCE_TAKEN' ||
-  /nonce \d+ is ahead of the confirmed|created 0 entities for [1-9]\d* creates|took too long to respond|HTTP request failed|fetch failed|ECONNRESET|socket hang up|Too Many Requests/.test(err?.message ?? '');
+  /nonce \d+ is ahead of the confirmed|created \d+ entities for [1-9]\d* creates|took too long to respond|HTTP request failed|fetch failed|ECONNRESET|socket hang up|Too Many Requests/.test(err?.message ?? '');
 async function retrying(fn, tries = 30) {
   for (let i = 1; ; i += 1) {
     try {
       return await fn();
     } catch (err) {
       if (i >= tries || !retryable(err)) throw err;
-      log(`retry ${i}: ${err.code ?? err.name ?? 'write'} (${/created 0 entities|NONCE|ahead of/.test(`${err.code} ${err.message}`) ? 'another write took the nonce' : 'the endpoint failed a request'})`);
+      log(`retry ${i}: ${err.code ?? err.name ?? 'write'} (${/entities for|NONCE|ahead of/.test(`${err.code} ${err.message}`) ? 'another write took the nonce' : 'the endpoint failed a request'})`);
       await sleep(3_000);
       await withinQueryBudget();
     }
@@ -130,7 +132,14 @@ if (stores.includes('directory')) {
     }
   }
   if (creates.length + patches.length > 0) {
-    const r = await dir.writer.send({ creates, patches });
+    // W_DIRECTORY is shared with the live site: a transaction found by nonce must be this batch.
+    const ours = async (createdKeys) => {
+      if (creates.length === 0) return false;
+      const e = createdKeys[0] ? await dir.publicClient.getEntity(createdKeys[0]) : null;
+      const a = e?.$attributes ?? e?.attributes;
+      return a?.type?.value === ENTITIES.shop.type && String(a?.shop_key?.value ?? '').toLowerCase() === creates[0].values.shop_key.toLowerCase();
+    };
+    const r = await dir.writer.send({ creates, patches }, { verifyRecovered: ours });
     creates.forEach((c, i) => {
       shops.find((s) => s.shopKey === c.values.shop_key).entityKey = r.createdKeys[i];
     });
@@ -155,13 +164,20 @@ if (stores.includes('nodes') || stores.includes('history')) {
   };
   const missing = (list) => list.filter((a) => !known.has(nodeOf(a.ens)));
   await retrying(() => look([...castNodes, ...historyBuyers()]));
+  // Every attempt reads the nonce, then which rows exist, and creates only those still missing:
+  // a row that landed before an error is never created twice.
+  const registerMissing = (list) =>
+    retrying(async () => {
+      const nonce = await ledger.confirmedNonce();
+      await look(list);
+      const left = missing(list);
+      if (left.length > 0) await ledger.registerActors(left, { nonce });
+      for (const a of left) known.add(nodeOf(a.ens));
+    });
 
   if (stores.includes('nodes')) {
     const fresh = missing(castNodes);
-    if (fresh.length > 0) {
-      await retrying(async () => ledger.registerActors(missing(fresh), { nonce: await ledger.confirmedNonce() }));
-      for (const a of fresh) known.add(nodeOf(a.ens));
-    }
+    if (fresh.length > 0) await registerMissing(fresh);
     manifest.written.nodes = { created: fresh.map((a) => a.ens) };
     log(`nodes: ${fresh.length} created, ${castNodes.length - fresh.length} already on Arkiv`);
     save();
@@ -173,21 +189,28 @@ if (stores.includes('nodes') || stores.includes('history')) {
     if (missing(castNodes).length > 0) throw new Error('cast: write the node rows first (--store nodes)');
     // Resume this cast's own stream if one is on Arkiv; otherwise a new one ending today.
     const streams = await ledger.findStreams('history:');
+    // Resume the stream this cast wrote (the manifest names it once a run has started), and never
+    // start a new one beside it: if a story change moved the parameters, a second history would
+    // count the same three shops twice.
+    const recorded = manifest.written.history?.stream ?? null;
     const own = streams.find((s) => {
+      if (recorded) return s.stream === recorded;
       const p = parseHistoryStream(s.stream);
-      return p && historyStream(paramsFor(p.endDay)) === s.stream;
+      return Boolean(p) && historyStream(paramsFor(p.endDay)) === s.stream;
     });
+    if (recorded && !own) throw new Error(`cast: the manifest's history stream ${recorded} is not on Arkiv; refusing to start another`);
+    if (own && historyStream(paramsFor(parseHistoryStream(own.stream).endDay)) !== own.stream) throw new Error(`cast: the story no longer gives the stream ${own.stream}; refusing to resume it with other parameters`);
+    if (!own && streams.length > 1) throw new Error(`cast: ${streams.length} history streams on Arkiv and none is this cast's; refusing to start another`);
     const endDay = own ? parseHistoryStream(own.stream).endDay : utcDay(Math.floor(Date.now() / 1000));
     const plan = planHistory(paramsFor(endDay));
     ledger.openHistory(plan.stream);
     const buyers = historyBuyers().map((b) => ({ ...b, dataset: plan.stream }));
-    if (missing(buyers).length > 0) {
-      await retrying(async () => ledger.registerActors(missing(buyers), { nonce: await ledger.confirmedNonce() }));
-      for (const b of buyers) known.add(nodeOf(b.ens));
-    }
+    if (missing(buyers).length > 0) await registerMissing(buyers);
     const actors = new Actors();
     for (const a of [...castNodes, ...buyers]) actors.register(a);
     log(`history: stream ${plan.stream}, ${plan.events.length} events${own ? ` (resuming at ${own.events})` : ''}; ${streams.length} history stream(s) on Arkiv before`);
+    manifest.written.history = { ...(manifest.written.history ?? {}), stream: plan.stream, endDay, events: plan.events.length };
+    save();
     before ??= Number(await arkiv.publicClient.getBalance({ address: arkiv.owner }));
     const out = await writeHistory({
       ledger,
@@ -203,8 +226,9 @@ if (stores.includes('nodes') || stores.includes('history')) {
     });
     const after = Number(await arkiv.publicClient.getBalance({ address: arkiv.owner }));
     const cp = await ledger.readCheckpoint(plan.stream);
-    manifest.written.history = { stream: plan.stream, endDay, events: plan.events.length, written: out.written, done: out.done, checkpointEvents: cp?.events ?? null, tglm: ((before - after) / 1e18).toFixed(6) };
-    log(`history: ${out.written} written, done ${out.done}, checkpoint ${cp?.events} of ${plan.events.length}, ${manifest.written.history.tglm} tGLM`);
+    // W_LEDGER's balance change over this run: the mirror's own writes count too unless it was stopped.
+    manifest.written.history = { stream: plan.stream, endDay, events: plan.events.length, written: out.written, done: out.done, checkpointEvents: cp?.events ?? null, lastRunTglm: ((before - after) / 1e18).toFixed(6) };
+    log(`history: ${out.written} written, done ${out.done}, checkpoint ${cp?.events} of ${plan.events.length}, W_LEDGER spent ${manifest.written.history.lastRunTglm} tGLM in this run`);
     save();
   };
   if (stores.includes('history')) await retrying(writeCastHistory);

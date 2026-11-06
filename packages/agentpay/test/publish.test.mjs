@@ -67,9 +67,9 @@ test('the shipped files name no secret, keyed URL or hosted GraphPay service', (
   }
 });
 
-test('the package is public, MIT, 0.1.1 with a files list', () => {
+test('the package is public, MIT, 1.0.0 with a files list', () => {
   assert.equal(pkg.name, '@graphpay_ethglobal/agentpay');
-  assert.equal(pkg.version, '0.1.1');
+  assert.equal(pkg.version, '1.0.0');
   assert.deepEqual(Object.keys(pkg.devDependencies ?? {}).filter((d) => d.startsWith('@graphpay/')), [], 'the published manifest names no workspace package');
   assert.equal(pkg.license, 'MIT');
   assert.equal(pkg.publishConfig.access, 'public');
