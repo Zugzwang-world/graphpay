@@ -1,0 +1,282 @@
+{
+  "generated": {
+    "end": "2026-11-06",
+    "seed": 2026,
+    "story": "test"
+  },
+  "counts": {
+    "edge": 9996,
+    "node": 607,
+    "tally": 7491,
+    "link": 3071,
+    "record": 9996,
+    "profile": 606,
+    "shop": 123
+  },
+  "truth": {
+    "synthetic": true,
+    "dataset": "graphpay-city-v1-M",
+    "q1": {
+      "shop": "filter-and-fold.graphpay.eth",
+      "orders": 960,
+      "refunds": 12,
+      "refundRate": 0.0125,
+      "orders90": 709
+    },
+    "q2": {
+      "identity": [
+        {
+          "ens": "filter-and-fold.graphpay.eth",
+          "epoch": 0,
+          "paidMicro": "4622400000"
+        },
+        {
+          "ens": "tawa-tangle.graphpay.eth",
+          "epoch": 0,
+          "paidMicro": "1601100000"
+        },
+        {
+          "ens": "idli-index.graphpay.eth",
+          "epoch": 0,
+          "paidMicro": "1207800000"
+        },
+        {
+          "ens": "vada-velvet-table.sim.graphpay.eth",
+          "epoch": 0,
+          "paidMicro": "1118380000"
+        },
+        {
+          "ens": "vada-velvet-corner.sim.graphpay.eth",
+          "epoch": 0,
+          "paidMicro": "859950000"
+        },
+        {
+          "ens": "tiffin-thimble-pantry.sim.graphpay.eth",
+          "epoch": 0,
+          "paidMicro": "802090000"
+        },
+        {
+          "ens": "dosa-dapple-tiffins.sim.graphpay.eth",
+          "epoch": 0,
+          "paidMicro": "547580000"
+        },
+        {
+          "ens": "idli-inkwell-tiffins.sim.graphpay.eth",
+          "epoch": 0,
+          "paidMicro": "532550000"
+        },
+        {
+          "ens": "dosa-dapple-pantry.sim.graphpay.eth",
+          "epoch": 0,
+          "paidMicro": "523440000"
+        },
+        {
+          "ens": "millet-mariglow-table.sim.graphpay.eth",
+          "epoch": 0,
+          "paidMicro": "397340000"
+        }
+      ],
+      "byName": [
+        {
+          "ens": "filter-and-fold.graphpay.eth",
+          "paidMicro": "4622400000"
+        },
+        {
+          "ens": "tawa-tangle.graphpay.eth",
+          "paidMicro": "1601100000"
+        },
+        {
+          "ens": "idli-index.graphpay.eth",
+          "paidMicro": "1207800000"
+        },
+        {
+          "ens": "vada-velvet-table.sim.graphpay.eth",
+          "paidMicro": "1118380000"
+        },
+        {
+          "ens": "vada-velvet-corner.sim.graphpay.eth",
+          "paidMicro": "859950000"
+        },
+        {
+          "ens": "tiffin-thimble-pantry.sim.graphpay.eth",
+          "paidMicro": "802090000"
+        },
+        {
+          "ens": "dosa-dapple-tiffins.sim.graphpay.eth",
+          "paidMicro": "547580000"
+        },
+        {
+          "ens": "idli-inkwell-tiffins.sim.graphpay.eth",
+          "paidMicro": "532550000"
+        },
+        {
+          "ens": "dosa-dapple-pantry.sim.graphpay.eth",
+          "paidMicro": "523440000"
+        },
+        {
+          "ens": "millet-mariglow-table.sim.graphpay.eth",
+          "paidMicro": "397340000"
+        }
+      ],
+      "payRows": 4970
+    },
+    "q3": {
+      "agents": [
+        "concierge.vitalik.graphpay.eth",
+        "scout.vitalik.graphpay.eth",
+        "analyst.vitalik.graphpay.eth",
+        "payer.vitalik.graphpay.eth"
+      ],
+      "spendByShop": {
+        "filter-and-fold.graphpay.eth": "9600000",
+        "idli-index.graphpay.eth": "8400000"
+      }
+    },
+    "q4": {
+      "agents": [
+        "errands.person-004.sim.graphpay.eth",
+        "errands.person-027.sim.graphpay.eth",
+        "errands.person-029.sim.graphpay.eth",
+        "errands.person-058.sim.graphpay.eth",
+        "errands.person-073.sim.graphpay.eth",
+        "errands.person-078.sim.graphpay.eth",
+        "errands.person-085.sim.graphpay.eth",
+        "errands.person-101.sim.graphpay.eth",
+        "errands.person-108.sim.graphpay.eth",
+        "errands.person-118.sim.graphpay.eth",
+        "errands.person-123.sim.graphpay.eth",
+        "payer.person-012.sim.graphpay.eth",
+        "payer.person-031.sim.graphpay.eth",
+        "payer.person-034.sim.graphpay.eth",
+        "payer.person-037.sim.graphpay.eth",
+        "payer.person-038.sim.graphpay.eth",
+        "payer.person-039.sim.graphpay.eth",
+        "payer.person-040.sim.graphpay.eth",
+        "payer.person-041.sim.graphpay.eth",
+        "payer.person-047.sim.graphpay.eth",
+        "payer.person-064.sim.graphpay.eth",
+        "payer.person-071.sim.graphpay.eth",
+        "payer.person-074.sim.graphpay.eth",
+        "payer.person-077.sim.graphpay.eth",
+        "payer.person-079.sim.graphpay.eth",
+        "payer.person-080.sim.graphpay.eth",
+        "payer.person-095.sim.graphpay.eth",
+        "payer.person-096.sim.graphpay.eth",
+        "payer.person-099.sim.graphpay.eth",
+        "payer.person-104.sim.graphpay.eth",
+        "payer.person-105.sim.graphpay.eth",
+        "payer.person-108.sim.graphpay.eth",
+        "payer.person-111.sim.graphpay.eth",
+        "payer.person-112.sim.graphpay.eth",
+        "payer.person-116.sim.graphpay.eth",
+        "payer.person-117.sim.graphpay.eth",
+        "payer.person-120.sim.graphpay.eth",
+        "payer.person-121.sim.graphpay.eth",
+        "payer.person-122.sim.graphpay.eth",
+        "payer.person-123.sim.graphpay.eth",
+        "payer.person-125.sim.graphpay.eth",
+        "payer.person-126.sim.graphpay.eth",
+        "payer.person-128.sim.graphpay.eth",
+        "payer.person-132.sim.graphpay.eth",
+        "payer.person-137.sim.graphpay.eth",
+        "payer.person-147.sim.graphpay.eth",
+        "payer.person-149.sim.graphpay.eth",
+        "payer.person-151.sim.graphpay.eth",
+        "payer.person-155.sim.graphpay.eth",
+        "payer.person-157.sim.graphpay.eth"
+      ]
+    },
+    "q5": {
+      "from": "payer.vitalik.graphpay.eth",
+      "to": "tawa-tangle.graphpay.eth",
+      "hops": 3
+    },
+    "q6": {
+      "shop": "filter-and-fold.graphpay.eth",
+      "nodes": [
+        "appam-acorn-courtyard.sim.graphpay.eth",
+        "appam-acorn-kitchen.sim.graphpay.eth",
+        "appam-acorn-pantry.sim.graphpay.eth",
+        "appam-acorn-table.sim.graphpay.eth",
+        "dosa-dapple-corner.sim.graphpay.eth",
+        "dosa-dapple-counter.sim.graphpay.eth",
+        "dosa-dapple-courtyard.sim.graphpay.eth",
+        "dosa-dapple-tiffins.sim.graphpay.eth",
+        "errands.person-021.sim.graphpay.eth",
+        "errands.person-044.sim.graphpay.eth",
+        "errands.person-045.sim.graphpay.eth",
+        "errands.person-077.sim.graphpay.eth",
+        "errands.person-099.sim.graphpay.eth",
+        "errands.person-114.sim.graphpay.eth",
+        "errands.person-146.sim.graphpay.eth",
+        "errands.person-152.sim.graphpay.eth",
+        "errands.person-154.sim.graphpay.eth",
+        "errands.person-156.sim.graphpay.eth",
+        "filter-and-fold.graphpay.eth",
+        "idli-index.graphpay.eth",
+        "idli-inkwell-courtyard.sim.graphpay.eth",
+        "idli-inkwell-room.sim.graphpay.eth",
+        "idli-inkwell-tiffins.sim.graphpay.eth",
+        "kaapi-kite-canteen.sim.graphpay.eth",
+        "kaapi-kite-corner.sim.graphpay.eth",
+        "kaapi-kite-courtyard.sim.graphpay.eth",
+        "millet-mariglow-counter.sim.graphpay.eth",
+        "millet-mariglow-room.sim.graphpay.eth",
+        "millet-mariglow-table.sim.graphpay.eth",
+        "neer-nooklet-tiffins.sim.graphpay.eth",
+        "payer.person-007.sim.graphpay.eth",
+        "payer.person-009.sim.graphpay.eth",
+        "payer.person-014.sim.graphpay.eth",
+        "payer.person-017.sim.graphpay.eth",
+        "payer.person-035.sim.graphpay.eth",
+        "payer.person-043.sim.graphpay.eth",
+        "payer.person-047.sim.graphpay.eth",
+        "payer.person-059.sim.graphpay.eth",
+        "payer.person-063.sim.graphpay.eth",
+        "payer.person-066.sim.graphpay.eth",
+        "payer.person-067.sim.graphpay.eth",
+        "payer.person-072.sim.graphpay.eth",
+        "payer.person-074.sim.graphpay.eth",
+        "payer.person-078.sim.graphpay.eth",
+        "payer.person-088.sim.graphpay.eth",
+        "payer.person-089.sim.graphpay.eth",
+        "payer.person-091.sim.graphpay.eth",
+        "payer.person-092.sim.graphpay.eth",
+        "payer.person-102.sim.graphpay.eth",
+        "payer.person-108.sim.graphpay.eth",
+        "payer.person-111.sim.graphpay.eth",
+        "payer.person-119.sim.graphpay.eth",
+        "payer.person-120.sim.graphpay.eth",
+        "payer.person-121.sim.graphpay.eth",
+        "payer.person-124.sim.graphpay.eth",
+        "payer.person-127.sim.graphpay.eth",
+        "payer.person-129.sim.graphpay.eth",
+        "payer.person-130.sim.graphpay.eth",
+        "payer.person-131.sim.graphpay.eth",
+        "payer.person-134.sim.graphpay.eth",
+        "payer.person-140.sim.graphpay.eth",
+        "payer.person-144.sim.graphpay.eth",
+        "payer.person-146.sim.graphpay.eth",
+        "payer.person-149.sim.graphpay.eth",
+        "payer.person-151.sim.graphpay.eth",
+        "payer.person-153.sim.graphpay.eth",
+        "payer.person-154.sim.graphpay.eth",
+        "payer.person-157.sim.graphpay.eth",
+        "payer.vitalik.graphpay.eth",
+        "podi-pebble-tiffins.sim.graphpay.eth",
+        "rasam-ribbon-canteen.sim.graphpay.eth",
+        "rasam-ribbon-corner.sim.graphpay.eth",
+        "rasam-ribbon-courtyard.sim.graphpay.eth",
+        "sambar-spindle-corner.sim.graphpay.eth",
+        "tawa-tangle.graphpay.eth",
+        "tiffin-thimble-corner.sim.graphpay.eth",
+        "tiffin-thimble-pantry.sim.graphpay.eth",
+        "tiffin-thimble-table.sim.graphpay.eth",
+        "uttapam-orbit-tiffins.sim.graphpay.eth",
+        "vada-velvet-corner.sim.graphpay.eth",
+        "vada-velvet-kitchen.sim.graphpay.eth",
+        "vada-velvet-tiffins.sim.graphpay.eth"
+      ]
+    }
+  }
+}

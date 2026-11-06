@@ -112,7 +112,10 @@ test('the authorize hook gates paid retries', async () => {
 });
 
 test('a deadline further out than the payment timeout is refused', async () => {
-  const r = rig({ merchantOptions: { quoteTtlSeconds: 86_400 } });
+  // createMerchant refuses such a quote lifetime, so the far deadline comes from a merchant whose
+  // clock runs a day ahead (as any server could): the buyer refuses it before signing.
+  assert.throws(() => rig({ merchantOptions: { quoteTtlSeconds: 86_400 } }), /quoteTtlSeconds is 1 to 600/);
+  const r = rig({ merchantOptions: { clock: () => Date.now() + 86_400_000 } });
   await assert.rejects(r.buyer.pay(URL_), (e) => e.code === 'DEADLINE_TOO_FAR');
 });
 

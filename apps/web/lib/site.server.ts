@@ -62,14 +62,21 @@ export interface SiteModel {
     refundReason: string;
     // The story's re-order: its own item (a sku of the merchant shop), quantity and price.
     reorder: { sku: string; item: string; quantity: number; priceMicro: string };
+    // The story's order over the payer's pass ("for everyone"): the request and how many of the order's item.
+    overPass: { request: string; quantity: number };
   };
   renewal: {
     plan: string;
     item: string;
+    // The plan's product at its shop (a sku of the renewal shop).
+    sku: string;
+    // The renewal shop's ENS name.
+    shopEns: string;
     priceMicro: string;
     period: string;
     weekday: string | null;
-    demoPeriod: { id: string; seconds: number; label: string };
+    // The labelled demo clock; maxCharges bounds what a demo subscription can ever pull.
+    demoPeriod: { id: string; seconds: number; label: string; maxCharges: number };
   };
 }
 
@@ -101,6 +108,7 @@ export function siteModel(): SiteModel {
   const order = cast.order as Loose;
   const renewal = cast.renewal as Loose;
   const reorder = field(order, 'reorder', isObject, 'order');
+  const overPass = field(order, 'overPass', isObject, 'order');
   const schedule = field(renewal, 'schedule', isObject, 'renewal');
   const demoPeriod = field(renewal, 'demoPeriod', isObject, 'renewal');
 
@@ -165,10 +173,13 @@ export function siteModel(): SiteModel {
         quantity: field(reorder, 'quantity', isNumber, 'order.reorder'),
         priceMicro: String(field(reorder, 'priceMicro', isNumber, 'order.reorder')),
       },
+      overPass: { request: field(overPass, 'request', isString, 'order.overPass'), quantity: field(overPass, 'quantity', isNumber, 'order.overPass') },
     },
     renewal: {
       plan: field(renewal, 'plan', isString, 'renewal'),
       item: field(renewal, 'item', isString, 'renewal'),
+      sku: field(renewal, 'sku', isString, 'renewal'),
+      shopEns: ensOf('shop', field(renewal, 'shop', isString, 'renewal')),
       priceMicro: String(field(renewal, 'priceMicro', isNumber, 'renewal')),
       period: field(schedule, 'period', isString, 'renewal.schedule'),
       weekday: isString(schedule.weekday) ? schedule.weekday : null,
@@ -176,6 +187,7 @@ export function siteModel(): SiteModel {
         id: field(demoPeriod, 'id', isString, 'renewal.demoPeriod'),
         seconds: field(demoPeriod, 'seconds', isNumber, 'renewal.demoPeriod'),
         label: field(demoPeriod, 'label', isString, 'renewal.demoPeriod'),
+        maxCharges: field(demoPeriod, 'maxCharges', isNumber, 'renewal.demoPeriod'),
       },
     },
   };

@@ -59,3 +59,39 @@ export function payGuard(state, shopEns, now) {
   state.paying = { shopEns, priceMicro: price };
   return { ok: true, offer, ranked, priceMicro: price };
 }
+
+// Code's own choice (W4, when the concierge names no shop of the ranking): the best-ranked
+// eligible shop whose scout offer fits what is left of the budget and the deadline at `now`.
+// Pure: it reserves nothing; payGuard still decides.
+export function bestFit(state, now) {
+  if (!state.scoutDone || !state.analystDone || !state.need) return null;
+  const left = state.mandate.budgetMicro - state.spentMicro - state.reservedMicro;
+  const deadline = Date.parse(state.mandate.deadlineIso);
+  for (const r of state.ranking ?? []) {
+    if (!r.eligible) continue;
+    const offer = state.offers.get(r.ens);
+    if (!offer || offer.item !== state.need.item || offer.quantity !== state.need.quantity) continue;
+    if (toMicro(offer.priceUsdt) > left) continue;
+    if (!(now + offer.etaMinutes * 60_000 <= deadline)) continue;
+    return r.ens;
+  }
+  return null;
+}
+
+// Why nothing fits (W4: the refusal a no-purchase carries, so the screens can say so): the reason
+// for the best-ranked eligible shop, in payGuard's words, or that no shop is eligible.
+export function whyNoFit(state, now) {
+  const top = (state.ranking ?? []).find((r) => r.eligible);
+  if (!top) return { reason: 'NO_ELIGIBLE_SHOP', detail: 'no shop in the ranking is eligible' };
+  const offer = state.offers.get(top.ens);
+  if (!offer || offer.item !== state.need?.item || offer.quantity !== state.need?.quantity) {
+    return { reason: 'NO_OFFER', detail: `the scout found no offer from ${top.ens} for ${state.need?.quantity} ${state.need?.item}` };
+  }
+  if (toMicro(offer.priceUsdt) > state.mandate.budgetMicro - state.spentMicro - state.reservedMicro) {
+    return { reason: 'OVER_BUDGET', detail: `${offer.priceUsdt} is above what is left of the ${state.mandate.budgetUsdt} budget` };
+  }
+  if (!(now + offer.etaMinutes * 60_000 <= Date.parse(state.mandate.deadlineIso))) {
+    return { reason: 'MISSES_DEADLINE', detail: `${top.ens} arrives after the deadline ${state.mandate.deadlineIso}` };
+  }
+  return { reason: 'NO_OFFER', detail: 'no eligible offer fits the limits' };
+}

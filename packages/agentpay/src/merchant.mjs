@@ -7,16 +7,17 @@
 import { EventEmitter } from 'node:events';
 import { randomBytes } from 'node:crypto';
 import { encodeAbiParameters, erc20Abi, getAddress, isAddressEqual, keccak256, recoverTypedDataAddress, stringToHex } from 'viem';
-import { ORDER_STATUS, SUB_STATUS, checkoutAbi } from './vendor/index.mjs';
+import { ORDER_STATUS, SUB_STATUS, checkoutAbi, renewalOrderId } from './vendor/index.mjs';
 import { AgentPayError, assertClientChain, assertWriteChain, explorerTx, whitechainNetwork } from './network.mjs';
 import { ZERO32, createOrder, nodeOf } from './order.mjs';
 import { formatUsdt, toMicro } from './money.mjs';
-import { FacilitatorUnavailable } from './facilitator.mjs';
+import { FacilitatorUnavailable, UNCERTAIN } from './facilitator.mjs';
 import { refundRequestDomain, refundRequestTypes } from './sign.mjs';
 import { toCsv } from './csv.mjs';
 import {
   AGENTPAY_EXTENSION,
   HEADERS,
+  MAX_TIMEOUT_SECONDS,
   PAYER_HEADERS,
   buildPaymentRequired,
   buildRequirement,
@@ -48,7 +49,6 @@ export function isRangeError(e) {
   return false;
 }
 // Facilitator answers that do not say whether the payment reached the chain (ours and T1's).
-const UNCERTAIN = new Set(['pending', 'in_flight', 'receipt_timeout', 'send_failed', 'busy', 'rate_limited', 'error']);
 
 export function jsonResponse(status, body, headers = {}) {
   return new Response(JSON.stringify(body, bigintSafe), { status, headers: { 'content-type': 'application/json', ...NO_STORE, ...headers } });
@@ -62,6 +62,16 @@ const asSub = (s) =>
   Array.isArray(s)
     ? { subscriberNode: s[0], shopNode: s[1], payerNode: s[2], subscriber: s[3], amountMicro: s[4], period: s[5], merchant: s[6], nextChargeAt: s[7], cycle: s[8], retryAt: s[9], failures: s[10], status: s[11] }
     : s;
+
+// Runs one task at a time, in call order, whatever the outcome of the one before.
+function serial() {
+  let tail = Promise.resolve();
+  return (fn) => {
+    const run = tail.then(fn, fn);
+    tail = run.catch(() => {});
+    return run;
+  };
+}
 
 // The default risk check: allow, unless a ReputationProvider rates the payer high risk.
 async function defaultRiskCheck({ reputation, payerName, payerNode, payer }) {
@@ -93,6 +103,8 @@ export function createMerchant({
   log = () => {},
 }) {
   if (!name) throw new Error('createMerchant needs a name');
+  // An SDK buyer refuses an order whose deadline is further out than the payment timeout.
+  if (!Number.isInteger(quoteTtlSeconds) || quoteTtlSeconds < 1 || quoteTtlSeconds > MAX_TIMEOUT_SECONDS) throw new Error(`createMerchant: quoteTtlSeconds is 1 to ${MAX_TIMEOUT_SECONDS}`);
   assertClientChain(publicClient, network);
   if (walletClient) assertClientChain(walletClient, network);
   let chunk = BigInt(logChunk);
@@ -104,7 +116,22 @@ export function createMerchant({
   const nowSec = () => Math.floor(clock() / 1000);
   const ttl = BigInt(quoteTtlSeconds);
   const seenRefundRequests = new Set();
+  const seenRenewals = new Set();
   const read = (functionName, args) => publicClient.readContract({ address: network.checkout, abi: checkoutAbi, functionName, args });
+  // The subscription endpoint, chargeDueRenewals and watchRenewals can all see one charge.
+  // Keyed by the charge's renewal order id (from its cycle when that is known); a charge with
+  // neither is reported as it comes.
+  const emitRenewal = (payload) => {
+    const cycle = Number(payload.cycle);
+    const k = payload.subId && Number.isSafeInteger(cycle) && cycle > 0 ? renewalOrderId(payload.subId, cycle) : payload.orderId;
+    if (k) {
+      const id = String(k).toLowerCase();
+      if (seenRenewals.has(id)) return;
+      seenRenewals.add(id);
+      if (seenRenewals.size > 10_000) seenRenewals.delete(seenRenewals.values().next().value);
+    }
+    emit('renewal.charged', payload);
+  };
   const emit = (event, payload) => {
     try {
       events.emit(event, payload);
@@ -252,20 +279,51 @@ export function createMerchant({
     };
   }
 
+  // A Node request that cannot be read as a Fetch request (a bad Host header, a body over
+  // 64 KB) is answered 400 or 413; it never reaches the payment code.
+  async function readable(req, res) {
+    try {
+      return await toFetchRequest(req);
+    } catch (e) {
+      log(`merchant: unreadable request (${e?.code ?? e?.name ?? 'Error'})`);
+      await answer(res, e?.code === 'BODY_TOO_LARGE' ? jsonResponse(413, { error: 'the request body is over 64 KB' }) : jsonResponse(400, { error: 'unreadable request' }));
+      return null;
+    }
+  }
+
+  // Writes a Fetch response to a Node one; if that fails, the response is ended or its socket closed.
+  async function answer(res, response) {
+    try {
+      await sendFetchResponse(res, response);
+    } catch (e) {
+      log(`merchant: the answer could not be sent (${e?.name ?? 'Error'})`);
+      try {
+        if (!res.headersSent) {
+          res.statusCode = 500;
+          res.end();
+        } else res.destroy?.();
+      } catch {
+        // the connection is already gone
+      }
+    }
+  }
+
   // Express middleware: a paid request continues to next() with req.agentpay = { order, settlement }.
   function express(pricer) {
     return async (req, res, next) => {
+      const request = await readable(req, res);
+      if (!request) return undefined;
+      let result;
       try {
-        const request = await toFetchRequest(req);
-        const result = await charge(request, (ctx) => pricer({ ...ctx, req }), { req });
-        if (result.response) return sendFetchResponse(res, result.response);
-        req.agentpay = result;
-        if (result.settlement) res.setHeader(HEADERS.response, encodeHeader(result.settlement));
-        return next();
+        result = await charge(request, (ctx) => pricer({ ...ctx, req }), { req });
       } catch (e) {
         log(`merchant: ${e?.name ?? 'Error'}`);
-        return sendFetchResponse(res, jsonResponse(500, { error: 'internal error' }));
+        return answer(res, jsonResponse(500, { error: 'internal error' }));
       }
+      if (result.response) return answer(res, result.response);
+      req.agentpay = result;
+      if (result.settlement) res.setHeader(HEADERS.response, encodeHeader(result.settlement));
+      return next();
     };
   }
 
@@ -273,8 +331,9 @@ export function createMerchant({
   function node(pricer, handler) {
     const fetchHandler = route(pricer, (request, result) => handler(request, result));
     return async (req, res) => {
-      const response = await fetchHandler(await toFetchRequest(req));
-      await sendFetchResponse(res, response);
+      const request = await readable(req, res);
+      if (!request) return;
+      await answer(res, await fetchHandler(request)); // the route answers every error itself
     };
   }
 
@@ -298,20 +357,37 @@ export function createMerchant({
   }
 
   // A partial or full refund, merchant → payer, capped at what is left. reasonCode: 0..255.
-  async function refund(orderId, amountMicro, { reasonCode = 1, note } = {}) {
+  // One at a time: each reads what the order has had refunded after the one before it landed.
+  const refunds = serial();
+  const refundedHere = new Map(); // order id -> micro this merchant has refunded or has in flight
+  const refund = (orderId, amountMicro, options) => refunds(() => refundNow(orderId, amountMicro, options));
+  async function refundNow(orderId, amountMicro, { reasonCode = 1, note } = {}) {
     const o = await ownOrder(orderId);
     if (o.status !== 'PAID' && o.status !== 'DELIVERED') throw new AgentPayError('NOT_REFUNDABLE', `the order is ${o.status}`);
     const amount = toMicro(amountMicro, 'amountMicro');
     if (amount === 0n) throw new AgentPayError('BAD_AMOUNT', 'a refund is above zero');
-    const left = o.amountMicro - o.refundedMicro;
+    // What this merchant has sent or has in flight on the order counts too, in case a read lags behind it.
+    const id = orderId.toLowerCase();
+    const mine = refundedHere.get(id) ?? 0n;
+    const refunded = o.refundedMicro > mine ? o.refundedMicro : mine;
+    const left = o.amountMicro - refunded;
     if (amount > left) throw new AgentPayError('OVER_REFUNDABLE', `only ${formatUsdt(left)} is left to refund`);
-    if (maxRefundMicro !== undefined && amount > BigInt(maxRefundMicro)) throw new AgentPayError('OVER_REFUND_MAX', `refunds above ${formatUsdt(maxRefundMicro)} need a person`);
+    // The limit is per order, in total: several small refunds cannot pass it either.
+    if (maxRefundMicro !== undefined && refunded + amount > BigInt(maxRefundMicro)) throw new AgentPayError('OVER_REFUND_MAX', `refunds of more than ${formatUsdt(maxRefundMicro)} on one order need a person (${formatUsdt(refunded)} refunded so far)`);
     const [balance, allowance] = await Promise.all([
       publicClient.readContract({ address: network.token.address, abi: erc20Abi, functionName: 'balanceOf', args: [merchant.address] }),
       publicClient.readContract({ address: network.token.address, abi: erc20Abi, functionName: 'allowance', args: [merchant.address, network.checkout] }),
     ]);
     if (balance < amount || allowance < amount) throw new AgentPayError('NO_REFUND_FLOAT', 'the payout wallet lacks the balance or the checkout allowance for this refund');
-    const sent = await sendOwn('refund', [orderId, amount, Number(reasonCode)]);
+    refundedHere.set(id, refunded + amount);
+    let sent;
+    try {
+      sent = await sendOwn('refund', [orderId, amount, Number(reasonCode)]);
+    } catch (e) {
+      // Kept as sent unless it surely was not (refused before sending, or reverted): it may land.
+      if (['NO_MERCHANT_KEY', 'WRONG_MERCHANT_KEY', 'WRONG_CHAIN', 'TX_REVERTED'].includes(e?.code)) refundedHere.set(id, refunded);
+      throw e;
+    }
     emit('refunded', { orderId, amountMicro: amount, note, ...sent });
     return { orderId, amountMicro: amount, full: amount === left, ...sent };
   }
@@ -328,7 +404,10 @@ export function createMerchant({
   async function accept(orderId, context = {}) {
     const o = await ownOrder(orderId);
     if (o.status !== 'PAID') return { accepted: false, orderId, reason: `the order is ${o.status}` };
-    const risk = await (riskCheck ?? defaultRiskCheck)({ order: { orderId, ...o }, payer: o.payer, payerName: context.payerName ?? '', payerNode: context.payerNode ?? ZERO32, reputation, identity, context });
+    // The chain keeps the payer's wallet on the order and its node on the OrderCreated event.
+    const payerNode = context.payerNode ?? (riskCheck || reputation?.assess ? await payerNodeOf(orderId) : ZERO32);
+    if (payerNode === null) return { accepted: false, orderId, reason: 'the payer of this order could not be found on chain' };
+    const risk = await (riskCheck ?? defaultRiskCheck)({ order: { orderId, ...o }, payer: o.payer, payerName: context.payerName ?? '', payerNode, reputation, identity, context });
     if (!risk?.allow) return { accepted: false, orderId, reason: risk?.reason ?? 'refused by the risk check' };
     emit('accepted', { orderId, amountMicro: o.amountMicro, payer: o.payer });
     return { accepted: true, orderId, amountMicro: o.amountMicro, payer: o.payer };
@@ -421,7 +500,7 @@ export function createMerchant({
         const result = await facilitator.subscribe({ sub: s, permitSingle: body.permitSingle, permitSig: body.permitSig, subSig: body.subSig, approvalPermit: body.approvalPermit ?? '0x' });
         if (!result?.success) return jsonResponse(402, { error: result?.errorReason ?? 'not subscribed', transaction: result?.transaction || undefined });
         emit('subscribed', { subId: s.subId, subscriber: s.subscriber, amountMicro: amount, transaction: result.transaction });
-        if (result.charged) emit('renewal.charged', { subId: s.subId, orderId: result.chargeOrderId, cycle: 1, amountMicro: amount, transaction: result.transaction });
+        if (result.charged) emitRenewal({ subId: s.subId, orderId: result.chargeOrderId, cycle: 1, amountMicro: amount, transaction: result.transaction });
         return jsonResponse(201, { status: 'subscribed', subId: s.subId, transaction: result.transaction, charged: result.charged });
       } catch (e) {
         if (e instanceof FacilitatorUnavailable) return jsonResponse(502, { error: 'the facilitator is unavailable' });
@@ -474,6 +553,27 @@ export function createMerchant({
     return out;
   }
 
+  // The payer node of a paid order, from its OrderCreated event, newest blocks first; null when
+  // no such event is found. Remembered per order (it never changes).
+  const payerNodes = new Map();
+  async function payerNodeOf(orderId) {
+    const id = orderId.toLowerCase();
+    if (payerNodes.has(id)) return payerNodes.get(id);
+    let found = null;
+    const head = await publicClient.getBlockNumber({ cacheTime: 0 });
+    for (let to = head; to >= network.deployBlock && found === null; ) {
+      const from = to - chunk + 1n > network.deployBlock ? to - chunk + 1n : network.deployBlock;
+      const [created] = await logsOf('OrderCreated', { orderId }, from, to);
+      if (created) found = String(created.args.payerNode).toLowerCase();
+      to = from - 1n;
+    }
+    if (found !== null) {
+      payerNodes.set(id, found);
+      if (payerNodes.size > 10_000) payerNodes.delete(payerNodes.keys().next().value);
+    }
+    return found;
+  }
+
   async function ourSubscriptions(fromBlock, toBlock) {
     const created = await logsOf('SubscriptionCreated', { shopNode: merchant.node }, fromBlock, toBlock);
     return created.map((l) => l.args.subId);
@@ -489,8 +589,8 @@ export function createMerchant({
       const now = BigInt(nowSec());
       if (SUB_STATUS[Number(s.status)] !== 'ACTIVE' || now < BigInt(s.nextChargeAt) || now < BigInt(s.retryAt)) continue;
       const r = await facilitator.renew(subId);
-      if (r?.success) emit('renewal.charged', { subId, orderId: r.orderId, cycle: r.cycle, amountMicro: BigInt(r.amount ?? s.amountMicro), transaction: r.transaction });
-      else emit('payment.failed', { subId, reason: r?.errorReason ?? 'not_renewed', transaction: r?.transaction });
+      if (r?.success) emitRenewal({ subId, orderId: r.orderId, cycle: r.cycle, amountMicro: BigInt(r.amount ?? s.amountMicro), transaction: r.transaction });
+      else if (!UNCERTAIN.has(r?.errorReason)) emit('payment.failed', { subId, reason: r?.errorReason ?? 'not_renewed', transaction: r?.transaction });
       results.push({ subId, ...r });
     }
     return results;
@@ -508,7 +608,7 @@ export function createMerchant({
       for (const l of await logsOf('SubscriptionRenewed', undefined, next, head)) {
         const { subId, orderId, cycle, amountMicro } = l.args;
         if (!ours.has(subId)) ours.set(subId, String(asSub(await read('subscription', [subId])).shopNode).toLowerCase() === merchant.node);
-        if (ours.get(subId)) emit('renewal.charged', { subId, orderId, cycle: Number(cycle), amountMicro, transaction: l.transactionHash });
+        if (ours.get(subId)) emitRenewal({ subId, orderId, cycle: Number(cycle), amountMicro, transaction: l.transactionHash });
       }
       next = head + 1n;
     }

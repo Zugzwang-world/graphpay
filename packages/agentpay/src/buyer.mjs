@@ -5,7 +5,8 @@
 
 import { createHash } from 'node:crypto';
 import { getAddress, isAddressEqual } from 'viem';
-import { checkoutAbi, ORDER_STATUS } from './vendor/index.mjs';
+import { checkoutAbi, ORDER_STATUS, SUB_STATUS } from './vendor/index.mjs';
+import { UNCERTAIN } from './facilitator.mjs';
 import { AgentPayError, assertChain, assertClientChain, whitechainNetwork } from './network.mjs';
 import { canonicalJson, nodeOf, ZERO32, ZERO_ADDRESS } from './order.mjs';
 import { formatUsdt, toMicro } from './money.mjs';
@@ -123,6 +124,18 @@ export function createBuyerAgent({
     if (BigInt(order.deadline) <= BigInt(t)) refuse('ORDER_EXPIRED', 'the order deadline has passed');
     // A signature lives until its deadline: never sign one that outlives the scheme's timeout.
     if (BigInt(order.deadline) > BigInt(t) + BigInt(MAX_TIMEOUT_SECONDS) + 60n) refuse('DEADLINE_TOO_FAR', 'the order deadline is further out than the payment timeout');
+    await spendGuards(order.merchant, amount, { maxMicro, refuse, t });
+    const onchainOrder = await publicClient.readContract({ address: network.checkout, abi: checkoutAbi, functionName: 'orders', args: [order.orderId] });
+    const status = ORDER_STATUS[Number(onchainOrder.status ?? onchainOrder[6])];
+    return { status };
+  }
+
+  // The guards on any charge of `amount` to `merchant` ({ name, node, address }): a payment,
+  // or a subscription's charge. The allowlist, the per-payment and caller maximum, the mandate,
+  // the identity resolver and the reputation provider, the on-chain pass and its daily cap,
+  // and the period cap.
+  async function spendGuards(merchant, amount, { maxMicro, refuse, t = nowSec() }) {
+    const order = { merchant };
     if (!merchantAllowed(limits.merchants, order.merchant)) refuse('MERCHANT_NOT_ALLOWED', `${order.merchant.name} is not on the pass allowlist`);
     if (limits.perPaymentMaxMicro !== undefined && amount > limits.perPaymentMaxMicro) refuse('OVER_PAYMENT_MAX', `${formatUsdt(amount)} is above the per-payment maximum ${formatUsdt(limits.perPaymentMaxMicro)}`);
     if (maxMicro !== undefined && amount > toMicro(maxMicro, 'maxMicro')) refuse('OVER_CALLER_MAX', `${formatUsdt(amount)} is above the asked maximum ${formatUsdt(maxMicro)}`);
@@ -150,9 +163,6 @@ export function createBuyerAgent({
       const spent = await spentInPeriod({ publicClient, network, node, epoch: p.epoch, period, nowSec: t });
       if (spent + ledger.pendingMicro + amount > limits.capMicro) refuse('OVER_PERIOD_CAP', `would pass the ${period} cap ${formatUsdt(limits.capMicro)} (spent ${formatUsdt(spent)})`);
     }
-    const onchainOrder = await publicClient.readContract({ address: network.checkout, abi: checkoutAbi, functionName: 'orders', args: [order.orderId] });
-    const status = ORDER_STATUS[Number(onchainOrder.status ?? onchainOrder[6])];
-    return { status };
   }
 
   function identityHeaders(extra = {}) {
@@ -218,13 +228,15 @@ export function createBuyerAgent({
     if (requestInit.body !== undefined && typeof requestInit.body !== 'string') throw new Error('pay(): send the body as a string, so the paid retry can repeat it');
     return lock(async () => {
       // Signatures past their deadline (with a minute's grace for clock skew) can never settle now.
-      for (const [k, e] of pending) {
-        if (e.order.deadline + 60n <= BigInt(nowSec()) && !['PAID', 'DELIVERED'].includes(await orderStatus(e.order.orderId))) {
-          pending.delete(k);
-          release(e);
-        }
-      }
       const key = requestKey(url, requestInit);
+      for (const [k, e] of pending) {
+        // This request's own entry is settled below: paid if the chain has it, else signed again.
+        if (k === key || e.order.deadline + 60n > BigInt(nowSec())) continue;
+        const settled = ['PAID', 'DELIVERED'].includes(await orderStatus(e.order.orderId));
+        pending.delete(k);
+        if (settled) confirmed(e); // the chain counts it now; keeping it pending would count it twice
+        else release(e);
+      }
       let entry = pending.get(key);
       if (entry) {
         const status = await orderStatus(entry.order.orderId);
@@ -339,10 +351,18 @@ export function createBuyerAgent({
       if (!Number.isSafeInteger(maxCycles) || maxCycles < 1 || maxCycles > 520) throw new AgentPayError('BAD_OFFER', 'maxCycles must be 1 to 520');
       if (!isAddressEqual(sub.subscriber, address) || sub.payerNode !== node || sub.subscriberNode !== buyerNode) throw new AgentPayError('NOT_FOR_THIS_PAYER', 'the offer was built for another subscriber');
       if (nodeOf(offer.merchant?.name) !== sub.shopNode || !isAddressEqual(offer.merchant?.address ?? ZERO_ADDRESS, sub.merchant)) throw new AgentPayError('BAD_OFFER', 'the offer names a merchant that does not match its terms');
-      const merchant = { name: offer.merchant.name, address: sub.merchant };
-      if (!merchantAllowed(limits.merchants, merchant)) throw new AgentPayError('MERCHANT_NOT_ALLOWED', `${merchant.name} is not on the pass allowlist`);
-      if (limits.perPaymentMaxMicro !== undefined && sub.amountMicro > limits.perPaymentMaxMicro) throw new AgentPayError('OVER_PAYMENT_MAX', 'one charge is above the per-payment maximum');
-      if (maxMicro !== undefined && sub.amountMicro > toMicro(maxMicro, 'maxMicro')) throw new AgentPayError('OVER_CALLER_MAX', 'one charge is above the asked maximum');
+      const merchant = { name: offer.merchant.name, node: sub.shopNode, address: sub.merchant };
+      const refuse = (code, message) => {
+        throw new AgentPayError(code, message, { subId: sub.subId, amountMicro: sub.amountMicro.toString() });
+      };
+      // The first charge is taken when the subscription is created: it passes every guard a payment does.
+      await spendGuards(merchant, sub.amountMicro, { maxMicro, refuse });
+      // The signature allows every cycle of the plan, so a mandate must cover all of them, in time.
+      if (mandate) {
+        const plan = sub.amountMicro * BigInt(maxCycles);
+        if (ledger.mandateSpentMicro + plan > mandate.budgetMicro) refuse('OVER_BUDGET', `the plan's ${maxCycles} charges (${formatUsdt(plan)}) would take the mandate over its budget ${formatUsdt(mandate.budgetMicro)}`);
+        if ((Number(sub.firstChargeAt) + sub.period * (maxCycles - 1)) * 1000 >= mandate.deadlineMs) refuse('MANDATE_EXPIRED', 'the plan would still charge after the mandate deadline');
+      }
       const periodSeconds = PERIOD_DAYS[period] * 86_400;
       // At most maxCycles charges ever (the Permit2 allowance is amount × maxCycles).
       const chargesPerPassPeriod = Math.min(maxCycles, Math.max(1, Math.ceil(periodSeconds / sub.period)));
@@ -353,10 +373,36 @@ export function createBuyerAgent({
       }
       const signed = await signSubscription({ account, publicClient, network, sub, maxCycles, approvalMicro, nowSec: nowSec() });
       const body = JSON.stringify({ sub: offer.sub, maxCycles, ...signed }, (_, v) => (typeof v === 'bigint' ? v.toString() : v));
-      const response = await fetchImpl(url, { method: 'POST', headers: { 'content-type': 'application/json', ...identityHeaders() }, body, redirect: 'error' });
+      // The first charge counts from the moment it is signed, as a payment does, and stays counted
+      // unless the chain, or a definite refusal, shows it was not taken.
+      const charge = { amount: sub.amountMicro };
+      reserve(charge);
+      let response;
+      try {
+        response = await fetchImpl(url, { method: 'POST', headers: { 'content-type': 'application/json', ...identityHeaders() }, body, redirect: 'error' });
+      } catch (error) {
+        confirmed(charge); // the merchant may have it: counted, never twice (the chain counts an agent's)
+        throw error;
+      }
       const result = await response.json().catch(() => ({}));
+      if (await chargeTaken(sub.subId, response, result)) confirmed(charge);
+      else release(charge);
       return { ok: response.ok, httpStatus: response.status, subId: sub.subId, ...result };
     });
+  }
+
+  // Whether a subscription's first charge was taken: the merchant said so, or the chain shows a
+  // cycle. When the chain has no subscription, only a definite refusal means it was not; an
+  // answer that may still settle (a 5xx, a 429, a pending relayer) counts as taken.
+  async function chargeTaken(subId, response, result) {
+    if (response.ok && result.charged) return true;
+    const onchain = await publicClient.readContract({ address: network.checkout, abi: checkoutAbi, functionName: 'subscription', args: [subId] }).catch(() => null);
+    if (!onchain) return true; // the chain could not say: counted, as the safe side
+    const status = SUB_STATUS[Number(onchain.status ?? onchain[11])];
+    if (status && status !== 'NONE') return BigInt(onchain.cycle ?? onchain[8]) >= 1n;
+    if (response.ok) return false;
+    const definite = response.status >= 400 && response.status < 500 && response.status !== 429 && !UNCERTAIN.has(result?.error);
+    return !(status === 'NONE' && definite);
   }
 
   // Cancel a subscription with a signature (gasless: the merchant's relayer sends cancelWithSig).
