@@ -1,23 +1,24 @@
 # Swarm in GraphPay
 
-**Status: menus and one dish photo live on Swarm and referenced from Arkiv; the encrypted refund photo is not built.** The three cast shops' menus (synthetic story data) are public files on Swarm, uploaded through the public gateway, each pointed to by a `menu` row on Arkiv with its content hash. The phones' build reads them keyless and would use a Swarm image for any product without a photo of its own; today every product has the site's own copy of the Grok photo, so the phones show that, and the Swarm copy is the one anyone can check by hash. The encrypted refund photo was dropped on purpose: Swarm is first in the cut order (ADR-0053), and the refund request's photo stays on the phone. Nothing below claims otherwise. Drafted by T3 on Fri 6 Nov; finished by the Submission stream (W7) that night, with every link below fetched and its hash checked at about 23:25 IST.
+**Status: the dosa shops' menus and their dish photos live on Swarm and referenced from Arkiv; the encrypted refund photo is not built.** The three cast shops' menus (synthetic story data) are public files on Swarm, uploaded through the public gateway, each pointed to by a `menu` row on Arkiv with its content hash; every menu item carries its dish photo, also on Swarm with its own hash ([#181](https://github.com/Zugzwang-world/graphpay/pull/181)). The phones' build reads the menus keyless and would use a Swarm image for any product without a photo of its own; today every product has the site's own copy of the same photo, so the phones show that, and the Swarm copy is the one anyone can check by hash. The encrypted refund photo was dropped on purpose: Swarm is first in the cut order (ADR-0053), and the refund request's photo stays on the phone. Nothing below claims otherwise. Drafted by T3 on Fri 6 Nov; finished by the Submission stream (W7) that night and updated at 00:57 IST on Sat 7 Nov, with every link below fetched and its hash checked.
 
 The seven items below follow the Swarm section of the event addendum.
 
 ## 1. What lives on Swarm, and what lives on Arkiv
 
-- **On Swarm:** each cast shop's **menu** as public JSON (synthetic story data, no personal data), one small file per shop, uploaded as a one-file collection named `menu.json`; and one dish photo, Filter & Fold's masala dosa combo (`dosa.jpg`, made by the Grok desk, ADR-0075).
+- **On Swarm:** each cast shop's **menu** as public JSON (synthetic story data, no personal data), one small file per shop, uploaded as a one-file collection named `menu.json`; and each item's **dish photo** (four per shop, the phones' own 240×240 photos, made by the Grok desk, ADR-0075).
 - **On Arkiv:** the `menu` row (W_DIRECTORY, mutable): `shop_key`, `shop_ens`, `version`, `swarm_ref` (64 hex), `content_hash` (sha-256 of the bytes) and `size`. Arkiv holds the pointer and the proof of what was uploaded; Swarm holds the bytes.
 - **Not built, by decision:** a **refund photo**, which would have been encrypted in our own code before leaving the server, with a `refund_evidence` row on Arkiv.
 
 ## 2. One entity key, its reference and an openable link
 
-Filter & Fold's menu (a synthetic story shop; its ENS name is still the test cast's `kesar-kingdom.graphpay.eth`), version 3, the dosa story:
+Filter & Fold's menu (a synthetic story shop) under its own name, `filter-and-fold.graphpay.eth`, version 1:
 
-- **Arkiv `menu` entity:** `0x0f32e7cd190884066418a9fb32df6f5807e5bc3f8b59f3a7776f99e3e1de273f` ([explorer](https://rabdi.explorer.arkiv.network/entity/0x0f32e7cd190884066418a9fb32df6f5807e5bc3f8b59f3a7776f99e3e1de273f)), patched to version 3 in [0x4395…cc56](https://rabdi.explorer.arkiv.network/tx/0x43955ea40b8f1ab4632e9c4a25ce73df1a8a77fc01495464f03606ace112cc56) (Fri 6 Nov, 18:28 IST, from W_DIRECTORY).
-- **Swarm reference (64 hex):** `25f880463e2702eb5a2e265aa3c78004d5083f430aee1347189e8bb2c6f033dd`
-- **Open it:** <https://api.gateway.ethswarm.org/bzz/25f880463e2702eb5a2e265aa3c78004d5083f430aee1347189e8bb2c6f033dd/menu.json> (863 bytes; sha-256 `0acda655…ffe1f`, equal to the row's `content_hash`).
-- **Its photo:** the masala dosa combo's `image` is `{ ref, name, contentType, sha256, bytes }`: reference `45ffef41901fd1fb0f3a6ee08bfbad31ee953b59dbd36dbc8e40379734bc4d89`, 28,626 bytes, sha-256 `9a22f698…a003`; <https://api.gateway.ethswarm.org/bzz/45ffef41901fd1fb0f3a6ee08bfbad31ee953b59dbd36dbc8e40379734bc4d89/dosa.jpg>.
+- **Arkiv `menu` entity:** `0x628f9aeed5550c543ca17dbfc14b0f15e683114c556ea273bbfe753c635604f8` ([explorer](https://rabdi.explorer.arkiv.network/entity/0x628f9aeed5550c543ca17dbfc14b0f15e683114c556ea273bbfe753c635604f8)), written in [0xca19…ef5a](https://rabdi.explorer.arkiv.network/tx/0xca197cd3e08cfd97bdf63333ce2b53b52ac17d4bcd1da0db79e8b6158575ef5a) from W_DIRECTORY.
+- **Swarm reference (64 hex):** `1e3df1a9613b7da3250a3247f13a03b29011453368ff683b6411a33c307f389f`
+- **Open it:** <https://api.gateway.ethswarm.org/bzz/1e3df1a9613b7da3250a3247f13a03b29011453368ff683b6411a33c307f389f/menu.json> (1,630 bytes; sha-256 `db81d7d3…538d83`, equal to the row's `content_hash`).
+- **One of its photos:** the masala dosa combo's `image` is `{ ref, name, contentType, sha256, bytes }`: reference `0f28013fa2f52285c954066fd6a4597106aabe6dfc1136ae1bd8028149406613`, 13,583 bytes, sha-256 `4e245665…`; <https://api.gateway.ethswarm.org/bzz/0f28013fa2f52285c954066fd6a4597106aabe6dfc1136ae1bd8028149406613/filter-and-fold-masala-dosa-combo.jpg>.
+- **The earlier menu,** under the shop's earlier name `kesar-kingdom.graphpay.eth` (version 3, with one photo): entity [0x0f32…273f](https://rabdi.explorer.arkiv.network/entity/0x0f32e7cd190884066418a9fb32df6f5807e5bc3f8b59f3a7776f99e3e1de273f), <https://api.gateway.ethswarm.org/bzz/25f880463e2702eb5a2e265aa3c78004d5083f430aee1347189e8bb2c6f033dd/menu.json>.
 
 The other two cast shops' menus (Tawa Tangle and Idli Index) are in [`docs/sessions/arkiv/swarm-menus.json`](../docs/sessions/arkiv/swarm-menus.json): entity key, transaction, reference and link for each.
 

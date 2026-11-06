@@ -59,7 +59,7 @@ export declare function findQuotes(client: PublicArkivClient, requestId: Hex, op
 export declare const SHOP_STATUS: string[];
 export interface ShopInput { shopEns: string; epoch?: number; category: string; area?: string; city?: string; lat: number; lng: number; status?: string; synthetic?: boolean; dataset?: string; name?: string; hours?: string }
 export declare function shopValues(shop: ShopInput): Record<string, unknown>;
-export declare function writeShop(arkiv: ArkivConnection, shop: ShopInput, options?: { lifetimeDays?: number }): Promise<{ entityKey: Hex; txHash: Hex; created: boolean }>;
+export declare function writeShop(arkiv: ArkivConnection, shop: ShopInput, options?: { lifetimeDays?: number }): Promise<{ entityKey: Hex; txHash: Hex | null; created: boolean; unchanged?: boolean }>;
 export declare function discoveryFilters(options: { category?: string; box: { latMin: number; latMax: number; lngMin: number; lngMax: number }; synthetic?: boolean }): unknown[];
 export declare function discoverShops(client: PublicArkivClient, options: { category?: string; box: { latMin: number; latMax: number; lngMin: number; lngMax: number }; synthetic?: boolean; owner?: string; cap?: number }): Promise<{ shops: { key: Hex; shopKey: Hex; ens: string; category: string; area: string | null; city: string | null; lat: number; lng: number; synthetic: boolean; dataset: string | null; name: string | null; hours: string | null }[]; queries: string[]; calls: number; query: string }>;
 
@@ -107,3 +107,7 @@ export declare function menuValues(options: { shopEns: string; epoch?: number; v
 export declare function writeMenu(arkiv: ArkivConnection, swarm: SwarmClient, options: { shopEns: string; epoch?: number; document: Record<string, unknown>; lifetimeDays?: number }): Promise<{ entityKey: Hex; txHash: Hex | null; reference: string; link: string; version: number; created: boolean; unchanged: boolean }>;
 export declare function readMenu(publicClient: unknown, swarm: SwarmClient, options: { shopEns: string; epoch?: number; owner?: Hex; document?: Record<string, unknown> | null }): Promise<{ row: Record<string, unknown>; document: Record<string, unknown> | null; link: string; reuploaded: boolean; verified: boolean; missing: boolean } | null>;
 export declare function castMenus(cast?: unknown): { key: string; shopEns: string; name: string; items: MenuItem[]; synthetic: boolean }[];
+// verifyRecovered checks for a shared wallet: a transaction found by nonce created this write's row
+// (its type, shop key and `expected` values), or the row with this key now holds `expected`.
+export declare function ownCreate(arkiv: ArkivConnection, def: { type: string }, shopKey: Hex, expected?: Record<string, unknown>): (createdKeys: Hex[]) => Promise<boolean>;
+export declare function rowHolds(arkiv: ArkivConnection, entityKey: Hex, expected: Record<string, unknown>): () => Promise<boolean>;

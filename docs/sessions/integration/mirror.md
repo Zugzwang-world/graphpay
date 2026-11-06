@@ -53,6 +53,20 @@ node acceptance/mirror.mjs d3 --ens kesar-kingdom.graphpay.eth --ens acceptance.
 - `d2a` runs beside the workers. `d2b --block N` and `d2c --block N` need the workers stopped cleanly (Ctrl-C) and an unmirrored edge event at or after block N: stop the workers before a payment, run the check, then start the workers again.
 - `refs --from N --to N` (D15's count) and `lag` (one fresh heartbeat).
 
+## At night (W5 Ops, from 23:43 IST Fri 6 Nov)
+
+- **The checkout:** the workers run from `.claude/worktrees/w5-workers`, detached at `origin/main`, so no session's branch work changes the files under them. The log is `.workers.log` there.
+- **The watchdog:** `node scripts/ops/workers-watchdog.mjs --dir <that checkout>`, started with `nohup`, logging to `.watchdog.log` there.
+  - It starts the workers when none run.
+  - It restarts them only after 30 minutes with neither a good poll nor a further scan (P-w5-ops-1). A mirror waiting out Arkiv's rate-limit reset resumes by itself, and a restart reloads W_LEDGER three times.
+- **A maintenance window:** `touch <checkout>/.workers.hold`, then stop the workers (`kill -INT`; then TERM; then KILL, since a waiting Arkiv call holds the shutdown). Remove the hold file to let the watchdog start them again within a minute.
+- **After a story change** (the label flip):
+  1. Hold the watchdog and stop the workers.
+  2. `git -C <checkout> fetch origin && git -C <checkout> checkout --detach origin/main`.
+  3. `fnm exec --using=22.23.4 pnpm install --frozen-lockfile` there.
+  4. Remove the hold file.
+- **The ENS watcher's polls:** `ENS_WATCH_POLL_MS` (at least 6,000; the default) slows them when publicnode throttles this Mac's log queries. Set it in the watchdog's environment; the workers inherit it.
+
 ## Running it (founder's Mac)
 
 ```bash

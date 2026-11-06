@@ -6,7 +6,7 @@ For the founder, who records it. **Your own voice, no text-to-speech or AI voice
 
 - The payer agent is **active** and Filter & Fold is **open**: https://graphpay-event.vercel.app/api/state/customer and the [map](https://graphpay-event.vercel.app/map).
 - A laptop window at least 1200 wide, on https://graphpay-event.vercel.app.
-- An errand takes about two minutes on the production site (91 to 171 s in the calibration table, `docs/thinking-partner/OPEN.md`). Talk over it while the deck follows each step. If the video runs long, cut the wait; never speed it up.
+- An errand took 91 to 171 s on the production site before [#182](https://github.com/Zugzwang-world/graphpay/pull/182) (the calibration table, `docs/thinking-partner/OPEN.md`); with the routine steps in code, an errand on the production site took 55.5 s (Sat 7 Nov 00:24 IST, [#192](https://github.com/Zugzwang-world/graphpay/pull/192)). Talk over it while the deck follows each step. If the video runs long, cut the wait; never speed it up.
 - Do not tap on the phones: Revoke, Change cap or "Let the agent try to raise its own cap" (not wired), Pause on Concierge or Analyst (use the Payer card), Subscribe and Cancel ([`docs/sessions/booth/demo-note.md`](../sessions/booth/demo-note.md)). Subscribe, Cancel and the kill work from the [`/customer`](https://graphpay-event.vercel.app/customer) page instead (#173, #175); a kill spends a spare agent, so use it once, as its own shot, if at all. W7 updates this list as the night streams land.
 
 ## Shots

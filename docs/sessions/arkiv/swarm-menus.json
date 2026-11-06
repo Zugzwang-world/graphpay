@@ -1,8 +1,128 @@
 {
   "gateway": "https://api.gateway.ethswarm.org",
   "synthetic": true,
-  "writtenAt": "2026-11-06T12:58:59.966Z",
+  "writtenAt": "2026-11-06T18:36:19.775Z",
+  "cast": "final",
   "menus": [
+    {
+      "shopEns": "filter-and-fold.graphpay.eth",
+      "entityKey": "0x628f9aeed5550c543ca17dbfc14b0f15e683114c556ea273bbfe753c635604f8",
+      "txHash": "0xca197cd3e08cfd97bdf63333ce2b53b52ac17d4bcd1da0db79e8b6158575ef5a",
+      "reference": "1e3df1a9613b7da3250a3247f13a03b29011453368ff683b6411a33c307f389f",
+      "link": "https://api.gateway.ethswarm.org/bzz/1e3df1a9613b7da3250a3247f13a03b29011453368ff683b6411a33c307f389f/menu.json",
+      "version": 1,
+      "contentHash": "db81d7d315650d55e204a9a185516ee617fddc59143c2137ae062fc762538d83",
+      "images": [
+        {
+          "sku": "filter-and-fold-masala-dosa-combo",
+          "ref": "0f28013fa2f52285c954066fd6a4597106aabe6dfc1136ae1bd8028149406613",
+          "link": "https://api.gateway.ethswarm.org/bzz/0f28013fa2f52285c954066fd6a4597106aabe6dfc1136ae1bd8028149406613/filter-and-fold-masala-dosa-combo.jpg",
+          "sha256": "4e24566570226e5fc049fda431a74b76975fe66faceef56faf4464adfeb1714c",
+          "bytes": 13583
+        },
+        {
+          "sku": "filter-and-fold-filter-coffee",
+          "ref": "3cffe29f4108e65db15655e2799b11a59e911907e130659343688da57093a4fb",
+          "link": "https://api.gateway.ethswarm.org/bzz/3cffe29f4108e65db15655e2799b11a59e911907e130659343688da57093a4fb/filter-and-fold-filter-coffee.jpg",
+          "sha256": "377486edf4c65b8f565d33186ddf0bf5c81f4ab41b519db37b570f8903e187b6",
+          "bytes": 10831
+        },
+        {
+          "sku": "filter-and-fold-sunday-breakfast",
+          "ref": "e1bf5ea611fbae09cca76426c69ca6a05b916a738a12c427e2f54a56aaf514ca",
+          "link": "https://api.gateway.ethswarm.org/bzz/e1bf5ea611fbae09cca76426c69ca6a05b916a738a12c427e2f54a56aaf514ca/filter-and-fold-sunday-breakfast.jpg",
+          "sha256": "50398581a3e9bef706f7b69f0b877279c9632dd0a628d60f7f789c4fcb5cdccf",
+          "bytes": 14494
+        },
+        {
+          "sku": "filter-and-fold-podi-idli",
+          "ref": "fc4500ee99130a5e09fc2719b39420b671e58cce7e3b4af0669c204360bb8126",
+          "link": "https://api.gateway.ethswarm.org/bzz/fc4500ee99130a5e09fc2719b39420b671e58cce7e3b4af0669c204360bb8126/filter-and-fold-podi-idli.jpg",
+          "sha256": "9817e97db1a7f0a11bcdf4b931a1c0f478c963eefc860734721581a27c9547ce",
+          "bytes": 17924
+        }
+      ]
+    },
+    {
+      "shopEns": "tawa-tangle.graphpay.eth",
+      "entityKey": "0xdb8649b11eb5a7b9ab3a2f6e98effe3ea24caefc9928931510fa1dc2c0fc4eba",
+      "txHash": null,
+      "reference": "b8898dbb62bb4e99a6d91ae0fc12d4383164577c51340aa6a927b1b6042a71ec",
+      "link": "https://api.gateway.ethswarm.org/bzz/b8898dbb62bb4e99a6d91ae0fc12d4383164577c51340aa6a927b1b6042a71ec/menu.json",
+      "version": 1,
+      "contentHash": "901d92c2dd1e87c431bfaac8a75cbf697b6957b1f988680c712caee65eecefc9",
+      "images": [
+        {
+          "sku": "tawa-tangle-masala-dosa-combo",
+          "ref": "d7180de7ea2619f98acdded09c930189008303f5ae1461fd9f54c88a7a309f69",
+          "link": "https://api.gateway.ethswarm.org/bzz/d7180de7ea2619f98acdded09c930189008303f5ae1461fd9f54c88a7a309f69/tawa-tangle-masala-dosa-combo.jpg",
+          "sha256": "29872789986bf6cba54e33fe8fbb74e639ee9b2827c1c1b45a3beb6130e9e028",
+          "bytes": 20188
+        },
+        {
+          "sku": "tawa-tangle-onion-uttapam",
+          "ref": "b0cc931b5ace6b600190ebdbb5649728a1eca3a48532a8a7c57ec7270816abc2",
+          "link": "https://api.gateway.ethswarm.org/bzz/b0cc931b5ace6b600190ebdbb5649728a1eca3a48532a8a7c57ec7270816abc2/tawa-tangle-onion-uttapam.jpg",
+          "sha256": "035470575e60a93b667f46fbba92b4e966d0c6a136360978e1f6334a612260c8",
+          "bytes": 19511
+        },
+        {
+          "sku": "tawa-tangle-lemon-rice",
+          "ref": "95cd7c0d180474c10bcbacb573c71edbe92fd757c2e2129f52f79e8b7e19700b",
+          "link": "https://api.gateway.ethswarm.org/bzz/95cd7c0d180474c10bcbacb573c71edbe92fd757c2e2129f52f79e8b7e19700b/tawa-tangle-lemon-rice.jpg",
+          "sha256": "dd9687f1176463c61336bbc20385b0f9eee4cad09cba2876cc57f77e53d727a6",
+          "bytes": 16580
+        },
+        {
+          "sku": "tawa-tangle-filter-coffee",
+          "ref": "271151c3b49639a417850667a035fd4bf1a93442b77f48680b8eaeb7e849dd7d",
+          "link": "https://api.gateway.ethswarm.org/bzz/271151c3b49639a417850667a035fd4bf1a93442b77f48680b8eaeb7e849dd7d/tawa-tangle-filter-coffee.jpg",
+          "sha256": "c354d147116dec53bdac1024e62b1b7efd654ce3e52ed17cd188af042d84d7b0",
+          "bytes": 14058
+        }
+      ]
+    },
+    {
+      "shopEns": "idli-index.graphpay.eth",
+      "entityKey": "0xd762c4cfffa6eb056ad8137e403d2535e957d9d823ca80ef7fe766e9b44550b0",
+      "txHash": "0x45584776f1b65599094656a95b03ce12180059ec27cc1bd60eacac171953a4d1",
+      "reference": "da915990f6fbae77408114d07c7e0910eec438649cebec390157c9f30e22d0c9",
+      "link": "https://api.gateway.ethswarm.org/bzz/da915990f6fbae77408114d07c7e0910eec438649cebec390157c9f30e22d0c9/menu.json",
+      "version": 1,
+      "contentHash": "8c844dfd2b32cebe58d1f17c1d3c1b5fa51aed5595e93efe546271e2e64f3f2c",
+      "images": [
+        {
+          "sku": "idli-index-masala-dosa-combo",
+          "ref": "e150bde2c85cd5c11112ad68066ad8c2b197731ec33129b481c1173740d317dc",
+          "link": "https://api.gateway.ethswarm.org/bzz/e150bde2c85cd5c11112ad68066ad8c2b197731ec33129b481c1173740d317dc/idli-index-masala-dosa-combo.jpg",
+          "sha256": "b2d81406d1fd3c45d0625ea7a1b9c6966d5349b13ef156fbe1a5635b88af18ef",
+          "bytes": 17373
+        },
+        {
+          "sku": "idli-index-idli-sambar",
+          "ref": "a861fc6e410b045c3ddc2b370a99e3e7ec4dd596911b6a00c6310a5c538ce3d6",
+          "link": "https://api.gateway.ethswarm.org/bzz/a861fc6e410b045c3ddc2b370a99e3e7ec4dd596911b6a00c6310a5c538ce3d6/idli-index-idli-sambar.jpg",
+          "sha256": "4744977c306c6f6271ae8c6f6fa2b1d9455a3c2b656c0ba11da8728016a513b5",
+          "bytes": 12312
+        },
+        {
+          "sku": "idli-index-medu-vada",
+          "ref": "73e286575a778f2449f17d68454ff6b3bb9c3eddad867df767ef831f154ad99b",
+          "link": "https://api.gateway.ethswarm.org/bzz/73e286575a778f2449f17d68454ff6b3bb9c3eddad867df767ef831f154ad99b/idli-index-medu-vada.jpg",
+          "sha256": "68ae97fddf48b6b41c24a06102bdbbdaa214afbd49a21b73054507a404232259",
+          "bytes": 15025
+        },
+        {
+          "sku": "idli-index-rava-upma",
+          "ref": "5aec2a94b70c96446e9bd09819c469fd8e84dde68d68b526df6bd92a5ea21818",
+          "link": "https://api.gateway.ethswarm.org/bzz/5aec2a94b70c96446e9bd09819c469fd8e84dde68d68b526df6bd92a5ea21818/idli-index-rava-upma.jpg",
+          "sha256": "a83b5e86815ac2afae6143e1b91f092f07cf40a5780d2bb4e8c487cafd3ec7ae",
+          "bytes": 15016
+        }
+      ]
+    }
+  ],
+  "previous": [
     {
       "shopEns": "kesar-kingdom.graphpay.eth",
       "entityKey": "0x0f32e7cd190884066418a9fb32df6f5807e5bc3f8b59f3a7776f99e3e1de273f",

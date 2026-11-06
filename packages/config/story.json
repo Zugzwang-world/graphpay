@@ -102,11 +102,11 @@
   "shops": [
     {
       "key": "kesar-kingdom",
-      "label": "kesar-kingdom",
+      "label": "filter-and-fold",
       "displayName": "Filter & Fold",
       "storyRole": "good",
       "walletRole": "SHOP_KESAR",
-      "category": "sweets",
+      "category": "south-indian",
       "area": null,
       "location": null,
       "products": [
@@ -158,11 +158,11 @@
     },
     {
       "key": "jamun-junction",
-      "label": "jamun-junction",
+      "label": "tawa-tangle",
       "displayName": "Tawa Tangle",
       "storyRole": "trap",
       "walletRole": "SHOP_JAMUN",
-      "category": "sweets",
+      "category": "south-indian",
       "area": null,
       "location": null,
       "products": [
@@ -214,11 +214,11 @@
     },
     {
       "key": "syrup-street",
-      "label": "syrup-street",
+      "label": "idli-index",
       "displayName": "Idli Index",
       "storyRole": "runner-up",
       "walletRole": "SHOP_SYRUP",
-      "category": "sweets",
+      "category": "south-indian",
       "area": null,
       "location": null,
       "products": [

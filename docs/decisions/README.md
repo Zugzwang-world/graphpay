@@ -82,6 +82,7 @@ Short records, one file each (skill `adr`). Lab decisions are adopted from `plan
 | [ADR-0077](ADR-0077-each-seeded-city-keeps-its-own-cast.md) | Each seeded city keeps its own cast; the big city M is seeded with the final cast | accepted |
 | [ADR-0080](ADR-0080-the-big-city-m-is-what-was-seeded.md) | The big city M is what was seeded: its first 3,175 events, graph store only | accepted |
 | [ADR-0078](ADR-0078-routine-agent-steps-run-in-code.md) | Routine agent steps run in code; each model keeps one judgment call | accepted |
+| [ADR-0079](ADR-0079-the-owners-cap-reaches-the-policy-through-the-watcher.md) | The owner's cap reaches the spending policy through the watcher, never above the configured cap (narrows E-11) | accepted |
 
 ## Proposed in the pack, recorded by the owning session when taken
 

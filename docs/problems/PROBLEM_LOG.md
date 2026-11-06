@@ -120,3 +120,22 @@ Symptom: PR 55's `ci` and Vercel builds failed with "Parsing CSS source code fai
 Cause: after `git merge origin/main` I resolved the conflicted docs files only (the ones I expected) and ran `git add -A`, which committed a second conflicted file (`apps/web/app/site.css`, both PRs appended CSS at its end). The checks I ran before the merge were green, and `pnpm check` does not look for conflict markers.
 Fix: kept both sides, rebuilt, pushed.
 Prevention: after every merge, list the conflicts from `git status` (or `git diff --name-only --diff-filter=U`) before committing, and run `git ls-files | xargs grep -ln '^<<<<<<< '` plus `pnpm build` before pushing; a merge commit is not green until the build is.
+
+## w5-ops
+
+### P-w5-ops-1: the mirror looked hung three times (22:02, 23:29, 00:23 IST), and a restart made it worse
+When: 2026-11-07 00:30 IST · Activity: w5-ops · Cost: payments reached Arkiv up to about 40 minutes late; two restarts
+Symptom: the workers' `/health` said `ok: false`. There was no good poll and no further scan for many minutes, with `lastError` null or "HTTP request failed". The process ignored SIGINT and SIGTERM.
+Cause:
+- The founder's Arkiv access key's quota has been spent since 21:36, so #148 falls back to the keyless endpoint. Its `arkiv_query` budget, a window of about 10,000 rows, is shared by every process on this Mac.
+- A refused or nearly spent reply makes the transport wait out the reset it reports, up to about 25 minutes. Every Arkiv call then waits, the shutdown's included.
+- Each start runs `adopt()`, which loads all of W_LEDGER's rows three times (about 4,000 rows each): most of a window. W2's history writes to W_LEDGER also trigger reloads (W2's diagnosis).
+- The checkpoint stays at block 12,326,024, behind two parked kit events, so every restart re-scans from there.
+Fix:
+- No restart while the mirror waits: `scripts/ops/workers-watchdog.mjs` restarts the workers only after 30 minutes with neither a good poll nor a further scan.
+- A hold file pauses the watchdog for a maintenance window (W2's history writes, 23:59 to 00:13 IST).
+- W2 spaces D7's heavy reads.
+Prevention:
+- A fresh Arkiv access key takes the mirror off the shared window (the founder).
+- Never restart a stalled mirror before a reset could have passed (25 minutes), unless the process is gone.
+- Space heavy Arkiv readers on this Mac while the mirror runs.

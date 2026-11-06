@@ -21,6 +21,8 @@ declare module '@graphpay/ens' {
   export interface OwnerActions {
     pause(name: string): Promise<OwnerActionResult>;
     resume(name: string): Promise<OwnerActionResult>;
+    // The published cap (micro-USDT), read back before it answers (optional here so fakes need not have it).
+    setCap?(name: string, capMicro: bigint | string): Promise<OwnerActionResult>;
   }
   // The kill: the owner's `unregister`, one-shot per label ("killed earlier" on a second call).
   export interface OwnerKill {

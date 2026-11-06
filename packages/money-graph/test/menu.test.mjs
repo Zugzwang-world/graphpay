@@ -4,7 +4,7 @@ import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
 import { test } from 'node:test';
 import { generatePrivateKey } from 'viem/accounts';
-import { ENTITIES, QUERIES, ZERO_BATCH, SwarmError, castMenus, connectArkiv, menuBytes, menuDocument, menuImageLink, menuValues, uploadMenuImage, newSim, readMenu, sha256Hex, swarmClient, writeMenu, writerAddresses } from '../index.mjs';
+import { ENTITIES, QUERIES, ZERO_BATCH, SwarmError, castMenus, connectArkiv, createQuote, identityKey, menuBytes, menuDocument, menuImageLink, menuValues, nodeOf, ownCreate, uploadMenuImage, newSim, readMenu, sha256Hex, swarmClient, writeMenu, writerAddresses } from '../index.mjs';
 
 const SHOP = 'alpha-sweets.sim.example.eth';
 const ITEMS = [{ sku: 'box-12', name: 'jamun', unit: 'box of 12', quantity: 12, priceMicro: 4_800_000 }];
@@ -170,4 +170,18 @@ test('menu images are small, typed and referenced by a 64-hex reference; nothing
   assert.throws(() => doc({ ...base, name: '../x.png' }), /file name/);
   assert.throws(() => doc({ ...base, contentType: 'text/html' }), /one of/);
   assert.throws(() => doc({ ...base, sha256: 'zz' }), /sha-256/);
+});
+
+// W_DIRECTORY is shared with the live site: a transaction found at the menu write's nonce counts
+// as that write only if it created this shop's menu row (on Fri 6 Nov a live handoff row and a
+// presence row were taken for menu rows, because the send carried no such check).
+test('a transaction found by nonce is the menu write only if it holds this shop\'s menu row', async () => {
+  const { directory, swarm, document } = await setup();
+  const shopKey = identityKey(nodeOf(SHOP), 0);
+  const r = await writeMenu(directory, swarm, { shopEns: SHOP, document });
+  const quote = await createQuote(directory, { requestId: `0x${'ab'.repeat(32)}`, shopKey, agentEns: 'payer.someone.sim.example.eth', price: 1_000_000n, validUntil: 1_900_000_000n });
+  assert.equal(await ownCreate(directory, ENTITIES.menu, shopKey)([r.entityKey]), true);
+  assert.equal(await ownCreate(directory, ENTITIES.menu, shopKey)([quote.entityKey ?? quote.key]), false);
+  assert.equal(await ownCreate(directory, ENTITIES.menu, identityKey(nodeOf('beta.sim.example.eth'), 0))([r.entityKey]), false);
+  assert.equal(await ownCreate(directory, ENTITIES.menu, shopKey)([]), false);
 });

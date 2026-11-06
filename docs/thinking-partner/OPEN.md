@@ -19,6 +19,7 @@ Updated 23:10 IST, Fri 6 Nov (night Coordinator). **Only the submission (Sat 09:
 6. **Submit by 08:00 IST** from W7's `docs/submission/ETHGLOBAL.md`; the form closes at 09:00.
 
 **Closed tonight:**
+- the big city: trimmed by the founder at 00:52 IST to what is seeded; W2 finishes race mode on it;
 - the payer resumed at 23:00 IST, and Filter & Fold open again;
 - the demo scope: the night brief decides it (the new shops on chain, the big city, caps, the kill, subscriptions);
 - the Submission session: W7 replaces it;
@@ -82,6 +83,7 @@ Agents (T4) and Join add one row per full errand run, so the presets can be cali
 | 00:11 | W4 code mode on mock services, short answers | live | the same | 15.6, 11.7 | $0.0266, $0.0227 | paid the good shop, the concierge's own choice; 3 calls, 2,887 and 2,839 tokens |
 | 00:14 | W4 code mode live, local runner (as at 00:10) | live | the same | 22.0 | $0.0265 | refused at G8, the shop's re-check before the 402: the buyer-standing read failed (`fetch failed`), so the guard failed closed; now a read that throws is tried once more |
 | 00:15 | W4 code mode live, local runner, after that fix | live | the same | 55.2 | $0.0247 | **paid** 4.80 to kesar: https://explorer.testnet.whitechain.io/tx/0xfe0a4327fb7dca69d7363f05c73a8cc15b486b57184fc2f1e72c6812785070d5 ; 3 calls, 2,886 tokens (1,884 in, 768 cached; 1,002 out, 605 reasoning); 13.6 s of model time; the payer's 41.7 s is the quote, the 402, the checks, the signature and the settlement |
+| 00:24 | W4 code mode (#182) live on the production site, payer | live | `kimi-k3.1-pro-highspeed`, concierge high, analyst and risk low; the rest in code | 55.5 | $0.0269 | **paid** 4.80 to kesar: https://explorer.testnet.whitechain.io/tx/0x194b7bc4dac70c36e55ca140a7e3ea477853d8938f3885fb94d95bff9c32f0e5 ; 3 calls, 2,852 tokens; models 13 s; the two longest waits are the 402 step (13.6 s: the hosted shop's quote write) and the settlement (13.3 s: our facilitator and the chain) |
 
 ## Kickoff rules and booth questions (closed; rolled up 06:55 IST)
 
@@ -169,11 +171,14 @@ Updated 23:38 IST, Fri 6 Nov (W7 Submission).
 
 ## w3-payments
 
-- **Acceptance follows the 0.80 re-order** (owner: W5). What: `integration/hosted.mjs` C3 quotes `story.order.sku` against the re-order's 0.80, and `acceptance/checks.mjs` C3 expects 1.20. Why: C3 is refused before signing on every fresh run. Recommendation: quote `story.order.reorder.sku` and take the amount from `order.reorder.priceMicro` (W5 is told).
-
-## w3-payments
-
-- **Acceptance follows the 0.80 re-order** (owner: W5). What: `integration/hosted.mjs` C3 quotes `story.order.sku` against the re-order's 0.80, and `acceptance/checks.mjs` C3 expects 1.20. Why: C3 is refused before signing on every fresh run. Recommendation: quote `story.order.reorder.sku` and take the amount from `order.reorder.priceMicro` (W5 is told).
+- **The owner's cap change goes live with W1's watcher** (owner: W3, with W1 and W5). What: `POST /api/customer/cap` (#179) writes the owner's ENS cap. The policy follows through the watcher on the Mac, never above the configured cap (ADR-0078). Why: until W1's watcher change is merged and W5 has restarted the workers, the route answers `policy.applied: false`. Recommendation: merge W1's PR, restart the workers, and W3 proves it once, 300 → 250 → 300.
+- **The "everyone" quantity** (owner: founder; default taken). What: `order.overPass.quantity` is 100, a synthetic story value; the brief gives no headcount. Why: any figure above the pass is refused the same way. Recommendation: keep 100, or set the real headcount in `story.json`.
+- Closed tonight:
+  - the 0.80 re-order (#155);
+  - subscribe, renew and cancel (#173);
+  - the refund decline (#163);
+  - over the pass and the refused cap raise (#169);
+  - acceptance C3 on the re-order's own item (W5).
 
 ## w4-agents
 
@@ -194,6 +199,7 @@ Updated 23:38 IST, Fri 6 Nov (W7 Submission).
 
   Why: the analyst ranks `nodes(category)`, and the new rows are `south-indian`; a labels-only flip would rank the old shops. A test in `packages/city` fails it. Recommendation: one PR.
 - **After the flip, delist the old shops' directory rows** (owner: W2). What: kesar-kingdom, syrup-street and jamun-junction stay listed under their new display names, so until then the map shows each name twice. Why: the old rows feed acceptance D8 at S until acceptance moves to M. Recommendation: W2 delists them once acceptance checks M.
+- **`arkiv/swarm.md` names the old menus** (owner: W7). What: its worked example is Kesar Kingdom's menu (version 2, one fox image). The final cast's menus are in `docs/sessions/arkiv/swarm-menus.json`: entity key, transaction, reference, link, and each image's reference and hash. Why: the Swarm judges open those links. Recommendation: use Filter & Fold's menu as the example ([menu.json](https://api.gateway.ethswarm.org/bzz/1e3df1a9613b7da3250a3247f13a03b29011453368ff683b6411a33c307f389f/menu.json)); the old three stay listed there under `previous`.
 
 ## w6-sdk
 
@@ -232,7 +238,7 @@ Updated 23:38 IST, Fri 6 Nov (W7 Submission).
   - Recommendation: wire `declineRefund` to the route. In `apps/phones/src/orders.ts`, `isLive` drops `dec:` rows today, so nothing changes on the phones yet. When it is widened, add a `dec:` branch where `request` rows are folded (refund status `declined`), or the decline becomes a second pending request and rings `refund_request`. The `/order/<id>` page already words it "Refund declined" (`lib/order-trail.ts`). The unlinked `/merchant` page still says "Refund requested by" the shop.
 - **Over the pass, "for everyone"** (from w3-payments; owner: the frontend pass).
   - What: `POST /api/customer/over-pass`, empty body. The payer agent signs the story's `order.overPass` order: 100 of the combo, 480 test USDT. The signed attempt goes to our facilitator's verify step only, which never sends. It refuses (`CAP_EXCEEDED`, the lower of the ENS cap and the policy cap), and its recorder writes the refusal to Arkiv. Only an attempt above the whole pass is ever signed.
-  - Answer: `{ refused, reason, sent: false, request, item, quantity, attemptedMicro, passMicro, spentTodayMicro, leftMicro, orderId, arkiv: { ref, entityKey }, repeated? }`. A second tap within a minute gets the same answer with `repeated: true`, and no new record. `NOT_OVER_PASS` means the order fits the pass, so nothing is signed.
+  - Answer: `{ refused, reason, sent: false, request, item, quantity, attemptedMicro, passMicro, spentTodayMicro, leftMicro, orderId, arkiv: { ref, entityKey }, repeated? }`. A second tap within a minute gets the same answer with `repeated: true`, and no new record. `NOT_OVER_PASS` means the order fits the pass, so nothing is signed. `BALANCE_COVERS` means the payer could pay it, so nothing is signed (a second belt). Without a decision on the payer (no answer, the facilitator's own read failure, or a failed step before verify) the route returns 502 `NO_DECISION` with `reason`, `signed` and `orderId`. It is never reported as a refusal, and nothing is sent, since the attempt is only verified.
   - Event: a `fail` edge from the payer agent to the shop, ref `att:<orderId>:…`, in the merchant stream.
   - Recommendation: a "Dosas for everyone" chip (its text is `order.overPass.request`) that calls the route and shows a refused attempt (`RefusedAttempt` kind `payment`, reason `cap`) with the Arkiv entity link.
 - **The agent tries to raise its own cap** (from w3-payments; owner: the frontend pass).
@@ -240,3 +246,11 @@ Updated 23:38 IST, Fri 6 Nov (W7 Submission).
   - Answer: `{ refused: true, sent: false, simulated: true, revert, agent, owner, key, attemptedMicro, currentMicro, resolver, block, arkivTx, entityKey, repeated? }`.
   - Event: a `request` edge from the payer agent to the persona, ref `cap:<node>:<minute>`, amount 0 (the figure is in its payload). It is not in the shop's stream.
   - Recommendation: wire `tryRaiseCap` to the route and show `cap.change.refused` with the revert reason and the Arkiv link.
+
+- **The owner changes the payer's cap** (from w3-payments; owner: the frontend pass).
+  - What: `POST /api/customer/cap`, body `{ capMicro }`, a micro-USDT string, at most the configured cap (`buyerAgents.payer.capMicro`, 300 tonight).
+  - The owner's wallet writes the ENS record on Sepolia. The watcher on the Mac then writes the policy as min(ENS cap, configured cap) (ADR-0079; W1's change). The route waits up to 60 s for it.
+  - Answer: `{ agent, owner, capMicro, configuredMicro, ens: { changed, beforeMicro, sepoliaTx }, policy: { capMicro, applied }, effectiveMicro, arkivTx, entityKey }`.
+  - Refusals: `OVER_CONFIGURED`, `UNDER_FLOOR` (below today's spend plus the story errand's budget, `order.budgetMicro`, so the next errand always fits; a restore to the configured cap is always allowed), `BAD_CAP`, `TOO_SOON` (one change per 20 s per instance). `policy.capMicro` is null when the policy could not be read; `arkivTx` is null when the record could not be written. The ENS change stands either way.
+  - Event: a `request` edge from the persona to the payer agent, ref `own:<node>:<second>:<cap>`, amount 0, the figures in its payload. The node row's `capMicro` follows through the mirror.
+  - Recommendation: wire `setCap` to the route and emit `agent.cap.changed` with the Sepolia link and, once `policy.applied`, the new pass.

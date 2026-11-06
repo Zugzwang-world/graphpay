@@ -10,16 +10,16 @@ import { checkoutAbi } from '@graphpay/contracts';
 import { KEYS, createEnsGate, createEnsReader, dnsEncode, ensPublicClient, permissionedResolverAbi, walkName } from '@graphpay/ens';
 import { decodePaymentRequiredHeader, errorNames, graphPayOrderClient, x402Client } from '@graphpay/facilitator';
 import { recordEdge, runGraphql } from '@graphpay/money-graph';
-import { BaseError, ContractFunctionRevertedError, isAddressEqual, keccak256, namehash, toHex, type Abi, type Hex } from 'viem';
+import { BaseError, ContractFunctionRevertedError, erc20Abi, isAddressEqual, keccak256, namehash, toHex, type Abi, type Hex } from 'viem';
 import { privateKeyToAccount } from 'viem/accounts';
 import { arkivEngine } from '../app/api/graphql/arkiv.server.ts';
 import { sharedCustomerState } from './customer-state.server.ts';
 import { PASSCODE_HEADER } from './passcode-header.ts';
-import { syncConnection, whitechain } from './payments.server.ts';
+import { syncConnection, whitechain, type Whitechain } from './payments.server.ts';
 import { recorderKeyConfigured } from './refund-request.server.ts';
 import { payerKeyName } from './reorder-live.server.ts';
 import { checkoutAddress, siteModel } from './site.server.ts';
-import { overPassPlan, type AttemptOutcome, type OverPassDeps, type OverPassQuote, type Pass, type RaiseCapDeps } from './limits.server.ts';
+import { SIGN_MARGIN_MS, overPassPlan, type AttemptOutcome, type OverPassDeps, type OverPassQuote, type Pass, type RaiseCapDeps } from './limits.server.ts';
 
 const KEY_SHAPE = /^0x[0-9a-fA-F]{64}$/;
 const ZERO32 = `0x${'0'.repeat(64)}`;
@@ -46,6 +46,17 @@ function payerAccount() {
   if (!KEY_SHAPE.test(key)) throw new Error('the payer key is not set');
   return privateKeyToAccount(key as Hex);
 }
+
+// One Whitechain client per instance (its RPC is probed once), forgotten after a failure.
+let wc: Promise<Whitechain> | null = null;
+const chain = () =>
+  (wc ??= whitechain().catch((error: unknown) => {
+    wc = null;
+    throw error;
+  }));
+
+// What is left of an attempt's budget, never less than a second (for a fetch timeout).
+const left = (until: number) => Math.max(1_000, until - Date.now());
 
 let gate: Promise<ReturnType<typeof createEnsGate>> | null = null;
 const ensGate = () =>
@@ -79,14 +90,16 @@ export function liveOverPassDeps(): OverPassDeps {
     pass: async (): Promise<Pass> => {
       // A fresh ENS read: the gate's 20 s cache must not hide a cap the owner just changed.
       (await ensGate()).invalidate(model.payer.ens);
-      const w = await whitechain();
+      const w = await chain();
       const checkout = checkoutAddress() as Hex;
-      const [policy, spent, ensCapMicro] = await Promise.all([
+      const payerAddress = payerAccount().address;
+      const [policy, spent, ensCapMicro, balance] = await Promise.all([
         w.publicClient.readContract({ address: checkout, abi: checkoutAbi, functionName: 'policies', args: [node] }) as Promise<{ dailyCapMicro: bigint }>,
         w.publicClient.readContract({ address: checkout, abi: checkoutAbi, functionName: 'spentToday', args: [node] }) as Promise<bigint>,
         ensCapOf(model.payer.ens),
+        w.publicClient.readContract({ address: config.whitechain.tokens.usdt.address as Hex, abi: erc20Abi, functionName: 'balanceOf', args: [payerAddress] }),
       ]);
-      return { policyCapMicro: BigInt(policy.dailyCapMicro), ensCapMicro, spentMicro: BigInt(spent) };
+      return { policyCapMicro: BigInt(policy.dailyCapMicro), ensCapMicro, spentMicro: BigInt(spent), balanceMicro: BigInt(balance) };
     },
     quote: async (): Promise<LiveQuote> => {
       const plan = overPassPlan(model);
@@ -101,9 +114,9 @@ export function liveOverPassDeps(): OverPassDeps {
       }
       return { orderId, priceMicro: String(body.priceMicro), quantity: Number(body.quantity), item: String(terms.item), terms, payUrl: String(body.payUrl) };
     },
-    attempt: async (q): Promise<AttemptOutcome> => {
+    attempt: async (q, until): Promise<AttemptOutcome> => {
       const quote = q as LiveQuote;
-      const w = await whitechain();
+      const w = await chain();
       const account = payerAccount();
       const price = BigInt(quote.priceMicro);
       const checkout = checkoutAddress() as Hex;
@@ -111,7 +124,7 @@ export function liveOverPassDeps(): OverPassDeps {
       const network = `eip155:${w.chain.id}`;
       const headers = { 'content-type': 'application/json', [PASSCODE_HEADER]: process.env.DEMO_PASSCODE ?? '' };
       const body = JSON.stringify(quote.terms);
-      const post = () => fetch(quote.payUrl, { method: 'POST', headers, body, redirect: 'error', cache: 'no-store', signal: AbortSignal.timeout(20_000) });
+      const post = () => fetch(quote.payUrl, { method: 'POST', headers, body, redirect: 'error', cache: 'no-store', signal: AbortSignal.timeout(Math.min(20_000, left(until))) });
       // 1. The shop's 402 for these terms (nothing is signed yet).
       let first: Response;
       try {
@@ -145,7 +158,8 @@ export function liveOverPassDeps(): OverPassDeps {
       if (!wire || String(wire.orderId).toLowerCase() !== quote.orderId.toLowerCase() || String(wire.parentOrderId) !== ZERO32 || BigInt(String(wire.amountMicro ?? accepted.amount)) !== price || BigInt(String(wire.deadline)) > BigInt(String(quote.terms.exp))) {
         return { status: 'unknown', reason: 'NOT_THE_QUOTE' };
       }
-      // 3. One signature under the pass, capped at the quoted amount.
+      // 3. One signature under the pass, capped at the quoted amount, and only with time left to verify it.
+      if (until - Date.now() < SIGN_MARGIN_MS) return { status: 'unknown', reason: 'NO_TIME', signed: false };
       let paymentPayload: unknown;
       try {
         const scheme = graphPayOrderClient({ account, publicClient: w.publicClient, chainId: w.chain.id, token, permit2: config.whitechain.system.permit2, checkout, payerName: model.payer.ens, mandateHash: keccak256(toHex(`graphpay over-pass ${quote.orderId}`)) });
@@ -165,19 +179,19 @@ export function liveOverPassDeps(): OverPassDeps {
           body: JSON.stringify({ x402Version: (paymentPayload as { x402Version?: unknown }).x402Version, paymentPayload, paymentRequirements: accepted }),
           redirect: 'error',
           cache: 'no-store',
-          signal: AbortSignal.timeout(30_000),
+          signal: AbortSignal.timeout(Math.min(30_000, left(until))),
         });
         answer = verified.ok ? ((await verified.json().catch(() => null)) as typeof answer) : null;
       } catch {
         answer = null;
       }
-      if (!answer || typeof answer.isValid !== 'boolean') return { status: 'unknown', reason: 'FACILITATOR_UNREACHABLE' };
-      if (answer.isValid) return { status: 'valid' };
-      return { status: 'refused', reason: typeof answer.invalidReason === 'string' && SAFE_REASON.test(answer.invalidReason) ? answer.invalidReason : undefined };
+      if (!answer || typeof answer.isValid !== 'boolean') return { status: 'unknown', reason: 'FACILITATOR_UNREACHABLE', signed: true };
+      if (answer.isValid) return { status: 'valid', signed: true };
+      return { status: 'refused', reason: typeof answer.invalidReason === 'string' && SAFE_REASON.test(answer.invalidReason) ? answer.invalidReason : undefined, signed: true };
     },
     // The facilitator's recorder writes the refusal as a `fail` edge with the order id (ref att:…).
-    record: async (orderId) => {
-      const until = Date.now() + RECORD_WAIT_MS;
+    record: async (orderId, deadline) => {
+      const until = Math.min(Date.now() + RECORD_WAIT_MS, deadline);
       for (;;) {
         try {
           const answer = await runGraphql({ engine: await arkivEngine(), query: 'query($id: String!) { order(id: $id) { kind ref } }', variables: { id: orderId } });
@@ -207,7 +221,11 @@ export function revertName(error: unknown): string | null {
 export function liveRaiseCapDeps(): RaiseCapDeps {
   const model = siteModel();
   return {
-    ensCap: () => ensCapOf(model.payer.ens),
+    ensCap: async () => {
+      // A fresh ENS read: an owner change in the last 20 s must not be missed.
+      (await ensGate()).invalidate(model.payer.ens);
+      return ensCapOf(model.payer.ens);
+    },
     simulate: async (capMicro) => {
       const { client } = await ensPublicClient({ env: process.env });
       // The chain id before the agent's key is used at all (CLAUDE.md): Ethereum Sepolia only.
