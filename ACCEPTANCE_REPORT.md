@@ -1,6 +1,6 @@
 # Acceptance report
 
-Written by `pnpm acceptance` at 2026-11-06T04:19:22.390Z. Checks and pass criteria: `planning/ACCEPTANCE_TESTS.md` and `docs/plan/ACCEPTANCE_ADDITIONS.md`. Only D7 may be `blocked` (C7 and E3 no longer wait on supply, ADR-0054); a check without a result is `not run`, never `pass`.
+Written by `pnpm acceptance` at 2026-11-06T04:21:08.394Z. Checks and pass criteria: `planning/ACCEPTANCE_TESTS.md` and `docs/plan/ACCEPTANCE_ADDITIONS.md`. Only D7 may be `blocked` (C7 and E3 no longer wait on supply, ADR-0054); a check without a result is `not run`, never `pass`.
 
 **45 pass, 0 fail, 1 blocked, 2 not run** (of 48).
 
@@ -1301,7 +1301,7 @@ Status: **pass**.
 
 Status: **pass**.
 
-### D10 (2026-11-06T04:17:41.444Z)
+### D10 (2026-11-06T04:21:08.387Z)
 
 - What: an expired or missing quote is refused and the agent re-quotes
 - Pass: true

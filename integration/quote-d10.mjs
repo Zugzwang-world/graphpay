@@ -9,7 +9,7 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { castEntries, config, story } from '@graphpay/config';
 import { decodePaymentRequiredHeader } from '@graphpay/facilitator';
-import { connectArkiv, findQuotes, LIFETIME, writerAddresses } from '@graphpay/money-graph';
+import { connectArkiv, findQuotes, writerAddresses } from '@graphpay/money-graph';
 import { PASSCODE_HEADER } from '@graphpay/shop';
 import { keccak256, toHex } from 'viem';
 import { loadEnv } from '../scripts/lib/env-loader.mjs';
@@ -31,10 +31,12 @@ const payer = entries.find((e) => e.kind === 'buyer-agent' && e.key === 'accepta
 const persona = entries.find((e) => e.kind === 'persona');
 const shop = entries.find((e) => e.kind === 'shop' && e.key === story.order.shop);
 const wallet = roleAddresses(values)[payer.walletRole];
+if (!env.DEMO_PASSCODE) throw new Error('DEMO_PASSCODE is not in .env');
 const startedAt = new Date().toISOString();
 const requestId = keccak256(toHex(`M13 D10c ${startedAt}`));
 
 const qs = new URLSearchParams({ shop: shop.ensName, item: story.order.sku, qty: '1', buyer: persona.ensName, payer: payer.ensName, wallet });
+const quotedAt = Math.floor(Date.now() / 1000);
 const q = await (await fetch(`${SITE}/api/shop/quote?${qs}`, { redirect: 'error', cache: 'no-store' })).json();
 const r402 = await fetch(`${SITE}${new URL(q.payUrl).pathname}`, { method: 'POST', redirect: 'error', cache: 'no-store', headers: { 'content-type': 'application/json', [PASSCODE_HEADER]: env.DEMO_PASSCODE }, body: JSON.stringify({ ...q.terms, requestId }) });
 if (r402.status !== 402) throw new Error(`the 402 step answered ${r402.status}`);
@@ -56,7 +58,7 @@ const created = await pub.getBlock({ blockNumber: createdBlock });
 const earlier = await pub.getBlock({ blockNumber: createdBlock - 100n });
 const blockSeconds = Number(created.timestamp - earlier.timestamp) / 100;
 const lifeBlocks = Number(BigInt(found.expiresAt) - createdBlock);
-const wantBlocks = (LIFETIME.quoteMinutes * 60) / blockSeconds;
+const wantBlocks = (15 * 60) / 2; // the spec's 15 minutes in Arkiv's 2 s blocks
 const validAfterS = Number(BigInt(found.validUntil) - created.timestamp);
 const out = {
   startedAt,
@@ -73,9 +75,11 @@ const out = {
   wantBlocks,
   validUntil: found.validUntil,
   validAfterSeconds: validAfterS,
-  signed: false,
+  // valid_until is the quote's exp, set at the GET; the gap to the entity's creation is here.
+  quotedAt,
+  exp: q.terms?.exp ?? null,
 };
-out.pass = typeof out.owner === 'string' && out.owner.toLowerCase() === out.wDirectory.toLowerCase() && Math.abs(lifeBlocks - wantBlocks) <= 2 && Math.abs(validAfterS - 600) <= 2 * blockSeconds + 5;
+out.pass = typeof out.owner === 'string' && out.owner.toLowerCase() === out.wDirectory.toLowerCase() && Math.abs(lifeBlocks - wantBlocks) <= 2 && Math.abs(validAfterS - 600) <= 10;
 say(`owner W_DIRECTORY, lives ${lifeBlocks} blocks (want ${wantBlocks.toFixed(1)} at ${blockSeconds} s), valid_until ${validAfterS} s after creation: ${out.pass ? 'pass' : 'FAIL'}`);
 const dir = join(here, '..', 'docs', 'sessions', 'integration', 'hosted');
 mkdirSync(dir, { recursive: true });
