@@ -97,10 +97,13 @@ export declare class SwarmError extends Error { status?: number }
 export declare function sha256Hex(bytes: Uint8Array | string): string;
 export interface SwarmClient { gateway: string; upload(bytes: Uint8Array, options: { name: string; contentType?: string }): Promise<{ reference: string; link: string }>; read(reference: string, name: string): Promise<Uint8Array | null>; link(reference: string, name: string): string }
 export declare function swarmClient(options?: { gateway?: string; fetchFn?: typeof fetch; timeoutMs?: number; attempts?: number }): SwarmClient;
-export interface MenuItem { sku: string; name: string; unit: string; quantity: number; priceMicro: number }
+export interface MenuImage { ref: string; name: string; contentType: 'image/svg+xml' | 'image/png' | 'image/jpeg' | 'image/webp'; sha256: string; bytes: number }
+export interface MenuItem { sku: string; name: string; unit: string; quantity: number; priceMicro: number; image?: MenuImage }
+export declare function uploadMenuImage(swarm: SwarmClient, options: { bytes: Uint8Array; name: string; contentType: MenuImage['contentType'] }): Promise<MenuImage>;
+export declare function menuImageLink(swarm: SwarmClient, image: MenuImage): string;
 export declare function menuDocument(options: { shopEns: string; name: string; items: MenuItem[]; version: number; synthetic?: boolean }): Record<string, unknown>;
 export declare function menuBytes(document: unknown): Uint8Array;
 export declare function menuValues(options: { shopEns: string; epoch?: number; version: number; reference: string; bytes: Uint8Array }): Record<string, unknown>;
 export declare function writeMenu(arkiv: ArkivConnection, swarm: SwarmClient, options: { shopEns: string; epoch?: number; document: Record<string, unknown>; lifetimeDays?: number }): Promise<{ entityKey: Hex; txHash: Hex | null; reference: string; link: string; version: number; created: boolean; unchanged: boolean }>;
 export declare function readMenu(publicClient: unknown, swarm: SwarmClient, options: { shopEns: string; epoch?: number; owner?: Hex; document?: Record<string, unknown> | null }): Promise<{ row: Record<string, unknown>; document: Record<string, unknown> | null; link: string; reuploaded: boolean; verified: boolean; missing: boolean } | null>;
-export declare function castMenus(cast?: unknown): { shopEns: string; name: string; items: MenuItem[]; synthetic: boolean }[];
+export declare function castMenus(cast?: unknown): { key: string; shopEns: string; name: string; items: MenuItem[]; synthetic: boolean }[];

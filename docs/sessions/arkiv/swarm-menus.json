@@ -1,21 +1,21 @@
 {
   "gateway": "https://api.gateway.ethswarm.org",
   "synthetic": true,
-  "writtenAt": "2026-11-06T04:22:40.884Z",
+  "writtenAt": "2026-11-06T07:17:05.417Z",
   "menus": [
     {
       "shopEns": "kesar-kingdom.graphpay.eth",
       "entityKey": "0x0f32e7cd190884066418a9fb32df6f5807e5bc3f8b59f3a7776f99e3e1de273f",
-      "txHash": "0xe08819acde1f50d2a21fc93c1b39abee3145c3f7362b35cdda3480d5200835b2",
-      "reference": "7812ec17664eac04ac47b56aa9137bd1ca470fe3f30960d76e9637423f6dd3c1",
-      "link": "https://api.gateway.ethswarm.org/bzz/7812ec17664eac04ac47b56aa9137bd1ca470fe3f30960d76e9637423f6dd3c1/menu.json",
-      "version": 1,
-      "contentHash": "41991f473c4b5cb863a60ffcd1c8ad1ccfe91d4f5bfb2601976081617dd09374"
+      "txHash": "0x23ab408597c199d1cce86ae46fbbdf3c2642fe0a4a86dfba063b5c3390c93e45",
+      "reference": "5110dca84647bf9e98b896ccd8865ab14f33cbbdb4391064660682a422d26b22",
+      "link": "https://api.gateway.ethswarm.org/bzz/5110dca84647bf9e98b896ccd8865ab14f33cbbdb4391064660682a422d26b22/menu.json",
+      "version": 2,
+      "contentHash": "291002e89e6c6b8ff0c1c92a1f82af1350fd22e08c1b99445b54c9bae45c4d20"
     },
     {
       "shopEns": "jamun-junction.graphpay.eth",
       "entityKey": "0x5386e7bec45d6ec3bd1af082805e938f89044a2c6cc19b27a408ced26351087e",
-      "txHash": "0x7439a7592d9bd9a04598a91f183693bfe1edb18aa41a74489b3734d96aa6a431",
+      "txHash": null,
       "reference": "ccf03dd4eacfcd317da97d53cde31fa0b887fec0d76e84aab1f6e9c973af51e4",
       "link": "https://api.gateway.ethswarm.org/bzz/ccf03dd4eacfcd317da97d53cde31fa0b887fec0d76e84aab1f6e9c973af51e4/menu.json",
       "version": 1,
@@ -24,7 +24,7 @@
     {
       "shopEns": "syrup-street.graphpay.eth",
       "entityKey": "0x109d491bd3d26ce9b92dd010b5186c843037859a27a99a94b181742911cc5f32",
-      "txHash": "0x22c693173ce529c78ca692ad50d9e101035ed5879a0e4a1648286716069338a2",
+      "txHash": null,
       "reference": "df04b7d9abdd31eff73fa18a1ba7fc0058c042a248f92c5567816a6e5d264384",
       "link": "https://api.gateway.ethswarm.org/bzz/df04b7d9abdd31eff73fa18a1ba7fc0058c042a248f92c5567816a6e5d264384/menu.json",
       "version": 1,
