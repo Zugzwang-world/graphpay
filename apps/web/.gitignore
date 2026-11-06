@@ -1,2 +1,5 @@
 # The phones, built from frontend/ by apps/phones/build.mjs before next build.
 public/phones/
+
+# Written by next dev and next build for coding agents; not ours.
+AGENTS.md

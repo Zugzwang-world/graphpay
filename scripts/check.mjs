@@ -15,9 +15,7 @@ export const CONFIG_FILE = 'packages/config/graphpay.config.json';
 const ADDRESS_SOURCES = [CONFIG_FILE, 'planning/FACTS.md', 'planning/WALLETS.md', 'docs/technical/WALLETS.md'];
 const CODE_PATH = /^(?:packages|apps|scripts|integration|acceptance|bench)\//;
 const CODE_EXT = /\.(?:[cm]?[jt]sx?|mdx|html?|graphql|gql|sol|json|sh|ya?ml|toml)$/;
-// The draft deck (booth, 2026-11-06) is a static page with its own synthetic STORY block, kept in the
-// story's words by hand; it is not application code, so the story-literal rule does not apply to it.
-const NOT_CODE = /(?:^|\/)(?:node_modules|broadcast|\.next)\/|^apps\/web\/public\/deck\//;
+const NOT_CODE = /(?:^|\/)(?:node_modules|broadcast|\.next)\//;
 const ADDRESS = /(?<![0-9a-fA-F])0x[0-9a-fA-F]{40}(?![0-9a-fA-F])/g;
 const ZERO = `0x${'0'.repeat(40)}`;
 
