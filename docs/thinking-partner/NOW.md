@@ -140,7 +140,7 @@ Updated 00:12 IST, Sat 7 Nov (W6 SDK, session `local_b6205da6-b613-4662-872a-6d4
 
 ## w7-submission
 
-Updated 00:33 IST, Sat 7 Nov (W7 Submission, `local_abd77623-de22-4fe2-a0a9-865fdd43dba2`; relay `relays/w7-submission.md`).
+Updated 00:37 IST, Sat 7 Nov (W7 Submission, `local_abd77623-de22-4fe2-a0a9-865fdd43dba2`; relay `relays/w7-submission.md`).
 - **The brief is done:** the form text is in one file, [`docs/submission/ETHGLOBAL.md`](../submission/ETHGLOBAL.md), and every claim in it links to evidence. Landed: the README and a root `LICENSE` ([#154](https://github.com/Zugzwang-world/graphpay/pull/154)); AI_USAGE.md and the five Arkiv files ([#159](https://github.com/Zugzwang-world/graphpay/pull/159)); the Whitechain and ENS notes ([#161](https://github.com/Zugzwang-world/graphpay/pull/161)); the form text ([#164](https://github.com/Zugzwang-world/graphpay/pull/164)).
 - **Also landed:** the video shot list and the submission checklist ([#166](https://github.com/Zugzwang-world/graphpay/pull/166)).
 - **Also landed:** AI_USAGE's effort split and W1's names in the README ([#170](https://github.com/Zugzwang-world/graphpay/pull/170)).
@@ -148,8 +148,9 @@ Updated 00:33 IST, Sat 7 Nov (W7 Submission, `local_abd77623-de22-4fe2-a0a9-865f
 - **Also landed:** the live re-order and subscription as evidence, the kill on `/customer` ([#180](https://github.com/Zugzwang-world/graphpay/pull/180)).
 - **Also landed:** W4's code-mode agents and W3's limits in the docs ([#187](https://github.com/Zugzwang-world/graphpay/pull/187)).
 - **Also landed:** the production kill as evidence ([#193](https://github.com/Zugzwang-world/graphpay/pull/193)).
-- **In this PR:** the label flip (#189) across the README, the Arkiv files, ENS.md, the checklist and the form text; W4's production errand (55.5 s, 3 model calls, #192).
-- **Running:** keep-current mode, a pass after each night stream lands (W2's race at M and menus under the new names, W6's SDK 1.0.0 on npm).
+- **Also landed:** the label flip across the docs, W4's production errand ([#195](https://github.com/Zugzwang-world/graphpay/pull/195)).
+- **In this PR:** arkiv-graph 1.0.0 on npm (00:34 IST) in the README and `reach.md`.
+- **Running:** keep-current mode, a pass after each night stream lands (W2's race at M and menus under the new names, agentpay 1.0.0 on npm, the regenerated acceptance report).
 - **Blockers:** none.
 
 ## before the night (retired day sessions)
