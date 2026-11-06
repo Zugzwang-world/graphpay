@@ -1,0 +1,30 @@
+{
+  "id": "F3",
+  "at": "2026-11-06T04:19:22.383Z",
+  "pass": true,
+  "what": "the relayer's safety floor is enforced",
+  "measured": {
+    "reason": "relayer_floor",
+    "transaction": "",
+    "relayerNonce": {
+      "before": 13,
+      "after": 13
+    },
+    "floorWbt": "1001",
+    "balanceWei": "794659557124942758",
+    "checks": [
+      "ok the local production build answers /api/facilitator/health",
+      "ok health shows the raised floor",
+      "ok health shows the balance below it",
+      "ok the local shop answers 402 (no facilitator call yet)",
+      "ok settle is refused before sending, naming the floor",
+      "ok no transaction: the relayer nonce is unchanged"
+    ]
+  },
+  "expected": "the payment refused before sending, naming the floor; no transaction (relayer nonce unchanged); health shows the floor and the balance",
+  "evidence": {
+    "file": "docs/sessions/payments/f3.json",
+    "by": "T1, a local production build with the hosted env (not a preview; the record says why)",
+    "at": "2026-11-06T04:16:55.317Z"
+  }
+}
