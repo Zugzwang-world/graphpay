@@ -115,6 +115,6 @@ One line per PR: time (IST) · activity · result · PR link. Append under your 
 - 19:55 IST · booth · sync step 0: the three "no purchase" errands (19:31 to 19:35) were the clock, not a bug: the good shop needs 45 min and the request said "by 8 pm"; the story deadline is now 11:59 pm · https://github.com/Zugzwang-world/graphpay/pull/142
 - 20:25 IST · booth · sync: the phones drive the deck (#143), a lagging status poll no longer undoes Stopped (#144), figurines without circles, no QR strip; one live errand paid 4.80, a 0.80 refund, pause and resume checked in Chrome · https://github.com/Zugzwang-world/graphpay/pull/143
 - 21:41 IST · records · after the 21:30 reset (usage 0%): the tick resumed; NOW and Founder now: production's Arkiv reads failing (T3), start the Submission session, the Booth's open list · https://github.com/Zugzwang-world/graphpay/pull/146
-- 21:55 IST · records · NOW: Arkiv reads fixed (#148, the access key's quota; keyless fallback); the payer paused again (78 of 100 spent today) · coord/now-2155
+- 21:55 IST · records · NOW: Arkiv reads fixed (#148, the access key's quota; keyless fallback); the payer paused again (78 of 100 spent today) · https://github.com/Zugzwang-world/graphpay/pull/149
 
 ## submission
