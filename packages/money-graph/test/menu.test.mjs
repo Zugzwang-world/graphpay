@@ -185,3 +185,16 @@ test('a transaction found by nonce is the menu write only if it holds this shop\
   assert.equal(await ownCreate(directory, ENTITIES.menu, identityKey(nodeOf('beta.sim.example.eth'), 0))([r.entityKey]), false);
   assert.equal(await ownCreate(directory, ENTITIES.menu, shopKey)([]), false);
 });
+
+test('a menu carries its shop\'s storefront photo as shop.image, uploaded and checked like an item image', async () => {
+  const { directory, reader, swarm } = await setup();
+  const bytes = new TextEncoder().encode('<svg xmlns="http://www.w3.org/2000/svg"/>');
+  const image = await uploadMenuImage(swarm, { bytes, name: 'storefront-alpha.svg', contentType: 'image/svg+xml' });
+  const document = menuDocument({ shopEns: SHOP, name: 'Alpha Sweets', items: ITEMS, version: 1, image });
+  assert.deepEqual(document.shop.image, image);
+  await writeMenu(directory, swarm, { shopEns: SHOP, document });
+  const read = await readMenu(reader.publicClient, swarm, { shopEns: SHOP, owner: directory.owner });
+  assert.equal(read.verified, true);
+  assert.equal(read.document.shop.image.sha256, sha256Hex(bytes));
+  assert.equal(menuDocument({ shopEns: SHOP, name: 'Alpha Sweets', items: ITEMS, version: 1 }).shop.image, undefined);
+});
