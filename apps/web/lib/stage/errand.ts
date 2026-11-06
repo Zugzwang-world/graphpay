@@ -150,7 +150,9 @@ export function foldFrame(prev: ErrandModel, event: string, data: string, at: nu
   }
   const m: ErrandModel = { ...prev, arrived: { ...prev.arrived }, risk: { ...prev.risk }, frames: prev.frames + 1 };
   if (event === 'started' && isObj(body)) {
+    // The tap itself starts scene 1: the request is on its way from the first frame.
     m.runId = str(body.runId);
+    mark(m, 'ask', at);
     return m;
   }
   if (event === 'failed') {

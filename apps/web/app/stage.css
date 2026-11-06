@@ -306,7 +306,8 @@ body.on-stage {
 .seq-arrow[data-protocol='true'][data-dir='right'] i::after { border-left-color: var(--gulab); }
 .seq-arrow[data-protocol='true'][data-dir='left'] i::after { border-right-color: var(--gulab); }
 .seq-label { position: absolute; left: 50%; bottom: 16px; transform: translateX(-50%); white-space: nowrap; font-size: 19px; color: #fff; }
-.seq-link { position: absolute; left: calc(100% + 12px); bottom: -2px; }
+.seq-link { position: absolute; left: calc(100% + 12px); bottom: -2px; white-space: nowrap; }
+.seq-link .net-pending, .seq-link .net-link { white-space: nowrap; }
 .seq-arrow[data-link='left'] .seq-link { left: auto; right: calc(100% + 12px); }
 
 /* ---------- scene 5: the refund flow ---------- */

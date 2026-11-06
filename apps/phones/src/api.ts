@@ -90,19 +90,3 @@ export async function getTextRetry(path: string, retryAfterMs = 2_500): Promise<
   }
   return null;
 }
-
-// The refund photo, uploaded from this browser to Swarm's public gateway as a one-file collection,
-// the way the menus were (`POST /bzz?name=`, the zero batch id the gateway's operator pays for).
-// The same bytes and name always give the same reference.
-export async function uploadToSwarm(gateway: string, file: string, blob: Blob): Promise<string> {
-  const base = gateway.replace(/\/+$/, '');
-  const res = await fetch(`${base}/bzz?name=${encodeURIComponent(file)}`, {
-    method: 'POST',
-    headers: { 'swarm-postage-batch-id': '0'.repeat(64), 'content-type': blob.type || 'image/jpeg' },
-    body: blob,
-  });
-  const body = (await res.json().catch(() => null)) as { reference?: unknown } | null;
-  const ref = typeof body?.reference === 'string' && /^[0-9a-f]{64}$/.test(body.reference) ? body.reference : null;
-  if (!res.ok || !ref) throw new Error('the gateway did not take the photo');
-  return ref;
-}

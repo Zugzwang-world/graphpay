@@ -137,13 +137,6 @@ Updated 02:01 IST, Sat 7 Nov (W7 Submission, `local_abd77623-de22-4fe2-a0a9-865f
 - **Running:** nothing. The README cites the closing acceptance run (#215): 36 pass, 2 stale fails (explained), 1 blocked, 9 not run, of 48.
 - **Founder:** review the README, confirm the team, record the video, submit from `ETHGLOBAL.md` by 08:00 IST (OPEN, `w7-submission`).
 
-## website
-
-Updated 03:40 IST, Sat 7 Nov (final website session).
-- **Built:** the stage as one story in eleven scenes on one screen; both phones rebuilt as one screen each; the director; the top bar with the records, Proofs and This run. The deck is gone.
-- **Running:** the first PR; next, one live errand on production, then scenes 5 and 6 checked live.
-- **Blockers:** none.
-
 ## before the night (retired day sessions)
 
 Rolled up 23:10 IST by the night Coordinator. The day sessions (M0, T1 to T6, Join, Integration, Booth and Booth Sync) are retired; their last relays are in `docs/archive/thinking-partner-relays/`.

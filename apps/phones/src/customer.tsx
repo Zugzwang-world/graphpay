@@ -12,8 +12,8 @@ import { customerErrandLines, endSentence, pauseLines, refundLines, type Line as
 import { advance, caughtUp, restPace, type Pace } from '../../web/lib/stage/pace.ts';
 import { ERRAND_STEPS, stepIndex, type BeatKey } from '../../web/lib/stage/scenes.ts';
 import { clock, microUsdt, orderNumber, percent, usdt } from '../../web/lib/stage/format.ts';
-import { getJson, postJson, Refusal, uploadToSwarm, type CustomerState, type HealState } from './api';
-import { cast, links, menuOf, networks, order, payer, productOf, renewal, shopOf, swarmGateway, timeZone } from './cast';
+import { getJson, postJson, Refusal, type CustomerState, type HealState } from './api';
+import { cast, links, menuOf, networks, order, payer, productOf, renewal, shopOf, timeZone } from './cast';
 import { readFrames } from './errand';
 import { embedded, postEvent, postFrame, useNow, useStage, type Frame } from './stage-link';
 import { ActivityRow, ArkivPending, Card, Figure, Line, ProofLink, SwarmPhoto, TeamStrip, useAutoScroll, type ActivityState, type TeamMember } from './ui';
@@ -25,7 +25,7 @@ const POLL_MS = 15_000;
 const FAST_POLL_MS = 3_000;
 
 interface RefundFlow {
-  phase: 'card' | 'uploading' | 'sending' | 'sent' | 'refunded' | 'declined' | 'error';
+  phase: 'card' | 'sending' | 'sent' | 'refunded' | 'declined' | 'error';
   orderId: string;
   swarm: { ref: string; file: string; uploaded: boolean; at: number } | null;
   arkiv: { tx: string | null; entityKey: string | null; at: number } | null;
@@ -192,19 +192,10 @@ export function CustomerPhone() {
   };
   const attachPhoto = async () => {
     if (!refund || refund.phase !== 'card') return;
+    // The coffee's photo, already on Swarm with its menu: its reference, read from the menu at build time.
     const coffee = productOf(cast.merchant.ens, order.reorder.sku);
-    const file = coffee?.image?.split('/').pop() ?? 'refund-photo.jpg';
-    setRefund({ ...refund, phase: 'uploading', error: null });
-    let swarm: RefundFlow['swarm'];
-    try {
-      const blob = await (await fetch(coffee?.image ?? '')).blob();
-      const ref = await uploadToSwarm(swarmGateway, file, blob);
-      swarm = { ref, file, uploaded: true, at: Date.now() };
-    } catch {
-      // The browser could not upload: the same photo's reference from its menu on Swarm.
-      const known = coffee?.swarm ? /\/bzz\/([0-9a-f]{64})\/([^/]+)$/.exec(coffee.swarm) : null;
-      swarm = known ? { ref: known[1]!, file: known[2]!, uploaded: false, at: Date.now() } : null;
-    }
+    const known = coffee?.swarm ? /\/bzz\/([0-9a-f]{64})\/([^/]+)$/.exec(coffee.swarm) : null;
+    const swarm: RefundFlow['swarm'] = known ? { ref: known[1]!, file: known[2]!, uploaded: false, at: Date.now() } : null;
     postEvent('refund-photo', swarm ? [{ label: 'Photo on Swarm', href: links.swarm(swarm.ref, swarm.file) }] : [], swarm ? { ...swarm } : {});
     setRefund((r) => (r ? { ...r, phase: 'sending', swarm } : r));
     // The route refunds the payer's newest order as the graph knows it; a fresh order can take a
@@ -574,10 +565,9 @@ function RefundThread({ flow, now, onAttach }: { flow: RefundFlow; now: number; 
               Attach the photo
             </button>
           ) : null}
-          {flow.phase === 'uploading' ? <p className="mt-3 text-caption font-bold text-muted">Sending the photo to {networks.swarm}.</p> : null}
           {flow.swarm ? (
             <div className="mt-2 flex flex-wrap gap-2">
-              <ProofLink href={links.swarm(flow.swarm.ref, flow.swarm.file)} network={networks.swarm} label={flow.swarm.uploaded ? 'Uploaded' : 'On'} at={flow.swarm.at} now={now} />
+              <ProofLink href={links.swarm(flow.swarm.ref, flow.swarm.file)} network={`On ${networks.swarm}`} now={now} />
             </div>
           ) : null}
         </Card>
