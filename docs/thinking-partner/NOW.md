@@ -34,7 +34,8 @@ Updated 09:47 IST, Fri 6 Nov (T1).
 Updated 05:00 IST. **M6 is done and merged (gate #34, watcher #40); B7 is covered.** The fork test for epochs on re-registration passes twice: a new registration after an unregister or after a lapse gets e + 1, and an unregistered label already shows a higher epoch while AVAILABLE (0 → 2). Fork tests are now 12, all passing.
 - `disposable-1` was killed on real Sepolia by someone else; the fork tests use `disposable-2` (kill) and `disposable-3` (lapse), provisioned on the fork only.
 - Running: nothing. Blockers: none. B6/B7/E7 real timings wait for Join's workers process to host the watcher.
-- Next: the demo cast's ENS names the moment the story locks (Coordinator will say), B9 (a) after T1's first settled payment.
+- B9 (a): the payee comparison now runs in the acceptance script and passes for Kesar Kingdom (the one shop with a settled payment); the other two are skipped until they have one.
+- Next: the demo cast's ENS names the moment the story locks (Coordinator will say).
 
 ## arkiv
 
