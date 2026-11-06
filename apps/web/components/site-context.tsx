@@ -95,14 +95,15 @@ export function SiteProvider({ model, children }: { model: SiteModel; children: 
 
   const post = useCallback(
     async <T,>(path: string, body: unknown): Promise<ApiAnswer<T>> => {
-      let code = passcode ?? readStored();
-      if (!code) code = await requestUnlock();
-      if (!code) return { ok: false, status: 0, body: null, waitingFor: null, error: 'locked: enter the passcode to use this button' };
+      // Public access (ADR-0069): no passcode is asked for or sent.
+      let code = model.publicAccess ? null : (passcode ?? readStored());
+      if (!code && !model.publicAccess) code = await requestUnlock();
+      if (!code && !model.publicAccess) return { ok: false, status: 0, body: null, waitingFor: null, error: 'locked: enter the passcode to use this button' };
       let res: Response;
       try {
         res = await fetch(path, {
           method: 'POST',
-          headers: { 'content-type': 'application/json', [PASSCODE_HEADER]: code },
+          headers: { 'content-type': 'application/json', ...(code ? { [PASSCODE_HEADER]: code } : {}) },
           body: JSON.stringify(body ?? {}),
           cache: 'no-store',
         });
@@ -115,19 +116,19 @@ export function SiteProvider({ model, children }: { model: SiteModel; children: 
       const error = res.ok ? null : typeof parsed?.error === 'string' ? parsed.error : `HTTP ${res.status}`;
       return { ok: res.ok, status: res.status, body: parsed, waitingFor, error };
     },
-    [passcode, requestUnlock, setPasscode],
+    [model.publicAccess, passcode, requestUnlock, setPasscode],
   );
 
   const stream = useCallback(
     async (path: string, body: unknown, onEvent: (event: string, data: string) => void): Promise<StreamOutcome | null> => {
-      let code = passcode ?? readStored();
-      if (!code) code = await requestUnlock();
-      if (!code) return null;
-      const outcome = await streamEvents(path, onEvent, { method: 'POST', body, headers: { [PASSCODE_HEADER]: code } });
+      let code = model.publicAccess ? null : (passcode ?? readStored());
+      if (!code && !model.publicAccess) code = await requestUnlock();
+      if (!code && !model.publicAccess) return null;
+      const outcome = await streamEvents(path, onEvent, { method: 'POST', body, headers: code ? { [PASSCODE_HEADER]: code } : {} });
       if (outcome.kind === 'refused' && outcome.status === 401) setPasscode(null);
       return outcome;
     },
-    [passcode, requestUnlock, setPasscode],
+    [model.publicAccess, passcode, requestUnlock, setPasscode],
   );
 
   const sound = useCallback(

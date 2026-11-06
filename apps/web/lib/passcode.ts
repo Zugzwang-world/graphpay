@@ -2,8 +2,15 @@
 // route that makes the relayer, a merchant or an owner sign calls this first and
 // sends nothing unless it passes. The passcode travels only in the
 // X-Demo-Passcode header, never in a URL; it is compared in constant time.
+//
+// Public access (ADR-0069): while the config's `site.publicAccess` is true, visitors
+// meet no passcode and this guard lets every request through. It is the one place
+// the switch acts; the keys between our own servers (the shop's pay route, the
+// facilitator's and the recorder's tokens, the cron secret) are checked elsewhere
+// and stay required.
 
 import { createHash, timingSafeEqual } from 'node:crypto';
+import { config } from '@graphpay/config';
 import { PASSCODE_HEADER } from './passcode-header.ts';
 
 export { PASSCODE_HEADER };
@@ -28,8 +35,16 @@ export function checkPasscode(request: Request, env: Env = process.env): Passcod
   return { ok: true };
 }
 
+// The switch. GRAPHPAY_PUBLIC_ACCESS=0 can only close the gate again (tests of the gated
+// mode, or an emergency); nothing outside the config file opens it.
+export function publicAccess(env: Env = process.env, site: { publicAccess?: unknown } = config.site): boolean {
+  if (env.GRAPHPAY_PUBLIC_ACCESS === '0') return false;
+  return site.publicAccess === true;
+}
+
 // null when the request may go on; otherwise the refusal to return as is.
 export function requirePasscode(request: Request, env: Env = process.env): Response | null {
+  if (publicAccess(env)) return null;
   const check = checkPasscode(request, env);
   if (check.ok) return null;
   return Response.json({ error: check.error }, { status: check.status, headers: { 'cache-control': 'no-store' } });

@@ -4,6 +4,7 @@
 
 import { activeCast, castEntries, config, network, story } from '@graphpay/config';
 import type { ExplorerBases } from './explorer.ts';
+import { publicAccess } from './passcode.ts';
 
 export interface ModelAgent {
   key: string;
@@ -33,6 +34,8 @@ export interface ModelShop {
 
 export interface SiteModel {
   siteUrl: string;
+  // Visitors meet no passcode (ADR-0069; the config's site.publicAccess).
+  publicAccess: boolean;
   root: string;
   storyName: string;
   storyLocked: boolean;
@@ -131,6 +134,7 @@ export function siteModel(): SiteModel {
 
   cached = {
     siteUrl: config.site.url,
+    publicAccess: publicAccess(),
     root,
     storyName: story.name,
     storyLocked: story.locked,

@@ -7,8 +7,11 @@ import { readdirSync, readFileSync, statSync } from 'node:fs';
 import { join, relative, sep } from 'node:path';
 import { test } from 'node:test';
 import { fileURLToPath } from 'node:url';
-import { MIN_PASSCODE_LENGTH, PASSCODE_HEADER } from './passcode.ts';
+import { MIN_PASSCODE_LENGTH, PASSCODE_HEADER, publicAccess } from './passcode.ts';
 import { PASSCODE_ROUTES, SITE_ROUTES } from './routes.ts';
+
+// These tests check the gated mode; public access (ADR-0069) is tested on its own.
+process.env.GRAPHPAY_PUBLIC_ACCESS = '0';
 
 const appDir = fileURLToPath(new URL('../app/', import.meta.url));
 const apiDir = join(appDir, 'api');
@@ -85,5 +88,20 @@ for (const route of PASSCODE_ROUTES) {
     const response = await post(route.path, { [PASSCODE_HEADER]: passcode });
     assert.ok(response.status === 204 || response.status === 503, `${route.path}: ${response.status}`);
     if (response.status === 503) assert.deepEqual(await response.json(), { error: 'not live yet', waitingFor: route.waitingFor });
+  });
+}
+
+// Public access (ADR-0069): with the config's switch on, a visitor's request without a
+// passcode reaches the route, exactly as one with the passcode does in the gated mode.
+for (const route of PASSCODE_ROUTES) {
+  test(`${route.path} under public access reaches the route without a passcode`, { skip: !publicAccess({}) && 'the config switch is off' }, async () => {
+    delete process.env.GRAPHPAY_PUBLIC_ACCESS;
+    try {
+      const response = await post(route.path, {});
+      assert.ok(response.status === 204 || response.status === 503, `${route.path}: ${response.status}`);
+      if (response.status === 503) assert.deepEqual(await response.json(), { error: 'not live yet', waitingFor: route.waitingFor });
+    } finally {
+      process.env.GRAPHPAY_PUBLIC_ACCESS = '0';
+    }
   });
 }
