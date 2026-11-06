@@ -8,6 +8,17 @@ AI agents with ENS names pay shops over x402 on Whitechain through our own facil
 
 **First real payment (Fri 6 Nov, 04:14 IST):** 4.80 test USDT from `acceptance.vitalik.graphpay.eth` to `kesar-kingdom.graphpay.eth` through our own x402 facilitator on Whitechain Sepolia. The ENS gate checked the agent first, the payee came from ENS, and the payer paid no gas: [the transaction](https://explorer.testnet.whitechain.io/tx/0x87505ef2457b6e925fa7378a55fd91419e83c37fb8effc06d901884700c72c00).
 
+## SDKs on npm
+
+Two MIT packages, each for one partner's network and testnet only. GraphPay itself is built on them.
+
+| package | version | what it does |
+|---|---|---|
+| [`@graphpay_ethglobal/arkiv-graph`](https://www.npmjs.com/package/@graphpay_ethglobal/arkiv-graph) | 0.1.0 | A generic graph on Arkiv: you define the nodes, edges and totals, and every read comes with an explain trace. Source: [`packages/arkiv-graph`](packages/arkiv-graph). |
+| [`@graphpay_ethglobal/agentpay`](https://www.npmjs.com/package/@graphpay_ethglobal/agentpay) | 0.1.0 | Agent payments in test USDT on Whitechain Sepolia. An AI agent pays an HTTP 402 with one signature and no gas, under an on-chain spending pass. A merchant prices any route and settles through its own relayer, with the anti-drain limits on. Source: [`packages/agentpay`](packages/agentpay). |
+
+Each README has a five-minute quickstart. Feedback goes to GitHub issues labelled `arkiv-graph` or `agentpay`, plus `feedback`. The published versions are frozen from the submission until judging ends.
+
 ## Repository map
 
 | path | what |

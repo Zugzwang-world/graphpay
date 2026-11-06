@@ -6,18 +6,14 @@ The founder's to-dos and open questions. Each item says what, where, why and wha
 
 Updated 10:40 IST, Fri 6 Nov, at the Coordinator handover (`docs/sessions/records/resume.md`). **Standing rule (ADR-0066): no target times.** Every task starts the moment it's given and is reported when it's done. Only the submission (Sat 09:00 IST) and the presentation (Sat 09:30 IST) are fixed.
 
-1. **Approve the agentpay publish.**
-   - **What:** approve the `npmjs.com/auth/cli/…` link the Coordinator sends, or press Enter in its "publish agentpay" Terminal tab. The link expires after about 5 minutes; two have expired already.
-   - **Why:** `@graphpay_ethglobal/arkiv-graph` 0.1.0 is already on npm; agentpay is the second SDK (ADR-0063).
-   - **Recommendation:** have the browser open on npm before the Coordinator starts the publish.
-2. **Lock the story.**
+1. **Lock the story.**
    - **What:** send the final story.
    - **Why:** the moment it locks, the demo cast is set up (T2 names, T1 policies, Join's bootstrap, T3's `shop` rows) and the large city starts seeding (100–130 minutes). Rehearsal 1 runs once the demo cast is in.
-3. **Top up Kimi.**
+2. **Top up Kimi.**
    - **What:** add credit on the Kimi platform. $1 or more unlocks K3.1 Pro; $10 reaches Tier 1 (15 concurrent requests, 100 a minute).
    - **Why:** the agents run on Kimi (ADR-0067). The prepaid balance is also the spending cap for the live runner.
    - **Recommendation:** $10.
-4. **The team's site, PR #70** (ADR-0068).
+3. **The team's site, PR #70** (ADR-0068).
    - **What:** T5's review says do not merge yet. The team must:
      - (a) move it into `apps/demo-ui` as a pnpm workspace app, with no npm lockfile;
      - (b) read the story and the explorer links from `@graphpay/config`;
@@ -26,13 +22,15 @@ Updated 10:40 IST, Fri 6 Nov, at the Coordinator handover (`docs/sessions/record
      - (e) add a CI step for `demo-ui`.
    - **Also:** confirm every committer is on the ETHGlobal team.
    - **Next:** T5 re-reviews as soon as the team pushes.
-5. **Start the Submission session** (its gate, CP4, is met).
+4. **Start the Submission session** (its gate, CP4, is met).
    - **What:** start it from `docs/plan/sessions/README.md` (Sonnet 5.5, high).
    - **Why:** the sponsor files and the submission text.
    - **Recommendation:** start it once the story work no longer needs the remaining plan usage, or at the latest after the 21:30 reset.
-6. **Plan usage: 86%.** Every session pauses gracefully at 92% (ADR-0062). The weekly window resets at 21:30 IST.
-7. **The written pre-event disclosure:** send it to ETHGlobal if you haven't yet (`docs/plan/DISCLOSURE_MESSAGE.md`).
-8. **Keep the charger in and the lid open** until the presentation.
+5. **Plan usage: 86%.** Every session pauses gracefully at 92% (ADR-0062). The weekly window resets at 21:30 IST.
+6. **The written pre-event disclosure:** send it to ETHGlobal if you haven't yet (`docs/plan/DISCLOSURE_MESSAGE.md`).
+7. **Keep the charger in and the lid open** until the presentation.
+
+**Closed 10:47:** both SDKs are on npm: `@graphpay_ethglobal/agentpay` 0.1.0 (published 10:40) and `@graphpay_ethglobal/arkiv-graph` 0.1.0. Both quickstarts pass from the registry.
 
 **Closed 10:31:**
 - The Kimi key: stored with the hidden prompt (the scan recognises it) and on Vercel Production as Sensitive (#89).

@@ -9,9 +9,7 @@ Updated 10:40 IST, Fri 6 Nov. **A fresh Coordinator is taking over.** Its handov
 **Standing rule (ADR-0066): no target times.** Every task starts the moment it's given, runs as fast as it can, and is reported when it's done. Two deadlines are fixed: the submission, Sat 09:00 IST, and the presentation, Sat 09:30 IST. Everything else is an event.
 
 - **The core works on the real testnets.** Acceptance: 45 pass, 0 fail, 1 blocked, 2 not run (09:51 run). D7, the large city, is the blocked one; B7 and B9 have merged since (#83, #84) and go into the next run.
-- **Both SDKs are on npm** (ADR-0063):
-  - `@graphpay_ethglobal/arkiv-graph` 0.1.0 is published;
-  - `@graphpay_ethglobal/agentpay` 0.1.0 is waiting for the founder's npm approval (see `OPEN.md`).
+- **Both SDKs are on npm** (ADR-0063): `@graphpay_ethglobal/arkiv-graph` 0.1.0 and `@graphpay_ethglobal/agentpay` 0.1.0. Each was installed from the registry into an empty folder, and its quickstart passed. The links are in the README and `FACTS.md`.
   - Developers at the venue can try them; their feedback goes to GitHub issues labelled `arkiv-graph` or `agentpay` plus `feedback`.
   - Versions freeze from submission until judging ends.
 - **The agents run on Kimi** (ADR-0067):
@@ -22,7 +20,7 @@ Updated 10:40 IST, Fri 6 Nov. **A fresh Coordinator is taking over.** Its handov
   - Join's live errand runner (#88) runs on the server with every guardrail. Join is merging `main` into it and moving it to Kimi.
 - **Next on the story lock:** the moment the story locks, the demo cast is set up and the large city starts seeding.
 - **Plan usage:** 86%. Every session pauses at 92% (ADR-0062); the weekly window resets at 21:30 IST.
-- **Open founder items** (`OPEN.md`): approve the agentpay publish; lock the story; top up Kimi; the team's fixes on #70; start the Submission session; the disclosure, if not sent.
+- **Open founder items** (`OPEN.md`): lock the story; top up Kimi; the team's fixes on #70; start the Submission session; the disclosure, if not sent.
 
 ## foundation
 

@@ -101,6 +101,6 @@ One line per PR: time (IST) · activity · result · PR link. Append under your 
 - 09:35 IST · records · the 09:35 brief filed; ADR-0063 (both SDKs as @graphpay_ethglobal by 13:00), ADR-0064 (one SDK per lane, the cab-ride moment), ADR-0065 (apps/demo-ui); labels and issue templates; the names renamed in the records; NOW and Founder now for the handoff · https://github.com/Zugzwang-world/graphpay/pull/72
 - 09:46 IST · records · the standing rule "no target times" (ADR-0066) in the coordinator file, NOW, OPEN and the master plan; every session told · https://github.com/Zugzwang-world/graphpay/pull/76
 - 10:25 IST · records · Kimi secret: KIMI_API_KEY server-only, a Kimi rule in the secret scan, JSON-escaped keys caught, a non-Kimi value refused; reviewer: ship · https://github.com/Zugzwang-world/graphpay/pull/89
-- 10:40 IST · records · handover: arkiv-graph 0.1.0 on npm; Kimi key stored and on Vercel; ADR-0068 (the team's site, the server-side runner); the Coordinator's resume file · coord/handover
+- 10:50 IST · records · handover: arkiv-graph 0.1.0 and agentpay 0.1.0 on npm (registry quickstarts pass; FACTS, README, Arkiv file); Kimi key stored and on Vercel; ADR-0068 (the team's site, the server-side runner); the Coordinator's resume file · coord/handover
 
 ## submission

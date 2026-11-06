@@ -6,7 +6,7 @@ The first Coordinator is handing over to a fresh Coordinator session, at the fou
 
 **What is true now:**
 - The core works on the real testnets. Acceptance stands at 45 pass, 0 fail, 1 blocked (D7, the large city, which waits for the story) and 2 not run. B7 and B9 have merged since and go into the next run.
-- **One SDK is on npm:** `@graphpay_ethglobal/arkiv-graph` 0.1.0. **`@graphpay_ethglobal/agentpay` 0.1.0 is packed and waits only for the founder's npm approval.** Approval links expire after about 5 minutes and two have lapsed, so the founder should have npm open in the browser before the next attempt.
+- **Both SDKs are on npm:** `@graphpay_ethglobal/arkiv-graph` 0.1.0 and `@graphpay_ethglobal/agentpay` 0.1.0. Each was installed from the registry into an empty folder, and its quickstart passed. Developers at the venue can try them now.
 - **The agents now run on Kimi** (ADR-0067). The founder stored the key through the hidden prompt, and the secret scan recognised it. The key is also on Vercel Production as a Sensitive value. T4 is running the calibration: three errands per preset, with seconds and cost.
 - **The website plan changed** (ADR-0068):
   - The founder's team has its own site (#70). T5 stopped building screens and now reviews and integrates the team's site.
@@ -14,12 +14,11 @@ The first Coordinator is handing over to a fresh Coordinator session, at the fou
   - The live errand runner (Join, #88) runs on the server only, uses the live preset only, keeps every guardrail and holds its keys only on Vercel. Join is merging `main` into it and moving it to Kimi.
 
 **What the founder does next** (`OPEN.md`, "Founder now"):
-1. Approve the agentpay publish the moment the link arrives.
-2. Lock the story. The demo cast and the large city's seeding start at once.
-3. Top up Kimi ($10 recommended).
-4. Pass T5's five fixes to the team.
-5. Start the Submission session when usage allows.
-6. Send the disclosure if not sent.
+1. Lock the story. The demo cast and the large city's seeding start at once.
+2. Top up Kimi ($10 recommended).
+3. Pass T5's five fixes to the team.
+4. Start the Submission session when usage allows.
+5. Send the disclosure if not sent.
 
 ## Technical
 
@@ -36,12 +35,12 @@ The first Coordinator is handing over to a fresh Coordinator session, at the fou
 
 **npm:**
 - arkiv-graph 0.1.0 has 21 files, 42.7 kB packed.
-- agentpay 0.1.0 has 32 files, 75.5 kB packed, from `main` at #80.
+- agentpay 0.1.0 has 32 files, 75.5 kB packed, from `main` at #80. It was published at 10:40 IST, after two approval links lapsed.
+- Checked from the registry:
+  - arkiv-graph's quickstart printed `grace: { follows: 1n, likes: 2n }` and its explain trace;
+  - agentpay's `sweets.mjs` paid 4.80 and `cab.mjs` 3.20 test USDT on a local anvil fork.
 - The main checkout needed `pnpm install` before pnpm could rewrite agentpay's three workspace devDependencies. Those are test-only and never installed by users. A 0.1.1 should drop them from the published manifest (T6), because they name a scope we don't own.
-- After publishing:
-  - install each package from the registry in an empty folder and run its quickstart;
-  - record the versions and links in `docs/technical/FACTS.md`, the README and the sponsor files;
-  - freeze the versions from submission until judging ends.
+- The versions and links are now in `FACTS.md`, the README and `arkiv/how-you-use-arkiv.md`. The versions freeze from submission until judging ends.
 
 **Wallets** (`pnpm -s funding --balances`, 10:3x IST):
 - FUNDER: 2.5948 WBT, 0.2749 Sepolia ETH, 15.08 tGLM and about 15.54 test USDT.

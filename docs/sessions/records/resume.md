@@ -82,15 +82,16 @@ Written by the outgoing Coordinator, Fri 6 Nov, about 10:40 IST. It replaces the
 
 ## npm (ADR-0063, Friday item 18)
 
-- **`@graphpay_ethglobal/arkiv-graph` 0.1.0 is published** (Fri ~10:1x IST, from main `d4f6a24`'s tree): https://www.npmjs.com/package/@graphpay_ethglobal/arkiv-graph
-- **`@graphpay_ethglobal/agentpay` 0.1.0** was waiting for the founder's web 2FA approval at handover time. See `NOW.md` for whether it landed.
+- **Both are published and checked:**
+  - `@graphpay_ethglobal/arkiv-graph` 0.1.0 (Fri 10:14 IST; source as of #74): https://www.npmjs.com/package/@graphpay_ethglobal/arkiv-graph
+  - `@graphpay_ethglobal/agentpay` 0.1.0 (Fri 10:40 IST; source as of #80): https://www.npmjs.com/package/@graphpay_ethglobal/agentpay
+  - Each was installed from the registry in an empty folder. arkiv-graph's quickstart ran in memory; agentpay's sweet-shop and cab examples ran on a local anvil fork.
+  - The versions and links are in `FACTS.md`, the README and `arkiv/how-you-use-arkiv.md`. The Whitechain sponsor file (Submission, M17) should link agentpay 0.1.0.
 - **To publish:** in a Terminal-panel tab, run `cd ~/graphpay && git pull --ff-only -q && cd packages/<pkg> && pnpm publish --access public --publish-branch main`.
   - npm prints an `npmjs.com/auth/cli/<id>` link that **expires in about 5 minutes**. Send it at once; the founder approves it, or presses Enter in the tab to open it.
   - The old `login/cli/…` link is the sign-in link, not the publish approval.
   - If the main checkout lacks workspace links (`ERR_PNPM_CANNOT_RESOLVE_WORKSPACE_PROTOCOL`), run `fnm exec --using=22.23.4 pnpm install --frozen-lockfile` there.
-- **After each publish:**
-  - Install it from the registry in an empty folder and run its quickstart.
-  - Record the version and npm link in `docs/technical/FACTS.md`, the README and the sponsor files.
+- **For any later version, after the publish:** install it from the registry in an empty folder, run its quickstart, and record it in `FACTS.md`, the README and the sponsor files.
 - **Versions:** 0.1.x for fixes, 0.2.0 for changes, driven by venue feedback (`FEEDBACK.md`, GitHub labels `arkiv-graph`, `agentpay`, `feedback`). **Freeze the published versions from submission until judging ends.**
 - **Follow-up for agentpay 0.1.1 (T6):** drop the three workspace devDependencies (`@graphpay/config`, `contracts`, `facilitator`) from the published manifest. They are test-only and never installed by users, but they name a scope we don't own.
 
