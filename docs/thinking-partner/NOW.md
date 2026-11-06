@@ -1,77 +1,58 @@
 # NOW
 
-Updated 01:30 IST, Sat 7 Nov (night Coordinator)
+Updated 02:15 IST, Sat 7 Nov (night Coordinator)
 
 ## Summary (Coordinator only)
 
-Updated 01:30 IST, Sat 7 Nov. **Only the submission (Sat 09:00 IST) and the presentation (09:30 IST) are fixed** (ADR-0066). Every deliverable's status is in [`TRACKER.md`](TRACKER.md).
+Updated 02:15 IST, Sat 7 Nov. **The backend is closed.** Only the submission (09:00 IST) and the presentation (09:30 IST) remain (ADR-0066). Every deliverable's status is in [`TRACKER.md`](TRACKER.md). The frontend pass starts from [`BACKEND_FOR_FRONTEND.md`](BACKEND_FOR_FRONTEND.md).
 
-**The Mac is on its charger** (100% at 01:17 IST). Keep the charger in and the lid open until the presentation: the mirror and every night session run on it.
+**What the night run landed** (brief `docs/archive/thinking-partner-briefs/2259-night-coordinator.md`; seven streams on Opus 5.5 at max; every stream has stopped):
+- **W1 Identity:**
+  - the dosa shops on ENS as filter-and-fold, idli-index and tawa-tangle, with their agents;
+  - the label flip, proven by the 01:07 IST errand through filter-and-fold.graphpay.eth ([tx](https://explorer.testnet.whitechain.io/tx/0xcc69b7bb16eb17c9dede32da4765a90ca15a6af18397011efae6a9eb599e5cb5));
+  - the kill, live, with a fresh spare.
+- **W2 City:** the new shops' rows and 1,258 history events on Arkiv, and the menus with dish and storefront photos on Swarm. The big city M is what was seeded and is not raced; race mode stays at S (ADR-0081). #186 was closed unmerged.
+- **W3 Payments:** every money action live: the 0.80 re-order, subscribe and renew and cancel, the refund decline, over the pass refused, the agent's own cap raise refused, and the owner's cap change in ENS and the policy (ADR-0079).
+- **W4 Agents:** errands at any hour ("delivered within an hour"). The routine steps run in code (ADR-0078): three live errands in a row averaged 47.4 s, 3 model calls and $0.027, against 91.4 s, 19 calls and $0.1455.
+- **W5 Ops:** the 300 pass, pause per agent, self-healing (proven by the cron's own resumes and reopens), the payer refilled from the takings, the workers under a watchdog, and the acceptance run (36 pass, 2 stale fails, 1 blocked, 9 not run; #215).
+- **W6 SDK:** arkiv-graph and agentpay at 1.0.0 on npm, frozen until judging ends (ADR-0080).
+- **W7 Submission:** the README, AI_USAGE, the sponsor files, the Whitechain and ENS notes, and the paste-ready form text (`docs/submission/ETHGLOBAL.md`), all matching what is live.
 
-**The night run** ([brief](briefs/2259-night-coordinator.md)): seven streams, each in its own session and worktree, on Opus 5.5 at max. The usage guardrails are off tonight, and no contract is redeployed.
+**Live at the close** (02:06 IST):
+- **The payer** is ACTIVE, with a 300 pass, 141.2 spent and 125 test USDT. The pass resets at 05:30 IST.
+- **Filter & Fold** is open under its new name.
+- **Kept running for the demo and the video:**
+  - the workers (the mirror 2 blocks behind, polling), under W5's watchdog in `.claude/worktrees/w5-workers`;
+  - the self-healing and renewal crons on Vercel.
 
-| stream | session | owns tonight |
-|---|---|---|
-| W1 Identity | `local_45f7cf5d-c31e-4dbf-b849-466f3067bdd3` | the new shops' ENS names, the label flip, the kill |
-| W2 City | `local_da212093-3d02-4768-9314-ab7be179eb86` | the new shops on Arkiv, the menus on Swarm, the big city M, race mode at M |
-| W3 Payments | `local_b65be40a-eb20-4d86-b784-7d2aa1a93527` | the re-order, subscriptions, the refund decline, the limits |
-| W4 Agents | `local_3404db4e-486c-4f86-8b3a-67ceb53ef025` | the relative deadline, speed and cost |
-| W5 Ops | `local_29b84e36-bafe-4ba2-9315-4c2a94a0a19e` | the payer and the shop, pause per agent, self-healing, the workers, acceptance |
-| W6 SDK | `local_b6205da6-b613-4662-872a-6d4879c66faf` | both SDKs at 1.0.0 |
-| W7 Submission | `local_abd77623-de22-4fe2-a0a9-865fdd43dba2` | the README, AI_USAGE, the sponsor files, the form text |
-| Coordinator | `local_1caa580c-782f-4658-a828-66758afb211a` | merges, the `story.json` order, funding, the records |
-
-**The order that matters:**
-1. W2 writes the new shops' Arkiv rows and history under their new names.
-2. Then W1 flips the shop labels in `story.json`.
-3. Then W5 restarts the workers.
-
-The Coordinator times each step. If a merge breaks the live errand, revert first, then fix.
-
-**Landed tonight** (each stream's own section below has the details):
-- **W1 Identity is done.** The three new shop names on ENS with their agents (#158). The kill, live: the owner unregistered spare disposable-2, the watcher revoked its pass at 00:16 IST, its next payment was refused and recorded, and a fresh spare (disposable-3) is ready (#175, #183). The label flip, live (#189): the first errand after the restart paid Filter & Fold through filter-and-fold.graphpay.eth at 01:07 IST ([tx](https://explorer.testnet.whitechain.io/tx/0xcc69b7bb16eb17c9dede32da4765a90ca15a6af18397011efae6a9eb599e5cb5)); the mirror recorded it under the new shop (242 orders); ENS acceptance reads 101 pass.
-- **W2 City:** Filter & Fold, Idli Index and Tawa Tangle on Arkiv under their new names (south-indian, at the Grok places), with all 1,258 history events (#167, ADR-0077). The menus on Swarm with their dish images (#181); the storefront photos are in PR (#201). **The founder trimmed the big city (00:52 IST) and kept race mode at S (01:24 IST):** M is what was seeded, 3,175 of its 9,996 events, 123 shops, labelled synthetic (#186, ADR-0080).
-- **W3 Payments is done.** Every money action live with its explorer link and Arkiv record: the 0.80 coffee re-order (#155); subscribe, renew and cancel (#173); the refund decline (#163); over the pass refused by the facilitator's verify only, so it can never settle (#169, #190); the agent's own cap raise refused (#169); the owner's cap change, live 300 → 250 → 300 in ENS and the policy (#179, #191, ADR-0079).
-- **W4 Agents is done.** "Delivered within an hour" (#153); every model call measured (#157); the routine steps in code (#162, #182, ADR-0078). Three live errands in a row after the flip, all paid to filter-and-fold: 47.4 s on average (−48%), 3 model calls, about 2,950 tokens (−91%), $0.027 (−81%), against the baseline of 91.4 s, 19 calls, 33,287 tokens, $0.1455.
-- **W5 Ops:** the 300 pass (#152); pause per agent and self-healing (#172); the acceptance checks updated (#188); the watchdog; PAYER refilled from the shop's takings, 63.2 test USDT, and the mirror's checkpoint freed from the two kit events (#209). The full acceptance run is next.
-- **W6 SDK:** arkiv-graph 1.0.0 (#174) and agentpay 1.0.0 (#177) merged. **The publish waits for the founder's npm sign-in in W6's chat.**
-- **W7 Submission:** done: the README, AI_USAGE, the Arkiv files, the Whitechain and ENS notes, the form text, the video shot list and the checklist (#154 to #178). It keeps them current.
-
-**Live now** (01:27 IST):
-- **The payer is ACTIVE,** with 141.2 of tonight's 300 test USDT spent and PAYER refilled to 125; the pass resets at 05:30 IST.
-- **Filter & Fold is open** under its new name, kept so by W5's heal cron.
-- **The mirror** runs from post-flip main (pid 30776, under W5's watchdog), 2 blocks behind, writing new payments under filter-and-fold.
-
-**Still running:** W5's full acceptance run; W2's race PR (#186) and storefront photos (#201); W6's agentpay publish (npm shows 0.1.1; arkiv-graph is at 1.0.0). Then the Coordinator writes `BACKEND_FOR_FRONTEND.md` for the frontend pass.
-
-**Retired at 23:05 IST:**
-- T1 to T6, Booth (with its two side sessions), Booth Sync and Integration are archived. Their last prompt logs are committed here.
-- The outgoing Coordinator was asked to delete its tick.
-- Join was archived at 23:49 IST, once W5 ran the mirror from its own worktree.
-
-**Still open** (from the 22:49 IST sync):
-- The Arkiv access key's quota is used up, so reads go to the keyless endpoint (#148).
-- Acceptance: W5 updated the failing checks to tonight's decisions (#188); the full re-run waits for Arkiv.
+**The Arkiv key** (02:01–02:10 IST):
+- The founder's new key is in `.env` and in Vercel Production as Sensitive.
+- The site was redeployed and the workers restarted on it.
+- **But Arkiv refuses this key for quota too:** three probes on the keyed endpoint answered 429 QUOTA_EXCEEDED. Reads therefore still use the keyless endpoint, as #148 designed.
+- The mirror polls fine on the keyless window now that the big readers have stopped (the M seed, the acceptance run).
+- **Ask the Arkiv team** to check this key's quota. With a working key, run the same `secrets:set`; the Coordinator pushes it and restarts.
 
 **Founder now** (OPEN):
-1. Keep the charger in.
-2. **A fresh Arkiv access key** (the most useful thing tonight: the mirror and the big city share the keyless budget).
-3. The Kimi balance, and more test USDT to FUNDER.
-4. **npm now:** W6's sign-in link waits in its chat (each link lasts about 5 minutes); both SDKs are merged at 1.0.0, npm still shows 0.1.1.
-5. The video.
-6. The disclosure and the team's registration.
+1. The Arkiv key's quota (above).
+2. The video, in your own voice (`docs/submission/VIDEO.md`).
+3. Review the README and the team list.
+4. The disclosure.
+5. Submit by 08:00 IST from `docs/submission/ETHGLOBAL.md`; the form closes at 09:00.
+6. Keep the charger in and the lid open until the presentation.
 
 ## records
 
-Updated 23:10 IST, Fri 6 Nov (night Coordinator, `local_1caa580c-…`).
+Updated 02:15 IST, Sat 7 Nov (night Coordinator, `local_1caa580c-…`).
 - **Done:**
-  - took over from the handover;
-  - resumed the payer and opened Filter & Fold;
-  - retired the day sessions;
-  - filed the night brief;
-  - moved the retired relays and the finished briefs to `docs/archive/`, to keep this folder under its word limit.
-- **Running:** the 10-minute tick, and the bridge loop (the shop's listing and the payer) until W5's cron.
-- **Next:** time the W2 → W1 → W5 order, merge the streams' PRs, and keep NOW and TRACKER current.
+  - took over at 22:59 IST and retired the day sessions;
+  - timed W2's rows, then W1's flip, then W5's restart;
+  - merged every stream's work, keeping the live errand working all night (no revert was needed);
+  - `BACKEND_FOR_FRONTEND.md`;
+  - the folder rolled up;
+  - the new Arkiv key stored, pushed, redeployed and restarted on (refused for quota);
+  - ADR-0081;
+  - the backend closed on the founder's word.
+- **Running:** the 10-minute tick, until the founder ends this session.
 
 ## w1-identity
 
@@ -92,9 +73,9 @@ Updated 01:15 IST, Sat 7 Nov (W2 City, session `local_da212093-3d02-4768-9314-ab
   - the three menus on Swarm, every item with its dish photo (#181), and now each with its storefront photo (this PR).
 
   Every file was checked by its hash on read-back.
-- **The big city M was trimmed by the founder to what was seeded** (ADR-0080): 3,175 events, 123 shops (the final cast and 120 synthetic places), 1,387 payment rows, graph store only. The seeding has stopped.
+- **The big city M was trimmed by the founder to what was seeded** (ADR-0081): 3,175 events, 123 shops (the final cast and 120 synthetic places), 1,387 payment rows, graph store only. The seeding has stopped.
 - **Race mode stays at S** (Q2: 2 reads against 5, measured). Its plain side needs M's plain store, which was never written. That is the founder's call (OPEN).
-- **In review:** #186, race mode for any seeded size, the seeder's recovery, M as seeded.
+- **Closed at the close:** #186 (race mode for any seeded size, the seeder's recovery, M as seeded) was closed unmerged after its reviewer found a blocking flaw in the seeder's recovery; the work stays on branch `arkiv/w2-race-m`. Race mode is S on main.
 
 ## w3-payments
 

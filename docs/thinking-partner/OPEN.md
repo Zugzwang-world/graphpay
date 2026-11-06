@@ -4,21 +4,19 @@ The founder's to-dos and open questions. Each item says what, where, why and wha
 
 ## Founder now (Coordinator only)
 
-Updated 23:10 IST, Fri 6 Nov (night Coordinator). **Only the submission (Sat 09:00 IST) and the presentation (09:30 IST) are fixed** (ADR-0066). The full status is in `TRACKER.md`; tonight's seven streams are in NOW.
+Updated 02:15 IST, Sat 7 Nov (night Coordinator). **The backend is closed.** Only the submission (09:00 IST) and the presentation (09:30 IST) remain.
 
-0. **Plug in the charger now.** The Mac is on battery (75% at 22:59 IST, about 4 h 20 min left). It runs the mirror and all eight night sessions. Keep the lid open until the presentation.
-1. **The Arkiv key's quota is used up.** Reads fall back to the keyless endpoint (#148), which is slower.
-   - Ask the Arkiv team to reset the quota or give us a new key.
-   - With a new key, run `pnpm -s secrets:set ARKIV_ACCESS_KEY` in the main checkout. The Coordinator pushes it to Vercel, and W5 restarts the mirror.
-2. **Funding:** the test USDT you are sending to FUNDER, and the Kimi top-up (anyone can run an errand, at up to $3.55 each). The Coordinator tells you early if WBT, Sepolia ETH or tGLM run low.
-3. **npm's web approval** when W6 asks for it (it lasts about 5 minutes), to publish both SDKs at 1.0.0.
-4. **The video,** in your own voice (the event's rule), once tonight's streams have landed.
-5. **ETHGlobal:**
-   - send the written pre-event disclosure, if you haven't (`docs/plan/DISCLOSURE_MESSAGE.md`);
-   - confirm that every team member is registered.
-6. **Submit by 08:00 IST** from W7's `docs/submission/ETHGLOBAL.md`; the form closes at 09:00.
+1. **The Arkiv key's quota.** The new key is in `.env` and in Vercel Production, the site is redeployed and the workers restarted, but Arkiv answers it 429 QUOTA_EXCEEDED, the same as the old one. Reads use the keyless endpoint and work now that the big readers have stopped. Ask the Arkiv team to check the key. With a working key, run `pnpm -s secrets:set ARKIV_ACCESS_KEY --overwrite` in the main checkout and tell the Coordinator.
+2. **The video,** in your own voice: the shot list is `docs/submission/VIDEO.md`.
+3. **Review the README** and the team list (W7's items below).
+4. **The ETHGlobal disclosure** (`docs/plan/DISCLOSURE_MESSAGE.md`), and confirm every team member is registered.
+5. **Submit by 08:00 IST** from `docs/submission/ETHGLOBAL.md`; the form closes at 09:00.
+6. **"Everyone" for "Dosas for everyone":** 100 by default (synthetic, `order.overPass`); change it only if you want another headcount.
+7. **Keep the charger in and the lid open** until the presentation: the workers, the watchdog and the mirror run on this Mac.
 
 **Closed tonight:**
+- the night run: W1 to W7 landed and stopped; the backend closed at the founder's word (01:30 IST);
+- npm's web approval: both SDKs at 1.0.0;
 - the big city: trimmed by the founder at 00:52 IST to what is seeded; W2 finishes race mode on it;
 - race mode: kept at S by the founder (01:24 IST);
 - the payer resumed at 23:00 IST, and Filter & Fold open again;
@@ -122,7 +120,7 @@ Updated 01:35 IST, Sat 7 Nov (W7 Submission, final).
 
 ## w2-city
 
-- **Race mode at M needs M's plain store** (owner: the founder). What: the big city M is trimmed to what was seeded (ADR-0080): 3,175 events, graph store only. Race mode's plain side reads the plain store, which was never written for M, so race mode stays at S and D7 stays blocked. Why: writing it is M seeding (about 140 transactions, about 0.5 tGLM, about 13 minutes, write-only after two small reads), which the founder stopped. Recommendation: yes if race at M matters for the pitch. W2 then writes it, measures D7 (Q2: 2 against 14, from the generator), and switches race mode to M with the measured reads. Otherwise race mode stays at S (2 against 5, measured).
+- **Race mode at M needs M's plain store** (owner: the founder). What: the big city M is trimmed to what was seeded (ADR-0081): 3,175 events, graph store only. Race mode's plain side reads the plain store, which was never written for M, so race mode stays at S and D7 stays blocked. Why: writing it is M seeding (about 140 transactions, about 0.5 tGLM, about 13 minutes, write-only after two small reads), which the founder stopped. Recommendation: yes if race at M matters for the pitch. W2 then writes it, measures D7 (Q2: 2 against 14, from the generator), and switches race mode to M with the measured reads. Otherwise race mode stays at S (2 against 5, measured).
 - **After the flip, delist the old shops' directory rows** (owner: W2). What: kesar-kingdom, syrup-street and jamun-junction stay listed under their new display names, so the map shows each name twice. Why: acceptance D8 still runs at S, where they are the cast. Recommendation: delist them once D8 moves off S (`node packages/city/scripts/cast.mjs --execute --store delist-test`, in #186).
 - **`arkiv/swarm.md` names the old menus** (owner: W7). What: its worked example is Kesar Kingdom's menu. The final cast's menus, now version 2 with their storefront photos, are in `docs/sessions/arkiv/swarm-menus.json`: entity, transaction, reference, link, and each image's reference and hash. Recommendation: use Filter & Fold's as the example ([menu.json](https://api.gateway.ethswarm.org/bzz/3f26da16d819311ceca5fde8e4af8077b497c272292df78d7f3292433df2dc76/menu.json)).
 - Closed 00:31 IST: W1's flip changed the labels and the category together, after the history and the workers' restart (#189).
