@@ -144,7 +144,13 @@ One line per PR: time (IST) · activity · result · PR link. Append under your 
 ## w5-ops
 
 - 23:10 IST · w5-ops · the payer's pass is 300 a day for tonight (policy and ENS, ADR-0071 amendment); PAYER back to 125 test USDT from FUNDER · https://github.com/Zugzwang-world/graphpay/pull/152
+- 23:40 IST · w5-ops · Pause and Resume per agent (payer and scout; the others say why); the self-healing cron: a paused agent resumes after 2 min, a closed shop reopens after 5 · https://github.com/Zugzwang-world/graphpay/pull/172
 
 ## w3-payments
 
-- 23:40 IST · w3-payments · in PR: fix(pay): "Another coffee" re-orders the filter coffee for 0.80 (order.reorder.sku) · https://github.com/Zugzwang-world/graphpay/pull/155
+- 23:34 IST · w3-payments · merged: fix(pay): "Another coffee" re-orders the filter coffee for 0.80; paid live, tx 0xf1d7…2b4a, its edges on Arkiv · https://github.com/Zugzwang-world/graphpay/pull/155
+- 00:00 IST · w3-payments · in PR: feat(pay): subscribe and cancel the Sunday box on the demo clock; the cron renews within the signed allowance
+
+## w6-sdk
+
+- 23:55 IST · w6-sdk · arkiv-graph 1.0.0: five bugs fixed (paging past rows that do not fit, row lifetimes, atomic split writes, refused batches, the predicate budget), every export documented and typed, the quickstart first, the reference app linked · https://github.com/Zugzwang-world/graphpay/pull/174
