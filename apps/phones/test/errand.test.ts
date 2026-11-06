@@ -48,7 +48,18 @@ test('a refused errand ends with the refusal; a failed one with a retryable erro
   const f = new ErrandMapper(story, txLink);
   assert.equal(f.map('failed', JSON.stringify({ error: 'the errand ran out of time' }))[0]?.type, 'error');
   const cut = new ErrandMapper(story, txLink);
-  assert.equal(cut.end()[0]?.type, 'error');
+  const dropped = cut.end()[0];
+  assert.equal(dropped?.type, 'error');
+  // a dropped stream never offers a second errand: the run may have paid
+  assert.equal(dropped?.type === 'error' && dropped.retry, undefined);
+  const back = new ErrandMapper(story, txLink);
+  back.map('started', JSON.stringify({ runId: 'r2' }));
+  assert.equal(back.runId, 'r2');
+  assert.equal(back.finished, false);
+  const paid = back.recovered('0xabc', { amount: '4.80', currency: 'USDT' }, '0xdef');
+  assert.equal(paid.at(-1)?.type, 'payment.settled');
+  assert.equal(back.finished, true);
+  assert.deepEqual(back.end(), []);
   assert.equal(refusalOf('ENS_PAUSED: the agent is paused'), 'paused');
   assert.equal(refusalOf('something else'), null);
 });

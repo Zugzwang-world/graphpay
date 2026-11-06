@@ -100,11 +100,26 @@ export class ErrandMapper {
     return [];
   }
 
-  // The stream closed: a run that never reached its result says so.
+  // True once the run's result (or its failure) has been applied.
+  get finished(): boolean {
+    return this.done;
+  }
+
+  get runId(): string | undefined {
+    return this.errandId;
+  }
+
+  // The run's order, read back by the phone after its stream dropped: the same paid card as a result.
+  recovered(orderId: string, total: Money, tx: string): DemoEvent[] {
+    return this.settled(orderId, total, tx);
+  }
+
+  // The stream closed and the order could not be read back: the run may still have paid, so there is
+  // no "Try again" (a second errand would pay again).
   end(): DemoEvent[] {
     if (this.done) return [];
     this.done = true;
-    return [{ type: 'error', message: 'The errand stream ended before its result. Try again.', recoverable: true, retry: 'sendPrompt', errandId: this.errandId }];
+    return [{ type: 'error', message: 'The errand stream ended before its result. It may have paid: check Orders before asking again.', recoverable: false, errandId: this.errandId }];
   }
 
   private agent(ens: string): AgentRef | undefined {
