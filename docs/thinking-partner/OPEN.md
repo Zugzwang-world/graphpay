@@ -82,6 +82,7 @@ Agents (T4) and Join add one row per full errand run, so the presets can be cali
 | 00:11 | W4 code mode on mock services, short answers | live | the same | 15.6, 11.7 | $0.0266, $0.0227 | paid the good shop, the concierge's own choice; 3 calls, 2,887 and 2,839 tokens |
 | 00:14 | W4 code mode live, local runner (as at 00:10) | live | the same | 22.0 | $0.0265 | refused at G8, the shop's re-check before the 402: the buyer-standing read failed (`fetch failed`), so the guard failed closed; now a read that throws is tried once more |
 | 00:15 | W4 code mode live, local runner, after that fix | live | the same | 55.2 | $0.0247 | **paid** 4.80 to kesar: https://explorer.testnet.whitechain.io/tx/0xfe0a4327fb7dca69d7363f05c73a8cc15b486b57184fc2f1e72c6812785070d5 ; 3 calls, 2,886 tokens (1,884 in, 768 cached; 1,002 out, 605 reasoning); 13.6 s of model time; the payer's 41.7 s is the quote, the 402, the checks, the signature and the settlement |
+| 00:24 | W4 code mode (#182) live on the production site, payer | live | `kimi-k3.1-pro-highspeed`, concierge high, analyst and risk low; the rest in code | 55.5 | $0.0269 | **paid** 4.80 to kesar: https://explorer.testnet.whitechain.io/tx/0x194b7bc4dac70c36e55ca140a7e3ea477853d8938f3885fb94d95bff9c32f0e5 ; 3 calls, 2,852 tokens; models 13 s; the two longest waits are the 402 step (13.6 s: the hosted shop's quote write) and the settlement (13.3 s: our facilitator and the chain) |
 
 ## Kickoff rules and booth questions (closed; rolled up 06:55 IST)
 

@@ -118,11 +118,11 @@ Updated 00:15 IST, Sat 7 Nov (W3 Payments, session `local_b65be40a-eb20-4d86-b78
 
 ## w4-agents
 
-Updated 00:17 IST, Sat 7 Nov (W4 Agents, session `local_3404db4e-486c-4f86-8b3a-67ceb53ef025`).
-- **Done:** item 1, the relative deadline ([#153](https://github.com/Zugzwang-world/graphpay/pull/153)); item 2, every model call measured ([#157](https://github.com/Zugzwang-world/graphpay/pull/157)); item 3's first cut ([#162](https://github.com/Zugzwang-world/graphpay/pull/162)).
-- **Item 3, second cut ([#182](https://github.com/Zugzwang-world/graphpay/pull/182); the reviewer says ship):** the routine steps in code, one model call each for the concierge, the analyst and the risk agent. **Proven live before merging:** paid 4.80 in 55.2 s with 3 model calls, 2,886 tokens and $0.0247 (the baseline: 91.4 s, 19 calls, 33,287 tokens, $0.1455). The screens get the same data.
-- **Found tonight:** the payer was paused by a visitor twice (W5's self-healing now resumes it); a dropped Arkiv read made the shop refuse the buyer once (now tried once more).
-- **Next:** merge, then three live errands in a row on the site.
+Updated 00:27 IST, Sat 7 Nov (W4 Agents, session `local_3404db4e-486c-4f86-8b3a-67ceb53ef025`).
+- **Done:** item 1, the relative deadline ([#153](https://github.com/Zugzwang-world/graphpay/pull/153)); item 2, every model call measured ([#157](https://github.com/Zugzwang-world/graphpay/pull/157)); item 3, the routine steps in code ([#162](https://github.com/Zugzwang-world/graphpay/pull/162), [#182](https://github.com/Zugzwang-world/graphpay/pull/182), live since 00:22 IST).
+- **Live on the site, 00:24 IST:** paid 4.80 in 55.5 s with 3 model calls, 2,852 tokens and $0.0269. The baseline at 23:30 IST: 91.4 s, 19 calls, 33,287 tokens, $0.1455.
+- **Holding** live errands at W1's request until W5 restarts the workers on the new shop names; then three live errands in a row (item 4).
+- **Where the rest goes:** the models take 13 s; the 402 step (13.6 s) and the settlement (13.3 s) are outside the agents (told the Coordinator).
 - **Blockers:** none.
 
 ## w5-ops
