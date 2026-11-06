@@ -46,11 +46,22 @@ const calls = (role, step, list) => ({ toolCalls: list.map(([toolName, input], i
 const answer = (value) => ({ text: JSON.stringify(value) });
 const last = (view, name) => view.results.filter((r) => r.toolName === name).at(-1)?.output;
 
+// "within an hour" or "within 45 minutes" from the task's local now, to the whole minute.
+function withinDeadline(task) {
+  const m = /within\s+(an?|one|\d+)\s*(hours?|minutes?)/i.exec(task.request);
+  if (!m) return null;
+  const count = /^\d+$/.test(m[1]) ? Number(m[1]) : 1;
+  const minutes = /^h/i.test(m[2]) ? count * 60 : count;
+  const zone = String(task.now).slice(19);
+  const local = Math.floor((Date.parse(`${String(task.now).slice(0, 19)}Z`) + minutes * 60_000) / 60_000) * 60_000;
+  return `${new Date(local).toISOString().slice(0, 19)}${zone}`;
+}
+
 function needFrom(task, { widen = false } = {}) {
   const budget = /(\d+(?:\.\d+)?)\s*USDT/i.exec(task.request)?.[1] ?? '0';
   const hour = /by\s+(\d{1,2})\s*pm/i.exec(task.request)?.[1];
   const day = String(task.now).slice(0, 10);
-  const deadline = hour ? `${day}T${String(Number(hour) + 12).padStart(2, '0')}:00:00${String(task.now).slice(19)}` : String(task.now);
+  const deadline = hour ? `${day}T${String(Number(hour) + 12).padStart(2, '0')}:00:00${String(task.now).slice(19)}` : (withinDeadline(task) ?? String(task.now));
   return {
     need: 'food',
     item: task.defaults.food.item,
