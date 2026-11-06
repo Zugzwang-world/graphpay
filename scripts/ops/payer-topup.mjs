@@ -1,47 +1,79 @@
-// node scripts/ops/payer-topup.mjs [--target <USDT>] [--shop-floor <USDT>] [--funder-floor <USDT>] [--execute --real]
+// node scripts/ops/payer-topup.mjs --from <shop|funder> [--target <USDT>] [--execute --real]
 // Keeps the payer agent's wallet funded tonight (the W5 Ops brief: "from FUNDER and from the
-// shop's takings"). It tops the payer's wallet up to --target test USDT (default 125, the plan's
-// target): first from the good shop's takings (its merchant wallet keeps --shop-floor, default
-// 20), then from FUNDER (which keeps --funder-floor, default 20, for disposable agents and other
-// top-ups). The roles come from the story (the payer agent's and the good shop's wallet roles),
-// never typed here, and the only recipient is the payer's wallet. Every transfer is
-// scripts/funding's fundUsdt:
+// shop's takings"). One source per run, so no run reads a balance its own earlier send moved:
+// - --from shop: the good shop's takings, above its refund float (MERCHANT_FLOAT_MICRO, 20 test
+//   USDT), keeping 0.03 WBT for the gas of its dispatches and refunds;
+// - --from funder: FUNDER's test USDT above 20 (kept for disposable agents and other top-ups),
+//   keeping the funding plan's WBT reserve.
+// Run --from shop first, then --from funder if the payer is still short of --target (default:
+// the funding plan's PAYER target).
+// Before anything is sent:
+// - every flag is parsed, and --target is at most 200;
+// - scripts/funding's identity checks pass: FUNDER is the configured FUNDER, and the payer and
+//   the shop are fresh roles with their own addresses;
+// - the payer's wallet is the one the checkout's policy binds to the payer agent's node;
+// - neither sender has a transaction in flight (a pending nonce): a re-run while an earlier send
+//   is unconfirmed would pay twice.
+// The transfer is scripts/funding's fundUsdt:
 // - the chain id is checked;
-// - the source's nonce is pinned, and a pending transaction stops it;
+// - the source's nonce is pinned;
 // - gas is estimated;
 // - the receipt and its exact Transfer log are checked.
-// A dry run by default; for real with --execute --real. Prints roles, addresses, amounts and
-// transaction hashes only.
+// A payment the payer makes between this script's read and fundUsdt's own pinned read raises the
+// send by that payment, at most one order; the floors leave room for it.
+// A dry run unless both --execute and --real. Prints roles, addresses, amounts and hashes only.
 
-import { erc20Abi, formatUnits, parseUnits } from 'viem';
+import { readFileSync } from 'node:fs';
+import { erc20Abi, formatUnits, namehash, parseUnits } from 'viem';
 import { privateKeyToAccount } from 'viem/accounts';
 import { activeCast, castEntries, config } from '../../packages/config/index.mjs';
+import { checkoutAbi } from '../../packages/contracts/index.mjs';
 import { fundUsdt } from '../funding/fund.mjs';
+import { identityProblems } from '../funding/logic.mjs';
 import { clientsFor } from '../lib/chains.mjs';
 import { loadEnv } from '../lib/env-loader.mjs';
 import { installErrorBoundary } from '../lib/redact.mjs';
-import { roleAddresses } from '../lib/wallets.mjs';
+import { FRESH, roleAddresses } from '../lib/wallets.mjs';
+import { MERCHANT_FLOAT_MICRO } from '../whitechain/plan.mjs';
 
-const argv = process.argv.slice(2);
-const KNOWN = ['--target', '--shop-floor', '--funder-floor', '--execute', '--real'];
-for (const a of argv) if (a.startsWith('--') && !KNOWN.includes(a)) throw new Error(`unknown flag; use ${KNOWN.join(' ')}`);
-const arg = (name, fallback) => (argv.includes(name) ? argv[argv.indexOf(name) + 1] : fallback);
-const amount = (name, fallback) => {
-  const v = arg(name, fallback);
-  if (!/^\d{1,6}(\.\d{1,6})?$/.test(String(v))) throw new Error(`${name} takes an amount of test USDT, like 125 or 20.5`);
-  return v;
-};
-if (argv.includes('--execute') !== argv.includes('--real')) throw new Error('a real run takes both --execute and --real');
-const real = argv.includes('--execute') && argv.includes('--real');
+const PLAN = JSON.parse(readFileSync(new URL('../funding/plan.json', import.meta.url), 'utf8'));
+const MAX_TARGET = 200;
+const FUNDER_KEEP = '20';
+const SHOP_RESERVE_WBT = '0.03';
 
-// The WBT each source keeps: the shop pays the gas of its dispatches and refunds; FUNDER keeps
-// the funding plan's reserve.
-const RESERVE_WBT = { shop: '0.03', funder: '0.2' };
+// Every flag first, before .env or any network is touched. A value is never echoed.
+export function parseFlags(argv) {
+  const out = { from: null, target: PLAN.usdt.whitechain.PAYER, execute: false, real: false };
+  const seen = new Set();
+  for (let i = 0; i < argv.length; i++) {
+    const flag = argv[i];
+    if (seen.has(flag)) throw new Error('a flag is given twice');
+    seen.add(flag);
+    if (flag === '--execute') out.execute = true;
+    else if (flag === '--real') out.real = true;
+    else if (flag === '--from' || flag === '--target') {
+      const value = argv[++i];
+      if (value === undefined) throw new Error(`${flag} needs a value`);
+      if (flag === '--from') {
+        if (value !== 'shop' && value !== 'funder') throw new Error('--from takes shop or funder');
+        out.from = value;
+      } else {
+        if (!/^\d{1,3}(\.\d{1,6})?$/.test(value) || Number(value) <= 0 || Number(value) > MAX_TARGET) throw new Error(`--target takes an amount of test USDT above 0 and at most ${MAX_TARGET}`);
+        out.target = value;
+      }
+    } else throw new Error('unknown argument; use --from <shop|funder> [--target <USDT>] [--execute --real]');
+  }
+  if (!out.from) throw new Error('say where the test USDT comes from: --from shop or --from funder');
+  if (out.execute !== out.real) throw new Error('a real run takes both --execute and --real');
+  return out;
+}
 
 let values = new Map();
 installErrorBoundary(() => values);
 
 async function main() {
+  const flags = parseFlags(process.argv.slice(2));
+  const real = flags.execute && flags.real;
   ({ values } = loadEnv());
   const env = Object.fromEntries(values);
   const addresses = roleAddresses(values);
@@ -49,47 +81,57 @@ async function main() {
   const payer = entries.find((e) => e.kind === 'buyer-agent' && e.key === 'payer');
   const shop = entries.find((e) => e.kind === 'shop' && e.storyRole === 'good');
   if (!payer?.walletRole || !shop?.walletRole) throw new Error('the story has no payer agent or no good shop with a wallet role');
-  const roles = { payer: payer.walletRole, shop: shop.walletRole, funder: 'FUNDER' };
-  for (const role of Object.values(roles)) if (!addresses[role]) throw new Error(`${role}: no valid key in .env`);
-  if (new Set(Object.values(roles).map((r) => addresses[r].toLowerCase())).size !== 3) throw new Error('the payer, the shop and FUNDER must be three different wallets');
-  if (addresses.FUNDER.toLowerCase() !== config.wallets.carried.FUNDER.toLowerCase()) throw new Error("FUNDER's key is not the configured FUNDER");
+  const role = { payer: payer.walletRole, shop: shop.walletRole };
+  if (!addresses.FUNDER || !addresses[role.payer] || !addresses[role.shop]) throw new Error('FUNDER, the payer or the shop has no valid key in .env');
+  const problems = identityProblems({ funder: addresses.FUNDER, carried: config.wallets.carried, labNotUsed: config.wallets.labNotUsed, fresh: FRESH, roles: [role.payer, role.shop], addresses });
+  if (problems.length > 0) {
+    for (const p of problems) console.log(`STOP: ${p}`);
+    process.exitCode = 1;
+    return;
+  }
 
   const c = await clientsFor('whitechain', env);
+  const pc = c.publicClient;
   const token = config.whitechain.tokens.usdt;
-  const decimals = await c.publicClient.readContract({ address: token.address, abi: erc20Abi, functionName: 'decimals' });
+  const checkout = config.whitechain.contracts.checkout.address;
+  const decimals = await pc.readContract({ address: token.address, abi: erc20Abi, functionName: 'decimals' });
   if (decimals !== token.decimals) throw new Error(`USDT decimals ${decimals}, the config says ${token.decimals}`);
-  const units = (v) => parseUnits(String(v), decimals);
   const fmt = (u) => formatUnits(u, decimals);
-  const balance = (role) => c.publicClient.readContract({ address: token.address, abi: erc20Abi, functionName: 'balanceOf', args: [addresses[role]] });
+  const balance = (r) => pc.readContract({ address: token.address, abi: erc20Abi, functionName: 'balanceOf', args: [addresses[r]] });
 
-  const target = units(amount('--target', '125'));
-  const shopFloor = units(amount('--shop-floor', '20'));
-  const funderFloor = units(amount('--funder-floor', '20'));
-  const [have, shopHas, funderHas] = await Promise.all([balance(roles.payer), balance(roles.shop), balance(roles.funder)]);
-  console.log(`${real ? 'REAL RUN' : 'dry run'}: ${roles.payer} (${payer.ensName}) has ${fmt(have)} test USDT, target ${fmt(target)}; ${roles.shop} (${shop.ensName}'s takings) has ${fmt(shopHas)}, keeps ${fmt(shopFloor)}; FUNDER has ${fmt(funderHas)}, keeps ${fmt(funderFloor)}`);
-  if (have >= target) return console.log('nothing to send');
+  // The payer's wallet is the one the checkout pays from for the payer agent.
+  const policy = await pc.readContract({ address: checkout, abi: checkoutAbi, functionName: 'policies', args: [namehash(payer.ensName)] });
+  if (String(policy.wallet).toLowerCase() !== addresses[role.payer].toLowerCase()) throw new Error(`${role.payer} is not the wallet the checkout's policy binds to ${payer.ensName}`);
 
-  const stops = [];
-  const min = (a, b) => (a < b ? a : b);
-  const fromShop = shopHas > shopFloor ? min(target - have, shopHas - shopFloor) : 0n;
-  if (fromShop > 0n) {
-    // fundUsdt tops a role up to a target from one source: the shop's part is the target it can reach.
-    const relabel = (line) => console.log(line.replace(/FUNDER/g, roles.shop));
-    const r = await fundUsdt({ c, funder: privateKeyToAccount(values.get(`${roles.shop}_PRIVATE_KEY`)), targets: { [roles.payer]: fmt(have + fromShop) }, addresses, token, reserve: RESERVE_WBT.shop, real, log: relabel });
-    stops.push(...r.stops);
+  // Neither sender may have a transaction in flight.
+  for (const r of [role.shop, 'FUNDER']) {
+    const [latest, pending] = await Promise.all([pc.getTransactionCount({ address: addresses[r], blockTag: 'latest' }), pc.getTransactionCount({ address: addresses[r], blockTag: 'pending' })]);
+    if (pending !== latest) {
+      console.log(`STOP: ${r} has a transaction in flight (nonce ${latest} confirmed, ${pending} pending); nothing sent`);
+      process.exitCode = 1;
+      return;
+    }
   }
-  const after = real ? await balance(roles.payer) : have + fromShop;
-  const rest = target > after ? target - after : 0n;
-  const fromFunder = rest > 0n && funderHas > funderFloor ? min(rest, funderHas - funderFloor) : 0n;
-  if (fromFunder > 0n && stops.length === 0) {
-    const r = await fundUsdt({ c, funder: privateKeyToAccount(values.get('FUNDER_PRIVATE_KEY')), targets: { [roles.payer]: fmt(after + fromFunder) }, addresses, token, reserve: RESERVE_WBT.funder, real });
-    stops.push(...r.stops);
-  }
-  console.log(`plan: ${fmt(fromShop)} from ${roles.shop}, ${fmt(fromFunder)} from FUNDER${rest > fromFunder ? `; ${fmt(rest - fromFunder)} short of the target` : ''}`);
+
+  const source = flags.from === 'shop' ? { role: role.shop, keep: MERCHANT_FLOAT_MICRO, reserve: SHOP_RESERVE_WBT } : { role: 'FUNDER', keep: parseUnits(FUNDER_KEEP, decimals), reserve: PLAN.funderReserve.whitechain };
+  const target = parseUnits(flags.target, decimals);
+  const [have, sourceHas] = await Promise.all([balance(role.payer), balance(source.role)]);
+  console.log(`${real ? 'REAL RUN' : 'dry run'}: ${role.payer} (${payer.ensName}) has ${fmt(have)} test USDT, target ${fmt(target)}; from ${source.role}${source.role === role.shop ? ` (${shop.ensName}'s takings)` : ''}, which has ${fmt(sourceHas)} and keeps ${fmt(source.keep)}`);
+  if (have >= target) return console.log('nothing to send: the payer is at its target');
+  const spare = sourceHas > source.keep ? sourceHas - source.keep : 0n;
+  const amount = target - have < spare ? target - have : spare;
+  if (amount <= 0n) return console.log(`nothing to send: ${source.role} has nothing above what it keeps`);
+
+  // fundUsdt's log and stops speak of "FUNDER" as the sender; here the sender is source.role.
+  const relabel = (s) => s.replace(/FUNDER/g, source.role);
+  const { stops } = await fundUsdt({ c, funder: privateKeyToAccount(values.get(`${source.role}_PRIVATE_KEY`)), targets: { [role.payer]: fmt(have + amount) }, addresses, token, reserve: source.reserve, real, log: (line) => console.log(relabel(line)) });
   if (stops.length > 0) {
-    for (const why of stops) console.log(`STOP: ${why}`);
+    for (const why of stops) console.log(`STOP: ${relabel(why)}`);
     process.exitCode = 1;
+    return;
   }
+  if (real) console.log(`${role.payer} now has ${fmt(await balance(role.payer))} test USDT`);
 }
 
-await main();
+const invoked = process.argv[1] && new URL(import.meta.url).pathname === (await import('node:fs')).realpathSync(process.argv[1]);
+if (invoked) await main();
