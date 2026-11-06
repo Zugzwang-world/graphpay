@@ -11,10 +11,49 @@ import type { z } from 'zod';
 export type TraceEvent =
   | { seq: number; type: 'message'; from: string; to: string; text: string }
   | { seq: number; type: 'agent.start'; agent: string; role: Role; task: unknown }
-  | { seq: number; type: 'agent.end'; agent: string; role: Role; output: unknown; usageTokens?: number; model?: string; error?: string }
+  | { seq: number; type: 'agent.end'; agent: string; role: Role; output: unknown; usageTokens?: number; model?: string; effort?: string | null; calls?: ModelCall[]; seconds?: number; error?: string }
   | { seq: number; type: 'tool.call'; agent: string; tool: string; input: unknown }
   | { seq: number; type: 'tool.result'; agent: string; tool: string; output: unknown; error?: string }
   | { seq: number; type: 'guard'; guard: string; ok: boolean; detail: string };
+
+/** One model call of an agent (agent.end `calls`): tokens in (of which cached), out (of which
+ * reasoning), its API cost, the tools it asked for; on live runs the seconds the model took to
+ * answer and the longest of its tools. */
+export interface ModelCall {
+  input: number;
+  cached: number;
+  output: number;
+  reasoning: number;
+  usd: number | null;
+  tools: string[];
+  seconds?: number | null;
+  toolSeconds?: number | null;
+}
+
+export interface AgentUsage {
+  agent: string;
+  role: Role;
+  model: string | null;
+  effort: string | null;
+  seconds: number | null;
+  calls: number;
+  input: number;
+  cached: number;
+  output: number;
+  reasoning: number;
+  usd: number;
+  modelSeconds: number;
+  perCall: ModelCall[];
+  error?: string;
+}
+export interface ErrandUsage {
+  agents: AgentUsage[];
+  total: { agents: number; calls: number; input: number; cached: number; output: number; reasoning: number; usd: number; modelSeconds: number };
+}
+/** Tokens and seconds per agent and per call, from a run log's events (or the site's trace frames). */
+export declare function usageOf(events: TraceEvent[]): ErrandUsage;
+/** The same as a Markdown table: a row per agent, then a row per call. */
+export declare function usageTable(usage: ErrandUsage): string;
 
 export interface RankedShop {
   ens: string;
@@ -247,6 +286,8 @@ export interface ErrandOptions {
   signal?: AbortSignal;
   /** Run every pre-sign check, then stop with DRY_RUN: nothing is signed (acceptance B9 b, D10). */
   dryRun?: boolean;
+  /** Per-call seconds in the run log (default: on for live runs, off for mock runs, so two mock run logs stay byte-identical). */
+  timing?: boolean;
   /** Presence renewal period in ms (default PRESENCE_RENEW_MS), and the timer functions (tests). */
   presenceRenewMs?: number;
   setTimer?: (fn: () => void, ms: number) => unknown;
@@ -259,6 +300,7 @@ export interface ErrandMetrics {
   tokens: number;
   apiCostUsd: number;
   byRole: Record<string, { calls: number; tokens: number; costUsd: number }>;
+  usage: ErrandUsage;
 }
 
 export declare function runErrand(options: ErrandOptions): Promise<{ runLog: RunLog; metrics: ErrandMetrics; state: RunState }>;

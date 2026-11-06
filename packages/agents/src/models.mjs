@@ -151,11 +151,17 @@ function stepCost(settings, step) {
   throw new Error(`no cost rule for provider "${settings.provider}"`);
 }
 
-// Tokens and API cost over every response of an errand (E8: cost from apiCostUsd).
-export function createMeter() {
-  const meter = { calls: 0, tokens: 0, costUsd: 0, byRole: {} };
+const round = (value, places) => (Number.isFinite(value) ? Number(value.toFixed(places)) : null);
+
+// Tokens and API cost over every response of an errand (E8: cost from apiCostUsd). `step`
+// returns the call's own record for the run log: tokens in (of which cached), out (of which
+// reasoning), its cost, the tools it asked for and, with `timing` on (live runs; a mock run
+// log stays byte-identical), the seconds the model took to answer and the tools to run.
+export function createMeter({ timing = false, now = () => performance.now() } = {}) {
+  const meter = { calls: 0, tokens: 0, costUsd: 0, byRole: {}, timing, now };
   meter.step = (role, settings, step) => {
-    const tokens = step.usage?.totalTokens ?? (step.usage?.inputTokens ?? 0) + (step.usage?.outputTokens ?? 0);
+    const u = step.usage ?? {};
+    const tokens = u.totalTokens ?? (u.inputTokens ?? 0) + (u.outputTokens ?? 0);
     const cost = stepCost(settings, step);
     meter.calls += 1;
     meter.tokens += tokens;
@@ -164,6 +170,20 @@ export function createMeter() {
     r.calls += 1;
     r.tokens += tokens;
     r.costUsd += cost;
+    const call = {
+      input: u.inputTokens ?? 0,
+      cached: u.inputTokenDetails?.cacheReadTokens ?? 0,
+      output: u.outputTokens ?? 0,
+      reasoning: u.outputTokenDetails?.reasoningTokens ?? 0,
+      usd: round(cost, 6),
+      tools: (step.toolCalls ?? []).map((c) => c.toolName),
+    };
+    if (timing) {
+      const tools = Object.values(step.performance?.toolExecutionMs ?? {});
+      call.seconds = round((step.performance?.responseTimeMs ?? Number.NaN) / 1000, 2);
+      call.toolSeconds = round(tools.length ? Math.max(...tools) / 1000 : 0, 2);
+    }
+    return call;
   };
   return meter;
 }
