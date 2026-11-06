@@ -7,9 +7,10 @@ import { decodeFunctionResult, encodeFunctionData } from 'viem';
 import { namehash } from 'viem/ens';
 import { arkivEngine } from '../app/api/graphql/arkiv.server.ts';
 import { rpcCall } from './chain.server.ts';
-import type { CustomerState } from './contracts.ts';
+import type { CustomerState, SubscriptionSummary } from './contracts.ts';
 import { agentStatusOf, newestPayment, orderSummary, policyOf, type EnsStatus, type OrderEdge, type Policy } from './customer-state.ts';
 import { checkoutAddress, siteModel } from './site.server.ts';
+import { payerSubscription } from './subscription-live.server.ts';
 
 export interface Sources {
   ensStatus(name: string): Promise<EnsStatus>;
@@ -17,6 +18,8 @@ export interface Sources {
   spentToday(node: `0x${string}`): Promise<bigint>;
   payments(name: string, sinceDay: number): Promise<OrderEdge[]>;
   trail(orderId: string): Promise<OrderEdge[]>;
+  // The payer agent's newest subscription to the story's plan, from the checkout.
+  subscription(): Promise<SubscriptionSummary | null>;
 }
 
 let gate: Promise<ReturnType<typeof createEnsGate>> | null = null;
@@ -54,6 +57,8 @@ export const liveSources: Sources = {
     return data.node?.out ?? [];
   },
   trail: async (orderId) => (await graphql<{ order: OrderEdge[] }>(`query($id: String!) { order(id: $id) { ${EDGE} } }`, { id: orderId })).order,
+  // Bounded: a slow chain read is no subscription on this answer, never a slow customer state.
+  subscription: () => Promise.race([payerSubscription(), new Promise<null>((resolve) => setTimeout(() => resolve(null), 8_000))]),
 };
 
 export async function readCustomerState(sources: Sources = liveSources, nowS = Math.floor(Date.now() / 1000)): Promise<CustomerState> {
@@ -61,11 +66,13 @@ export async function readCustomerState(sources: Sources = liveSources, nowS = M
   const node = namehash(agent) as `0x${string}`;
   // Independent sources: all are awaited, and any one failing fails the whole answer, so the
   // phone never shows a half-known agent as active.
-  const [ens, policy, spent, payments] = await Promise.all([
+  // The subscription is the one source that may fail on its own: it never decides the agent's status.
+  const [ens, policy, spent, payments, subscription] = await Promise.all([
     sources.ensStatus(agent),
     sources.policy(node),
     sources.spentToday(node),
     sources.payments(agent, Math.floor(nowS / 86_400) - 30),
+    sources.subscription().catch(() => null),
   ]);
   const payment = newestPayment(payments);
   const lastOrder = payment?.orderId ? orderSummary(payment, await sources.trail(payment.orderId)) : null;
@@ -75,8 +82,7 @@ export async function readCustomerState(sources: Sources = liveSources, nowS = M
     spentTodayMicro: String(spent),
     policyExpiresAt: policy && policy.expiry > 0n ? new Date(Number(policy.expiry) * 1000).toISOString() : null,
     lastOrder,
-    // Subscriptions arrive with M4's subscribe flow (their id comes from the checkout event).
-    subscription: null,
+    subscription,
   };
 }
 
