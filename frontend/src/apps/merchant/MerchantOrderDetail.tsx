@@ -5,12 +5,11 @@ import { ExplorerLink, MoneyAmount, StatusChip } from '@/components/shared/Primi
 import { InlineBanner } from '@/components/shared/States';
 import { StatusTracker } from '@/components/shared/StatusTracker';
 import { useDemo, useDemoEvents } from '@/demo/DemoProvider';
-import type { Order, RefundStatus } from '@/demo/contract';
+import type { Order } from '@/demo/contract';
 import { refundableMax } from '@/demo/rules';
 import { copy, fill } from '@/copy';
 import { formatMoney, isZero } from '@/lib/money';
-
-const refundSteps: RefundStatus[] = ['requested', 'accepted', 'refunded'];
+import { refundTrackerSteps } from '@/lib/refundTracker';
 
 /** M3: Dispatch starts an adapter action; the next two tracker states arrive as order.updated events. */
 export function MerchantOrderDetail({ orderId, onRefund }: { orderId: string | null; onRefund: () => void }) {
@@ -37,7 +36,7 @@ export function MerchantOrderDetail({ orderId, onRefund }: { orderId: string | n
       const current = ['paid', 'dispatched', 'delivered'].indexOf(order.status);
       return { id: step, label: copy.status[step], state: (index < current || order.status === 'delivered' ? 'done' : index === current ? 'current' : 'todo') as 'done' | 'current' | 'todo' };
     })} />
-    {refund && <div className="rounded-card border border-line bg-surface p-3"><StatusTracker label={copy.merchant.pages.refunds} steps={refundSteps.map((step, index) => ({ id: step, label: copy.status[step], state: refund.status === 'declined' ? index === 0 ? 'failed' as const : 'todo' as const : index < refundSteps.indexOf(refund.status) || refund.status === 'refunded' ? 'done' as const : index === refundSteps.indexOf(refund.status) ? 'current' as const : 'todo' as const }))} /></div>}
+    {refund && <div className="rounded-card border border-line bg-surface p-3"><StatusTracker label={copy.merchant.pages.refunds} steps={refundTrackerSteps(refund.status)} /></div>}
     <BuyerCard order={order} />
     <div className="rounded-card border border-line bg-surface p-4 shadow-card"><div className="flex justify-between gap-2 text-body font-bold"><span>{copy.merchant.order.payment}</span><MoneyAmount amount={order.total} /></div><div className="mt-2 flex flex-wrap gap-2">{order.links.map((link, index) => <ExplorerLink key={`${link.url}-${index}`} link={link} />)}</div></div>
     {refund && refund.status === 'refunded' && <div className="rounded-card border border-info bg-info/5 p-4"><p className="text-body font-bold">{fill(copy.merchant.order.refundedAmount, { amount: formatMoney(refund.amount) })}</p><div className="mt-2 flex flex-wrap gap-2">{refund.links.map((link, index) => <ExplorerLink key={`${link.url}-${index}`} link={link} />)}</div></div>}

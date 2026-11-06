@@ -5,7 +5,7 @@ import type { AgentRef, Money } from '@/demo/contract';
 import { checkAmount, formatMoney } from '@/lib/money';
 import { copy, fill } from '@/copy';
 
-export function AmountEntry({ label, max, value, onConfirm, agent, agentLabel, readOnly = false }: { label: string; max: Money; value: Money | null; onConfirm: (value: Money) => void; agent?: AgentRef; agentLabel?: string; readOnly?: boolean }) {
+export function AmountEntry({ label, max, value, onConfirm, onEdit, agent, agentLabel, readOnly = false }: { label: string; max: Money; value: Money | null; onConfirm: (value: Money) => void; onEdit?: () => void; agent?: AgentRef; agentLabel?: string; readOnly?: boolean }) {
   const [editing, setEditing] = useState(value === null);
   const [draft, setDraft] = useState(value?.amount ?? '');
   const [touched, setTouched] = useState(false);
@@ -26,7 +26,7 @@ export function AmountEntry({ label, max, value, onConfirm, agent, agentLabel, r
   };
   if (readOnly || (!editing && value)) return <div className="flex min-h-11 items-center justify-between gap-3 rounded-input border border-line bg-surface px-4 text-body">
     <span><span className="text-muted">{label}</span> <strong className="tabular">{formatMoney(value ?? max)}</strong></span>
-    {!readOnly && <button type="button" onClick={() => { setDraft(value?.amount ?? ''); setTouched(false); setFocusOnMount(true); setEditing(true); }} className="min-h-11 px-2 font-bold text-info">{copy.common.edit}</button>}
+    {!readOnly && <button type="button" onClick={() => { setDraft(value?.amount ?? ''); setTouched(false); setFocusOnMount(true); setEditing(true); onEdit?.(); }} className="min-h-11 px-2 font-bold text-info">{copy.common.edit}</button>}
   </div>;
 
   const cheeky = result.ok ? null : result.problem === 'above_max' ? fill(copy.amount.comeOnBro[0], { max: formatMoney(max) }) : copy.amount.invalidComeOnBro;

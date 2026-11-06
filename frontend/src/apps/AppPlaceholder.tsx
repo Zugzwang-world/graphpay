@@ -20,8 +20,11 @@ import type { Money } from '@/demo/contract';
 import { CustomerJourneyProvider, useCustomerJourney } from './customer/CustomerJourneyProvider';
 import { CustomerDesk } from './customer/CustomerDesk';
 import { CustomerQuoteSheet } from './customer/CustomerQuoteSheet';
+import { CustomerOrders } from './customer/CustomerOrders';
+import { RefundWizard } from './customer/RefundWizard';
 import { MerchantHome } from './merchant/MerchantHome';
 import { MerchantOrderDetail } from './merchant/MerchantOrderDetail';
+import { MerchantRefunds } from './merchant/MerchantRefunds';
 
 const customerPages: AppPage[] = [
   { id: 'desk', label: copy.customer.pages.desk },
@@ -43,22 +46,30 @@ export function AppPlaceholder({ app }: { app: 'customer' | 'merchant' }) {
   const { snapshot, generation } = useDemo();
   const { muted } = useSoundPreference();
   const [selectedMerchantOrder, setSelectedMerchantOrder] = useState<string | null>(null);
-  const pages = app === 'customer' ? customerPages : merchantPages;
-  const title = app === 'customer' ? story.customer.name : story.shop.name;
+  const [merchantRefundFocus, setMerchantRefundFocus] = useState<string | null>(null);
   const cap = snapshot?.agents.find((agent) => agent.pass && agent.ref.role === story.spendingPass.payingRole)?.pass?.cap.amount;
-  const subtitle = app === 'customer' ? cap ? fill(copy.customer.desk.subtitle, { cap }) : undefined : snapshot?.shop.open ? muted ? copy.merchant.home.subtitleOpenMuted : copy.merchant.home.subtitleOpen : copy.merchant.home.subtitleClosed;
+  if (app === 'customer') return <CustomerJourneyProvider key={generation}><CustomerShell subtitle={cap ? fill(copy.customer.desk.subtitle, { cap }) : undefined} /></CustomerJourneyProvider>;
+  const subtitle = snapshot?.shop.open ? muted ? copy.merchant.home.subtitleOpenMuted : copy.merchant.home.subtitleOpen : copy.merchant.home.subtitleClosed;
   const selectedOrder = snapshot?.orders.find((order) => order.id === selectedMerchantOrder);
-  const shell = <AppShell app={app} pages={pages} homeTitle={title} subtitle={subtitle}
+  return <AppShell app="merchant" pages={merchantPages} homeTitle={story.shop.name} subtitle={subtitle}
+    onMenuNavigate={(page) => { if (page === 'refunds') setMerchantRefundFocus(null); }}
     getPageTitle={(page) => page === 'order-detail' && selectedOrder ? fill(copy.merchant.order.title, { number: selectedOrder.number }) : undefined}
     getPageSubtitle={(page) => page === 'order-detail' && selectedOrder ? fill(copy.merchant.order.via, { owner: selectedOrder.owner.name, agent: selectedOrder.buyer.role }) : undefined}
-    renderPage={(page) => app === 'merchant' && (page === 'home' || page === 'order-detail') ? <MerchantRoute page={page} selectedOrder={selectedMerchantOrder} onSelectOrder={setSelectedMerchantOrder} /> : <><PlaceholderPage app={app} page={page} pages={pages} />{app === 'customer' && <LiveQuoteSheet />}</>} />;
-  return app === 'customer' ? <CustomerJourneyProvider key={generation}>{shell}</CustomerJourneyProvider> : shell;
+    renderPage={(page) => page === 'home' || page === 'order-detail' || page === 'refunds' ? <MerchantRoute page={page} selectedOrder={selectedMerchantOrder} refundFocus={merchantRefundFocus} onSelectOrder={setSelectedMerchantOrder} onRefundFocus={setMerchantRefundFocus} /> : <PlaceholderPage app="merchant" page={page} pages={merchantPages} />} />;
 }
 
-function MerchantRoute({ page, selectedOrder, onSelectOrder }: { page: string; selectedOrder: string | null; onSelectOrder: (id: string) => void }) {
+function CustomerShell({ subtitle }: { subtitle?: string }) {
+  const { selectOrder } = useCustomerJourney();
+  return <AppShell app="customer" pages={customerPages} homeTitle={story.customer.name} subtitle={subtitle}
+    onMenuNavigate={(page) => { if (page === 'orders' || page === 'refund') selectOrder(null); }}
+    renderPage={(page) => <><PlaceholderPage app="customer" page={page} pages={customerPages} /><LiveQuoteSheet /></>} />;
+}
+
+function MerchantRoute({ page, selectedOrder, refundFocus, onSelectOrder, onRefundFocus }: { page: string; selectedOrder: string | null; refundFocus: string | null; onSelectOrder: (id: string) => void; onRefundFocus: (id: string | null) => void }) {
   const { adapter } = useDemo();
   const navigate = useAppNavigation();
-  if (page === 'order-detail') return <MerchantOrderDetail orderId={selectedOrder} onRefund={() => navigate('refunds')} />;
+  if (page === 'order-detail') return <MerchantOrderDetail orderId={selectedOrder} onRefund={() => { onRefundFocus(selectedOrder); navigate('refunds'); }} />;
+  if (page === 'refunds') return <MerchantRefunds focusedOrderId={refundFocus} onHome={() => navigate('home')} />;
   return <MerchantHome onOrderDetails={(id) => { onSelectOrder(id); void adapter.markOrderSeen?.(id); navigate('order-detail'); }} />;
 }
 
@@ -82,7 +93,8 @@ function PlaceholderPage({ app, page, pages }: { app: 'customer' | 'merchant'; p
   if (preview === 'success') return <div className="p-4"><ReceiptCard title={`${pageLabel}: ${copy.dev.successTitle}`} amount={usdt('4.00')} rows={[{ label: copy.customer.quote.total, value: <MoneyAmount amount={usdt('4.00')} /> }]} links={[sampleLink]} footer={copy.common.cannotBeEdited} /></div>;
   if (preview === 'components') return <ComponentGallery />;
   if (app === 'customer' && page === 'desk') return <CustomerDesk />;
-  if (app === 'customer' && page === 'orders') return <CustomerOrderHandoff />;
+  if (app === 'customer' && page === 'orders') return <CustomerOrders />;
+  if (app === 'customer' && page === 'refund') return <RefundWizard />;
 
   return <div className="flex flex-col gap-3 px-4 pt-4 pb-8">
     <p className="rounded-card border border-line bg-surface p-4 text-body text-muted shadow-card">{copy.placeholder[app]}</p>
@@ -90,17 +102,6 @@ function PlaceholderPage({ app, page, pages }: { app: 'customer' | 'merchant'; p
     {home && <ul className="flex flex-col gap-2">{[...orders].reverse().map((order) => <li key={order.id} className="flex items-center justify-between gap-2 rounded-card border border-line bg-surface px-4 py-3 shadow-card"><span className="text-body">#{order.number} {order.items[0]?.name}</span><span className="tabular text-caption text-muted">{formatMoney(order.total)} · {orderChip(order)}</span></li>)}</ul>}
     {!home && <EmptyState title={pageLabel} detail={copy.dev.emptyDetail} action={copy.dev.backHome} onAction={() => navigate(pages[0]!.id)} />}
   </div>;
-}
-
-function CustomerOrderHandoff() {
-  const { state } = useCustomerJourney();
-  const { snapshot } = useDemo();
-  const navigate = useAppNavigation();
-  const order = snapshot?.orders.find((entry) => entry.id === state.selectedOrderId);
-  if (!order) return <div className="p-4"><EmptyState title={copy.customer.orders.title} detail={copy.customer.orders.empty[0]} action={copy.customer.orders.askAgents} onAction={() => navigate('desk')} /></div>;
-  const steps = ['ordered', 'paid', 'dispatched', 'delivered'] as const;
-  const current = steps.indexOf(order.status);
-  return <div className="flex flex-col gap-3 p-4"><StatusTracker label={copy.customer.orders.detailTitle.replace('{number}', order.number)} steps={steps.map((step, index) => ({ id: step, label: copy.status[step], state: index < current || order.status === 'delivered' ? 'done' as const : index === current ? 'current' as const : 'todo' as const }))} /><ReceiptCard title={fill(copy.customer.orders.detailTitle, { number: order.number })} amount={order.total} status={order.status} rows={[{ label: copy.customer.quote.from, value: order.shop.name }]} links={order.links} /><button type="button" className="min-h-11 rounded-full border border-line px-4 text-body font-bold" onClick={() => navigate('desk')}>{copy.dev.backHome}</button></div>;
 }
 
 const sampleLink = { label: copy.common.viewTx, url: 'mock:preview', mock: true } as const;

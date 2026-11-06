@@ -22,6 +22,7 @@ export function AgentAvatar({ agent, label, status = 'active', activity = 'idle'
       {visual === 'paused' && <span className="absolute -right-1 -top-1 text-caption" aria-hidden>z</span>}
       {visual === 'revoked' && <span className="absolute inset-0 flex items-center justify-center rounded-full bg-ink/50 text-title text-white" aria-hidden>×</span>}
       {(visual === 'success' || visual === 'paid' || visual === 'approving') && <span className="absolute -right-1 -top-1 text-caption text-ok" aria-hidden>✓</span>}
+      {visual === 'declining' && <span className="absolute -right-1 -top-1 text-caption text-bad" aria-hidden>✋</span>}
     </button>
     {details && <span role="tooltip" className="absolute top-full left-1/2 z-20 mt-1 w-max max-w-52 -translate-x-1/2 rounded-input bg-ink px-3 py-2 text-caption text-white shadow-card"><span className="block font-bold">{label}</span><span className="break-all">{agent.ens}</span><span className="block">{copy.status[status]}</span></span>}
   </span>;

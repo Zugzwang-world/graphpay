@@ -8,9 +8,10 @@ import { customerJourneyReducer, initialCustomerJourney, type CustomerJourneySta
 interface CustomerJourneyContextValue {
   state: CustomerJourneyState;
   send: (text: string) => Promise<void>;
+  reorder: (orderId: string) => Promise<void>;
   retry: () => Promise<void>;
   setSheetOpen: (open: boolean) => void;
-  selectOrder: (orderId: string) => void;
+  selectOrder: (orderId: string | null) => void;
 }
 const CustomerJourneyContext = createContext<CustomerJourneyContextValue | null>(null);
 
@@ -41,7 +42,14 @@ export function CustomerJourneyProvider({ children }: { children: ReactNode }) {
     try { await adapter.sendPrompt(state.lastPrompt); }
     catch (error) { pending.current = false; dispatch({ kind: 'localError', message: error instanceof Error ? error.message : copy.common.errorGeneric }); }
   };
-  return <CustomerJourneyContext.Provider value={{ state, send, retry, setSheetOpen: (open) => dispatch({ kind: 'sheet', open }), selectOrder: (orderId) => dispatch({ kind: 'selectOrder', orderId }) }}>{children}</CustomerJourneyContext.Provider>;
+  const reorder = async (orderId: string) => {
+    if (state.running || pending.current) return;
+    pending.current = true;
+    dispatch({ kind: 'send', text: copy.customer.orders.reorder, at: Date.now() });
+    try { await adapter.reorder(orderId); }
+    catch (error) { pending.current = false; dispatch({ kind: 'localError', message: error instanceof Error ? error.message : copy.common.errorGeneric }); }
+  };
+  return <CustomerJourneyContext.Provider value={{ state, send, reorder, retry, setSheetOpen: (open) => dispatch({ kind: 'sheet', open }), selectOrder: (orderId) => dispatch({ kind: 'selectOrder', orderId }) }}>{children}</CustomerJourneyContext.Provider>;
 }
 
 export function useCustomerJourney(): CustomerJourneyContextValue {

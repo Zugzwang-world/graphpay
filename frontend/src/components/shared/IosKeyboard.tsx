@@ -167,7 +167,7 @@ export function IosTextInput({ label, value, onChange, onDone, mode = 'text', re
     <label htmlFor={id} className={clsx('mb-2 block text-body font-bold', labelHidden && 'sr-only')}>{label}</label>
     {multiline ? <textarea {...common} ref={input as Ref<HTMLTextAreaElement>} /> : <input {...common} ref={input as Ref<HTMLInputElement>} type="text" inputMode={mode === 'number' ? 'decimal' : 'text'} />}
     {error && <p id={`${id}-error`} role="alert" className="mt-1 text-caption text-bad">{error}</p>}
-    {open && !nativeKeyboard && layer && createPortal(<div data-ios-keyboard className="absolute inset-x-0 bottom-0 z-10 h-[316px] bg-ios-keyboard px-1 pt-2 pb-7 font-ios text-ink shadow-sheet keyboard-enter" onPointerUp={stopDelete} onPointerCancel={stopDelete}>
+    {open && !nativeKeyboard && layer && createPortal(<div data-ios-keyboard className="absolute inset-x-0 bottom-0 z-[35] h-[316px] bg-ios-keyboard px-1 pt-2 pb-7 font-ios text-ink shadow-sheet keyboard-enter" onPointerUp={stopDelete} onPointerCancel={stopDelete}>
       {mode === 'number' ? <div className="grid h-full grid-cols-3 grid-rows-5 gap-1 pb-1">
         {['1', '2', '3', '4', '5', '6', '7', '8', '9', '.', '0', 'delete'].map((key) => <KeyButton key={key} value={key} pressed={pressed === key} pop={pop === key} onClick={() => key !== 'delete' && press(key)} onPointerDown={key === 'delete' ? startDelete : undefined} />)}
         <button type="button" disabled={!canDone} onPointerDown={(event) => event.preventDefault()} onClick={() => press('done')} className="col-span-3 min-h-11 rounded-input bg-ios-blue text-body font-bold text-white disabled:opacity-50">{returnLabel}</button>

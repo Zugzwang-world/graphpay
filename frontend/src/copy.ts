@@ -41,8 +41,8 @@ export const copy = {
 
   /** Temporary text inside the phones until the pages are built (F3–F10). */
   placeholder: {
-    customer: 'The desk, orders, refunds, renewals and agents arrive in the next milestones.',
-    merchant: 'Shop Home, refunds, renewals and payouts arrive in the next milestones.',
+    customer: 'Renewals and agents arrive in the next milestones.',
+    merchant: 'Renewals and payouts arrive in the next milestones.',
   },
 
   dev: {
@@ -245,6 +245,7 @@ export const copy = {
       refundHeading: 'Refund',
       refundNotPaid: 'You can ask for a refund once it is paid',
       refundFull: 'Already fully refunded',
+      refundPending: 'A refund request is already in progress',
       declinedNote: 'The shop said: “{note}”',
       reordering: 'Asking for a new quote…',
     },

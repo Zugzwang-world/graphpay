@@ -34,7 +34,7 @@ export type JourneyAction =
   | { kind: 'send'; text: string; at: number }
   | { kind: 'retry' }
   | { kind: 'sheet'; open: boolean }
-  | { kind: 'selectOrder'; orderId: string }
+  | { kind: 'selectOrder'; orderId: string | null }
   | { kind: 'localError'; message: string }
   | { kind: 'event'; event: DemoEvent };
 
