@@ -6,10 +6,14 @@ import { sharedShopEdges } from '../../../../lib/merchant-feed.server.ts';
 import { buildCsv } from '../../../../lib/merchant-feed.ts';
 import { json } from '../../../../lib/http.ts';
 
+// Requests a minute per client on this instance. A whole venue can sit behind one IP (ADR-0069), so this is a
+// ceiling against a runaway client, not a limit a crowd reaches; each read is shared and cached behind it.
+const READ_LIMIT = 100;
+
 export const dynamic = 'force-dynamic';
 
 export async function GET(request: Request): Promise<Response> {
-  if (!allowed(request, 10)) return json({ error: 'too many requests' }, 429);
+  if (!allowed(request, READ_LIMIT)) return json({ error: 'too many requests' }, 429);
   const model = siteModel();
   try {
     // The graph keeps rows for 30 days (docs/technical/FACTS.md), so 31 days back is all there is.
