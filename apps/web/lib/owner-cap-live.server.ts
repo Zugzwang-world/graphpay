@@ -59,7 +59,11 @@ export function liveOwnerCapDeps(): OwnerCapDeps {
       if (typeof payer?.capMicro !== 'number' || payer.capMicro <= 0) throw new Error('story config: the payer agent has no cap');
       return BigInt(payer.capMicro);
     },
-    floorMicro: () => BigInt(model.order.budgetMicro),
+    floorMicro: async () => {
+      const w = await whitechain();
+      const spent = (await w.publicClient.readContract({ address: checkoutAddress() as Hex, abi: checkoutAbi, functionName: 'spentToday', args: [node] })) as bigint;
+      return BigInt(spent) + BigInt(model.order.budgetMicro);
+    },
     ensCap: async () => {
       // A fresh read: the gate's 20 s cache must not give an old value as "before".
       (await ensGate()).invalidate(model.payer.ens);

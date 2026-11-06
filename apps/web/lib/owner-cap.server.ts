@@ -5,8 +5,8 @@
 //   Mac by design (ADR-0021: no hosted key may lift a cap). The policy writer there applies the owner's
 //   change as min(the owner's cap, the payments setup's configured cap); this route waits for it.
 // The owner may lower the pass, or restore it up to the configured cap, never lift it above that; on this
-// public site (ADR-0069) not below the story errand's budget either, so a visitor cannot stop the live
-// errand. The change is recorded on Arkiv as a `request` edge from the owner to the agent. This file holds the
+// public site (ADR-0069) never below today's spend plus the story errand's budget either, so a visitor
+// cannot stop the live errand. The change is recorded on Arkiv as a `request` edge from the owner to the agent. This file holds the
 // decisions; the writes and reads are injected (lib/owner-cap-live.server.ts).
 import { siteModel } from './site.server.ts';
 
@@ -32,9 +32,9 @@ export class OwnerCapRefusal extends Error {
 export interface OwnerCapDeps {
   // The payments setup's cap for the payer agent (the story's), the bound no owner change passes.
   configuredMicro(): bigint;
-  // The lowest cap a visitor may set on this public site (ADR-0069): the story errand's budget, so the
-  // live errand always fits the pass.
-  floorMicro(): bigint;
+  // The lowest cap a visitor may set on this public site (ADR-0069): what the payer has spent today plus
+  // the story errand's budget, so the next live errand always fits the pass.
+  floorMicro(): Promise<bigint>;
   ensCap(): Promise<bigint>;
   setEnsCap(capMicro: bigint): Promise<{ changed: boolean; sepoliaTx: string | null }>;
   // The agent's policy on the checkout: its daily cap and its epoch.
@@ -68,7 +68,8 @@ export async function setOwnerCap(input: { capMicro?: unknown }, deps: OwnerCapD
   const cap = BigInt(input.capMicro);
   const configured = deps.configuredMicro();
   if (cap > configured) throw new OwnerCapRefusal('OVER_CONFIGURED');
-  if (cap < deps.floorMicro()) throw new OwnerCapRefusal('UNDER_FLOOR');
+  // A restore to the configured cap is always allowed; anything lower must leave room for today's next errand.
+  if (cap < configured && cap < (await deps.floorMicro())) throw new OwnerCapRefusal('UNDER_FLOOR');
   const now = deps.now();
   // One change at a time and at most one per 20 s on this instance: each is a Sepolia transaction of the owner's.
   if (busy || now - lastChange < CAP_COOLDOWN_MS) throw new OwnerCapRefusal('TOO_SOON', 429);

@@ -15,7 +15,7 @@ When the payer agent's owner changes its daily cap (`POST /api/customer/cap`), t
 ## Why
 - **The brief asks for both records.** It says "the owner changes the payer's cap, in both the spending policy and the ENS record".
 - **Only the policy writer can write the policy**, and its key stays on the Mac on purpose (planning/SPEC/ARCHITECTURE.md §3; ADR-0021: "a stolen relayer key cannot lift a cap"). `secrets:vercel` refuses it (LOCAL_ONLY).
-- **The owner's key is already hosted** for pause and resume, and the site is public (ADR-0069). Any visitor can therefore change the cap through the route, not just a thief of the key. Bounding the copy by the configured cap keeps ADR-0021 true: no one can lift the pass above what the payments setup allows. The route also refuses a cap below the story errand's budget (`order.budgetMicro`), so a visitor cannot stop the live errand.
+- **The owner's key is already hosted** for pause and resume, and the site is public (ADR-0069). Any visitor can therefore change the cap through the route, not just a thief of the key. Bounding the copy by the configured cap keeps ADR-0021 true: no one can lift the pass above what the payments setup allows. The route also refuses a cap below today's spend plus the story errand's budget (`order.budgetMicro`), so a visitor cannot stop the live errand (W5 found that a floor at the budget alone would not do it). A restore to the configured cap is always allowed.
 - **The contract's own policy check is the only cap on renewals.** Renewals do not pass the ENS gate, so the policy must follow the owner, or a lowered cap would not bind them.
 
 ## Consequences

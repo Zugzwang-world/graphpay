@@ -6,14 +6,14 @@ import { CAP_COOLDOWN_MS, OwnerCapRefusal, POLICY_WAIT_MS, forgetOwnerCap, setOw
 const T0 = 1_800_000_000_000;
 const code = async (p: Promise<unknown>) => p.then(() => 'ok', (e: unknown) => (e instanceof OwnerCapRefusal ? e.code : `error:${String(e)}`));
 
-function deps(over: { policyAfter?: (bigint | Error)[]; at?: number; recordFails?: boolean } = {}) {
+function deps(over: { policyAfter?: (bigint | Error)[]; at?: number; recordFails?: boolean; spent?: bigint } = {}) {
   let clock = over.at ?? T0;
   const writes: bigint[] = [];
   const records: Parameters<OwnerCapDeps['record']>[0][] = [];
   const policies = [...(over.policyAfter ?? [300_000_000n, 50_000_000n])];
   const d: OwnerCapDeps = {
     configuredMicro: () => 300_000_000n,
-    floorMicro: () => 6_000_000n,
+    floorMicro: async () => (over.spent ?? 0n) + 6_000_000n,
     ensCap: async () => 300_000_000n,
     setEnsCap: async (cap) => {
       writes.push(cap);
@@ -70,13 +70,19 @@ test('after the ENS change, a failed policy read or Arkiv write never loses the 
   assert.deepEqual([lost.ens.changed, lost.arkivTx], [true, null]);
 });
 
-test('the owner can never lift the cap above the configured one, nor a visitor drop it below the errand\'s budget', async () => {
-  const { d, writes } = deps();
+test('the owner can never lift the cap above the configured one, nor a visitor drop it below today\'s spend plus one errand', async () => {
+  const { d, writes } = deps({ spent: 117_200_000n });
   assert.equal(await code(setOwnerCap({ capMicro: '300000001' }, d)), 'OVER_CONFIGURED');
-  assert.equal(await code(setOwnerCap({ capMicro: '5999999' }, d)), 'UNDER_FLOOR');
+  // 117.20 spent today: 6.00 would stop every errand until the day turns, and 123.19 leaves no room for one.
+  assert.equal(await code(setOwnerCap({ capMicro: '6000000' }, d)), 'UNDER_FLOOR');
+  assert.equal(await code(setOwnerCap({ capMicro: '123199999' }, d)), 'UNDER_FLOOR');
   assert.equal(await code(setOwnerCap({ capMicro: '0' }, d)), 'BAD_CAP');
   assert.equal(await code(setOwnerCap({ capMicro: 5 }, d)), 'BAD_CAP');
   assert.equal(writes.length, 0);
+  // 123.20 leaves the next errand room; a restore to the configured cap is always allowed.
+  assert.equal(await code(setOwnerCap({ capMicro: '123200000' }, d)), 'ok');
+  forgetOwnerCap();
+  assert.equal(await code(setOwnerCap({ capMicro: '300000000' }, deps({ spent: 299_000_000n }).d)), 'ok');
 });
 
 test('one change at a time, and one per 20 s', async () => {
