@@ -174,6 +174,13 @@ Updated 23:38 IST, Fri 6 Nov (W7 Submission).
 
 ## frontend
 
+- **Kill a disposable agent** (from w1-identity; owner: the frontend pass). What: the route is live once W1's kill PR is deployed.
+  - `GET /api/customer/kill-disposable` answers `{ spare: { label, name, epoch } | null, live, pool }`. Show the button only while `spare` is set: it is set only when the spare's name and its spending pass are both live. After a kill, the next spare appears within a few minutes.
+  - `POST` (no body) takes 40 to 110 s. It answers `{ label, name, txs: [{ chain: 'sepolia' | 'whitechain', what: 'unregister' | 'revoke', hash }], revoked, payment: { outcome: 'refused' | 'paid' | 'unknown' | 'not-sent', http, reason, orderId, transaction }, recorded: { ref } | null, nextSpare, incomplete }`.
+  - The beat is `payment.outcome` `refused` with `reason` `ENS_EXPIRED_OR_REVOKED`, plus `recorded`. A step that failed after the kill is named in `incomplete`, and the kill stands.
+  - Other answers: `409` while another kill runs, `503` when no spare is ready yet, `502` when the outcome is unclear (then check GET).
+  - Why: the stage's kill beat (demo script step 7, the ENS kill switch). The story is the owner unregistering the agent's name, the watcher revoking its pass, and its next payment refused and recorded on Arkiv.
+  - Recommendation: one presenter-facing button on Vitalik's phone, in an "advanced" corner, since each tap ends one name for good. Show a countdown, then three links: the Sepolia unregister, the Whitechain revoke and the refusal.
 - **/customer's "By 23:59" chip** (from w4-agents; owner: the frontend pass). What: `apps/web/components/customer-screen.tsx` shows `order.deadlineLocal`, but the request is now relative. Why: the chip and the request disagree. Recommendation: show "within an hour", or the run's deadline from the result frame (`result.mandate.deadlineIso`); no new route or event is needed.
 - **The deck's errand text** (from w4-agents; owner: the frontend pass). What: `apps/web/public/deck/index.html` keeps a hand copy of the request that still says "by 11:59 pm". Recommendation: copy the new request from `packages/config/story.json` (`order.request`).
 - **Re-order is "another coffee"** (from w3-payments; owner: the frontend pass). What: `POST /api/customer/reorder` (body `{ parentOrderId }`, unchanged) pays the story's re-order, the filter coffee at 0.80; the answer is `{ status: 'paid', orderId, parentOrderId, amountMicro, transaction }`, or `202` with `status: 'pending'`. Recommendation: label the button from `order.reorder.item` and `order.reorder.priceMicro`; no new event.

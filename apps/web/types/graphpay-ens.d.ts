@@ -22,7 +22,23 @@ declare module '@graphpay/ens' {
     pause(name: string): Promise<OwnerActionResult>;
     resume(name: string): Promise<OwnerActionResult>;
   }
-  export function createOwnerActions(context: { client: PublicClient; runner: TxRunner; senderFor(role: string): OwnerSender; log?: (line: string) => void; retryReads?: boolean }): OwnerActions;
+  // The kill: the owner's `unregister`, one-shot per label ("killed earlier" on a second call).
+  export interface OwnerKill {
+    kill(name: string): Promise<OwnerActionResult & { killedEarlier?: boolean }>;
+  }
+  export function createOwnerActions(context: { client: PublicClient; runner: TxRunner; senderFor(role: string): OwnerSender; log?: (line: string) => void; retryReads?: boolean }): OwnerActions & OwnerKill;
+  // The lowest live disposable-<n> among `numbers`, from chain state.
+  export interface LiveDisposable {
+    n: number;
+    name: string;
+    node: `0x${string}`;
+    epoch: number;
+    expiry: bigint;
+    holder: `0x${string}`;
+    registry: `0x${string}`;
+    resolver: `0x${string}`;
+  }
+  export function liveDisposable(client: PublicClient, numbers: number[], options?: { parentRegistry?: `0x${string}` }): Promise<LiveDisposable | null>;
   export function ensPublicClient(options?: { env?: Record<string, string | undefined> }): Promise<{ client: PublicClient; rpcLabel: string }>;
   export interface EnsGate {
     // Registry state and the public records of a name; status is never "ACTIVE" for a name that could not be read.
