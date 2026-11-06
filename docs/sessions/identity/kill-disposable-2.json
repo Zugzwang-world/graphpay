@@ -1,0 +1,104 @@
+{
+  "route": "https://graphpay-event.vercel.app/api/customer/kill-disposable",
+  "startedAt": "2026-11-06T18:46:15.014Z",
+  "spareBefore": {
+    "label": "disposable-2",
+    "name": "disposable-2.vitalik.graphpay.eth",
+    "epoch": 0
+  },
+  "status": 200,
+  "answer": {
+    "label": "disposable-2",
+    "name": "disposable-2.vitalik.graphpay.eth",
+    "txs": [
+      {
+        "chain": "sepolia",
+        "what": "unregister",
+        "hash": "0x08f116fc2ceebb93e1de209fcbb2f60ac53c094c25b3b06d7da6eb16f194fff5"
+      },
+      {
+        "chain": "whitechain",
+        "what": "revoke",
+        "hash": "0x40d51ac52b440bc33bb6ec2686fe53c53b77be370a84970a0790a744bbd8233a"
+      }
+    ],
+    "revoked": true,
+    "payment": {
+      "outcome": "refused",
+      "http": 402,
+      "reason": "ENS_EXPIRED_OR_REVOKED",
+      "orderId": "0x6602eb43c13640ee169b0c700cfe9b4ec7ce6986da48930e8118d5a3e571e934",
+      "transaction": null
+    },
+    "recorded": {
+      "ref": "att:0x6602eb43c13640ee169b0c700cfe9b4ec7ce6986da48930e8118d5a3e571e934:0xd2f6c7403b8197985fd2c68dabdbabc5aa4557e9:5426c309"
+    },
+    "nextSpare": null,
+    "incomplete": null
+  },
+  "checks": {
+    "unregistered": {
+      "status": 0,
+      "ok": true
+    },
+    "revoked": {
+      "revoked": true,
+      "tx": "0x40d51ac52b440bc33bb6ec2686fe53c53b77be370a84970a0790a744bbd8233a",
+      "ok": true
+    },
+    "recorded": {
+      "ref": "att:0x6602eb43c13640ee169b0c700cfe9b4ec7ce6986da48930e8118d5a3e571e934:0xd2f6c7403b8197985fd2c68dabdbabc5aa4557e9:5426c309",
+      "edge": {
+        "kind": "fail",
+        "ref": "att:0x6602eb43c13640ee169b0c700cfe9b4ec7ce6986da48930e8118d5a3e571e934:0xd2f6c7403b8197985fd2c68dabdbabc5aa4557e9:5426c309",
+        "from": {
+          "ens": "disposable-2.vitalik.graphpay.eth"
+        },
+        "to": {
+          "ens": "kesar-kingdom.graphpay.eth"
+        }
+      },
+      "trace": {
+        "explainId": "41a1a6c94911",
+        "backend": "rabdi",
+        "calls": 2,
+        "queries": [
+          "project = str('graphpay') AND type = str('edge') AND order_id = str('0x6602eb43c13640ee169b0c700cfe9b4ec7ce6986da48930e8118d5a3e571e934') AND $owner = addr(0x7DeAF022B3829C53c73031B7d28Ed9746F517665) LIMIT 100 OFFSET 0",
+          "project = str('graphpay') AND type = str('edge') AND order_id = str('0x6602eb43c13640ee169b0c700cfe9b4ec7ce6986da48930e8118d5a3e571e934') AND $owner = addr(0x7c32D2a9Cc01Fb855Ab7877E99886bE8d846ED71) LIMIT 100 OFFSET 0"
+        ],
+        "ms": 326,
+        "bytes": 3385,
+        "entityKeys": [
+          "0x057e0e89a1d7da0156bec919b0a1c64f3b2ec09427a33c8fb86e34ea8a6afc14"
+        ],
+        "blockNumber": "302526",
+        "warnings": [],
+        "notes": [],
+        "truncated": false
+      },
+      "ok": true
+    },
+    "freshSpare": {
+      "spare": {
+        "label": "disposable-3",
+        "name": "disposable-3.vitalik.graphpay.eth",
+        "epoch": 0
+      },
+      "at": "2026-11-06T18:49:47Z",
+      "ok": true,
+      "how": "node scripts/ens/spare.mjs --yes, run by hand: the workers running at the kill predate #175, so their keeper hook was not loaded yet",
+      "txs": {
+        "sepolia": [
+          "0x5f1c91b29e2f198805f48822d4ed0deda18dbbf624d527592252cd56defc10ad",
+          "0xe19f27fa4e65db93119f23301f56ed145a7d131893dde4e93c85ee86505821f7",
+          "0xbec80ebc4024e52cd648a6577ee21efa719f926c4bfbd5c8a3eb829129555145"
+        ],
+        "whitechain": {
+          "policy": "0x5825d9ffaeb375b6d0f67750747deddf7aaadef6ed9d8d2ada003fc7a2afd608",
+          "topUp": "0x83a3de586ab8039365065ab241219694b7fd8b08893a66786f75d4d9c84130d1"
+        }
+      },
+      "seenOnSite": "GET /api/customer/kill-disposable named disposable-3 at 00:19:47 IST"
+    }
+  }
+}

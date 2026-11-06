@@ -1,6 +1,6 @@
 # Swarm in GraphPay
 
-**Status: menus and one dish photo live on Swarm and referenced from Arkiv; the encrypted refund photo is not built.** The three cast shops' menus (synthetic story data) are public files on Swarm, uploaded through the public gateway, each pointed to by a `menu` row on Arkiv with its content hash. The phones' build reads them and shows the Swarm photo wherever the dosa combo appears. The encrypted refund photo was dropped on purpose: Swarm is first in the cut order (ADR-0053), and the refund request's photo stays on the phone. Nothing below claims otherwise. Drafted by T3 on Fri 6 Nov; finished by the Submission stream (W7) that night, with every link below fetched and its hash checked at about 23:25 IST.
+**Status: menus and one dish photo live on Swarm and referenced from Arkiv; the encrypted refund photo is not built.** The three cast shops' menus (synthetic story data) are public files on Swarm, uploaded through the public gateway, each pointed to by a `menu` row on Arkiv with its content hash. The phones' build reads them keyless and would use a Swarm image for any product without a photo of its own; today every product has the site's own copy of the Grok photo, so the phones show that, and the Swarm copy is the one anyone can check by hash. The encrypted refund photo was dropped on purpose: Swarm is first in the cut order (ADR-0053), and the refund request's photo stays on the phone. Nothing below claims otherwise. Drafted by T3 on Fri 6 Nov; finished by the Submission stream (W7) that night, with every link below fetched and its hash checked at about 23:25 IST.
 
 The seven items below follow the Swarm section of the event addendum.
 
@@ -30,7 +30,7 @@ Decided (ADR-0061, ADR-0039): the upload goes through the **public gateway** (`a
 - `packages/money-graph/src/swarm.mjs`: the gateway client (upload, read, link). No account, the all-zero batch id, never encrypted; a reference that is not 64 hex digits is refused.
 - `packages/money-graph/src/menu.mjs`: `menuDocument`, `writeMenu` (upload, read back, check the hash, then create or patch the `menu` row) and `readMenu` (row, bytes from the gateway, hash check; uploads again if the gateway has lost it, which gives the same reference).
 - `packages/money-graph/scripts/menus.mjs`: the run script. Tests: `packages/money-graph/test/menu.test.mjs` (an in-memory stand-in for the gateway and ArkivSim).
-- `apps/phones/menu-images.mjs`: the phones' build reads each shop's menu keyless, checks it, and passes each item's Swarm link into the product the phones show.
+- `apps/phones/menu-images.mjs`: the phones' build reads each shop's menu keyless, checks it, and gives its Swarm image link to any product that has no image of its own (`apps/phones/build.mjs`).
 
 ## 5. Run steps
 

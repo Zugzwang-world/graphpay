@@ -15,6 +15,9 @@
 
 import { X402_VERSION } from './wire.mjs';
 
+// Settlement answers that may still settle (the transaction may land): never read as a refusal.
+export const UNCERTAIN = new Set(['pending', 'in_flight', 'receipt_timeout', 'send_failed', 'busy', 'rate_limited', 'error']);
+
 export class FacilitatorUnavailable extends Error {
   constructor(message) {
     super(message);

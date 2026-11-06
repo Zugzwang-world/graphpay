@@ -8,7 +8,14 @@
 // Without POLICY_WRITER_PRIVATE_KEY the policy sink logs what it would send. ENS_WATCHER=0
 // turns the watcher off. Every send is serialised, refused while POLICY_WRITER has a
 // pending transaction, and logged by hash and explorer link.
+//   the spare keeper  after the watcher revoked a killed disposable agent, and once at start,
+//                 scripts/ens/spare.mjs --yes makes sure one funded spare is live for the
+//                 site's next kill (a child process: its failure never touches the mirror;
+//                 one run at a time). SPARE_KEEPER=0 turns it off.
 
+import { execFile } from 'node:child_process';
+import { fileURLToPath } from 'node:url';
+import { activeCast } from '@graphpay/config';
 import { checkoutAbi } from '@graphpay/contracts';
 import { createEnsGate, createEnsReader, createEnsWatcher, createPolicySink, disposableAgent, memoryCheckpoint, namespacePlan, retryingReads } from '@graphpay/ens';
 import { privateKeyToAccount } from 'viem/accounts';
@@ -26,6 +33,66 @@ export function watchedNames({ roles = {} } = {}) {
   const ns = Object.keys(roles).map((r) => /^DISPOSABLE_([1-9][0-9]*)$/.exec(r)?.[1]).filter(Boolean).map(Number);
   const names = new Set([...plan.owners.map((o) => o.name), ...plan.agents.map((a) => a.name), ...ns.map((n) => disposableAgent(n).name)]);
   return [...names];
+}
+
+const SPARE_SCRIPT = fileURLToPath(new URL('../../../scripts/ens/spare.mjs', import.meta.url));
+
+// True for a numbered disposable agent's name (disposable-<n> under the persona).
+export function isDisposableName(name) {
+  const prefix = activeCast().disposable.labelPrefix;
+  const label = name.split('.')[0];
+  const n = label.startsWith(prefix) ? label.slice(prefix.length) : '';
+  return /^[1-9][0-9]*$/.test(n) && disposableAgent(Number(n)).name === name;
+}
+
+function runScript(file, args) {
+  return new Promise((resolve) => {
+    execFile(process.execPath, [file, ...args], { timeout: 15 * 60_000, maxBuffer: 1 << 20 }, (error, stdout, stderr) => {
+      resolve({ code: error ? (typeof error.code === 'number' ? error.code : 1) : 0, out: `${stdout}${stderr}` });
+    });
+  });
+}
+
+// One keeper run at a time; a kick while one runs schedules exactly one more after it. A failed run
+// (an RPC error, a nonce clash, a held lock) is tried again after `retryMs`; exit 2 (a key is
+// missing, on this Mac or on the site) waits for a person, so it is not retried.
+export function spareKeeper({ log, run = runScript, disabled = false, retryMs = 120_000, setTimer = (fn, ms) => setTimeout(fn, ms).unref?.() }) {
+  let running = null;
+  let again = null;
+  let retrying = false;
+  const kick = (why) => {
+    if (disabled) return Promise.resolve();
+    if (running) {
+      again = why;
+      return running;
+    }
+    running = run(SPARE_SCRIPT, ['--yes'])
+      .then(({ code, out }) => {
+        for (const line of out.split('\n').filter(Boolean)) log(`spare keeper: ${line}`);
+        log(`spare keeper (${why}): exit ${code}`);
+        return code;
+      })
+      .catch((e) => {
+        log(`spare keeper (${why}): ${e.message}`);
+        return 1;
+      })
+      .then((code) => {
+        running = null;
+        if (again) {
+          const next = again;
+          again = null;
+          kick(next);
+        } else if (code !== 0 && code !== 2 && !retrying) {
+          retrying = true;
+          setTimer(() => {
+            retrying = false;
+            kick('retry');
+          }, retryMs);
+        }
+      });
+    return running;
+  };
+  return { kick };
 }
 
 // whitechain: the workers' checked clients (clientsFor). values: the loaded .env as [name, value] pairs.
@@ -85,6 +152,7 @@ export async function startEnsWatcher({ env, values, whitechain, checkout, log }
     updatePolicy: (c) => policySink.updatePolicy(c),
     patchNode: async (node, fields) => log(`ens watcher: node ${node.slice(0, 10)}… ${json(fields)} (the mirror writes the standing from AgentPolicySet)`),
   };
+  const keeper = spareKeeper({ log, disabled: env.SPARE_KEEPER === '0' || !account });
   const watcher = createEnsWatcher({
     client,
     names: watchedNames({ roles }),
@@ -93,9 +161,13 @@ export async function startEnsWatcher({ env, values, whitechain, checkout, log }
     gate: createEnsGate({ client, expectedEpoch: async () => null, policyCapMicro: async () => null, spentToday: async () => 0n }),
     checkpoint: memoryCheckpoint(),
     log,
+    onRevoked: ({ name }) => {
+      if (isDisposableName(name)) keeper.kick(`${name} revoked`);
+    },
   });
   const started = await watcher.start();
   log(`ens watcher: ${started.tracked} names from block ${started.checkpoint}${account ? '' : ' (no POLICY_WRITER key: policy writes are logged only)'}`);
+  keeper.kick('start');
   // ENS_WATCH_POLL_MS slows the polls when the public Sepolia RPC throttles this machine's log
   // queries (each poll sends one getLogs per 8 tracked addresses; 28 names since the new shops).
   const pollMs = Number(process.env.ENS_WATCH_POLL_MS) >= 6_000 ? Number(process.env.ENS_WATCH_POLL_MS) : 6_000;

@@ -14,12 +14,20 @@ export declare function checkIndexes(def: EntityDef, filtered: string[]): string
 
 export type Row = Record<string, any> & { $key: Hex; $owner: Hex };
 export interface GraphEnd { node: Hex; epoch: number | bigint; kind: string; columns?: Record<string, unknown> }
-export interface GraphEvent {
-  ref: string; kind: string; from: GraphEnd; to: GraphEnd; value?: bigint; ts: number | bigint; day?: number;
-  position?: { block: bigint | number; logIndex: number }; columns?: Record<string, unknown>; labels?: Record<string, unknown>;
-  existingEdge?: boolean; counted?: boolean; nodeUpdate?: { node: Hex; epoch: number | bigint; values: Record<string, unknown> };
+export interface EventPosition { block: bigint | number; logIndex: bigint | number }
+/** An edge between two ends, which moves their totals by the graph's rules. */
+export interface GraphEdgeEvent {
+  ref: string; kind: string; from: GraphEnd; to: GraphEnd; value?: bigint | number; ts: number | bigint; day?: number;
+  position?: EventPosition; columns?: Record<string, unknown>; labels?: Record<string, unknown>;
+  existingEdge?: boolean; counted?: boolean; nodeUpdate?: undefined;
   [extra: string]: unknown;
 }
+/** A patch of a node row the graph already holds: no edge and no totals. */
+export interface GraphNodeUpdateEvent {
+  ref: string; nodeUpdate: { node: Hex; epoch: number | bigint; values: Record<string, unknown> }; ts?: number | bigint; position?: EventPosition;
+  [extra: string]: unknown;
+}
+export type GraphEvent = GraphEdgeEvent | GraphNodeUpdateEvent;
 export interface PlannedCreate { def: EntityDef; values: Record<string, unknown> }
 export interface PlannedPatch { def: EntityDef; key: Hex; values: Record<string, unknown> }
 export interface Plan { creates: PlannedCreate[]; patches: PlannedPatch[]; skipped: string[]; applied: string[]; commit(createdKeys: Hex[]): Record<string, Hex> }
@@ -30,6 +38,7 @@ export interface Graph {
   defs: { node: EntityDef; edge: EntityDef; totals: EntityDef; link: EntityDef; checkpoint: EntityDef; [extra: string]: EntityDef };
   counters: string[]; windows: string[]; valueColumn: string; sumColumn: string;
   newState(): GraphState;
+  incrementsOf(event: GraphEvent): Record<string, bigint> | null;
   plan(events: GraphEvent[], state: GraphState, options?: { stream?: string | null; createNodes?: boolean; labels?: Record<string, unknown> }): Plan;
 }
 export declare function defineGraph(spec: {
@@ -52,7 +61,7 @@ export declare function dayOf(ts: number | bigint): number;
 export declare function checkedOwner(address: string, label?: string): Hex;
 export declare function scope(def: EntityDef): Expression[];
 export declare function trustedRows(def: EntityDef, owner: string, entities: Record<string, unknown>[]): Row[];
-export declare function readAll(client: PublicArkivClient, def: EntityDef, options: { owner: string; where?: Expression[]; cap?: number }): Promise<Row[]>;
+export declare function readAll(client: PublicArkivClient, def: EntityDef, options: { owner: string; where?: Expression[]; cap?: number; truncate?: boolean }): Promise<Row[]>;
 export declare function findOne(client: PublicArkivClient, def: EntityDef, options: { owner: string; where?: Expression[] }): Promise<Row | null>;
 export declare function countRows(client: PublicArkivClient, def: EntityDef, options: { owner: string; where?: Expression[] }): Promise<bigint>;
 
@@ -67,6 +76,9 @@ export interface Writer {
   address: Hex;
   send(batch: WriteBatch, options?: { split?: boolean; nonce?: number | null; verifyRecovered?: ((createdKeys: Hex[]) => Promise<boolean>) | null }): Promise<{ txs: SentTx[]; createdKeys: Hex[] }>;
   confirmedNonce(): Promise<number>;
+  operations(batch: WriteBatch): { kind: 'create' | 'patch' | 'delete' | 'extend'; params: Record<string, unknown> }[];
+  operationBytes(op: unknown): number;
+  recover(nonce: number, fromBlock: bigint): Promise<Hex | null>;
 }
 export declare function createWriter(options: { walletClient: WalletArkivClient; publicClient: PublicArkivClient; entityContract: string; splitBytes?: number; recoveryMs?: number; pollMs?: number; maxSends?: number; sentHashes?: { has(hash: string): boolean } | null; log?: (entry: Record<string, unknown>) => void }): Writer;
 export declare function operationBytes(op: unknown): number;
@@ -105,12 +117,29 @@ export declare function connect(options?: { rpcUrl?: string; chainId?: number; p
 
 export type Filter = { [field: string]: { eq?: unknown; in?: unknown[]; gt?: unknown; gte?: unknown; lt?: unknown; lte?: unknown; between?: [unknown, unknown]; startsWith?: string; exists?: true } } | { AND?: Filter[]; OR?: Filter[] };
 export interface ExplainTrace { explainId: string; backend: string; calls: number; queries: string[]; ms: number; bytes: number; entityKeys: Hex[]; blockNumber: string | null; warnings: string[]; notes: string[]; truncated: boolean; reads: Record<string, unknown>[] }
+export interface ExplainStore { put(trace: ExplainTrace): void; get(id: string): ExplainTrace | null; size(): number }
+export declare function createExplainStore(max?: number): ExplainStore;
+export declare function explainIdOf(backend: string, queries: string[]): string;
+export declare function compileFilter(def: EntityDef, filter: Filter | null | undefined): Expression[] | null;
+export interface ReadContext {
+  query(def: EntityDef, options: { where?: Expression[]; owners: string[]; orderBy?: unknown; want?: number }): Promise<Row[]>;
+  queryAny(def: EntityDef, options: { where?: Expression[]; terms: Expression[]; owners: string[]; orderBy?: unknown; want?: number; maxTerms?: number }): Promise<Row[]>;
+  count(def: EntityDef, options: { where?: Expression[]; owners: string[] }): Promise<bigint>;
+  explain(): ExplainTrace;
+  note(text: string): void;
+  warn(text: string): void;
+  markTruncated(): void;
+  readonly truncated: boolean;
+  calls: Record<string, unknown>[];
+}
+export interface Engine { context(options?: { rowCap?: number; callBudget?: number }): ReadContext; explainStore: ExplainStore; backend: string; and: (expressions: Expression[]) => Expression }
+export declare function createEngine(options: { publicClient: PublicArkivClient; backend: string; stats?: TransportStats | null; rowCap?: number; explainStore?: ExplainStore; budget?: number }): Engine;
 export interface Store {
   owner: Hex; graph: Graph;
   load(): Promise<GraphState>;
   write(events: GraphEvent[], options?: { split?: boolean }): Promise<{ applied: string[]; skipped: string[]; txs: SentTx[] }>;
   query(entity: string, options?: { filter?: Filter; orderBy?: { field: string; direction?: 'asc' | 'desc' }; limit?: number }): Promise<{ rows: Row[]; explain: ExplainTrace; truncated: boolean }>;
-  explainStore: { get(id: string): ExplainTrace | null; size(): number };
+  explainStore: ExplainStore;
 }
 export declare function createStore(options: { graph: Graph; arkiv: Connection; stream?: string | null; days?: number; labels?: Record<string, unknown>; createNodes?: boolean }): Store;
 export { ExpirationTime } from '@arkiv-network/sdk';
