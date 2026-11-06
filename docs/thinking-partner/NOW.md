@@ -1,6 +1,6 @@
 # NOW
 
-Updated 16:58 IST, Fri 6 Nov (Coordinator)
+Updated 17:46 IST, Fri 6 Nov (Coordinator)
 
 ## Summary (Coordinator only)
 
@@ -25,7 +25,11 @@ Updated 13:32 IST, Fri 6 Nov. **Standing rule (ADR-0066): no target times.** Onl
     - the Open switch;
     - the refund request, which reaches the shop's inbox;
     - pause and resume.
-  - **Failing on the server, with their owners, not retried:** the merchant refund (502, T5) and the re-order (BAD_402, T5 and T1).
+  - **The refund and re-order work too, after their fixes** (#129, #131), one try each at 17:4x IST:
+    - the merchant refund: 0.80 on #6741 ([tx](https://explorer.testnet.whitechain.io/tx/0xcd442a5e6675e0eae8a66bc17ee3913af1b673e39a54a28d4a14a0fab58bc425)), shown on both phones;
+    - the re-order: 1.20, order #2F8A ([tx](https://explorer.testnet.whitechain.io/tx/0x78acbc3fbf50a15bbe3920bdcfe9e47a032fa43db81b5710c1d369e8a83778ef)), delivered.
+  - **Every button on the stage has now worked live.** Dispatch is automatic. The payer has spent 20.40 of 100 today.
+  - **One small item for the team:** a re-order gets no receipt card in Vitalik's thread (their screen draws receipts only for quotes). The order still appears under Orders.
 - **Phase 2 works end to end** (#122):
   - An errand asked from `/live` at 16:34 IST paid 4.80 to Kesar Kingdom in about 107 s ([tx](https://explorer.testnet.whitechain.io/tx/0x89acd9521341763f6f6a37893eec921c9548d7a0b5984597d56088a5f5d5b990)).
   - Vitalik's phone showed the agents' steps, the three shops (the trap rejected, with reasons) and the quote going from signed to paid. Kesar's phone showed the order, and the explainer showed the lanes.
@@ -130,7 +134,7 @@ Updated 11:09 IST, Fri 6 Nov (T6 AgentPay, Sonnet 5.5). **0.1.0 merged (PR 80); 
 
 ## records
 
-Updated 12:47 IST, Fri 6 Nov (Coordinator).
+Updated 17:46 IST, Fri 6 Nov (Coordinator).
 - **Done this step:**
   - #70 merged;
   - the funding moves (PAYER to 125 test USDT, VITALIK to 0.02 Sepolia ETH);
