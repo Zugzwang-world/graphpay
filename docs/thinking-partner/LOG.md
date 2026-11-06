@@ -112,7 +112,8 @@ One line per PR: time (IST) · activity · result · PR link. Append under your 
 - 00:24 IST · records · NOW rewritten by stream (W1 kill live and flip cleared, W2 step 1 done, W3 limits live, W4 routine in code, W5 self-healing proven, W6 1.0.0 merged, W7 done); TRACKER to match · https://github.com/Zugzwang-world/graphpay/pull/184
 - 00:44 IST · records · NOW and TRACKER: the label flip live (#189), the workers restart and proof errand next, the mirror stalled on the shared Arkiv budget, W4's code mode live (#182), W5's acceptance updates (#188) · https://github.com/Zugzwang-world/graphpay/pull/197
 - 01:00 IST · records · the founder's 00:52 IST word: the big city trimmed, seeding stopped (00:58 IST), the mirror first, then the restart, W1's proof errand, W4's three, acceptance; the menus (#181) · https://github.com/Zugzwang-world/graphpay/pull/200
-- 01:20 IST · records · W1 done: the flip proven by the 01:07 IST errand through filter-and-fold (mirror edge, 242 orders, ENS 101 pass); the mirror back on post-flip main; W4, W3, W2 and W5 next · coord/night-records-9
+- 01:20 IST · records · W1 done: the flip proven by the 01:07 IST errand through filter-and-fold (mirror edge, 242 orders, ENS 101 pass); the mirror back on post-flip main; W4, W3, W2 and W5 next · https://github.com/Zugzwang-world/graphpay/pull/203
+- 01:30 IST · records · W3 and W4 done; W5's payer refill and checkpoint fix (#209); the founder kept race mode at S, M as seeded (#186); acceptance, race PR, storefronts and agentpay still running · coord/night-records-10
 
 ## booth
 
@@ -142,7 +143,9 @@ One line per PR: time (IST) · activity · result · PR link. Append under your 
 - 00:37 IST · w7-submission · arkiv-graph 1.0.0 on npm (00:34 IST) in the README and reach.md; agentpay still 0.1.1 · https://github.com/Zugzwang-world/graphpay/pull/196
 - 00:48 IST · w7-submission · keep current: the owner's cap route (#179, ADR-0079) in the README and ENS.md; the workers' watchdog (#194) · https://github.com/Zugzwang-world/graphpay/pull/198
 - 00:58 IST · w7-submission · the dosa menus on Swarm (#181) under the new names, with their dish photos, in swarm.md, the README and the form text (menu and photo hashes checked on the gateway) · https://github.com/Zugzwang-world/graphpay/pull/199
-- 01:20 IST · w7-submission · the version-2 menus with storefront photos (#201) in swarm.md, the README and the form text (hashes checked) · this PR
+- 01:20 IST · w7-submission · the version-2 menus with storefront photos (#201) in swarm.md, the README and the form text (hashes checked) · https://github.com/Zugzwang-world/graphpay/pull/205
+- 01:24 IST · w7-submission · the first errand under the new name (#202, 01:07 IST, checked on the explorer) headlines the README, the form text and ENS.md · https://github.com/Zugzwang-world/graphpay/pull/208
+- 01:28 IST · w7-submission · the owner's cap change live (300 to 250 and back, ENS and policy; #207) and W4's three errands in a row (47 s, 3 calls, $0.027; #206), every transaction checked · this PR
 
 ## w1-identity
 
@@ -162,6 +165,7 @@ One line per PR: time (IST) · activity · result · PR link. Append under your 
 - 23:52 IST · w4-agents · item 3, second cut: the routine steps in code, one model call each for the concierge, analyst and risk agent (3 calls in all; Kimi on mocks 14 s, $0.027) · https://github.com/Zugzwang-world/graphpay/pull/182
 - 00:15 IST · w4-agents · the second cut proven live before merging (local runner, production services): paid 4.80 in 55.2 s, 3 calls, 2,886 tokens, $0.0247 (tx 0xfe0a…70d5); the reviewer says ship · https://github.com/Zugzwang-world/graphpay/pull/182
 - 00:24 IST · w4-agents · code mode live on the site: paid 4.80 in 55.5 s, 3 calls, 2,852 tokens, $0.0269 (tx 0x194b…f0e5); then holding for W1's label flip and W5's restart · https://github.com/Zugzwang-world/graphpay/pull/192
+- 01:16–01:18 IST · w4-agents · item 4: three live errands in a row paid on the site after the flip (Filter & Fold): 54.2, 45.4, 42.6 s, $0.025 to $0.029, 3 calls each; the brief is done · https://github.com/Zugzwang-world/graphpay/pull/206
 
 ## w5-ops
 
@@ -169,6 +173,7 @@ One line per PR: time (IST) · activity · result · PR link. Append under your 
 - 23:40 IST · w5-ops · Pause and Resume per agent (payer and scout; the others say why); the self-healing cron: a paused agent resumes after 2 min, a closed shop reopens after 5 · https://github.com/Zugzwang-world/graphpay/pull/172
 - 00:35 IST · w5-ops · acceptance: B2, C3, C7, E3, D8 and E1 updated to tonight's decisions (reviewed twice); B2, C7 and E3 pass read-only, C3 waits for a fresh e2e:hosted after 05:30 IST, E1 for a fresh errand · https://github.com/Zugzwang-world/graphpay/pull/188
 - 00:35 IST · w5-ops · the workers under a watchdog (a 30-minute fuse, longer than Arkiv's rate-limit reset; a hold file for maintenance windows), the ENS watcher's poll interval as a setting, P-w5-ops-1 · https://github.com/Zugzwang-world/graphpay/pull/194
+- 01:40 IST · w5-ops · the workers on the new names (00:51 restart; a live errand to filter-and-fold at 01:07 shown on Filter & Fold's phone); PAYER refilled from the shop's takings (63.2); the mirror passes the checkout kit's anonymous payment instead of parking it · https://github.com/Zugzwang-world/graphpay/pull/209
 
 ## w3-payments
 

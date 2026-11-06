@@ -44,6 +44,10 @@ export async function mapEvent(e, ctx) {
   const ts = () => ctx.blockTime(e.block);
 
   const edge = async (kind, fromNode, toNode, fields = {}) => {
+    // The zero node is no one: a checkout-kit payment from a wallet with no ENS name. It can
+    // never be registered, so it is passed with nothing written rather than parked: a parked
+    // event holds the checkpoint, and every restart would re-scan from it.
+    if ([fromNode, toNode].some((n) => /^0x0{64}$/i.test(String(n)))) return { action: 'none', why: 'anonymous party (the zero node): outside the graph' };
     const unknown = [fromNode, toNode].filter((n) => !actors.has(n));
     if (unknown.length) return { action: 'park', nodes: unknown, why: 'unknown actor' };
     const from = actors.get(fromNode);

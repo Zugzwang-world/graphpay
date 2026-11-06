@@ -20,6 +20,7 @@ Updated 23:10 IST, Fri 6 Nov (night Coordinator). **Only the submission (Sat 09:
 
 **Closed tonight:**
 - the big city: trimmed by the founder at 00:52 IST to what is seeded; W2 finishes race mode on it;
+- race mode: kept at S by the founder (01:24 IST);
 - the payer resumed at 23:00 IST, and Filter & Fold open again;
 - the demo scope: the night brief decides it (the new shops on chain, the big city, caps, the kill, subscriptions);
 - the Submission session: W7 replaces it;
@@ -84,6 +85,9 @@ Agents (T4) and Join add one row per full errand run, so the presets can be cali
 | 00:14 | W4 code mode live, local runner (as at 00:10) | live | the same | 22.0 | $0.0265 | refused at G8, the shop's re-check before the 402: the buyer-standing read failed (`fetch failed`), so the guard failed closed; now a read that throws is tried once more |
 | 00:15 | W4 code mode live, local runner, after that fix | live | the same | 55.2 | $0.0247 | **paid** 4.80 to kesar: https://explorer.testnet.whitechain.io/tx/0xfe0a4327fb7dca69d7363f05c73a8cc15b486b57184fc2f1e72c6812785070d5 ; 3 calls, 2,886 tokens (1,884 in, 768 cached; 1,002 out, 605 reasoning); 13.6 s of model time; the payer's 41.7 s is the quote, the 402, the checks, the signature and the settlement |
 | 00:24 | W4 code mode (#182) live on the production site, payer | live | `kimi-k3.1-pro-highspeed`, concierge high, analyst and risk low; the rest in code | 55.5 | $0.0269 | **paid** 4.80 to kesar: https://explorer.testnet.whitechain.io/tx/0x194b7bc4dac70c36e55ca140a7e3ea477853d8938f3885fb94d95bff9c32f0e5 ; 3 calls, 2,852 tokens; models 13 s; the two longest waits are the 402 step (13.6 s: the hosted shop's quote write) and the settlement (13.3 s: our facilitator and the chain) |
+| 01:16 | W4 item 4, three in a row (1 of 3), after the shop-name flip and W5's restart, payer | live | `kimi-k3.1-pro-highspeed`, concierge high, analyst and risk low; the rest in code | 54.2 | $0.0293 | **paid** 4.80 to filter-and-fold: https://explorer.testnet.whitechain.io/tx/0x32bbd598de36731532da5a3d3927d355aab62b27fcd743d1fd62dc0c09c66b5e ; 3 calls, 2,963 tokens; models 14.6 s |
+| 01:17 | W4 item 4, three in a row (2 of 3) | live | the same | 45.4 | $0.0270 | **paid** 4.80 to filter-and-fold: https://explorer.testnet.whitechain.io/tx/0xdedadeb8be1ee53cc6428a845024fd8052c4e734dcc4e844a227410638f15742 ; 3 calls, 2,995 tokens; models 15.6 s |
+| 01:18 | W4 item 4, three in a row (3 of 3) | live | the same | 42.6 | $0.0247 | **paid** 4.80 to filter-and-fold: https://explorer.testnet.whitechain.io/tx/0x128517cae8acca9ac1cc229ddda5fd0ae1a63065788ad487eac24b0e9d80a238 ; 3 calls, 2,877 tokens; models 14.0 s |
 
 ## Kickoff rules and booth questions (closed; rolled up 06:55 IST)
 
@@ -183,7 +187,7 @@ Updated 23:38 IST, Fri 6 Nov (W7 Submission).
 
 ## w4-agents
 
-- **Acceptance E1 reads the old clock deadline** (owner: the Coordinator, who regenerates acceptance). What: `acceptance/checks.mjs` E1 expects the run's deadline to contain `T23:59:00` (`order.deadlineLocal`); the request now says "delivered within an hour". Why: E1 would fail on every fresh run. Recommendation: expect the deadline one hour after the run's request, to the minute (`result.mandate.deadlineIso`); E1 needs a fresh `e2e:food` run anyway.
+- Closed 01:20 IST: acceptance E1 and the relative deadline (W5's #188 updated E1); the brief's four items (#153, #157, #162, #182; three live errands in a row paid at 01:16 to 01:18 IST).
 
 ## w2-city
 
@@ -229,6 +233,8 @@ Updated 23:38 IST, Fri 6 Nov (W7 Submission).
 
 - **Presenter-only Pause** (owner: the founder; from Founder now). What: a visitor's Pause now heals itself after 2 minutes, and a Close after 5. Why: the open question was whether to make Pause presenter-only after a visitor paused the payer for 96 minutes. Recommendation: keep Pause public; self-healing bounds the damage.
 - **W_DIRECTORY's tGLM** (owner: W5). What: the cron renews the shop's listing about every 5 minutes when no merchant page is open; W_DIRECTORY held 0.417 tGLM at 23:15 IST. Recommendation: W5 watches the balance overnight and tops it up from FUNDER (15.08 tGLM) if it runs low.
+- **A fresh Arkiv access key** (owner: the founder). What: this Mac's free Arkiv query allowance (10,000 per minute) runs out. The mirror then waits, or re-reads from Arkiv and re-scans, and once took 9 minutes to show a paid order. Why: the access key's quota has been spent since 21:36. Recommendation: a new key from hub.arkiv.network: `pnpm -s secrets:set ARKIV_ACCESS_KEY`, then `pnpm -s secrets:vercel` and a redeploy; W5 restarts the workers.
+- **The payer top-up's one runner** (owner: W5). What: `scripts/ops/payer-topup.mjs` refills PAYER from the shop's takings or FUNDER. Why: two sessions running it at once, one per source, would each pass its nonce check. Recommendation: only W5 runs it tonight; ask W5 for a top-up.
 - **Decline a refund request** (from w3-payments; owner: the frontend pass).
   - What: `POST /api/merchant/refund-decline`, body `{ orderId, note? }`. The note is plain text, at most 140 characters, with no `@ / :` and no run of six digits (no contact details on a public graph). The request's reason follows the same rule now.
   - Answer: `{ orderId, decision: 'declined', amountMicro, requestRef, ref, note, arkivTx, entityKey }`. `arkivTx` is null when the decline was already on the record.
@@ -248,7 +254,7 @@ Updated 23:38 IST, Fri 6 Nov (W7 Submission).
 
 - **The owner changes the payer's cap** (from w3-payments; owner: the frontend pass).
   - What: `POST /api/customer/cap`, body `{ capMicro }`, a micro-USDT string, at most the configured cap (`buyerAgents.payer.capMicro`, 300 tonight).
-  - The owner's wallet writes the ENS record on Sepolia. The watcher on the Mac then writes the policy as min(ENS cap, configured cap) (ADR-0079; W1's change). The route waits up to 60 s for it.
+  - The owner's wallet writes the ENS record on Sepolia. The watcher on the Mac then writes the policy as min(ENS cap, configured cap) (ADR-0079; W1's change). The route waits up to 90 s for it.
   - Answer: `{ agent, owner, capMicro, configuredMicro, ens: { changed, beforeMicro, sepoliaTx }, policy: { capMicro, applied }, effectiveMicro, arkivTx, entityKey }`.
   - Refusals: `OVER_CONFIGURED`, `UNDER_FLOOR` (below today's spend plus the story errand's budget, `order.budgetMicro`, so the next errand always fits; a restore to the configured cap is always allowed), `BAD_CAP`, `TOO_SOON` (one change per 20 s per instance). `policy.capMicro` is null when the policy could not be read; `arkivTx` is null when the record could not be written. The ENS change stands either way.
   - Event: a `request` edge from the persona to the payer agent, ref `own:<node>:<second>:<cap>`, amount 0, the figures in its payload. The node row's `capMicro` follows through the mirror.

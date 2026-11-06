@@ -12,9 +12,10 @@ import { siteModel } from './site.server.ts';
 
 export const OWNER_CAP_WAITING_FOR = "the owner's and the recorder's keys on this server (the Coordinator sets them in Vercel)";
 export const CAP_COOLDOWN_MS = 20_000;
-// How long the route waits for the policy writer to apply the change (the watcher polls every 2 s and
-// retries a failed write on its 30 s tick).
-export const POLICY_WAIT_MS = 60_000;
+// How long the route waits for the policy writer to apply the change: the watcher polls Sepolia about every
+// 20 s, then sends one setPolicy and waits for its Whitechain receipt (live, 01:17 IST: it landed 61 s after
+// the ENS write), and retries a failed write on its 30 s tick. CHANGE_BUDGET_MS still bounds the whole change.
+export const POLICY_WAIT_MS = 90_000;
 // The whole change must leave the Arkiv write its time inside the route's 300 s (the Sepolia receipt
 // alone can take 180 s and its read-back 60 s): the policy wait is cut to what is left of this.
 export const CHANGE_BUDGET_MS = 260_000;
@@ -66,8 +67,17 @@ export interface OwnerCapResult {
 let busy = false;
 let lastChange = Number.NEGATIVE_INFINITY;
 
+// A read that may not outlive the change's budget: past it, it counts as not seen (null).
+function within<T>(read: Promise<T>, ms: number): Promise<T | null> {
+  if (ms <= 0) return Promise.resolve(null);
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  return Promise.race([read, new Promise<null>((resolve) => (timer = setTimeout(() => resolve(null), ms)))]).finally(() => clearTimeout(timer));
+}
+
 export async function setOwnerCap(input: { capMicro?: unknown }, deps: OwnerCapDeps): Promise<OwnerCapResult> {
   const model = siteModel();
+  // The budget counts from the first read.
+  const started = deps.now();
   if (typeof input.capMicro !== 'string' || !/^[1-9][0-9]{0,12}$/.test(input.capMicro)) throw new OwnerCapRefusal('BAD_CAP', 400);
   const cap = BigInt(input.capMicro);
   const configured = deps.configuredMicro();
@@ -79,13 +89,12 @@ export async function setOwnerCap(input: { capMicro?: unknown }, deps: OwnerCapD
   if (busy || now - lastChange < CAP_COOLDOWN_MS) throw new OwnerCapRefusal('TOO_SOON', 429);
   busy = true;
   lastChange = now;
-  const started = deps.now();
   try {
     const before = await deps.ensCap();
     const ens = await deps.setEnsCap(cap);
     // From here the ENS change stands: a failed read only means "not seen yet", and the change is
     // recorded whatever the policy shows.
-    const read = async () => deps.policy().catch(() => null);
+    const read = async () => within(deps.policy().catch(() => null), started + CHANGE_BUDGET_MS - deps.now());
     // The policy follows by the policy writer on the Mac; the route waits a while for it.
     let policy = await read();
     const until = Math.min(deps.now() + POLICY_WAIT_MS, started + CHANGE_BUDGET_MS);
