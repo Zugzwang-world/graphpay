@@ -134,7 +134,7 @@ export interface PaymentPayload {
   extensions?: Record<string, unknown>;
 }
 export declare function buildRequirement(order: Order, network: AgentPayNetwork, options?: { shopName?: string; maxTimeoutSeconds?: number }): PaymentRequirement;
-export declare function buildPaymentRequired(order: Order, network: AgentPayNetwork, options?: { resourceUrl?: string; description?: string; error?: string }): PaymentRequired;
+export declare function buildPaymentRequired(order: Order, network: AgentPayNetwork, options: { resourceUrl: string; description?: string; error?: string }): PaymentRequired;
 export declare function orderOfPaymentRequired(paymentRequired: unknown, network: AgentPayNetwork): { paymentRequired: PaymentRequired; requirement: PaymentRequirement; order: Order };
 export declare function encodeHeader(value: unknown): string;
 export declare function decodeHeader(value: string | null | undefined): any;
@@ -201,6 +201,8 @@ export interface PayResult {
   transaction?: Hex;
   reason?: string;
   orderStatus?: string;
+  /** Set on `unknown`: call pay() again with the same request, which re-sends the same signature. */
+  retry?: string;
   response?: Response;
 }
 export interface BuyerAgent {
@@ -246,6 +248,8 @@ export declare function issueSpendingPass(options: {
   expiry?: Micro;
   epoch?: number;
   revoked?: boolean;
+  /** Wallets this deployment knows must never be bound to an agent (an owner's, a merchant's). */
+  refuseWallets?: Address[];
 }): Promise<{ transaction: Hex; node: Hex; epoch: number; wallet: Address; dailyCapMicro: bigint; expiry: bigint; revoked: boolean }>;
 export declare function revokeSpendingPass(options: { walletClient: WalletClient; publicClient: PublicClient; network: AgentPayNetwork; name?: string; node?: Hex }): ReturnType<typeof issueSpendingPass>;
 export declare function spentInPeriod(options: { publicClient: PublicClient; network: AgentPayNetwork; node: Hex; epoch: number; period: PassPeriod; nowSec: number }): Promise<bigint>;
@@ -296,6 +300,7 @@ export interface RelayerLimits {
   maxRenewGas: bigint;
   maxCancelGas: bigint;
   receiptTimeoutMs: number;
+  inFlightHoldMs: number;
 }
 export declare const RELAYER_DEFAULTS: Readonly<RelayerLimits>;
 export declare function resolveLimits(overrides?: Partial<RelayerLimits>): RelayerLimits;
@@ -333,17 +338,19 @@ export type RiskCheck = (ctx: { order: Order | Record<string, unknown>; payer: A
 export type MerchantEvent = 'paid' | 'payment.failed' | 'refund.requested' | 'refunded' | 'accepted' | 'delivered' | 'subscribed' | 'renewal.charged' | 'cancelled';
 export interface Merchant {
   name: string;
-  node: Hex;
+  /** The shop node on-chain is nodeOf(name); `node` is the node:http listener below. */
   address: Address;
   network: AgentPayNetwork;
+  limits: Readonly<{ maxRefundMicro?: bigint; quoteTtlSeconds: number }>;
   on(event: MerchantEvent, listener: (payload: any) => void): void;
   off(event: MerchantEvent, listener: (payload: any) => void): void;
   once(event: MerchantEvent, listener: (payload: any) => void): void;
   order(input: Omit<OrderInput, 'merchant' | 'deadline'> & { deadline?: bigint }): Order;
   charge(request: Request, pricer: Pricer, extra?: Record<string, unknown>): Promise<Paid | { free: true } | { response: Response; order?: Order }>;
-  route(pricer: Pricer, handler: (request: Request, paid: Paid & { routeCtx?: unknown }) => unknown): (request: Request, routeCtx?: unknown) => Promise<Response>;
+  /** The handler gets the paid result, or `{ free: true }` when the pricer returned null. */
+  route(pricer: Pricer, handler: (request: Request, result: (Paid | { free: true }) & { routeCtx?: unknown }) => unknown): (request: Request, routeCtx?: unknown) => Promise<Response>;
   express(pricer: Pricer): (req: any, res: any, next: () => void) => Promise<void>;
-  node(pricer: Pricer, handler: (request: Request, paid: Paid) => unknown): (req: any, res: any) => Promise<void>;
+  node(pricer: Pricer, handler: (request: Request, result: Paid | { free: true }) => unknown): (req: any, res: any) => Promise<void>;
   refund(orderId: Hex, amountMicro: Micro, options?: { reasonCode?: number; note?: string }): Promise<{ orderId: Hex; amountMicro: bigint; full: boolean; transaction: Hex; explorer: string }>;
   deliver(orderId: Hex): Promise<{ orderId: Hex; transaction: Hex; explorer: string }>;
   accept(orderId: Hex, context?: Record<string, unknown>): Promise<{ accepted: boolean; orderId: Hex; reason?: string }>;
@@ -362,6 +369,8 @@ export declare function createMerchant(options: {
   walletClient?: WalletClient;
   network?: AgentPayNetwork;
   riskCheck?: RiskCheck;
+  /** Gates every request that makes the facilitator spend gas (a paid retry, a subscription, a cancel). */
+  authorize?: (request: Request) => boolean | Promise<boolean>;
   identity?: IdentityResolver;
   reputation?: ReputationProvider;
   quoteTtlSeconds?: number;
@@ -389,7 +398,7 @@ export declare function buyerToolDefinitions(buyer: BuyerAgent, options?: { allo
 export declare function merchantToolDefinitions(merchant: Merchant, options?: { catalog?: Record<string, { name: string; unitPriceMicro: Micro }>; fulfilmentTypes?: FulfilmentType[] }): ToolDefinition[];
 export declare function aiSdkTools(definitions: ToolDefinition[]): Record<string, Tool>;
 export declare function buyerTools(buyer: BuyerAgent, options?: { allowedOrigins?: string[] }): Record<string, Tool>;
-export declare function merchantTools(merchant: Merchant, options?: { catalog?: Record<string, { name: string; unitPriceMicro: Micro }> }): Record<string, Tool>;
+export declare function merchantTools(merchant: Merchant, options?: { catalog?: Record<string, { name: string; unitPriceMicro: Micro }>; fulfilmentTypes?: FulfilmentType[] }): Record<string, Tool>;
 export declare function registerTools(server: McpServer, definitions: ToolDefinition[], options?: { prefix?: string }): McpServer;
 export declare function registerBuyerTools(server: McpServer, buyer: BuyerAgent, options?: { allowedOrigins?: string[] }): McpServer;
 export declare function registerMerchantTools(server: McpServer, merchant: Merchant, options?: { catalog?: Record<string, { name: string; unitPriceMicro: Micro }> }): McpServer;

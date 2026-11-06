@@ -5,7 +5,7 @@
 // owner's key is read from the server's env only, by role name, and never leaves this
 // module. The gate sees the change within its 20 s cache.
 import { config, resolveRpc } from '@graphpay/config';
-import { createOwnerActions, createTxRunner, ensChain, ownerRoleOf, type OwnerActions, type OwnerSender } from '@graphpay/ens';
+import { createOwnerActions, createTxRunner, ensChain, ownerRoleOf, type OwnerActions, type OwnerKill, type OwnerSender } from '@graphpay/ens';
 import { createPublicClient, createWalletClient, http } from 'viem';
 import { privateKeyToAccount } from 'viem/accounts';
 import { siteModel, type ModelAgent, type SiteModel } from './site.server.ts';
@@ -73,7 +73,9 @@ function sepoliaRpc() {
   return rpcCache.value;
 }
 
-async function actions(): Promise<OwnerActions> {
+// The owner's actions over the live Sepolia endpoint, with the owner's key from this server's env
+// (the kill of a disposable agent uses them too: lib/kill-disposable.server.ts).
+export async function liveOwnerActions(): Promise<OwnerActions & OwnerKill> {
   const rpc = await sepoliaRpc();
   const chain = ensChain();
   const client = createPublicClient({ chain, transport: http(rpc.url, { retryCount: 2, timeout: 20_000 }) });
@@ -117,7 +119,7 @@ let lastChange = Number.NEGATIVE_INFINITY;
 // onlyIf: a change decided earlier (the self-healing cron's) is checked again once its turn in
 // the queue comes, and sends nothing when it is no longer due.
 export const NO_LONGER_DUE = 'no longer due';
-export function changeStatus(paused: boolean, { actionsFor = actions, agent = siteModel().payer.ens, open = publicAccess(), now = Date.now(), onlyIf }: { actionsFor?: () => Promise<OwnerActions>; agent?: string; open?: boolean; now?: number; onlyIf?: () => Promise<boolean> } = {}): Promise<OwnerChange> {
+export function changeStatus(paused: boolean, { actionsFor = liveOwnerActions, agent = siteModel().payer.ens, open = publicAccess(), now = Date.now(), onlyIf }: { actionsFor?: () => Promise<OwnerActions>; agent?: string; open?: boolean; now?: number; onlyIf?: () => Promise<boolean> } = {}): Promise<OwnerChange> {
   if (pending >= MAX_PENDING) return Promise.reject(new Busy('busy'));
   if (open && now - lastChange < CHANGE_COOLDOWN_MS) return Promise.reject(new Busy('too soon'));
   if (open) lastChange = now;
@@ -128,9 +130,15 @@ export function changeStatus(paused: boolean, { actionsFor = actions, agent = si
     const result = await (paused ? owner.pause(agent) : owner.resume(agent));
     return { changed: result.changed, sepoliaTx: result.hash ?? null, note: result.changed ? null : (result.reason ?? 'no change') };
   };
-  const run = tail.then(task, task).finally(() => {
+  return inOwnerQueue(task).finally(() => {
     pending -= 1;
   });
+}
+
+// Every transaction the owner's key signs on this instance (pause, resume, the kill of a disposable
+// agent) runs in this one queue, in order, so two never race for the owner's nonce.
+export function inOwnerQueue<T>(task: () => Promise<T>): Promise<T> {
+  const run = tail.then(task, task);
   tail = run.catch(() => undefined);
   return run;
 }

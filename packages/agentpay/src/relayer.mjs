@@ -106,7 +106,7 @@ const asPolicy = (p) =>
 export function resolveLimits(overrides = {}) {
   const L = { ...RELAYER_DEFAULTS };
   for (const [key, value] of Object.entries(overrides ?? {})) {
-    if (!(key in RELAYER_DEFAULTS)) throw new Error(`createReferenceRelayer: unknown limit "${key}"`);
+    if (!Object.hasOwn(RELAYER_DEFAULTS, key)) throw new Error(`createReferenceRelayer: unknown limit "${key}"`);
     const ok = typeof value === 'bigint' ? value > 0n : typeof value === 'number' && Number.isFinite(value) && value > 0;
     if (!ok) throw new Error(`createReferenceRelayer: limit "${key}" must be a finite number above zero (the limits cannot be switched off)`);
     L[key] = typeof RELAYER_DEFAULTS[key] === 'bigint' ? BigInt(value) : Number(value);

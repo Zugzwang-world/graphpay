@@ -16,6 +16,7 @@ declare module '@graphpay/facilitator' {
   export function facilitatorHandler(options: Any): Handler;
   export function recorderClient(options: { url: string; token: string }): { refused(entry: Any): Promise<void> };
   export function recorderHandler(options: { token: string; write: ((edge: Any) => Promise<Any>) | null; log?: (line: string) => void }): Handler;
+  export function attemptEdge(entry: Any): { ref: string } & Record<string, unknown>;
   export function bearerOk(request: Request, token: string): boolean;
   export function errorNames(error: unknown): string;
   export function decodePaymentRequiredHeader(header: string): { accepts?: { payTo: string; amount: string; asset: string; network: string }[] } & Record<string, unknown>;
