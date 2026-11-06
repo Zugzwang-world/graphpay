@@ -170,7 +170,18 @@ Updated 23:38 IST, Fri 6 Nov (W7 Submission).
 
 ## w2-city
 
-- **W1's flip changes the labels and the category together** (owner: W1; the Coordinator times it). What: in `packages/config/story.json`, set `shops[].label` to the final cast's labels by story role (good → `filter-and-fold`, runner-up → `idli-index`, trap → `tawa-tangle`) and every `shops[].category` to `south-indian`, in one PR. Why: the analyst ranks `nodes(category)`, and the new rows are `south-indian`; a labels-only flip would rank the old shops. A test in `packages/city` fails it. Recommendation: one PR, after the new shops' ENS names resolve.
+- **The flip waits for the restart that follows the history** (owner: the Coordinator, who times it; W5 restarts the workers). What, in order:
+  1. W2's history for the new shops is complete (1,258 of 1,258 events);
+  2. then W5 restarts the workers;
+  3. then W1's flip merges.
+
+  Why: a mirror that read the new shops' tallies part-way would plan their first live payment from stale counts and overwrite their totals (reviewer finding, ADR-0077). Recommendation: keep that order. A mirror started after the history is fine; W5's restart on W2's "done" is that restart.
+- **W1's flip changes the labels and the category together** (owner: W1). What: in `packages/config/story.json`, set `shops[].label` to the final cast's labels by story role and every `shops[].category` to `south-indian`, in one PR:
+  - good → `filter-and-fold`;
+  - runner-up → `idli-index`;
+  - trap → `tawa-tangle`.
+
+  Why: the analyst ranks `nodes(category)`, and the new rows are `south-indian`; a labels-only flip would rank the old shops. A test in `packages/city` fails it. Recommendation: one PR.
 - **After the flip, delist the old shops' directory rows** (owner: W2). What: kesar-kingdom, syrup-street and jamun-junction stay listed under their new display names, so until then the map shows each name twice. Why: the old rows feed acceptance D8 at S until acceptance moves to M. Recommendation: W2 delists them once acceptance checks M.
 
 ## frontend

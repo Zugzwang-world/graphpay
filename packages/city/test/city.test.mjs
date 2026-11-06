@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { existsSync, readFileSync } from 'node:fs';
 import { test } from 'node:test';
 import { story } from '@graphpay/config';
-import { generateCity, pinnedCast, truthOf } from '../index.mjs';
+import { cityDigest, generateCity, pinnedCast, truthOf } from '../index.mjs';
 
 test('the city is deterministic for a seed and labelled synthetic', () => {
   const a = generateCity({ story, size: 'S', end: '2026-11-05' });
@@ -43,6 +43,17 @@ test('every seeded city generates again as seeded', () => {
     const seeded = JSON.parse(readFileSync(file, 'utf8'));
     const city = generateCity({ story, size, end: seeded.generated.end });
     assert.deepEqual(JSON.parse(JSON.stringify(truthOf(city))), seeded.truth, `size ${size}`);
+  }
+});
+
+// Stronger than the answers: every event and every actor of a seeded city, by digest.
+test('every seeded city generates the same events and actors again', () => {
+  const seeded = JSON.parse(readFileSync(new URL('../../../docs/sessions/arkiv/city/digests.json', import.meta.url), 'utf8'));
+  const sizes = Object.keys(seeded).filter((k) => k !== 'about');
+  assert.ok(sizes.includes('S'));
+  for (const size of sizes) {
+    const { end, ...digest } = seeded[size];
+    assert.deepEqual(cityDigest(generateCity({ story, size, end })), digest, `size ${size}`);
   }
 });
 

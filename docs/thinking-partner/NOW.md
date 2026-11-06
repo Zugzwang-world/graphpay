@@ -82,12 +82,12 @@ Updated 23:35 IST, Fri 6 Nov (W1 Identity, session `local_45f7cf5d-c31e-4dbf-b84
 
 ## w2-city
 
-Updated 23:45 IST, Fri 6 Nov (W2 City, session `local_da212093-3d02-4768-9314-ab7be179eb86`).
-- **Step 1, partly written:** Filter & Fold, Idli Index and Tawa Tangle are on Arkiv under their own names, at epoch 0, in the category `south-indian`: their directory rows at the Grok places and their node rows. Of their labelled 90-day history, 175 of 1,258 events are written. The rest resumes when this Mac's Arkiv query budget resets, at about 23:59 IST.
-- **Fixed (this PR):** race mode's Q2 at S and acceptance D4. Both read the small city with the new 2.40 renewal, while S was seeded at 0.40. Each seeded city now keeps its own cast (ADR-0077).
-- **For W1's flip:** change `shops[].label` and `shops[].category` in one PR (a test enforces it).
-- **Running:** the M city is generated and checked on ArkivSim (9,996 events, every count exact, about 6.0 tGLM live). It seeds on Rabdi next.
-- **Blocker:** the keyless endpoint meters queries on their own window (10,000), shared by every process on this Mac, the mirror included. My scripts now keep 40% of it free.
+Updated 00:15 IST, Sat 7 Nov (W2 City, session `local_da212093-3d02-4768-9314-ab7be179eb86`).
+- **Step 1 is done:** Filter & Fold, Idli Index and Tawa Tangle are on Arkiv under their own names, at epoch 0, category `south-indian`, with their full labelled 90-day history (1,258 of 1,258 events). The analyst's own query reads 241, 60 and 110 orders, with the story's refund and on-time rates; Tawa Tangle is vetoed.
+- **The flip, in order:** the workers restart first (W5, now), then W1's flip changes `shops[].label` and `shops[].category` together.
+- **Fixed:** race mode's Q2 at S and acceptance D4 (each seeded city keeps its own cast, ADR-0077).
+- **Running:** the big city M seeding on Rabdi (batch 30 of 400 at 00:08 IST; about 2 hours). The menus are on Swarm with their dish images (in their PR).
+- **Learned:** Arkiv's keyless endpoint meters queries on a window that every process on this Mac shares. Retries that reload all of W_LEDGER's rows spent it twice tonight; my scripts now keep 40% of it free.
 
 ## w3-payments
 

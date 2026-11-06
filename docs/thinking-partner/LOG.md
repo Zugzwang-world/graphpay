@@ -147,4 +147,4 @@ One line per PR: time (IST) · activity · result · PR link. Append under your 
 
 ## w2-city
 
-- 23:45 IST · w2-city · item 1, code: each seeded city keeps its own cast, which fixes race Q2 at S and D4 (ADR-0077); the dosa shops' directory and node rows on Arkiv (south-indian), history in progress · PR_LINK
+- 23:45 IST · w2-city · item 1, code: each seeded city keeps its own cast, which fixes race Q2 at S and D4 (ADR-0077); the dosa shops' directory and node rows on Arkiv (south-indian), history in progress · https://github.com/Zugzwang-world/graphpay/pull/167

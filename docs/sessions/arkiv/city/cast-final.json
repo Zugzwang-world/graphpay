@@ -75,8 +75,52 @@
         "risk.idli-index.graphpay.eth",
         "dispatch.idli-index.graphpay.eth"
       ]
+    },
+    "history": {
+      "stream": "history:test:v1:x0.05:d20763:99fe16f5",
+      "endDay": 20763,
+      "events": 1258,
+      "written": 1083,
+      "done": true,
+      "checkpointEvents": 1258,
+      "lastRunTglm": "0.388460",
+      "note": "Events 1 to 175 went out in earlier runs beside the running mirror (17:51 to 17:58 UTC); events 176 to 1,258 in the last run, 18:29 to 18:41 UTC, with the mirror stopped by W5. lastRunTglm is W_LEDGER's balance change over that last run."
     }
   },
   "started": "2026-11-06T17:49:05.406Z",
-  "finished": "2026-11-06T17:49:23.289Z"
+  "finished": "2026-11-06T18:41:27Z",
+  "verified": {
+    "at": "2026-11-06T18:42:00Z",
+    "how": "the analyst's own ranking query through https://graphpay-event.vercel.app/api/graphql (nodes(kind: shop, category: south-indian, city: mumbai), reputation D90), then packages/agents rankShops",
+    "explainId": "5a46086c6653",
+    "shops": [
+      {
+        "ens": "filter-and-fold.graphpay.eth",
+        "orders": 241,
+        "refunds": 3,
+        "refundRate": "0.0124",
+        "onTimeRate": "0.9709",
+        "score": 0.916,
+        "eligible": true
+      },
+      {
+        "ens": "idli-index.graphpay.eth",
+        "orders": 60,
+        "refunds": 2,
+        "refundRate": "0.0333",
+        "onTimeRate": "0.9333",
+        "score": 0.863,
+        "eligible": true
+      },
+      {
+        "ens": "tawa-tangle.graphpay.eth",
+        "orders": 110,
+        "refunds": 20,
+        "refundRate": "0.1818",
+        "onTimeRate": "0.7090",
+        "score": 0.751,
+        "eligible": false
+      }
+    ]
+  }
 }

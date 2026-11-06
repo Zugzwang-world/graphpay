@@ -34,7 +34,7 @@ The synthetic cities' graph rows (`node`, `edge`, `tally`, `link`) are written b
 
 ## Casts (ADR-0077)
 
-Each seeded city, and the live graph, is written with a cast pinned in `story.json` → `syntheticCity.casts`: the shops' labels, `category`, places and the renewal price, by story role. A seeded city is generated again from its own cast, so its rows and its truth do not move when the live story changes.
+Each seeded city, and the live graph, is written with a cast pinned in `story.json` → `syntheticCity.casts`: the shops' labels, `category`, places and the renewal price, by story role. A seeded city is generated again from its own cast, so its events, actors and truth do not move when the live story changes. Two tests check them against `docs/sessions/arkiv/city/` (the truth files and `digests.json`).
 
 - **`test`** (size S, seeded 5 Nov): kesar-kingdom, syrup-street, jamun-junction; category `sweets`. Their live rows stay on Arkiv as history.
 - **`final`** (the dosa story, ADR-0073): filter-and-fold, idli-index, tawa-tangle, at epoch 0, category `south-indian`, with the Grok pack's places. W2 wrote these before W1's label flip, with `node packages/city/scripts/cast.mjs` (manifest `docs/sessions/arkiv/city/cast-final.json`):
