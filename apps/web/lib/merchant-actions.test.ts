@@ -191,6 +191,15 @@ test('public access: a visitor acts only on the story persona’s orders, once p
   visitorGuard({ ...order, buyerNode: `0x${'bb'.repeat(32)}` }, id, { open: false, persona });
 });
 
+test('public access: a visitor refunds an order once, whatever the phone or the server instance', async () => {
+  const { refundOnce } = await import('./merchant-actions.server.ts');
+  const order = { status: 'DELIVERED', amountMicro: 4_800_000n, refundedMicro: 0n, merchant: '0x0000000000000000000000000000000000000001', shopNode: `0x${'00'.repeat(32)}`, buyerNode: `0x${'aa'.repeat(32)}` } as const;
+  refundOnce(order, { open: true });
+  assert.throws(() => refundOnce({ ...order, refundedMicro: 800_000n }, { open: true }), (e: unknown) => e instanceof Refusal && e.code === 'ALREADY_REFUNDED' && e.status === 409);
+  // The gated mode keeps a later full refund of what is left.
+  refundOnce({ ...order, refundedMicro: 800_000n }, { open: false });
+});
+
 test('a send that fails after it may have reached the node locks the order, so a retry cannot refund twice', async () => {
   const order = fresh();
   const { chain, sent } = fakeChain({ status: 2 }, { writeFails: true });

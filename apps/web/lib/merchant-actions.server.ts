@@ -19,7 +19,7 @@ const HEX32 = /^0x[0-9a-fA-F]{64}$/;
 export const MERCHANT_REFUND_REASON = 1;
 
 // A refusal the merchant can act on (shown as its code); anything else is a failure of the chain.
-export type RefusalCode = 'NO_SUCH_ORDER' | 'NOT_OURS' | 'NOT_THE_STORY_BUYER' | 'TOO_SOON' | 'NOT_DELIVERABLE' | 'NOT_REFUNDABLE' | 'BAD_AMOUNT' | 'OVER_REFUNDABLE' | 'FLOAT_LOW' | 'STILL_PENDING' | 'GAS_LOW';
+export type RefusalCode = 'NO_SUCH_ORDER' | 'NOT_OURS' | 'NOT_THE_STORY_BUYER' | 'TOO_SOON' | 'NOT_DELIVERABLE' | 'NOT_REFUNDABLE' | 'BAD_AMOUNT' | 'OVER_REFUNDABLE' | 'ALREADY_REFUNDED' | 'FLOAT_LOW' | 'STILL_PENDING' | 'GAS_LOW';
 export class Refusal extends Error {
   code: RefusalCode;
   status: number;
@@ -191,6 +191,14 @@ export function visitorGuard(order: OrderState, orderId: string, { open = public
   lastAction.set(orderId, now);
 }
 
+// Public access: a visitor refunds an order once. Every open copy of the stage runs the shop's
+// phone, and an automatic Accept in each would refund the same request again (a live double
+// refund, 04:09 IST Sat 7 Nov); the 30 s cooldown is per server instance. The refunded amount
+// is read from the chain, so every instance agrees. The gated mode keeps a later full refund.
+export function refundOnce(order: OrderState, { open = publicAccess() }: { open?: boolean } = {}): void {
+  if (open && order.refundedMicro > 0n) throw new Refusal('ALREADY_REFUNDED');
+}
+
 export function markDispatched(orderId: string, chain?: Promise<Chain>): Promise<Sent> {
   return serially(async () => {
     const c = await (chain ?? liveChain());
@@ -222,6 +230,7 @@ export function refundOrder(orderId: string, amountMicro: bigint | null, chain?:
       c.publicClient.readContract({ address: c.token, abi: erc20Abi, functionName: 'allowance', args: [c.walletClient.account.address, c.checkout] }),
     ]);
     if (balance < amount || allowance < amount) throw new Refusal('FLOAT_LOW');
+    refundOnce(order);
     visitorGuard(order, orderId);
     const sent = await send(c, orderId, 'refund', [orderId, amount, MERCHANT_REFUND_REASON]);
     return { ...sent, amountMicro: String(amount), full: amount === left };
