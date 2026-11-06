@@ -338,6 +338,12 @@ export function MerchantPhone() {
           postEvent('refund', tx ? [{ label: 'Refund on Whitechain', href: links.whitechainTx(tx) }] : [], { orderId, amountMicro: answer.amountMicro ?? amountMicro, transaction: tx });
           return;
         } catch (error) {
+          // Refunded before (an earlier answer that was lost, another tap): the order is refunded
+          // and nothing more was sent, so this phone keeps its once-only mark and shows it done.
+          if (error instanceof Refusal && error.code === 'ALREADY_REFUNDED') {
+            setAsk((a) => (mine(a) ? { ...a!, phase: 'refunded', tx: null, decisionAt: Date.now() } : a));
+            return;
+          }
           // Refused before anything was signed: this phone may try again later.
           if (notYet(error) || (error instanceof Refusal && error.status >= 400 && error.status < 500)) markRefunded(orderId, false);
           if (!notYet(error) || attempt === RETRIES - 1) {

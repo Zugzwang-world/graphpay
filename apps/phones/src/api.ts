@@ -32,6 +32,7 @@ const WORDS: Record<string, string> = {
   OVER_REFUNDABLE: 'That is more than is left to refund on this order.',
   FLOAT_LOW: 'The shop’s refund float is low. Try a smaller amount.',
   STILL_PENDING: 'The last transaction for this order is still on its way. Try again in a minute.',
+  ALREADY_REFUNDED: 'Already refunded: this order’s refund went out before, so nothing more was sent.',
   NO_REQUEST: 'There is no refund request on this order to decline.',
   ALREADY_DECIDED: 'This refund request was already decided.',
   NOT_REORDERABLE: 'This order cannot be ordered again.',

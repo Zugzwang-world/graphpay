@@ -215,14 +215,17 @@ export function markDispatched(orderId: string, chain?: Promise<Chain>): Promise
 export function refundOrder(orderId: string, amountMicro: bigint | null, chain?: Promise<Chain>): Promise<Sent & { amountMicro: string; full: boolean }> {
   return serially(async () => {
     const c = await (chain ?? liveChain());
+    // A refund of this order still on its way is settled (or refused as STILL_PENDING) before the
+    // order is read, so the read below already counts it.
+    await settled(c, orderId);
     const order = await readOrder(c, orderId);
     ours(c, order);
     if (order.status !== 'PAID' && order.status !== 'DELIVERED') throw new Refusal('NOT_REFUNDABLE');
+    refundOnce(order);
     const left = order.amountMicro - order.refundedMicro;
     const amount = amountMicro ?? left;
     if (amount <= 0n) throw new Refusal('BAD_AMOUNT');
     if (amount > left) throw new Refusal('OVER_REFUNDABLE');
-    await settled(c, orderId);
     // The float: the shop's wallet must hold the amount and have approved it to the checkout, or the
     // refund would revert; say so instead of a generic failure.
     const [balance, allowance] = await Promise.all([
@@ -230,7 +233,6 @@ export function refundOrder(orderId: string, amountMicro: bigint | null, chain?:
       c.publicClient.readContract({ address: c.token, abi: erc20Abi, functionName: 'allowance', args: [c.walletClient.account.address, c.checkout] }),
     ]);
     if (balance < amount || allowance < amount) throw new Refusal('FLOAT_LOW');
-    refundOnce(order);
     visitorGuard(order, orderId);
     const sent = await send(c, orderId, 'refund', [orderId, amount, MERCHANT_REFUND_REASON]);
     return { ...sent, amountMicro: String(amount), full: amount === left };
