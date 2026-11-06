@@ -2,9 +2,11 @@
 
 Fri 6 Nov, about 18:45 IST. The live site https://graphpay-event.vercel.app is ready to demo on a laptop or projector (width 1200 or more).
 
-## What works
+## What works (updated 19:20 IST, part 2)
 - **One screen, no page scroll.** Vitalik's phone on the left, Filter & Fold's phone on the right, both fully visible; the middle is the draft deck. Panels scroll inside themselves. On a real mobile phone it is one phone per page, as before.
-- **The middle has a Story / Live run switch.** Story is the draft deck with Back and Next (it has Vitalik, masala dosa, Filter & Fold, Idli Index and Tawa Tangle). Live run is the explainer with its explorer chips (concierge to scout and the rest). A request switches the middle to Live run; the deck returns 12 s after the run ends, or after 4 minutes if the run's stream drops. Tap Story or Live run to choose by hand.
+- **The middle is the deck, and it follows the run.** During an errand the deck moves to the matching slide at each step (the ask, the team, the check, the check back, the 402 quote, the payment, the record on Arkiv). A strip at its bottom shows "step n of 7" and that step's explorer chips (the handoff records, the settlement, the order's trail on Arkiv, exact reads). After the run it stays on the last slide with the real links. Back, Next and "Replay the last run" work at any time; there is no Live run tab any more.
+- **Grok's figurines and photos in the phones.** Each agent shows its figurine for its state (idle, thinking, talking, success, refused; a bob while thinking); dish photos and storefront photos are on the shop comparison cards, the quote sheet and the order cards. The customer phone has no menu screen, so the menu shows no photos. Photos are served from our site (`/phones/grok/`).
+- **A dropped stream no longer offers Try again.** The phone re-attaches to the run by its id, then reads the payer's newest order, and shows the paid card. If both fail it says the errand may have paid and offers no retry.
 - **The errand.** "Just landed in Mumbai. Get me the best masala dosa near BKC under 6 USDT by 8 pm." The analyst's ranking excludes Tawa Tangle (refund rate 18.5%, on-time 71.3%), then Filter & Fold is paid 4.80 USDT, no gas. Both errands today paid and were delivered (orders 0x52aa… and 0x37a3…).
 - **The team's pause and resume.** Menu, then Agents and Spending Pass, then the Payer card: Pause sets the payer to PAUSED on Sepolia; Resume sets it back (about 35 s). Tested once on production; the payer is active.
 - **Refund (Request refund on the customer phone; Refund on the shop phone), Open toggle, Mark dispatched.**
@@ -16,8 +18,9 @@ Fri 6 Nov, about 18:45 IST. The live site https://graphpay-event.vercel.app is r
 - **Subscribe and Cancel** (no hosted subscription endpoint).
 
 ## Things to know
-- The phone's result frame can fail to arrive: in two tests the errand paid and was delivered, but the stream closed before its result (the phone then says "The errand stream ended before its result. Try again."). Do not tap Try again: the payment already happened. If it says "busy: one errand at a time", the first is still running; wait about 2 minutes.
+- The stream that dropped in part 1 (the browser pane at about 25 s, curl at 111 s) did not drop in a normal Chrome window: the live errand of part 2 ran its full length with the result on both phones. The cause is not proven (the keep-alive is now every 5 s; the run lives in one server instance's memory, so a replay by id can miss on another instance, which is why the phone also reads the newest order). If "busy: one errand at a time" shows, the first errand is still running; wait about 2 minutes.
 - ENS names stay the old ones (kesar-kingdom, syrup-street, jamun-junction), so the traces and the deck's tables show them next to the new display names.
 - The deck's sweets photo and menu pictures are still the sample sweets. The category in Arkiv is still "sweets".
-- The Sunday breakfast box is shown at 2.40 in the deck and its menu; the phones' renewal line still shows 0.40, the price the live subscription was created with.
-- The payer has spent 39.60 of its 100 USDT today (two errands today were mine: 9.60).
+- The good shop's combo is "Ghee roast masala dosa + filter coffee" on the phones and the menu; the agents and the quote call it "masala dosa" (a `short` field), so the traces still say masala dosa.
+- The Sunday breakfast box shows 2.40 on the phones and in the deck (display only: the live subscription keeps its on-chain amount).
+- The payer has spent 49.20 of its 100 USDT today (three errands today were mine: 14.40).

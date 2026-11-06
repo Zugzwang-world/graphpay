@@ -111,5 +111,6 @@ One line per PR: time (IST) · activity · result · PR link. Append under your 
 ## booth
 
 - 18:45 IST · booth · the team's pause and resume (#132), the Grok swap on screen (#135), the deck in the middle with one screen (#136); two live errands paid 4.80 to Filter & Fold · https://github.com/Zugzwang-world/graphpay/pull/136
+- 19:20 IST · booth · part 2: no double payment on a dropped stream (#138), the deck follows the live run (#139), Grok's figurines and photos, renewal 2.40, the Ghee roast combo (#140); one live errand in Chrome paid 4.80 · https://github.com/Zugzwang-world/graphpay/pull/140
 
 ## submission

@@ -146,14 +146,13 @@ Updated 17:46 IST, Fri 6 Nov (Coordinator).
 
 ## booth
 
-Updated 18:45 IST, Fri 6 Nov (Booth session).
-- **Done this step:** the booth run is live, in the brief's order.
-  - The team's pause and resume (#132) is merged and works on production from Vitalik's phone.
-  - Grok's story is on screen (#135): masala dosa near BKC, Filter & Fold, Idli Index and Tawa Tangle; ENS names, wallets, stats, caps and prices unchanged; menus on Swarm with one dish image.
-  - The draft deck sits in the middle with a Story / Live run switch, and the page does not scroll on laptops (#136).
-  - Two live errands (the most the brief allows) vetoed Tawa Tangle and paid 4.80 to the good shop's wallet, delivered.
-- **Waiting on:** nothing.
-- **Next:** the founder's demo check; what not to tap is in `docs/sessions/booth/demo-note.md` (re-order, Revoke, Change cap).
+Updated 19:20 IST, Fri 6 Nov (Booth session).
+- **Done this step (part 2):** all merged and live.
+  - A dropped errand stream no longer offers "Try again": the phone recovers the run by its id and shows the paid order (#138).
+  - The deck in the middle follows the live run through seven steps with its explorer chips and "Replay the last run"; the Live run tab is gone (#139).
+  - Grok's figurines (by agent state) and dish and storefront photos are in the phones; the renewal shows 2.40; the good shop's combo reads "Ghee roast masala dosa + filter coffee" (#140).
+  - One live errand in Chrome: all seven deck steps, 4.80 paid to Filter & Fold, both phones updated, no "stream ended".
+- **Waiting on:** nothing. **Next:** the founder's demo check; what not to tap is in `docs/sessions/booth/demo-note.md`.
 
 ## submission
 

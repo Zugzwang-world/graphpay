@@ -1,5 +1,19 @@
 # Booth session: resume
 
+Updated 19:20 IST, Fri 6 Nov, after part 2 (`docs/thinking-partner/briefs/1900-booth-run-part2.md`). Part 2 is all merged; the part 1 text below stays as it was.
+
+## Part 2: done and merged
+1. **No double payment** (#138): `apps/phones/src/errand.ts` and `live-adapter.ts` recover a dropped run by its id (replay `/api/agents/run/<id>/events`, skipping applied frames), then poll `/api/state/customer` for the payer's newest order; no "Try again" for a run that may have paid. Keep-alive every 5 s. Cause of the drop not proven; it did not happen in Chrome.
+2. **The deck follows the live run** (#139): `apps/web/components/middle-switch.tsx` posts the stage, slide and chips to the deck (`apps/web/public/deck/index.html`, embed mode); Replay the last run; the Live run tab is gone.
+3. **Grok's visuals** (#140): `apps/phones/grok-images.mjs` (macOS `sips`) writes `apps/phones/static/grok/`; the build copies it to `/phones/grok/`; `story.json` carries `avatar` and `image`; `AgentAvatar` and `components/shared/Photo.tsx` in `frontend/`.
+4. **Small fixes** (#140): renewal 2.40; the good shop's combo name by a `short` field (`packages/shop`, `packages/agents/mocks`); `castMenus` drops the site image path.
+
+Checked in Chrome on production, one live errand (the second and last of part 2 was not needed): the deck went through all 7 steps and stayed on the record slide with the links; Tawa Tangle rejected; the dish photos on the cards; the paid card on Vitalik's phone (4.80, order #4020 on the shop's phone); no "stream ended". Payer active, shop open.
+
+Still open after 21:30: the real ENS names and history, the big city, re-order (1 x 4.80 now) and caps and kill and subscriptions, the menu photos (no menu screen), animation beyond the state images, the deck's non-demo slides checked one by one, the Arkiv category ("sweets").
+
+---
+
 Booth session (Sonnet 5.5, High), started Fri 6 Nov about 18:00 IST from `docs/thinking-partner/briefs/1850-booth-run.md`. Worktree `.claude/worktrees/booth-session-work-0975ee`. Usage line: stop at 98% of "Weekly · all models" (read 94% throughout); the weekly reset is 21:30 IST.
 
 ## Done and merged
