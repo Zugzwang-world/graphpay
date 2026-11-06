@@ -318,5 +318,8 @@ The team's four older asks stay in OPEN under `## phones`: product images, hidin
 - The refund reason on chain is always 1.
 - The demo store is not deployed.
 - Acceptance E1 still expects the old 23:59 deadline.
+- **The race stream's call counter:** it opens with one `call` frame without `ms`, before the counted reads. So a live counter shows 3 (plain: 6) until `answer.calls` sets 2 (plain: 5). Skip `call` frames without `ms`, or show `answer.calls`.
+- **`/api/merchant/export.csv` reads Arkiv live and is intermittent:** at 02:03 IST it answered 502 "the graph did not answer; try again" twice, then 200 after 45 s. Retry once before showing an error.
+- **Big city M:** recorded as seeded and not raced (ADR-0081). `/api/race` refuses `size=M`, and `/api/graphql?dataset=M` reads its graph store only.
 
 **Sources:** every fact here comes from the Coordinator's inventory of `main`, which gives each row its file and line: [`docs/sessions/coordinator/backend-inventory.md`](../sessions/coordinator/backend-inventory.md). Items inferred from code but never seen on a screen are marked as such above.

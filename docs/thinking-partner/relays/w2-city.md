@@ -14,7 +14,7 @@ Updated 01:15 IST, Sat 7 Nov (W2 City, session `local_da212093-3d02-4768-9314-ab
 - All three menus are on Swarm. Each carries its shop's storefront photo and its four dish photos, the same files the phones show (15 images in all).
 - Each menu has its pointer row on Arkiv. Every file was checked by its hash when read back.
 
-**3. The big city M: trimmed by the founder to what was seeded (ADR-0080).**
+**3. The big city M: trimmed by the founder to what was seeded (ADR-0081).**
 - The graph store holds the first 3,175 events of the generated city (9 Jul to 14 Aug): all 606 actors, the 3 cast shops and the 120 synthetic places from Grok, and 1,387 payment rows. Labelled synthetic.
 - It cost 1.65 tGLM. Rabdi refused part of batch 127; that part was undone, so the store is exactly batches 0 to 126.
 - The plain store (what plain Arkiv code reads) and the directory rows were not written.
@@ -34,16 +34,16 @@ Updated 01:15 IST, Sat 7 Nov (W2 City, session `local_da212093-3d02-4768-9314-ab
 - **Fixes found on the way:**
   - W_DIRECTORY writes now take a transaction found by nonce only if it holds their own row. Two of the live site's rows had been taken for menu rows.
   - The history writer resumes only its own stream.
-  - The seeder undoes a batch the node refuses part-way, and a stopped run resumes at its batch (#186).
+  - The seeder undoes a batch the node refuses part-way, and a stopped run resumes at its batch (on branch `arkiv/w2-race-m`; #186 was closed unmerged at the close).
 - **The Arkiv read window** (`docs/technical/FACTS.md`):
   - The keyless endpoint meters queries on a window of about 10,000 rows that every process on this Mac shares.
   - Full reloads of W_LEDGER (mine on retries, the mirror's on restart) spent it, and the mirror waited.
   - My scripts now pause, space heavy reads, and write between the mirror's heartbeats. W5's watchdog now waits 30 minutes before restarting.
 - **SDK finding (for W6):** when another writer takes a pinned nonce, `adopt()` throws "created N entities for M creates" before `verifyRecovered` can call the transaction someone else's.
-- **Reviewer:** #167 and #181 were reviewed and every blocking item fixed. #186 is in review.
+- **Reviewer:** #167 and #181 were reviewed and every blocking item fixed. #186 was closed unmerged at the close: its reviewer found a blocking flaw in the seeder's recovery (a failed read right after a batch lands could undo it against the wrong state).
 
 ## Next
 
-- Merge #186 after its review. Race mode stays at S.
+- Race mode stays at S (ADR-0081). The work in #186 stays on branch `arkiv/w2-race-m` (2bad364) for after the event.
 - If the founder asks for M's plain store: write it, run `bench/d7.mjs --size M`, publish `bench/results/questions-M.csv`, and set `raceSize: "M"`.
 - Delist the old shops' directory rows once acceptance's D8 moves off S.
