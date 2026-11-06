@@ -1,6 +1,6 @@
 # ADR-0057: arkiv-graph is a generic SDK, published as @graphpay/arkiv-graph
 
-Status: accepted; the package name and the timing are superseded by ADR-0063 (published as `@graphpay_ethglobal/arkiv-graph` by 13:00 Friday) · Date: 2026-11-06 01:10 IST · Decided by: founder (chat, 00:48 IST) · Source: `docs/thinking-partner/briefs/0048-arkiv-graph-sdk.md`; the Arkiv booth asked for a developer SDK for our graph layer
+Status: accepted; the package name and the timing are superseded by ADR-0063 (published as `@graphpay_ethglobal/arkiv-graph` by 13:00 Friday) · Date: 2026-11-06 01:10 IST · Decided by: founder (chat, 00:48 IST) · Source: `docs/archive/thinking-partner-briefs/0048-arkiv-graph-sdk.md`; the Arkiv booth asked for a developer SDK for our graph layer
 
 ## Decision
 

@@ -33,6 +33,12 @@ This replaces the 92% pause. The founder gave it to the new Coordinator at the t
 
 ## Amendment 2 (founder, Fri 6 Nov 12:40 IST): merges and payments up to 97% for the integration
 
-- Merges and real payments are allowed up to 97% for three things: the integration proof of concept, the support essentials in the 1240 brief (`docs/thinking-partner/briefs/1240-coordinator-integration-support.md`), and the founder's run.
+- Merges and real payments are allowed up to 97% for three things: the integration proof of concept, the support essentials in the 1240 brief (`docs/archive/thinking-partner-briefs/1240-coordinator-integration-support.md`), and the founder's run.
 - Every session pauses at 97%, as before.
 - At 95% every session still writes its resume. For other work, the 95% stop on new real payments, merges and publishes stands.
+
+## Amendment 3 (founder, Fri 6 Nov, after the 21:30 IST reset): guardrails off for tonight
+
+- **The guardrails are off:** after the weekly reset, the usage guardrails are lifted for tonight's night run.
+- **The model:** every session tonight runs on Opus 5.5 at max effort.
+- **What still applies:** the Coordinator still reports usage in NOW.

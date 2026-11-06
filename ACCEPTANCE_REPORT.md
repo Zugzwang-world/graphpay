@@ -1,51 +1,51 @@
 # Acceptance report
 
-Written by `pnpm acceptance` at 2026-11-06T08:05:32.312Z. Checks and pass criteria: `planning/ACCEPTANCE_TESTS.md` and `docs/plan/ACCEPTANCE_ADDITIONS.md`. Only D7 may be `blocked` (C7 and E3 no longer wait on supply, ADR-0054); a check without a result is `not run`, never `pass`.
+Written by `pnpm acceptance` at 2026-11-06T17:10:05.399Z. Checks and pass criteria: `planning/ACCEPTANCE_TESTS.md` and `docs/plan/ACCEPTANCE_ADDITIONS.md`. Only D7 may be `blocked` (C7 and E3 no longer wait on supply, ADR-0054); a check without a result is `not run`, never `pass`.
 
-**45 pass, 0 fail, 1 blocked, 2 not run** (of 48).
+**35 pass, 8 fail, 1 blocked, 4 not run** (of 48).
 
 | id | check | status | note |
 |---|---|---|---|
 | A1 | CI is green (at M0 the `contracts` job runs a placeholder Foundry project) | pass |  |
 | A2 | The secret scan is clean | pass |  |
-| A3 | Deny rules block reads of `.env` | pass |  |
+| A3 | Deny rules block reads of `.env` | not run | not found: selfCheck |
 | A4 | Auto-merge works | pass |  |
 | A5 | The event wallets are fresh, except FUNDER and OPERATOR | pass |  |
 | A6 | `planning/` and the thinking-partner folder are in place | pass |  |
 | A7 | No known address literal in code outside the config file (D6) | pass |  |
 | A8 | No story name or value in code outside the story file (ADR-0047) | pass |  |
-| A9 | The agent presets are accepted (ADR-0048) | pass |  |
+| A9 | The agent presets are accepted (ADR-0048) | not run | no probe row for anthropic-testing, anthropic-video, anthropic-live |
 | A10 | The Whitechain RPC rules hold (ADR-0031) | pass |  |
-| B1 | The `graphpay.eth` namespace resolves; all owners and agents exist | pass |  |
-| B2 | The gate passes active agents | pass |  |
+| B1 | The `graphpay.eth` namespace resolves; all owners and agents exist | fail |  |
+| B2 | The gate passes active agents | fail |  |
 | B3 | A scoped role stops an agent raising its own cap | pass |  |
 | B4 | The payment preference parses | pass |  |
 | B5 | A synthetic wildcard name resolves | pass |  |
 | B6 | Killing a disposable agent makes the gate deny it | pass |  |
-| B7 | The epoch changes on re-registration (fork test) | not run | no fork test for a new registration after a lapse or an unregister (only renew keeping the epoch); needs an anvil fork of Sepolia |
+| B7 | The epoch changes on re-registration (fork test) | not run | the fork test exists but has no recorded output (needs an anvil fork of Sepolia, not run here) |
 | B8 | ENSIP-26 records exist and the MCP endpoint answers | pass |  |
 | B9 | The payee is the shop's ENS address | not run |  |
 | C1 | Contracts are verified on the explorer | pass |  |
 | C2 | A payment through the facilitator costs the payer no gas | pass |  |
-| C3 | Partial refund, re-order and renewal work | pass |  |
+| C3 | Partial refund, re-order and renewal work | fail |  |
 | C4 | Revoked-agent and over-cap failures are recorded | pass |  |
 | C5 | A repeat request returns "already paid" | pass |  |
 | C6 | Hosted endpoints return 401 without the passcode or token | pass |  |
-| C7 | **The qualifying payment in test USDT `0xcedfB56113143d55b2358b8CFbB0dEB5Ad2f55a7`** | pass |  |
+| C7 | **The qualifying payment in test USDT `0xcedfB56113143d55b2358b8CFbB0dEB5Ad2f55a7`** | fail |  |
 | D1 | One payment event writes its edge and tallies in one atomic batch | pass |  |
 | D2 | A retry with the same nonce creates no duplicate | pass |  |
 | D3 | Tallies recomputed from edges equal the stored tallies | pass |  |
-| D4 | GraphQL's top 10 matches the ground truth | pass |  |
+| D4 | GraphQL's top 10 matches the ground truth | fail |  |
 | D5 | The explain trace lists the reads behind each answer | pass |  |
 | D6 | Benchmark at size S | pass |  |
 | D7 | Benchmark at size M, if seeded | blocked | waiting for the locked story (the M city is seeded only after the founder locks it) |
-| D8 | The geo query returns only shops inside the box, and only from our writers | pass |  |
+| D8 | The geo query returns only shops inside the box, and only from our writers | fail |  |
 | D9 | A receipt cannot be edited | pass |  |
 | D10 | An expired or missing quote is refused and the agent re-quotes | pass |  |
 | D15 | The mirror resumes after a sleep or a network drop (ADR-0056) | pass |  |
-| E1 | Vitalik's request | pass |  |
+| E1 | Vitalik's request | fail |  |
 | E2 | The agents choose Kesar Kingdom, never the trap | pass |  |
-| E3 | The payment is made in USDT on Whitechain | pass |  |
+| E3 | The payment is made in USDT on Whitechain | fail |  |
 | E4 | The mirror writes it to Arkiv | pass |  |
 | E5 | GraphQL shows the new edge and the updated tallies | pass |  |
 | E6 | A refund updates the tallies | pass |  |
@@ -59,18 +59,18 @@ Written by `pnpm acceptance` at 2026-11-06T08:05:32.312Z. Checks and pass criter
 
 Status: **pass**.
 
-### A1 (2026-11-05T22:50:47.454Z)
+### A1 (2026-11-06T17:06:02.373Z)
 
 - What: CI is green on main
 - Pass: true
 - Expected: the latest ci run on main: success
-- Evidence: `{"url":"https://github.com/Zugzwang-world/graphpay/actions/runs/42124115751"}`
+- Evidence: `{"url":"https://github.com/Zugzwang-world/graphpay/actions/runs/42252758380"}`
 
 ```json
 {
   "conclusion": "success",
-  "headSha": "54af4519888c4d1cb6aa3f3b7d5caf6cfa2b94ae",
-  "url": "https://github.com/Zugzwang-world/graphpay/actions/runs/42124115751"
+  "headSha": "cac18f4ec1f1b054bdfe305d3d9d05ec436f7bbb",
+  "url": "https://github.com/Zugzwang-world/graphpay/actions/runs/42252758380"
 }
 ```
 
@@ -78,7 +78,7 @@ Status: **pass**.
 
 Status: **pass**.
 
-### A2 (2026-11-05T22:50:47.934Z)
+### A2 (2026-11-06T17:06:03.813Z)
 
 - What: the secret scan is clean (pnpm check)
 - Pass: true
@@ -87,18 +87,18 @@ Status: **pass**.
 
 ```json
 [
-  "check: clean (590 files)"
+  "check: clean (1143 files)"
 ]
 ```
 
 ## A3: Deny rules block reads of `.env`
 
-Status: **pass**.
+Status: **not run** (not found: selfCheck).
 
-### A3 (2026-11-05T23:52:17.334Z)
+### A3 (2026-11-06T17:06:03.813Z)
 
 - What: deny rules block reads of .env
-- Pass: true
+- Pass: null
 - Expected: every rule of SPEC/SECURITY_AND_OPS.md §2 present; the self-check shows the Read of .env refused (P-foundation-3: the wording changed, the block holds)
 - Evidence: `{"settings":".claude/settings.json","spec":"planning/SPEC/SECURITY_AND_OPS.md §2","selfCheck":"docs/thinking-partner/relays/foundation.md","wording":"docs/problems/PROBLEM_LOG.md P-foundation-3"}`
 
@@ -113,7 +113,7 @@ Status: **pass**.
     "Bash(vercel projects ls*)",
     "Bash(vercel projects list*)"
   ],
-  "selfCheck": "**A3 self-check.** An empty `.env` was created by a script (a direct write is refused once the deny rules load). The `Read` of `.env` was refused with: `File is in a directory that is denied by your permission settings.` The shell `cat .env` was refused with: `Permission to use Bash with command cat"
+  "selfCheck": null
 }
 ```
 
@@ -121,12 +121,12 @@ Status: **pass**.
 
 Status: **pass**.
 
-### A4 (2026-11-05T23:52:19.406Z)
+### A4 (2026-11-06T17:06:07.301Z)
 
 - What: auto-merge works
 - Pass: true
 - Expected: auto-merge on, squash only, delete-on-merge on; required check ci, admins enforced, linear history, no force-push; a docs PR merged by auto-merge after ci passed
-- Evidence: `{"cmd":"gh api repos/{owner}/{repo}; gh api repos/{owner}/{repo}/branches/main/protection; gh pr list --state merged (read-only)","pr":"https://github.com/Zugzwang-world/graphpay/pull/62"}`
+- Evidence: `{"cmd":"gh api repos/{owner}/{repo}; gh api repos/{owner}/{repo}/branches/main/protection; gh pr list --state merged (read-only)","pr":"https://github.com/Zugzwang-world/graphpay/pull/149"}`
 
 ```json
 {
@@ -147,16 +147,16 @@ Status: **pass**.
     "linear": true
   },
   "pr": {
-    "number": 62,
-    "url": "https://github.com/Zugzwang-world/graphpay/pull/62",
+    "number": 149,
+    "url": "https://github.com/Zugzwang-world/graphpay/pull/149",
     "autoMergeRequest": {
       "mergeMethod": "SQUASH",
-      "enabledAt": "2026-11-05T23:41:27Z"
+      "enabledAt": "2026-11-06T16:26:24Z"
     },
-    "mergedAt": "2026-11-05T23:43:25Z",
+    "mergedAt": "2026-11-06T16:28:51Z",
     "ci": {
       "conclusion": "SUCCESS",
-      "completedAt": "2026-11-05T23:43:16Z"
+      "completedAt": "2026-11-06T16:28:37Z"
     }
   }
 }
@@ -166,7 +166,7 @@ Status: **pass**.
 
 Status: **pass**.
 
-### A5 (2026-11-05T23:29:28.194Z)
+### A5 (2026-11-06T17:06:07.591Z)
 
 - What: the event wallets are fresh, except FUNDER and OPERATOR
 - Pass: true
@@ -175,7 +175,7 @@ Status: **pass**.
 
 ```json
 {
-  "roles": 21,
+  "roles": 22,
   "carried": [
     "FUNDER",
     "OPERATOR"
@@ -188,7 +188,7 @@ Status: **pass**.
 
 Status: **pass**.
 
-### A6 (2026-11-05T22:50:47.934Z)
+### A6 (2026-11-06T17:06:07.591Z)
 
 - What: `planning/` and the thinking-partner folder are in place
 - Pass: true
@@ -205,7 +205,7 @@ Status: **pass**.
 
 Status: **pass**.
 
-### A7 (2026-11-05T22:50:48.309Z)
+### A7 (2026-11-06T17:06:08.814Z)
 
 - What: no known address literal outside the config (pnpm check)
 - Pass: true
@@ -214,7 +214,7 @@ Status: **pass**.
 
 ```json
 [
-  "check: clean (592 files)"
+  "check: clean (1143 files)"
 ]
 ```
 
@@ -222,7 +222,7 @@ Status: **pass**.
 
 Status: **pass**.
 
-### A8 (2026-11-05T22:50:48.683Z)
+### A8 (2026-11-06T17:06:10.033Z)
 
 - What: no story name or value outside the story file (pnpm check)
 - Pass: true
@@ -231,18 +231,18 @@ Status: **pass**.
 
 ```json
 [
-  "check: clean (593 files)"
+  "check: clean (1143 files)"
 ]
 ```
 
 ## A9: The agent presets are accepted (ADR-0048)
 
-Status: **pass**.
+Status: **not run** (no probe row for anthropic-testing, anthropic-video, anthropic-live).
 
-### A9 (2026-11-05T23:52:19.409Z)
+### A9 (2026-11-06T17:06:10.034Z)
 
 - What: the agent presets are accepted
-- Pass: true
+- Pass: null
 - Expected: every preset of story.json's agentModels has a probe row with its model and effort, accepted, seconds and cost recorded; the live preset over three turns
 - Evidence: `{"file":"docs/thinking-partner/OPEN.md (preset calibration)","cmd":"pnpm agents:probe (recorded, not re-run)"}`
 
@@ -251,7 +251,7 @@ Status: **pass**.
   {
     "preset": "testing",
     "want": [
-      "`claude-opus-5-5`, xhigh"
+      "`kimi-k3.1-pro`, high"
     ],
     "row": {
       "time": "22:54",
@@ -261,12 +261,12 @@ Status: **pass**.
       "cost": "$0.0005",
       "notes": "accepted"
     },
-    "ok": true
+    "ok": false
   },
   {
     "preset": "video",
     "want": [
-      "`claude-opus-5-5`, xhigh"
+      "`kimi-k3.1-pro-highspeed`, high"
     ],
     "row": {
       "time": "22:54",
@@ -276,12 +276,12 @@ Status: **pass**.
       "cost": "$0.0006",
       "notes": "accepted"
     },
-    "ok": true
+    "ok": false
   },
   {
     "preset": "live",
     "want": [
-      "`claude-haiku-5-5`, xhigh"
+      "`kimi-k3.1-pro-highspeed`, high"
     ],
     "row": {
       "time": "22:54",
@@ -291,7 +291,31 @@ Status: **pass**.
       "cost": "under $0.0002 in all",
       "notes": "accepted; no empty reply, no `max_tokens`; once the same answer in two text blocks (read the final block)"
     },
-    "ok": true
+    "ok": false
+  },
+  {
+    "preset": "anthropic-testing",
+    "want": [
+      "`claude-opus-5-5`, xhigh"
+    ],
+    "row": null,
+    "ok": false
+  },
+  {
+    "preset": "anthropic-video",
+    "want": [
+      "`claude-opus-5-5`, xhigh"
+    ],
+    "row": null,
+    "ok": false
+  },
+  {
+    "preset": "anthropic-live",
+    "want": [
+      "`claude-haiku-5-5`, xhigh"
+    ],
+    "row": null,
+    "ok": false
   }
 ]
 ```
@@ -300,7 +324,7 @@ Status: **pass**.
 
 Status: **pass**.
 
-### A10 (2026-11-05T23:52:20.056Z)
+### A10 (2026-11-06T17:06:10.720Z)
 
 - What: the Whitechain RPC rules hold
 - Pass: true
@@ -330,14 +354,14 @@ Status: **pass**.
 
 ## B1: The `graphpay.eth` namespace resolves; all owners and agents exist
 
-Status: **pass**.
+Status: **fail**.
 
-### B1 (2026-11-05T22:52:28.170Z)
+### B1 (2026-11-06T17:07:47.165Z)
 
 - What: the graphpay.eth namespace resolves; all owners and agents exist
-- Pass: true
+- Pass: false
 - Expected: every line of scripts/ens/acceptance.mjs for this id passes
-- Evidence: `{"script":"scripts/ens/acceptance.mjs","exit":0}`
+- Evidence: `{"script":"scripts/ens/acceptance.mjs","exit":1}`
 
 ```json
 [
@@ -368,7 +392,7 @@ Status: **pass**.
   "pass B1 analyst.vitalik.graphpay.eth status active",
   "pass B1 payer.vitalik.graphpay.eth registered, epoch 0, node 0xdb661831…",
   "pass B1 payer.vitalik.graphpay.eth kind agent",
-  "pass B1 payer.vitalik.graphpay.eth status active",
+  "FAIL B1 payer.vitalik.graphpay.eth status active",
   "pass B1/B9a payer.vitalik.graphpay.eth coin type 2147485522 address is PAYER's wallet",
   "pass B1 rehearsal.vitalik.graphpay.eth registered, epoch 0, node 0xa03a8a93…",
   "pass B1 rehearsal.vitalik.graphpay.eth kind agent",
@@ -411,12 +435,12 @@ Status: **pass**.
 
 ## B2: The gate passes active agents
 
-Status: **pass**.
+Status: **fail**.
 
-### B2 (2026-11-05T22:52:44.691Z)
+### B2 (2026-11-06T17:07:56.803Z)
 
 - What: the gate passes active agents
-- Pass: true
+- Pass: false
 - Expected: every paying agent of the story passes the full gate (ENS and its checkout policy)
 - Evidence: `{"checkout":"0x75233b7341B9e86407e4b31599f07b8936716FcA"}`
 
@@ -430,9 +454,9 @@ Status: **pass**.
   },
   {
     "name": "payer.vitalik.graphpay.eth",
-    "ok": true,
-    "reason": null,
-    "capMicro": "6000000"
+    "ok": false,
+    "reason": "ENS_PAUSED",
+    "capMicro": null
   },
   {
     "name": "rehearsal.vitalik.graphpay.eth",
@@ -442,9 +466,9 @@ Status: **pass**.
   },
   {
     "name": "acceptance.vitalik.graphpay.eth",
-    "ok": true,
-    "reason": null,
-    "capMicro": "6000000"
+    "ok": false,
+    "reason": "CAP_EXCEEDED",
+    "capMicro": null
   }
 ]
 ```
@@ -453,7 +477,7 @@ Status: **pass**.
 
 Status: **pass**.
 
-### B3 (2026-11-05T23:52:24.075Z)
+### B3 (2026-11-06T17:07:58.809Z)
 
 - What: a scoped role stops an agent raising its own cap
 - Pass: true
@@ -478,12 +502,12 @@ Status: **pass**.
 
 Status: **pass**.
 
-### B4 (2026-11-05T22:52:44.692Z)
+### B4 (2026-11-06T17:07:58.810Z)
 
 - What: the payment preference parses
 - Pass: true
 - Expected: every line of scripts/ens/acceptance.mjs for this id passes
-- Evidence: `{"script":"scripts/ens/acceptance.mjs","exit":0}`
+- Evidence: `{"script":"scripts/ens/acceptance.mjs","exit":1}`
 
 ```json
 [
@@ -498,16 +522,16 @@ Status: **pass**.
 
 Status: **pass**.
 
-### B5 (2026-11-05T22:52:44.693Z)
+### B5 (2026-11-06T17:07:58.810Z)
 
 - What: a synthetic wildcard name resolves
 - Pass: true
 - Expected: every line of scripts/ens/acceptance.mjs for this id passes
-- Evidence: `{"script":"scripts/ens/acceptance.mjs","exit":0}`
+- Evidence: `{"script":"scripts/ens/acceptance.mjs","exit":1}`
 
 ```json
 [
-  "pass B5 acceptance-sh8bfy.sim.graphpay.eth graphpay.synthetic=true",
+  "pass B5 acceptance-0fdv87.sim.graphpay.eth graphpay.synthetic=true",
   "pass B5 wildcard kind agent",
   "pass B5 wildcard status empty",
   "pass B5 the walk says ENS_SYNTHETIC"
@@ -518,7 +542,7 @@ Status: **pass**.
 
 Status: **pass**.
 
-### B6 (2026-11-05T23:26:19.713Z)
+### B6 (2026-11-06T17:07:58.810Z)
 
 - What: killing a disposable agent makes the gate deny it
 - Pass: true
@@ -534,9 +558,9 @@ Status: **pass**.
 
 ## B7: The epoch changes on re-registration (fork test)
 
-Status: **not run** (no fork test for a new registration after a lapse or an unregister (only renew keeping the epoch); needs an anvil fork of Sepolia).
+Status: **not run** (the fork test exists but has no recorded output (needs an anvil fork of Sepolia, not run here)).
 
-### B7 (2026-11-05T23:52:24.077Z)
+### B7 (2026-11-06T17:07:58.811Z)
 
 - What: the epoch changes on re-registration (fork test)
 - Pass: null
@@ -547,6 +571,7 @@ Status: **not run** (no fork test for a new registration after a lapse or an unr
 {
   "epochTests": [
     "gate.fork.test.mjs: a lapse then renew revives the same epoch; a never-registered label is the next free disposable",
+    "gate.fork.test.mjs: B7: the epoch after re-registering: a new registration after an unregister or a lapse gets e + 1",
     "namespace.fork.test.mjs: B1/B2 on the fork: every name of the cast walks ok, is REGISTERED at epoch 0 with its own factory-proxy resolver"
   ]
 }
@@ -591,12 +616,12 @@ Status: **pass**.
 
 Status: **not run**.
 
-### B9 (2026-11-06T00:13:18.602Z)
+### B9 (2026-11-06T17:07:58.811Z)
 
 - What: the payee is the shop's ENS address
 - Pass: null
 - Expected: every line of scripts/ens/acceptance.mjs for this id passes
-- Evidence: `{"script":"scripts/ens/acceptance.mjs","exit":0}`
+- Evidence: `{"script":"scripts/ens/acceptance.mjs","exit":1}`
 
 ```json
 []
@@ -606,7 +631,7 @@ Status: **not run**.
 
 Status: **pass**.
 
-### C1 (2026-11-05T22:52:45.975Z)
+### C1 (2026-11-06T17:08:00.144Z)
 
 - What: the checkout is verified on the explorer
 - Pass: true
@@ -625,7 +650,7 @@ Status: **pass**.
 
 Status: **pass**.
 
-### C2 (2026-11-06T00:03:11.096Z)
+### C2 (2026-11-06T17:08:00.148Z)
 
 - What: a payment through the facilitator costs the payer no gas
 - Pass: true
@@ -663,12 +688,12 @@ Status: **pass**.
 
 ## C3: Partial refund, re-order and renewal work
 
-Status: **pass**.
+Status: **fail**.
 
-### C3 (2026-11-06T00:03:12.274Z)
+### C3 (2026-11-06T17:08:01.045Z)
 
 - What: partial refund, re-order and renewal work
-- Pass: true
+- Pass: false
 - Expected: Refunded(800000, full false), payer +0.80, gas 75,344 ±15%; re-order OrderCreated(kind 1, parent) + PaymentSettled 1.20, gas 252,082 ±15%; SubscriptionRenewed(cycle 2) + PaymentSettled of a kind-2 order, gas 201,555 ±15%
 - Evidence: `{"file":"docs/sessions/integration/hosted/paid-2026-11-06T00-00-52-957Z.json","startedAt":"2026-11-06T00:00:52.957Z","site":"https://graphpay-event.vercel.app","renewal":{"tx":"https://explorer.testnet.whitechain.io/tx/0x48b14aa45f56d487dee743721416a359fed96296b3ad0ababf546838f55e480f","by":"the hosted cron as RENEWER (T1's M4)","subscription":"the rehearsal agent's 120 s demo subscription (C3 asks only for cycle 2 and a kind-2 PaymentSettled)"}}`
 
@@ -676,7 +701,7 @@ Status: **pass**.
 {
   "refund": true,
   "reorder": true,
-  "renewal": true,
+  "renewal": false,
   "refundTx": {
     "tx": "0x0d04220e9a26243f919715e649d85681439dc4f2a492618bb1f1a916df9fe33f",
     "explorer": "https://explorer.testnet.whitechain.io/tx/0x0d04220e9a26243f919715e649d85681439dc4f2a492618bb1f1a916df9fe33f",
@@ -711,7 +736,7 @@ Status: **pass**.
 
 Status: **pass**.
 
-### C4 (2026-11-06T00:14:29.293Z)
+### C4 (2026-11-06T17:08:05.982Z)
 
 - What: revoked-agent and over-cap failures are recorded
 - Pass: true
@@ -770,7 +795,7 @@ Status: **pass**.
 
 Status: **pass**.
 
-### C5 (2026-11-06T00:03:12.276Z)
+### C5 (2026-11-06T17:08:06.019Z)
 
 - What: a repeat request returns "already paid"
 - Pass: true
@@ -802,7 +827,7 @@ Status: **pass**.
 
 Status: **pass**.
 
-### C6 (2026-11-06T08:05:32.304Z)
+### C6 (2026-11-06T17:08:06.045Z)
 
 - What: hosted endpoints return 401 without the passcode or token (the server-to-server keys, public access)
 - Pass: true
@@ -844,24 +869,24 @@ Status: **pass**.
 
 ## C7: **The qualifying payment in test USDT `0xcedfB56113143d55b2358b8CFbB0dEB5Ad2f55a7`**
 
-Status: **pass**.
+Status: **fail**.
 
-### C7 (2026-11-05T23:29:35.237Z)
+### C7 (2026-11-06T17:08:15.659Z)
 
 - What: the qualifying payment in test USDT
-- Pass: true
+- Pass: false
 - Expected: PaymentSettled on the USDT checkout; a 4,800,000-unit transfer of the configured test USDT; sent by the relayer (payer gas 0)
-- Evidence: `{"tx":"https://explorer.testnet.whitechain.io/tx/0x87505ef2457b6e925fa7378a55fd91419e83c37fb8effc06d901884700c72c00","payer":"acceptance.vitalik.graphpay.eth","by":"T1's usdt-ready (M3 part B)"}`
+- Evidence: `{"tx":"https://explorer.testnet.whitechain.io/tx/0xb77851de876e39556a5c690e938e8fda69e5aa69ef5079a20b85aadcdf27e3d2","payer":"acceptance.vitalik.graphpay.eth","by":"T1's usdt-ready (M3 part B)"}`
 
 ```json
 {
   "status": "success",
   "paymentSettled": true,
-  "usdtTransferMicro": "4800000",
+  "usdtTransferMicro": null,
   "txFrom": "0x1ab82871c3e1be64717269d45f08ca9d54c1ebf6",
   "payerSentIt": false,
-  "gasUsed": "309483",
-  "block": 12322239
+  "gasUsed": "244343",
+  "block": 12326954
 }
 ```
 
@@ -905,12 +930,12 @@ Status: **pass**.
 
 Status: **pass**.
 
-### D2a (2026-11-05T22:56:14.434Z)
+### D2a (2026-11-06T17:09:24.975Z)
 
 - What: the mirror step again over the same blocks sends no transaction
 - Pass: true
 - Expected: `{"checkpointForgotten":"no send","anchorHiddenToo":"no edge send (standing re-applies listed)"}`
-- Evidence: `{"range":{"from":12313887,"to":12322516},"errors":[]}`
+- Evidence: `{"range":{"from":12313887,"to":12326024},"errors":[]}`
 
 ```json
 {
@@ -918,7 +943,7 @@ Status: **pass**.
     "stats": {
       "written": 0,
       "standing": 0,
-      "skippedCheckpoint": 36,
+      "skippedCheckpoint": 58,
       "skippedRef": 0,
       "none": 0,
       "unknownLogs": 0,
@@ -927,22 +952,30 @@ Status: **pass**.
     },
     "wouldSend": [],
     "nonce": {
-      "before": 251,
-      "after": 251
+      "before": 2055,
+      "after": 2055
     }
   },
   "anchorHiddenToo": {
     "stats": {
       "written": 0,
-      "standing": 2,
+      "standing": 5,
       "skippedCheckpoint": 0,
-      "skippedRef": 25,
-      "none": 9,
+      "skippedRef": 46,
+      "none": 7,
       "unknownLogs": 0,
       "retries": 0,
-      "lastWriteAt": 1793919367467
+      "lastWriteAt": 1793984954392
     },
     "wouldSend": [
+      {
+        "port": "writeStanding",
+        "ref": "1874:0xa6307e945c81d993715d710586b71205c564afd3a57616d55f92e1084e09b6f7:3"
+      },
+      {
+        "port": "writeStanding",
+        "ref": "1874:0x696252535fead528ebca0add0f3c3d7a8bee70e7864fbeba6ed4fbd7ee031d41:0"
+      },
       {
         "port": "writeStanding",
         "ref": "1874:0x20f8b2dba2b0a310773383c4653c73fa4eb773790e905c63ee89b0c2cb48d493:0"
@@ -950,12 +983,16 @@ Status: **pass**.
       {
         "port": "writeStanding",
         "ref": "1874:0x63045e36f2df6ecc4e376df64e0d628cfcc9b07a2d3a722a15e7d51dd829e559:0"
+      },
+      {
+        "port": "writeStanding",
+        "ref": "1874:0x14289bcf11a6b26b49a0aa76c5148314d7f8fc4a0c459d3b0415433b3cc95863:0"
       }
     ],
     "edgeSends": 0,
     "nonce": {
-      "before": 251,
-      "after": 252
+      "before": 2055,
+      "after": 2057
     }
   }
 }
@@ -1100,7 +1137,7 @@ Status: **pass**.
 
 Status: **pass**.
 
-### D3 (2026-11-05T22:53:43.852Z)
+### D3 (2026-11-06T17:09:38.551Z)
 
 - What: tallies recomputed from edges equal the stored tallies
 - Pass: true
@@ -1115,33 +1152,33 @@ Status: **pass**.
     "epoch": 0,
     "source": "RAW_VERIFIED",
     "reputation": {
-      "orders": "250",
-      "refunds": "4",
-      "fails": "1",
-      "delivered": "245",
-      "paidUsdt": "1168.81",
-      "refundedUsdt": "15.2",
+      "orders": "277",
+      "refunds": "9",
+      "fails": "4",
+      "delivered": "268",
+      "paidUsdt": "1259.61",
+      "refundedUsdt": "23.2",
       "source": "RAW_VERIFIED",
       "synthetic": true
     },
     "stored": {
-      "orders": "250",
-      "refunds": "4",
-      "delivered": "245",
-      "onTime": "238",
-      "paidMicro": "1168810000",
-      "refundedMicro": "15200000",
-      "fails": "1",
+      "orders": "277",
+      "refunds": "9",
+      "delivered": "268",
+      "onTime": "261",
+      "paidMicro": "1259610000",
+      "refundedMicro": "23200000",
+      "fails": "4",
       "synthetic": true
     },
     "counted": {
-      "edges": 751,
-      "orders": "250",
-      "refunds": "4",
-      "delivered": "245",
-      "onTime": "238",
-      "paidMicro": "1168810000",
-      "refundedMicro": "15200000"
+      "edges": 835,
+      "orders": "277",
+      "refunds": "9",
+      "delivered": "268",
+      "onTime": "261",
+      "paidMicro": "1259610000",
+      "refundedMicro": "23200000"
     },
     "recountMatches": true,
     "explainId": "481d3731dbf6"
@@ -1152,33 +1189,33 @@ Status: **pass**.
     "epoch": 0,
     "source": "RAW_VERIFIED",
     "reputation": {
-      "orders": "1",
-      "refunds": "0",
-      "fails": "0",
-      "delivered": "1",
-      "paidUsdt": "4.8",
-      "refundedUsdt": "0",
+      "orders": "3",
+      "refunds": "1",
+      "fails": "1",
+      "delivered": "3",
+      "paidUsdt": "10.8",
+      "refundedUsdt": "0.8",
       "source": "RAW_VERIFIED",
       "synthetic": false
     },
     "stored": {
-      "orders": "1",
-      "refunds": "0",
-      "delivered": "1",
-      "onTime": "1",
-      "paidMicro": "4800000",
-      "refundedMicro": "0",
-      "fails": "0",
+      "orders": "3",
+      "refunds": "1",
+      "delivered": "3",
+      "onTime": "3",
+      "paidMicro": "10800000",
+      "refundedMicro": "800000",
+      "fails": "1",
       "synthetic": false
     },
     "counted": {
-      "edges": 3,
-      "orders": "1",
-      "refunds": "0",
-      "delivered": "1",
-      "onTime": "1",
-      "paidMicro": "4800000",
-      "refundedMicro": "0"
+      "edges": 10,
+      "orders": "3",
+      "refunds": "1",
+      "delivered": "3",
+      "onTime": "3",
+      "paidMicro": "10800000",
+      "refundedMicro": "800000"
     },
     "recountMatches": true,
     "explainId": "319ccfa4b1c6"
@@ -1188,18 +1225,18 @@ Status: **pass**.
 
 ## D4: GraphQL's top 10 matches the ground truth
 
-Status: **pass**.
+Status: **fail**.
 
-### D4 (2026-11-05T22:53:51.138Z)
+### D4 (2026-11-06T17:09:45.797Z)
 
 - What: GraphQL's top 10 matches the ground truth (seeded S city, synthetic)
-- Pass: true
+- Pass: false
 - Expected: exact order and amounts against the generator's identity truth; 2 calls
-- Evidence: `{"script":"packages/city/scripts/check.mjs (read-only)","file":"docs/sessions/arkiv/city/check-S.json","exit":0}`
+- Evidence: `{"script":"packages/city/scripts/check.mjs (read-only)","file":"docs/sessions/arkiv/city/check-S.json","exit":1}`
 
 ```json
 {
-  "ok": true,
+  "ok": false,
   "calls": 2,
   "explainId": "6d02b9d6f1a0",
   "bytes": 35370
@@ -1210,7 +1247,7 @@ Status: **pass**.
 
 Status: **pass**.
 
-### D5 (2026-11-05T22:53:52.818Z)
+### D5 (2026-11-06T17:09:47.678Z)
 
 - What: the explain trace lists the reads behind each answer
 - Pass: true
@@ -1232,7 +1269,7 @@ Status: **pass**.
 
 Status: **pass**.
 
-### D6 (2026-11-05T22:53:52.819Z)
+### D6 (2026-11-06T17:09:47.678Z)
 
 - What: benchmark at size S (calls exact; times recorded, not scored)
 - Pass: true
@@ -1251,14 +1288,14 @@ Status: **pass**.
 
 ## D8: The geo query returns only shops inside the box, and only from our writers
 
-Status: **pass**.
+Status: **fail**.
 
-### D8 (2026-11-05T22:53:52.820Z)
+### D8 (2026-11-06T17:09:47.679Z)
 
 - What: the geo query returns only shops inside the box, and only from our writers
-- Pass: true
+- Pass: false
 - Expected: the cast shops only; synthetic ones only when opted in
-- Evidence: `{"script":"packages/city/scripts/check.mjs (read-only)","exit":0}`
+- Evidence: `{"script":"packages/city/scripts/check.mjs (read-only)","exit":1}`
 
 ```json
 {
@@ -1273,7 +1310,7 @@ Status: **pass**.
 
 Status: **pass**.
 
-### D9 (2026-11-05T22:53:54.873Z)
+### D9 (2026-11-06T17:09:49.733Z)
 
 - What: a receipt cannot be edited
 - Pass: true
@@ -1301,7 +1338,7 @@ Status: **pass**.
 
 Status: **pass**.
 
-### D10 (2026-11-06T04:21:08.387Z)
+### D10 (2026-11-06T17:09:49.900Z)
 
 - What: an expired or missing quote is refused and the agent re-quotes
 - Pass: true
@@ -1331,13 +1368,13 @@ Status: **pass**.
     ]
   },
   "c": {
-    "quoteKey": "0x1fced134518db48adb16d628520187f3fe1beb6d43317aa56bd23034d3658dc4",
+    "quoteKey": "0xf568eba7813d8785ffcf35fd00c51734f2d52c2aa66c83be0793d4d558a56b2e",
     "owner": "0x146002b43A9Fb8EB963699e77Ed18579dC30A6e4",
     "lifeBlocks": 450,
     "wantBlocks": 450,
     "blockSeconds": 2,
     "validAfterSeconds": 596,
-    "file": "docs/sessions/integration/hosted/quote-2026-11-06T04-17-21-900Z.json"
+    "file": "docs/sessions/integration/hosted/quote-2026-11-06T05-19-34-442Z.json"
   }
 }
 ```
@@ -1364,12 +1401,12 @@ Status: **pass**.
 
 ## E1: Vitalik's request
 
-Status: **pass**.
+Status: **fail**.
 
-### E1 (2026-11-05T23:15:02.717Z)
+### E1 (2026-11-06T17:09:49.902Z)
 
-- What: Vitalik's request
-- Pass: true
+- What: the human's request
+- Pass: false
 - Expected: the exact request; budget 6.000000, deadline 20:00 local; scout and analyst both start before either ends
 - Evidence: `{"runFile":"docs/sessions/integration/runs/run-a8d00695846884f3/run.json"}`
 
@@ -1391,7 +1428,7 @@ Status: **pass**.
 
 Status: **pass**.
 
-### E2 (2026-11-05T23:15:02.718Z)
+### E2 (2026-11-06T17:09:49.903Z)
 
 - What: the agents choose the good shop, never the trap
 - Pass: true
@@ -1425,24 +1462,24 @@ Status: **pass**.
 
 ## E3: The payment is made in USDT on Whitechain
 
-Status: **pass**.
+Status: **fail**.
 
-### E3 (2026-11-05T23:29:42.411Z)
+### E3 (2026-11-06T17:09:59.119Z)
 
 - What: the payment is made in USDT on Whitechain
-- Pass: true
+- Pass: false
 - Expected: PaymentSettled on the USDT checkout; a 4,800,000-unit transfer of the configured test USDT; sent by the relayer (payer gas 0)
-- Evidence: `{"tx":"https://explorer.testnet.whitechain.io/tx/0x87505ef2457b6e925fa7378a55fd91419e83c37fb8effc06d901884700c72c00","payer":"acceptance.vitalik.graphpay.eth","by":"T1's usdt-ready (M3 part B)"}`
+- Evidence: `{"tx":"https://explorer.testnet.whitechain.io/tx/0xb77851de876e39556a5c690e938e8fda69e5aa69ef5079a20b85aadcdf27e3d2","payer":"acceptance.vitalik.graphpay.eth","by":"T1's usdt-ready (M3 part B)"}`
 
 ```json
 {
   "status": "success",
   "paymentSettled": true,
-  "usdtTransferMicro": "4800000",
+  "usdtTransferMicro": null,
   "txFrom": "0x1ab82871c3e1be64717269d45f08ca9d54c1ebf6",
   "payerSentIt": false,
-  "gasUsed": "309483",
-  "block": 12322239
+  "gasUsed": "244343",
+  "block": 12326954
 }
 ```
 
@@ -1450,7 +1487,7 @@ Status: **pass**.
 
 Status: **pass**.
 
-### E4 (2026-11-05T23:15:02.719Z)
+### E4 (2026-11-06T17:09:59.120Z)
 
 - What: the mirror writes it to Arkiv
 - Pass: true
@@ -1473,7 +1510,7 @@ Status: **pass**.
 
 Status: **pass**.
 
-### E5 (2026-11-05T23:15:02.719Z)
+### E5 (2026-11-06T17:09:59.122Z)
 
 - What: GraphQL shows the new edge and the updated tallies
 - Pass: true
@@ -1510,7 +1547,7 @@ Status: **pass**.
 
 Status: **pass**.
 
-### E6 (2026-11-05T23:15:02.719Z)
+### E6 (2026-11-06T17:09:59.126Z)
 
 - What: a refund updates the tallies
 - Pass: true
@@ -1535,7 +1572,7 @@ Status: **pass**.
 
 Status: **pass**.
 
-### E7 (2026-11-05T23:28:01.873Z)
+### E7 (2026-11-06T17:09:59.723Z)
 
 - What: a killed agent is refused
 - Pass: true
@@ -1559,7 +1596,7 @@ Status: **pass**.
 
 Status: **pass**.
 
-### E8 (2026-11-05T23:15:02.720Z)
+### E8 (2026-11-06T17:09:59.727Z)
 
 - What: every counting errand records its time and cost
 - Pass: true
@@ -1581,7 +1618,7 @@ Status: **pass**.
 
 Status: **pass**.
 
-### F1 (2026-11-06T00:11:30.285Z)
+### F1 (2026-11-06T17:10:05.393Z)
 
 - What: no secrets are in the repo
 - Pass: true
@@ -1590,16 +1627,16 @@ Status: **pass**.
 
 ```json
 {
-  "tree": "check: clean (738 files)",
+  "tree": "check: clean (1143 files)",
   "history": {
-    "commits": 313,
+    "commits": 598,
     "findings": {},
     "commitsWithFindings": []
   },
   "trackedEnvFiles": [],
   "vercelProduction": {
-    "vars": 15,
-    "secretShaped": 14,
+    "vars": 18,
+    "secretShaped": 17,
     "notHidden": []
   }
 }
@@ -1609,7 +1646,7 @@ Status: **pass**.
 
 Status: **pass**.
 
-### F2 (2026-11-06T08:05:32.305Z)
+### F2 (2026-11-06T17:10:05.395Z)
 
 - What: spending endpoints: visitors open (ADR-0069), the keys between our servers enforced
 - Pass: true
@@ -1687,7 +1724,7 @@ Status: **pass**.
 
 Status: **pass**.
 
-### F3 (2026-11-06T04:19:22.383Z)
+### F3 (2026-11-06T17:10:05.396Z)
 
 - What: the relayer's safety floor is enforced
 - Pass: true

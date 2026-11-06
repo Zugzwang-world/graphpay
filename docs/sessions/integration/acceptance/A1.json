@@ -1,15 +1,15 @@
 {
   "id": "A1",
-  "at": "2026-11-05T22:50:47.454Z",
+  "at": "2026-11-06T17:06:02.373Z",
   "pass": true,
   "what": "CI is green on main",
   "measured": {
     "conclusion": "success",
-    "headSha": "54af4519888c4d1cb6aa3f3b7d5caf6cfa2b94ae",
-    "url": "https://github.com/Zugzwang-world/graphpay/actions/runs/42124115751"
+    "headSha": "cac18f4ec1f1b054bdfe305d3d9d05ec436f7bbb",
+    "url": "https://github.com/Zugzwang-world/graphpay/actions/runs/42252758380"
   },
   "expected": "the latest ci run on main: success",
   "evidence": {
-    "url": "https://github.com/Zugzwang-world/graphpay/actions/runs/42124115751"
+    "url": "https://github.com/Zugzwang-world/graphpay/actions/runs/42252758380"
   }
 }

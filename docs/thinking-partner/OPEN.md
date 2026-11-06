@@ -4,25 +4,37 @@ The founder's to-dos and open questions. Each item says what, where, why and wha
 
 ## Founder now (Coordinator only)
 
-Updated 21:55 IST, Fri 6 Nov (Coordinator). **Standing rule (ADR-0066): no target times.** Only the submission (Sat 09:00 IST) and the presentation (Sat 09:30 IST) are fixed.
+Updated 22:49 IST, Fri 6 Nov (Coordinator, full sync). **Only the submission (Sat 09:00 IST) and the presentation (09:30 IST) are fixed** (ADR-0066). The full status is in `TRACKER.md`.
 
-1. **Start the Submission session now.** Usage reset to 0%. It writes the sponsor files and the submission text (`docs/plan/sessions/submission.md`, Sonnet 5.5, high).
-2. **The Arkiv key:** reads were restored at 21:54 IST by falling back to the keyless endpoint (#148). Ask the Arkiv team for a quota reset or a new key, so reads are fast again. **The payer is paused** (a visitor pressed Pause): resume it before you demo. It has spent 78 of today's 100, and the allowance resets at 05:30 IST.
-3. **Decide what else goes into tomorrow's demo,** from the Booth's open list:
-   - real ENS names for the dosa shops (T2) and their history (T3);
-   - the big city (T3; 100 to 130 minutes of seeding);
-   - caps, the kill and subscriptions (T1, T2).
-   - **Recommendation:** fix the Arkiv reads first, then only what the video and the pitch show.
-4. **The video** in your own voice (the event's rule), once the reads are back.
-5. **The Kimi balance:** a production errand costs $0.71 to $3.55, and with public access anyone can run errands. Top up enough for the video and the pitch.
-6. **This session's effort:** it runs at max; the plan says high. Switch it in this session's model menu. Only you can.
-7. **The written pre-event disclosure,** if not sent (`docs/plan/DISCLOSURE_MESSAGE.md`).
-8. **Keep the charger in and the lid open** until the presentation.
+0. **Plug in the charger now.** The Mac is on battery (78% at 22:49 IST, about 5 h 20 min left), and it runs the mirror and every session. Keep the lid open until the presentation.
+1. **Start the Submission session now.** `docs/plan/sessions/submission.md`, Opus 5.5 at max tonight (ADR-0062, amendment 3). It writes the sponsor files, the README and the form text.
+2. **The payer has been paused since 21:24 IST,** after someone pressed the public Pause. While it stays paused, every errand is refused.
+   - **Decide:** resume it now, and make Pause/Resume presenter-only (behind the passcode, an exception to ADR-0069).
+   - **Recommendation:** yes to both.
+3. **The Arkiv key's quota is used up.** Reads fall back to the keyless endpoint (#148), which is slower.
+   - Ask the Arkiv team to reset the quota or give us a new key.
+   - With a new key, run `pnpm -s secrets:set ARKIV_ACCESS_KEY` in the main checkout. The Coordinator pushes it to Vercel, and Join restarts the mirror.
+4. **Demo scope:** decide whether to move the dosa shops on chain tonight (new ENS names, their history, the Arkiv category; T2 and T3). Also decide on the big city (T3), and on caps, the kill and subscriptions (T1 and T2).
+   - **Recommendation:** only what the video and the pitch show.
+5. **The video,** in your own voice (the event's rule).
+6. **The Kimi balance:** check it on the Kimi platform. With public access, anyone can run errands, at $0.71 to $3.55 each.
+7. **ETHGlobal:**
+   - send the written pre-event disclosure, if you haven't (`docs/plan/DISCLOSURE_MESSAGE.md`);
+   - confirm that every team member is registered.
+8. **This session's effort:** a fresh Coordinator can take over from `docs/sessions/coordinator/handover.md`, because this one's context is nearly full.
+9. **Keep the charger in and the lid open** until the presentation. The mirror runs on this Mac.
 
-**Closed since 17:46:**
-- your test run;
-- the Booth's deck and the story on screen;
-- #132, merged and credited to ajatshatru01.
+**Closed today:**
+- both SDKs at 0.1.1;
+- #70 and #132 merged, credited to ajatshatru01;
+- the integration phases 1 to 4;
+- public access;
+- the payer's pass at 100;
+- every stage button proven live;
+- the story on screen;
+- the deck as the stage;
+- the CLAUDE.md model line;
+- the Arkiv read outage (#148).
 
 ## Funding (the Coordinator)
 
@@ -69,108 +81,76 @@ The kickoff rules (the deadline Sat 09:00 IST; AI use documented; spec files in 
 
 ## foundation
 
-- Nothing waiting on the founder beyond "Founder now".
+- Nothing open. M0 retired Thu 23:58 IST.
+- Closed today: nothing (M0 closed Thursday, #1 to #7).
 
 ## payments
 
-- **F3 done (T1):** the relayer floor is enforced. The production build of `apps/web` was run locally with the hosted environment and `MIN_RELAYER_BALANCE_WBT` raised to 1001 WBT, above the relayer's 0.795. A signed 0.40 payment sent to `/settle` was refused as `relayer_floor`, no transaction was sent (relayer nonce 13 before and after), and health showed the floor and the balance. Record: `docs/sessions/payments/f3.json`. This was run locally, not on a preview: a preview would need the relayer key in the preview environment, and the hosted URLs are pinned to the production facilitator. Join reads the record.
-- **For the Coordinator (CI), still open:** only `ci` is a required check, so the `contracts` job (forge build, ABI check, fork tests) does not gate a merge. Recommendation: an aggregator job named `ci` that needs every job and fails unless all succeeded (`needs` alone passes on a skipped job). Until then T1 enables auto-merge on contract PRs only after `contracts` is green.
-- **For every session (keys, settled):** real payments go through the hosted facilitator only (`/api/facilitator/{verify,settle}`, bearer `FACILITATOR_AUTH_TOKEN`); RENEWER belongs to the hosted cron. No local script sends as FACILITATOR or RENEWER during the demo (M4 pitfall). Join has switched.
-- **For the Coordinator (config, before M4):** ADR-0030 and the M5 amendment say `ALLOWED_MERCHANTS` and `SHOP_MERCHANTS` are built from the config, but the config holds no Whitechain role addresses (the shops' merchant wallets are only in `docs/technical/WALLETS.md`). Recommendation: add the public role addresses (`wallets.addresses`, role → address) to `packages/config/graphpay.config.json`; T1 then checks both env values against it at start-up. Safe default until then: both are env values that M4's env script derives from the role keys (never typed in), validated as addresses, and the shop's payee must still equal its ENS address.
-- Nothing for the founder in M3. Gas on the real chain (04:13 IST): a first payment with its approval 309,483 gas, about 0.0015 WBT; FACILITATOR still holds about 0.79 WBT, far above its 0.3 WBT floor.
+- **Subscribe and cancel** (owner: T1). The hosted shop and facilitator have no subscription endpoints, so both phone buttons say "not live yet". Next: build them, if the founder keeps subscriptions in the demo.
+- **Run the next renewal** (owner: T1). It does nothing in live mode; the hosted cron renews due subscriptions by itself, on the 2-minute demo clock. Next: a route for the phone, with subscribe.
+- **Decline refund** (owner: T1). "Not live yet" on the merchant phone. Next: build it if the demo shows it.
+- **The cap actions** (owner: T1). The agent raising its own cap is "not live yet", and "Dosas for everyone" must be refused as over the pass. Next: build both on the real cap checks, if in scope.
+- **The 0.80 coffee re-order** (owner: T1; ADR-0073). The re-order still re-buys the 4.80 combo. Next: the Coordinator adds `order.reorder.sku` (0.80) and its prompt text to `story.json`; the shop and the re-order route follow it.
+- **The CI gate** (owner: Coordinator). The `contracts` job does not block a merge. Next: an aggregator `ci` job that fails unless every job passed; until then, merge contract PRs only on a green `contracts`.
+- Closed today: M3 and M4 (#45, #62); F3, the relayer floor (#78); the quote retry (#96); the payer's cap at 100 on-chain (#107); the settle safety (#114); the merchant addresses (env default kept).
 
 ## identity
-- **Nothing needs the founder.** Defaults taken: non-paying agents publish a zero cap in ENS (ADR-0059; recommendation: keep). The agent record `agent-endpoint[mcp]` points at the hosted MCP and B8's MCP call now passes (closed 2026-11-06, `scripts/ens/acceptance.mjs`).
-- **For Join (the watcher):** host `createEnsWatcher` from `@graphpay/ens` in the workers process: `watcher.start()`, then `watcher.run()`. Give it `sink = { updatePolicy: createPolicySink({ configured, readPolicy, writePolicy }).updatePolicy, patchNode }` (POLICY_WRITER signs `writePolicy`; one nonce stream: only the watcher writes policies after M2's setup). A persistent `checkpoint` ({ get, set }) is optional: without it the watcher starts at the head and catches up from chain state. `node scripts/ens/watch.mjs` shows it running with logging sinks.
-- **For the Coordinator (only when the kill demo needs a fresh label):** `DISPOSABLE_2` has a key and no funds; it needs 0.005 WBT and 1 test USDT (`pnpm funding`) before `node scripts/ens/owner.mjs disposable --real`. `disposable-1` is the first kill target.
-- **Decision for the founder (low stakes):** `ens_check` says ACTIVE for any status other than `paused` (the agents spec), while the gate refuses anything but exactly `active`. Recommendation: keep the spec wording.
+
+- **ENS names for the dosa shops** (owner: T2). Filter & Fold, Idli Index and Tawa Tangle, and their agents, still use the test cast's labels. Next: if the founder says yes, register the new names; the Coordinator updates `story.json`; then T3 moves the history.
+- **The kill** (owner: T2, with the Coordinator). `/api/customer/kill-disposable` says "not live yet": it needs T2's provisioning and a funded disposable wallet (`disposable-1` is already killed). Next: if in scope, the Coordinator funds DISPOSABLE_2 (0.005 WBT and 1 test USDT, `pnpm funding`); T2 provisions it (`node scripts/ens/owner.mjs disposable --real`) and wires the route.
+- Closed today: M6 and B8's MCP call (#40); the watcher in the workers (#46); B7 and B9 (a) (#83, #84); the payer's ENS cap at 100 (#106); the `ens_check` wording (the spec's, kept).
 
 ## arkiv
 
-- **What:** the story's re-registered shop epoch. **Where:** `packages/config/story.json` `syntheticCity.reRegisteredShop.epoch` (2). **Why:** fresh ENSv2 names start at epoch 0 and a re-registration goes up by one (`planning/SPEC/ARKIV_GRAPH.md` §8), so 1 would match the spec; 2 copies the lab. The S city uses the story's value; nothing is wrong by identity either way. **Recommendation:** the Coordinator sets it to 1 in the final story before M.
-- **What:** T3 added two blocks to the story config. **Where:** `story.json` `syntheticCity.generator` (generator inputs; the spec's values, the rest labelled as T3's choices) and `locations.neighbourhoods` (8 OpenStreetMap places with links). **Why:** ADR-0047 says every city parameter and place lives there. **Recommendation:** the Coordinator keeps them when the final story replaces the cast.
-- **What:** publish `@graphpay_ethglobal/arkiv-graph` 0.1.0 (ADR-0063). **Where:** `packages/arkiv-graph`; the Coordinator runs `pnpm publish` after the founder's npm login. **Why:** the package, README quickstart, CHANGELOG, FEEDBACK and licence are ready (09:50 IST, PR below); versions freeze after the submission. **Recommendation:** re-check the name is free right before publishing (`npm view @graphpay_ethglobal/arkiv-graph name version`); the full API reference follows in 0.1.x, after the submission only if the rules allow it.
-- **What:** the GitHub labels and issue template. **Where:** the labels `arkiv-graph` and `feedback`, and `.github/ISSUE_TEMPLATE/arkiv-graph-feedback.yml` (Coordinator). **Why:** the README, FEEDBACK.md and `package.json` `bugs` point at that template. **Recommendation:** merge the template before publishing so the links work.
-- **What:** where race mode gets its truth. **Where:** `apps/web/app/api/race` (T5) calling `raceQuestion` from `@graphpay/money-graph`. **Why:** the "correct" badge needs the generator's truth, which comes from `@graphpay/city` (pure, a few milliseconds at S); the web app does not depend on it yet, and adding it changes the lockfile. **Recommendation:** T5 adds the workspace dependency in its next dependency PR (usage in `docs/sessions/arkiv/README.md`, "Race mode"); until then the race still shows reads and bytes, with `correct: null`.
-- **What:** wiring the activity rows. **Where:** the Open toggle (T5's merchant route) calls `openShop` every few minutes while on and `closeShop` when off; the agent run route passes `hooks: activityHooks(directoryConn)` to `runErrand` (T4/T5); usage in `docs/sessions/arkiv/README.md` ("Activity"). **Why:** the rows exist only when something writes them; acceptance D11 reads them. **Recommendation:** the Coordinator asks T5 and T4 to wire them before CP6; both are additive and no-op until called.
-- **What:** acceptance D7 (the benchmark at size M). **Where:** `bench/run.mjs` refuses M. **Why:** M waits for the founder's final story (ADR-0049). **Recommendation:** after the M seed, run `node bench/run.mjs --size M --end <date>` once the size guard is lifted; T3 does it.
-- **What:** Graph Arkiv's bytes on window questions. **Where:** `packages/arkiv-graph/src/engine.mjs` reads every column (`select('*')`). **Why:** Q1's 90-day window adds up one day-tally row per active day (70 rows, about 107 KB, against plain's 1.3 KB); the reads are equal (3 against 3), and reads are the result (ADR-0042). **Recommendation:** leave it for the event; projections in the engine's reads would cut it, after the Friday items if time allows.
-- **What:** two writer limits the reviewer noted (no action needed tonight). **Where:** `packages/arkiv-graph/src/writer.mjs`. **Why:** a foreign transaction of another shape at a pinned nonce stops the write loudly (`WriteUncertainError`) rather than being judged not ours; `writeShop` passes no ownership check, which is safe only while W_DIRECTORY scripts never run with the site live (ADR-0033). **Recommendation:** keep ADR-0033's rule; T3 revisits it after the Friday items if time allows.
-- Closed: the explorer's entity page (`/entity/<key>`, verified by the website session; `arkiv/schema.md` updated); Join's `$attributes` finding (PR #25); the W_DIRECTORY top-up (it holds 0.50 tGLM); the i32 box (ADR-0058).
-- **What:** the Arkiv drafts need a final pass. **Where:** `arkiv/friction.md`, `how-you-use-arkiv.md`, `swarm.md` (drafts, 10:40 IST). **Why:** Submission (M17) finishes them; the judges read them. Open items inside: the `agent_presence` and `handoff` rows are built but no agent run calls them (T4/T5); `swarm.md` still lists `refund_evidence` as not built; the friction rows list only what we reproduced at the event. **Recommendation:** after the last live run, re-check each repro and the numbers against `docs/technical/FACTS.md`, and add anything the founder's own run turns up.
-- **Closed (Coordinator, Fri):** `refund_evidence` (the encrypted refund photo on Swarm) is dropped: first in the cut order, and the demo's refund request carries no photo. `arkiv/swarm.md` says so.
-- **What:** the Swarm gateway keeps data "for a limited time". **Where:** `arkiv/swarm.md`, `readMenu`. **Why:** a menu the gateway has lost is uploaded again under the same reference on the next read that passes the menu document; the Arkiv rows live 14 days. **Recommendation:** re-run `pnpm -s --filter @graphpay/money-graph menus --execute` once the founder's final story is locked and again before the video.
+- **The dosa shops' history and category** (owner: T3). The history sits under the test cast's names, and the Arkiv category still says "sweets". Next: after T2's names, move the history and rename the category in the directory rows and graph nodes together; re-upload the Swarm menus (`pnpm -s --filter @graphpay/money-graph menus --execute`), and once more before the video.
+- **The big city at size M** (owner: T3). It waits for the locked story (ADR-0049), and `story.json` still says `test`, unlocked. Next: the Coordinator locks it and sets `syntheticCity.reRegisteredShop.epoch` to 1; T3 seeds M, lifts the size guard and runs D7 (`node bench/run.mjs --size M --end <date>`).
+- **The website's GraphQL asks** (owner: T3; default taken). `Shop` has no Arkiv entity `key`, and `Edge` no `entityKey` or `orderKind` (the map's links, three CSV columns). Next: add them if cheap; the demo works without them.
+- Closed today: `Reputation.synthetic` (#30); the race's truth badges (#36); the activity rows, wired (#39, #88); menus and images on Swarm (#82, #109); the writer fix and 0.1.1 on npm (#97, #98, #103); `refund_evidence` dropped (#86); the Arkiv read outage (#148).
 
 ## agents
 
-- Nothing waiting on the founder. Open for Join: the config's `whitechain.contracts` is empty, so the payer refuses every real 402 (`UNKNOWN_CONTRACT`) until T1's checkout address is in the config (recommendation: T1 adds it at M2; the payer reads every address in that section).
+- Nothing open. T4 is idle; Kimi tuning only if asked.
+- Closed today: the Kimi switch (#87, #92) and its calibration (#95); the checkout address in the config.
 
 ## integration
 
-Updated 09:47 IST, Fri 6 Nov. Nothing for the founder now. M13 is done; the two checks left are T2's (below). Closed: F3 (T1's record, PR 78). Closed: C4(a) (passed 05:38 IST with the workers paused, Coordinator's go).
-
-- **No rate limit on the live runner (the founder, 12:40 brief; recorded here).** What: PR 108 removes the runner's 6-an-hour cap; one errand at a time per server instance stays. Why it matters: concurrent Vercel instances each allow one errand, so API spend is bounded only by the prepaid Kimi balance and the contract's daily caps (the payer's 100 a day). Recommendation: keep the Kimi balance small, as decided.
-- **Keep the lid open (watch).** What: the workers process runs on this Mac under `caffeinate -ims`. Where: this Mac. Why: caffeinate does not stop a closed lid from sleeping the Mac; the mirror then resumes from Arkiv on wake (D15), but the site's scores lag until then. Recommendation: keep the lid open and the charger in until Saturday's submission.
-- **B7: the re-registration fork test (T2): closed 2026-11-06 05:00 IST.** `packages/ens/test-fork/gate.fork.test.mjs`, test "B7: the epoch after re-registering…": a new registration after an unregister or a lapse gets e + 1; the AVAILABLE view after an unregister shows 0 → 2. Needs a fork with `disposable-2` and `disposable-3` provisioned (`real-run.mjs --fork … --disposable n`); the check reads the title through `acceptance/tracks.mjs`.
-- **B9 (a): the payee comparison (T2): done 2026-11-06 05:15 IST for the shop with a settled payment.** `scripts/ens/acceptance.mjs` now compares the merchant of each cast shop's last settled order with the shop's `addr(2147485522)`: Kesar Kingdom passes (order paid the ENS address; settlement transaction in the script output). The other two shops have no settled payment yet and are skipped, not failed; re-run `node scripts/ens/acceptance.mjs` after more payments.
-- **Ask of T3: the reputation's synthetic label (open since 03:29 IST).** What: `Reputation.synthetic` in `packages/money-graph/src/graphql.mjs` comes from the node row only, so scores built from the labelled history say `synthetic: false`. Recommendation: true when the node or any tally row read is synthetic.
+- **The mirror's new write** (owner: Join). The mirror restarted on #148 at 21:58 IST and caught up, with no new payment since. Next: once the payer is ACTIVE again, run one errand and check that its event reaches Arkiv.
+- Closed today: the live runner, with the run id and hooks (#88); the reliable errand (#108, #112, #114, #119); no hourly cap (ADR-0069); C6 and F2 for public access (#120); M13, D10 and C4(a) (#66, #67, #79); the lid note (now in "Founder now").
 
 ## phones
 
-Updated 13:05 IST, Fri 6 Nov (Integration).
-- **For the team (`frontend/` is theirs): a way to hide unbuilt actions.** What: in live mode the phones must hide subscribe and cancel, the kill, the cap actions, decline and reset until T1 and T2 build them. Where: `frontend/src/demo/contract.ts` and the buttons that call those methods. Why: the adapter cannot hide a button. Recommendation: an optional `supports?: Partial<Record<keyof DemoAdapter, boolean>>` on the adapter (their "PROPOSED" pattern); a button whose method is `false` is not rendered. Our adapter fills it.
-- **For the team: label sample orders.** What: `Order.synthetic` is never shown. Why: the shop's seeded history is synthetic and must be labelled, so the live adapter leaves it out for now. Recommendation: a small "Sample data" chip (their `copy.common.synthetic`) when `synthetic` is true.
-- **For the founder's story lock: the re-order prompt's text.** What: their desk has a second quick prompt ("Re-order my usual"); our story has no text for it, so the phones show only the ask. Where: `packages/config/story.json` (`order.reorder`). Recommendation: add a `prompt` field with the final story.
-- **For Join (acceptance C6 and F2, ADR-0069): the route table's labels.** What: `apps/web/lib/routes.ts` still labels the site's routes `gate: 'passcode'`, and its header and the how page's table say so. Why: under public access they are open to visitors; the server-to-server checks are the shop's pay route, the facilitator's and recorder's tokens and the cron secret. Recommendation: relabel them in your F2 rewrite; the unit tests already cover both modes (`apps/web/lib/routes.test.ts`).
-- **Watch (founder): the Open switch has no cooldown.** What: each toggle is one W_DIRECTORY write on Arkiv. Why: a visitor can toggle it repeatedly; W_DIRECTORY holds 0.48 tGLM. Recommendation: accept for the demo and watch the balance; a cooldown is a one-line change if needed.
-- **For the team: optional repeat buyers on the shop card.** What: `ShopChoice.repeatBuyers` is required, but the graph has no repeat-buyer count, so the live card shows a dash. Where: `frontend/src/apps/customer/CustomerDesk.tsx` (`shopFacts`). Recommendation: make it optional and leave it out of the line when unknown.
-- **For the team: a pause and resume button (F9).** What: the live adapter's `pauseAgent` and `resumeAgent` work, but no screen calls them yet. Recommendation: the agents page's switch calls them for the paying agent.
-- **For the team: draw product images (Swarm).** What: the phones' data now carries Kesar Kingdom's gulab jamun image from Swarm (read through its Arkiv menu row); order items carry `productId`. Where: `frontend/src/apps/customer/CustomerOrders.tsx` and the quote sheet. Recommendation: show `productById(item.productId)?.image` as a small thumbnail when it is set. Done-when needs one image on Vitalik's phone.
-- **For the team: a receipt for a re-order.** What: a paid re-order sends `payment.settled` with its link, but the thread draws receipts only for quotes. Recommendation: show a small paid card in the thread for a settled payment with no quote.
+- **The team's four asks** (owner: the team, through T5's review):
+  - a receipt card for a paid re-order (receipts are drawn only for quotes);
+  - `ShopChoice.repeatBuyers` optional (the live card shows a dash);
+  - a "Sample data" chip for seeded orders;
+  - hiding unbuilt buttons (an optional `supports` map the adapter fills), once the founder settles the demo scope.
+- Closed today: the team's phones and controls (#70, #132); phases 1 to 4 (#111, #122, #124, #128); public access (#117); product photos (#140); the route labels (#120); the re-order's prompt text (moved to payments); the Open switch's cooldown (accepted).
 
 ## website
 
-- **Open (default taken):** the kill button (`/api/customer/kill-disposable`) still says "not live yet": it needs T2's `provisionDisposable` plus a funded disposable wallet, which are not wired yet.
-
-- **Founder to-dos:** none now. Friday: the final story config goes to the Coordinator, as before.
-- **Ask of T3 (default taken):** the GraphQL `Edge` has no Arkiv entity key, no Arkiv transaction and no `payload` (item, order kind), so the merchant stream sends them as `null` and the accountant CSV has no "item", "kind (one-off, re-order, renewal)" or "Arkiv entity key" column; the settlement tx comes from the edge ref. Why: `WEBSITE_SPEC.md` §4 lists them. Recommendation: add `entityKey` and an `orderKind` to `Edge` if cheap; the CSV and pop-up pick them up with a one-line change. Not needed for the demo to work.
-- **Ask of the Coordinator or the founder (to put the store online):** (1) create the Vercel project `graphpay-store` from `apps/store` (a login step, I do not touch Vercel projects); (2) set its env as Sensitive values: `MERCHANT_ADDRESS` (the shop's payout address, from `docs/technical/WALLETS.md`, SHOP_KESAR), `DEMO_PASSCODE` (24+ characters), `FACILITATOR_AUTH_TOKEN` (the hosted facilitator's bearer token, the same name as in `env.example`), `FACILITATOR_URL` (default `https://graphpay-event.vercel.app/api/facilitator`), and for dispatch and refunds `SHOP_KESAR_PRIVATE_KEY`; (3) the shop's payout wallet needs a bounded USDT float approved to the checkout for refunds. Why: M16's done-when ("a human pays in the store with a browser wallet and no gas") needs T1's hosted facilitator (M4) and a wallet on Whitechain Sepolia (chain 1874) that holds test USDT. Recommendation: set the env when M4 lands, then one real purchase from a browser wallet before rehearsal 1; the wallet signing path is tested in code through a mock EIP-1193 provider, not yet in MetaMask itself.
-- **Dependency (told T6 at 04:30 IST, agreed by the Coordinator):** `packages/checkout-kit` uses only the public exports of `@graphpay_ethglobal/agentpay` (renamed from `@graphpay/agentpay`, ADR-0063): `createMerchant`, `httpFacilitator`, `whitechainNetwork`, `decodeHeader` (and in tests `signOrderPayment`, `buildRequirement`, `createOrder`, `nodeOf`). Recommendation: T6 keeps them stable or says before changing them.
-- **Open (default taken):** the store's Sunday box (subscribe and cancel) is not built: the kit's merchant has it (`shop.merchant`, agentpay's `signSubscription`) but the button offers one-off orders and re-orders only. Recommendation: after the video-critical items, if time.
-- **Ask of T3 (default taken):** the GraphQL `Shop` has no Arkiv entity `key`, so a map dot opens the explorer's query page for its directory row (`project = str('graphpay') AND type = str('shop') AND shop_key = key(0x...)`) rather than its entity page. UNVERIFIED that the explorer's query page accepts this text (the spec marks it so). Recommendation: add `key` to `Shop` (agent presence rows already have one) so a dot opens `/entity/<key>`; the map picks it up with a small change.
-- **Ask of Join (M12 wiring of the website's runner):** `ErrandInput` (in `apps/web/lib/run-registry.server.ts`) now carries `runId`, the id the website knows the run by. Pass it on as the errand's `runId` (`runErrand({ ..., runId: input.runId, hooks: activityHooks(dir) })`): the agents write their handoff and presence rows under it, and the explainer's lanes and the map query by it. Why: with a different id the lanes stay empty ("No handoff records for this run"). Recommendation: do it in the same PR that sets the runner in `apps/web/lib/agents-live.server.ts`.
-- **Closed by T6's #64 (merged):** `merchant.exportCsv` of `@graphpay_ethglobal/agentpay` now reads logs in chunks the public RPCs accept. Still to do on my side: rerun the store's export once and note the row for the kit payment (order `0x0864…05f0`).
-- **Ask of the Coordinator (Mark dispatched and Refund on the event site):** the shop's key (`SHOP_KESAR_PRIVATE_KEY`, from the story's wallet role) must be in Vercel Production for `graphpay-event`; the hosted shop already uses it for deliveries, so it is probably set. For a refund the shop wallet must hold test USDT and have approved the checkout (the route says so if not: "The shop wallet lacks the balance or the approval"). Recommendation: one dispatch and one partial refund from the stage before rehearsal 1, with the passcode.
-- **Ask of T1 (default taken):** a shared table of refund reason codes. The contract takes a `uint8` and only emits it; the merchant phone sends `1` ("the merchant's own refund", `MERCHANT_REFUND_REASON` in `apps/web/lib/merchant-actions.server.ts`), the customer's request uses "2 squashed" in the story. Recommendation: one table in `@graphpay/contracts` so the mirror, the export and the phones read a code the same way.
-- **Ask of the Coordinator (Request refund on the event site):** set `W_SYNC_PRIVATE_KEY` in Vercel Production for `graphpay-event` (the recorder's key; the hosted recorder route uses the same one, so it is probably set). Without it `POST /api/customer/refund-request` answers "not live yet". Recommendation: one Request refund from the stage with the passcode before rehearsal 1.
-- **Note (default taken):** Request refund's one-per-minute and six-per-minute limits live in each server instance's memory, so a passcode holder who fans out can still write more than that. Recommendation: acceptable behind the passcode; if W_SYNC's nonce is ever starved, check the order's trail for a recent request before writing.
-- **Ask of T1 (default taken):** the hosted shop has `/catalog`, `/quote` and `/orders/:id/{pay,reorder}` only. Subscribe and Cancel on the customer phone need a hosted endpoint pair (agentpay's `merchant.subscriptions(plan)` and `cancellations()`) over a facilitator that creates subscriptions (`facilitator.subscribe`, `cancelSubscription`); the hosted facilitator has neither. Until then both buttons say "not live yet". Recommendation: only if the Sunday box is on the video's script.
-- **Ask of the Coordinator (Re-order on the event site):** `PAYER_PRIVATE_KEY` in Vercel Production, funded with test USDT and bound to the payer agent by an active spending pass (the story's daily cap is 6.00 USDT; a re-order is 1.20). Without it the button says "not live yet". Then one real re-order from the stage; tell Join first (one sender at a time on the hosted facilitator).
-- **Bug found on first real use (11:17 UTC), Re-order:** 409 BAD_402, nothing paid. Cause: it pays through agentpay's buyer, which needs an `agentpay` block in the 402 that the hosted shop's 402 does not carry. Fix is written up in `docs/sessions/website/resume.md` (pay with `graphPayOrderClient` and `x402Client`, as `integration/hosted.mjs` does). Not yet fixed. Merchant Refund and Dispatch 502 (wrong account type on the send) are fixed in the PR that carries this line.
-- **Known limit (default taken, reviewer-flagged):** Re-order's guard against a double tap lives in each server instance's memory (the payer agent is held until a signature can no longer settle, about 11 minutes after an unclear outcome, 2 minutes after a paid one). Two taps landing on two different instances at the same moment would each sign. The pass's daily cap (enforced by the contract) bounds the loss to what is left under 6.00 USDT that day. There is no database to close it (ADR-0003). Recommendation: accept; one person taps one button.
+- **The read-limit ceiling** (owner: T5). ADR-0069's amendment says no ceilings, but the read limits raised in #113 still cap a runaway client. Next: remove or keep them, and record which in the ADR.
+- **The deck's other slides** (owner: T5). The non-demo slides have not been checked one by one (ADR-0074). Next: check each on production.
+- **The refund-reason table** (owner: T5, with T1). The contract only emits a `uint8`, and the merchant phone sends 1. Next: one table in `@graphpay/contracts` for the mirror, the export and the phones.
+- **The demo store online** (owner: Coordinator, then T5). https://graphpay-store.vercel.app answers "deployment not found" (22:40 IST). Next: create the Vercel project `graphpay-store` from `apps/store`, and set the names it reads (`MERCHANT_ADDRESS`, `FACILITATOR_URL`, `FACILITATOR_AUTH_TOKEN`, `DEMO_PASSCODE`) by helper. Then T5 makes one browser-wallet purchase and checks its export row. Its Sunday box only if time allows.
+- Closed today: Request refund and Refund, live (#73, #129); Re-order, live (#81, #131); the Open toggle; pause and resume; the feed's 50-edge stall and the CSV (#104); the keys `SHOP_KESAR`, `W_SYNC` and `PAYER` on Vercel; the kit's log reads (#64).
 
 ## agentpay
 
-- **The examples' story values (for the Coordinator).** What: a new `agentpayExamples` section in `packages/config/story.json`: the ride (operator name, from and to neighbourhoods, a 1.50 fixed fare, synthetic) and `testAmountMicro` (0.01, the real test payment's operational amount, never a story price). Where: the story config, which you own. Why: the brief says names come from the story config, and the ride had none. Recommendation: keep the section in the final story, or tell T6 to move it.
-- **A real ride payment needs a ride merchant in the cast (for the Coordinator, T2 and Join).** What: a real payment to a merchant the mirror does not know is parked, and the mirror's checkpoint never passes a parked event. Where: `packages/mirror/src/mirror.mjs`. Why: one test ride would stall the money graph's mirror. Recommendation: keep the ride on the fork (as now). If the founder wants a real ride, add the operator to the cast (story, ENS name, mirror actor) first.
-- **RENEWER has a second use (for the Coordinator, `docs/technical/WALLETS.md`).** What: AgentPay's real test payment settled through the reference relayer on the RENEWER key (one `settleOrder`, 309,451 gas); RENEWER now holds about 0.098 WBT. Why: the wallet record should say so, and T1's renewals share its gas. Recommendation: note it in WALLETS.md; top up RENEWER before the M4 renewals run; T6 makes no further real payments with it tonight.
-- **Closed 04:20 IST: T1's facilitator adapter (A4).** `packages/agentpay/test-fork/t1-facilitator.test.mjs` pays the SDK merchant through T1's `createGraphPayFacilitator` both in process (`inProcessFacilitator` over an `x402Facilitator`) and over `facilitatorHandler` (`httpFacilitator`). Nothing was missing from T1's public exports, and no wire change was needed. For T1, no action: the test stubs the ENS gate (the fork has no ENS), as T1's own fork e2e does.
-- **T5's checkout kit depends on AgentPay's public exports (for T6, kept).** What: `packages/checkout-kit` (T5, M16) uses `createMerchant` (route, exportCsv, deliver, refund, the 402 flow), `httpFacilitator`, `whitechainNetwork` and `decodeHeader`, plus four helpers in its tests. T6 keeps them stable and tells T5 before any change. T5's note, no action: the SDK imports Node modules, so a browser bundle cannot use it; a browser-safe signer subpath is a V2 idea.
-- **Closed 05:30 IST: the export failed on the real chain (T5's report).** What: `exportCsv`, `chargeDueRenewals` and `watchRenewals` searched logs 50,000 blocks at a time; Whitechain's RPC refuses over 10,000 (-32602) and the public Ankr endpoint over about 1,000 (-32062), measured 05:00 IST. Now: 10,000 by default, a tenth after a range refusal, kept for that merchant; new option `logChunk`. Checked read-only on both public RPCs: 15 orders each (6 and 42 calls).
-- **FUNDER's test USDT is down to 15.54 (for the Coordinator).** What: the fork tests drew their test USDT from FUNDER by impersonation and began to fail once it fell under 20. They now write the balance on the fork, so they no longer need it. Recommendation: nothing for T6; check FUNDER before the next real payments and top-ups.
-- **Closed 04:35 IST: a flaky fork test was an SDK bug.** `exportCsv` read the chain head through viem's cached `eth_blockNumber` (kept for the polling interval, about 4 s), so a refund mined in the last seconds could be left out of the CSV. It now reads the head uncached (also in the renewal charge and watch). The CSV fork test failed 2 of 3 runs before and passed 3 of 3 after. No action.
-- **Outside developers cannot settle on our deployed checkout (for the Coordinator, 0.1.0 publish).** What: `GraphPayCheckout.settleOrder` is `onlyRelayer`, so only GraphPay's granted relayers can settle there. Where: the README, "Using it on the real Whitechain Sepolia". Why: the founder's rule is that nobody else can spend our gas or break the demo. Now: the 5-minute quickstart runs on a local anvil fork with the developer's own checkout (`@graphpay_ethglobal/agentpay/sandbox`, needs Foundry's `anvil`), and on the real testnet a developer deploys their own with `deployCheckout` and their own relayer. Recommendation: say this when you ask developers at the venue to try it.
-- **Publish notes (for the Coordinator).** Publish with `pnpm publish --access public` from `packages/agentpay`. `devDependencies` still name the private workspace packages (tests only; npm does not install them). The files list is checked: no secret, no keyed URL (`pnpm check` over the unpacked tarball is clean). `scripts/check.mjs` has one new exemption, the generated `packages/agentpay/src/vendor/defaults.mjs`, backed by a sync test.
-- **Feedback.** Label `agentpay` and `feedback`, template `.github/ISSUE_TEMPLATE/agentpay-feedback.yml`; `packages/agentpay/FEEDBACK.md` is the log (date, who, what they asked, outcome). T6 fills it as issues arrive.
+- **The README link to the demo app** (owner: T6; T3 for arkiv-graph). ADR-0076 says both package READMEs link to it; neither does yet. Next: add it in the repo; npm shows it only after a 0.1.2 (the founder's login), before the freeze.
+- **Feedback** (owner: T6). No `agentpay` issue yet. Next: log each one in `packages/agentpay/FEEDBACK.md`.
+- Closed today: 0.1.1 on npm (#99, #103); the labels and issue templates; A4 (#47); the log-range fix (#64); the examples' story values (kept in `story.json`); RENEWER's second use (in `WALLETS.md`); FUNDER's test USDT (topped up); the ride (stays on the fork).
 
 ## records
 
-- **npm login for the publish (ADR-0063, item 18).** What: your `npm login` and go-ahead when both SDKs are ready (about 12:00). Where: a Terminal-panel tab the Coordinator opens; npm's sign-in and the 2FA happen there and Claude never sees them. Why: publishing needs your account, and a publish can't be undone after 72 hours. Recommendation: nothing now; the Coordinator asks.
-- **Prompt logs land in the main checkout** (P-records-1). What: the prompt-log hook writes every session's log to `~/graphpay/prompts/raw/`, not to the session's worktree, so track PRs do not carry their logs. Recommendation: the Coordinator changes the hook to write into the session's own checkout and sweeps the logs written so far into a records PR. No founder action.
+- **Keep the stage ready** (owner: Coordinator). Top up PAYER if it falls under about 25 test USDT; push a new Arkiv key to Vercel when the founder has one; the pre-flight (`planning/EVENT_RUNBOOK.md` §4) and a read-only acceptance run before 07:00 IST; freeze both SDK versions at submission.
+- Closed today: the npm login and both publishes; prompt logs in each checkout (#24, #27); the 18 key names on Vercel; ADR-0072 to ADR-0076 and the handover.
 
 ## booth
 
-- **After the 21:30 reset:** the deck following the live run slide by slide; real ENS names for the new shops (and their history); the cast's Arkiv category ("sweets") renamed with the directory rows and graph nodes together; Grok's figurines and photos; the re-order fix; polish. Recommendation: the ENS names first, then the deck.
-- **Check the phone's result frame:** in two tests the errand paid and was delivered but the stream closed before its `result` frame. Where: the phone's "stream ended" message after a run. Why: the stage shows no final answer. Recommendation: ask Integration to re-read a run by id when the stream drops.
+- Nothing open. The dosa shops on chain moved to identity and arkiv, and the 0.80 re-order to payments.
+- Closed today: the story on screen (#135); the deck as the stage (#136, #139); the stream recovery (#138); Grok's figurines and photos (#140); the 11:59 pm deadline (#142); the phones drive the deck (#143, #144).
 
 ## submission
+
+- **M17** (owner: Submission, not started). Everything in `docs/plan/sessions/submission.md`: the sponsor files and the README; the `arkiv/` files (finish T3's three drafts; write `reach.md` and `why-arkiv.md`); the video's shot list and narration; the submission text and checklist. The founder reviews, records the video in his own voice and submits, by Sat 08:00 IST (hard deadline 09:00).
+- Closed today: the README's fictional-persona note (ADR-0072) and AI_USAGE's Grok desk line.

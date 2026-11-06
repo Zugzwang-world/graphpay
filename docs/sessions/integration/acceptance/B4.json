@@ -1,6 +1,6 @@
 {
   "id": "B4",
-  "at": "2026-11-05T22:52:44.692Z",
+  "at": "2026-11-06T17:07:58.810Z",
   "pass": true,
   "what": "the payment preference parses",
   "measured": [
@@ -12,6 +12,6 @@
   "expected": "every line of scripts/ens/acceptance.mjs for this id passes",
   "evidence": {
     "script": "scripts/ens/acceptance.mjs",
-    "exit": 0
+    "exit": 1
   }
 }

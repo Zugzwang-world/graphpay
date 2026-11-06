@@ -1,7 +1,7 @@
 {
   "id": "B1",
-  "at": "2026-11-05T22:52:28.170Z",
-  "pass": true,
+  "at": "2026-11-06T17:07:47.165Z",
+  "pass": false,
   "what": "the graphpay.eth namespace resolves; all owners and agents exist",
   "measured": [
     "pass B1 vitalik.graphpay.eth registered, epoch 0, node 0xbaff83a5…",
@@ -31,7 +31,7 @@
     "pass B1 analyst.vitalik.graphpay.eth status active",
     "pass B1 payer.vitalik.graphpay.eth registered, epoch 0, node 0xdb661831…",
     "pass B1 payer.vitalik.graphpay.eth kind agent",
-    "pass B1 payer.vitalik.graphpay.eth status active",
+    "FAIL B1 payer.vitalik.graphpay.eth status active",
     "pass B1/B9a payer.vitalik.graphpay.eth coin type 2147485522 address is PAYER's wallet",
     "pass B1 rehearsal.vitalik.graphpay.eth registered, epoch 0, node 0xa03a8a93…",
     "pass B1 rehearsal.vitalik.graphpay.eth kind agent",
@@ -73,6 +73,6 @@
   "expected": "every line of scripts/ens/acceptance.mjs for this id passes",
   "evidence": {
     "script": "scripts/ens/acceptance.mjs",
-    "exit": 0
+    "exit": 1
   }
 }

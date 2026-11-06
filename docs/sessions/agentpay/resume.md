@@ -14,7 +14,7 @@
 - Verified: pack, `npm install` in an empty folder outside the repo, README quickstart, both examples, on Node 22.23.4. Reviewer: 2 blocking fixed, re-check clean (PR 80).
 - Left: the Coordinator publishes (`pnpm publish --access public` in `packages/agentpay`, after the founder's `npm login`), then installs from the registry in an empty folder and runs the quickstart; record version and link in FACTS.md. Frozen after submission.
 
-Updated 09:30 IST, Fri 6 Nov. Brief: `docs/thinking-partner/briefs/0325-agentpay-v1.md`. Branch prefix `agentpay/`.
+Updated 09:30 IST, Fri 6 Nov. Brief: `docs/archive/thinking-partner-briefs/0325-agentpay-v1.md`. Branch prefix `agentpay/`.
 
 ## State
 

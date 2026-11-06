@@ -1,6 +1,6 @@
 {
   "id": "C4",
-  "at": "2026-11-06T00:14:29.293Z",
+  "at": "2026-11-06T17:08:05.982Z",
   "pass": true,
   "what": "revoked-agent and over-cap failures are recorded",
   "measured": {

@@ -1,6 +1,6 @@
 # ADR-0064: One SDK per partner lane, and the "same kit, different business" moment
 
-Status: accepted · Date: 2026-11-06 09:30 IST · Decided by: founder (the thinking-partner chat, via the 09:35 brief) · Source: `docs/thinking-partner/briefs/0935-sdk-publish-and-handoff.md` §2
+Status: accepted · Date: 2026-11-06 09:30 IST · Decided by: founder (the thinking-partner chat, via the 09:35 brief) · Source: `docs/archive/thinking-partner-briefs/0935-sdk-publish-and-handoff.md` §2
 
 ## Decision
 

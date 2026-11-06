@@ -1,8 +1,8 @@
 {
   "id": "E1",
-  "at": "2026-11-05T23:15:02.717Z",
-  "pass": true,
-  "what": "Vitalik's request",
+  "at": "2026-11-06T17:09:49.902Z",
+  "pass": false,
+  "what": "the human's request",
   "measured": {
     "request": "Just landed in Mumbai. Get me the best gulab jamun near me under 6 USDT by 8 pm.",
     "mandate": {

@@ -1,44 +1,50 @@
-# Relay: records (the Coordinator), 12:47 IST, Fri 6 Nov: supporting the integration proof of concept
+# Relay: records (the Coordinator), 22:49 IST, Fri 6 Nov: the full sync before the night run
 
 ## In plain words
 
-The founder started the integration proof of concept. A new Integration session builds one website: the team's two phones beside T5's explainer, on the live back end. The Coordinator's job is the essentials it needs and the decisions on record, while every other session stays idle so the usage goes to the integration.
+The records are now the complete truth, for the thinking partner's fresh chat.
+- **The tracker** is `TRACKER.md`: one row per deliverable, with its status, evidence and next step.
+- **NOW, OPEN, LOG and every relay** are current.
+- **The founder's decisions** are recorded as ADR-0072 to ADR-0076, with amendments to ADR-0062 and ADR-0069:
+  - the fictional persona;
+  - the dosa story;
+  - the deck as the stage;
+  - the Grok desk;
+  - SDKs without UI;
+  - guardrails off tonight.
+- **The acceptance report** is regenerated read-only from main.
+- **A new Coordinator can take over** from `docs/sessions/coordinator/handover.md`, because this session's context is nearly full.
 
-**Done:**
-- **The team's code is in.** PR #70 is squash-merged, credited to the team member who wrote it.
-- **Funding:** the founder's 150 test USDT reached our funding wallet. 100 of it went on to Vitalik's payer, which now holds 125, and Vitalik's wallet got gas for many pauses and resumes.
-- **The founder's decisions, recorded:**
-  - **ADR-0069:** visitors use the site with no passcode and no rate limits; the keys between our own servers stay.
-  - **ADR-0070:** option A from the audit.
-  - **ADR-0071:** Mr. Vitalik stays the persona, the payer can spend 100 a day, and the new story comes after the founder's run.
-  - **ADR-0062, amended:** payments and merges are allowed up to 97% for this work.
-- **Kimi:** the project instructions and the README now say the agents run on Kimi.
-
-**In progress:**
-- **The payer's 100-a-day pass:** T1 writes it on-chain and T2 in ENS.
-- **A reliable errand:** Join leads, with T4.
-- **T3:** one image on Swarm.
-- **T5:** reviews.
+**Since 11:00 IST:**
+- Both SDKs went to 0.1.1.
+- The team's front end merged (#70, #132).
+- The integration's phases 1 to 4 went live. The site is one public stage: the deck between the two live phones.
+- Every stage button has worked live.
+- The payer's pass went to 100 a day.
+- **Two incidents:**
+  - the Arkiv access key's quota ran out at about 21:36 IST; #148 falls back to the keyless endpoint;
+  - a visitor's Pause has left the payer paused since 21:24 IST.
 
 ## Technical
 
-- **#70:** merged with `--match-head-commit bef8862`.
-  - GitHub made UTSAV OJHA the commit's author, with GitHub as committer.
-  - The body lists the 10 commits, with Co-authored-by trailers.
-  - `gh pr merge --author-email` with the author's noreply address was refused ("Invalid email address"): it must be one of the merger's own emails.
-- **Funding:**
-  - The founder's transfer: `0x7aeb681a…42e10535`, block 12,349,311, at 11:44:39 IST.
-  - `--plan usdt`: PAYER 99.8, ACCEPTANCE_PAYER 5.2, VITALIK 5.2 and REHEARSAL_PAYER 1.2.
-  - `--plan m0` on Sepolia: VITALIK 0.018 ETH.
-  - FUNDER keeps 54.14 test USDT and 0.2569 Sepolia ETH. All of it is in `WALLETS.md` §2b.
-  - The payer's bounded Permit2 approval (50) renews itself whenever the allowance falls below the amount due, so a cap of 100 is not blocked.
-- **Builds:**
-  - `apps/web/vercel.json` now has an `ignoreCommand`, verified in Vercel's schema and docs, which say it overrides the project setting.
-  - It adds `integration/`, `frontend/` and `apps/phones/`. `integration/` was missing, so runner-only commits did not deploy.
-- **PRs:**
-  - #105: the config and funding records.
-  - This PR (`coord/decisions-1240`): the ADRs, CLAUDE.md, the README and the thinking-partner records.
+- **The sync PR:**
+  - TRACKER.md (new);
+  - the NOW summary;
+  - OPEN's "Founder now";
+  - LOG (31 missing lines added, and the lines from 04:00 to 08:59 rolled up);
+  - every relay, including the new `phones.md`, `booth.md` and `sync.md`;
+  - ADR-0072 to ADR-0076;
+  - the README's fictional-persona note;
+  - AI_USAGE's Grok desk row;
+  - `ACCEPTANCE_REPORT.md`;
+  - the handover.
+- **Shared facts**, read at 22:25 IST:
+  - 146 PRs merged since Thu 21:00 IST;
+  - 18 Vercel Production key names;
+  - wallets: FUNDER 54.14 test USDT, PAYER 58.2, SHOP_KESAR 118.81; FACILITATOR 0.774 WBT.
+- **Don't remove `ARKIV_ACCESS_KEY`:** the live runner requires it.
 
 ## Problems
 
-- A Sepolia balance read from the public node lagged behind the receipt for a few seconds. Lesson: confirm a transfer by its receipt, and read balances again later.
+- **The Arkiv quota:** nothing in the records showed the key's limit. FACTS now has the quota row (T3).
+- **Public owner actions:** a visitor's Pause stops every errand. The founder decides whether Pause/Resume become presenter-only.

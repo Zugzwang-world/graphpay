@@ -6,25 +6,21 @@ One line per PR: time (IST) · activity · result · PR link. Append under your 
 
 **Rolled up 11:15 IST (Coordinator), the 28 lines before Fri 04:00 IST:** payments: M1, the checkout contract and its fork tests (#12); M2, the USDT checkout deployed and set up on Whitechain Sepolia (#15). identity: M5, the ENS package and the namespace on Sepolia (#18); M6 part 1, the gate and the owner actions (#34). arkiv: M7a, the SDK and the money graph (#14); M8, size S seeded, and M7b, the engine, GraphQL and the MCP routes (#21); fixes #25 and #30; M9 at S with D6 passing (#31); the activity rows (#35). agents: M10 (#11); the presence and hand-off hooks (#16). integration: the mirror core, the workers process and the mirror live on Rabdi (#8, #20, #33). website: the shell, the phone views, the run route, the order stream and CSV, the order trail (#10, #13, #17, #23, #26). records: the first Coordinator's start, the recovery after the sleep, the prompt-log hook fix and sweep, the usage step-down, ADR-0061 (#19, #24, #27, #29, #32).
 
+**Rolled up 22:35 IST (Coordinator), the lines from Fri 04:00 to 08:59 IST:** payments: #42, #45, #53, #58, #62; identity: #40, #83, #84; integration: #37, #46, #48, #52, #56, #57, #60, #66, #67; website: #36, #39, #43, #44, #51, #54, #55, #63, #65; agentpay: #38, #41, #47, #64; records: #49, #61, #68, #69. The full history is in `git log` and the merged PRs.
+
 ## foundation
 
 ## payments
 
-- 04:05 IST · payments · M3 part A: facilitator pipeline, shop 402 API, recorder; 77 offline tests and a fork e2e on the real contract and test USDT; reviewer pass 2: ship · https://github.com/Zugzwang-world/graphpay/pull/42
-- 04:06 IST · payments · merged: M3 part A, the facilitator, the shop 402 API and the recorder · https://github.com/Zugzwang-world/graphpay/pull/42
-- 04:20 IST · payments · M3 part B on the real chain: C7 paid once as acceptance.vitalik, the lifecycle as rehearsal.vitalik, the subscription renewed and cancelled; reviewer: ship · https://github.com/Zugzwang-world/graphpay/pull/45
-- 04:40 IST · payments · M4 dependencies: apps/web depends on the facilitator and shop packages · https://github.com/Zugzwang-world/graphpay/pull/53
-- 05:05 IST · payments · M4 hosted routes: shop, facilitator, recorder, renewal cron; vercel-env (14 Sensitive values set) and pay:public; two reviews fixed · https://github.com/Zugzwang-world/graphpay/pull/58
-- 05:05 IST · payments · merged: M4 part 1, the hosted routes · https://github.com/Zugzwang-world/graphpay/pull/58
-- 05:11 IST · payments · M4 live: pay:public settled 0.40 through the public URL, C6 401s, recorder edge, cron renewal (M4 done) · https://github.com/Zugzwang-world/graphpay/pull/62
 - 09:47 IST · payments · F3: relayer floor enforced on the production build (refused as relayer_floor, nothing sent) · https://github.com/Zugzwang-world/graphpay/pull/78
 - 10:56 IST · payments · the hosted shop retries an uncertain W_DIRECTORY quote write (nonce clashes across instances), within 45 s; reviewer: ship · https://github.com/Zugzwang-world/graphpay/pull/96
 - 11:12 IST · payments · error logs name the cause chain (class names and plain codes, never messages), after a live settle's send failed with an unexplained ContractFunctionExecutionError · pay/error-chain
 - 12:46 IST · payments · payer.vitalik's daily cap 100 test USDT on-chain (founder's 1240 brief, story #105): one setPolicy, tx 0x7bc34acb…cfbde · pay/policy-cap
+- 11:17 IST · payments · merged: fix(facilitator,shop,web): error logs name the cause chain, never the message · https://github.com/Zugzwang-world/graphpay/pull/100
+- 12:49 IST · payments · merged: feat(whitechain): payer.vitalik's daily cap at 100 test USDT on-chain, with a one-agent policy-cap script · https://github.com/Zugzwang-world/graphpay/pull/107
+- 13:00 IST · payments · merged: fix(shop,facilitator): settle safety: pending 504 after a possible send, the signed hash in flight before the broadcast · https://github.com/Zugzwang-world/graphpay/pull/114
 
 ## identity
-- 04:25 IST · identity · M6 done: the ENS watcher library and policy sink (reviewed twice), B8's MCP call in the acceptance script · [PR #40](https://github.com/Zugzwang-world/graphpay/pull/40)
-- 05:00 IST · identity · B7: fork test for the epoch on re-registration (after a lapse and after an unregister: e + 1); fork tests moved to disposable-2/3; B9 (a) payee comparison in the acceptance script, passes for the settled shop · [PR #83](https://github.com/Zugzwang-world/graphpay/pull/83), [PR #84](https://github.com/Zugzwang-world/graphpay/pull/84)
 - identity · ENS cap of the payer set to 100 test USDT a day (owner action `owner.mjs cap`, Sepolia block 12075031) · [PR #106](https://github.com/Zugzwang-world/graphpay/pull/106)
 
 ## arkiv
@@ -34,23 +30,29 @@ One line per PR: time (IST) · activity · result · PR link. Append under your 
 - 09:55 IST · arkiv · Friday items 4–5 (menu): Swarm gateway probe, `menu` entity, 3 cast menus on Swarm and Arkiv, verified; `swarm.md` filled in · https://github.com/Zugzwang-world/graphpay/pull/82
 - 11:05 IST · arkiv · fix: the writer no longer adopts another instance of the same key's transaction at our nonce (T1's finding); reviewer pass · https://github.com/Zugzwang-world/graphpay/pull/97
 - 12:50 IST · arkiv · one image on Swarm: optional `image` on a menu item, the team's fox uploaded, Kesar Kingdom's `menu` row patched to v2 · https://github.com/Zugzwang-world/graphpay/pull/109
+- 09:42 IST · arkiv · merged: feat(arkiv-graph): 0.1.0 publish prep as @graphpay_ethglobal/arkiv-graph · https://github.com/Zugzwang-world/graphpay/pull/74
+- 10:07 IST · arkiv · merged: docs(arkiv): swarm.md says refund evidence was dropped on purpose · https://github.com/Zugzwang-world/graphpay/pull/86
+- 11:08 IST · arkiv · merged: chore(arkiv-graph): 0.1.1 (the writer replacement fix) · https://github.com/Zugzwang-world/graphpay/pull/98
+- 21:52 IST · arkiv · merged: fix(arkiv): fall back to the keyless endpoint when the access key's quota is spent · https://github.com/Zugzwang-world/graphpay/pull/148
 
 ## agents
 
+- 10:18 IST · agents · merged: feat(agents): Kimi as the provider of the testing, video and live presets, Anthropic kept as fallbacks (ADR-0067) · https://github.com/Zugzwang-world/graphpay/pull/87
+- 10:46 IST · agents · merged: fix(agents): Kimi gets the output schema in its instructions so the concierge calls its tools · https://github.com/Zugzwang-world/graphpay/pull/92
+- 10:53 IST · agents · merged: docs(agents): Kimi calibration rows for testing, video and live · https://github.com/Zugzwang-world/graphpay/pull/95
 
 ## integration
 
-- 04:10 IST · integration · opened: the ENS gate on the payer's signing path (M12) and batched live presence and hand-off hooks (Friday item 3) · https://github.com/Zugzwang-world/graphpay/pull/37
-- 04:30 IST · integration · opened: T2's watcher hosted in the workers; the first ACCEPTANCE_REPORT (18 pass, 0 fail, 1 blocked, 29 not run; D1 and D3 pass on the real payments) · https://github.com/Zugzwang-world/graphpay/pull/46
-- 05:10 IST · integration · merged: the buyer_risk fix and `pnpm e2e:food` (M12) · https://github.com/Zugzwang-world/graphpay/pull/48
-- 04:55 IST · integration · opened: the counting e2e:food run passed A–E on the real networks (paid 4.80, delivered, refunded 0.80); the signer fix; the report at 24 pass · https://github.com/Zugzwang-world/graphpay/pull/52
-- 05:00 IST · integration · opened: the kill check F passes for real (402 after 9.3 s, the watcher revoked the policy, the fail edge on Arkiv); the recorder ref fix; (M12 done) · https://github.com/Zugzwang-world/graphpay/pull/56
-- 05:15 IST · integration · opened: acceptance A5, C7, E3 pass (the qualifying USDT payment read from its receipt); the report at 29 pass, 0 fail, 1 blocked · https://github.com/Zugzwang-world/graphpay/pull/57
-- 05:10 IST · integration · opened: D2b, D2c and D15 pass live (a frozen mirror, a raced nonce, a crash after send); the report at 31 pass (M11 done) · https://github.com/Zugzwang-world/graphpay/pull/60
-- 05:33 IST · integration · opened: M13's hosted run passes C2, C3, C5, C6, F2 and C4(b) on the production domain (4.80 paid, 0.80 refunded, 1.20 re-order, over-cap refused); A3, A4, A9, A10, B3 wired; the report at 41 pass, 0 fail · https://github.com/Zugzwang-world/graphpay/pull/66
-- 05:41 IST · integration · opened: C4(a) passes (the scout agent revoked, refused on-chain AGENT_REVOKED, restored exactly; the mirror's fail edge once after a paused restart); the report at 42 pass, 0 fail; then F1 (no secrets in the tree, the history of every branch or Vercel), 43 pass · https://github.com/Zugzwang-world/graphpay/pull/67
 - 09:47 IST · integration · opened: D10 passes (the hosted shop's quote on Arkiv: owner W_DIRECTORY, 15 minutes, valid_until 10 minutes); the report at 44 pass, 0 fail, 1 blocked, 3 not run (M13 done); then F3 from T1's record, 45 pass · https://github.com/Zugzwang-world/graphpay/pull/79
 - 10:36 IST · integration · opened: the e2e stack on the hosted shop and facilitator; D11's presence half passes (6.7 s to appear, lapsed 14.98 min after the end, owner W_DIRECTORY) · https://github.com/Zugzwang-world/graphpay/pull/85
+- 10:40 IST · integration · merged: feat(web): the live errand runner behind /api/agents/run, server side only (live preset, hosted routes, every guardrail) · https://github.com/Zugzwang-world/graphpay/pull/88
+- 10:48 IST · integration · merged: docs(integration): the live runner's production smoke test (Kimi live: the concierge stops without delegating) · https://github.com/Zugzwang-world/graphpay/pull/91
+- 11:07 IST · integration · merged: feat(web): the runner's busy and rate-limit lines, a server-only guard, the live runner's tests · https://github.com/Zugzwang-world/graphpay/pull/93
+- 11:18 IST · integration · merged: docs(integration): the first live errand through the production site paid (Kimi live, 4.80 to kesar) · https://github.com/Zugzwang-world/graphpay/pull/102
+- 12:52 IST · integration · merged: feat(integration): a reliable live errand (retry the signed payment while the shop says it is safe; no hourly cap) · https://github.com/Zugzwang-world/graphpay/pull/108
+- 12:56 IST · integration · merged: feat(integration): the runner retries the facilitator's busy 502 (before any send) · https://github.com/Zugzwang-world/graphpay/pull/112
+- 13:36 IST · integration · merged: docs(integration): the live errand pays reliably on production (the founder's two errands paid) · https://github.com/Zugzwang-world/graphpay/pull/119
+- 13:42 IST · integration · merged: feat(acceptance): C6 and F2 for public access (visitors open, server-to-server keys enforced) · https://github.com/Zugzwang-world/graphpay/pull/120
 
 ## phones
 
@@ -62,37 +64,27 @@ One line per PR: time (IST) · activity · result · PR link. Append under your 
 - 16:55 IST · phones · the first paid errand from `/live` (4.80 to kesar in about 107 s, tx `0x89ac…b990`); the Open switch used live; a refund request sent live from the team's wizard; fix: requests recorded on Arkiv (no transaction) now reach both phones, and the model's narrative is left off the phone · https://github.com/Zugzwang-world/graphpay/pull/127
 - 17:05 IST · phones · phase 3 live: Open switch, refund request, pause and resume work; merchant refund (502) and re-order (BAD_402) fail on the server, reported. Phase 4: `/live` is the home page; the Swarm menu image through its Arkiv row; the test script; relay started · https://github.com/Zugzwang-world/graphpay/pull/128
 - 17:20 IST · phones · retried once after T5's #129 and #131: the merchant refund (0.80, tx `0xcd44…c425`) and the re-order (1.20, tx `0x78ac…78ef`) work from the phones; every phase 3 button has now worked live · PR link follows
+- 12:39 IST · phones · merged: Frontend code · https://github.com/Zugzwang-world/graphpay/pull/70
+- 17:48 IST · phones · merged: docs(phones): the refund and the re-order work live · https://github.com/Zugzwang-world/graphpay/pull/133
 
 ## website
 
-- 04:20 IST · website · opened: race mode live (Friday item 8): `/api/race` runs one side on Rabdi with per-read ticks and truth badges, the committed benchmark table under it · https://github.com/Zugzwang-world/graphpay/pull/36 (merged)
-- 05:05 IST · website · opened: the Open toggle (Friday item 9): `POST /api/merchant/open` writes the shop's `shop_open` row as W_DIRECTORY, renewed every 5 minutes by the merchant phone; reviewer pass · https://github.com/Zugzwang-world/graphpay/pull/39
-- 05:50 IST · website · opened: the customer's Pause and Resume buttons (M6): the owner wallet sets `graphpay.status` of the payer agent on Sepolia, behind the passcode; reviewer pass · https://github.com/Zugzwang-world/graphpay/pull/43
-- 06:05 IST · website · opened: the customer phone's live state (`/api/state/customer`: status from ENS and the AgentPolicy, cap and spend from the checkout contract, last order from the graph) and the checkout address fix · https://github.com/Zugzwang-world/graphpay/pull/44
-- 07:10 IST · website · opened: M16 the checkout kit and the demo store (a shop in 17 lines, a person pays from a browser wallet, merchant view, chain-based accountant export), two reviewer passes, a bundler-safe ABI import in contracts · https://github.com/Zugzwang-world/graphpay/pull/51
-- 07:55 IST · website · opened: the Mumbai map (Friday item 10): our own SVG of the neighbourhoods, directory dots, open shops and agents glowing, explorer links · https://github.com/Zugzwang-world/graphpay/pull/54
-- 08:20 IST · website · opened: the explainer's agent lanes (Friday item 13) from the handoff rows, and the run id passed to the errand runner · https://github.com/Zugzwang-world/graphpay/pull/55
-- 05:40 IST · website · opened: M16 proof, one real 4.80 USDT kit payment on the hosted facilitator (tx 0xf1e76a91…), the store's facilitator env name, the export's RPC range cap logged · https://github.com/Zugzwang-world/graphpay/pull/63
-- 06:10 IST · website · opened: the merchant phone's Mark dispatched and Refund (Friday item 12), signed with the shop's key behind the passcode, reviewer pass · https://github.com/Zugzwang-world/graphpay/pull/65
 - 09:50 IST · website · opened: the customer phone's Request refund (Friday item 11): a request edge on Arkiv from the recorder's key behind the passcode, reviewer pass; the website relay trimmed to about 700 words · https://github.com/Zugzwang-world/graphpay/pull/73
 - 10:50 IST · website · opened: the customer phone's Re-order (Friday item 11): the payer agent's one signed payment through the hosted shop behind the passcode, reviewer pass (three double-payment findings fixed) · https://github.com/Zugzwang-world/graphpay/pull/81
 - 12:20 IST · website · opened: the merchant feed and the accountant CSV no longer cut the newest rows (integration audit): full-size graph answers, a flag when full, a window that shrinks to fit · https://github.com/Zugzwang-world/graphpay/pull/104
 - 13:05 IST · website · opened: the read limits for the CSV, events, state and map raised tenfold (a venue on one IP never meets a 429; ceiling kept) · https://github.com/Zugzwang-world/graphpay/pull/113
+- 09:47 IST · website · merged: docs(website): resume file and OPEN updated for the renames and the merged phone buttons · https://github.com/Zugzwang-world/graphpay/pull/75
+- 16:34 IST · website · merged: docs(website): resume file for a fresh start (after #124) · https://github.com/Zugzwang-world/graphpay/pull/125
+- 16:58 IST · website · merged: fix(web): merchant refund and dispatch sign locally, the 502 on first real use (reviewer pass) · https://github.com/Zugzwang-world/graphpay/pull/129
+- 17:13 IST · website · merged: fix(web): Re-order pays the hosted shop through its own x402 path, the 409 BAD_402 (reviewer pass) · https://github.com/Zugzwang-world/graphpay/pull/131
 
 ## agentpay
-- 04:05 IST · agentpay · opened: `@graphpay/agentpay` V1, the two-sided SDK (buyer pass and guards, merchant middleware, facilitator interface and reference relayer, AI SDK and MCP tools, the sweet shop and ride examples), 36 offline and 13 fork tests, reviewer's 2 blocking fixed · https://github.com/Zugzwang-world/graphpay/pull/38
-- 04:10 IST · agentpay · opened: the first real test payment through the SDK (0.01 test USDT, rehearsal agent → good shop, https://explorer.testnet.whitechain.io/tx/0xfbd7d307b1b0c08f3af015b4bdb03aaeed12d0c2d18c2553432cb4679ff14c7e), its script and tx log · https://github.com/Zugzwang-world/graphpay/pull/41 (merged)
-- 04:20 IST · agentpay · opened: A4, the SDK merchant settling through T1's facilitator on a fork (in process and over HTTP; bad token and a gate refusal send nothing), 4 fork tests; the CSV's cached-head fix · https://github.com/Zugzwang-world/graphpay/pull/47 (merged)
-- 05:30 IST · agentpay · opened: the merchant's log reads fit the public RPCs' block-range caps (10,000, then 1,000 on a refusal; T5's report), checked on the real chain; fork tests write test USDT on the fork instead of drawing on FUNDER · https://github.com/Zugzwang-world/graphpay/pull/64
 - 09:50 IST · agentpay · opened: `@graphpay_ethglobal/agentpay` 0.1.0 ready to publish (renamed, self-contained, chain 1874 only, own relayer with anti-drain limits on, sandbox and `deployCheckout`, sweet shop and cab examples, MIT, lane test; packed, installed in an empty folder, quickstart passes) · https://github.com/Zugzwang-world/graphpay/pull/80
 - 11:09 IST · agentpay · opened: 0.1.1, the published manifest drops the workspace devDependencies (tests use the root ones), sandbox exit-hook and constructor-order test; packed and run from an empty folder · https://github.com/Zugzwang-world/graphpay/pull/99
+- 09:31 IST · agentpay · merged: docs(agentpay): the npm publish brief at the top of the resume file · https://github.com/Zugzwang-world/graphpay/pull/71
 
 ## records
 
-- 04:45 IST · records · M14 relay: first real payment, the first acceptance report, ADR-0062 (92% pause), wallets §2b, the README payment link, T5's secrets set in Vercel · https://github.com/Zugzwang-world/graphpay/pull/49
-- 05:15 IST · records · CP4 met: M11 and M12 done on the real networks, acceptance at 31 pass, 0 fail, 1 blocked; CP4 relay · https://github.com/Zugzwang-world/graphpay/pull/61
-- 06:55 IST · records · 06:45 relay: M4 and M16 done, acceptance at 42 pass, 0 fail; LOG rolled up; OPEN's closed M0 tables condensed · https://github.com/Zugzwang-world/graphpay/pull/68
-- 08:30 IST · records · morning relay: 42 pass, 0 fail; usage 82%; the story brief, a message to wake the sessions, and the budget call are the founder's · https://github.com/Zugzwang-world/graphpay/pull/69
 - 09:35 IST · records · the 09:35 brief filed; ADR-0063 (both SDKs as @graphpay_ethglobal by 13:00), ADR-0064 (one SDK per lane, the cab-ride moment), ADR-0065 (apps/demo-ui); labels and issue templates; the names renamed in the records; NOW and Founder now for the handoff · https://github.com/Zugzwang-world/graphpay/pull/72
 - 09:46 IST · records · the standing rule "no target times" (ADR-0066) in the coordinator file, NOW, OPEN and the master plan; every session told · https://github.com/Zugzwang-world/graphpay/pull/76
 - 10:25 IST · records · Kimi secret: KIMI_API_KEY server-only, a Kimi rule in the secret scan, JSON-escaped keys caught, a non-Kimi value refused; reviewer: ship · https://github.com/Zugzwang-world/graphpay/pull/89
@@ -107,6 +99,10 @@ One line per PR: time (IST) · activity · result · PR link. Append under your 
 - 16:40 IST · records · NOW: phase 2 paid from /live (4.80, 107 s), phase 3 live (#124); the payer resumed after a visitor's pause · https://github.com/Zugzwang-world/graphpay/pull/126
 - 16:58 IST · records · NOW: the integration is live, all four phases (the home page is the stage; the founder's test script); refund and re-order failing, with T5 and T1 · https://github.com/Zugzwang-world/graphpay/pull/130
 - 17:46 IST · records · NOW: the merchant refund and the re-order work live after #129 and #131; every stage button has worked · https://github.com/Zugzwang-world/graphpay/pull/134
+- 10:48 IST · records · merged: docs(records): handover to a fresh Coordinator: resume file, ADR-0068, NOW, OPEN, relay · https://github.com/Zugzwang-world/graphpay/pull/90
+- 12:47 IST · records · merged: feat(config): the payer's daily cap is 100; funding targets; the Vercel build step in git · https://github.com/Zugzwang-world/graphpay/pull/105
+- 21:49 IST · records · merged: docs(records): the Coordinator's resume at 21:45 IST · https://github.com/Zugzwang-world/graphpay/pull/147
+- 22:49 IST · records · full sync: TRACKER (new, 55 rows), NOW, OPEN by owner, LOG catch-up and roll-up, every relay (+ phones, booth, sync), ADR-0072 to ADR-0076, the acceptance report (read-only: 35/8/1/4), the fresh-Coordinator handover; completed briefs archived · https://github.com/Zugzwang-world/graphpay/pull/150
 
 ## booth
 
@@ -116,5 +112,8 @@ One line per PR: time (IST) · activity · result · PR link. Append under your 
 - 20:25 IST · booth · sync: the phones drive the deck (#143), a lagging status poll no longer undoes Stopped (#144), figurines without circles, no QR strip; one live errand paid 4.80, a 0.80 refund, pause and resume checked in Chrome · https://github.com/Zugzwang-world/graphpay/pull/143
 - 21:41 IST · records · after the 21:30 reset (usage 0%): the tick resumed; NOW and Founder now: production's Arkiv reads failing (T3), start the Submission session, the Booth's open list · https://github.com/Zugzwang-world/graphpay/pull/146
 - 21:55 IST · records · NOW: Arkiv reads fixed (#148, the access key's quota; keyless fallback); the payer paused again (78 of 100 spent today) · https://github.com/Zugzwang-world/graphpay/pull/149
+- 18:43 IST · booth · merged: docs(records): booth run: resume, demo note, NOW, LOG; the middle returns to the deck if a run's stream drops · https://github.com/Zugzwang-world/graphpay/pull/137
+- 19:12 IST · booth · merged: docs(records): booth part 2: demo note, resume, NOW, LOG · https://github.com/Zugzwang-world/graphpay/pull/141
+- 20:23 IST · booth · merged: docs(records): sync: demo note, resume, NOW, LOG · https://github.com/Zugzwang-world/graphpay/pull/145
 
 ## submission

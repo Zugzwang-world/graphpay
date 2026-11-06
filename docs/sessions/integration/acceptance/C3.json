@@ -1,12 +1,12 @@
 {
   "id": "C3",
-  "at": "2026-11-06T00:03:12.274Z",
-  "pass": true,
+  "at": "2026-11-06T17:08:01.045Z",
+  "pass": false,
   "what": "partial refund, re-order and renewal work",
   "measured": {
     "refund": true,
     "reorder": true,
-    "renewal": true,
+    "renewal": false,
     "refundTx": {
       "tx": "0x0d04220e9a26243f919715e649d85681439dc4f2a492618bb1f1a916df9fe33f",
       "explorer": "https://explorer.testnet.whitechain.io/tx/0x0d04220e9a26243f919715e649d85681439dc4f2a492618bb1f1a916df9fe33f",

@@ -1,5 +1,5 @@
 # ADR-0071: The story for the founder's run: Mr. Vitalik stays, the payer's pass is 100 a day, the dosa and BKC swap comes after
-Status: accepted · Date: 2026-11-06 12:40 IST · Decided by: founder · Source: the support brief `docs/thinking-partner/briefs/1240-coordinator-integration-support.md`
+Status: accepted · Date: 2026-11-06 12:40 IST · Decided by: founder · Source: the support brief `docs/archive/thinking-partner-briefs/1240-coordinator-integration-support.md`
 
 ## Decision
 - Mr. Vitalik stays the persona.
