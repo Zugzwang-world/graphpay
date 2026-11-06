@@ -20,7 +20,7 @@ export const MAX_ATTEMPTED_CAP_MICRO = 1_000_000_000_000n;
 // is no proof of the scope, so nothing is recorded for it.
 export const EXPECTED_REVERT = 'EACUnauthorizedAccountRoles';
 
-export type LimitRefusalCode = 'NOT_OVER_PASS' | 'QUOTE_CHANGED' | 'NOT_A_RAISE' | 'BAD_CAP' | 'NOT_REFUSED';
+export type LimitRefusalCode = 'NOT_OVER_PASS' | 'BALANCE_COVERS' | 'QUOTE_CHANGED' | 'NOT_A_RAISE' | 'BAD_CAP' | 'NOT_REFUSED';
 export class LimitRefusal extends Error {
   code: LimitRefusalCode;
   status: number;
@@ -37,6 +37,19 @@ export interface Pass {
   policyCapMicro: bigint;
   ensCapMicro: bigint;
   spentMicro: bigint;
+  // What the payer agent's wallet holds now (micro-USDT).
+  balanceMicro: bigint;
+}
+
+// The facilitator gave no answer to the signed attempt. It was sent to verify only, so nothing can have
+// moved; the order id is returned so the attempt can be looked up.
+export class AttemptUnanswered extends Error {
+  orderId: string;
+  constructor(orderId: string) {
+    super('the facilitator did not answer');
+    this.name = 'AttemptUnanswered';
+    this.orderId = orderId;
+  }
 }
 
 export interface OverPassQuote {
@@ -117,12 +130,13 @@ export async function overPass(deps: OverPassDeps): Promise<OverPassResult> {
     const passMicro = pass.ensCapMicro < pass.policyCapMicro ? pass.ensCapMicro : pass.policyCapMicro;
     const left = passMicro > pass.spentMicro ? passMicro - pass.spentMicro : 0n;
     // Only an attempt above the whole pass is signed, not merely above what is left of it: a cap
-    // raised in the next seconds can then never make it fit.
+    // raised in the next seconds can then never make it fit. And never one the payer could pay.
     if (plan.priceMicro <= passMicro) throw new LimitRefusal('NOT_OVER_PASS');
+    if (plan.priceMicro <= pass.balanceMicro) throw new LimitRefusal('BALANCE_COVERS');
     const quote = await deps.quote();
     if (quote.priceMicro !== String(plan.priceMicro) || quote.quantity !== plan.quantity || quote.item !== plan.sku) throw new LimitRefusal('QUOTE_CHANGED');
     const outcome = await deps.attempt(quote);
-    if (outcome.status === 'unknown') throw new Error('the facilitator did not answer');
+    if (outcome.status === 'unknown') throw new AttemptUnanswered(quote.orderId);
     if (outcome.status === 'valid') console.error('over-pass: the facilitator would have accepted the attempt; nothing was sent');
     const refused = outcome.status === 'refused';
     return {

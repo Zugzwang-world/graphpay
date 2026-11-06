@@ -6,7 +6,7 @@ import { permissionedResolverAbi as resolverAbi } from '@graphpay/ens';
 const permissionedResolverAbi = resolverAbi as unknown as Abi;
 import { siteModel } from './site.server.ts';
 import { revertName } from './limits-live.server.ts';
-import { EXPECTED_REVERT, LIMIT_COOLDOWN_MS, LimitRefusal, forgetLimits, overPass, overPassPlan, raiseOwnCap, type AttemptOutcome, type OverPassDeps, type Pass, type RaiseCapDeps } from './limits.server.ts';
+import { AttemptUnanswered, EXPECTED_REVERT, LIMIT_COOLDOWN_MS, LimitRefusal, forgetLimits, overPass, overPassPlan, raiseOwnCap, type AttemptOutcome, type OverPassDeps, type Pass, type RaiseCapDeps } from './limits.server.ts';
 
 const T0 = 1_800_000_000_000;
 const ORDER = `0x${'0a'.repeat(32)}`;
@@ -16,7 +16,7 @@ function passDeps(over: { pass?: Partial<Pass>; outcome?: AttemptOutcome; price?
   const plan = overPassPlan();
   const attempts: unknown[] = [];
   const d: OverPassDeps = {
-    pass: async () => ({ policyCapMicro: 300_000_000n, ensCapMicro: 300_000_000n, spentMicro: 82_800_000n, ...over.pass }),
+    pass: async () => ({ policyCapMicro: 300_000_000n, ensCapMicro: 300_000_000n, spentMicro: 82_800_000n, balanceMicro: 125_000_000n, ...over.pass }),
     quote: async () => ({ orderId: ORDER, priceMicro: over.price ?? String(plan.priceMicro), quantity: over.quantity ?? plan.quantity, item: over.item ?? plan.sku }),
     attempt: async (q) => {
       attempts.push(q);
@@ -76,7 +76,14 @@ test('a verify that would accept it is reported as not refused, and still sends 
   const valid = await overPass(passDeps({ outcome: { status: 'valid' } }).d);
   assert.deepEqual([valid.refused, valid.sent, valid.arkiv], [false, false, null]);
   forgetLimits();
-  assert.match(await code(overPass(passDeps({ outcome: { status: 'unknown' } }).d)), /^error:/);
+  await assert.rejects(overPass(passDeps({ outcome: { status: 'unknown' } }).d), (e: unknown) => e instanceof AttemptUnanswered && e.orderId === ORDER);
+});
+
+test('never an attempt the payer could actually pay: the balance is a second belt', async () => {
+  const plan = overPassPlan();
+  const rich = passDeps({ pass: { balanceMicro: plan.priceMicro } });
+  assert.equal(await code(overPass(rich.d)), 'BALANCE_COVERS');
+  assert.equal(rich.attempts.length, 0);
 });
 
 test('a second tap within the minute gets the last answer (one attempt, one record); after it, a new attempt', async () => {

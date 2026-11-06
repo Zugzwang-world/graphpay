@@ -10,7 +10,7 @@ import { checkoutAbi } from '@graphpay/contracts';
 import { KEYS, createEnsGate, createEnsReader, dnsEncode, ensPublicClient, permissionedResolverAbi, walkName } from '@graphpay/ens';
 import { decodePaymentRequiredHeader, errorNames, graphPayOrderClient, x402Client } from '@graphpay/facilitator';
 import { recordEdge, runGraphql } from '@graphpay/money-graph';
-import { BaseError, ContractFunctionRevertedError, isAddressEqual, keccak256, namehash, toHex, type Abi, type Hex } from 'viem';
+import { BaseError, ContractFunctionRevertedError, erc20Abi, isAddressEqual, keccak256, namehash, toHex, type Abi, type Hex } from 'viem';
 import { privateKeyToAccount } from 'viem/accounts';
 import { arkivEngine } from '../app/api/graphql/arkiv.server.ts';
 import { sharedCustomerState } from './customer-state.server.ts';
@@ -81,12 +81,13 @@ export function liveOverPassDeps(): OverPassDeps {
       (await ensGate()).invalidate(model.payer.ens);
       const w = await whitechain();
       const checkout = checkoutAddress() as Hex;
-      const [policy, spent, ensCapMicro] = await Promise.all([
+      const [policy, spent, ensCapMicro, balance] = await Promise.all([
         w.publicClient.readContract({ address: checkout, abi: checkoutAbi, functionName: 'policies', args: [node] }) as Promise<{ dailyCapMicro: bigint }>,
         w.publicClient.readContract({ address: checkout, abi: checkoutAbi, functionName: 'spentToday', args: [node] }) as Promise<bigint>,
         ensCapOf(model.payer.ens),
+        w.publicClient.readContract({ address: config.whitechain.tokens.usdt.address as Hex, abi: erc20Abi, functionName: 'balanceOf', args: [payerAccount().address] }),
       ]);
-      return { policyCapMicro: BigInt(policy.dailyCapMicro), ensCapMicro, spentMicro: BigInt(spent) };
+      return { policyCapMicro: BigInt(policy.dailyCapMicro), ensCapMicro, spentMicro: BigInt(spent), balanceMicro: BigInt(balance) };
     },
     quote: async (): Promise<LiveQuote> => {
       const plan = overPassPlan(model);
