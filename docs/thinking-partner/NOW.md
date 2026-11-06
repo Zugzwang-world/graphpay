@@ -1,12 +1,12 @@
 # NOW
 
-Updated 00:24 IST, Sat 7 Nov (night Coordinator)
+Updated 00:44 IST, Sat 7 Nov (night Coordinator)
 
 ## Summary (Coordinator only)
 
-Updated 00:24 IST, Sat 7 Nov. **Only the submission (Sat 09:00 IST) and the presentation (09:30 IST) are fixed** (ADR-0066). Every deliverable's status is in [`TRACKER.md`](TRACKER.md).
+Updated 00:44 IST, Sat 7 Nov. **Only the submission (Sat 09:00 IST) and the presentation (09:30 IST) are fixed** (ADR-0066). Every deliverable's status is in [`TRACKER.md`](TRACKER.md).
 
-**The Mac is charging** (86% at 00:19 IST). Keep the charger in and the lid open until the presentation: the mirror and every night session run on it.
+**The Mac is charging** (94% at 00:38 IST). Keep the charger in and the lid open until the presentation: the mirror and every night session run on it.
 
 **The night run** ([brief](briefs/2259-night-coordinator.md)): seven streams, each in its own session and worktree, on Opus 5.5 at max. The usage guardrails are off tonight, and no contract is redeployed.
 
@@ -29,18 +29,18 @@ Updated 00:24 IST, Sat 7 Nov. **Only the submission (Sat 09:00 IST) and the pres
 The Coordinator times each step. If a merge breaks the live errand, revert first, then fix.
 
 **Landed tonight** (each stream's own section below has the details):
-- **W1 Identity:** the three new shop names on ENS with their agents (#158). The kill, live: the owner unregistered spare disposable-2, the watcher revoked its pass at 00:16 IST, and a fresh spare (disposable-3) is ready (#175). **The label flip has the go** (W2's step 1 is complete); W1 merges it, then W5 restarts the workers once.
+- **W1 Identity:** the three new shop names on ENS with their agents (#158). The kill, live: the owner unregistered spare disposable-2, the watcher revoked its pass at 00:16 IST, and a fresh spare (disposable-3) is ready (#175). **The label flip is live:** the story's shops are filter-and-fold, idli-index and tawa-tangle, category south-indian ([#189](https://github.com/Zugzwang-world/graphpay/pull/189), deployed 00:31 IST); the heal cron lists filter-and-fold open. Next: W5's one post-flip workers restart (after W1's owner-cap PR #191 and the mirror's catch-up, about 00:50 IST), then W1's proof errand through the new name, then W4's three in a row.
 - **W2 City:** Filter & Fold, Idli Index and Tawa Tangle on Arkiv under their new names (south-indian, at the Grok places), with all 1,258 history events; the live ranking picks Filter & Fold (0.916) and excludes Tawa Tangle (#167, ADR-0077). In PR: the menus with dish images (#181) and the big city M (#168, seeding).
 - **W3 Payments:** the 0.80 coffee re-order (#155); subscribe, renew and cancel (#173); the refund decline (#163); over the pass refused, nothing sent, and the agent's own cap raise refused, both recorded on Arkiv (#169). In PR: the owner's cap change (#179).
 - **W4 Agents:** "delivered within an hour" (#153), per-call metrics (#157), low effort (#162). In PR: the routine steps in code (#182), proven at 55 s, 3 model calls and $0.025 per errand, against a baseline of 91 s, 19 calls and $0.15.
-- **W5 Ops:** the 300 pass (#152); pause per agent and self-healing, proven by the cron's own resumes and renewals (#172). The workers run from W5's checkout under a watchdog.
+- **W5 Ops:** the 300 pass (#152); pause per agent and self-healing, proven by the cron's own resumes and renewals (#172); the failing acceptance checks updated to tonight's decisions (#188); a watchdog with a 30-minute fuse keeps the workers running.
 - **W6 SDK:** arkiv-graph 1.0.0 (#174) and agentpay 1.0.0 (#177) merged. **The publish waits for the founder's npm sign-in in W6's chat.**
 - **W7 Submission:** done: the README, AI_USAGE, the Arkiv files, the Whitechain and ENS notes, the form text, the video shot list and the checklist (#154 to #178). It keeps them current.
 
-**Live now** (00:21 IST):
-- **The payer is ACTIVE,** with 112.4 of tonight's 300 test USDT spent; the pass resets at 05:30 IST.
-- **Filter & Fold is open.** W5's heal cron (every minute) resumes a paused agent after 2 minutes, renews the shop's listing and reopens a closed shop after 5. The Coordinator's bridge loop stopped at 00:21 IST.
-- **The mirror** runs from W5's checkout (pid 3723, under a watchdog), 2 blocks behind. This Mac's Arkiv read budget is shared (the access key's quota is spent), so it has stalled twice tonight; the mirror comes before the big city's seed.
+**Live now** (00:38 IST):
+- **The payer is ACTIVE,** with 122 of tonight's 300 test USDT spent; the pass resets at 05:30 IST.
+- **Filter & Fold is open** under its new name, kept so by W5's heal cron.
+- **The mirror is stalled again** (last good poll 00:23 IST, 822 blocks behind): this Mac's keyless Arkiv budget is shared, the access key's quota is spent, and W2's two-hour seed of the big city draws on it too. Payments still settle on Whitechain; they reach Arkiv when the mirror catches up, so the merchant feed and the receipts lag. **A fresh Arkiv access key** fixes it.
 
 **Retired at 23:05 IST:**
 - T1 to T6, Booth (with its two side sessions), Booth Sync and Integration are archived. Their last prompt logs are committed here.
@@ -49,13 +49,13 @@ The Coordinator times each step. If a merge breaks the live errand, revert first
 
 **Still open** (from the 22:49 IST sync):
 - The Arkiv access key's quota is used up, so reads go to the keyless endpoint (#148).
-- Acceptance: 35 pass, 8 fail (W5).
+- Acceptance: W5 updated the failing checks to tonight's decisions (#188); the full re-run waits for Arkiv.
 
 **Founder now** (OPEN):
 1. Keep the charger in.
 2. **A fresh Arkiv access key** (the most useful thing tonight: the mirror and the big city share the keyless budget).
 3. The Kimi balance, and more test USDT to FUNDER.
-4. npm's web approval when W6 asks.
+4. **npm now:** W6's sign-in link waits in its chat (each link lasts about 5 minutes); both SDKs are merged at 1.0.0, npm still shows 0.1.1.
 5. The video.
 6. The disclosure and the team's registration.
 
