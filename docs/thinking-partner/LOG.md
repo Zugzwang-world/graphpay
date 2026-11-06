@@ -162,7 +162,7 @@ One line per PR: time (IST) · activity · result · PR link. Append under your 
 - 00:03 IST · w3-payments · merged: feat(pay): subscribe and cancel the Sunday box; live: subscribed 2.40 (tx 0xf3f7…c393), the cron renewed it (0x8d40…de83), cancelled by the payer's signature (0x70ed…7b42); edges on Arkiv · https://github.com/Zugzwang-world/graphpay/pull/173
 - 00:17 IST · w3-payments · merged: feat(pay): the shop declines a refund request; live: request then decline on Arkiv (0xf103…54fa, 0xff07…3b20) · https://github.com/Zugzwang-world/graphpay/pull/163
 - 00:21 IST · w3-payments · merged: feat(pay): the limits live: 480 over a 300 pass refused CAP_EXCEEDED, nothing sent, recorded; the agent's own cap raise refused EACUnauthorizedAccountRoles, recorded (0xabc4…4144) · https://github.com/Zugzwang-world/graphpay/pull/169
-- 00:25 IST · w3-payments · in PR: feat(pay): the owner changes the payer's cap; the policy follows through the watcher (ADR-0078) · https://github.com/Zugzwang-world/graphpay/pull/179
+- 00:25 IST · w3-payments · in PR: feat(pay): the owner changes the payer's cap; the policy follows through the watcher (ADR-0079) · https://github.com/Zugzwang-world/graphpay/pull/179
 
 ## w2-city
 

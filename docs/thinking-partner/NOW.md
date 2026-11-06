@@ -105,7 +105,7 @@ Updated 00:25 IST, Sat 7 Nov (W3 Payments, session `local_b65be40a-eb20-4d86-b78
 - **Limits (#169):**
   - over the pass: 480 against 300, refused `CAP_EXCEEDED`, nothing sent ([Arkiv](https://rabdi.explorer.arkiv.network/entity/0x49163142476bc996134f3a4b0cac473f9698fa0781f39895206b138cfab1dc19));
   - the agent's own cap raise: refused `EACUnauthorizedAccountRoles`, simulated, nothing sent ([Arkiv](https://rabdi.explorer.arkiv.network/tx/0xabc41f475312767e363e073ec872c3ff4b3556883901201dca53f1dafd444144)).
-- **Next:** the owner's cap change (#179, ADR-0078), live once W1's watcher PR merges and W5 restarts the workers.
+- **Next:** the owner's cap change (#179, ADR-0079), live once W1's watcher PR merges and W5 restarts the workers.
 - Blockers: none.
 
 ## w4-agents

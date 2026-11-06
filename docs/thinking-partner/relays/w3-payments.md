@@ -12,7 +12,7 @@
 - **4. Limits:**
   - **over the pass, done:** "Dosas for everyone at the hackathon" (100 dosas, 480) against a 300 pass is refused before anything is sent, and the refusal is recorded;
   - **the agent's own cap raise, done:** ENS refuses it, with the revert reason. It was simulated, so nothing was sent, and the attempt is recorded;
-  - **the owner's cap change, built:** the owner writes the ENS cap, and the spending policy follows through the watcher on the Mac, never above the configured cap (ADR-0078). It is live once W1's watcher change is merged and W5 restarts the workers.
+  - **the owner's cap change, built:** the owner writes the ENS cap, and the spending policy follows through the watcher on the Mac, never above the configured cap (ADR-0079). It is live once W1's watcher change is merged and W5 restarts the workers.
 
 ## Technical
 
