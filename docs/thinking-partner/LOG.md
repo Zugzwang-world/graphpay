@@ -102,7 +102,7 @@ One line per PR: time (IST) · activity · result · PR link. Append under your 
 - 10:48 IST · records · merged: docs(records): handover to a fresh Coordinator: resume file, ADR-0068, NOW, OPEN, relay · https://github.com/Zugzwang-world/graphpay/pull/90
 - 12:47 IST · records · merged: feat(config): the payer's daily cap is 100; funding targets; the Vercel build step in git · https://github.com/Zugzwang-world/graphpay/pull/105
 - 21:49 IST · records · merged: docs(records): the Coordinator's resume at 21:45 IST · https://github.com/Zugzwang-world/graphpay/pull/147
-- 22:49 IST · records · full sync: TRACKER (new, 55 rows), NOW, OPEN by owner, LOG catch-up and roll-up, every relay (+ phones, booth, sync), ADR-0072 to ADR-0076, the acceptance report (read-only: 35/8/1/4), the fresh-Coordinator handover; completed briefs archived · coord/full-sync
+- 22:49 IST · records · full sync: TRACKER (new, 55 rows), NOW, OPEN by owner, LOG catch-up and roll-up, every relay (+ phones, booth, sync), ADR-0072 to ADR-0076, the acceptance report (read-only: 35/8/1/4), the fresh-Coordinator handover; completed briefs archived · https://github.com/Zugzwang-world/graphpay/pull/150
 
 ## booth
 
