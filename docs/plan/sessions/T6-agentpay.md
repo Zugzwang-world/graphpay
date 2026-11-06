@@ -35,7 +35,7 @@ Activity `agentpay`; your own worktree; branches `agentpay/*`. Read `CLAUDE.md`,
 - Names and prices come from the story config. Addresses come only from the config. Check chain id 1874 before every signature.
 - Run the reviewer on any code that signs, sends or holds money. No secrets in code. Do not publish to npm (the founder logs in later).
 - Real payments go only to cast actors, with operational test amounts (`agentpayExamples.testAmountMicro`), never during the hosted demo, and never with the hosted relayer key (FACILITATOR). Use RENEWER through the reference relayer.
-- Pause at 92% weekly plan usage (the founder's rule, 04:15 IST): push, write the resume file, end the turn.
+- Usage (ADR-0062 as amended Fri 11:00 IST): at 95% weekly plan usage, start no new real payment, merge or publish, and write the resume file; at 97%, pause at a clean checkpoint (push, resume, end the turn).
 
 ## Unattended rules
 

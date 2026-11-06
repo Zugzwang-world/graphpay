@@ -104,7 +104,7 @@ Opus 5.5 at **high**: judgement on merges, records and the story lock, with litt
 
 ## Handover state
 
-**Current: `docs/sessions/records/resume.md`** (Fri 6 Nov, from the outgoing Coordinator). It covers the work in flight, every session's state and id, the open decisions and every standing rule: no target times, the 92% pause, the live runner's conditions, the website plan with the team's PR #70, the two disposable wallets, the npm versions and the freeze after submission, and Kimi. Read it first.
+**Current: `docs/sessions/records/resume.md`** (Fri 6 Nov, from the outgoing Coordinator; kept by the new Coordinator, which took over at 11:00 IST). It covers the work in flight, every session's state and id, the open decisions and every standing rule: no target times, the usage lines (95% and 97%, ADR-0062 amended), the Arkiv writer clash and its approved fallback, the live runner's conditions, the website plan with the team's PR #70, the two disposable wallets, the npm versions and the freeze after submission, and Kimi. Read it first.
 
 History, the M0 handover (Thu 23:55 IST). Its follow-ups still apply:
 

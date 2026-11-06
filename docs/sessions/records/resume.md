@@ -2,10 +2,12 @@
 
 Written by the outgoing Coordinator, Fri 6 Nov, about 10:40 IST. It replaces the "Handover state" section of `docs/plan/sessions/coordinator.md`. Read it first, then `docs/thinking-partner/NOW.md` and `OPEN.md`.
 
+**Taken over Fri 11:00 IST** by the new Coordinator (`local_3b893898-fa05-4265-93ee-e9090aeee49f`, "GraphPay Coordinator takeover"), which has kept it current since. The first Coordinator (`local_d1ca442e-…`) has retired, and every session has been told to report to the new one.
+
 ## Start
 
 1. Ask the app to keep the Mac awake (`request_keep_awake`, until `session_idle`).
-2. Set up your own tick with the cron tool (session-only). The old one used `7,27,47 * * * *`, as a polling cadence and not a target. **The outgoing Coordinator's tick and background tasks are stopped, so only you run.**
+2. Set up your own tick with the cron tool (session-only). The current one is `4,14,24,34,44,54 * * * *`, a polling cadence and not a target. **Only one Coordinator ticks at a time.**
 3. Run the first tick: PRs, conflicts, gates, sessions, usage, power.
 
 ## Standing rules (all hold)
@@ -14,7 +16,11 @@ Written by the outgoing Coordinator, Fri 6 Nov, about 10:40 IST. It replaces the
   - Only two deadlines are fixed: **submission, Sat 09:00 IST**, and **presentation, Sat 09:30 IST**.
   - Everything else is an event. The large city seeds the moment the story locks.
   - Clock times in older files are history.
-- **Usage:** warn the founder at 90%. **At 92%, every session pauses gracefully** (ADR-0062). It was 86% at 10:24 IST, and the weekly window resets Fri 21:30 IST (16:00 UTC).
+- **Usage** (ADR-0062 as amended by the founder, Fri 11:00 IST):
+  - At 90%, warn the founder and every running session.
+  - **At 95%,** no session starts a new real payment, merge or publish, and every session writes its resume.
+  - **At 97%,** every session pauses at a clean checkpoint. The Coordinator then ships a records PR, replaces its tick with one wake-up just after the reset, and resumes the sessions.
+  - It was 87% at 11:02 IST. The weekly window resets Fri 21:30 IST (16:00 UTC).
 - **Effort:** every track session runs at high, not max (founder). The Coordinator runs Opus 5.5 at high.
 - **Messages:**
   - The app stops cross-session Desktop messages after 10 sent without the founder typing. Do not work around this; ask the founder to type.
@@ -48,7 +54,34 @@ Written by the outgoing Coordinator, Fri 6 Nov, about 10:40 IST. It replaces the
     - The testing preset may have the same problem, which would affect every errand and the video run.
     - Join re-runs the production smoke test after T4's fix.
   - D11's presence half passes (6.7 s to appear, lapsed after 14.98 minutes). D11's `shop_open` half has no runner.
-  - Left over from #88's review (Join): a 429 for the rate limit, a unit test for the runner, and the `server-only` guard.
+  - Left over from #88's review (Join): a 429 for the rate limit, a unit test for the runner, and the `server-only` guard. **Done in #93** (merged 11:07).
+  - **11:07 update:**
+    - T4's fix (#92) makes the concierge delegate on Kimi. Every preset paid the good shop in mock runs.
+    - Join's 10:47 production run got as far as the 402 step, then failed on the hosted shop's quote write (the W_DIRECTORY clash, below). So there is still no production purchase.
+    - Join re-runs the smoke test now that #93 is deployed.
+
+## The Arkiv writer clash (the founder's approval, Fri 11:00 IST)
+
+- **The cause:** three writers share W_DIRECTORY from separate Vercel instances:
+  - the hosted shop's quotes, `apps/web/lib/payments.server.ts`;
+  - the runner's presence and hand-off rows, `integration/src/live-runner.mjs` and `activity.mjs`;
+  - the Open toggle's `shop_open` rows, `apps/web/lib/open-toggle.server.ts`.
+  - At 05:19 UTC W_DIRECTORY sent 10 transactions in 96 s (nonces 50–59), and a quote write failed.
+- **Fixes, merged and deployed:**
+  - #96 retries an uncertain quote write, twice at most, within 45 s;
+  - #97 stops the writer adopting another instance's transaction;
+  - #93 has the runner hold its writes around the 402 step.
+- **The trigger:** one more quote, presence or Open write fails in a live errand.
+- **Then, at once:**
+  - Give each writer its own Arkiv wallet: `pnpm -s wallet:gen --only <ROLE>` per role.
+  - Fund each with test tGLM from FUNDER: a dry run, then `--execute --real`, recorded in WALLETS.md §2b.
+  - Put the keys on Vercel with `pnpm -s secrets:vercel`.
+  - In the same PR, update every owner check that trusts W_DIRECTORY:
+    - `packages/money-graph`: `quotes.mjs` (`findQuotes`), `activity.mjs` (`directory()`), `graphql.mjs` (the owner lists) and `model.mjs`;
+    - `integration/d11.mjs`, `quote-d10.mjs` and `acceptance/tracks.mjs`;
+    - `packages/config/graphpay.config.json`, `scripts/whitechain/vercel-env.mjs` and `scripts/funding/plan.json`.
+  - The directory and menu rows stay on W_DIRECTORY, because only scripts write them (ADR-0033).
+  - Run the reviewer: the change touches keys.
   - The provider is now **Kimi** (ADR-0067): the live preset is `kimi-k3.1-pro-highspeed` at high. It needs `KIMI_API_KEY` on Vercel.
   - Kimi is prepaid, so its balance is the spend cap across all instances.
 
@@ -99,7 +132,11 @@ Written by the outgoing Coordinator, Fri 6 Nov, about 10:40 IST. It replaces the
   - If the main checkout lacks workspace links (`ERR_PNPM_CANNOT_RESOLVE_WORKSPACE_PROTOCOL`), run `fnm exec --using=22.23.4 pnpm install --frozen-lockfile` there.
 - **For any later version, after the publish:** install it from the registry in an empty folder, run its quickstart, and record it in `FACTS.md`, the README and the sponsor files.
 - **Versions:** 0.1.x for fixes, 0.2.0 for changes, driven by venue feedback (`FEEDBACK.md`, GitHub labels `arkiv-graph`, `agentpay`, `feedback`). **Freeze the published versions from submission until judging ends.**
-- **Follow-up for agentpay 0.1.1 (T6):** drop the three workspace devDependencies (`@graphpay/config`, `contracts`, `facilitator`) from the published manifest. They are test-only and never installed by users, but they name a scope we don't own.
+- **Follow-up for agentpay 0.1.1 (T6):** drop the three workspace devDependencies (`@graphpay/config`, `contracts`, `facilitator`) from the published manifest. They are test-only and never installed by users, but they name a scope we don't own. T6 was told at 11:05.
+- **arkiv-graph 0.1.1 is ready to publish** (#97, #98, `main` at `caa0ecc`).
+  - Packed from the main checkout: 21 files, no secret shapes, public URLs only, dependencies `@arkiv-network/sdk` 1.0.1 and `viem`.
+  - It needs only the founder at the browser for npm's approval link.
+  - Both registry versions so far: 0.0.0-stage and 0.1.0.
 
 ## Kimi (ADR-0067)
 
@@ -125,11 +162,11 @@ All are idle unless noted. Message them with `local_` ids.
 |---|---|---|
 | T1 Payments | `local_16ccf7cf-ca9a-497a-bfce-d8bb3415cd92` | M4 and F3 done; next, the demo cast's policies when the story locks |
 | T2 Identity | `local_8ec48e25-b5c3-442f-b70d-a258266170ba` | M6 done, B7 (#83) and B9(a) (#84) done; next, the demo cast's ENS names when the story locks |
-| T3 Arkiv | `local_949a2091-02b7-4f63-9c71-efebf8fe215a` | arkiv-graph published; Swarm menus (#82, #86); next, the `shop` rows and the **size-M seeding the moment the story locks** |
-| T4 Agents | `local_0a83861b-1aaa-424f-abb4-cd36290807d2` | working: fixing the concierge so it delegates on Kimi (Join's repro), then calibration (3 errands per preset) |
+| T3 Arkiv | `local_949a2091-02b7-4f63-9c71-efebf8fe215a` | arkiv-graph 0.1.0 published; the writer fix (#97) and 0.1.1 (#98) merged; Swarm menus (#82, #86); next, the `shop` rows and the **size-M seeding the moment the story locks** |
+| T4 Agents | `local_0a83861b-1aaa-424f-abb4-cd36290807d2` | the Kimi fix (#92) and the calibration (#95) merged; idle unless Join's next run shows an agents issue |
 | T5 Web | `local_e34793ca-bfc1-4489-8340-07a90fc9b703` | screens stopped; Re-order merged (#81); waits for the team's fixes on #70 |
-| Join | `local_e67c2aa7-36f4-43ff-bee9-578ad5a1d519` | #85 and #88 merged and live; evidence in PR #91; re-runs the production smoke test after T4's fix |
-| T6 AgentPay | `local_be1a1d1c-53bd-4570-b242-09a41617ce01` | 0.1.0 ready (#80); venue feedback, then 0.1.1 |
+| Join | `local_e67c2aa7-36f4-43ff-bee9-578ad5a1d519` | #85, #88 and #93 merged and live; evidence in PR #91; re-runs the production smoke test now that the clash fixes are deployed |
+| T6 AgentPay | `local_be1a1d1c-53bd-4570-b242-09a41617ce01` | 0.1.0 published (#80); working on 0.1.1 (no workspace devDependencies) and venue feedback |
 | Submission | not started | its gate (CP4) is met; starting it is the founder's call (usage) |
 
 ## Open decisions and founder items
@@ -140,6 +177,8 @@ All are idle unless noted. Message them with `local_` ids.
 4. **The Submission session:** start it now, or after the 21:30 reset.
 5. **The disclosure** to ETHGlobal, if not sent (`docs/plan/DISCLOSURE_MESSAGE.md`).
 6. **Charger in and lid open** until the presentation.
+7. **The npm approval link for 0.1.1:** arkiv-graph now, agentpay when T6 is ready.
+8. **This session's effort:** max as started; the plan says high, and only the founder can switch it.
 
 ## Follow-ups (not blocking)
 
