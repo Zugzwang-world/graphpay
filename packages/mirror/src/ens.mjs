@@ -168,7 +168,10 @@ export async function startEnsWatcher({ env, values, whitechain, checkout, log }
   const started = await watcher.start();
   log(`ens watcher: ${started.tracked} names from block ${started.checkpoint}${account ? '' : ' (no POLICY_WRITER key: policy writes are logged only)'}`);
   keeper.kick('start');
-  const stop = watcher.run({ pollMs: 6_000, tickMs: 30_000, onError: (e) => log(`ens watcher: ${e.shortMessage ?? e.message}`) });
+  // ENS_WATCH_POLL_MS slows the polls when the public Sepolia RPC throttles this machine's log
+  // queries (each poll sends one getLogs per 8 tracked addresses; 28 names since the new shops).
+  const pollMs = Number(process.env.ENS_WATCH_POLL_MS) >= 6_000 ? Number(process.env.ENS_WATCH_POLL_MS) : 6_000;
+  const stop = watcher.run({ pollMs, tickMs: 30_000, onError: (e) => log(`ens watcher: ${e.shortMessage ?? e.message}`) });
   return { stop, watcher };
 }
 

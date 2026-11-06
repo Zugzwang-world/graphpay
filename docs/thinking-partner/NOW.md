@@ -117,12 +117,19 @@ Updated 00:27 IST, Sat 7 Nov (W4 Agents, session `local_3404db4e-486c-4f86-8b3a-
 
 ## w5-ops
 
-Updated 23:50 IST, Fri 6 Nov (W5 Ops).
-- **The payer is ACTIVE**, with a **300 test USDT** pass for tonight (policy and ENS; #152). PAYER holds 125 test USDT.
+Updated 00:35 IST, Sat 7 Nov (W5 Ops).
+- **The payer is ACTIVE**, with a 300 test USDT pass for tonight (117.2 spent at 00:30 IST) (#152).
 - **The shop (Filter & Fold) is open.**
-- **The mirror hung at 23:29 IST** (the same silent stall as at 22:02). W5 restarted the workers at 23:43 IST from a dedicated checkout of main (`.claude/worktrees/w5-workers`, pid 79148). It caught up by 23:49 IST: 2 blocks behind, nothing new parked.
-- **In review:** Pause and Resume per agent (payer and scout only; the others say why), and the self-healing cron: a paused agent resumes after 2 minutes, a closed shop reopens after 5. The reviewer's blocking finding and nine others are fixed; it is checking the fixes.
-- **Next:** prove both live on production; restart the workers after W1's label flip; acceptance at 0 failures.
+- **Live since 00:06 IST: Pause per agent and self-healing** (#172).
+  - Only Payer and Scout can be paused; Concierge and Analyst answer why not.
+  - A paused agent resumes by itself about 2 minutes after the pause. Proven on the Scout and the Payer, with the cron's own transactions.
+  - A closed shop is open again within 5 minutes.
+  - The phones still pause only the payer until they send the tapped agent (OPEN, "frontend").
+- **The mirror** waits out Arkiv's shared rate-limit window at times. That is what the 22:02, 23:29 and 00:23 IST stalls were. It resumes by itself.
+  - A watchdog keeps the workers running and restarts them only after 30 minutes with no progress.
+  - The real fix is the founder's new Arkiv key.
+- **Acceptance** (#188, in review): B2, C7 and E3 now pass. C3 waits for a fresh hosted run after 05:30 IST, E1 for a fresh errand after W1's label flip, and D4 and D8 for a full run.
+- **Next:** restart the workers on W1's flip, run one errand to prove the mirror on the new shops, then the full acceptance run.
 
 ## w6-sdk
 
