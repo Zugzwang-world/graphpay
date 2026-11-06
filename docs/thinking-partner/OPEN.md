@@ -84,6 +84,9 @@ Agents (T4) and Join add one row per full errand run, so the presets can be cali
 | 00:14 | W4 code mode live, local runner (as at 00:10) | live | the same | 22.0 | $0.0265 | refused at G8, the shop's re-check before the 402: the buyer-standing read failed (`fetch failed`), so the guard failed closed; now a read that throws is tried once more |
 | 00:15 | W4 code mode live, local runner, after that fix | live | the same | 55.2 | $0.0247 | **paid** 4.80 to kesar: https://explorer.testnet.whitechain.io/tx/0xfe0a4327fb7dca69d7363f05c73a8cc15b486b57184fc2f1e72c6812785070d5 ; 3 calls, 2,886 tokens (1,884 in, 768 cached; 1,002 out, 605 reasoning); 13.6 s of model time; the payer's 41.7 s is the quote, the 402, the checks, the signature and the settlement |
 | 00:24 | W4 code mode (#182) live on the production site, payer | live | `kimi-k3.1-pro-highspeed`, concierge high, analyst and risk low; the rest in code | 55.5 | $0.0269 | **paid** 4.80 to kesar: https://explorer.testnet.whitechain.io/tx/0x194b7bc4dac70c36e55ca140a7e3ea477853d8938f3885fb94d95bff9c32f0e5 ; 3 calls, 2,852 tokens; models 13 s; the two longest waits are the 402 step (13.6 s: the hosted shop's quote write) and the settlement (13.3 s: our facilitator and the chain) |
+| 01:16 | W4 item 4, three in a row (1 of 3), after the shop-name flip and W5's restart, payer | live | `kimi-k3.1-pro-highspeed`, concierge high, analyst and risk low; the rest in code | 54.2 | $0.0293 | **paid** 4.80 to filter-and-fold: https://explorer.testnet.whitechain.io/tx/0x32bbd598de36731532da5a3d3927d355aab62b27fcd743d1fd62dc0c09c66b5e ; 3 calls, 2,963 tokens; models 14.6 s |
+| 01:17 | W4 item 4, three in a row (2 of 3) | live | the same | 45.4 | $0.0270 | **paid** 4.80 to filter-and-fold: https://explorer.testnet.whitechain.io/tx/0xdedadeb8be1ee53cc6428a845024fd8052c4e734dcc4e844a227410638f15742 ; 3 calls, 2,995 tokens; models 15.6 s |
+| 01:18 | W4 item 4, three in a row (3 of 3) | live | the same | 42.6 | $0.0247 | **paid** 4.80 to filter-and-fold: https://explorer.testnet.whitechain.io/tx/0x128517cae8acca9ac1cc229ddda5fd0ae1a63065788ad487eac24b0e9d80a238 ; 3 calls, 2,877 tokens; models 14.0 s |
 
 ## Kickoff rules and booth questions (closed; rolled up 06:55 IST)
 
@@ -182,7 +185,7 @@ Updated 23:38 IST, Fri 6 Nov (W7 Submission).
 
 ## w4-agents
 
-- **Acceptance E1 reads the old clock deadline** (owner: the Coordinator, who regenerates acceptance). What: `acceptance/checks.mjs` E1 expects the run's deadline to contain `T23:59:00` (`order.deadlineLocal`); the request now says "delivered within an hour". Why: E1 would fail on every fresh run. Recommendation: expect the deadline one hour after the run's request, to the minute (`result.mandate.deadlineIso`); E1 needs a fresh `e2e:food` run anyway.
+- Closed 01:20 IST: acceptance E1 and the relative deadline (W5's #188 updated E1); the brief's four items (#153, #157, #162, #182; three live errands in a row paid at 01:16 to 01:18 IST).
 
 ## w2-city
 

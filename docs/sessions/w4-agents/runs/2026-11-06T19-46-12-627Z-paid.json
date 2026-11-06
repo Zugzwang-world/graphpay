@@ -1,0 +1,245 @@
+{
+  "site": "https://graphpay-event.vercel.app",
+  "runId": "8debdb99-02b8-4089-8df2-182a145213e0",
+  "startedAt": "2026-11-06T19:46:12.627Z",
+  "request": "Just landed in Mumbai. Get me the best masala dosa near BKC under 6 USDT, delivered within an hour.",
+  "seconds": 54.2,
+  "result": {
+    "status": "paid",
+    "chosenShop": "filter-and-fold.graphpay.eth",
+    "priceUsdt": "4.800000",
+    "orderId": "0x7ae226463dc11ae72ddc294cbb81eb38c6a7a55cfd569fa53b2de761cde229ea",
+    "transaction": "0x32bbd598de36731532da5a3d3927d355aab62b27fcd743d1fd62dc0c09c66b5e",
+    "explorerUrl": "https://explorer.testnet.whitechain.io/tx/0x32bbd598de36731532da5a3d3927d355aab62b27fcd743d1fd62dc0c09c66b5e",
+    "refusals": [],
+    "deadlineIso": "2026-11-07T02:16:00+05:30",
+    "error": null
+  },
+  "failed": null,
+  "events": 66,
+  "usage": {
+    "agents": [
+      {
+        "agent": "scout.vitalik.graphpay.eth",
+        "role": "scout",
+        "model": "code",
+        "effort": null,
+        "seconds": 0.53,
+        "calls": 0,
+        "input": 0,
+        "cached": 0,
+        "output": 0,
+        "reasoning": 0,
+        "usd": 0,
+        "modelSeconds": 0,
+        "perCall": []
+      },
+      {
+        "agent": "analyst.vitalik.graphpay.eth",
+        "role": "analyst",
+        "model": "kimi-k3.1-pro-highspeed",
+        "effort": "low",
+        "seconds": 7.85,
+        "calls": 1,
+        "input": 699,
+        "cached": 0,
+        "output": 509,
+        "reasoning": 315,
+        "usd": 0.012976,
+        "modelSeconds": 6.36,
+        "perCall": [
+          {
+            "input": 699,
+            "cached": 0,
+            "output": 509,
+            "reasoning": 315,
+            "usd": 0.012976,
+            "tools": [],
+            "seconds": 6.36,
+            "toolSeconds": 0
+          }
+        ]
+      },
+      {
+        "agent": "risk.filter-and-fold.graphpay.eth",
+        "role": "risk",
+        "model": "kimi-k3.1-pro-highspeed",
+        "effort": "low",
+        "seconds": 4.45,
+        "calls": 1,
+        "input": 463,
+        "cached": 0,
+        "output": 208,
+        "reasoning": 134,
+        "usd": 0.006012,
+        "modelSeconds": 3.12,
+        "perCall": [
+          {
+            "input": 463,
+            "cached": 0,
+            "output": 208,
+            "reasoning": 134,
+            "usd": 0.006012,
+            "tools": [],
+            "seconds": 3.12,
+            "toolSeconds": 0
+          }
+        ]
+      },
+      {
+        "agent": "storefront.filter-and-fold.graphpay.eth",
+        "role": "storefront",
+        "model": "code",
+        "effort": null,
+        "seconds": 0,
+        "calls": 0,
+        "input": 0,
+        "cached": 0,
+        "output": 0,
+        "reasoning": 0,
+        "usd": 0,
+        "modelSeconds": 0,
+        "perCall": []
+      },
+      {
+        "agent": "dispatch.filter-and-fold.graphpay.eth",
+        "role": "dispatch",
+        "model": "code",
+        "effort": null,
+        "seconds": 0.08,
+        "calls": 0,
+        "input": 0,
+        "cached": 0,
+        "output": 0,
+        "reasoning": 0,
+        "usd": 0,
+        "modelSeconds": 0,
+        "perCall": []
+      },
+      {
+        "agent": "payer.vitalik.graphpay.eth",
+        "role": "payer",
+        "model": "code",
+        "effort": null,
+        "seconds": 36.57,
+        "calls": 0,
+        "input": 0,
+        "cached": 0,
+        "output": 0,
+        "reasoning": 0,
+        "usd": 0,
+        "modelSeconds": 0,
+        "perCall": []
+      },
+      {
+        "agent": "concierge.vitalik.graphpay.eth",
+        "role": "concierge",
+        "model": "kimi-k3.1-pro-highspeed",
+        "effort": "high",
+        "seconds": 49.53,
+        "calls": 1,
+        "input": 710,
+        "cached": 0,
+        "output": 374,
+        "reasoning": 287,
+        "usd": 0.01032,
+        "modelSeconds": 5.1,
+        "perCall": [
+          {
+            "input": 710,
+            "cached": 0,
+            "output": 374,
+            "reasoning": 287,
+            "usd": 0.01032,
+            "tools": [],
+            "seconds": 5.1,
+            "toolSeconds": 0
+          }
+        ]
+      }
+    ],
+    "total": {
+      "agents": 7,
+      "calls": 3,
+      "input": 1872,
+      "cached": 0,
+      "output": 1091,
+      "reasoning": 736,
+      "usd": 0.029308,
+      "modelSeconds": 14.58
+    }
+  },
+  "timeline": [
+    {
+      "at": 0.6,
+      "type": "agent.start",
+      "role": "concierge"
+    },
+    {
+      "at": 0.6,
+      "type": "agent.start",
+      "role": "scout"
+    },
+    {
+      "at": 0.6,
+      "type": "agent.start",
+      "role": "analyst"
+    },
+    {
+      "at": 1.1,
+      "type": "agent.end",
+      "role": "scout"
+    },
+    {
+      "at": 8.4,
+      "type": "agent.end",
+      "role": "analyst"
+    },
+    {
+      "at": 13.6,
+      "type": "agent.start",
+      "role": "payer"
+    },
+    {
+      "at": 13.8,
+      "type": "agent.start",
+      "role": "risk"
+    },
+    {
+      "at": 18.2,
+      "type": "agent.end",
+      "role": "risk"
+    },
+    {
+      "at": 18.2,
+      "type": "agent.start",
+      "role": "storefront"
+    },
+    {
+      "at": 18.2,
+      "type": "agent.end",
+      "role": "storefront"
+    },
+    {
+      "at": 50.2,
+      "type": "agent.start",
+      "role": "dispatch"
+    },
+    {
+      "at": 50.2,
+      "type": "agent.end",
+      "role": "dispatch"
+    },
+    {
+      "at": 50.2,
+      "type": "agent.end",
+      "role": "payer"
+    },
+    {
+      "at": 50.2,
+      "type": "agent.end",
+      "role": "concierge"
+    }
+  ],
+  "synthetic": true
+}

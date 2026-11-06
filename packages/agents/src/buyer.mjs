@@ -1,7 +1,9 @@
 // The buyer team (planning/SPEC/AGENTS.md §2, §4): the concierge delegates to its
-// sub-agents, which are its tools (`scout`, `analyst`, `pay_shop`). The SDK runs
-// the tool calls of one step concurrently, so scout and analyst run in parallel
-// with no hand-written Promise.all. Shared state is code-owned (RunState).
+// sub-agents, which are its tools (`scout`, `analyst`, `pay_shop`), and the scout and
+// the analyst run in parallel. With the routine steps in code (W4, ADR-0078, the
+// default) code makes those calls through the same tools and each model answers once;
+// with `steps: 'model'` the SDK runs the model's tool calls. Shared state is code-owned
+// (RunState).
 
 import { z } from 'zod';
 import { askModel, callTool, endAgent, runAgent, runCodeAgent } from './agents.mjs';
