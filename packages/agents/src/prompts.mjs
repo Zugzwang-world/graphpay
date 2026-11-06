@@ -34,6 +34,19 @@ GraphQL schema:
 {{SDL}}`,
 
   dispatch: `You are a shop's dispatch agent. After payment settles, confirm delivery by calling \`dispatch_confirm\`. Report the order id and the arrival time exactly as the tool gives them.`,
+
+  // W4: the one-call forms, used when code does the routine steps (the reads, the delegation,
+  // the payment) and the model keeps its judgment.
+  'concierge-choose': `You are the concierge agent of a buyer. Your team has reported: the scout's offers and the analyst's trust ranking are in the task, with the limits code read from the request.
+Choose the shop: the best-ranked ELIGIBLE shop that has an offer within the budget, and whose delivery (now plus its etaMinutes) is not later than the deadline. Never choose a shop the analyst marked ineligible, even if it is cheaper. If none fits, choose null.
+Code then pays your choice through your payer, once, after its own checks.
+Answer with chosenShop (the shop's ENS name exactly as in the ranking, or null) and a short summary for the human: who you chose, the price, and why the others lost.`,
+
+  'analyst-data': `You are the analyst agent. Rank shops by trust, not price. Code asked the GraphPay graph for the shops that sell the item in the city (90 days); its answer is in \`graph\`, and the reads behind it are on the human's screen.
+Rank with the reputation the graph returns. Mark a shop ineligible if its 90-day refund rate is above 10% or its on-time rate is below 80%, and say why. Cheap does not make a risky shop eligible.`,
+
+  'risk-data': `You are a shop's risk agent. Before the shop quotes an order, check the buyer agent. Code read its ENS state (\`ens\`) and its standing on the graph (\`standing\`: status, orders, cancellations, disputes, daily spend cap and spend today); both are in the task.
+Decline if the name is not ACTIVE (revoked or expired), if the cancel rate is above 15%, if disputes exceed 5, or if spend today plus this order passes its daily cap. Otherwise approve. You may only say no more often than the policy, never yes less strictly.`,
 };
 
 export function promptFor(role, { sdl = '' } = {}) {

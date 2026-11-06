@@ -13,10 +13,11 @@ const KEY = ['kimi', 'test', 'Q'.repeat(24)].join('-');
 const env = { KIMI_API_KEY: KEY };
 const roles = Object.keys(story.agentModels.presets.testing.roles);
 
-// W4: the concierge and the analyst decide, so they stay at high; the routine roles run at low.
-const HIGH = new Set(['concierge', 'analyst']);
+// W4: the concierge chooses, so it stays at high; code does the other roles' routine steps, and
+// what is left of their thinking runs at low.
+const HIGH = new Set(['concierge']);
 
-test('the testing, video and live presets are Kimi, high for the concierge and the analyst and low for the routine roles; Anthropic stays as named fallbacks', () => {
+test('the testing, video and live presets are Kimi, high for the concierge and low for the other roles; Anthropic stays as named fallbacks', () => {
   const presets = story.agentModels.presets;
   for (const [name, model] of [['testing', 'kimi-k3.1-pro'], ['video', 'kimi-k3.1-pro-highspeed'], ['live', 'kimi-k3.1-pro-highspeed']]) {
     for (const role of roles) assert.deepEqual({ ...presets[name].roles[role] }, { provider: 'moonshot', model, effort: HIGH.has(role) ? 'high' : 'low', maxTokens: 32000 }, `${name}/${role}`);

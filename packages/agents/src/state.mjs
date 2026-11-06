@@ -59,3 +59,21 @@ export function payGuard(state, shopEns, now) {
   state.paying = { shopEns, priceMicro: price };
   return { ok: true, offer, ranked, priceMicro: price };
 }
+
+// Code's own choice (W4, when the concierge names no shop of the ranking): the best-ranked
+// eligible shop whose scout offer fits what is left of the budget and the deadline at `now`.
+// Pure: it reserves nothing; payGuard still decides.
+export function bestFit(state, now) {
+  if (!state.scoutDone || !state.analystDone || !state.need) return null;
+  const left = state.mandate.budgetMicro - state.spentMicro - state.reservedMicro;
+  const deadline = Date.parse(state.mandate.deadlineIso);
+  for (const r of state.ranking ?? []) {
+    if (!r.eligible) continue;
+    const offer = state.offers.get(r.ens);
+    if (!offer || offer.item !== state.need.item || offer.quantity !== state.need.quantity) continue;
+    if (toMicro(offer.priceUsdt) > left) continue;
+    if (!(now + offer.etaMinutes * 60_000 <= deadline)) continue;
+    return r.ens;
+  }
+  return null;
+}
