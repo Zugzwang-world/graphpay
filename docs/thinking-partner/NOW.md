@@ -96,7 +96,11 @@ Started 23:02 IST, Fri 6 Nov (session `local_b6205da6-b613-4662-872a-6d4879c66fa
 
 ## w7-submission
 
-Started 23:02 IST, Fri 6 Nov (session `local_abd77623-de22-4fe2-a0a9-865fdd43dba2`). W7 rewrites this section at the end of each step.
+Updated 23:25 IST, Fri 6 Nov (W7 Submission, `local_abd77623-de22-4fe2-a0a9-865fdd43dba2`; relay `relays/w7-submission.md`).
+- **Landed:** the README, with a "verify each claim" table (24 transactions checked on their explorers at about 23:10 IST), a runnable Arkiv query with no keys, the fictional-persona sentence, the team; a root MIT `LICENSE`.
+- **Running:** AI_USAGE.md, then the Arkiv files, `WHITECHAIN_FEEDBACK.md`, `docs/submission/ENS.md`, and `docs/submission/ETHGLOBAL.md` (the form text).
+- **Waits on:** W1's new shop names, W2's menus and race at M, W6's SDK 1.0.0; each gets a pass after it lands.
+- **Blockers:** none.
 
 ## before the night (retired day sessions)
 

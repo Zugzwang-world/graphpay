@@ -150,10 +150,14 @@ The kickoff rules (the deadline Sat 09:00 IST; AI use documented; spec files in 
 - Nothing open. The dosa shops on chain moved to identity and arkiv, and the 0.80 re-order to payments.
 - Closed today: the story on screen (#135); the deck as the stage (#136, #139); the stream recovery (#138); Grok's figurines and photos (#140); the 11:59 pm deadline (#142); the phones drive the deck (#143, #144).
 
-## submission
+## w7-submission
 
-- **M17** (owner: Submission, not started). Everything in `docs/plan/sessions/submission.md`: the sponsor files and the README; the `arkiv/` files (finish T3's three drafts; write `reach.md` and `why-arkiv.md`); the video's shot list and narration; the submission text and checklist. The founder reviews, records the video in his own voice and submits, by Sat 08:00 IST (hard deadline 09:00).
-- Closed today: the README's fictional-persona note (ADR-0072) and AI_USAGE's Grok desk line.
+Updated 23:25 IST, Fri 6 Nov (W7 Submission).
+- **Review the README** (what: the new README with its "verify each claim" table; where: `README.md`; why: it is the first thing every judge opens; recommendation: read the persona note, the claims table and the Team section, and tell W7 any change).
+- **The team list** (what: the README names `Zugzwang-world` and `ajatshatru01` by GitHub handle; where: `README.md`, "Team"; why: no other member is recorded in the repo; recommendation: add names, or anyone missing, and confirm each is on the ETHGlobal project).
+- **The video** (what: 2 to 4 minutes in your own voice, every party shown; where: the link goes into the form text, `docs/submission/ETHGLOBAL.md`, coming next; why: Whitechain's qualification and ETHGlobal's rules; recommendation: record after the night streams land, with the payer active and the shop open).
+- **Submit by 08:00 IST** (what: title, description, repo link, three partner prizes; where: `docs/submission/ETHGLOBAL.md`; why: the form closes at 09:00 IST; recommendation: paste from the file once W7 says it is final).
+- Closed: M17 started as the W7 night stream (23:02 IST); the README rewritten with its evidence (this step).
 
 ## w4-agents
 
