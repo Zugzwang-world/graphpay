@@ -53,6 +53,7 @@ function sepoliaLink(tx: string): Link {
   return { label: fill(copy.common.viewOnEns, { chain: story.explorers.ensLabel }), url: `${story.explorers.ens.replace(/\/+$/, '')}/tx/${tx}` };
 }
 
+const sleep = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms));
 const usdt = (micro: string | bigint): Money => ({ amount: microToAmount(BigInt(micro)), currency: 'USDT' });
 
 async function getJson<T>(path: string): Promise<T | null> {
@@ -169,8 +170,10 @@ export class LiveAdapter implements DemoAdapter {
       const body = (await res.json().catch(() => null)) as { error?: unknown } | null;
       throw new Error(res.status === 409 ? 'Another errand is running right now. Try again in a minute.' : typeof body?.error === 'string' ? body.error : `The errand did not start (HTTP ${res.status}).`);
     }
+    const baseline = (await this.lastOrder())?.orderId ?? null;
     const mapper = new ErrandMapper(story, txLink);
-    void readFrames(res.body, (event, data) => {
+    let frames = 0;
+    const apply = (event: string, data: string) => {
       postToStage(event, data);
       for (const e of mapper.map(event, data)) {
         try {
@@ -179,9 +182,58 @@ export class LiveAdapter implements DemoAdapter {
           console.error(`the phones could not apply "${e.type}":`, error);
         }
       }
-    }).then(() => {
-      for (const e of mapper.end()) this.emit(e);
-    });
+    };
+    void readFrames(res.body, (event, data) => {
+      frames += 1;
+      apply(event, data);
+    })
+      .then(() => (mapper.finished ? undefined : this.recoverRun(mapper, frames, baseline, apply)))
+      .then(() => {
+        for (const e of mapper.end()) this.emit(e);
+      });
+  }
+  private async lastOrder(): Promise<{ orderId: string; amountMicro: string; transaction: string | null; status: string } | null> {
+    try {
+      const res = await fetch('/api/state/customer', { cache: 'no-store' });
+      if (!res.ok) return null;
+      return ((await res.json()) as { lastOrder?: { orderId: string; amountMicro: string; transaction: string | null; status: string } | null }).lastOrder ?? null;
+    } catch {
+      return null;
+    }
+  }
+  // The stream dropped before the run's result. The run goes on server side, so first re-attach to it by
+  // its id (the server replays its frames; the ones already applied are skipped), then read the payer's
+  // newest order until it differs from the one before the run. Never offer a second errand meanwhile.
+  private async recoverRun(mapper: ErrandMapper, applied: number, baseline: string | null, apply: (event: string, data: string) => void): Promise<void> {
+    const runId = mapper.runId;
+    let attached = runId !== undefined;
+    for (let tries = 0; attached && !mapper.finished && tries < 8; tries++) {
+      try {
+        const res = await fetch(`/api/agents/run/${runId}/events`, { cache: 'no-store', headers: { accept: 'text/event-stream' } });
+        if (res.status === 404) attached = false;
+        else if (res.ok && res.body) {
+          let seen = 0;
+          await readFrames(res.body, (event, data) => {
+            seen += 1;
+            if (seen > applied) {
+              applied += 1;
+              apply(event, data);
+            }
+          });
+        }
+      } catch {
+        // the connection dropped again: try once more
+      }
+      if (!mapper.finished) await sleep(2000);
+    }
+    for (let polls = 0; !mapper.finished && polls < 45; polls++) {
+      const order = await this.lastOrder();
+      if (order && order.orderId !== baseline && order.transaction) {
+        for (const e of mapper.recovered(order.orderId, usdt(order.amountMicro), order.transaction)) this.emit(e);
+        return;
+      }
+      await sleep(4000);
+    }
   }
   // The server re-derives the parent order (the payer's last) and pays the story's re-order.
   async reorder(orderId: string): Promise<void> {

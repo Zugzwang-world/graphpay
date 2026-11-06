@@ -135,7 +135,7 @@ export function streamRun(run: Run, signal?: AbortSignal): Response {
         controller.enqueue(encoder.encode(frameText(frame)));
         if (frame.event === 'result' || frame.event === 'failed') finish();
       };
-      const keepAlive = setInterval(() => !closed && controller.enqueue(encoder.encode(': keep-alive\n\n')), 15_000);
+      const keepAlive = setInterval(() => !closed && controller.enqueue(encoder.encode(': keep-alive\n\n')), 5_000);
       cleanup = () => {
         clearInterval(keepAlive);
         run.listeners.delete(push);
