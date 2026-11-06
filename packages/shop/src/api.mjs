@@ -228,7 +228,7 @@ export function shopHandler(deps) {
       verdict = await facilitator.verify(paymentPayload, requirement);
     } catch (e) {
       log(`shop: facilitator verify unavailable (${errorNames(e)})`);
-      return json(502, { error: 'facilitator unavailable; retry is safe' });
+      return json(502, { error: 'facilitator verify unavailable; retry is safe' }); // nothing can have been sent
     }
     if (!verdict.isValid) {
       const s = { success: false, errorReason: verdict.invalidReason ?? 'invalid', transaction: '', network, payer: verdict.payer };
@@ -239,7 +239,13 @@ export function shopHandler(deps) {
       settled = await facilitator.settle(paymentPayload, requirement);
     } catch (e) {
       log(`shop: facilitator settle unavailable (${errorNames(e)})`);
-      return json(502, { error: 'facilitator unavailable; retry is safe' });
+      // Only the facilitator's own refusals before any send (a full queue, a rate limit) are safe to
+      // retry. Any other failure may come after the relayer broadcast (a send error, a timeout past
+      // the function's limit): the payment is unknown, and the payer keeps it unsettled (G16).
+      if (e?.name === 'SettleError' && (e.errorReason === 'busy' || e.errorReason === 'rate_limited')) {
+        return json(502, { error: 'facilitator busy; retry is safe', reason: e.errorReason });
+      }
+      return json(504, { status: 'pending', reason: 'settle_unknown', orderId: order.orderId });
     }
     if (settled.success) {
       let delivery = 'not_configured';

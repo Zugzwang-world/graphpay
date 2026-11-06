@@ -2,7 +2,7 @@
 // relayer's send, and the receipt's verdict. The pipeline only talks to this adapter, so the
 // offline tests replace it with a fake.
 
-import { decodeEventLog, erc20Abi, isAddressEqual, parseAbi } from 'viem';
+import { decodeEventLog, encodeFunctionData, erc20Abi, isAddressEqual, keccak256, parseAbi } from 'viem';
 import { network } from '@graphpay/config';
 import { checkoutAbi } from '@graphpay/contracts';
 
@@ -89,9 +89,24 @@ export function viemChain({ publicClient, walletClient, account, checkout, token
       return publicClient.getBalance({ address: account.address });
     },
 
+    // Signed here, so the hash is known before the broadcast: when the broadcast call errors (a
+    // transport retry answered "already known" or "nonce too low", a timeout after the node took
+    // it), a transaction the node has under that hash is adopted instead of reported as failed.
     async sendSettle(args, gas) {
       if (!(await chainOk())) throw new Error('sendSettle: the RPC is not on the relayer chain');
-      return walletClient.writeContract({ ...c, functionName: 'settleOrder', args, account, chain, gas });
+      const request = await walletClient.prepareTransactionRequest({ account, chain, to: checkout, data: encodeFunctionData({ abi: checkoutAbi, functionName: 'settleOrder', args }), gas });
+      const serializedTransaction = await walletClient.signTransaction({ ...request, account, chain });
+      const hash = keccak256(serializedTransaction);
+      try {
+        return await walletClient.sendRawTransaction({ serializedTransaction });
+      } catch (e) {
+        const known = await publicClient.getTransaction({ hash }).then(
+          () => true,
+          () => false,
+        );
+        if (known) return hash;
+        throw e;
+      }
     },
 
     async waitReceipt(hash, timeoutMs) {
