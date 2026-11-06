@@ -88,6 +88,6 @@ One line per PR: time (IST) · activity · result · PR link. Append under your 
 - 04:45 IST · records · M14 relay: first real payment, the first acceptance report, ADR-0062 (92% pause), wallets §2b, the README payment link, T5's secrets set in Vercel · https://github.com/Zugzwang-world/graphpay/pull/49
 - 05:15 IST · records · CP4 met: M11 and M12 done on the real networks, acceptance at 31 pass, 0 fail, 1 blocked; CP4 relay · https://github.com/Zugzwang-world/graphpay/pull/61
 - 06:55 IST · records · 06:45 relay: M4 and M16 done, acceptance at 42 pass, 0 fail; LOG rolled up; OPEN's closed M0 tables condensed · https://github.com/Zugzwang-world/graphpay/pull/68
-- 08:30 IST · records · morning relay: 42 pass, 0 fail; usage 82%; the story brief, a message to wake the sessions, and the budget call are the founder's · PR_LINK
+- 08:30 IST · records · morning relay: 42 pass, 0 fail; usage 82%; the story brief, a message to wake the sessions, and the budget call are the founder's · https://github.com/Zugzwang-world/graphpay/pull/69
 
 ## submission
