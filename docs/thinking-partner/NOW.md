@@ -38,11 +38,12 @@ M0 is done and handed over (PRs #1–#7); see `relays/foundation.md`.
 
 ## payments
 
-Updated 10:56 IST, Fri 6 Nov (T1).
+Updated 12:46 IST, Fri 6 Nov (T1).
 - **M4 is done: payments run from the public site.** The shop, our facilitator, the refusal recorder and the renewal job are live on https://graphpay-event.vercel.app. A 0.40 payment went through the public URL with no gas from the payer ([explorer](https://explorer.testnet.whitechain.io/tx/0x06d43ca9a501342a1177d3a48383dc1611505863bab15a396aa38bc02aee6e01)), the repeat answered "already paid", every protected route refuses without its passcode or token, and the renewal job renewed a 2-minute demo subscription on its own ([explorer](https://explorer.testnet.whitechain.io/tx/0x48b14aa45f56d487dee743721416a359fed96296b3ad0ababf546838f55e480f)).
 - Join's agents now pay through the hosted facilitator, so no two processes share a key.
 - F3 done: the relayer's safety floor refuses a payment before sending (`docs/sessions/payments/f3.json`).
 - Fixed: a live errand's quote write failed when several servers wrote with the same Arkiv key at once. The shop now retries that write (bounded), and Join's runner pauses its own writes during a payment (#93).
+- The payer agent's daily cap is now 100 test USDT on-chain (founder's brief); the ENS cap record is T2's.
 - Next: the demo cast's policies, which start once the story locks. T1 pauses until then (usage near the 92% line). Blockers: none.
 
 ## identity
