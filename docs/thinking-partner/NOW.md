@@ -24,10 +24,11 @@ M0 is done and handed over (PRs #1–#7); see `relays/foundation.md`.
 
 ## payments
 
-Updated 05:11 IST, Fri 6 Nov (T1).
+Updated 09:47 IST, Fri 6 Nov (T1).
 - **M4 is done: payments run from the public site.** The shop, our facilitator, the refusal recorder and the renewal job are live on https://graphpay-event.vercel.app. A 0.40 payment went through the public URL with no gas from the payer ([explorer](https://explorer.testnet.whitechain.io/tx/0x06d43ca9a501342a1177d3a48383dc1611505863bab15a396aa38bc02aee6e01)), the repeat answered "already paid", every protected route refuses without its passcode or token, and the renewal job renewed a 2-minute demo subscription on its own ([explorer](https://explorer.testnet.whitechain.io/tx/0x48b14aa45f56d487dee743721416a359fed96296b3ad0ababf546838f55e480f)).
 - Join's agents now pay through the hosted facilitator, so no two processes share a key.
-- Next: the Friday items after the story lock. Blockers: none.
+- F3 done: the relayer's safety floor refuses a payment before sending (`docs/sessions/payments/f3.json`).
+- Next: the demo cast's policies, which start once the story locks. Blockers: none.
 
 ## identity
 Updated 04:25 IST. **M6 is built: the gate is merged (PR #34); the watcher PR is open.** The watcher keeps the payment policy and the Arkiv node standing in step with ENS: a kill revokes the policy, a pause shows on the node, a lapse is caught by a 30 s ticker, and it never creates a policy or copies an ENS cap into one. Join hosts it in the workers process.
