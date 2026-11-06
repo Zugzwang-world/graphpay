@@ -60,7 +60,8 @@ export interface SiteModel {
     deadlineLocal: string;
     refundMicro: string;
     refundReason: string;
-    reorder: { quantity: number; priceMicro: string };
+    // The story's re-order: its own item (a sku of the merchant shop), quantity and price.
+    reorder: { sku: string; item: string; quantity: number; priceMicro: string };
   };
   renewal: {
     plan: string;
@@ -158,7 +159,12 @@ export function siteModel(): SiteModel {
       deadlineLocal: field(order, 'deadlineLocal', isString, 'order'),
       refundMicro: String(field(order, 'refundMicro', isNumber, 'order')),
       refundReason: field(order, 'refundReason', isString, 'order'),
-      reorder: { quantity: field(reorder, 'quantity', isNumber, 'order.reorder'), priceMicro: String(field(reorder, 'priceMicro', isNumber, 'order.reorder')) },
+      reorder: {
+        sku: field(reorder, 'sku', isString, 'order.reorder'),
+        item: field(reorder, 'item', isString, 'order.reorder'),
+        quantity: field(reorder, 'quantity', isNumber, 'order.reorder'),
+        priceMicro: String(field(reorder, 'priceMicro', isNumber, 'order.reorder')),
+      },
     },
     renewal: {
       plan: field(renewal, 'plan', isString, 'renewal'),

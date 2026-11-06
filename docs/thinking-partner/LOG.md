@@ -117,3 +117,7 @@ One line per PR: time (IST) · activity · result · PR link. Append under your 
 - 20:23 IST · booth · merged: docs(records): sync: demo note, resume, NOW, LOG · https://github.com/Zugzwang-world/graphpay/pull/145
 
 ## submission
+
+## w3-payments
+
+- 23:40 IST · w3-payments · in PR: fix(pay): "Another coffee" re-orders the filter coffee for 0.80 (order.reorder.sku)

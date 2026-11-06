@@ -96,7 +96,7 @@ try {
   beat('refund', { amount: fmt(story.order.refundMicro), gas: rr.gasUsed, status: await lp.orderStatus(q.orderId), tx: link(rr.transactionHash) });
 
   // 4. Re-order at the parent's path.
-  const rq = await lp.quote(agent, { buyer, qty: story.order.reorder.quantity, parent: q.orderId });
+  const rq = await lp.quote(agent, { buyer, item: story.order.reorder.sku, qty: story.order.reorder.quantity, parent: q.orderId });
   check(rq.priceMicro === String(story.order.reorder.priceMicro), 'the re-order is the catalog price');
   const re = await lp.pay(rq, agent);
   check(re.status === 200 && re.settlement?.success === true, `re-order answered ${re.status} ${JSON.stringify(re.body)}`);

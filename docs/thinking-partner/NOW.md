@@ -165,3 +165,10 @@ Updated 20:25 IST, Fri 6 Nov (Sync session).
 ## submission
 
 Not started (the Submission session, M17, from Fri 13:00; submit by Sat 08:00 IST).
+
+## w3-payments
+
+Updated 23:40 IST, Fri 6 Nov (W3 Payments).
+- **Re-order (item 1, in its PR):** "Another coffee" re-orders the filter coffee for 0.80 (ADR-0073), from `order.reorder` in the story. One live re-order proves it after the deploy.
+- **Next:** subscribe and cancel (item 2), the refund decline (item 3), then the limits (item 4).
+- Blockers: none.

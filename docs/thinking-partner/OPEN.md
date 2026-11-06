@@ -154,3 +154,15 @@ The kickoff rules (the deadline Sat 09:00 IST; AI use documented; spec files in 
 
 - **M17** (owner: Submission, not started). Everything in `docs/plan/sessions/submission.md`: the sponsor files and the README; the `arkiv/` files (finish T3's three drafts; write `reach.md` and `why-arkiv.md`); the video's shot list and narration; the submission text and checklist. The founder reviews, records the video in his own voice and submits, by Sat 08:00 IST (hard deadline 09:00).
 - Closed today: the README's fictional-persona note (ADR-0072) and AI_USAGE's Grok desk line.
+
+## w3-payments
+
+- **Acceptance follows the 0.80 re-order** (owner: W5). `integration/hosted.mjs` C3 quotes `story.order.sku` with the re-order's price, and `acceptance/checks.mjs` expects 1.20. Next: quote `story.order.reorder.sku` there.
+
+## frontend
+
+Routes and events the screens need (the frontend pass wires them; no screen was changed by these streams).
+
+### W3 payments
+
+- **Re-order** (`POST /api/customer/reorder`, body `{ parentOrderId }`, unchanged): pays the story's re-order, the filter coffee at 0.80. The button's item and price come from `order.reorder` (`item`, `priceMicro`); the answer is `{ status: 'paid', orderId, parentOrderId, amountMicro, transaction }`, or `202` with `status: 'pending'`.

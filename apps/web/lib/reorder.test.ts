@@ -17,7 +17,7 @@ function deps(over: Partial<{ status: string; shopNode: string; buyerNode: strin
     quote: async (input) => {
       quoted.push(input);
       const m = model();
-      const terms = { orderId: '0x1', shop: m.merchant.ens, item: m.order.sku, quantity: m.order.reorder.quantity, priceMicro: m.order.reorder.priceMicro, parentOrderId: input.parentOrderId, buyer: input.buyer, payer: m.payer.ens, exp: over.exp ?? 1_800_000_600, ...over.terms };
+      const terms = { orderId: '0x1', shop: m.merchant.ens, item: m.order.reorder.sku, quantity: m.order.reorder.quantity, priceMicro: m.order.reorder.priceMicro, parentOrderId: input.parentOrderId, buyer: input.buyer, payer: m.payer.ens, exp: over.exp ?? 1_800_000_600, ...over.terms };
       return { buyer: input.buyer, terms, payUrl: 'https://example.test/pay', priceMicro: over.price ?? model().order.reorder.priceMicro, quantity: over.quantity ?? model().order.reorder.quantity };
     },
     pay: async (quote) => {
