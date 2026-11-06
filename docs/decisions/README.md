@@ -65,7 +65,7 @@ Short records, one file each (skill `adr`). Lab decisions are adopted from `plan
 | [ADR-0060](ADR-0060-hosted-graphql-and-mcp-are-thin-stateless-routes.md) | Hosted GraphQL and MCP are thin, stateless routes | accepted |
 | [ADR-0061](ADR-0061-swarm-public-content-through-the-gateway-encrypt-client-side.md) | Swarm: public content through the gateway, evidence encrypted client-side | accepted |
 | [ADR-0062](ADR-0062-pause-every-session-at-92-percent-of-the-weekly-limit.md) | Every session pauses gracefully at 92% of the weekly plan limit (amended Fri 11:00 IST: 95% stops new real payments, merges and publishes; 97% pauses every session; amended Fri 12:40 IST: merges and payments allowed up to 97% for the integration, its essentials and the founder's run) | accepted, amended three times |
-| [ADR-0063](ADR-0063-both-sdks-on-npm-as-graphpay-ethglobal-by-13-00.md) | Both SDKs on npm under @graphpay_ethglobal by 13:00 Friday | accepted |
+| [ADR-0063](ADR-0063-both-sdks-on-npm-as-graphpay-ethglobal-by-13-00.md) | Both SDKs on npm under @graphpay_ethglobal by 13:00 Friday | accepted (versioning amended by ADR-0080) |
 | [ADR-0064](ADR-0064-one-sdk-per-partner-lane-and-the-same-kit-moment.md) | One SDK per partner lane, and the "same kit, different business" moment | accepted |
 | [ADR-0065](ADR-0065-the-founders-team-builds-apps-demo-ui-in-parallel.md) | The founder's team builds its own UI in apps/demo-ui, in parallel | accepted (amended by ADR-0070) |
 | [ADR-0066](ADR-0066-no-target-times-only-events-and-external-deadlines.md) | No target times; only events and the deadlines we don't control | accepted |
@@ -82,6 +82,7 @@ Short records, one file each (skill `adr`). Lab decisions are adopted from `plan
 | [ADR-0077](ADR-0077-each-seeded-city-keeps-its-own-cast.md) | Each seeded city keeps its own cast; the big city M is seeded with the final cast | accepted |
 | [ADR-0078](ADR-0078-routine-agent-steps-run-in-code.md) | Routine agent steps run in code; each model keeps one judgment call | accepted |
 | [ADR-0079](ADR-0079-the-owners-cap-reaches-the-policy-through-the-watcher.md) | The owner's cap reaches the spending policy through the watcher, never above the configured cap (narrows E-11) | accepted |
+| [ADR-0080](ADR-0080-both-sdks-at-1-0-0-then-frozen.md) | Both SDKs at 1.0.0 before the submission, with no new features, then frozen until judging ends (amends ADR-0063) | accepted |
 
 ## Proposed in the pack, recorded by the owning session when taken
 
