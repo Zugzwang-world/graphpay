@@ -118,3 +118,5 @@ One line per PR: time (IST) · activity · result · PR link. Append under your 
 - 20:23 IST · booth · merged: docs(records): sync: demo note, resume, NOW, LOG · https://github.com/Zugzwang-world/graphpay/pull/145
 
 ## submission
+
+- 23:50 IST · submission · W7: the README rewritten with a verify-each-claim table (24 transactions checked on the explorers), a keyless Arkiv query, the persona sentence, the team; a root MIT LICENSE · this PR
