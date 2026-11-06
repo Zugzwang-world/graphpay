@@ -44,8 +44,8 @@ Updated 09:55 IST, Fri 6 Nov (T3).
 - **Where we are:** the SDK 0.1.0 is merged and waits for the npm login (PR #74). The three Arkiv judges' drafts are merged (PR #77). This step: Swarm.
 - **This step (Friday items 4 and 5, the menu part):** the three cast shops' menus (synthetic story data) are public files on Swarm through the public gateway, each referenced by a `menu` row on Arkiv with a hash; read back and verified from Arkiv and the gateway. `arkiv/swarm.md` now has the real entity key, reference and link.
 - **Running:** nothing. **Blockers:** none.
-- **Not done:** the encrypted refund photo (`refund_evidence`); it is first in the cut order and needs the Swarm wrapping key from the Coordinator.
-- **Next:** wait for the Coordinator on `refund_evidence`; otherwise the demo cast `shop` rows once the founder's names land (item 6).
+- **Dropped on purpose:** the encrypted refund photo (`refund_evidence`); the demo has no refund photo (Coordinator).
+- **Next:** idle until the story locks; then the demo cast `shop` rows (item 6).
 
 ## agents
 
