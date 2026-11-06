@@ -108,6 +108,20 @@ export async function assertEmpty(conn, types) {
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
+// A read the node refused or dropped (a spent query window answers 429) is tried again after a
+// minute, for up to 40 minutes: reads change nothing, so trying again is always safe.
+async function readAgain(fn, log, what) {
+  for (let attempt = 1; ; attempt += 1) {
+    try {
+      return await fn();
+    } catch (error) {
+      if (attempt >= 40 || !/HTTP request failed|took too long|fetch failed|429|Too Many Requests/i.test(error.message ?? '')) throw error;
+      log(`${what}: ${(error.shortMessage ?? error.message).split('\n')[0]}; again in 60 s`);
+      await sleep(60_000);
+    }
+  }
+}
+
 // This wallet's transactions at or after `nonce`, from `fromBlock` on, once none is pending: what
 // each created and updated (EntityCreated and EntityUpdated logs of the entity contract).
 async function landedSince(conn, { nonce, fromBlock, toBlock = null }) {
@@ -170,9 +184,9 @@ export async function undoSince(conn, state, { nonce, fromBlock, toBlock = null 
 // refuses can leave the ones before it landed: those are undone back to the state the plan was made
 // from, and after a pause for the node the batch is sent again (`retries` times).
 export async function seedGraph(city, conn, { log = () => {}, batchEvents = 25, manifest, fromBatch = 0, retries = 3, pauseMs = 15_000 }) {
-  if (fromBatch === 0) await assertEmpty(conn, ['edge', 'node', 'tally', 'link']);
+  if (fromBatch === 0) await readAgain(() => assertEmpty(conn, ['edge', 'node', 'tally', 'link']), log, 'graph: the empty check');
   const ledger = createLedger({ arkiv: conn, synthetic: { dataset: city.dataset }, createNodes: true, reloadOnError: false });
-  await ledger.load();
+  await readAgain(() => ledger.load(), log, 'graph: the load');
   const batches = chunks(ledgerEvents(city), batchEvents);
   for (let i = fromBatch; i < batches.length; i += 1) {
     for (let attempt = 1; ; attempt += 1) {
@@ -208,7 +222,7 @@ export async function seedPlain(city, conn, { log = () => {}, batchEvents = 25, 
     haveNames = new Set((await readAll(conn.publicClient, ENTITIES.profile, { owner: conn.owner, cap: 200_000 })).map((r) => r.name));
     log(`plain resume: ${haveRefs.size} records and ${haveNames.size} profiles already written`);
   } else {
-    await assertEmpty(conn, ['record', 'profile']);
+    await readAgain(() => assertEmpty(conn, ['record', 'profile']), log, 'plain: the empty check');
   }
   const exp = () => ExpirationTime.fromDays(LIFETIME.syntheticDays);
   const profiles = chunks(plainProfiles(city).filter((p) => !haveNames.has(p.name)), batchEvents * 2);
