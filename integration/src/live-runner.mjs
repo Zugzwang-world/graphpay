@@ -6,7 +6,7 @@
 // Guardrails, all in the path of every run:
 //   - the payer-side ENS gate before every signature (gatedSign), the contract's policy caps,
 //     the facilitator's own gate and the x402 spend control (at most the story's budget);
-//   - the passcode and one run at a time (the route and the registry), and a rate limit here;
+//   - the passcode and one run at a time (the route and the registry, and a busy flag here);
 //   - the site's runId as the errand's runId, so its presence and handoff rows carry it;
 //   - presence and handoffs batched as W_DIRECTORY (batchedActivity) and flushed at the end.
 // createLiveRunner(env) answers null when a needed name is missing, and the route then says so.
@@ -29,8 +29,24 @@ const modelKeys = () => [...new Set(Object.values(story.agentModels?.presets?.li
 export const LIVE_RUNNER_NEEDS = [...modelKeys(), `${payerEntry()?.walletRole ?? 'PAYER'}_PRIVATE_KEY`, 'W_DIRECTORY_PRIVATE_KEY', 'ARKIV_ACCESS_KEY', 'DEMO_PASSCODE', 'ALLOW_REAL_NETWORK'];
 // The Arkiv flush of presence and handoffs may not hold the result back longer than this.
 const FLUSH_WAIT_MS = 10_000;
-// At most this many errands per instance in a rolling hour (each one spends test USDT and API).
-export const RUNS_PER_HOUR = 6;
+// A signed payment the shop answers with "retry is safe" (nothing was sent: the facilitator was
+// unavailable, or the instance was starting) is sent again, the same signature for the same
+// order, after these waits. The order id makes it idempotent: a payment that did settle answers
+// "already paid" from the chain. Any other answer goes to the payer agent as it came (G16).
+export const PAY_RETRY_WAITS_MS = [3_000, 8_000];
+const retrySafe = (r) => (r.status === 502 && /retry is safe/.test(String(r.body?.error))) || (r.status === 503 && r.body?.error === 'starting');
+
+// pay(args) once, then again after each wait while the answer is retry-safe and the run goes on.
+export async function payWithRetry(pay, args, { waits = PAY_RETRY_WAITS_MS, signal = null, log = () => {}, sleep = (ms) => new Promise((ok) => setTimeout(ok, ms)) } = {}) {
+  let r = await pay(args);
+  for (const wait of waits) {
+    if (!retrySafe(r) || signal?.aborted) break;
+    log(`live runner: the shop answered ${r.status} (retry is safe); the same signed payment again in ${wait / 1000} s`);
+    await sleep(wait);
+    r = await pay(args);
+  }
+  return r;
+}
 
 export function liveRunnerMissing(env = process.env) {
   if (!payerEntry()) return ['a paying agent named payer in the story'];
@@ -52,10 +68,9 @@ async function clientsFor(key, env) {
 
 // env: the server's environment (process.env on Vercel). log: one line, no secrets.
 // buildParts: the tests' seam for the start-up (clients, connections, the stack); the default builds them live.
-export function createLiveRunner(env = process.env, { log = () => {}, now = Date.now, buildParts = null } = {}) {
+export function createLiveRunner(env = process.env, { log = () => {}, buildParts = null } = {}) {
   if (liveRunnerMissing(env).length) return null;
   const runEnv = { ...env, AGENT_PRESET: 'live', AGENT_MODE: 'live' }; // the live preset only
-  const started = [];
   let busy = false; // one errand at a time in this instance, until its last step has finished
   let parts = null; // the clients, connections and stack, built on the first run of an instance
 
@@ -71,11 +86,7 @@ export function createLiveRunner(env = process.env, { log = () => {}, now = Date
   }
 
   return async function liveErrand({ runId, request, onEvent, signal }) {
-    const t = now();
-    while (started.length && t - started[0] > 3_600_000) started.shift();
     if (busy) throw Object.assign(new Error('busy: an errand is still finishing on this server'), { code: 'LIVE_RUNNER_BUSY' });
-    if (started.length >= RUNS_PER_HOUR) throw Object.assign(new Error(`rate limited: at most ${RUNS_PER_HOUR} errands an hour`), { code: 'LIVE_RUNNER_RATE_LIMITED' });
-    started.push(t);
     busy = true;
     try {
       return await errand({ runId, request, onEvent, signal });
@@ -101,7 +112,7 @@ export function createLiveRunner(env = process.env, { log = () => {}, now = Date
       return {
         ...surface,
         async pay(args) {
-          if (args.signature) return surface.pay(args);
+          if (args.signature) return payWithRetry(surface.pay, args, { signal, log });
           const release = await activity.hold();
           try {
             return await surface.pay(args);
