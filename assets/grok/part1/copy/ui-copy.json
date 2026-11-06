@@ -1,0 +1,23 @@
+{
+  "schema": "graphpay.grok.ui-copy.v1",
+  "strings": {
+    "searching": "Finding dosa near BKC",
+    "comparing": "Comparing price, refunds and on-time orders",
+    "vetoed": "{shop} ruled out: high refund rate",
+    "quote-ready": "{shop}: {amount} test USDT. Ready to pay.",
+    "paying": "Paying {amount} test USDT to {shop}",
+    "paid": "Paid {amount} test USDT to {shop}",
+    "delivered": "Order delivered",
+    "refund-requested": "Spill photo uploaded. Refund requested.",
+    "refunded": "Refunded {amount} test USDT",
+    "reordered": "Another coffee ordered for {amount} test USDT",
+    "refused-over-pass": "Payment refused: exceeds the daily pass",
+    "paused": "{agent} paused. Payments stopped.",
+    "resumed": "{agent} resumed",
+    "shut-down": "{agent} shut down permanently",
+    "renewal-charged": "Weekly breakfast paid: {amount} test USDT",
+    "busy-watch-live": "Demo busy. Watch the live run.",
+    "credit-out-replay": "Demo credits used up. Watch the replay.",
+    "synthetic-label": "Synthetic shops, people and data. Test money only."
+  }
+}

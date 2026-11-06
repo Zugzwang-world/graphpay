@@ -1,0 +1,851 @@
+{
+  "schema": "graphpay.grok.manifest.v1",
+  "files": [
+    {
+      "path": "CHECKLIST.md",
+      "kind": "md",
+      "bot": "Producer",
+      "notes": ""
+    },
+    {
+      "path": "README.md",
+      "kind": "md",
+      "bot": "Producer",
+      "notes": ""
+    },
+    {
+      "path": "USER-ADDITIONS.md",
+      "kind": "md",
+      "bot": "Producer",
+      "notes": ""
+    },
+    {
+      "path": "agents/agents.json",
+      "kind": "json",
+      "bot": "Agent Designer",
+      "notes": ""
+    },
+    {
+      "path": "agents/png/analyst-idle.png",
+      "kind": "png",
+      "bot": "Agent Designer",
+      "notes": ""
+    },
+    {
+      "path": "agents/png/analyst-refused.png",
+      "kind": "png",
+      "bot": "Agent Designer",
+      "notes": ""
+    },
+    {
+      "path": "agents/png/analyst-success.png",
+      "kind": "png",
+      "bot": "Agent Designer",
+      "notes": ""
+    },
+    {
+      "path": "agents/png/analyst-talking.png",
+      "kind": "png",
+      "bot": "Agent Designer",
+      "notes": ""
+    },
+    {
+      "path": "agents/png/analyst-thinking-1.png",
+      "kind": "png",
+      "bot": "Agent Designer",
+      "notes": ""
+    },
+    {
+      "path": "agents/png/analyst-thinking-2.png",
+      "kind": "png",
+      "bot": "Agent Designer",
+      "notes": ""
+    },
+    {
+      "path": "agents/png/analyst-thinking-3.png",
+      "kind": "png",
+      "bot": "Agent Designer",
+      "notes": ""
+    },
+    {
+      "path": "agents/png/analyst-thinking-4.png",
+      "kind": "png",
+      "bot": "Agent Designer",
+      "notes": ""
+    },
+    {
+      "path": "agents/png/analyst-thinking.png",
+      "kind": "png",
+      "bot": "Agent Designer",
+      "notes": ""
+    },
+    {
+      "path": "agents/png/concierge-idle.png",
+      "kind": "png",
+      "bot": "Agent Designer",
+      "notes": ""
+    },
+    {
+      "path": "agents/png/concierge-refused.png",
+      "kind": "png",
+      "bot": "Agent Designer",
+      "notes": ""
+    },
+    {
+      "path": "agents/png/concierge-success.png",
+      "kind": "png",
+      "bot": "Agent Designer",
+      "notes": ""
+    },
+    {
+      "path": "agents/png/concierge-talking.png",
+      "kind": "png",
+      "bot": "Agent Designer",
+      "notes": ""
+    },
+    {
+      "path": "agents/png/concierge-thinking-1.png",
+      "kind": "png",
+      "bot": "Agent Designer",
+      "notes": ""
+    },
+    {
+      "path": "agents/png/concierge-thinking-2.png",
+      "kind": "png",
+      "bot": "Agent Designer",
+      "notes": ""
+    },
+    {
+      "path": "agents/png/concierge-thinking-3.png",
+      "kind": "png",
+      "bot": "Agent Designer",
+      "notes": ""
+    },
+    {
+      "path": "agents/png/concierge-thinking-4.png",
+      "kind": "png",
+      "bot": "Agent Designer",
+      "notes": ""
+    },
+    {
+      "path": "agents/png/concierge-thinking.png",
+      "kind": "png",
+      "bot": "Agent Designer",
+      "notes": ""
+    },
+    {
+      "path": "agents/png/dispatch-idle.png",
+      "kind": "png",
+      "bot": "Agent Designer",
+      "notes": ""
+    },
+    {
+      "path": "agents/png/dispatch-refused.png",
+      "kind": "png",
+      "bot": "Agent Designer",
+      "notes": ""
+    },
+    {
+      "path": "agents/png/dispatch-success.png",
+      "kind": "png",
+      "bot": "Agent Designer",
+      "notes": ""
+    },
+    {
+      "path": "agents/png/dispatch-talking.png",
+      "kind": "png",
+      "bot": "Agent Designer",
+      "notes": ""
+    },
+    {
+      "path": "agents/png/dispatch-thinking-1.png",
+      "kind": "png",
+      "bot": "Agent Designer",
+      "notes": ""
+    },
+    {
+      "path": "agents/png/dispatch-thinking-2.png",
+      "kind": "png",
+      "bot": "Agent Designer",
+      "notes": ""
+    },
+    {
+      "path": "agents/png/dispatch-thinking-3.png",
+      "kind": "png",
+      "bot": "Agent Designer",
+      "notes": ""
+    },
+    {
+      "path": "agents/png/dispatch-thinking-4.png",
+      "kind": "png",
+      "bot": "Agent Designer",
+      "notes": ""
+    },
+    {
+      "path": "agents/png/dispatch-thinking.png",
+      "kind": "png",
+      "bot": "Agent Designer",
+      "notes": ""
+    },
+    {
+      "path": "agents/png/payer-idle.png",
+      "kind": "png",
+      "bot": "Agent Designer",
+      "notes": ""
+    },
+    {
+      "path": "agents/png/payer-refused.png",
+      "kind": "png",
+      "bot": "Agent Designer",
+      "notes": ""
+    },
+    {
+      "path": "agents/png/payer-success.png",
+      "kind": "png",
+      "bot": "Agent Designer",
+      "notes": ""
+    },
+    {
+      "path": "agents/png/payer-talking.png",
+      "kind": "png",
+      "bot": "Agent Designer",
+      "notes": ""
+    },
+    {
+      "path": "agents/png/payer-thinking-1.png",
+      "kind": "png",
+      "bot": "Agent Designer",
+      "notes": ""
+    },
+    {
+      "path": "agents/png/payer-thinking-2.png",
+      "kind": "png",
+      "bot": "Agent Designer",
+      "notes": ""
+    },
+    {
+      "path": "agents/png/payer-thinking-3.png",
+      "kind": "png",
+      "bot": "Agent Designer",
+      "notes": ""
+    },
+    {
+      "path": "agents/png/payer-thinking-4.png",
+      "kind": "png",
+      "bot": "Agent Designer",
+      "notes": ""
+    },
+    {
+      "path": "agents/png/payer-thinking.png",
+      "kind": "png",
+      "bot": "Agent Designer",
+      "notes": ""
+    },
+    {
+      "path": "agents/png/risk-idle.png",
+      "kind": "png",
+      "bot": "Agent Designer",
+      "notes": ""
+    },
+    {
+      "path": "agents/png/risk-refused.png",
+      "kind": "png",
+      "bot": "Agent Designer",
+      "notes": ""
+    },
+    {
+      "path": "agents/png/risk-success.png",
+      "kind": "png",
+      "bot": "Agent Designer",
+      "notes": ""
+    },
+    {
+      "path": "agents/png/risk-talking.png",
+      "kind": "png",
+      "bot": "Agent Designer",
+      "notes": ""
+    },
+    {
+      "path": "agents/png/risk-thinking-1.png",
+      "kind": "png",
+      "bot": "Agent Designer",
+      "notes": ""
+    },
+    {
+      "path": "agents/png/risk-thinking-2.png",
+      "kind": "png",
+      "bot": "Agent Designer",
+      "notes": ""
+    },
+    {
+      "path": "agents/png/risk-thinking-3.png",
+      "kind": "png",
+      "bot": "Agent Designer",
+      "notes": ""
+    },
+    {
+      "path": "agents/png/risk-thinking-4.png",
+      "kind": "png",
+      "bot": "Agent Designer",
+      "notes": ""
+    },
+    {
+      "path": "agents/png/risk-thinking.png",
+      "kind": "png",
+      "bot": "Agent Designer",
+      "notes": ""
+    },
+    {
+      "path": "agents/png/scout-idle.png",
+      "kind": "png",
+      "bot": "Agent Designer",
+      "notes": ""
+    },
+    {
+      "path": "agents/png/scout-refused.png",
+      "kind": "png",
+      "bot": "Agent Designer",
+      "notes": ""
+    },
+    {
+      "path": "agents/png/scout-success.png",
+      "kind": "png",
+      "bot": "Agent Designer",
+      "notes": ""
+    },
+    {
+      "path": "agents/png/scout-talking.png",
+      "kind": "png",
+      "bot": "Agent Designer",
+      "notes": ""
+    },
+    {
+      "path": "agents/png/scout-thinking-1.png",
+      "kind": "png",
+      "bot": "Agent Designer",
+      "notes": ""
+    },
+    {
+      "path": "agents/png/scout-thinking-2.png",
+      "kind": "png",
+      "bot": "Agent Designer",
+      "notes": ""
+    },
+    {
+      "path": "agents/png/scout-thinking-3.png",
+      "kind": "png",
+      "bot": "Agent Designer",
+      "notes": ""
+    },
+    {
+      "path": "agents/png/scout-thinking-4.png",
+      "kind": "png",
+      "bot": "Agent Designer",
+      "notes": ""
+    },
+    {
+      "path": "agents/png/scout-thinking.png",
+      "kind": "png",
+      "bot": "Agent Designer",
+      "notes": ""
+    },
+    {
+      "path": "agents/png/storefront-idle.png",
+      "kind": "png",
+      "bot": "Agent Designer",
+      "notes": ""
+    },
+    {
+      "path": "agents/png/storefront-refused.png",
+      "kind": "png",
+      "bot": "Agent Designer",
+      "notes": ""
+    },
+    {
+      "path": "agents/png/storefront-success.png",
+      "kind": "png",
+      "bot": "Agent Designer",
+      "notes": ""
+    },
+    {
+      "path": "agents/png/storefront-talking.png",
+      "kind": "png",
+      "bot": "Agent Designer",
+      "notes": ""
+    },
+    {
+      "path": "agents/png/storefront-thinking-1.png",
+      "kind": "png",
+      "bot": "Agent Designer",
+      "notes": ""
+    },
+    {
+      "path": "agents/png/storefront-thinking-2.png",
+      "kind": "png",
+      "bot": "Agent Designer",
+      "notes": ""
+    },
+    {
+      "path": "agents/png/storefront-thinking-3.png",
+      "kind": "png",
+      "bot": "Agent Designer",
+      "notes": ""
+    },
+    {
+      "path": "agents/png/storefront-thinking-4.png",
+      "kind": "png",
+      "bot": "Agent Designer",
+      "notes": ""
+    },
+    {
+      "path": "agents/png/storefront-thinking.png",
+      "kind": "png",
+      "bot": "Agent Designer",
+      "notes": ""
+    },
+    {
+      "path": "agents/provenance.json",
+      "kind": "json",
+      "bot": "Agent Designer",
+      "notes": ""
+    },
+    {
+      "path": "agents/svg/analyst.svg",
+      "kind": "svg",
+      "bot": "Agent Designer",
+      "notes": ""
+    },
+    {
+      "path": "agents/svg/concierge.svg",
+      "kind": "svg",
+      "bot": "Agent Designer",
+      "notes": ""
+    },
+    {
+      "path": "agents/svg/dispatch.svg",
+      "kind": "svg",
+      "bot": "Agent Designer",
+      "notes": ""
+    },
+    {
+      "path": "agents/svg/payer.svg",
+      "kind": "svg",
+      "bot": "Agent Designer",
+      "notes": ""
+    },
+    {
+      "path": "agents/svg/risk.svg",
+      "kind": "svg",
+      "bot": "Agent Designer",
+      "notes": ""
+    },
+    {
+      "path": "agents/svg/scout.svg",
+      "kind": "svg",
+      "bot": "Agent Designer",
+      "notes": ""
+    },
+    {
+      "path": "agents/svg/storefront.svg",
+      "kind": "svg",
+      "bot": "Agent Designer",
+      "notes": ""
+    },
+    {
+      "path": "agents/video/analyst-success.mp4",
+      "kind": "mp4",
+      "bot": "Agent Designer",
+      "notes": ""
+    },
+    {
+      "path": "agents/video/analyst-thinking.mp4",
+      "kind": "mp4",
+      "bot": "Agent Designer",
+      "notes": ""
+    },
+    {
+      "path": "agents/video/concierge-success.mp4",
+      "kind": "mp4",
+      "bot": "Agent Designer",
+      "notes": ""
+    },
+    {
+      "path": "agents/video/concierge-thinking.mp4",
+      "kind": "mp4",
+      "bot": "Agent Designer",
+      "notes": ""
+    },
+    {
+      "path": "agents/video/dispatch-success.mp4",
+      "kind": "mp4",
+      "bot": "Agent Designer",
+      "notes": ""
+    },
+    {
+      "path": "agents/video/dispatch-thinking.mp4",
+      "kind": "mp4",
+      "bot": "Agent Designer",
+      "notes": ""
+    },
+    {
+      "path": "agents/video/payer-success.mp4",
+      "kind": "mp4",
+      "bot": "Agent Designer",
+      "notes": ""
+    },
+    {
+      "path": "agents/video/payer-thinking.mp4",
+      "kind": "mp4",
+      "bot": "Agent Designer",
+      "notes": ""
+    },
+    {
+      "path": "agents/video/risk-success.mp4",
+      "kind": "mp4",
+      "bot": "Agent Designer",
+      "notes": ""
+    },
+    {
+      "path": "agents/video/risk-thinking.mp4",
+      "kind": "mp4",
+      "bot": "Agent Designer",
+      "notes": ""
+    },
+    {
+      "path": "agents/video/scout-success.mp4",
+      "kind": "mp4",
+      "bot": "Agent Designer",
+      "notes": ""
+    },
+    {
+      "path": "agents/video/scout-thinking.mp4",
+      "kind": "mp4",
+      "bot": "Agent Designer",
+      "notes": ""
+    },
+    {
+      "path": "agents/video/storefront-success.mp4",
+      "kind": "mp4",
+      "bot": "Agent Designer",
+      "notes": ""
+    },
+    {
+      "path": "agents/video/storefront-thinking.mp4",
+      "kind": "mp4",
+      "bot": "Agent Designer",
+      "notes": ""
+    },
+    {
+      "path": "agents/visual-review.json",
+      "kind": "json",
+      "bot": "Agent Designer",
+      "notes": ""
+    },
+    {
+      "path": "copy/beats.json",
+      "kind": "json",
+      "bot": "Writer",
+      "notes": ""
+    },
+    {
+      "path": "copy/persona-note.md",
+      "kind": "md",
+      "bot": "Writer",
+      "notes": ""
+    },
+    {
+      "path": "copy/ui-copy.json",
+      "kind": "json",
+      "bot": "Writer",
+      "notes": ""
+    },
+    {
+      "path": "images/dishes/filter-and-fold-filter-coffee.jpg",
+      "kind": "png",
+      "bot": "Food Photographer",
+      "notes": ""
+    },
+    {
+      "path": "images/dishes/filter-and-fold-masala-dosa-combo.jpg",
+      "kind": "png",
+      "bot": "Food Photographer",
+      "notes": ""
+    },
+    {
+      "path": "images/dishes/filter-and-fold-podi-idli.jpg",
+      "kind": "png",
+      "bot": "Food Photographer",
+      "notes": ""
+    },
+    {
+      "path": "images/dishes/filter-and-fold-sunday-breakfast.jpg",
+      "kind": "png",
+      "bot": "Food Photographer",
+      "notes": ""
+    },
+    {
+      "path": "images/dishes/idli-index-idli-sambar.jpg",
+      "kind": "png",
+      "bot": "Food Photographer",
+      "notes": ""
+    },
+    {
+      "path": "images/dishes/idli-index-masala-dosa-combo.jpg",
+      "kind": "png",
+      "bot": "Food Photographer",
+      "notes": ""
+    },
+    {
+      "path": "images/dishes/idli-index-medu-vada.jpg",
+      "kind": "png",
+      "bot": "Food Photographer",
+      "notes": ""
+    },
+    {
+      "path": "images/dishes/idli-index-rava-upma.jpg",
+      "kind": "png",
+      "bot": "Food Photographer",
+      "notes": ""
+    },
+    {
+      "path": "images/dishes/tawa-tangle-filter-coffee.jpg",
+      "kind": "png",
+      "bot": "Food Photographer",
+      "notes": ""
+    },
+    {
+      "path": "images/dishes/tawa-tangle-lemon-rice.jpg",
+      "kind": "png",
+      "bot": "Food Photographer",
+      "notes": ""
+    },
+    {
+      "path": "images/dishes/tawa-tangle-masala-dosa-combo.jpg",
+      "kind": "png",
+      "bot": "Food Photographer",
+      "notes": ""
+    },
+    {
+      "path": "images/dishes/tawa-tangle-onion-uttapam.jpg",
+      "kind": "png",
+      "bot": "Food Photographer",
+      "notes": ""
+    },
+    {
+      "path": "images/hero/bkc-dusk-1.jpg",
+      "kind": "png",
+      "bot": "Food Photographer",
+      "notes": ""
+    },
+    {
+      "path": "images/hero/bkc-dusk-2.jpg",
+      "kind": "png",
+      "bot": "Food Photographer",
+      "notes": ""
+    },
+    {
+      "path": "images/hero/dosa-hero-1.jpg",
+      "kind": "png",
+      "bot": "Food Photographer",
+      "notes": ""
+    },
+    {
+      "path": "images/moments/delivery-1.jpg",
+      "kind": "png",
+      "bot": "Food Photographer",
+      "notes": ""
+    },
+    {
+      "path": "images/moments/delivery-2.jpg",
+      "kind": "png",
+      "bot": "Food Photographer",
+      "notes": ""
+    },
+    {
+      "path": "images/moments/packed-1.jpg",
+      "kind": "png",
+      "bot": "Food Photographer",
+      "notes": ""
+    },
+    {
+      "path": "images/moments/refund-spill-1.jpg",
+      "kind": "png",
+      "bot": "Food Photographer",
+      "notes": ""
+    },
+    {
+      "path": "images/moments/refund-spill-2.jpg",
+      "kind": "png",
+      "bot": "Food Photographer",
+      "notes": ""
+    },
+    {
+      "path": "images/moments/refund-spill-3.jpg",
+      "kind": "png",
+      "bot": "Food Photographer",
+      "notes": ""
+    },
+    {
+      "path": "images/selection-notes.md",
+      "kind": "md",
+      "bot": "Food Photographer",
+      "notes": ""
+    },
+    {
+      "path": "images/storefronts/filter-and-fold.jpg",
+      "kind": "png",
+      "bot": "Food Photographer",
+      "notes": ""
+    },
+    {
+      "path": "images/storefronts/idli-index.jpg",
+      "kind": "png",
+      "bot": "Food Photographer",
+      "notes": ""
+    },
+    {
+      "path": "images/storefronts/tawa-tangle.jpg",
+      "kind": "png",
+      "bot": "Food Photographer",
+      "notes": ""
+    },
+    {
+      "path": "media/broll/attempt-history.json",
+      "kind": "json",
+      "bot": "Food Photographer",
+      "notes": ""
+    },
+    {
+      "path": "media/broll/delivery-dusk.mp4",
+      "kind": "mp4",
+      "bot": "Food Photographer",
+      "notes": ""
+    },
+    {
+      "path": "media/broll/dosa-tawa.mp4",
+      "kind": "mp4",
+      "bot": "Food Photographer",
+      "notes": ""
+    },
+    {
+      "path": "media/broll/filter-coffee-pour.mp4",
+      "kind": "mp4",
+      "bot": "Food Photographer",
+      "notes": ""
+    },
+    {
+      "path": "media/broll/ghee-pour.mp4",
+      "kind": "mp4",
+      "bot": "Food Photographer",
+      "notes": ""
+    },
+    {
+      "path": "media/broll/mumbai-dusk.mp4",
+      "kind": "mp4",
+      "bot": "Food Photographer",
+      "notes": ""
+    },
+    {
+      "path": "media/broll/visual-review.json",
+      "kind": "json",
+      "bot": "Food Photographer",
+      "notes": ""
+    },
+    {
+      "path": "menus/filter-and-fold.json",
+      "kind": "json",
+      "bot": "Writer",
+      "notes": ""
+    },
+    {
+      "path": "menus/idli-index.json",
+      "kind": "json",
+      "bot": "Writer",
+      "notes": ""
+    },
+    {
+      "path": "menus/tawa-tangle.json",
+      "kind": "json",
+      "bot": "Writer",
+      "notes": ""
+    },
+    {
+      "path": "places/cast-shops.json",
+      "kind": "json",
+      "bot": "Place Scout",
+      "notes": ""
+    },
+    {
+      "path": "places/city-places.json",
+      "kind": "json",
+      "bot": "Place Scout",
+      "notes": ""
+    },
+    {
+      "path": "places/name-checks.md",
+      "kind": "md",
+      "bot": "Place Scout",
+      "notes": ""
+    },
+    {
+      "path": "places/neighbourhoods.json",
+      "kind": "json",
+      "bot": "Place Scout",
+      "notes": ""
+    },
+    {
+      "path": "prompts/desk-prompt.md",
+      "kind": "md",
+      "bot": "Producer",
+      "notes": ""
+    },
+    {
+      "path": "research/bkc-places.md",
+      "kind": "md",
+      "bot": "Place Scout",
+      "notes": ""
+    },
+    {
+      "path": "research/judge-questions.md",
+      "kind": "md",
+      "bot": "Pitch Researcher",
+      "notes": ""
+    },
+    {
+      "path": "research/landscape.md",
+      "kind": "md",
+      "bot": "Pitch Researcher",
+      "notes": ""
+    },
+    {
+      "path": "research/link-checks.md",
+      "kind": "md",
+      "bot": "Pitch Researcher",
+      "notes": ""
+    },
+    {
+      "path": "research/numbers.md",
+      "kind": "md",
+      "bot": "Pitch Researcher",
+      "notes": ""
+    },
+    {
+      "path": "research/partners.md",
+      "kind": "md",
+      "bot": "Pitch Researcher",
+      "notes": ""
+    },
+    {
+      "path": "research/quotes.md",
+      "kind": "md",
+      "bot": "Pitch Researcher",
+      "notes": ""
+    },
+    {
+      "path": "manifest.json",
+      "kind": "manifest",
+      "bot": "Producer",
+      "notes": "Union manifest for both archives."
+    }
+  ]
+}

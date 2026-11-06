@@ -1,0 +1,47 @@
+{
+  "schema": "graphpay.menu.v1",
+  "synthetic": true,
+  "version": 1,
+  "shop": {
+    "ens": "filter-and-fold.graphpay.eth",
+    "name": "Filter & Fold"
+  },
+  "items": [
+    {
+      "sku": "filter-and-fold-masala-dosa-combo",
+      "name": "Ghee roast masala dosa + filter coffee",
+      "unit": "plate",
+      "quantity": 1,
+      "priceMicro": 4800000,
+      "description": "Golden dosa with spiced potato, chutneys, sambar and filter coffee.",
+      "image": "images/dishes/filter-and-fold-masala-dosa-combo.jpg"
+    },
+    {
+      "sku": "filter-and-fold-filter-coffee",
+      "name": "Filter coffee",
+      "unit": "cup",
+      "quantity": 1,
+      "priceMicro": 800000,
+      "description": "Strong filter coffee with hot milk and a soft froth.",
+      "image": "images/dishes/filter-and-fold-filter-coffee.jpg"
+    },
+    {
+      "sku": "filter-and-fold-sunday-breakfast",
+      "name": "Sunday breakfast box: 2 idlis, 1 medu vada, 1 filter coffee",
+      "unit": "box",
+      "quantity": 1,
+      "priceMicro": 2400000,
+      "description": "Soft idlis, a crisp vada and hot filter coffee, packed for Sunday.",
+      "image": "images/dishes/filter-and-fold-sunday-breakfast.jpg"
+    },
+    {
+      "sku": "filter-and-fold-podi-idli",
+      "name": "Ghee podi idli",
+      "unit": "plate",
+      "quantity": 1,
+      "priceMicro": 1800000,
+      "description": "Tender mini idlis tossed in warm ghee and nutty, chilli-flecked podi.",
+      "image": "images/dishes/filter-and-fold-podi-idli.jpg"
+    }
+  ]
+}

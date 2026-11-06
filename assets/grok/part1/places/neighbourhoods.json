@@ -1,0 +1,89 @@
+{
+  "schema": "graphpay.grok.neighbourhoods.v1",
+  "neighbourhoods": [
+    {
+      "id": "bkc",
+      "name": "Bandra Kurla Complex",
+      "lat": 19.067115,
+      "lon": 72.865725,
+      "source": "https://www.openstreetmap.org/node/1640262758"
+    },
+    {
+      "id": "bandra-east",
+      "name": "Bandra East",
+      "lat": 19.061657,
+      "lon": 72.849811,
+      "source": "https://www.openstreetmap.org/node/622267824"
+    },
+    {
+      "id": "kalanagar",
+      "name": "Kalanagar",
+      "lat": 19.054670,
+      "lon": 72.848509,
+      "source": "https://www.openstreetmap.org/node/1647344904"
+    },
+    {
+      "id": "kalina",
+      "name": "Kalina",
+      "lat": 19.079273,
+      "lon": 72.861267,
+      "source": "https://www.openstreetmap.org/node/1375215062"
+    },
+    {
+      "id": "kurla-west",
+      "name": "Kurla West",
+      "lat": 19.068603,
+      "lon": 72.876583,
+      "source": "https://www.openstreetmap.org/node/1366008926"
+    },
+    {
+      "id": "sion",
+      "name": "Sion",
+      "lat": 19.040000,
+      "lon": 72.860000,
+      "source": "https://en.wikipedia.org/wiki/Sion,_Mumbai"
+    },
+    {
+      "id": "matunga",
+      "name": "Matunga",
+      "lat": 19.017980,
+      "lon": 72.844763,
+      "source": "https://en.wikipedia.org/wiki/Matunga"
+    },
+    {
+      "id": "dadar",
+      "name": "Dadar",
+      "lat": 19.021000,
+      "lon": 72.841000,
+      "source": "https://en.wikipedia.org/wiki/Dadar"
+    },
+    {
+      "id": "mahim",
+      "name": "Mahim",
+      "lat": 19.035000,
+      "lon": 72.840000,
+      "source": "https://en.wikipedia.org/wiki/Mahim"
+    },
+    {
+      "id": "dharavi",
+      "name": "Dharavi",
+      "lat": 19.037780,
+      "lon": 72.853610,
+      "source": "https://en.wikipedia.org/wiki/Dharavi"
+    },
+    {
+      "id": "chunabhatti",
+      "name": "Chunabhatti",
+      "lat": 19.051652,
+      "lon": 72.869053,
+      "source": "https://en.wikipedia.org/wiki/Chunabhatti"
+    },
+    {
+      "id": "santacruz-east",
+      "name": "Santacruz East",
+      "lat": 19.081364,
+      "lon": 72.853893,
+      "source": "https://www.openstreetmap.org/node/6126211462"
+    }
+  ]
+}

@@ -1,0 +1,96 @@
+{
+  "schema": "graphpay.grok.beats.v1",
+  "beats": [
+    {
+      "id": "ask",
+      "title": "Dinner, delegated",
+      "caption": "Find the best masala dosa near BKC under 6 USDT by 8 pm.",
+      "partner": "none",
+      "voiceover": "We ask for the best masala dosa near BKC, under 6 USDT, by 8 pm."
+    },
+    {
+      "id": "team",
+      "title": "Four agents, one errand",
+      "caption": "Concierge, scout, analyst and payer split the work.",
+      "partner": "ENS",
+      "voiceover": "We give each agent a named role, so we can see who searches, checks and pays."
+    },
+    {
+      "id": "veto",
+      "title": "Cheap is not enough",
+      "caption": "Tawa Tangle costs less. Its 18.4% refund rate rules it out.",
+      "partner": "Arkiv",
+      "voiceover": "We compare the synthetic payment histories and reject Tawa Tangle. A lower price does not outweigh its higher refund rate."
+    },
+    {
+      "id": "check-back",
+      "title": "Check before paying",
+      "caption": "Confirm the shop\u2019s payout address, spending cap and active status.",
+      "partner": "ENS",
+      "voiceover": "We check the shop\u2019s ENS records before paying: its payout address, spending cap and status."
+    },
+    {
+      "id": "payment",
+      "title": "One signature, paid",
+      "caption": "Pay Filter & Fold 4.80 test USDT, with no gas for the agent.",
+      "partner": "Whitechain",
+      "voiceover": "We sign once and pay Filter & Fold 4.80 test USDT. The agent pays no gas."
+    },
+    {
+      "id": "memory",
+      "title": "Keep the payment history",
+      "caption": "Payment records become graph data for the next decision.",
+      "partner": "Arkiv",
+      "voiceover": "We keep payments in a graph, so the next choice can use earlier orders and refunds."
+    },
+    {
+      "id": "refund-reorder",
+      "title": "Spill, refund, another coffee",
+      "caption": "Upload the spill photo, refund 0.80, then reorder coffee for 0.80.",
+      "partner": "Swarm",
+      "voiceover": "We upload the spilled-coffee photo, receive a 0.80 test USDT refund, then order another coffee for 0.80."
+    },
+    {
+      "id": "limits",
+      "title": "The pass says no",
+      "caption": "Dosas for everyone exceed the daily pass. Payment refused.",
+      "partner": "ENS",
+      "voiceover": "We ask for dosas for everyone at the hackathon. The request exceeds the daily pass, so we refuse payment."
+    },
+    {
+      "id": "off-switch",
+      "title": "You keep control",
+      "caption": "Pause and resume the payer. Shut down the spare agent permanently.",
+      "partner": "ENS",
+      "voiceover": "We pause the payer, resume it when needed, and shut down a spare agent for good."
+    },
+    {
+      "id": "renewal",
+      "title": "Sunday breakfast, again",
+      "caption": "Two idlis, one medu vada and one coffee renew weekly for 2.40.",
+      "partner": "Whitechain",
+      "voiceover": "We renew the Sunday breakfast box every week for 2.40 test USDT: two idlis, one medu vada and one filter coffee."
+    },
+    {
+      "id": "scale",
+      "title": "Count the reads",
+      "caption": "2 reads against about 48. A read comparison, not a speed claim.",
+      "partner": "Arkiv",
+      "voiceover": "We compare reads for this demo query: 2 reads against about 48. We are counting reads, not measuring speed."
+    },
+    {
+      "id": "same-kit",
+      "title": "Same kit, cab ride",
+      "caption": "Pay a fixed-fare cab ride with the same SDK.",
+      "partner": "none",
+      "voiceover": "We use the same SDK to pay for a fixed-fare cab ride. The checkout changes; the payment kit stays the same."
+    },
+    {
+      "id": "drop-in",
+      "title": "Checkout in 17 lines",
+      "caption": "A shop adds checkout in 17 lines of code.",
+      "partner": "none",
+      "voiceover": "We show a shop adding checkout in 17 lines of code."
+    }
+  ]
+}

@@ -1,0 +1,75 @@
+{
+  "schema": "graphpay.grok.agent-visual-review.v1",
+  "clips": [
+    {
+      "path": "agents/video/concierge-thinking.mp4",
+      "status": "pass",
+      "notes": "Final cleanup passed: exactly two eyes, shifted up/right, no extra dots; spark moves with character."
+    },
+    {
+      "path": "agents/video/concierge-success.mp4",
+      "status": "pass",
+      "notes": ""
+    },
+    {
+      "path": "agents/video/scout-thinking.mp4",
+      "status": "pass",
+      "notes": "Thinking spark travels with character."
+    },
+    {
+      "path": "agents/video/scout-success.mp4",
+      "status": "pass",
+      "notes": ""
+    },
+    {
+      "path": "agents/video/analyst-thinking.mp4",
+      "status": "pass",
+      "notes": "Thinking spark travels with character."
+    },
+    {
+      "path": "agents/video/analyst-success.mp4",
+      "status": "pass",
+      "notes": ""
+    },
+    {
+      "path": "agents/video/payer-thinking.mp4",
+      "status": "pass",
+      "notes": "Thinking spark travels with character."
+    },
+    {
+      "path": "agents/video/payer-success.mp4",
+      "status": "pass",
+      "notes": ""
+    },
+    {
+      "path": "agents/video/storefront-thinking.mp4",
+      "status": "pass",
+      "notes": "Thinking spark travels with character."
+    },
+    {
+      "path": "agents/video/storefront-success.mp4",
+      "status": "pass",
+      "notes": ""
+    },
+    {
+      "path": "agents/video/risk-thinking.mp4",
+      "status": "pass",
+      "notes": "Risk red body restored and follow-up visual review passed."
+    },
+    {
+      "path": "agents/video/risk-success.mp4",
+      "status": "pass",
+      "notes": "Risk red body restored and follow-up visual review passed."
+    },
+    {
+      "path": "agents/video/dispatch-thinking.mp4",
+      "status": "pass",
+      "notes": "Thinking spark travels with character."
+    },
+    {
+      "path": "agents/video/dispatch-success.mp4",
+      "status": "pass",
+      "notes": ""
+    }
+  ]
+}
