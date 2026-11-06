@@ -4,10 +4,10 @@ The founder's to-dos and open questions. Each item says what, where, why and wha
 
 ## Founder now (Coordinator only)
 
-Updated 21:41 IST, Fri 6 Nov (Coordinator). **Standing rule (ADR-0066): no target times.** Only the submission (Sat 09:00 IST) and the presentation (Sat 09:30 IST) are fixed.
+Updated 21:55 IST, Fri 6 Nov (Coordinator). **Standing rule (ADR-0066): no target times.** Only the submission (Sat 09:00 IST) and the presentation (Sat 09:30 IST) are fixed.
 
 1. **Start the Submission session now.** Usage reset to 0%. It writes the sponsor files and the submission text (`docs/plan/sessions/submission.md`, Sonnet 5.5, high).
-2. **Production's Arkiv reads are failing,** since at least 21:36 IST. The map and the customer phone's live state answer 502. T3 is on it; the Coordinator tells you when they're back. Until then, don't demo the live state.
+2. **The Arkiv key:** reads were restored at 21:54 IST by falling back to the keyless endpoint (#148). Ask the Arkiv team for a quota reset or a new key, so reads are fast again. **The payer is paused** (a visitor pressed Pause): resume it before you demo. It has spent 78 of today's 100, and the allowance resets at 05:30 IST.
 3. **Decide what else goes into tomorrow's demo,** from the Booth's open list:
    - real ENS names for the dosa shops (T2) and their history (T3);
    - the big city (T3; 100 to 130 minutes of seeding);

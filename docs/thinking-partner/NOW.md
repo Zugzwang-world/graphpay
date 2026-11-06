@@ -1,16 +1,18 @@
 # NOW
 
-Updated 21:41 IST, Fri 6 Nov (Coordinator)
+Updated 21:55 IST, Fri 6 Nov (Coordinator)
 
 ## Summary (Coordinator only)
 
 Updated 21:41 IST, Fri 6 Nov. **Standing rule (ADR-0066): no target times.** Only the submission (Sat 09:00 IST) and the presentation (Sat 09:30 IST) are fixed.
 
 - **Usage reset at 21:30 IST:** 0% of the new week, which resets again Fri 13 Nov. The Coordinator has resumed its tick.
-- **Failing now: production's Arkiv reads** (since at least 21:36 IST).
-  - `/api/map` and `/api/state/customer` answer 502 ("the graph did not answer"), so the phones' live state is blank.
-  - The chains themselves answer, and nothing has deployed since about 20:13 IST.
-  - T3 is diagnosing.
+- **Fixed at 21:54 IST: production's Arkiv reads** (T3, #148).
+  - The cause was that the Arkiv access key's quota ran out: every keyed query got 429 `QUOTA_EXCEEDED`.
+  - The transport now repeats a refused call on the keyless public endpoint, which allows 2,000 calls per window.
+  - `/api/map` and `/api/state/customer` answer 200 again.
+  - The key stays on Vercel, because the live runner requires it. The founder is asked for a quota reset or a new key.
+- **The payer is PAUSED again:** someone pressed the public Pause. It has spent 78.00 of today's 100, so 22 are left until 05:30 IST. PAYER holds 58.2 test USDT, and FUNDER 54.14.
 - **The live stage** is https://graphpay-event.vercel.app: the team's phones around the deck, with no passcode.
   - The Booth sessions (#135 to #145) put the Grok dosa story on screen: Filter & Fold, Idli Index and Tawa Tangle. The ENS labels are unchanged.
   - The deck follows the live run.
@@ -110,7 +112,7 @@ Updated 11:09 IST, Fri 6 Nov (T6 AgentPay, Sonnet 5.5). **0.1.0 merged (PR 80); 
 
 ## records
 
-Updated 17:46 IST, Fri 6 Nov (Coordinator).
+Updated 21:55 IST, Fri 6 Nov (Coordinator).
 - **Done this step:**
   - #70 merged;
   - the funding moves (PAYER to 125 test USDT, VITALIK to 0.02 Sepolia ETH);
