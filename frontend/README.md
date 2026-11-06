@@ -18,6 +18,8 @@ npm test           # the seven journeys against the mock adapter (Vitest, fake t
 
 Dev extras: `?debug` logs every mock event to the console, and in dev the mock adapter is available as `window.__demo`.
 
+F3 state previews: in dev, use the floating **Preview** control or `?state=loading|empty|success|refused|error|components`. The chosen state applies to the open page in each phone; the page menu lets you inspect every page. `components` is a gallery of the shared F3 pieces. The control and query override are absent from production builds.
+
 ## How the mock engine works
 
 - **One store for both phones.** `MockAdapter` (`src/demo/mock-adapter.ts`) holds the in-memory state. Both apps read it through `DemoProvider` and the same snapshot, so an action in one phone appears live in the other.
@@ -123,7 +125,7 @@ All are marked `PROPOSED (mock only)` in `src/demo/contract.ts`.
 - [x] **F0** Foundations: project, tokens, fonts, story data, copy, contract, mock seed data, README
 - [x] **F1** Mock engine: shared store, event bus, scripted journeys, reset (`npm test`: 22 journey tests)
 - [x] **F2** Stage: dark stage, two iPhone frames, strip, narrow-width switch
-- [ ] **F3** Shared components 1: header and coin hamburger, page strip, chips, sheets, states, dev state switcher
+- [x] **F3** Shared components 1: header and coin hamburger, page strip, chips, sheets, states, dev state switcher
 - [ ] **F4** Shared components 2: iOS keyboard, AmountEntry, StatusTracker, AgentAvatar, sounds, SVG fox
 - [ ] **F5** Customer journey 1: desk, shop cards, quote and receipt
 - [ ] **F6** Merchant journey 1: Shop Home, order detail

@@ -4,6 +4,7 @@ import { PhoneFrame, FRAME_H, FRAME_W, PHONE_H, PHONE_W } from './PhoneFrame';
 import { DemoStrip } from './DemoStrip';
 import { useViewport } from '@/lib/useViewport';
 import { copy } from '@/copy';
+import { StateSwitcher } from '@/dev/StateSwitcher';
 
 const STRIP_H = 56;
 const CAPTION_H = 36;
@@ -97,6 +98,7 @@ export function Stage({ customer, merchant }: StageProps) {
         {phone('customer', customer)}
         {phone('merchant', merchant)}
       </main>
+      <StateSwitcher />
     </div>
   );
 }

@@ -143,3 +143,25 @@
     scroll-behavior: auto !important;
   }
 }
+
+@keyframes page-in-forward {
+  from { opacity: 0; transform: translateX(28px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes page-in-backward {
+  from { opacity: 0; transform: translateX(-28px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes page-fade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.page-enter-forward { animation: page-in-forward 200ms var(--ease-out) both; }
+.page-enter-backward { animation: page-in-backward 200ms var(--ease-out) both; }
+
+@media (prefers-reduced-motion: reduce) {
+  .page-enter-forward, .page-enter-backward { animation-name: page-fade; animation-duration: 120ms !important; }
+}
