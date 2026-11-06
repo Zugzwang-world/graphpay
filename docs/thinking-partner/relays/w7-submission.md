@@ -1,31 +1,50 @@
 # Relay: w7-submission (the night Submission stream)
 
-Updated 23:25 IST, Fri 6 Nov, by W7 Submission (`local_abd77623-de22-4fe2-a0a9-865fdd43dba2`). Brief: [`briefs/2258-w7-submission.md`](../briefs/2258-w7-submission.md).
+Updated 23:30 IST, Fri 6 Nov, by W7 Submission (`local_abd77623-de22-4fe2-a0a9-865fdd43dba2`). Brief: [`briefs/2258-w7-submission.md`](../briefs/2258-w7-submission.md).
 
 ## Plain language
 
 W7 writes what a judge reads, so the founder can paste the ETHGlobal submission from one file and every claim in it links to evidence.
 
-**Landed in this step:** the README. It now says what GraphPay is, gives the live link, and has a "verify each claim" table: every payment, refund, renewal, ENS action and Arkiv receipt it mentions opens on a public explorer. Each of those 24 transactions was checked on its explorer at about 23:10 IST. It also has the fictional-persona sentence from the brief, the SDKs, the Whitechain, ENS and Arkiv sections the prize rules ask for, a runnable Arkiv query with no keys, the limitations, and the team. A root MIT `LICENSE` is added (the packages were MIT already; the repo root had none).
+**Landed:** the README ([#154](https://github.com/Zugzwang-world/graphpay/pull/154), 23:24 IST). It says what GraphPay is, gives the live link, carries the fictional-persona sentence, and has a "verify each claim" table where every payment, refund, renewal, ENS action and Arkiv receipt opens on a public explorer. A root MIT `LICENSE` came with it.
 
-**Next, in order:** AI_USAGE.md; the Arkiv files (`friction.md`, `reach.md`, `why-arkiv.md`, `how-you-use-arkiv.md`, `swarm.md`); `WHITECHAIN_FEEDBACK.md` and `docs/submission/ENS.md`; then `docs/submission/ETHGLOBAL.md`, the form text. Then a pass after each night stream lands (W1's new shop names, W2's menus and the race at M, W6's 1.0.0 SDKs).
+**In this step's PR:**
+- **AI_USAGE.md:** Claude Code wrote the code; Claude on the web helped plan; Kimi runs the agents; a Grok bot desk made the assets, with its prompts in `assets/grok/`; all images are AI-generated. Every session is listed with its model, the night run included. The team's phone apps are credited to ajatshatru01, whose #70 commit lists GitHub Copilot as co-author.
+- **The five Arkiv files, finished:** `friction.md` gains two rows reproduced tonight; `reach.md` and `why-arkiv.md` are new; `how-you-use-arkiv.md` and `swarm.md` are brought to the live state.
 
-**The founder must:** review the README; record the video (2 to 4 minutes, own voice) and paste its link into the form; submit by 08:00 IST from `docs/submission/ETHGLOBAL.md`; confirm the team list and that every member is registered.
+**Next:** `WHITECHAIN_FEEDBACK.md` and `docs/submission/ENS.md`, then the form text, `docs/submission/ETHGLOBAL.md`. Then a pass after W1's new shop names, W2's race at M and W6's 1.0.0 SDKs.
+
+**The founder must:** review the README; confirm the team list; record the video and paste its link into the form; submit by 08:00 IST.
 
 ## Technical
 
-- **Branch and PRs:** `submit/readme` (this step). Small PRs, one per item, auto-merge.
-- **How links were checked:** a read-only script queried the Whitechain explorer's API (status, method, token transfers), and public Sepolia and Rabdi RPCs (receipt status, chain id first). All 24 succeeded. Highlights:
-  - the first real test-USDT payment, 4.80, 04:13 IST, sent by our relayer: [0x8750…2c00](https://explorer.testnet.whitechain.io/tx/0x87505ef2457b6e925fa7378a55fd91419e83c37fb8effc06d901884700c72c00);
-  - the latest live errand, 4.80, 20:36 IST: [0xbc05…cd43](https://explorer.testnet.whitechain.io/tx/0xbc052d7f11bd61ab0fcee69a78da0b7fbe5bcbf9821741d1150345a0fe29cd43);
-  - refund 0.80, re-order 1.20, the cron renewal, a subscription created, renewed and cancelled (by script), a revoked agent's on-chain `PaymentFailed`;
-  - on Sepolia: the agent's own `agent-context` write (B3), the disposable agent's kill, the payer's cap record.
-- **Arkiv receipts link to their payment:** a keyless `arkiv_query` for the payer's `pay` edges (owner W_LEDGER) returns rows whose `ref` is `1874:<Whitechain tx>:<log>`; for example entity `0xc64b…7204` points at the errand `0x8617…863a`. The README carries the query as a curl command and as an explorer "run this query" link.
-- **ENS read with stock viem** on Sepolia's public RPC: the shop's coin-type 2147485522 address is the payee of every payment; the payer's `graphpay.status` and `graphpay.cap_micro`; `graphpay.eth`'s `agent-endpoint[mcp]`; a wildcard `sim-0042` name answers "synthetic agent, unverified".
-- **The drop-in:** the store's integration is 12 lines in four files, counted by the store's own rule (`apps/store/lib/integration.ts`); the old "about 20" stays the limit its test holds.
+- **Evidence method:** a read-only script read 24 transactions back (Whitechain's Blockscout API for status, method and token transfers; public Sepolia and Rabdi RPCs, chain id first). All succeeded. A link checker now runs over every owned file: relative links must exist, with their anchors; external links must answer. Only npm's pages refuse it (403 to scripts), so the packages are checked through the registry API instead.
+- **New friction rows:**
+  - #8, the access key's quota: HTTP 429 `QUOTA_EXCEEDED` with `arkiv-quota-used-percent: 100`, while the rate-limit header still showed about 4,900 left. It was fixed by the keyless fallback (#148).
+  - #9: `bool(false)` is refused ("bool takes no wrapper"), unlike every other typed literal.
+- **reach.md:**
+  - It leads with `npm i @graphpay_ethglobal/arkiv-graph`.
+  - Its ten-line quickstart was run against the package source and printed `1n` and the exact Arkiv query.
+  - It covers the live GraphQL and the MCP server (`claude mcp add --transport http …`, also found through ENS `agent-endpoint[mcp]`).
+  - Installs: published 0.1.0 and 0.1.1; npm's download counter has no data yet for a package published today; no feedback issue yet (read 23:25 IST).
+  - The roadmap: keyset paging, server-side aggregates, a React kit.
+- **why-arkiv.md:**
+  - The case: a reputation no platform owns; authorship anyone can check (the owner filter, plus each receipt's `ref` naming its Whitechain transaction); receipts that cannot be edited; expiry as policy; reads for any agent.
+  - What it costs, and what stays off Arkiv.
+- **how-you-use-arkiv.md:**
+  - Presence and hand-offs are now shipped (the live runner writes them).
+  - `count()` is live: `ask` with `verify: true` answered `RAW_VERIFIED` for Filter & Fold in 8 calls.
+  - The map lists 16 shops, 10 labelled synthetic.
+  - New row: the Swarm pointers.
+- **swarm.md:** the dosa menus (Filter & Fold v3). The menu's sha-256 equals the row's `content_hash`, and the dish photo's equals its recorded hash (both fetched tonight). The phones' build reads them keyless (`apps/phones/menu-images.mjs`).
+- **Corrections made:**
+  - Explain ids live per server instance (the last 200), so the docs link no fixed explain id.
+  - The GraphQL and explorer links now percent-encode their parentheses, so every renderer keeps them whole.
+  - The times in #154 were corrected to measured ones.
 - **Deviations:**
-  - The tallies of the good shop include labelled synthetic history (`history-buyer-N.sim…`, `synthetic: true`). The README says so rather than quoting the shop's order count.
-  - The payer's daily cap is not quoted as a number: it reads 300 test USDT in ENS since about 23:10 IST (W5's #152), after the 100 of ADR-0071. The README links the live state instead.
-  - The store is not deployed (graphpay-store.vercel.app answers 404), so the README says how to run it locally.
   - The brief's `why.md` is written as `arkiv/why-arkiv.md`, the name the pack, the master plan and the M17 plan use.
-- **Open risks:** the ENS labels change with W1, the race numbers with W2 at M, the SDK versions with W6; each is a find-and-replace in the README and the form text, done after it lands.
+  - The payer's cap is linked live, never quoted: it is 300 tonight (W5's #152).
+  - The store is not deployed, so the README says how to run it locally.
+- **Open risks:**
+  - The shop labels change with W1, the menus and race with W2, the SDK versions with W6.
+  - Each is a pass over the README, the Arkiv files and the form text after it lands.
