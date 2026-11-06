@@ -25,7 +25,7 @@ const save = () => {
   out.endedAt = new Date().toISOString();
   const dir = join(here, '..', 'docs', 'sessions', 'integration', 'hosted');
   mkdirSync(dir, { recursive: true });
-  writeFileSync(join(dir, `d11-${out.startedAt.replace(/[:.]/g, '-')}.json`), `${JSON.stringify(out, null, 2)}\n`);
+  writeFileSync(join(dir, `d11-${out.startedAt.replace(/[:.]/g, '-')}.json`), `${JSON.stringify(out, (_, v) => (typeof v === 'bigint' ? v.toString() : v), 2)}\n`);
 };
 process.on('exit', save);
 
@@ -52,6 +52,7 @@ const exited = new Promise((ok) => child.on('exit', (code) => ok(code)));
 async function poll() {
   const rows = await agentsOnline(arkiv.publicClient, { session: runId });
   const p = { at: Date.now(), rows: rows.length, agents: rows.map((r) => r.agentEns) };
+  for (const r of rows) if (!out.lastExpiresAt || BigInt(r.expiresAt) > BigInt(out.lastExpiresAt)) out.lastExpiresAt = String(r.expiresAt);
   out.polls.push(p);
   return rows;
 }
@@ -86,9 +87,16 @@ while (seen && out.errandEndMs && Date.now() - out.errandEndMs < 20 * 60_000) {
   }
 }
 const s = (ms) => (ms ? Math.round(ms / 100) / 10 : null);
+// When the rows really lapsed: the timestamp of their last expiry block on Arkiv (polling only
+// brackets it), against the errand's end.
+if (out.goneMs && out.lastExpiresAt) {
+  const b = await arkiv.publicClient.getBlock({ blockNumber: BigInt(out.lastExpiresAt) }).catch(() => null);
+  if (b) out.expiredAtMs = Number(b.timestamp) * 1000;
+}
 out.secondsToPresence = out.firstSeenMs && out.errandStartMs ? s(out.firstSeenMs - out.errandStartMs) : null;
-out.minutesToGone = out.goneMs && out.errandEndMs ? Math.round((out.goneMs - out.errandEndMs) / 600) / 100 : null;
+out.minutesToGoneObserved = out.goneMs && out.errandEndMs ? Math.round((out.goneMs - out.errandEndMs) / 600) / 100 : null;
+out.minutesToGone = out.expiredAtMs && out.errandEndMs ? Math.round((out.expiredAtMs - out.errandEndMs) / 600) / 100 : null;
 out.ownersOk = (out.firstRows ?? []).length > 0 && out.firstRows.every((r) => String(r.owner).toLowerCase() === owner.toLowerCase());
 out.pass = out.secondsToPresence !== null && out.secondsToPresence <= 30 && out.minutesToGone !== null && out.minutesToGone <= 15 && out.ownersOk;
-say(`presence ${out.secondsToPresence} s after the start, gone ${out.minutesToGone} min after the end, handoffs ${out.handoffs}: ${out.pass ? 'pass' : 'FAIL'}`);
+say(`presence ${out.secondsToPresence} s after the start, expired ${out.minutesToGone} min after the end (seen gone ${out.minutesToGoneObserved}), handoffs ${out.handoffs}: ${out.pass ? 'pass' : 'FAIL'}`);
 process.exitCode = out.pass ? 0 : 1;
