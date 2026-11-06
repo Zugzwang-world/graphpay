@@ -154,3 +154,12 @@ The kickoff rules (the deadline Sat 09:00 IST; AI use documented; spec files in 
 
 - **M17** (owner: Submission, not started). Everything in `docs/plan/sessions/submission.md`: the sponsor files and the README; the `arkiv/` files (finish T3's three drafts; write `reach.md` and `why-arkiv.md`); the video's shot list and narration; the submission text and checklist. The founder reviews, records the video in his own voice and submits, by Sat 08:00 IST (hard deadline 09:00).
 - Closed today: the README's fictional-persona note (ADR-0072) and AI_USAGE's Grok desk line.
+
+## w4-agents
+
+- **Acceptance E1 reads the old clock deadline** (owner: the Coordinator, who regenerates acceptance). What: `acceptance/checks.mjs` E1 expects the run's deadline to contain `T23:59:00` (`order.deadlineLocal`); the request now says "delivered within an hour". Why: E1 would fail on every fresh run. Recommendation: expect the deadline one hour after the run's request, to the minute (`result.mandate.deadlineIso`); E1 needs a fresh `e2e:food` run anyway.
+
+## frontend
+
+- **/customer's "By 23:59" chip** (from w4-agents; owner: the frontend pass). What: `apps/web/components/customer-screen.tsx` shows `order.deadlineLocal`, but the request is now relative. Why: the chip and the request disagree. Recommendation: show "within an hour", or the run's deadline from the result frame (`result.mandate.deadlineIso`); no new route or event is needed.
+- **The deck's errand text** (from w4-agents; owner: the frontend pass). What: `apps/web/public/deck/index.html` keeps a hand copy of the request that still says "by 11:59 pm". Recommendation: copy the new request from `packages/config/story.json` (`order.request`).

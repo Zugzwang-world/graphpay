@@ -117,3 +117,7 @@ One line per PR: time (IST) · activity · result · PR link. Append under your 
 - 20:23 IST · booth · merged: docs(records): sync: demo note, resume, NOW, LOG · https://github.com/Zugzwang-world/graphpay/pull/145
 
 ## submission
+
+## w4-agents
+
+- 23:25 IST · w4-agents · item 1: the request says "delivered within an hour"; code reads the span from the request, so errands work at any hour (mocks: paid at 23:50, 23:59 and 03:00 IST) · PR link to follow

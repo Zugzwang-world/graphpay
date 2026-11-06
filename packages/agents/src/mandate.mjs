@@ -1,5 +1,6 @@
 // G1: the limits come from the human's words. Code reads the budget and the
-// deadline from the request; no readable budget or deadline means no agent runs
+// deadline (a clock time today, or a span from the request such as "within an
+// hour") from the request; no readable budget or deadline means no agent runs
 // (fail closed). The model's need is adopted only after code has overwritten
 // its limits, and the need is set once (planning/SPEC/AGENTS.md §3, §4).
 
@@ -31,6 +32,22 @@ function deadlines(request) {
       continue; // "by 8" is ambiguous: no deadline is read from it
     }
     out.push({ hour, minute });
+  }
+  return out;
+}
+
+// A deadline relative to the request: "within an hour", "in 45 minutes", "under 2 hours",
+// "within half an hour". Up to a day; a zero or longer span is not read as a deadline.
+const RELATIVE = /\b(?:within|in|under)\s+(?:the\s+next\s+)?(half\s+an?|an?|one|\d{1,4}(?:\.\d{1,2})?)\s*(hours?|hrs?|minutes?|mins?)\b/gi;
+export const MAX_RELATIVE_MINUTES = 24 * 60;
+
+function relativeMinutes(request) {
+  const out = [];
+  for (const m of request.matchAll(RELATIVE)) {
+    const amount = m[1].toLowerCase().replace(/\s+/g, ' ');
+    const count = amount.startsWith('half') ? 0.5 : amount === 'a' || amount === 'an' || amount === 'one' ? 1 : Number(amount);
+    const minutes = Math.round(/^h/i.test(m[2]) ? count * 60 : count);
+    if (minutes >= 1 && minutes <= MAX_RELATIVE_MINUTES) out.push(minutes);
   }
   return out;
 }
@@ -99,13 +116,18 @@ export function parseMandate(request, { now, timeZone, currency, buyer }) {
   const found = [...new Set(budgets(request, currency).map((b) => toMicro(b)))];
   if (found.length === 0) return { ok: false, reason: 'MANDATE_NO_BUDGET', detail: `no budget in ${currency} in the request` };
   if (found.length > 1) return { ok: false, reason: 'MANDATE_AMBIGUOUS_BUDGET', detail: 'the request names more than one budget' };
-  const times = deadlines(request);
-  const distinct = [...new Set(times.map((t) => t.hour * 60 + t.minute))];
-  if (distinct.length === 0) return { ok: false, reason: 'MANDATE_NO_DEADLINE', detail: 'no clock time ("by 8 pm", "by 20:00") in the request' };
+  // A clock time is today's in the city; a span counts from the request, to the whole minute
+  // (never later than the words allow), so an errand works at any hour.
+  const instants = [
+    ...deadlines(request).map((t) => todayAt(now, t, timeZone)),
+    ...relativeMinutes(request).map((minutes) => Math.floor((now + minutes * 60_000) / 60_000) * 60_000),
+  ];
+  const distinct = [...new Set(instants)];
+  if (distinct.length === 0) return { ok: false, reason: 'MANDATE_NO_DEADLINE', detail: 'no deadline ("by 8 pm", "by 20:00", "within an hour") in the request' };
   if (distinct.length > 1) return { ok: false, reason: 'MANDATE_AMBIGUOUS_DEADLINE', detail: 'the request names more than one deadline' };
   const budgetMicro = found[0];
   if (budgetMicro <= 0n) return { ok: false, reason: 'MANDATE_NO_BUDGET', detail: 'the budget is zero' };
-  const deadlineMs = todayAt(now, times[0], timeZone);
+  const deadlineMs = distinct[0];
   if (!(deadlineMs > now)) {
     return { ok: false, reason: 'MANDATE_DEADLINE_PASSED', detail: `the deadline ${isoWithOffset(deadlineMs, timeZone)} has passed` };
   }

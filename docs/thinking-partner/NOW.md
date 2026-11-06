@@ -165,3 +165,10 @@ Updated 20:25 IST, Fri 6 Nov (Sync session).
 ## submission
 
 Not started (the Submission session, M17, from Fri 13:00; submit by Sat 08:00 IST).
+
+## w4-agents
+
+Updated 23:25 IST, Fri 6 Nov (W4 Agents, the night's agents session).
+- **Item 1, the relative deadline (in its PR):** the request now says "delivered within an hour", and code reads the hour from the moment of the request, so errands work at any hour, also after 23:15 and across midnight. The guard checks each shop's ETA against that hour.
+- **Next:** measure every model call of a live errand (tokens, cached, output, seconds), then cut tokens and time without changing the screens, then three live errands in a row that pay.
+- **Blockers:** none. Today's pass has 22 of 100 test USDT left (four payments) until it resets at 05:30 IST.
