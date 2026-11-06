@@ -51,7 +51,7 @@ One line per PR: time (IST) · activity · result · PR link. Append under your 
 
 ## phones
 
-- 13:05 IST · phones · phase 1: the team's two phones on our site at `/live`, built from `frontend/` (#70, `8abe39a`) with their Vite, on live read-only data (agents, pass, Open flag, real orders with explorer links, the merchant stream) · PR link follows
+- 13:05 IST · phones · phase 1: the team's two phones on our site at `/live`, built from `frontend/` (#70, `8abe39a`) with their Vite, on live read-only data (agents, pass, Open flag, real orders with explorer links, the merchant stream) · https://github.com/Zugzwang-world/graphpay/pull/111
 
 ## website
 
