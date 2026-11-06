@@ -1,4 +1,5 @@
 // node scripts/ens/owner.mjs <pause|resume|kill> <agent name> [--fork <loopback url> | --real]
+// node scripts/ens/owner.mjs cap <agent name> [micro-USDT] [--fork <loopback url> | --real]   (default: the story's cap)
 // node scripts/ens/owner.mjs disposable [--fork <loopback url> | --real] [--n <k>]
 // The owner's actions on an agent's name (packages/ens/src/actions.mjs), signed with the agent's
 // owner wallet from the git-ignored .env (a fork impersonates it and sends nothing to Sepolia).
@@ -12,7 +13,7 @@ import { execFileSync } from 'node:child_process';
 import { createPublicClient, createWalletClient, getAddress, http, isAddressEqual } from 'viem';
 import { privateKeyToAccount } from 'viem/accounts';
 import { config } from '../../packages/config/index.mjs';
-import { createOwnerActions, createTxRunner, disposableAgent, ensChain, nextFreeDisposable, ownerRoleOf } from '../../packages/ens/index.mjs';
+import { createOwnerActions, createTxRunner, disposableAgent, ensChain, namespacePlan, nextFreeDisposable, ownerRoleOf } from '../../packages/ens/index.mjs';
 import { clientsFor } from '../lib/chains.mjs';
 import { loadEnv } from '../lib/env-loader.mjs';
 import { installErrorBoundary } from '../lib/redact.mjs';
@@ -27,7 +28,7 @@ const [action, target] = argv;
 const forkUrl = arg('--fork');
 const real = argv.includes('--real');
 const sepolia = config.networks[config.ens.network];
-if (!['pause', 'resume', 'kill', 'disposable'].includes(action)) throw new Error('usage: owner.mjs <pause|resume|kill> <name> | disposable  [--fork url | --real]');
+if (!['pause', 'resume', 'kill', 'cap', 'disposable'].includes(action)) throw new Error('usage: owner.mjs <pause|resume|kill|cap> <name> | disposable  [--fork url | --real]');
 if (!forkUrl && !real) throw new Error('say where: --fork <loopback url> or --real (Ethereum Sepolia)');
 if (forkUrl && real) throw new Error('use --fork or --real, not both');
 
@@ -94,7 +95,13 @@ async function main() {
   const role = ownerRoleOf(target);
   if (!addresses[role]) throw new Error(`${role}: no key in .env`);
   senders.set(role, await walletFor(role, getAddress(addresses[role])));
-  const result = await actions[action](target);
+  let result;
+  if (action === 'cap') {
+    const agent = namespacePlan().agents.find((a) => a.name === target);
+    const cap = argv[2] && !argv[2].startsWith('--') ? argv[2] : agent?.capMicro;
+    if (cap === undefined) throw new Error(`${target}: no cap given and none in the story`);
+    result = await actions.setCap(target, cap);
+  } else result = await actions[action](target);
   const at = result.receipt ? `block ${result.receipt.blockNumber}, tx ${result.hash}` : result.reason ?? (result.killedEarlier ? 'killed earlier' : '');
   console.log(`${action} ${result.name ?? target}: ${result.changed ? 'done' : 'no change'} (${at})`);
 }

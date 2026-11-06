@@ -52,6 +52,7 @@ Updated 05:00 IST. **M6 is done and merged (gate #34, watcher #40); B7 is covere
 - Running: nothing. Blockers: none. B6/B7/E7 real timings wait for Join's workers process to host the watcher.
 - B9 (a): the payee comparison now runs in the acceptance script and passes for Kesar Kingdom (the one shop with a settled payment); the other two are skipped until they have one.
 - Next: the demo cast's ENS names the moment the story locks (Coordinator will say).
+- **Payer cap (founder's support brief):** the payer's ENS `graphpay.cap_micro` is 100000000 (100 test USDT a day) on Sepolia, [transaction](https://sepolia.etherscan.io/tx/0x8898d10728f998983c7747aae50389392bb9ce276b7e2dbadaed509ede674c16). The gate takes the lower of this and the on-chain policy cap, so T1's policy update sets the effective cap.
 
 ## arkiv
 
