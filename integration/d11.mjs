@@ -58,12 +58,17 @@ async function poll() {
 
 const t0 = Date.now();
 let seen = null;
-while (!seen && Date.now() - t0 < 30 * 60_000) {
+let childDone = false;
+exited.then(() => {
+  childDone = true;
+});
+while (!seen && !childDone && Date.now() - t0 < 30 * 60_000) {
   const rows = await poll().catch(() => []);
   if (rows.length) {
     seen = Date.now();
     out.firstSeenMs = seen;
-    out.firstRows = rows.map((r) => ({ key: r.key, agentEns: r.agentEns, role: r.role, expiresAt: r.expiresAt }));
+    // Each row's own owner, read from the entity (evidence; agentsOnline already filters by it).
+    out.firstRows = await Promise.all(rows.map(async (r) => ({ key: r.key, agentEns: r.agentEns, role: r.role, expiresAt: r.expiresAt, owner: (await arkiv.publicClient.getEntity(r.key).catch(() => null))?.$owner ?? null })));
     say(`presence: ${rows.length} rows (${rows.map((r) => r.role).join(', ')})`);
   } else await new Promise((ok) => setTimeout(ok, 5_000));
 }
@@ -71,8 +76,9 @@ out.exitCode = await exited;
 say(`e2e:food exited ${out.exitCode}`);
 out.handoffs = (await handoffsFor(arkiv.publicClient, requestId).catch(() => [])).length;
 
+// Every 60 s, then every 10 s from minute 13 (the rows live exactly 15 minutes).
 while (seen && out.errandEndMs && Date.now() - out.errandEndMs < 20 * 60_000) {
-  await new Promise((ok) => setTimeout(ok, 60_000));
+  await new Promise((ok) => setTimeout(ok, Date.now() - out.errandEndMs > 13 * 60_000 ? 10_000 : 60_000));
   const rows = await poll().catch(() => null);
   if (rows && rows.length === 0) {
     out.goneMs = Date.now();
@@ -82,5 +88,7 @@ while (seen && out.errandEndMs && Date.now() - out.errandEndMs < 20 * 60_000) {
 const s = (ms) => (ms ? Math.round(ms / 100) / 10 : null);
 out.secondsToPresence = out.firstSeenMs && out.errandStartMs ? s(out.firstSeenMs - out.errandStartMs) : null;
 out.minutesToGone = out.goneMs && out.errandEndMs ? Math.round((out.goneMs - out.errandEndMs) / 600) / 100 : null;
-out.pass = out.secondsToPresence !== null && out.secondsToPresence <= 30 && out.minutesToGone !== null && out.minutesToGone <= 15;
+out.ownersOk = (out.firstRows ?? []).length > 0 && out.firstRows.every((r) => String(r.owner).toLowerCase() === owner.toLowerCase());
+out.pass = out.secondsToPresence !== null && out.secondsToPresence <= 30 && out.minutesToGone !== null && out.minutesToGone <= 15 && out.ownersOk;
 say(`presence ${out.secondsToPresence} s after the start, gone ${out.minutesToGone} min after the end, handoffs ${out.handoffs}: ${out.pass ? 'pass' : 'FAIL'}`);
+process.exitCode = out.pass ? 0 : 1;

@@ -88,6 +88,19 @@ export function checks(root, env) {
       return { pass: rows.length > 0 && carried.every((c) => c === 'FUNDER' || c === 'OPERATOR') && shared.length === 0, what: 'the event wallets are fresh, except FUNDER and OPERATOR', measured: { roles: rows.length, carried, sharedAddresses: shared.length }, expected: 'only FUNDER and OPERATOR carried; no two roles share an address', evidence: { cmd: 'pnpm -s wallets:addresses (addresses only)' } };
     },
     F1: async () => noSecrets(root),
+    // D11 (Friday): the presence half from integration/d11.mjs (an e2e:food errand watched on
+    // Arkiv); the Open toggle's shop_open half has no runner here yet.
+    D11: async () => {
+      const dir = join(root, 'docs/sessions/integration/hosted');
+      const f = existsSync(dir) ? readdirSync(dir).filter((x) => x.startsWith('d11-')).sort().at(-1) : null;
+      const what = 'heartbeats lapse';
+      if (!f) return { pass: null, why: 'no d11 run yet', what, measured: null, expected: '', evidence: {} };
+      const d = JSON.parse(readFileSync(join(dir, f), 'utf8'));
+      const presence = typeof d.secondsToPresence === 'number' && d.secondsToPresence <= 30 && typeof d.minutesToGone === 'number' && d.minutesToGone <= 15 && (d.firstRows ?? []).length > 0 && d.firstRows.every((r) => String(r.owner).toLowerCase() === writerAddresses().W_DIRECTORY.toLowerCase());
+      const parts = { presence, shopOpen: null };
+      const pass = parts.presence === false ? false : null;
+      return { pass, why: pass === null ? 'the presence half passes; the shop_open half (the Open toggle) is not run here' : undefined, what, measured: { secondsToPresence: d.secondsToPresence, minutesToGone: d.minutesToGone, rows: d.firstRows?.length ?? 0, handoffs: d.handoffs, owner: d.owner, errand: d.errandLine ?? null }, expected: 'agent_presence within 30 s of the start and gone within 15 min of the stop; both owned by W_DIRECTORY; shop_open present while on and gone within 15 min of off', evidence: { file: `docs/sessions/integration/hosted/${f}`, parts } };
+    },
     // F3: T1's record (docs/sessions/payments/f3.json): the production build run locally with the
     // hosted env and the floor raised above the relayer's balance (a preview would need the
     // relayer key in the preview env, and its shop would call the production facilitator).

@@ -65,7 +65,7 @@ export async function startStack({ env, whitechain, sepolia, directory, sync, sh
   if (env.ALLOW_REAL_NETWORK !== '1') throw new Error('stack: the real network needs ALLOW_REAL_NETWORK=1');
   // Since M4 the hosted shop and facilitator are the default: the hosted facilitator relays as
   // FACILITATOR, and a local relayer would race its nonces, so it runs only on an explicit opt-in.
-  const hosted = env.STACK_LOCAL_RELAY !== '1';
+  const hosted = process.env.STACK_LOCAL_RELAY !== '1'; // the shell only, never a leftover in .env
   const chainId = whitechain.chain.id;
   const NETWORK = `eip155:${chainId}`;
   const checkout = config.whitechain.contracts.checkout.address;
@@ -84,14 +84,16 @@ export async function startStack({ env, whitechain, sepolia, directory, sync, sh
   const shops = storyShops();
   const merchants = Object.fromEntries(shops.map((s) => [s.key, key(s.walletRole).address]));
   const walletClients = Object.fromEntries(shops.map((s) => [s.key, whitechain.walletClient(key(s.walletRole))]));
+  const orderStatus = async (orderId) => ({ status: STATUS[Number((await pub.readContract({ address: checkout, abi: checkoutAbi, functionName: 'orders', args: [orderId] })).status)] });
   const local = merchantActions({ publicClient: pub, walletClients, checkout, chain: whitechain.chain });
   // Hosted, the shop delivers with the same merchant key: a refund here waits for it to be quiet.
   const merchant = !hosted
     ? local
     : {
-        ...local,
         async refund(shopKey, orderId, amountMicro, reason) {
           const address = merchants[shopKey];
+          // The hosted shop's markDelivered first (up to 60 s), then a key with nothing pending.
+          for (let i = 0; i < 20 && (await orderStatus(orderId)).status !== 'DELIVERED'; i += 1) await new Promise((ok) => setTimeout(ok, 3_000));
           for (let i = 0; i < 20; i += 1) {
             const [latest, pending] = await Promise.all(['latest', 'pending'].map((blockTag) => pub.getTransactionCount({ address, blockTag })));
             if (latest === pending) return local.refund(shopKey, orderId, amountMicro, reason);
@@ -115,7 +117,7 @@ export async function startStack({ env, whitechain, sepolia, directory, sync, sh
     if (health.startup !== 'ok' || !(await pub.readContract({ address: checkout, abi: checkoutAbi, functionName: 'isRelayer', args: [health.signer] }))) throw new Error('stack: the hosted facilitator is not ready');
     log(`stack: the hosted shop and facilitator (${site}), relayer ${health.signer}`);
     // Refusals are written by the hosted recorder; read them on Arkiv (W_SYNC).
-    return { base: `${site}/api/shop`, passcode: env.DEMO_PASSCODE, refusals: [], relayer: health.signer, secrets: [], close() {} };
+    return { base: `${site}/api/shop`, passcode: env.DEMO_PASSCODE, refusals: [], relayer: health.signer, secrets: [env.DEMO_PASSCODE], close() {} };
   }
 
   // The local facilitator and shop on loopback (STACK_LOCAL_RELAY=1 only).
@@ -203,28 +205,28 @@ export async function startStack({ env, whitechain, sepolia, directory, sync, sh
     };
   }
 
-  const orderStatus = async (orderId) => ({ status: STATUS[Number((await pub.readContract({ address: checkout, abi: checkoutAbi, functionName: 'orders', args: [orderId] })).status)] });
-
   // The agents' ShopSurface for one shop: the real shop API over HTTP.
   function surfaceFor(shopEns) {
     const shop = shops.find((s) => s.ensName === shopEns);
     if (!shop) throw new Error(`stack: no shop ${shopEns} in the story`);
     let catalog = null;
-    const getCatalog = async () => (catalog ??= await (await fetch(`${base}/catalog?shop=${encodeURIComponent(shopEns)}`)).json());
+    const getCatalog = async () => (catalog ??= await (await fetch(`${base}/catalog?shop=${encodeURIComponent(shopEns)}`, { redirect: 'error' })).json());
     return {
       catalog: getCatalog,
       async quote({ item, quantity, buyer, payer, wallet }) {
         const entry = (await getCatalog()).items.find((i) => i.item === item || i.sku === item);
         if (!entry) throw new Error(`${shopEns} does not sell ${item}`);
         const qs = new URLSearchParams({ shop: shopEns, item: entry.sku, qty: String(quantity), buyer, payer, wallet });
-        const r = await fetch(`${base}/quote?${qs}`);
+        const r = await fetch(`${base}/quote?${qs}`, { redirect: 'error' });
         const q = await r.json();
         if (r.status !== 200) throw new Error(`quote answered ${r.status}: ${q.error ?? ''}`);
         return { shop: shopEns, item: entry.item, quantity: q.quantity, priceMicro: q.priceMicro, etaMinutes: q.etaMinutes, validUntil: q.validUntil, orderId: q.orderId, terms: q.terms, payUrl: q.payUrl };
       },
       async pay({ payUrl, terms, requestId, signature }) {
         const headers = { 'content-type': 'application/json', [PASSCODE_HEADER]: passcode, ...(signature ? { 'PAYMENT-SIGNATURE': signature } : {}) };
-        const r = await fetch(payUrl, { method: 'POST', headers, body: JSON.stringify({ ...terms, ...(requestId ? { requestId } : {}) }) });
+        // The passcode goes only to the shop's own origin, never through a redirect.
+        if (new URL(payUrl).origin !== new URL(base).origin) throw new Error('stack: the pay URL is not on the shop\'s origin');
+        const r = await fetch(payUrl, { method: 'POST', redirect: 'error', headers, body: JSON.stringify({ ...terms, ...(requestId ? { requestId } : {}) }) });
         return { status: r.status, headers: Object.fromEntries(r.headers), body: await r.json().catch(() => null) };
       },
       orderStatus,

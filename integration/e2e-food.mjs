@@ -128,12 +128,18 @@ const assertions = [
 // 7. The partial refund (E), as the good shop's merchant.
 if (r.status === 'paid' && r.orderId && r.chosenShop === good.ensName) {
   const shopKey = cast.shops.find((s) => `${s.label}.${config.root.ens}` === good.ensName).key;
-  const refund = await stack.merchant.refund(shopKey, r.orderId, story.order.refundMicro);
-  say(`refund ${story.order.refundMicro} micro: ${whitechain.explorerTx(refund.hash)} (${refund.status})`);
-  events = await settle();
-  const afterRefund = await tallies(mcp, { good: good.ensName, payer: buyer.ensName });
-  const refundTrail = await trail(mcp, r.orderId);
-  assertions.push(assertRefund({ graph: { before: afterPay.graph, after: afterRefund }, trail: refundTrail, refundMicro: story.order.refundMicro }));
+  // A refund that cannot go out fails E; the run file is still written (a real payment happened).
+  const refund = await stack.merchant.refund(shopKey, r.orderId, story.order.refundMicro).catch((e) => ({ error: e.message }));
+  if (refund.error) {
+    say(`refund not sent: ${refund.error}`);
+    assertions.push({ id: 'E', pass: false, failed: [`refund not sent: ${refund.error}`] });
+  } else {
+    say(`refund ${story.order.refundMicro} micro: ${whitechain.explorerTx(refund.hash)} (${refund.status})`);
+    events = await settle();
+    const afterRefund = await tallies(mcp, { good: good.ensName, payer: buyer.ensName });
+    const refundTrail = await trail(mcp, r.orderId);
+    assertions.push(assertRefund({ graph: { before: afterPay.graph, after: afterRefund }, trail: refundTrail, refundMicro: story.order.refundMicro }));
+  }
 }
 stack.close();
 await mcp.close();
