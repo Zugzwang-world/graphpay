@@ -55,6 +55,7 @@ One line per PR: time (IST) · activity · result · PR link. Append under your 
 ## phones
 
 - 13:05 IST · phones · phase 1: the team's two phones on our site at `/live`, built from `frontend/` (#70, `8abe39a`) with their Vite, on live read-only data (agents, pass, Open flag, real orders with explorer links, the merchant stream) · https://github.com/Zugzwang-world/graphpay/pull/111
+- 13:50 IST · phones · public access (ADR-0069): the passcode check is a no-op behind the config's `site.publicAccess`; visitor guards on merchant refund and dispatch (the persona's orders only, 30 s per order) and pause and resume (20 s); reviewer: no blocking · PR link follows
 
 ## website
 
