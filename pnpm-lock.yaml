@@ -54,6 +54,9 @@ importers:
 
   apps/web:
     dependencies:
+      '@graphpay/agentpay':
+        specifier: workspace:*
+        version: link:../../packages/agentpay
       '@graphpay/city':
         specifier: workspace:*
         version: link:../../packages/city
