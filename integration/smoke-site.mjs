@@ -53,6 +53,10 @@ if (res.status !== 200) {
       } else if (event === 'trace') {
         out.events[d.type] = (out.events[d.type] ?? 0) + 1;
         if (d.type === 'guard') say(`guard ${d.guard} ${d.ok ? 'ok' : 'REFUSED'}: ${String(d.detail).slice(0, 140)}`);
+        if (d.type === 'agent.end') {
+          (out.agentEnds ??= []).push({ agent: d.agent, role: d.role, model: d.model ?? null, usageTokens: d.usageTokens ?? null, error: d.error ?? null, output: typeof d.output === 'string' ? d.output.slice(0, 600) : d.output ?? null });
+          say(`agent.end ${d.role} ${d.model ?? ''} ${d.error ? `error: ${String(d.error).slice(0, 200)}` : 'ok'}`);
+        }
       } else if (event === 'result') {
         out.result = { status: d.status, chosenShop: d.chosenShop, priceUsdt: d.priceUsdt, orderId: d.orderId, receipt: d.receipt ? { transaction: d.receipt.transaction, explorerUrl: d.receipt.explorerUrl, amountUsdt: d.receipt.amountUsdt } : null, refusals: d.refusals, error: d.error ?? null };
         say(`result: ${d.status}, ${d.chosenShop ?? 'no shop'}, ${d.receipt?.explorerUrl ?? 'no receipt'}`);
