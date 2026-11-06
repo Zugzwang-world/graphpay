@@ -105,6 +105,6 @@ One line per PR: time (IST) · activity · result · PR link. Append under your 
 - 16:20 IST · records · NOW: phase 2 live (#122, fd10734): Vitalik's ask on /live runs the real errand; the founder tests · https://github.com/Zugzwang-world/graphpay/pull/123
 - 16:40 IST · records · NOW: phase 2 paid from /live (4.80, 107 s), phase 3 live (#124); the payer resumed after a visitor's pause · https://github.com/Zugzwang-world/graphpay/pull/126
 - 16:58 IST · records · NOW: the integration is live, all four phases (the home page is the stage; the founder's test script); refund and re-order failing, with T5 and T1 · https://github.com/Zugzwang-world/graphpay/pull/130
-- 17:46 IST · records · NOW: the merchant refund and the re-order work live after #129 and #131; every stage button has worked · coord/now-1746
+- 17:46 IST · records · NOW: the merchant refund and the re-order work live after #129 and #131; every stage button has worked · https://github.com/Zugzwang-world/graphpay/pull/134
 
 ## submission
