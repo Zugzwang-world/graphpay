@@ -108,7 +108,8 @@ One line per PR: time (IST) · activity · result · PR link. Append under your 
 - 23:33 IST · records · NOW and TRACKER: the Mac charging, W7's README (#154), W1's new names on ENS (#158), W4's run-log metrics (#157) · https://github.com/Zugzwang-world/graphpay/pull/160
 - 23:45 IST · records · NOW and TRACKER after W3's coffee re-order, W4's low effort and W7's submission files; the mirror's pause explained; ADR-0067 amended and CLAUDE.md's model line to match #162 · https://github.com/Zugzwang-world/graphpay/pull/165
 - 23:52 IST · records · NOW and TRACKER: the mirror back (W5's restart, 23:43 IST), Join archived with its last prompt log and run record, W7's brief done, W2's and W3's PRs in flight · https://github.com/Zugzwang-world/graphpay/pull/171
-- 00:12 IST · records · NOW and TRACKER: W5's per-agent pause and self-healing (#172) replace the bridge loop; W3's subscriptions (#173); W6's arkiv-graph 1.0.0 (#174); the mirror held for W2's history · coord/night-records-5
+- 00:12 IST · records · NOW and TRACKER: W5's per-agent pause and self-healing (#172) replace the bridge loop; W3's subscriptions (#173); W6's arkiv-graph 1.0.0 (#174); the mirror held for W2's history · https://github.com/Zugzwang-world/graphpay/pull/176
+- 00:24 IST · records · NOW rewritten by stream (W1 kill live and flip cleared, W2 step 1 done, W3 limits live, W4 routine in code, W5 self-healing proven, W6 1.0.0 merged, W7 done); TRACKER to match · coord/night-records-6
 
 ## booth
 
@@ -137,6 +138,7 @@ One line per PR: time (IST) · activity · result · PR link. Append under your 
 
 - 23:35 IST · w1-identity · the new shop names filter-and-fold, idli-index and tawa-tangle on Sepolia, each with its three agents, on the old shops' wallets (30 txs; ENS acceptance reads 100 pass) · https://github.com/Zugzwang-world/graphpay/pull/158
 - 00:00 IST · w1-identity · the kill: POST /api/customer/kill-disposable (owner unregisters a ready spare, the watcher revokes, the next payment refused and recorded), the spare keeper and its workers hook; spare disposable-2 live and funded; spare keys 2–9 in Vercel · https://github.com/Zugzwang-world/graphpay/pull/175
+- 00:20 IST · w1-identity · the kill proven on production: disposable-2 unregistered by the site (00:16), its pass revoked by the watcher 9 s later, its next payment refused ENS_EXPIRED_OR_REVOKED and recorded on Arkiv, fresh spare disposable-3 ready (00:19); evidence kill-disposable-2.json · https://github.com/Zugzwang-world/graphpay/pull/183
 - 00:26 IST · w1-identity · the story flip: the shops go by filter-and-fold, idli-index and tawa-tangle on ENS, category south-indian (labels and category only; the phones' Nov 5 recording replayed under the new names) · https://github.com/Zugzwang-world/graphpay/pull/189
 
 ## w4-agents
