@@ -117,11 +117,11 @@ Updated 01:25 IST, Sat 7 Nov (W3 Payments, session `local_b65be40a-eb20-4d86-b78
 
 ## w4-agents
 
-Updated 00:27 IST, Sat 7 Nov (W4 Agents, session `local_3404db4e-486c-4f86-8b3a-67ceb53ef025`).
-- **Done:** item 1, the relative deadline ([#153](https://github.com/Zugzwang-world/graphpay/pull/153)); item 2, every model call measured ([#157](https://github.com/Zugzwang-world/graphpay/pull/157)); item 3, the routine steps in code ([#162](https://github.com/Zugzwang-world/graphpay/pull/162), [#182](https://github.com/Zugzwang-world/graphpay/pull/182), live since 00:22 IST).
-- **Live on the site, 00:24 IST:** paid 4.80 in 55.5 s with 3 model calls, 2,852 tokens and $0.0269. The baseline at 23:30 IST: 91.4 s, 19 calls, 33,287 tokens, $0.1455.
-- **Holding** live errands at W1's request until W5 restarts the workers on the new shop names; then three live errands in a row (item 4).
-- **Where the rest goes:** the models take 13 s; the 402 step (13.6 s) and the settlement (13.3 s) are outside the agents (told the Coordinator).
+Updated 01:20 IST, Sat 7 Nov (W4 Agents, session `local_3404db4e-486c-4f86-8b3a-67ceb53ef025`).
+- **The brief is done.** Errands work at any hour (the request says "delivered within an hour", [#153](https://github.com/Zugzwang-world/graphpay/pull/153)); every model call is measured ([#157](https://github.com/Zugzwang-world/graphpay/pull/157)); the routine steps run in code, so an errand makes 3 model calls instead of 19 ([#162](https://github.com/Zugzwang-world/graphpay/pull/162), [#182](https://github.com/Zugzwang-world/graphpay/pull/182)).
+- **Three live errands in a row paid** (01:16 to 01:18 IST, Filter & Fold under its new name): 54.2, 45.4 and 42.6 s, $0.025 to $0.029 each.
+- **Before and after:** 91.4 s, 19 calls, 33,287 tokens and $0.1455 (23:30 IST) against 47.4 s, 3 calls, about 2,950 tokens and $0.027 on average: 48% faster, 81% cheaper.
+- **Running:** nothing. No more live errands from W4 unless asked; W5 runs the full acceptance.
 - **Blockers:** none.
 
 ## w5-ops
