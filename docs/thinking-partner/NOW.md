@@ -80,10 +80,12 @@ Started 23:02 IST, Fri 6 Nov (session `local_da212093-3d02-4768-9314-ab7be179eb8
 
 ## w3-payments
 
-Updated 23:50 IST, Fri 6 Nov (W3 Payments, session `local_b65be40a-eb20-4d86-b784-7d2aa1a93527`).
-- **Re-order (item 1, PR #155):** "Another coffee" re-orders the filter coffee for 0.80 (ADR-0073), from `order.reorder` in the story. One live re-order proves it after the deploy.
-- **Next:** subscribe and cancel (item 2), the refund decline (item 3), then the limits (item 4).
-- Blockers: none.
+Updated 23:45 IST, Fri 6 Nov (W3 Payments, session `local_b65be40a-eb20-4d86-b784-7d2aa1a93527`).
+- **Re-order (item 1, done, #155):** "Another coffee" paid 0.80 live at 23:34 IST ([0xf1d7…2b4a](https://explorer.testnet.whitechain.io/tx/0xf1d7cb5654de6cc09ede0a404818a009f7429d9d149e3e564222d4a4d3ae2b4a)). Its Arkiv edges wait for the mirror, stalled since about 23:29 IST (W5 told).
+- **Subscribe and cancel (item 2):** in review; proven end to end on an anvil fork.
+- **Refund decline (item 3):** in its PR.
+- **Next:** the limits (item 4).
+- **Blocker:** the mirror stall (W5). It holds every Arkiv record that comes from the chain.
 
 ## w4-agents
 
