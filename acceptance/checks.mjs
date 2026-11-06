@@ -70,7 +70,7 @@ export function checks(root, env) {
       const firstEnd = Math.min(...['scout', 'analyst'].map((role) => idx('agent.end', role)).filter((i) => i >= 0));
       const m = r.run.agents.result.mandate;
       const request = ev.find((e) => e.type === 'message')?.text;
-      const pass = request === story.order.request && m?.budgetUsdt === (story.order.budgetMicro / 1e6).toFixed(6) && /T20:00:00/.test(m?.deadlineIso ?? '') && idx('agent.start', 'scout') < firstEnd && idx('agent.start', 'analyst') < firstEnd;
+      const pass = request === story.order.request && m?.budgetUsdt === (story.order.budgetMicro / 1e6).toFixed(6) && (m?.deadlineIso ?? '').includes(`T${story.order.deadlineLocal}:00`) && idx('agent.start', 'scout') < firstEnd && idx('agent.start', 'analyst') < firstEnd;
       return { pass, what: "the human's request", measured: { request, mandate: m, scoutStart: idx('agent.start', 'scout'), analystStart: idx('agent.start', 'analyst'), firstEnd }, expected: 'the exact request; budget 6.000000, deadline 20:00 local; scout and analyst both start before either ends', evidence: { runFile: r.f.slice(root.length + 1) } };
     },
     E2: fromRun('E2', 'the agents choose the good shop, never the trap', 'A', 'explainId; good > runner-up, trap excluded; no trap order or payment; trap balance unchanged'),
