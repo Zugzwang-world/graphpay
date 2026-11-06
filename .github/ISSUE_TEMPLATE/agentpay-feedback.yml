@@ -1,0 +1,30 @@
+name: "agentpay feedback"
+description: Tell us what worked, what broke, or what you need from @graphpay_ethglobal/agentpay.
+title: "[agentpay] "
+labels: ["agentpay", "feedback"]
+body:
+  - type: input
+    id: version
+    attributes:
+      label: Package version
+      placeholder: "0.1.0"
+    validations:
+      required: true
+  - type: dropdown
+    id: kind
+    attributes:
+      label: Kind of feedback
+      options: ["Bug", "Missing feature", "Quickstart or docs", "Other"]
+    validations:
+      required: true
+  - type: textarea
+    id: details
+    attributes:
+      label: What happened, and what did you expect?
+      description: Steps, code, the transaction hash or the error message. Never paste private keys, relayer keys or keyed RPC URLs. V1 is testnet only (Whitechain Sepolia, chain 1874).
+    validations:
+      required: true
+  - type: input
+    id: environment
+    attributes:
+      label: Node version, buyer or merchant side, and your own relayer or facilitator
