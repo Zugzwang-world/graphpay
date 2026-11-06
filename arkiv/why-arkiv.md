@@ -17,7 +17,7 @@ GraphPay's agents ask a money graph before they pay: has this shop delivered, re
 
 ## 3. Receipts that cannot be edited
 
-Every edge, payments included, is created readonly (ADR-0034): a simulated patch of a receipt's `amount_micro` reverts while a tally patch passes (acceptance D9). The owner could still delete or extend a readonly row (the SDK's own types say so), so we say "cannot be edited", not "permanent".
+Every edge, payments included, is created readonly (ADR-0034): a simulated patch of a receipt's `amount_micro` reverts while a tally patch passes (acceptance D9). The owner could still delete or extend a readonly row (the SDK's own types say so), so we say "cannot be edited", not "cannot be removed".
 
 ## 4. Expiry as policy
 
