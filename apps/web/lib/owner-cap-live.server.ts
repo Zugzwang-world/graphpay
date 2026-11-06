@@ -7,6 +7,7 @@ import { activeCast, config, resolveRpc } from '@graphpay/config';
 import { checkoutAbi } from '@graphpay/contracts';
 import { KEYS, createEnsGate, createOwnerActions, createTxRunner, ensChain, ensPublicClient, ownerRoleOf, type OwnerSender } from '@graphpay/ens';
 import { recordEdge } from '@graphpay/money-graph';
+import { inOwnerQueue } from './owner-actions.server.ts';
 import { createPublicClient, createWalletClient, http, namehash, toHex, type Hex } from 'viem';
 import { privateKeyToAccount } from 'viem/accounts';
 import { syncConnection, whitechain } from './payments.server.ts';
@@ -72,13 +73,16 @@ export function liveOwnerCapDeps(): OwnerCapDeps {
       if (check.status === 'UNKNOWN' || !/^\d{1,19}$/.test(value)) throw new Error('the ENS cap is unreadable');
       return BigInt(value);
     },
-    setEnsCap: async (capMicro) => {
-      const actions = await ownerActions();
-      if (!actions.setCap) throw new Error('@graphpay/ens has no setCap');
-      const result = await actions.setCap(model.payer.ens, capMicro);
-      (await ensGate()).invalidate(model.payer.ens);
-      return { changed: result.changed, sepoliaTx: result.hash ?? null };
-    },
+    // In the one owner-key queue of this instance (pause, resume, the heal cron and the kill use it too),
+    // so a cap change never races them for the owner's nonce.
+    setEnsCap: (capMicro) =>
+      inOwnerQueue(async () => {
+        const actions = await ownerActions();
+        if (!actions.setCap) throw new Error('@graphpay/ens has no setCap');
+        const result = await actions.setCap(model.payer.ens, capMicro);
+        (await ensGate()).invalidate(model.payer.ens);
+        return { changed: result.changed, sepoliaTx: result.hash ?? null };
+      }),
     policy: async () => {
       const w = await whitechain();
       const policy = (await w.publicClient.readContract({ address: checkoutAddress() as Hex, abi: checkoutAbi, functionName: 'policies', args: [node] })) as { dailyCapMicro: bigint; epoch: number | bigint };
