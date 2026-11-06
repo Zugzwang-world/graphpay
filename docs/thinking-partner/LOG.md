@@ -19,7 +19,8 @@ One line per PR: time (IST) · activity · result · PR link. Append under your 
 - 05:05 IST · payments · M4 hosted routes: shop, facilitator, recorder, renewal cron; vercel-env (14 Sensitive values set) and pay:public; two reviews fixed · https://github.com/Zugzwang-world/graphpay/pull/58
 - 05:05 IST · payments · merged: M4 part 1, the hosted routes · https://github.com/Zugzwang-world/graphpay/pull/58
 - 05:11 IST · payments · M4 live: pay:public settled 0.40 through the public URL, C6 401s, recorder edge, cron renewal (M4 done) · https://github.com/Zugzwang-world/graphpay/pull/62
-- 09:47 IST · payments · F3: relayer floor enforced on the production build (refused as relayer_floor, nothing sent) · pay/f3
+- 09:47 IST · payments · F3: relayer floor enforced on the production build (refused as relayer_floor, nothing sent) · https://github.com/Zugzwang-world/graphpay/pull/78
+- 10:56 IST · payments · the hosted shop retries an uncertain W_DIRECTORY quote write (nonce clashes across instances), within 45 s; reviewer: ship · pay/quote-retry
 
 ## identity
 - 02:00 IST · identity · M5: the ens package, ABIs from Sourcify, run script and checkers; namespace provisioned on real Sepolia (60 tx, 72.7M gas); B1/B4/B5/B8/B9a reads pass · [PR #18](https://github.com/Zugzwang-world/graphpay/pull/18)
