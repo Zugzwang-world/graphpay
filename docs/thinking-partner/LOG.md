@@ -140,4 +140,5 @@ One line per PR: time (IST) · activity · result · PR link. Append under your 
 
 ## w3-payments
 
-- 23:40 IST · w3-payments · in PR: fix(pay): "Another coffee" re-orders the filter coffee for 0.80 (order.reorder.sku) · https://github.com/Zugzwang-world/graphpay/pull/155
+- 23:34 IST · w3-payments · merged: fix(pay): "Another coffee" re-orders the filter coffee for 0.80; paid live, tx 0xf1d7…2b4a · https://github.com/Zugzwang-world/graphpay/pull/155
+- 23:55 IST · w3-payments · in PR: feat(pay): the limits live: over the pass refused and recorded; the agent's own cap raise refused, with its revert reason

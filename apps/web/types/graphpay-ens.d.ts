@@ -30,4 +30,11 @@ declare module '@graphpay/ens' {
     invalidate(name?: string): void;
   }
   export function createEnsGate(options: { client: PublicClient; expectedEpoch?: unknown; policyCapMicro?: unknown; spentToday?: unknown }): EnsGate;
+  // The record keys from the config (graphpay.cap_micro, graphpay.status, ...).
+  export const KEYS: Readonly<Record<'acceptsText' | 'agentContext' | 'agentEndpointMcp' | 'agentEndpointWeb' | 'status' | 'capMicro' | 'principal' | 'kind' | 'synthetic', string>>;
+  export function dnsEncode(name: string): `0x${string}`;
+  // The PermissionedResolver ABI (generated from Sourcify), with its EAC errors.
+  export const permissionedResolverAbi: import('viem').Abi;
+  // The registry walk the gate uses: the leaf's resolver and state, or the reason it fails.
+  export function walkName(client: PublicClient, name: string): Promise<({ ok: true; name: string; node: `0x${string}`; resolver: `0x${string}`; epoch: number; expiry: bigint } & Record<string, unknown>) | { ok: false; reason: string; detail?: string }>;
 }
