@@ -1,6 +1,6 @@
 # Feedback
 
-This is 0.1.x, published during a hackathon. We would like it to be useful to you, and we learn most from people who try it.
+Version 1.0.0 was released at ETHGlobal Mumbai (5 to 7 November 2026). We would like it to be useful to you, and we learn most from people who try it.
 
 ## How to tell us
 
@@ -24,4 +24,4 @@ What people asked, and what we did about it. Newest last.
 
 | date | who | what they asked | outcome |
 |---|---|---|---|
-| | | | |
+| 2026-11-06 | (the event) | no issue was opened while the packages were at 0.1.x | 1.0.0: our own review before the release found five bugs (paging past rows that do not fit the schema, row lifetimes, split writes, refused batches waiting out the recovery window, the predicate budget), all fixed; every export documented and typed; the quickstart safe to run twice on a node |
