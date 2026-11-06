@@ -45,10 +45,14 @@ export interface Pass {
 // moved; the order id is returned so the attempt can be looked up.
 export class AttemptUnanswered extends Error {
   orderId: string;
-  constructor(orderId: string) {
-    super('the facilitator did not answer');
+  reason: string | null;
+  signed: boolean;
+  constructor(orderId: string, reason: string | null, signed: boolean) {
+    super('the attempt reached no decision');
     this.name = 'AttemptUnanswered';
     this.orderId = orderId;
+    this.reason = reason;
+    this.signed = signed;
   }
 }
 
@@ -59,19 +63,30 @@ export interface OverPassQuote {
   item: string;
 }
 
-// What our facilitator's verify step answered for the signed attempt. 'valid' means the pass did not
-// hold: nothing is sent all the same (verify never sends). 'unknown' is no answer at all.
+// What our facilitator's verify step answered for the signed attempt. 'refused' is a decision on the
+// payer (its pass or its standing); 'valid' means the pass did not hold: nothing is sent all the same
+// (verify never sends); 'unknown' is no decision: no answer, a failed read of the facilitator's own,
+// or a step before verify that failed. `signed` says whether a signature was made at all.
 export interface AttemptOutcome {
   status: 'refused' | 'valid' | 'unknown';
   reason?: string;
+  signed?: boolean;
 }
+
+// The facilitator's refusals that are decisions on the payer; anything else is no verdict.
+export const DECISIONS = new Set(['CAP_EXCEEDED', 'SPEND_CAP', 'insufficient_balance', 'ENS_PAUSED', 'ENS_EXPIRED_OR_REVOKED', 'AGENT_REVOKED', 'AGENT_EXPIRED']);
+// The whole attempt (quote, 402, payee, signature, verify, record) runs inside this, well within the
+// route's 120 s; no signature is made with less than SIGN_MARGIN_MS of it left.
+export const ATTEMPT_BUDGET_MS = 95_000;
+export const SIGN_MARGIN_MS = 35_000;
 
 export interface OverPassDeps {
   pass(): Promise<Pass>;
   quote(): Promise<OverPassQuote>;
-  attempt(quote: OverPassQuote): Promise<AttemptOutcome>;
-  // The refusal's record on Arkiv, once the recorder has written it (null if not seen in time).
-  record(orderId: string): Promise<{ ref: string; entityKey: string | null } | null>;
+  // `until`: the attempt's deadline (ms); no step may run past it, and none signs too close to it.
+  attempt(quote: OverPassQuote, until: number): Promise<AttemptOutcome>;
+  // The refusal's record on Arkiv, once the recorder has written it (null if not seen by `until`).
+  record(orderId: string, until: number): Promise<{ ref: string; entityKey: string | null } | null>;
   now(): number;
 }
 
@@ -125,6 +140,7 @@ async function shared<T extends object>(kind: string, now: number, run: () => Pr
 
 export async function overPass(deps: OverPassDeps): Promise<OverPassResult> {
   return shared('over-pass', deps.now(), async (): Promise<OverPassResult> => {
+    const until = deps.now() + ATTEMPT_BUDGET_MS;
     const plan = overPassPlan();
     const pass = await deps.pass();
     const passMicro = pass.ensCapMicro < pass.policyCapMicro ? pass.ensCapMicro : pass.policyCapMicro;
@@ -135,8 +151,9 @@ export async function overPass(deps: OverPassDeps): Promise<OverPassResult> {
     if (plan.priceMicro <= pass.balanceMicro) throw new LimitRefusal('BALANCE_COVERS');
     const quote = await deps.quote();
     if (quote.priceMicro !== String(plan.priceMicro) || quote.quantity !== plan.quantity || quote.item !== plan.sku) throw new LimitRefusal('QUOTE_CHANGED');
-    const outcome = await deps.attempt(quote);
-    if (outcome.status === 'unknown') throw new AttemptUnanswered(quote.orderId);
+    const outcome = await deps.attempt(quote, until);
+    // Only a decision on the payer is a refusal; a failed read or a failed step is no verdict.
+    if (outcome.status === 'unknown' || (outcome.status === 'refused' && !DECISIONS.has(outcome.reason ?? ''))) throw new AttemptUnanswered(quote.orderId, outcome.reason ?? null, outcome.signed ?? outcome.status === 'refused');
     if (outcome.status === 'valid') console.error('over-pass: the facilitator would have accepted the attempt; nothing was sent');
     const refused = outcome.status === 'refused';
     return {
@@ -151,7 +168,7 @@ export async function overPass(deps: OverPassDeps): Promise<OverPassResult> {
       spentTodayMicro: String(pass.spentMicro),
       leftMicro: String(left),
       orderId: quote.orderId,
-      arkiv: refused ? await deps.record(quote.orderId) : null,
+      arkiv: refused ? await deps.record(quote.orderId, until) : null,
     };
   });
 }
