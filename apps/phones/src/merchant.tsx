@@ -11,7 +11,7 @@ import { foldAll } from '../../web/lib/stage/errand.ts';
 import { dispatchLines, merchantErrandLines, pauseLines, refundLines, type Line as LineData } from '../../web/lib/stage/lines.ts';
 import { stepIndex, type BeatKey } from '../../web/lib/stage/scenes.ts';
 import { microUsdt, orderNumber, usdt } from '../../web/lib/stage/format.ts';
-import { getJson, getTextRetry, postJson, Refusal, type HealState } from './api';
+import { getJson, getTextRetry, plainWords, postJson, Refusal, type HealState } from './api';
 import { cast, links, networks, order, productOf, timeZone } from './cast';
 import { foldOrders, rowFromEdge, rowKey, rowsFromCsv, type LedgerRow } from './orders';
 import { embedded, postEvent, useNow, useStage } from './stage-link';
@@ -84,6 +84,8 @@ interface RefundAsk {
   tx: string | null;
   decisionAt: number | null;
   error: string | null;
+  // True when the route answered ALREADY_REFUNDED: refunded before, nothing more sent.
+  already?: boolean;
 }
 
 // Today in the city's zone, as a date string, for the earnings.
@@ -341,7 +343,8 @@ export function MerchantPhone() {
           // Refunded before (an earlier answer that was lost, another tap): the order is refunded
           // and nothing more was sent, so this phone keeps its once-only mark and shows it done.
           if (error instanceof Refusal && error.code === 'ALREADY_REFUNDED') {
-            setAsk((a) => (mine(a) ? { ...a!, phase: 'refunded', tx: null, decisionAt: Date.now() } : a));
+            setAsk((a) => (mine(a) ? { ...a!, phase: 'refunded', tx: null, decisionAt: Date.now(), already: true } : a));
+            postEvent('refund', [], { orderId, amountMicro, transaction: null });
             return;
           }
           // Refused before anything was signed: this phone may try again later.
@@ -468,7 +471,7 @@ export function MerchantPhone() {
               </Line>
             ) : null}
             {ask?.phase === 'refunded' ? (
-              <Line role="storefront" text={refundLines.shopRefunded(cast, ask.amountMicro)} tone="ok">
+              <Line role="storefront" text={ask.already ? plainWords('ALREADY_REFUNDED', 409) : refundLines.shopRefunded(cast, ask.amountMicro)} tone="ok">
                 <div className="flex flex-wrap gap-2">{ask.tx ? <ProofLink href={links.whitechainTx(ask.tx)} network={networks.whitechain} at={ask.decisionAt} now={now} /> : null}</div>
               </Line>
             ) : null}
