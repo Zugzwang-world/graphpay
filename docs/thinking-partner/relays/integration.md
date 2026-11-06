@@ -1,6 +1,6 @@
 # Relay: integration (Join)
 
-Updated 05:41 IST, Fri 6 Nov.
+Updated 09:47 IST, Fri 6 Nov.
 
 ## In plain words
 
@@ -21,14 +21,16 @@ Five more checks from the other tracks are now wired into the report from their 
 
 - **No secrets are in the repo (F1).** The secret scan passes on the tree and on the history of every branch (313 commits), no env file is tracked, and all 14 secret-shaped variables on Vercel's production environment are hidden.
 
-**The acceptance report: 43 pass, 0 fail, 1 blocked (the big city waits for the locked story), 4 not run.**
+- **Quotes expire as designed (D10).** One 402 step with a request id at the hosted shop (nothing signed) wrote the acceptance agent's quote. On Arkiv it is owned by the directory writer, lives 450 blocks (15 minutes at 2 s a block) and its `valid_until` is 596 s after creation. Parts (a) and (b), the agent refusing a missing or expired quote and re-quoting once, pass on the agents' own code in process.
+
+- **The relayer's safety floor holds (F3, T1's run).** With the floor raised above the relayer's balance, a signed payment was refused before anything was sent, naming the floor; T1 ran the production build locally with the hosted env rather than on a preview (a preview would need the relayer key).
+
+**The acceptance report: 45 pass, 0 fail, 1 blocked (the big city waits for the locked story), 2 not run.** M13 is done; the two left are T2's (B7, B9).
 
 ## What is not done, and whose it is
 
 - **B7:** T2's fork tests cover "renew keeps the epoch" but not a new registration after a lapse or an unregister.
-- **D10(c):** the quote's expiry on Arkiv. Parts (a) and (b) pass on the agents' own code, in process and without signing.
 - **B9:** T2's ENS script still prints no B9 rows (its payee comparison waited for a settled payment; there are several now).
-- **F3:** the relayer's safety floor needs a preview deployment with the floor raised. That is T1's.
 
 ## Technical
 

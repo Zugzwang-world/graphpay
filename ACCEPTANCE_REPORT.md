@@ -1,8 +1,8 @@
 # Acceptance report
 
-Written by `pnpm acceptance` at 2026-11-06T00:14:29.305Z. Checks and pass criteria: `planning/ACCEPTANCE_TESTS.md` and `docs/plan/ACCEPTANCE_ADDITIONS.md`. Only D7 may be `blocked` (C7 and E3 no longer wait on supply, ADR-0054); a check without a result is `not run`, never `pass`.
+Written by `pnpm acceptance` at 2026-11-06T04:21:08.394Z. Checks and pass criteria: `planning/ACCEPTANCE_TESTS.md` and `docs/plan/ACCEPTANCE_ADDITIONS.md`. Only D7 may be `blocked` (C7 and E3 no longer wait on supply, ADR-0054); a check without a result is `not run`, never `pass`.
 
-**43 pass, 0 fail, 1 blocked, 4 not run** (of 48).
+**45 pass, 0 fail, 1 blocked, 2 not run** (of 48).
 
 | id | check | status | note |
 |---|---|---|---|
@@ -41,7 +41,7 @@ Written by `pnpm acceptance` at 2026-11-06T00:14:29.305Z. Checks and pass criter
 | D7 | Benchmark at size M, if seeded | blocked | waiting for the locked story (the M city is seeded only after the founder locks it) |
 | D8 | The geo query returns only shops inside the box, and only from our writers | pass |  |
 | D9 | A receipt cannot be edited | pass |  |
-| D10 | An expired or missing quote is refused and the agent re-quotes | not run | not run: (c) the quote entity's expiry on Arkiv needs a live 402 with requestId (passcode; W_DIRECTORY writes a quote) |
+| D10 | An expired or missing quote is refused and the agent re-quotes | pass |  |
 | D15 | The mirror resumes after a sleep or a network drop (ADR-0056) | pass |  |
 | E1 | Vitalik's request | pass |  |
 | E2 | The agents choose Kesar Kingdom, never the trap | pass |  |
@@ -53,7 +53,7 @@ Written by `pnpm acceptance` at 2026-11-06T00:14:29.305Z. Checks and pass criter
 | E8 | Every counting errand records its time and cost (ADR-0048) | pass |  |
 | F1 | No secrets are in the repo | pass |  |
 | F2 | Spending endpoints are passcode-gated | pass |  |
-| F3 | The relayer's safety floor is enforced | not run | no runner yet |
+| F3 | The relayer's safety floor is enforced | pass |  |
 
 ## A1: CI is green (at M0 the `contracts` job runs a placeholder Foundry project)
 
@@ -1299,14 +1299,14 @@ Status: **pass**.
 
 ## D10: An expired or missing quote is refused and the agent re-quotes
 
-Status: **not run** (not run: (c) the quote entity's expiry on Arkiv needs a live 402 with requestId (passcode; W_DIRECTORY writes a quote)).
+Status: **pass**.
 
-### D10 (2026-11-05T23:52:24.196Z)
+### D10 (2026-11-06T04:21:08.387Z)
 
 - What: an expired or missing quote is refused and the agent re-quotes
-- Pass: null
+- Pass: true
 - Expected: (a) QUOTE_MISSING, one re-quote that passes; (b) QUOTE_EXPIRED, one re-quote with a new entity key that passes; no signature before the passing check; (c) owner W_DIRECTORY, expiry 15 min after creation (±2 blocks), valid_until 10 min after
-- Evidence: `{"how":"in process on the mock world (packages/agents/mocks): createPayer → presignCheck with fake 402s, quote entities and signer; no network, no model, no real signature; the one mock signature follows the passing re-quote","tests":"packages/agents/test/errand.test.mjs (D10 a, D10 b)"}`
+- Evidence: `{"how":"(a), (b) in process on the mock world (packages/agents/mocks): createPayer → presignCheck with fake 402s, quote entities and signer; no network, no model, no real signature; the one mock signature follows the passing re-quote","tests":"packages/agents/test/errand.test.mjs (D10 a, D10 b)"}`
 
 ```json
 {
@@ -1330,7 +1330,15 @@ Status: **not run** (not run: (c) the quote entity's expiry on Arkiv needs a liv
       "QUOTE_EXPIRED: re-quoting once (new quote, new 402)"
     ]
   },
-  "c": null
+  "c": {
+    "quoteKey": "0x1fced134518db48adb16d628520187f3fe1beb6d43317aa56bd23034d3658dc4",
+    "owner": "0x146002b43A9Fb8EB963699e77Ed18579dC30A6e4",
+    "lifeBlocks": 450,
+    "wantBlocks": 450,
+    "blockSeconds": 2,
+    "validAfterSeconds": 596,
+    "file": "docs/sessions/integration/hosted/quote-2026-11-06T04-17-21-900Z.json"
+  }
 }
 ```
 
@@ -1741,6 +1749,38 @@ Status: **pass**.
     "before": 11,
     "after": 11
   }
+}
+```
+
+## F3: The relayer's safety floor is enforced
+
+Status: **pass**.
+
+### F3 (2026-11-06T04:19:22.383Z)
+
+- What: the relayer's safety floor is enforced
+- Pass: true
+- Expected: the payment refused before sending, naming the floor; no transaction (relayer nonce unchanged); health shows the floor and the balance
+- Evidence: `{"file":"docs/sessions/payments/f3.json","by":"T1, a local production build with the hosted env (not a preview; the record says why)","at":"2026-11-06T04:16:55.317Z"}`
+
+```json
+{
+  "reason": "relayer_floor",
+  "transaction": "",
+  "relayerNonce": {
+    "before": 13,
+    "after": 13
+  },
+  "floorWbt": "1001",
+  "balanceWei": "794659557124942758",
+  "checks": [
+    "ok the local production build answers /api/facilitator/health",
+    "ok health shows the raised floor",
+    "ok health shows the balance below it",
+    "ok the local shop answers 402 (no facilitator call yet)",
+    "ok settle is refused before sending, naming the floor",
+    "ok no transaction: the relayer nonce is unchanged"
+  ]
 }
 ```
 
