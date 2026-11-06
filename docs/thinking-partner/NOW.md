@@ -1,27 +1,42 @@
 # NOW
 
-Updated 10:40 IST, Fri 6 Nov (Coordinator)
+Updated 11:15 IST, Fri 6 Nov (Coordinator)
 
 ## Summary (Coordinator only)
 
-Updated 10:40 IST, Fri 6 Nov. **A fresh Coordinator is taking over.** Its handover is `docs/sessions/records/resume.md`.
+Updated 11:15 IST, Fri 6 Nov. **A fresh Coordinator took over at 11:00 IST** (the session "GraphPay Coordinator takeover"), and the first one has retired. Every session now reports to the new one. Its resume is `docs/sessions/records/resume.md`.
 
-**Standing rule (ADR-0066): no target times.** Every task starts the moment it's given, runs as fast as it can, and is reported when it's done. Two deadlines are fixed: the submission, Sat 09:00 IST, and the presentation, Sat 09:30 IST. Everything else is an event.
+**Standing rule (ADR-0066): no target times.** Every task starts the moment it's given and is reported when it's done. Two deadlines are fixed: the submission, Sat 09:00 IST, and the presentation, Sat 09:30 IST.
 
-- **The core works on the real testnets.** Acceptance: 45 pass, 0 fail, 1 blocked, 2 not run (09:51 run). D7, the large city, is the blocked one; B7 and B9 have merged since (#83, #84) and go into the next run.
-- **Both SDKs are on npm** (ADR-0063): `@graphpay_ethglobal/arkiv-graph` 0.1.0 and `@graphpay_ethglobal/agentpay` 0.1.0. Each was installed from the registry into an empty folder, and its quickstart passed. The links are in the README and `FACTS.md`.
-  - Developers at the venue can try them; their feedback goes to GitHub issues labelled `arkiv-graph` or `agentpay` plus `feedback`.
+- **New usage rule** (the founder, 11:00 IST; ADR-0062 amended):
+  - At 95% of the weekly plan, no session starts a new real payment, merge or publish, and every session writes its resume.
+  - At 97%, every session pauses at a clean checkpoint.
+  - Usage is 87%. The weekly window resets at 21:30 IST. Every session has been told.
+- **The core works on the real testnets.** Acceptance: 45 pass, 0 fail, 1 blocked (D7, the large city), 2 not run (09:51 run). B7 and B9 have merged since (#83, #84).
+- **The Arkiv writer clash:**
+  - Three writers share the directory wallet W_DIRECTORY from separate server instances: the shop's quotes, the agents' presence and hand-off rows, and the Open toggle.
+  - A live errand's quote write failed at 10:49 IST (the 10:47 run), so that run paid nothing.
+  - Three fixes are merged and live on production:
+    - the shop retries an uncertain quote write (#96);
+    - the writer never takes another instance's transaction for its own (#97);
+    - the runner holds its writes around the quote step (#93).
+  - **If one more quote, presence or Open write fails in a live errand,** each writer gets its own Arkiv wallet at once (the founder approved).
+- **The agents on Kimi** (ADR-0067):
+  - After T4's fix (#92), every preset pays the good shop in mock runs. Per errand: testing 127–155 s, video 56–70 s, live 58–65 s, at $0.06–0.14.
+  - No production purchase yet. Join re-runs the live runner now that the fixes are deployed.
+- **npm:** both SDKs are on npm as 0.1.0.
+  - arkiv-graph 0.1.1 (the writer fix) is merged and checked, and needs only the founder's approval link.
+  - agentpay 0.1.1 (T6) drops three test-only dependencies.
   - Versions freeze from submission until judging ends.
-- **The agents run on Kimi** (ADR-0067):
-  - `KIMI_API_KEY` is stored, on the Mac and on Vercel Production, and the secret scan recognises Kimi keys (#89).
-  - T4 is calibrating: three errands per preset, with seconds and cost per errand.
-- **The website** (ADR-0068):
-  - The founder's team's site (#70) needs fixes (a)–(e) before it merges. T5 reviews them and then integrates the site.
-  - Join's live errand runner (#88) is merged and live on production. It runs on the server, with every guardrail, on Kimi.
-  - **On Kimi the agents don't complete a purchase yet:** the concierge stops at a plan, so nothing is signed or paid. T4 is fixing this with Join's repro.
-- **Next on the story lock:** the moment the story locks, the demo cast is set up and the large city starts seeding.
-- **Plan usage:** 86%. Every session pauses at 92% (ADR-0062); the weekly window resets at 21:30 IST.
-- **Open founder items** (`OPEN.md`): lock the story; top up Kimi; the team's fixes on #70; start the Submission session; the disclosure, if not sent.
+- **The website** (ADR-0068): T5 builds no new screens. It reviews the team's site (#70) the moment the team pushes fixes (a)–(e).
+- **On the story lock:** the demo cast is set up and the large city starts seeding.
+- **Open founder items** (`OPEN.md`):
+  - lock the story;
+  - the npm approval for 0.1.1;
+  - the team's fixes on #70;
+  - the Submission session;
+  - the disclosure, if not sent;
+  - this session's effort.
 
 ## foundation
 
@@ -90,10 +105,16 @@ Updated 11:09 IST, Fri 6 Nov (T6 AgentPay, Sonnet 5.5). **0.1.0 merged (PR 80); 
 
 ## records
 
-Updated 06:55 IST. **The 06:45 relay is written.** LOG.md is rolled up, and the closed M0 tables in OPEN.md are condensed: the folder was at 24,459 words, over the 20,000 guideline.
-- Since 05:15: M4 done (#58, #62); M13's hosted run and C4(a) (#66, #67: 42 pass); M16 proved (#63); DISPOSABLE_1 funded and the kill check passed (#59); T5's kit payment.
-- Waiting: T5 is idle and can't be woken until the founder types (the app's message cap). Join is idle after F1. The others wait for the story.
-- Next: the 08:30 morning relay; the story brief; the graphpay-store Vercel project.
+Updated 11:15 IST, Fri 6 Nov (the new Coordinator).
+- **Took over at 11:00 IST:** the 10-minute tick and the keep-awake hold are on. Every session has been told that it reports here and that the 95%/97% usage rule applies.
+- **Merged since:**
+  - #93's conflict (OPEN.md only) is resolved, and #93 merged at 11:07.
+  - T3's writer fix (#97) and the 0.1.1 bump (#98) are merged.
+  - ADR-0062 is amended with the new usage rule.
+- **Watching:** the W_DIRECTORY clash. One more failed live write and the three writers get their own wallets.
+- **Next:**
+  - publish arkiv-graph 0.1.1, then agentpay 0.1.1, each with the founder's approval link;
+  - the story lock.
 
 ## submission
 

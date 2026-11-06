@@ -16,4 +16,4 @@ Clock targets made sessions pace and wait. Event-driven work lets every task fin
 
 - ADR-0053's internal times are no longer targets: the "submit by 08:00", the 18:00 feature freeze and the rehearsal hours. The same goes for ADR-0049's "latest start 14:00", ADR-0063's "by 13:00", and the times in `docs/plan/MASTER_PLAN.md` §3 to §4 and the run files. ADR-0053's cut order still stands.
 - The Coordinator's ticks stay a polling cadence, not a target. The M14 records go out on events (a milestone merged, the publish, the story lock, the 92% pause), not every two hours.
-- The 92% pause rule (ADR-0062) is unchanged.
+- This ADR left the 92% pause rule (ADR-0062) unchanged. Since Fri 11:00 IST the lines are 95% and 97% (ADR-0062's amendment).

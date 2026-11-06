@@ -64,7 +64,7 @@ Short records, one file each (skill `adr`). Lab decisions are adopted from `plan
 | [ADR-0059](ADR-0059-non-paying-agents-publish-a-zero-cap-in-ens.md) | Non-paying agents publish a zero cap in ENS | accepted |
 | [ADR-0060](ADR-0060-hosted-graphql-and-mcp-are-thin-stateless-routes.md) | Hosted GraphQL and MCP are thin, stateless routes | accepted |
 | [ADR-0061](ADR-0061-swarm-public-content-through-the-gateway-encrypt-client-side.md) | Swarm: public content through the gateway, evidence encrypted client-side | accepted |
-| [ADR-0062](ADR-0062-pause-every-session-at-92-percent-of-the-weekly-limit.md) | Every session pauses gracefully at 92% of the weekly plan limit | accepted |
+| [ADR-0062](ADR-0062-pause-every-session-at-92-percent-of-the-weekly-limit.md) | Every session pauses gracefully at 92% of the weekly plan limit (amended Fri 11:00 IST: 95% stops new real payments, merges and publishes; 97% pauses every session) | accepted, amended |
 | [ADR-0063](ADR-0063-both-sdks-on-npm-as-graphpay-ethglobal-by-13-00.md) | Both SDKs on npm under @graphpay_ethglobal by 13:00 Friday | accepted |
 | [ADR-0064](ADR-0064-one-sdk-per-partner-lane-and-the-same-kit-moment.md) | One SDK per partner lane, and the "same kit, different business" moment | accepted |
 | [ADR-0065](ADR-0065-the-founders-team-builds-apps-demo-ui-in-parallel.md) | The founder's team builds its own UI in apps/demo-ui, in parallel | accepted |
