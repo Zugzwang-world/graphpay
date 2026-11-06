@@ -2,3 +2,74 @@
 @import '../../../frontend/src/styles/index.css';
 @source '../../../frontend/src';
 @source '.';
+
+/* The stage phones' motion: lines arrive one at a time, cards slide in, the request floats. */
+@keyframes stage-line-in {
+  from { opacity: 0; transform: translateY(14px) scale(0.98); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes stage-slide-in {
+  from { opacity: 0; transform: translateX(22px); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes stage-fade-in { from { opacity: 0; } to { opacity: 1; } }
+@keyframes stage-float {
+  0%, 100% { transform: translateY(0) rotate(-0.6deg); }
+  50% { transform: translateY(-9px) rotate(0.6deg); }
+}
+@keyframes stage-pulse {
+  0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--color-brand) 45%, transparent); }
+  70% { box-shadow: 0 0 0 22px color-mix(in srgb, var(--color-brand) 0%, transparent); }
+  100% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--color-brand) 0%, transparent); }
+}
+@keyframes stage-glow {
+  0%, 100% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--color-ok) 35%, transparent); }
+  50% { box-shadow: 0 0 0 6px color-mix(in srgb, var(--color-ok) 0%, transparent); }
+}
+@keyframes stage-dot { 50% { opacity: 0.25; } }
+@keyframes stage-replay-in {
+  from { opacity: 0; transform: translateY(18px) scale(0.96); filter: blur(2px); }
+  to { opacity: 1; transform: none; filter: none; }
+}
+@keyframes stage-chosen {
+  0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--color-brand) 40%, transparent); }
+  100% { box-shadow: 0 0 0 10px color-mix(in srgb, var(--color-brand) 0%, transparent); }
+}
+
+.stage-line { animation: stage-line-in 420ms var(--ease-out) both; }
+.stage-slide { animation: stage-slide-in 420ms var(--ease-out) both; }
+.stage-fade { animation: stage-fade-in 500ms ease-out both; }
+.stage-replay { animation: stage-replay-in 360ms var(--ease-out) both; }
+.stage-chosen { animation: stage-chosen 1.4s ease-out 3; }
+.stage-scroll { scrollbar-width: none; overscroll-behavior: contain; }
+.stage-scroll::-webkit-scrollbar { display: none; }
+
+.stage-bubble { animation: stage-float 3.6s ease-in-out infinite, stage-pulse 2.4s ease-out infinite; transition: transform 160ms ease; }
+.stage-bubble:active { transform: scale(0.98); }
+.stage-live-label { letter-spacing: 0.01em; }
+
+.stage-member { transition: transform 260ms var(--ease-out); }
+.stage-member .stage-figure { transition: width 360ms var(--ease-out), height 360ms var(--ease-out); }
+
+.stage-activity { color: var(--color-muted); background: var(--color-bg); transition: background 300ms ease, color 300ms ease; }
+.stage-activity-dot { width: 10px; height: 10px; border-radius: 9999px; background: var(--color-line); transition: background 300ms ease; }
+.stage-activity[data-state='on'] { color: var(--color-ok); background: color-mix(in srgb, var(--color-ok) 10%, transparent); animation: stage-glow 1.6s ease-in-out infinite; }
+.stage-activity[data-state='on'] .stage-activity-dot { background: var(--color-ok); }
+.stage-activity[data-state='done'] { color: var(--color-white); background: var(--color-ok); }
+.stage-activity[data-state='done'] .stage-activity-dot { background: var(--color-white); }
+.stage-activity[data-state='blocked'] { color: var(--color-white); background: var(--color-bad); }
+.stage-activity[data-state='blocked'] .stage-activity-dot { background: var(--color-white); }
+
+.stage-pulse-dot { width: 7px; height: 7px; border-radius: 9999px; background: currentColor; animation: stage-dot 1.2s ease-in-out infinite; }
+
+.stage-switch { position: relative; display: inline-flex; width: 52px; height: 32px; flex: none; border-radius: 9999px; background: var(--color-line); transition: background 240ms ease; }
+.stage-switch > span { position: absolute; top: 3px; left: 3px; width: 26px; height: 26px; border-radius: 9999px; background: var(--color-white); box-shadow: 0 1px 3px rgb(0 0 0 / 0.2); transition: transform 240ms var(--ease-out); }
+.stage-switch.is-on { background: var(--color-ios-green); }
+.stage-switch.is-on > span { transform: translateX(20px); }
+
+.stage-earnings { animation: stage-fade-in 500ms ease-out both; }
+
+@media (prefers-reduced-motion: reduce) {
+  .stage-line, .stage-slide, .stage-fade, .stage-replay, .stage-earnings { animation: stage-fade-in 120ms ease-out both !important; }
+  .stage-bubble, .stage-chosen, .stage-activity[data-state='on'], .stage-pulse-dot { animation: none !important; }
+}

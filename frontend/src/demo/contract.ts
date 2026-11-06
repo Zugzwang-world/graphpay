@@ -194,7 +194,7 @@ export interface ShopChoice {
   distanceKm: number;
   paidOrders: number;
   refundRate: string;
-  repeatBuyers: number;
+  repeatBuyers?: number;
   verdict: 'chosen' | 'considered' | 'rejected';
   reason?: string;
 }

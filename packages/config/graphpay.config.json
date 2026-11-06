@@ -36,7 +36,8 @@
           "url": "https://ethereum-sepolia-rpc.publicnode.com"
         }
       ],
-      "explorer": "https://sepolia.etherscan.io"
+      "explorer": "https://sepolia.etherscan.io",
+      "ensApp": "https://sepolia.app.ens.domains"
     },
     "rabdi": {
       "name": "Arkiv Rabdi",
@@ -160,6 +161,11 @@
     "publicAccess": true,
     "mcpPath": "/api/mcp",
     "graphqlPath": "/api/graphql",
+    "repo": "https://github.com/Zugzwang-world/graphpay",
+    "packages": [
+      { "key": "arkiv-graph", "name": "@graphpay_ethglobal/arkiv-graph", "readme": "https://github.com/Zugzwang-world/graphpay/tree/main/packages/arkiv-graph#readme" },
+      { "key": "agentpay", "name": "@graphpay_ethglobal/agentpay", "readme": "https://github.com/Zugzwang-world/graphpay/tree/main/packages/agentpay#readme" }
+    ],
     "vercel": {
       "project": "graphpay-event",
       "projectId": "prj_I3XDMAm2tg7lU6vPVzcYyouIqV0m",

@@ -29,3 +29,6 @@ packages/contracts/lib/
 
 # Next.js
 next-env.d.ts
+
+# Playwright MCP screenshots and logs (local QA only)
+.playwright-mcp/

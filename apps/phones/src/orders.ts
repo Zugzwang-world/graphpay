@@ -140,9 +140,18 @@ export function itemsFor(shop: string, total: bigint, products: FoldProduct[]): 
   return [];
 }
 
-// A row of the live ledger: a chain event (it has a settlement transaction) or a refund request
-// recorded on Arkiv (`req:` ref, no transaction). The seeded history has neither.
-export const isLive = (r: Pick<LedgerRow, 'tx' | 'ref' | 'kind'>): boolean => r.tx !== null || (r.kind === 'request' && r.ref.startsWith('req:'));
+// A row of the live ledger: a chain event (it has a settlement transaction), a refund request or the
+// shop's decline recorded on Arkiv (`req:` and `dec:` refs, both kind `request`, no transaction), or a
+// refused attempt (`att:`, kind `fail`). The seeded history has none of these.
+export const isDecline = (r: Pick<LedgerRow, 'ref' | 'kind'>): boolean => r.kind === 'request' && r.ref.startsWith('dec:');
+export const isAttempt = (r: Pick<LedgerRow, 'ref' | 'kind'>): boolean => r.kind === 'fail' && r.ref.startsWith('att:');
+export const isLive = (r: Pick<LedgerRow, 'tx' | 'ref' | 'kind'>): boolean => r.tx !== null || (r.kind === 'request' && (r.ref.startsWith('req:') || r.ref.startsWith('dec:'))) || isAttempt(r);
+
+// The refused attempts in the rows (a paused or revoked payer, a payment over the pass): nothing was
+// paid, so they are never orders; the shop's phone lists them on their own.
+export function refusedAttempts(rows: LedgerRow[]): { orderId: string | null; payer: string; ts: number; ref: string }[] {
+  return rows.filter(isAttempt).sort((a, b) => a.ts - b.ts).map((r) => ({ orderId: r.orderId, payer: r.payer, ts: r.ts, ref: r.ref }));
+}
 
 // Every order in the rows, oldest first. Rows without an order id, and the seeded history,
 // are left out; an order needs at least one chain event.
@@ -180,6 +189,10 @@ export function foldOrders(rows: LedgerRow[], ctx: FoldContext, isNew: (orderId:
       } else if (r.kind === 'deliver') {
         if (status === 'paid') status = 'delivered';
         deliveredAt = at;
+      } else if (isDecline(r)) {
+        // The shop's answer to the open request: declined, never a second pending request.
+        const open = refunds.find((f) => f.status === 'requested');
+        if (open) Object.assign(open, { status: 'declined', decidedAt: at });
       } else if (r.kind === 'request') {
         refunds.push({ id: r.ref, amount: usdt(r.amountMicro), full: r.amountMicro >= total, reason: '', status: 'requested', requestedAt: at, links: r.tx ? [ctx.txLink(r.tx)] : [] });
       } else if (r.kind === 'refund') {

@@ -55,9 +55,6 @@ function arkivCalls(out: Json): number {
   }
 }
 
-// The repeat-buyer count is not in the graph yet; the card shows a dash, never a made-up number.
-const UNKNOWN_COUNT = { toLocaleString: () => '—' } as unknown as number;
-
 export class ErrandMapper {
   private errandId: string | undefined;
   private offers = new Map<string, Offer>();
@@ -203,7 +200,6 @@ export class ErrandMapper {
         // The story's synthetic scenario for the city (labelled synthetic in the story).
         paidOrders: shop?.paidOrders ?? 0,
         refundRate: shop?.refundRate ?? '—',
-        repeatBuyers: UNKNOWN_COUNT,
         verdict: r === best ? 'chosen' : r.eligible === true ? 'considered' : 'rejected',
         ...(r.eligible === true ? {} : { reason: reasons.join('; ') }),
       };
