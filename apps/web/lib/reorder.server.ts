@@ -33,7 +33,7 @@ export interface ReorderQuote {
   quantity: number;
 }
 
-// What the payer agent's buyer answers (agentpay's pay()): paid, unknown (the signature may still
+// What the payer agent's buyer answers (the payer's pay step): paid, unknown (the signature may still
 // settle), failed, not_payable or free.
 export interface PayOutcome {
   status: string;
@@ -64,7 +64,7 @@ export interface ReorderResult {
 const holds = new Map<string, number>();
 let busy = false;
 
-// A buyer's refusal code (agentpay's AgentPayError.code, such as OVER_PERIOD_CAP or PASS_REVOKED)
+// A buyer's refusal code (the buyer's refusal code, such as OVER_PERIOD_CAP or PASS_REVOKED)
 // reaches the phone; any other failure text never does.
 const SAFE_CODE = /^[A-Z][A-Z0-9_]{2,39}$/;
 export const codeOf = (value: unknown): string | null => {
