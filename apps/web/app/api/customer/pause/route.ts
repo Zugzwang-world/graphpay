@@ -22,7 +22,7 @@ export async function POST(request: Request): Promise<Response> {
   if (!ownerConfigured(process.env, pick.agent.ens)) return notLive(OWNER_WAITING_FOR);
   try {
     const change = await changeStatus(true, { agent: pick.agent.ens });
-    return json({ ...change, agent: pick.agent.ens, effectiveWithinS: EFFECTIVE_WITHIN_S, resumesAfterS: RESUME_AFTER_S });
+    return json({ ...change, agent: pick.agent.ens, effectiveWithinS: EFFECTIVE_WITHIN_S, ...(process.env.GRAPHPAY_HEAL === '0' ? {} : { resumesAfterS: RESUME_AFTER_S }) });
   } catch (error) {
     if (error instanceof Busy) return json({ error: 'another status change is still running; wait for it' }, 429);
     // The kind only: a chain error's message can name an RPC. None reaches the browser.

@@ -9,8 +9,8 @@
 import { readAll, type EntityDef } from '@graphpay_ethglobal/arkiv-graph';
 import { ensPublicClient, KEYS, locate, readText, retryingReads } from '@graphpay/ens';
 import { ENTITIES } from '@graphpay/money-graph';
-import { parseAbiItem, type PublicClient } from 'viem';
-import { namehash } from 'viem/ens';
+import { decodeFunctionResult, encodeFunctionData, parseAbiItem, toHex, type PublicClient } from 'viem';
+import { namehash, packetToBytes } from 'viem/ens';
 import { RESUME_AFTER_S, planAgent, planShop, type AgentPlan, type ShopPlan, type StatusChange } from './heal.ts';
 import { directoryConfigured, directoryConnection, setShopOpen, shopKeyOf } from './open-toggle.server.ts';
 import { NO_LONGER_DUE, changeStatus, failureKind, ownerConfigured, pausableAgents } from './owner-actions.server.ts';
@@ -19,8 +19,10 @@ import { siteModel } from './site.server.ts';
 // The resolver's text-record event, as in @graphpay/ens's generated ABI (heal.test.ts checks
 // that they match). keyHash is the indexed key, so one record's changes are one topic filter.
 export const TEXT_UPDATED = parseAbiItem('event TextUpdated(uint256 indexed recordId, string indexed keyHash, string key, string value)');
-// The agent's own resolver read directly at a past block (ENSIP-5 text).
+// The agent's own resolver read at a past block. The ENSv2 resolver answers a text record only
+// through ENSIP-10 resolve(name, text(node, key)), as the ENS provisioner reads it (readOwn).
 const TEXT = parseAbiItem('function text(bytes32 node, string key) view returns (string)');
+const RESOLVE = parseAbiItem('function resolve(bytes name, bytes data) view returns (bytes)');
 // About three hours of Sepolia blocks (12 s each): a pause older than that resumes at once.
 export const LOOKBACK_BLOCKS = 900n;
 // RESUME_AFTER_S in Sepolia blocks: with no change in the window, the record must already have
@@ -95,6 +97,13 @@ async function lastStatusChange(client: PublicClient, resolver: `0x${string}`, h
   return { value: String(last.args.value ?? ''), at: Number(block.timestamp) };
 }
 
+// The status record as the agent's own resolver held it at a block.
+export async function statusAt(client: Pick<PublicClient, 'readContract'>, name: string, resolver: `0x${string}`, blockNumber: bigint): Promise<string> {
+  const data = encodeFunctionData({ abi: [TEXT], functionName: 'text', args: [namehash(name), KEYS.status] });
+  const raw = await client.readContract({ address: resolver, abi: [RESOLVE], functionName: 'resolve', args: [toHex(packetToBytes(name)), data], blockNumber });
+  return decodeFunctionResult({ abi: [TEXT], functionName: 'text', data: raw });
+}
+
 const shopKey = (shopEns: string) => cached(`shop ${shopEns}`, () => shopKeyOf(shopEns));
 
 export const liveSources: HealSources = {
@@ -108,8 +117,7 @@ export const liveSources: HealSources = {
     if (last) return { status, last };
     // No change in the window: the record read RECENT_BLOCKS back tells an old pause from a new
     // one whose log this node has not served yet. A failed read is a failed run: nothing is sent.
-    const earlier = await client.readContract({ address: resolver, abi: [TEXT], functionName: 'text', args: [namehash(name), KEYS.status], blockNumber: head - RECENT_BLOCKS });
-    return { status, last: null, pausedEarlier: earlier === 'paused' };
+    return { status, last: null, pausedEarlier: (await statusAt(client, name, resolver, head - RECENT_BLOCKS)) === 'paused' };
   },
   listings: async (shopEns) => {
     const arkiv = await directoryConnection();
@@ -168,6 +176,9 @@ export function heal(options: { sources?: HealSources; actions?: HealActions; no
   const shopStillDue = (ens: string, action: ShopPlan['action']) => async () => planShop(await sources.listings(ens), clock()).action === action;
   const run = (async (): Promise<HealReport> => {
     const report = await inspect(options);
+    // A read that failed acts on nothing; it is said in the log so a stuck agent is never silent.
+    for (const a of report.agents) if (a.failed) log(`heal: reading ${a.ens} failed: ${a.failed}`);
+    if (report.shop?.failed) log(`heal: reading ${report.shop.ens}'s listing failed: ${report.shop.failed}`);
     await Promise.all([
       ...report.agents.map(async (a) => {
         if (a.action !== 'resume') return;

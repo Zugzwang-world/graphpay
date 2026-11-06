@@ -2,7 +2,9 @@ import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { permissionedResolverAbi } from '@graphpay/ens';
 import { REOPEN_AFTER_S, RENEW_BELOW_S, RESUME_AFTER_S, planAgent, planShop } from './heal.ts';
-import { TEXT_UPDATED, heal, inspect, type HealActions, type HealSources } from './heal.server.ts';
+import { decodeFunctionData, encodeFunctionResult, parseAbiItem, toHex } from 'viem';
+import { namehash, packetToBytes } from 'viem/ens';
+import { RECENT_BLOCKS, TEXT_UPDATED, heal, inspect, statusAt, type HealActions, type HealSources } from './heal.server.ts';
 import { pausableAgents } from './owner-actions.server.ts';
 import { siteModel } from './site.server.ts';
 
@@ -157,4 +159,26 @@ test('the pause route refuses a body that is not a JSON object, rather than paus
       assert.equal(res.status, 400, `${path} ${body.slice(0, 12)}`);
     }
   }
+});
+
+test("the earlier status is read through the resolver's ENSIP-10 resolve, at the block asked", async () => {
+  const name = siteModel().payer.ens;
+  const resolver = `0x${'ab'.repeat(20)}` as const;
+  const TEXT = parseAbiItem('function text(bytes32 node, string key) view returns (string)');
+  const calls: { functionName: string; blockNumber?: bigint }[] = [];
+  // The ENSv2 resolver has no direct text(): a stub that answers resolve only, as it does.
+  const client = {
+    readContract: async (req: { address: string; functionName: string; args: readonly unknown[]; blockNumber?: bigint }) => {
+      calls.push({ functionName: req.functionName, blockNumber: req.blockNumber });
+      if (req.functionName !== 'resolve') throw new Error('execution reverted');
+      assert.equal(req.address, resolver);
+      assert.equal(req.args[0], toHex(packetToBytes(name)));
+      const inner = decodeFunctionData({ abi: [TEXT], data: req.args[1] as `0x${string}` });
+      assert.deepEqual(inner.args, [namehash(name), 'graphpay.status']);
+      return encodeFunctionResult({ abi: [TEXT], functionName: 'text', result: 'paused' });
+    },
+  };
+  assert.equal(await statusAt(client as never, name, resolver, 12_000_000n - RECENT_BLOCKS), 'paused');
+  assert.deepEqual(calls, [{ functionName: 'resolve', blockNumber: 12_000_000n - RECENT_BLOCKS }]);
+  assert.equal(RECENT_BLOCKS, BigInt(Math.ceil(RESUME_AFTER_S / 12)));
 });
