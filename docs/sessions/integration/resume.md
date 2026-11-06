@@ -1,6 +1,6 @@
 # Join: resume after a fresh start
 
-Updated 09:47 IST, Fri 6 Nov. Read this first, then `docs/plan/sessions/join.md`.
+Updated 13:33 IST, Fri 6 Nov. Read this first, then `docs/plan/sessions/join.md`.
 
 ## Running now
 
@@ -20,6 +20,13 @@ Updated 09:47 IST, Fri 6 Nov. Read this first, then `docs/plan/sessions/join.md`
 2. Not covered yet: C4(a) (a POLICY_WRITER revoke of the scout agent while the workers hold that key) and F3 (a preview deployment with the floor raised; T1's). `integration/src/stack.mjs` (e2e:food, e2e:kill) now refuses unless `STACK_LOCAL_RELAY=1`.
 3. Done: `acceptance/tracks.mjs` (A3, A4, A9, A10, B3 pass; B7 waits on T2's fork test; D10(c) needs a recorded quote's expiry). F1 passes (PR 67). Next: the item-6 bootstrap for the demo cast when the story locks (no target times; report when done).
 4. The website errand runner: `runId: input.runId` and `batchedActivity` + `flush()` (T5's note).
+
+## Live runner (the site's /api/agents/run), 13:33 IST
+
+- Reliable on production: the founder's two live errands paid (13:28, 13:30 IST; tx 0x9749a7f7…1e1a, 0x11588a5e…0a13). PRs: #88 the runner, #93 the hold around the quote write, #108 retry only the shop's verify 502 or 503 starting and no hourly cap, #112 the facilitator busy 502 too; T1's #114 settle-safety; T4's #92 Kimi.
+- Smoke test: `node integration/smoke-site.mjs` (the passcode from .env; may pay 4.80 as payer.vitalik): tell T1 and T5 before and after. Results in `docs/sessions/integration/hosted/site-*.json`; a calibration row in OPEN.md each run.
+- Next: rewrite C6 and F2 for public access once the Integration session's switch lands (visitors meet no passcode; the keys between our servers stay). The Coordinator's writer split (one Arkiv wallet per writer) will touch d11.mjs, quote-d10.mjs, acceptance/tracks.mjs, checks.mjs D11 and the runner's directory connection.
+- Usage rule: at 95% weekly no new real payment, merge or publish; at 97% pause.
 
 ## Relay key rule
 
