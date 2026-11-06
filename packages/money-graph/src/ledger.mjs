@@ -45,7 +45,9 @@ export function toGraphEvent(e, labels) {
   };
 }
 
-export function createLedger({ arkiv, stream = null, synthetic = null, lifetimeDays, createNodes = false } = {}) {
+// reloadOnError: false keeps the state a failed write was planned from instead of re-reading it, for a
+// caller that repairs Arkiv to that state itself (the city seeder); the mirror keeps the default.
+export function createLedger({ arkiv, stream = null, synthetic = null, lifetimeDays, createNodes = false, reloadOnError = true } = {}) {
   if (!arkiv?.writer) throw new Error('money-graph: the ledger needs a connection with a writer');
   const owner = arkiv.owner;
   const labels = synthetic ? { synthetic: true, dataset: synthetic.dataset } : { synthetic: false, dataset: 'live' };
@@ -115,6 +117,7 @@ export function createLedger({ arkiv, stream = null, synthetic = null, lifetimeD
         { split, nonce, verifyRecovered: split ? null : verifier(planned) },
       );
     } catch (error) {
+      if (!reloadOnError) throw error;
       // Discard the plan and re-adopt what Arkiv holds; until that works, refuse to plan.
       state = null;
       try {

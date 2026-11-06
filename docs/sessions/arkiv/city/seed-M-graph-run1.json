@@ -1,0 +1,26 @@
+{
+  "synthetic": true,
+  "size": "M",
+  "store": "graph",
+  "owner": "0x734fc394248777046fb80d55ad1f0b0c142a0d64",
+  "dataset": "graphpay-city-v1-M",
+  "backend": "rabdi",
+  "transactions": 332,
+  "creates": 7427,
+  "patches": 3005,
+  "deletes": 0,
+  "gas": "1636517814",
+  "tglm": "1.636606",
+  "firstTx": "0x708e1318244edccc1ac6ad8ae4c91af98bd6d13aea67083f3b26a7b428386aa2",
+  "lastTx": "0xb7945bc9889b698f753ba597ae533e24bd3bad0f6a30a096fc7f15c7428b7475",
+  "started": "2026-11-06T18:30:00.458Z",
+  "finished": null,
+  "minutes": null,
+  "httpStatus": {
+    "200": 5049,
+    "429": 1
+  },
+  "lowestRateLimitRemaining": 1849,
+  "status": "failed",
+  "error": "arkiv-graph: the batch reverted: Transaction failed: The contract function \"execute\" reverted with the following reason:\nRevm error: apply: Store(\"Store(Entity(Store(HandleInvalid)))\")\n\nDetails: Revm error: apply: Store(\"Store(Entity(Store(HandleInvalid)))\")\nVersion: viem@2.57.16"
+}

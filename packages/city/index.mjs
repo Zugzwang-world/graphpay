@@ -4,5 +4,5 @@ export { pinnedCast, castOfSize } from './src/cast.mjs';
 export { cityDigest } from './src/digest.mjs';
 export { truthOf } from './src/truth.mjs';
 export { benchParams, benchTruth } from './src/bench.mjs';
-export { ledgerEvents, plainRecords, plainProfiles, directoryRows, seedGraph, seedPlain, seedDirectory, wipe, newManifest, assertEmpty } from './src/seed.mjs';
+export { ledgerEvents, plainRecords, plainProfiles, directoryRows, seedGraph, seedPlain, seedDirectory, undoSince, wipe, newManifest, assertEmpty } from './src/seed.mjs';
 export { mulberry32, draws, zipf } from './src/rng.mjs';

@@ -9,6 +9,9 @@
 //   node packages/city/scripts/seed.mjs --size S --end <YYYY-MM-DD> --backend rabdi --execute --store plain --resume
 //       the plain store only, skipping the rows a stopped run already wrote
 //   node packages/city/scripts/seed.mjs --size S --backend rabdi --wipe --execute [--store graph,plain]
+//   node packages/city/scripts/seed.mjs --size M --end <YYYY-MM-DD> --backend rabdi --execute --store graph --from-batch <n> [--undo-from-nonce <k> --undo-from-block <b> [--undo-to-block <c>]]
+//       the graph store from batch n (0-based) on, after undoing what a stopped run's partial batch
+//       landed (this wallet's transactions from nonce k, block b on; creates only)
 // Manifests go to docs/sessions/arkiv/city/. Prints addresses, hashes and numbers only.
 
 import { mkdirSync, writeFileSync } from 'node:fs';
@@ -16,7 +19,7 @@ import { generatePrivateKey } from 'viem/accounts';
 import { readAll } from '@graphpay_ethglobal/arkiv-graph';
 import { story, config } from '@graphpay/config';
 import { ENTITIES, connectArkiv, graph, newSim, nodeOf, seedOwner, writerAddresses } from '@graphpay/money-graph';
-import { generateCity, truthOf, seedGraph, seedPlain, seedDirectory, wipe, newManifest, ledgerEvents } from '../index.mjs';
+import { generateCity, truthOf, seedGraph, seedPlain, seedDirectory, undoSince, wipe, newManifest, ledgerEvents } from '../index.mjs';
 
 const args = process.argv.slice(2);
 const opt = (name, fallback = null) => {
@@ -154,15 +157,21 @@ if (backend === 'sim') {
           throw error;
         }
       }
+      const fromBatch = Number(opt('from-batch', 0));
+      if (opt('undo-from-nonce') !== null) {
+        const undo = await undoSince(seedConn, null, { nonce: Number(opt('undo-from-nonce')), fromBlock: BigInt(opt('undo-from-block')), toBlock: opt('undo-to-block') === null ? null : BigInt(opt('undo-to-block')) });
+        log(`undid ${undo.deleted} creates from ${undo.landed.length} landed txs (${undo.landed.map((t) => t.hash).join(' ')}) in ${undo.txs.map((t) => t.hash).join(' ')}`);
+        save(`undo-${size}-${Date.now()}.json`, { synthetic: true, size, landed: undo.landed.map((t) => ({ hash: t.hash, nonce: t.nonce, created: t.created.length, updated: t.updated.length })), txs: undo.txs.map((t) => t.hash), deleted: undo.deleted });
+      }
       for (const store of ['graph', 'plain']) {
         if (!stores.includes(store)) continue;
         const mf = newManifest({ ...base, store });
         const run = store === 'graph' ? seedGraph : seedPlain;
         try {
-          save(`seed-${size}-${store}.json`, await run(city, seedConn, { log, batchEvents: story.syntheticCity.generator.batchEvents, manifest: mf, resume: store === 'plain' && flag('resume') }));
+          save(`seed-${size}-${store}${store === 'graph' && fromBatch > 0 ? `-from-${fromBatch}` : ''}.json`, await run(city, seedConn, { log, batchEvents: story.syntheticCity.generator.batchEvents, manifest: mf, resume: store === 'plain' && flag('resume'), fromBatch: store === 'graph' ? fromBatch : 0 }));
           log(`${store} done: ${mf.transactions} txs, ${mf.tglm} tGLM, ${mf.minutes} min, last ${mf.lastTx}`);
         } catch (error) {
-          save(`seed-${size}-${store}.json`, { ...mf, status: 'failed', error: error.shortMessage ?? error.message });
+          save(`seed-${size}-${store}${store === 'graph' && fromBatch > 0 ? `-from-${fromBatch}` : ''}.json`, { ...mf, status: 'failed', error: error.shortMessage ?? error.message });
           throw error;
         }
       }

@@ -4,7 +4,8 @@
 // the shop directory under W_DIRECTORY. 25 events per logical batch, split by bytes. A
 // store an owner already holds is refused; a failed run is wiped, then seeded again.
 
-import { ExpirationTime } from '@arkiv-network/sdk';
+import { ENTITY_EVENTS_ABI, ExpirationTime } from '@arkiv-network/sdk';
+import { decodeEventLog } from 'viem';
 import { countRows, readAll } from '@graphpay_ethglobal/arkiv-graph';
 import { ENTITIES, LIFETIME, createLedger, microDegrees, nodeOf, shopValues } from '@graphpay/money-graph';
 import { key } from '@arkiv-network/sdk';
@@ -105,14 +106,93 @@ export async function assertEmpty(conn, types) {
   }
 }
 
-export async function seedGraph(city, conn, { log = () => {}, batchEvents = 25, manifest }) {
-  await assertEmpty(conn, ['edge', 'node', 'tally', 'link']);
-  const ledger = createLedger({ arkiv: conn, synthetic: { dataset: city.dataset }, createNodes: true });
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+
+// This wallet's transactions at or after `nonce`, from `fromBlock` on, once none is pending: what
+// each created and updated (EntityCreated and EntityUpdated logs of the entity contract).
+async function landedSince(conn, { nonce, fromBlock, toBlock = null }) {
+  const owner = conn.owner.toLowerCase();
+  for (let i = 0; i < 60; i += 1) {
+    const [latest, pending] = await Promise.all([conn.publicClient.getTransactionCount({ address: owner, blockTag: 'latest' }), conn.publicClient.getTransactionCount({ address: owner, blockTag: 'pending' })]);
+    if (latest === pending) break;
+    await sleep(2_000);
+  }
+  const head = toBlock === null ? await conn.publicClient.getBlockNumber() : BigInt(toBlock);
+  const out = [];
+  for (let b = BigInt(fromBlock); b <= head; b += 1n) {
+    const block = await conn.publicClient.getBlock({ blockNumber: b, includeTransactions: true });
+    for (const tx of block.transactions) {
+      if (tx.from?.toLowerCase() !== owner || Number(tx.nonce) < nonce) continue;
+      const receipt = await conn.publicClient.getTransactionReceipt({ hash: tx.hash });
+      const created = [];
+      const updated = [];
+      for (const l of receipt.status === 'success' ? receipt.logs : []) {
+        try {
+          const d = decodeEventLog({ abi: ENTITY_EVENTS_ABI, topics: l.topics, data: l.data });
+          if (d.eventName === 'EntityCreated') created.push(d.args.entityKey.toLowerCase());
+          if (d.eventName === 'EntityUpdated') updated.push(d.args.entityKey.toLowerCase());
+        } catch {
+          // an event this ABI does not describe
+        }
+      }
+      out.push({ hash: tx.hash, nonce: Number(tx.nonce), gasUsed: receipt.gasUsed, effectiveGasPrice: receipt.effectiveGasPrice ?? 0n, created, updated });
+    }
+  }
+  return out;
+}
+
+// Undoes what this wallet's transactions since `nonce` did to the graph store: their creates are
+// deleted and their patches set back to `state`, the rows the failed plan was made from. Without a
+// state (a run that stopped earlier), only creates can be undone; a patch to undo is refused.
+export async function undoSince(conn, state, { nonce, fromBlock, toBlock = null }) {
+  const landed = await landedSince(conn, { nonce, fromBlock, toBlock });
+  const created = landed.flatMap((t) => t.created);
+  const updated = [...new Set(landed.flatMap((t) => t.updated))];
+  const rows = state ? [...state.totals.values(), ...state.links.values(), ...state.nodes.values()] : [];
+  const restore = [];
+  for (const k of updated) {
+    const row = rows.find((r) => String(r.key).toLowerCase() === k);
+    if (!row) throw new Error(`city: transaction ${landed.find((t) => t.updated.includes(k)).hash} patched ${k}, which this run cannot set back; wipe the graph store instead`);
+    restore.push(row);
+  }
+  const defOf = (row) => (state.totals.has(`${row.values.node}:${row.values.epoch}:${row.values.window}`) ? ENTITIES.tally : row.values.from_node ? ENTITIES.link : ENTITIES.node);
+  // A row's identity never changes in a patch; everything else is set back.
+  const IDENTITY = new Set(['project', 'type', 'schema_v', 'node', 'epoch', 'window', 'day', 'kind', 'from_node', 'to_node', 'from_epoch', 'to_epoch', 'ens', 'owner_node']);
+  const backTo = (row) => Object.fromEntries(Object.entries(row.values).filter(([k]) => !IDENTITY.has(k)));
+  const txs = [];
+  if (created.length > 0) txs.push(...(await conn.writer.send({ deletes: created.map((key) => ({ key })) }, { split: true })).txs);
+  if (restore.length > 0) txs.push(...(await conn.writer.send({ patches: restore.map((r) => ({ def: defOf(r), key: r.key, values: backTo(r) })) }, { split: true })).txs);
+  return { landed, txs, deleted: created.length, restored: restore.length };
+}
+
+// The graph store, batch by batch. `fromBatch` resumes a run that stopped there, once undoSince has
+// set Arkiv back to the batch before it. A batch goes out in several transactions, so one the node
+// refuses can leave the ones before it landed: those are undone back to the state the plan was made
+// from, and after a pause for the node the batch is sent again (`retries` times).
+export async function seedGraph(city, conn, { log = () => {}, batchEvents = 25, manifest, fromBatch = 0, retries = 3, pauseMs = 15_000 }) {
+  if (fromBatch === 0) await assertEmpty(conn, ['edge', 'node', 'tally', 'link']);
+  const ledger = createLedger({ arkiv: conn, synthetic: { dataset: city.dataset }, createNodes: true, reloadOnError: false });
   await ledger.load();
   const batches = chunks(ledgerEvents(city), batchEvents);
-  for (const [i, batch] of batches.entries()) {
-    const r = await ledger.applyBatch(batch);
-    account(manifest, r.txs, conn);
+  for (let i = fromBatch; i < batches.length; i += 1) {
+    for (let attempt = 1; ; attempt += 1) {
+      const fromBlock = await conn.publicClient.getBlockNumber();
+      const nonce = await conn.writer.confirmedNonce();
+      try {
+        const r = await ledger.applyBatch(batches[i]);
+        account(manifest, r.txs, conn);
+        break;
+      } catch (error) {
+        if (attempt > retries) {
+          error.batch = i;
+          throw error;
+        }
+        const undo = await undoSince(conn, ledger.state, { nonce, fromBlock });
+        account(manifest, [...undo.landed.map((t) => ({ ...t, creates: t.created.length, patches: t.updated.length })), ...undo.txs], conn);
+        log(`graph batch ${i + 1}: ${(error.shortMessage ?? error.message).split('\n')[0]}; undid ${undo.deleted} creates and ${undo.restored} patches from ${undo.landed.length} landed txs; again in ${pauseMs / 1000} s`);
+        await sleep(pauseMs);
+      }
+    }
     if ((i + 1) % 5 === 0 || i === batches.length - 1) log(`graph ${i + 1}/${batches.length} batches, ${manifest.transactions} txs, ${manifest.tglm} tGLM`);
   }
   return finish(manifest);
