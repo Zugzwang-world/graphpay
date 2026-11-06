@@ -1,23 +1,35 @@
-# Relay: w4-agents (W4 Agents, the night’s agents session), 23:21 IST, Fri 6 Nov
+# Relay: w4-agents (W4 Agents, the night’s agents session), 23:35 IST, Fri 6 Nov
 
 ## In plain words
 
-- **Item 1, done ([#153](https://github.com/Zugzwang-world/graphpay/pull/153)): the deadline is relative.** Vitalik's request says "delivered within an hour" instead of "by 11:59 pm". Code reads the hour from the moment of the request, so an errand can buy at any time of day or night. The old request could not buy between about 23:14 IST and midnight, and after midnight its deadline had passed.
-- The guard still checks each shop's delivery time (ETA) against the deadline three times: when the concierge picks a shop, when the shop quotes, and just before the payer signs. The good shop needs 45 minutes, so it fits; with "within 30 minutes" no eligible shop fits and nothing is paid.
-- **Item 2, in its PR: measuring.** Each agent now reports every one of its model calls: the tokens it read (and how many came from Kimi's cache), the tokens it wrote (and how many were reasoning), what the call cost, which tools it asked for and, on live runs, how many seconds the model took. One command runs a live errand on the site and prints the table.
-- **What the first look found:** on production the analyst reads two answers, the GraphQL ranking and its explain trace, that each carry about 16,800 characters of Arkiv entity keys. The model never uses them (the ranking data itself is 600 characters); the screens and the explainer do. That is the first thing to cut, for the model only.
-- Still to come: a live baseline, the cuts, then three live errands in a row that pay.
+- **Item 1, done ([#153](https://github.com/Zugzwang-world/graphpay/pull/153), 23:18 IST): the deadline is relative.** Vitalik's request says "delivered within an hour". Code reads the hour from the moment of the request, so an errand can buy at any time of day or night. The guard checks each shop's delivery time against that hour three times: when the concierge picks, when the shop quotes, and just before the payer signs.
+- **Item 2, done ([#157](https://github.com/Zugzwang-world/graphpay/pull/157), 23:26 IST): measuring.** Each agent reports every model call: tokens read (and how many came from Kimi's cache), tokens written (and how many were reasoning), its cost, its tools and its seconds. `node scripts/agents/site-errand.mjs` runs one live errand on the site and prints the table.
+- **The baseline, live on the site at 23:30 IST:** paid 4.80 to the good shop in **91.4 s**, with **19 model calls, 33,287 tokens and $0.1455**. 62.6 s of it was the models thinking; the rest was reads, the quote, the signature and the settlement.
+- **Item 3, first cut (in its PR):** the five routine agents (scout, payer, storefront, dispatch, risk) think at Kimi's low effort, while the concierge and the analyst stay at high; the models read short tool replies; and the concierge is handed the budget and deadline that code read, so it does no date arithmetic. The screens get exactly the same data as before. Next: measure it live, then do the routine steps in code.
 
 ## Technical
 
-- `packages/agents/src/mandate.mjs`: a clock time ("by 8 pm") or a span ("within", "in" or "under", then "an hour", "half an hour", "45 minutes", "2 hours", "1.5 hrs"; 1 minute to 24 hours). The deadline is the request instant plus the span, floored to the whole minute, so it is never later than the words allow and `deadlineIso` equals `deadlineMs`. A clock time and a different span together, or two different spans, are refused (`MANDATE_AMBIGUOUS_DEADLINE`) before any agent runs. `story.json`: `order.request` only.
-- Measuring: `createMeter({ timing })` returns one record per model call (`input`, `cached`, `output`, `reasoning`, `usd`, `tools`, and with timing `seconds` and `toolSeconds`, from AI SDK 7's step `usage` and `performance`); `agent.end` carries `effort`, `calls` and on live runs `seconds`. Timing is on for live runs only, so two mock run logs stay byte-identical. `usageOf(events)` and `usageTable()` add it up; `metrics.usage` has the same. The screens ignore the new fields.
-- `scripts/agents/site-errand.mjs`: one errand through the site's POST /api/agents/run as a visitor (no passcode or key read), the stream timestamped, the summary written to `docs/sessions/w4-agents/runs/`.
-- MCP reply sizes on production (read-only probe, 23:17 IST): the schema 3,209 characters (also in the analyst's and risk agent's instructions); the ranking GraphQL answer 17,834, of which `extensions.arkiv.entityKeys` 16,868; explain 19,120, of which `entityKeys` 16,800; the buyer-risk table 295.
-- Tests on mocks: 75 pass in `packages/agents`, 2 for the script; the whole workspace suite passes; `pnpm check` is clean.
-- Open: acceptance E1 still expects the 23:59 deadline (OPEN, the Coordinator); /customer's "By 23:59" chip and the deck's copy of the old request (OPEN, frontend).
+- Baseline per agent (live preset, all at high; `docs/sessions/w4-agents/runs/2026-11-06T18-00-33-601Z-paid.json`):
+
+| agent | calls | in (cached) | out (reasoning) | model s | USD |
+|---|---|---|---|---|---|
+| concierge | 3 | 4,977 (2,816) | 849 (458) | 10.4 | 0.026 |
+| scout | 3 | 2,763 (1,280) | 504 (115) | 6.8 | 0.016 |
+| analyst | 3 | 7,413 (4,352) | 1,074 (774) | 16.7 | 0.035 |
+| risk | 3 | 9,127 (4,352) | 903 (482) | 12.3 | 0.038 |
+| storefront | 2 | 1,109 (256) | 272 (135) | 4.9 | 0.009 |
+| payer | 3 | 2,300 (1,024) | 285 (123) | 6.0 | 0.011 |
+| dispatch | 2 | 1,361 (512) | 350 (100) | 5.5 | 0.011 |
+| errand | 19 | 29,050 (14,592) | 4,237 (2,187) | 62.6 | 0.146 |
+
+- Where the time goes: the critical path is concierge → analyst (16.7 s) → concierge → payer → shop (risk 12.3 s + storefront 4.9 s) → 402, checks, signature and settlement → dispatch (5.5 s) → payer → concierge. Every one of those agents waits on the next.
+- Found: the analyst's own GraphQL query asked for city "Mumbai" while the graph stores "mumbai", so its visible read returned no shops; code's fixed query did the ranking, as designed (G2). The risk agent's second query returned 4,502 characters, mostly Arkiv entity keys.
+- Short tool replies: `tracedMcpTools` gives each MCP tool a `toModelOutput`: a graph answer becomes its data, errors and `{ explainId, calls }`, an explain trace its counts; the run log keeps the whole answer (the phones count reads from it; the explainer links it). `tracedTool({ modelView })` does the same for the concierge's reports (offers without the sku; the ranking with scores to 3 places). A test drives the SDK end to end: the model's second prompt has the data and the explain id, not the keys.
+- Presets (`story.json` `agentModels`, testing, video and live only): concierge and analyst at high; scout, payer, storefront, dispatch and risk at low (Kimi has low, high, max).
+- The concierge's task carries `limits` (code's budget and deadline); its prompt's step 1 says to copy them (a deviation from AGENTS.md §8, in NOTES).
+- Tests: 80 pass in `packages/agents`; the workspace suite passes; `pnpm check` is clean.
 
 ## State
 
-- Item 1 merged at 23:18 IST; item 2 in its PR. Next: the live baseline after item 2 deploys, then item 3.
-- The payer's pass is 300 test USDT a day tonight (W5, #152); the contract's day turns at 05:30 IST.
+- Item 3's first cut in its PR. Next: one live errand on it, then the routine steps in code (with the reviewer), then three live errands in a row that pay.
+- Open (OPEN): acceptance E1 expects the old 23:59 deadline (the Coordinator); frontend: /customer's "By 23:59" chip and the deck's copy of the old request.

@@ -58,10 +58,11 @@ function withinDeadline(task) {
 }
 
 function needFrom(task, { widen = false } = {}) {
-  const budget = /(\d+(?:\.\d+)?)\s*USDT/i.exec(task.request)?.[1] ?? '0';
+  // A good model copies the limits code read (task.limits); without them it reads the request.
+  const budget = task.limits?.budgetUsdt ?? /(\d+(?:\.\d+)?)\s*USDT/i.exec(task.request)?.[1] ?? '0';
   const hour = /by\s+(\d{1,2})\s*pm/i.exec(task.request)?.[1];
   const day = String(task.now).slice(0, 10);
-  const deadline = hour ? `${day}T${String(Number(hour) + 12).padStart(2, '0')}:00:00${String(task.now).slice(19)}` : (withinDeadline(task) ?? String(task.now));
+  const deadline = task.limits?.deadlineIso ?? (hour ? `${day}T${String(Number(hour) + 12).padStart(2, '0')}:00:00${String(task.now).slice(19)}` : (withinDeadline(task) ?? String(task.now)));
   return {
     need: 'food',
     item: task.defaults.food.item,

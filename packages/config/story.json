@@ -524,7 +524,7 @@
     "active": "testing",
     "presets": {
       "testing": {
-        "purpose": "every test run (active): Kimi K3.1 Pro at high; the founder replaced Anthropic with Kimi on 2026-11-06 because the Anthropic key ran out of credit",
+        "purpose": "every test run (active): Kimi K3.1 Pro, the concierge and the analyst at high, the routine roles at low (W4, 2026-11-06); the founder replaced Anthropic with Kimi on 2026-11-06 because the Anthropic key ran out of credit",
         "roles": {
           "concierge": {
             "provider": "moonshot",
@@ -535,7 +535,7 @@
           "scout": {
             "provider": "moonshot",
             "model": "kimi-k3.1-pro",
-            "effort": "high",
+            "effort": "low",
             "maxTokens": 32000
           },
           "analyst": {
@@ -547,31 +547,31 @@
           "payer": {
             "provider": "moonshot",
             "model": "kimi-k3.1-pro",
-            "effort": "high",
+            "effort": "low",
             "maxTokens": 32000
           },
           "storefront": {
             "provider": "moonshot",
             "model": "kimi-k3.1-pro",
-            "effort": "high",
+            "effort": "low",
             "maxTokens": 32000
           },
           "risk": {
             "provider": "moonshot",
             "model": "kimi-k3.1-pro",
-            "effort": "high",
+            "effort": "low",
             "maxTokens": 32000
           },
           "dispatch": {
             "provider": "moonshot",
             "model": "kimi-k3.1-pro",
-            "effort": "high",
+            "effort": "low",
             "maxTokens": 32000
           }
         }
       },
       "video": {
-        "purpose": "the recorded video: Kimi K3.1 Pro highspeed at high, if its timing fits",
+        "purpose": "the recorded video: Kimi K3.1 Pro highspeed, the concierge and the analyst at high, the routine roles at low (W4), if its timing fits",
         "roles": {
           "concierge": {
             "provider": "moonshot",
@@ -582,7 +582,7 @@
           "scout": {
             "provider": "moonshot",
             "model": "kimi-k3.1-pro-highspeed",
-            "effort": "high",
+            "effort": "low",
             "maxTokens": 32000
           },
           "analyst": {
@@ -594,31 +594,31 @@
           "payer": {
             "provider": "moonshot",
             "model": "kimi-k3.1-pro-highspeed",
-            "effort": "high",
+            "effort": "low",
             "maxTokens": 32000
           },
           "storefront": {
             "provider": "moonshot",
             "model": "kimi-k3.1-pro-highspeed",
-            "effort": "high",
+            "effort": "low",
             "maxTokens": 32000
           },
           "risk": {
             "provider": "moonshot",
             "model": "kimi-k3.1-pro-highspeed",
-            "effort": "high",
+            "effort": "low",
             "maxTokens": 32000
           },
           "dispatch": {
             "provider": "moonshot",
             "model": "kimi-k3.1-pro-highspeed",
-            "effort": "high",
+            "effort": "low",
             "maxTokens": 32000
           }
         }
       },
       "live": {
-        "purpose": "the live demo and the submission: Kimi K3.1 Pro highspeed at high",
+        "purpose": "the live demo and the submission: Kimi K3.1 Pro highspeed, the concierge and the analyst at high, the routine roles at low (W4)",
         "roles": {
           "concierge": {
             "provider": "moonshot",
@@ -629,7 +629,7 @@
           "scout": {
             "provider": "moonshot",
             "model": "kimi-k3.1-pro-highspeed",
-            "effort": "high",
+            "effort": "low",
             "maxTokens": 32000
           },
           "analyst": {
@@ -641,25 +641,25 @@
           "payer": {
             "provider": "moonshot",
             "model": "kimi-k3.1-pro-highspeed",
-            "effort": "high",
+            "effort": "low",
             "maxTokens": 32000
           },
           "storefront": {
             "provider": "moonshot",
             "model": "kimi-k3.1-pro-highspeed",
-            "effort": "high",
+            "effort": "low",
             "maxTokens": 32000
           },
           "risk": {
             "provider": "moonshot",
             "model": "kimi-k3.1-pro-highspeed",
-            "effort": "high",
+            "effort": "low",
             "maxTokens": 32000
           },
           "dispatch": {
             "provider": "moonshot",
             "model": "kimi-k3.1-pro-highspeed",
-            "effort": "high",
+            "effort": "low",
             "maxTokens": 32000
           }
         }
