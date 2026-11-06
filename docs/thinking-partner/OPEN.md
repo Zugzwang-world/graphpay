@@ -204,3 +204,10 @@ Updated 23:38 IST, Fri 6 Nov (W7 Submission).
   - Answer: `{ refused: true, sent: false, simulated: true, revert, agent, owner, key, attemptedMicro, currentMicro, resolver, block, arkivTx, entityKey, repeated? }`.
   - Event: a `request` edge from the payer agent to the persona, ref `cap:<node>:<minute>`, amount 0 (the figure is in its payload). It is not in the shop's stream.
   - Recommendation: wire `tryRaiseCap` to the route and show `cap.change.refused` with the revert reason and the Arkiv link.
+- **The owner changes the payer's cap** (from w3-payments; owner: the frontend pass).
+  - What: `POST /api/customer/cap`, body `{ capMicro }`, a micro-USDT string, at most the configured cap (`buyerAgents.payer.capMicro`, 300 tonight).
+  - The owner's wallet writes the ENS record on Sepolia. The watcher on the Mac then writes the policy as min(ENS cap, configured cap) (ADR-0078; W1's change). The route waits up to 45 s for it.
+  - Answer: `{ agent, owner, capMicro, configuredMicro, ens: { changed, beforeMicro, sepoliaTx }, policy: { capMicro, applied }, effectiveMicro, arkivTx, entityKey }`.
+  - Refusals: `OVER_CONFIGURED`, `BAD_CAP`, `TOO_SOON` (one change per 20 s per instance).
+  - Event: a `request` edge from the persona to the payer agent, ref `own:<node>:<minute>`, amount the new cap (in its payload too). The node row's `capMicro` follows through the mirror.
+  - Recommendation: wire `setCap` to the route and emit `agent.cap.changed` with the Sepolia link and, once `policy.applied`, the new pass.
