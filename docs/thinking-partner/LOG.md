@@ -158,7 +158,7 @@ One line per PR: time (IST) · activity · result · PR link. Append under your 
 ## w2-city
 
 - 00:15 IST · w2-city · item 1: the dosa shops on Arkiv under their own names at epoch 0 (directory, nodes and the full labelled 90-day history, south-indian; the analyst reads 241, 60 and 110 orders with the story's rates); each seeded city keeps its own cast, which fixes race Q2 at S and D4 (ADR-0077) · https://github.com/Zugzwang-world/graphpay/pull/167
-- 00:20 IST · w2-city · item 2: the three menus on Swarm, every item with its dish image (12 images), each menu's row on Arkiv, verified on read-back; a W_DIRECTORY write takes a transaction found by nonce only if it holds its own row · PR_LINK
+- 00:20 IST · w2-city · item 2: the three menus on Swarm, every item with its dish image (12 images), each menu's row on Arkiv, verified on read-back; a W_DIRECTORY write takes a transaction found by nonce only if it holds its own row · https://github.com/Zugzwang-world/graphpay/pull/181
 
 ## w6-sdk
 
