@@ -6,7 +6,7 @@ For the founder, who records it. **Your own voice, no text-to-speech or AI voice
 
 - The payer agent is **active** and Filter & Fold is **open**: https://graphpay-event.vercel.app/api/state/customer and the [map](https://graphpay-event.vercel.app/map).
 - A laptop window at least 1200 wide, on https://graphpay-event.vercel.app.
-- An errand takes about two minutes on the production site (115 to 171 s in the calibration table, `docs/thinking-partner/OPEN.md`). Talk over it while the deck follows each step. If the video runs long, cut the wait; never speed it up.
+- An errand takes about two minutes on the production site (91 to 171 s in the calibration table, `docs/thinking-partner/OPEN.md`). Talk over it while the deck follows each step. If the video runs long, cut the wait; never speed it up.
 - Do not tap: Revoke, Change cap or "Let the agent try to raise its own cap" (not wired on the phones), Pause on Concierge, Scout or Analyst (use the Payer card), Subscribe and Cancel ([`docs/sessions/booth/demo-note.md`](../sessions/booth/demo-note.md)). The night streams may change this list; W7 updates it when they land.
 
 ## Shots
@@ -19,7 +19,7 @@ For the founder, who records it. **Your own voice, no text-to-speech or AI voice
 | 1:50–2:10 | Filter & Fold's phone rings: the buyer agent's ENS name and its reputation; Mark dispatched | The shop sees who is buying, by name, and its record. | ENS identity, the merchant view |
 | 2:10–2:30 | The deck's record step: the payment on Arkiv as a receipt and tallies, with its explorer link | The payment is now memory: a receipt that cannot be edited, and running tallies, written in one batch. The next agent that asks will see it. | Arkiv as the memory |
 | 2:30–2:55 | Request refund on Vitalik's phone (the coffee arrived cold, with a photo); Refund 0.80 on the shop's phone; its Whitechain link | Past the first payment: a partial refund, on chain. Renewals and the accountant's export work the same way. | refunds, the business flow |
-| 2:55–3:20 | Vitalik's Payer card: Pause; the Sepolia transaction; resume | The human stays in charge: one ENS record stops the agent, and the gate refuses it before anything is signed. | the ENS kill switch |
+| 2:55–3:20 | Vitalik's Payer card: Pause; the Sepolia transaction; resume (or leave it: the site resumes a paused agent after 2 minutes) | The human stays in charge: one ENS record stops the agent, and the gate refuses it before anything is signed. | the ENS kill switch |
 | 3:20–3:45 | [Race mode](https://graphpay-event.vercel.app/race) at the largest seeded city: the reads each side needs, ticking | Plain Arkiv has to read every payment to rank the city; Graph Arkiv reads its tallies. Say the city size and that it is synthetic. | the benchmark, in reads |
 | 3:45–4:00 | The README's "Verify each claim" table, or the drop-in store's 12 lines | Every claim links to a public explorer. Any shop can add this checkout in 12 lines. | the evidence, the drop-in |
 
