@@ -20,6 +20,7 @@
   },
   "dependencies": {
     "@ai-sdk/anthropic": "4.0.96",
+    "@ai-sdk/moonshotai": "3.0.84",
     "@graphpay/config": "workspace:*",
     "ai": "7.0.162",
     "graphql": "16.14.2",

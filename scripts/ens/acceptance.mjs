@@ -1,12 +1,14 @@
 // node scripts/ens/acceptance.mjs [--fork <loopback url>]
 // Read-only checks on Ethereum Sepolia (or a fork): B1 (every name registered, epoch, own resolver,
 // kind, wallet), B4 (x-graphpay-accepts), B5 (the wildcard), B8's record reads and B9 (a)'s address
-// reads. B8's MCP call waits for M7b; B9 (a)'s payee comparison waits for a settled payment.
+// reads and its payee comparison (each cast shop's last settled order's merchant against the shop's ENS
+// address). B8's MCP call is made against the hosted endpoint.
 // Exit 1 on any failure. Prints names, nodes and public addresses only.
 
 import { createPublicClient, getAddress, http } from 'viem';
 import { config } from '../../packages/config/index.mjs';
-import { coinResource, disposableAgent, ensChain, KEYS, namespacePlan, parseAccepts, permissionedResolverAbi, readAddressBytes, readText, RESOLVER, retryingReads, textResource, WHITECHAIN_COIN_TYPE, walkName } from '../../packages/ens/index.mjs';
+import { coinResource, disposableAgent, ensChain, KEYS, namehash, namespacePlan, parseAccepts, permissionedResolverAbi, readAddressBytes, readText, RESOLVER, retryingReads, textResource, WHITECHAIN_COIN_TYPE, walkName } from '../../packages/ens/index.mjs';
+import { checkoutAbi } from '../../packages/contracts/index.mjs';
 import { clientsFor } from '../lib/chains.mjs';
 import { loadEnv } from '../lib/env-loader.mjs';
 import { roleAddresses } from '../lib/wallets.mjs';
@@ -102,6 +104,32 @@ try {
   check('B8', Boolean(init.result?.serverInfo) && ['schema', 'ask', 'graphql', 'explain'].every((n) => tools.includes(n)), `${endpoint}: initialize and tools/list = ${tools.join(', ')}`);
 } catch (e) {
   check('B8', false, `${endpoint}: MCP call failed (${e.message})`);
+}
+
+// B9 (a): for each cast shop with a settled payment, the merchant of its last settled order equals the
+// address its ENS name resolves to for coin type 2147485522 (read-only, Whitechain Sepolia).
+if (!fork) {
+  const checkout = config.whitechain.contracts?.checkout;
+  const wc = (await clientsFor('whitechain', Object.fromEntries(values))).publicClient;
+  const head = await wc.getBlockNumber();
+  const settledEvent = checkoutAbi.find((x) => x.type === 'event' && x.name === 'PaymentSettled');
+  // The Whitechain RPC answers a log range of 1000 blocks, not 5000: one pass from the deploy block, all shops.
+  const settled = [];
+  for (let from = BigInt(checkout.deployBlock); from <= head; from += 1_000n) {
+    const to = from + 999n < head ? from + 999n : head;
+    settled.push(...(await wc.getLogs({ address: checkout.address, event: settledEvent, fromBlock: from, toBlock: to })));
+  }
+  for (const shop of plan.owners.filter((o) => o.kind === 'shop')) {
+    const node = namehash(shop.name);
+    const last = settled.filter((l) => l.args.shopNode === node).at(-1);
+    if (!last) {
+      console.log(`skip B9a ${shop.name}: no settled payment yet`);
+      continue;
+    }
+    const order = await wc.readContract({ address: checkout.address, abi: checkoutAbi, functionName: 'orders', args: [last.args.orderId] });
+    const ens = await safe(() => readAddressBytes(client, shop.name, WHITECHAIN_COIN_TYPE));
+    check('B9a', typeof ens === 'string' && ens.startsWith('0x') && ens.toLowerCase() === order.merchant.toLowerCase(), `${shop.name}: last settled order ${last.args.orderId.slice(0, 10)}… paid ${order.merchant} (tx ${last.transactionHash}); ENS addr(2147485522) is ${ens}`);
+  }
 }
 
 console.log(failures.length === 0 ? '\nENS acceptance reads: all pass' : `\n${failures.length} failure(s)`);

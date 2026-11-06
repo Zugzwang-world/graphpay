@@ -152,6 +152,9 @@
       "W_SEED_M_EVENT": "0x734Fc394248777046fb80d55AD1f0b0C142a0d64"
     }
   },
+  "swarm": {
+    "gateway": "https://api.gateway.ethswarm.org"
+  },
   "site": {
     "url": "https://graphpay-event.vercel.app",
     "mcpPath": "/api/mcp",
@@ -258,7 +261,7 @@
     ]
   },
   "models": {
-    "source": "Anthropic pricing page (https://platform.claude.com/docs/en/about-claude/pricing), checked 2026-11-05; every price here is listed there. Cache writes cost 1.25x input for 5 minutes and 2x input for 1 hour; cache reads 0.1x input (0.05x on Opus 5.5). Haiku 5.5 has a second card (longPrompt) for a prompt over 100,000 tokens, counting all input tokens including cache reads and writes; it then prices every token of that request, output included. Re-check the page before quoting a cost publicly.",
+    "source": "Anthropic pricing page (https://platform.claude.com/docs/en/about-claude/pricing), checked 2026-11-05; every price here is listed there. Cache writes cost 1.25x input for 5 minutes and 2x input for 1 hour; cache reads 0.1x input (0.05x on Opus 5.5). Haiku 5.5 has a second card (longPrompt) for a prompt over 100,000 tokens, counting all input tokens including cache reads and writes; it then prices every token of that request, output included. Re-check the page before quoting a cost publicly. Kimi (Moonshot AI) prices, base URL, models and reasoning efforts: docs/technical/FACTS.md (Kimi rows), from Kimi's API docs as checked by the verifier on 2026-11-06.",
     "apiBaseUrl": "https://api.anthropic.com",
     "pricingUsdPerMTok": {
       "claude-opus-5-5": {
@@ -282,6 +285,16 @@
           "cacheWrite1h": 1.0,
           "cacheRead": 0.05
         }
+      },
+      "kimi-k3.1-pro": {
+        "input": 2.0,
+        "output": 10.0,
+        "cacheRead": 0.2
+      },
+      "kimi-k3.1-pro-highspeed": {
+        "input": 4.0,
+        "output": 20.0,
+        "cacheRead": 0.2
       }
     },
     "effortLevels": [
@@ -290,6 +303,16 @@
       "high",
       "xhigh",
       "max"
-    ]
+    ],
+    "moonshot": {
+      "about": "Kimi (Moonshot AI), an optional agent provider (ADR-0048 presets, provider \"moonshot\"). Server-only key; Authorization: Bearer; the base URL is the international endpoint. Reasoning effort is low, high or max (no xhigh); temperature is fixed at 1.0 by the models. Cache-write tokens are costed as ordinary input (assumption: no cache-write price is in the verified rows; re-check before quoting a cost).",
+      "apiBaseUrl": "https://api.moonshot.ai/v1",
+      "keyEnv": "KIMI_API_KEY",
+      "effortLevels": [
+        "low",
+        "high",
+        "max"
+      ]
+    }
   }
 }

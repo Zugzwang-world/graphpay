@@ -1,8 +1,8 @@
-// @graphpay/agentpay: a two-sided SDK for agentic stablecoin payments on Whitechain.
+// @graphpay_ethglobal/agentpay: a two-sided SDK for agentic stablecoin payments on Whitechain.
 // Buyers pay a 402 with one signature and no gas under an on-chain spending pass; merchants
 // price any route and settle through a facilitator. See README.md.
 
-export { whitechainNetwork, assertChain, explorerTx, AgentPayError, ALLOWED_CHAIN_IDS } from './src/network.mjs';
+export { whitechainNetwork, assertChain, assertClientChain, assertWriteChain, explorerTx, AgentPayError, ALLOWED_CHAIN_IDS } from './src/network.mjs';
 export { usdt, formatUsdt, toMicro } from './src/money.mjs';
 export { createOrder, orderToWire, orderFromWire, deriveOrderId, detailsHash, nodeOf, canonicalJson, FULFILMENT_TYPES, ORDER_SCHEMA, ZERO32 } from './src/order.mjs';
 export {
@@ -24,7 +24,8 @@ export { readSpendingPass, issueSpendingPass, revokeSpendingPass, spentInPeriod,
 export { signOrderPayment, signSubscription, signCancel, signRefundRequest, DEFAULT_APPROVAL_MICRO } from './src/sign.mjs';
 export { createMerchant, toFetchRequest, sendFetchResponse, jsonResponse } from './src/merchant.mjs';
 export { httpFacilitator, inProcessFacilitator, FacilitatorUnavailable } from './src/facilitator.mjs';
-export { createReferenceRelayer, predictPolicy, RELAYER_DEFAULTS } from './src/relayer.mjs';
+export { deployCheckout } from './src/deploy.mjs';
+export { createReferenceRelayer, predictPolicy, resolveLimits, RELAYER_DEFAULTS } from './src/relayer.mjs';
 export { staticIdentity, staticReputation } from './src/identity.mjs';
 export { buyerTools, merchantTools, buyerToolDefinitions, merchantToolDefinitions, aiSdkTools } from './src/tools.mjs';
 export { createAgentPayMcpServer, registerBuyerTools, registerMerchantTools, registerTools } from './src/mcp.mjs';

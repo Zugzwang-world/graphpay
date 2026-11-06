@@ -434,54 +434,148 @@
     "active": "testing",
     "presets": {
       "testing": {
-        "purpose": "every test run (active tonight)",
+        "purpose": "every test run (active): Kimi K3.1 Pro at high; the founder replaced Anthropic with Kimi on 2026-11-06 because the Anthropic key ran out of credit",
         "roles": {
           "concierge": {
-            "provider": "anthropic",
-            "model": "claude-opus-5-5",
-            "effort": "xhigh",
-            "maxTokens": 64000
+            "provider": "moonshot",
+            "model": "kimi-k3.1-pro",
+            "effort": "high",
+            "maxTokens": 32000
           },
           "scout": {
-            "provider": "anthropic",
-            "model": "claude-opus-5-5",
-            "effort": "xhigh",
-            "maxTokens": 64000
+            "provider": "moonshot",
+            "model": "kimi-k3.1-pro",
+            "effort": "high",
+            "maxTokens": 32000
           },
           "analyst": {
-            "provider": "anthropic",
-            "model": "claude-opus-5-5",
-            "effort": "xhigh",
-            "maxTokens": 64000
+            "provider": "moonshot",
+            "model": "kimi-k3.1-pro",
+            "effort": "high",
+            "maxTokens": 32000
           },
           "payer": {
-            "provider": "anthropic",
-            "model": "claude-opus-5-5",
-            "effort": "xhigh",
-            "maxTokens": 64000
+            "provider": "moonshot",
+            "model": "kimi-k3.1-pro",
+            "effort": "high",
+            "maxTokens": 32000
           },
           "storefront": {
-            "provider": "anthropic",
-            "model": "claude-opus-5-5",
-            "effort": "xhigh",
-            "maxTokens": 64000
+            "provider": "moonshot",
+            "model": "kimi-k3.1-pro",
+            "effort": "high",
+            "maxTokens": 32000
           },
           "risk": {
-            "provider": "anthropic",
-            "model": "claude-opus-5-5",
-            "effort": "xhigh",
-            "maxTokens": 64000
+            "provider": "moonshot",
+            "model": "kimi-k3.1-pro",
+            "effort": "high",
+            "maxTokens": 32000
           },
           "dispatch": {
-            "provider": "anthropic",
-            "model": "claude-opus-5-5",
-            "effort": "xhigh",
-            "maxTokens": 64000
+            "provider": "moonshot",
+            "model": "kimi-k3.1-pro",
+            "effort": "high",
+            "maxTokens": 32000
           }
         }
       },
       "video": {
-        "purpose": "the recorded video, if its timing fits (videos cannot be sped up)",
+        "purpose": "the recorded video: Kimi K3.1 Pro highspeed at high, if its timing fits",
+        "roles": {
+          "concierge": {
+            "provider": "moonshot",
+            "model": "kimi-k3.1-pro-highspeed",
+            "effort": "high",
+            "maxTokens": 32000
+          },
+          "scout": {
+            "provider": "moonshot",
+            "model": "kimi-k3.1-pro-highspeed",
+            "effort": "high",
+            "maxTokens": 32000
+          },
+          "analyst": {
+            "provider": "moonshot",
+            "model": "kimi-k3.1-pro-highspeed",
+            "effort": "high",
+            "maxTokens": 32000
+          },
+          "payer": {
+            "provider": "moonshot",
+            "model": "kimi-k3.1-pro-highspeed",
+            "effort": "high",
+            "maxTokens": 32000
+          },
+          "storefront": {
+            "provider": "moonshot",
+            "model": "kimi-k3.1-pro-highspeed",
+            "effort": "high",
+            "maxTokens": 32000
+          },
+          "risk": {
+            "provider": "moonshot",
+            "model": "kimi-k3.1-pro-highspeed",
+            "effort": "high",
+            "maxTokens": 32000
+          },
+          "dispatch": {
+            "provider": "moonshot",
+            "model": "kimi-k3.1-pro-highspeed",
+            "effort": "high",
+            "maxTokens": 32000
+          }
+        }
+      },
+      "live": {
+        "purpose": "the live demo and the submission: Kimi K3.1 Pro highspeed at high",
+        "roles": {
+          "concierge": {
+            "provider": "moonshot",
+            "model": "kimi-k3.1-pro-highspeed",
+            "effort": "high",
+            "maxTokens": 32000
+          },
+          "scout": {
+            "provider": "moonshot",
+            "model": "kimi-k3.1-pro-highspeed",
+            "effort": "high",
+            "maxTokens": 32000
+          },
+          "analyst": {
+            "provider": "moonshot",
+            "model": "kimi-k3.1-pro-highspeed",
+            "effort": "high",
+            "maxTokens": 32000
+          },
+          "payer": {
+            "provider": "moonshot",
+            "model": "kimi-k3.1-pro-highspeed",
+            "effort": "high",
+            "maxTokens": 32000
+          },
+          "storefront": {
+            "provider": "moonshot",
+            "model": "kimi-k3.1-pro-highspeed",
+            "effort": "high",
+            "maxTokens": 32000
+          },
+          "risk": {
+            "provider": "moonshot",
+            "model": "kimi-k3.1-pro-highspeed",
+            "effort": "high",
+            "maxTokens": 32000
+          },
+          "dispatch": {
+            "provider": "moonshot",
+            "model": "kimi-k3.1-pro-highspeed",
+            "effort": "high",
+            "maxTokens": 32000
+          }
+        }
+      },
+      "anthropic-testing": {
+        "purpose": "fallback (Anthropic): every test run (active tonight)",
         "roles": {
           "concierge": {
             "provider": "anthropic",
@@ -527,8 +621,55 @@
           }
         }
       },
-      "live": {
-        "purpose": "the live demo and the submission",
+      "anthropic-video": {
+        "purpose": "fallback (Anthropic): the recorded video, if its timing fits (videos cannot be sped up)",
+        "roles": {
+          "concierge": {
+            "provider": "anthropic",
+            "model": "claude-opus-5-5",
+            "effort": "xhigh",
+            "maxTokens": 64000
+          },
+          "scout": {
+            "provider": "anthropic",
+            "model": "claude-opus-5-5",
+            "effort": "xhigh",
+            "maxTokens": 64000
+          },
+          "analyst": {
+            "provider": "anthropic",
+            "model": "claude-opus-5-5",
+            "effort": "xhigh",
+            "maxTokens": 64000
+          },
+          "payer": {
+            "provider": "anthropic",
+            "model": "claude-opus-5-5",
+            "effort": "xhigh",
+            "maxTokens": 64000
+          },
+          "storefront": {
+            "provider": "anthropic",
+            "model": "claude-opus-5-5",
+            "effort": "xhigh",
+            "maxTokens": 64000
+          },
+          "risk": {
+            "provider": "anthropic",
+            "model": "claude-opus-5-5",
+            "effort": "xhigh",
+            "maxTokens": 64000
+          },
+          "dispatch": {
+            "provider": "anthropic",
+            "model": "claude-opus-5-5",
+            "effort": "xhigh",
+            "maxTokens": 64000
+          }
+        }
+      },
+      "anthropic-live": {
+        "purpose": "fallback (Anthropic): the live demo and the submission",
         "roles": {
           "concierge": {
             "provider": "anthropic",

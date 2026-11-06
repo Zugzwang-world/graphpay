@@ -6,7 +6,7 @@ import { generatePrivateKey, privateKeyToAccount } from 'viem/accounts';
 import { recoverTypedDataAddress } from 'viem';
 import { config } from '@graphpay/config';
 import { permit2Domain, permitWitnessTypes } from '@graphpay/contracts';
-import { whitechainNetwork } from '@graphpay/agentpay';
+import { whitechainNetwork } from '@graphpay_ethglobal/agentpay';
 import { fakeChain, fakeFacilitator } from './fakes.mjs';
 import { CatalogError, MAX_QUANTITY, createGraphPayShop, networkForClient } from '../index.mjs';
 import { CheckoutError, HEADERS, PAYER_HEADER, decodeHeader, encodeHeader, getQuote, graphpayCheckout, payQuote } from '../src/client.mjs';

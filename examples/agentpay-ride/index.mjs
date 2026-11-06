@@ -1,7 +1,7 @@
 // A fixed-fare cab ride on the same SDK: the fare is known before the ride, so it is a
 // fixed-price order (variable fares need pre-authorisation: V2). Names and the fare come
 // from the story config.
-import { createBuyerAgent, createMerchant } from '@graphpay/agentpay';
+import { createBuyerAgent, createMerchant } from '@graphpay_ethglobal/agentpay';
 import { config, story } from '@graphpay/config';
 
 const ride = story.agentpayExamples.ride;

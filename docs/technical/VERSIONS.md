@@ -72,6 +72,7 @@ The M0 verifier's snapshot of every package in `planning/FACTS.md` §5 is in `do
 |---|---|---|---|
 | `ai` | 7.0.162 (`packages/agents`) | the lab's pin; still exists per the M0 verifier (`docs/technical/FACTS.md`, `latest` is 7.0.163); installed from the registry tarball, API names read from its shipped `dist/index.d.ts` and `docs/` (`ToolLoopAgent`, `Output.object`, `isStepCount`, `wrapLanguageModel`, `ai/test` `MockLanguageModelV4`) | verified (not the newest patch; the lab's tests ran on it) |
 | `@ai-sdk/anthropic` | 4.0.96 | same (`latest` 4.0.97); `providerOptions.anthropic.effort` and native structured output for Opus 5.5 read from its shipped docs | verified |
+| `@ai-sdk/moonshotai` | 3.0.84 (`latest` 3.0.85) | npm registry: depends on `@ai-sdk/provider` 4.0.35 and `provider-utils` 5.0.74, the same as `@ai-sdk/anthropic` 4.0.96, so it matches `ai` 7.0.162; model ids `kimi-k3.1-pro` and `kimi-k3.1-pro-highspeed`, `providerOptions.moonshotai.reasoningEffort` (low, high, max) and `reasoning_content` round-trip read from its shipped source (tarball), 2026-11-06 | verified |
 | `zod` | 4.6.7 | = `latest` (FACTS.md) | verified |
 | `graphql` | 16.14.2 | same pin as `packages/arkiv-graph`; the mock MCP runs real graphql-js | verified |
 

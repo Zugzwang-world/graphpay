@@ -13,8 +13,14 @@ const BIP39 = new Set(
 
 export const SHAPES = [
   { label: 'anthropic-api-key', re: /sk-ant-[A-Za-z0-9_-]{20,}/g },
-  { label: 'xai-api-key', re: /(?<![A-Za-z0-9])xai-[A-Za-z0-9]{20,}/g },
-  { label: 'jwt', re: /(?<![A-Za-z0-9_-])eyJ[A-Za-z0-9_-]{8,}\.eyJ[A-Za-z0-9_-]{8,}\.[A-Za-z0-9_-]{8,}/g },
+  // Prompt logs and diffs hold JSON text, where a key that starts a line or follows a tab is stored as
+  // \nkey or \tkey: in the rules with a lookbehind, that escape counts as a boundary too.
+  { label: 'xai-api-key', re: /(?:(?<![A-Za-z0-9])|(?<=\\[nrt]))xai-[A-Za-z0-9]{20,}/g },
+  // Kimi (Moonshot AI) keys start sk- (admin keys sk-admin-); neither the length nor the character set is
+  // documented (FACTS, 2026-11-06), so a conservative minimum over the usual key characters. It also catches
+  // other sk- style keys; Anthropic's sk-ant- has its own rule.
+  { label: 'kimi-api-key', re: /(?:(?<![A-Za-z0-9_-])|(?<=\\[nrt]))sk-(?!ant-)[A-Za-z0-9_-]{32,}/g },
+  { label: 'jwt', re: /(?:(?<![A-Za-z0-9_-])|(?<=\\[nrt]))eyJ[A-Za-z0-9_-]{8,}\.eyJ[A-Za-z0-9_-]{8,}\.[A-Za-z0-9_-]{8,}/g },
   // "private key", "priv key", "secret key", "signer key" as private_key, private-key or privatekey,
   // then within 16 spaces an optional ':' or '=', an optional quote and 64 hex digits.
   {
@@ -26,8 +32,8 @@ export const SHAPES = [
   { label: 'arkiv-access-key-in-url', re: /rpc\.rabdi\.db-chain\.testnet\.arkiv\.network\/(?:ws\/)?[A-Za-z0-9._~-]{8,}/gi },
   // An Ankr API key follows the network segment: rpc.ankr.com/<network>/<key> (or /<network>/ws/<key>).
   { label: 'ankr-api-key-in-url', re: /rpc\.ankr\.com\/[A-Za-z0-9_]+\/(?:ws\/)?[A-Za-z0-9]{16,}/gi },
-  { label: 'github-token', re: /(?<![A-Za-z0-9])gh[pousr]_[A-Za-z0-9]{36,}/g },
-  { label: 'github-fine-grained-token', re: /(?<![A-Za-z0-9])github_pat_[A-Za-z0-9_]{22,}/g },
+  { label: 'github-token', re: /(?:(?<![A-Za-z0-9])|(?<=\\[nrt]))gh[pousr]_[A-Za-z0-9]{36,}/g },
+  { label: 'github-fine-grained-token', re: /(?:(?<![A-Za-z0-9])|(?<=\\[nrt]))github_pat_[A-Za-z0-9_]{22,}/g },
   {
     label: 'database-url-password',
     re: /(?<![A-Za-z0-9+.-])(?:postgres(?:ql)?|mysql|mariadb|mongodb(?:\+srv)?|rediss?|amqps?):\/\/[^\s:/@]+:(?!\[YOUR-PASSWORD\]|\$\{|<)[^\s@/]+@/gi,

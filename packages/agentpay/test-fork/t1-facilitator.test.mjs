@@ -6,7 +6,7 @@
 // T1's ENS gate is a stub here (the fork has no ENS): for the test agent it answers the name's
 // node and the pass's on-chain epoch, as T2's gate does for an active agent; any other name gets
 // T2's ENS_EXPIRED_OR_REVOKED.
-//   pnpm --filter @graphpay/agentpay test:fork
+//   pnpm --filter @graphpay_ethglobal/agentpay test:fork
 
 import { after, before, test } from 'node:test';
 import assert from 'node:assert/strict';

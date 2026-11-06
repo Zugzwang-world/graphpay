@@ -1,5 +1,6 @@
 // The live errand runner behind the site's POST /api/agents/run (planning/SPEC/ARCHITECTURE.md
-// row 7; the founder's go, Fri 6 Nov): the buyer team on the `live` preset, over live ENS,
+// row 7; the founder's go, Fri 6 Nov): the buyer team on the story's `live` preset (its providers
+// and their key names come from the preset and config `models`, ADR-0067), over live ENS,
 // Arkiv, the MCP and the hosted shop and facilitator (stack.mjs, hosted mode), as the story's
 // payer agent. Server side only: the keys come from the server's environment and never leave it.
 // Guardrails, all in the path of every run:
@@ -11,7 +12,7 @@
 // createLiveRunner(env) answers null when a needed name is missing, and the route then says so.
 
 import { createShopGateway, runErrand, teamCast } from '@graphpay/agents';
-import { castEntries, config, network, resolveRpc } from '@graphpay/config';
+import { castEntries, config, network, resolveRpc, story } from '@graphpay/config';
 import { connectArkiv } from '@graphpay/money-graph';
 import { createPublicClient, createWalletClient, defineChain, http } from 'viem';
 import { privateKeyToAccount } from 'viem/accounts';
@@ -23,7 +24,9 @@ import { startStack, x402Codec } from './stack.mjs';
 // What the runner needs on the server (names only; the values are never read into a log).
 const PAYER = 'payer'; // the cast's stage payer agent (its key in the story config)
 const payerEntry = () => castEntries().find((e) => e.kind === 'buyer-agent' && e.key === PAYER) ?? null;
-export const LIVE_RUNNER_NEEDS = ['ANTHROPIC_API_KEY', `${payerEntry()?.walletRole ?? 'PAYER'}_PRIVATE_KEY`, 'W_DIRECTORY_PRIVATE_KEY', 'ARKIV_ACCESS_KEY', 'DEMO_PASSCODE', 'ALLOW_REAL_NETWORK'];
+// The live preset's model keys: each provider's key name from config models (never named here).
+const modelKeys = () => [...new Set(Object.values(story.agentModels?.presets?.live?.roles ?? {}).map((r) => config.models?.[r.provider]?.keyEnv ?? `an installed provider for ${r.provider}`))];
+export const LIVE_RUNNER_NEEDS = [...modelKeys(), `${payerEntry()?.walletRole ?? 'PAYER'}_PRIVATE_KEY`, 'W_DIRECTORY_PRIVATE_KEY', 'ARKIV_ACCESS_KEY', 'DEMO_PASSCODE', 'ALLOW_REAL_NETWORK'];
 // The Arkiv flush of presence and handoffs may not hold the result back longer than this.
 const FLUSH_WAIT_MS = 10_000;
 // At most this many errands per instance in a rolling hour (each one spends test USDT and API).
@@ -31,6 +34,7 @@ export const RUNS_PER_HOUR = 6;
 
 export function liveRunnerMissing(env = process.env) {
   if (!payerEntry()) return ['a paying agent named payer in the story'];
+  if (!story.agentModels?.presets?.live) return ['a live preset in the story'];
   if (process.env.STACK_LOCAL_RELAY === '1') return ['STACK_LOCAL_RELAY unset (the runner uses the hosted stack only)'];
   return LIVE_RUNNER_NEEDS.filter((name) => !env[name] || (name === 'ALLOW_REAL_NETWORK' && env[name] !== '1'));
 }
@@ -49,7 +53,7 @@ async function clientsFor(key, env) {
 // env: the server's environment (process.env on Vercel). log: one line, no secrets.
 export function createLiveRunner(env = process.env, { log = () => {}, now = Date.now } = {}) {
   if (liveRunnerMissing(env).length) return null;
-  const runEnv = { ...env, AGENT_PRESET: 'live', AGENT_MODE: 'anthropic' }; // the live preset only
+  const runEnv = { ...env, AGENT_PRESET: 'live', AGENT_MODE: 'live' }; // the live preset only
   const started = [];
   let busy = false; // one errand at a time in this instance, until its last step has finished
   let parts = null; // the clients, connections and stack, built on the first run of an instance
@@ -107,7 +111,7 @@ export function createLiveRunner(env = process.env, { log = () => {}, now = Date
     };
     hooks.shopClient = (shopEns, opts) => createShopGateway({ shopEns, surface: stack.surfaceFor(shopEns), mcp, hooks, storefront: storefront(shopEns), names: team.shopAgentNames(shopEns), ...opts });
     try {
-      const { runLog, metrics } = await runErrand({ mode: 'anthropic', env: runEnv, buyer: PAYER, hooks, mcp, runId, request, onEvent, signal, secrets: stack.secrets, label: 'live errand on the site (SYNTHETIC story)' });
+      const { runLog, metrics } = await runErrand({ mode: 'live', env: runEnv, buyer: PAYER, hooks, mcp, runId, request, onEvent, signal, secrets: stack.secrets, label: 'live errand on the site (SYNTHETIC story)' });
       log(`live errand ${runId}: ${runLog.result.status}, ${metrics.seconds.toFixed(1)} s, $${metrics.apiCostUsd.toFixed(4)}`);
       return runLog.result;
     } finally {
