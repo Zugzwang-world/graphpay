@@ -112,7 +112,8 @@ One line per PR: time (IST) · activity · result · PR link. Append under your 
 - 00:24 IST · records · NOW rewritten by stream (W1 kill live and flip cleared, W2 step 1 done, W3 limits live, W4 routine in code, W5 self-healing proven, W6 1.0.0 merged, W7 done); TRACKER to match · https://github.com/Zugzwang-world/graphpay/pull/184
 - 00:44 IST · records · NOW and TRACKER: the label flip live (#189), the workers restart and proof errand next, the mirror stalled on the shared Arkiv budget, W4's code mode live (#182), W5's acceptance updates (#188) · https://github.com/Zugzwang-world/graphpay/pull/197
 - 01:00 IST · records · the founder's 00:52 IST word: the big city trimmed, seeding stopped (00:58 IST), the mirror first, then the restart, W1's proof errand, W4's three, acceptance; the menus (#181) · https://github.com/Zugzwang-world/graphpay/pull/200
-- 01:20 IST · records · W1 done: the flip proven by the 01:07 IST errand through filter-and-fold (mirror edge, 242 orders, ENS 101 pass); the mirror back on post-flip main; W4, W3, W2 and W5 next · coord/night-records-9
+- 01:20 IST · records · W1 done: the flip proven by the 01:07 IST errand through filter-and-fold (mirror edge, 242 orders, ENS 101 pass); the mirror back on post-flip main; W4, W3, W2 and W5 next · https://github.com/Zugzwang-world/graphpay/pull/203
+- 01:30 IST · records · W3 and W4 done; W5's payer refill and checkpoint fix (#209); the founder kept race mode at S, M as seeded (#186); acceptance, race PR, storefronts and agentpay still running · coord/night-records-10
 
 ## booth
 
