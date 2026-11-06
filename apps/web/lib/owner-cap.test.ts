@@ -63,7 +63,7 @@ test('after the ENS change, a failed policy read or Arkiv write never loses the 
   forgetOwnerCap();
   const unread = deps({ policyAfter: [new Error('rpc')] });
   const none = await setOwnerCap({ capMicro: '50000000' }, unread.d);
-  assert.deepEqual([none.policy.capMicro, none.policy.applied, none.effectiveMicro], [null, false, '50000000']);
+  assert.deepEqual([none.policy.capMicro, none.policy.applied, none.effectiveMicro], [null, false, null]);
   assert.equal(unread.records[0]!.policyMicro, null);
   forgetOwnerCap();
   const lost = await setOwnerCap({ capMicro: '50000000' }, deps({ recordFails: true }).d);
@@ -89,4 +89,18 @@ test('one change at a time, and one per 20 s', async () => {
   assert.equal(await code(setOwnerCap({ capMicro: '50000000' }, deps().d)), 'ok');
   assert.equal(await code(setOwnerCap({ capMicro: '60000000' }, deps({ at: T0 + 1000 }).d)), 'TOO_SOON');
   assert.equal(await code(setOwnerCap({ capMicro: '60000000' }, deps({ at: T0 + CAP_COOLDOWN_MS + 60_000 }).d)), 'ok');
+});
+
+test('the policy wait is cut to what is left of the change\'s budget, so the Arkiv write always has its time', async () => {
+  const { d, records } = deps({ policyAfter: [300_000_000n] });
+  // A slow Sepolia change: 250 of the 260 s are gone before the policy is first read.
+  const slow = { ...d, setEnsCap: async (cap: bigint) => {
+    await d.sleep(250_000);
+    return d.setEnsCap(cap);
+  } };
+  const t0 = d.now();
+  const out = await setOwnerCap({ capMicro: '50000000' }, slow);
+  assert.equal(out.policy.applied, false);
+  assert.ok(d.now() - t0 <= 263_000, `took ${d.now() - t0} ms`);
+  assert.equal(records.length, 1);
 });

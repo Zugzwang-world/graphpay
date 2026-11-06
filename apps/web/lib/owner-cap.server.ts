@@ -15,6 +15,9 @@ export const CAP_COOLDOWN_MS = 20_000;
 // How long the route waits for the policy writer to apply the change (the watcher polls every 2 s and
 // retries a failed write on its 30 s tick).
 export const POLICY_WAIT_MS = 60_000;
+// The whole change must leave the Arkiv write its time inside the route's 300 s (the Sepolia receipt
+// alone can take 180 s and its read-back 60 s): the policy wait is cut to what is left of this.
+export const CHANGE_BUDGET_MS = 260_000;
 const POLL_MS = 3_000;
 
 export type OwnerCapRefusalCode = 'BAD_CAP' | 'OVER_CONFIGURED' | 'UNDER_FLOOR' | 'TOO_SOON';
@@ -52,8 +55,9 @@ export interface OwnerCapResult {
   ens: { changed: boolean; beforeMicro: string; sepoliaTx: string | null };
   // null when the policy could not be read in the wait.
   policy: { capMicro: string | null; applied: boolean };
-  // What the gate enforces now: the lower of the two (within the gate's 20 s cache).
-  effectiveMicro: string;
+  // What the gate enforces now: the lower of the two (within the gate's 20 s cache); null when the
+  // policy could not be read.
+  effectiveMicro: string | null;
   // null when the Arkiv write failed: the ENS change stands, and the answer says so.
   arkivTx: string | null;
   entityKey: string | null;
@@ -75,6 +79,7 @@ export async function setOwnerCap(input: { capMicro?: unknown }, deps: OwnerCapD
   if (busy || now - lastChange < CAP_COOLDOWN_MS) throw new OwnerCapRefusal('TOO_SOON', 429);
   busy = true;
   lastChange = now;
+  const started = deps.now();
   try {
     const before = await deps.ensCap();
     const ens = await deps.setEnsCap(cap);
@@ -83,7 +88,7 @@ export async function setOwnerCap(input: { capMicro?: unknown }, deps: OwnerCapD
     const read = async () => deps.policy().catch(() => null);
     // The policy follows by the policy writer on the Mac; the route waits a while for it.
     let policy = await read();
-    const until = deps.now() + POLICY_WAIT_MS;
+    const until = Math.min(deps.now() + POLICY_WAIT_MS, started + CHANGE_BUDGET_MS);
     while (policy?.capMicro !== cap && deps.now() + POLL_MS <= until) {
       await deps.sleep(POLL_MS);
       policy = (await read()) ?? policy;
@@ -95,7 +100,7 @@ export async function setOwnerCap(input: { capMicro?: unknown }, deps: OwnerCapD
     } catch {
       console.error('owner cap: the Arkiv record could not be written; the ENS change stands');
     }
-    const effective = policy && policy.capMicro < cap ? policy.capMicro : cap;
+    const effective = policy === null ? null : policy.capMicro < cap ? policy.capMicro : cap;
     return {
       agent: model.payer.ens,
       owner: model.persona.ens,
@@ -103,7 +108,7 @@ export async function setOwnerCap(input: { capMicro?: unknown }, deps: OwnerCapD
       configuredMicro: String(configured),
       ens: { changed: ens.changed, beforeMicro: String(before), sepoliaTx: ens.sepoliaTx },
       policy: { capMicro: policy ? String(policy.capMicro) : null, applied },
-      effectiveMicro: String(effective),
+      effectiveMicro: effective === null ? null : String(effective),
       arkivTx: written?.txHash ?? null,
       entityKey: written?.entityKey ?? null,
     };
