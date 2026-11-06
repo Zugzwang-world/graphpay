@@ -1,0 +1,16 @@
+# ADR-0078: The owner's cap reaches the spending policy through the watcher, never above the configured cap
+Status: accepted · Date: 2026-11-07 00:10 IST · Decided by: the night Coordinator, under the founder's authority (W3 brief, item 4b) · Source: the W3 brief `docs/thinking-partner/briefs/2258-w3-payments.md`; NOW, "Decided tonight (Coordinator)", 00:00 IST
+
+## Decision
+When the payer agent's owner changes its daily cap (`POST /api/customer/cap`), the owner's wallet writes the ENS record `graphpay.cap_micro` on Sepolia. The ENS watcher on the Mac then writes the same cap into the agent's spending policy on the checkout, as min(the owner's ENS cap, the payments setup's configured cap, `buyerAgents.<agent>.capMicro`). POLICY_WRITER stays local. The route waits up to 45 s for the policy and records the change on Arkiv (a W_SYNC `request` edge from the owner to the agent, ref `own:`).
+
+## Why
+- **The brief asks for both records.** It says "the owner changes the payer's cap, in both the spending policy and the ENS record".
+- **Only the policy writer can write the policy**, and its key stays on the Mac on purpose (planning/SPEC/ARCHITECTURE.md §3; ADR-0021: "a stolen relayer key cannot lift a cap"). `secrets:vercel` refuses it (LOCAL_ONLY).
+- **The owner's key is already hosted** for pause and resume. Bounding the copy by the configured cap keeps ADR-0021 true: a stolen hosted owner key can lower the pass or restore it, never lift it above what the payments setup allows.
+- **The contract's own policy check is the only cap on renewals.** Renewals do not pass the ENS gate, so the policy must follow the owner, or a lowered cap would not bind them.
+
+## Consequences
+- **This narrows `planning/DECISIONS.md` E-11** ("the watcher never copies the ENS cap") and `planning/SPEC/IDENTITY_ENS.md` §8 ("`graphpay.cap_micro` changes are shown on the node, never written into the policy"). The watcher may now write an owner's cap change into the policy of a story agent that already has one, bounded as above. It still never creates a policy, never writes an address, never lifts a revocation and never changes an epoch.
+- **W1** implements the watcher and policy-sink side in `packages/ens`. **W5** restarts the workers so it runs.
+- **W3's route** refuses a cap above the configured one (`OVER_CONFIGURED`). It writes ENS through `@graphpay/ens`'s `setCap`, and it reports `policy.applied: false` if the watcher has not followed within 45 s. The gate already enforces the lower of the two caps, so a lowered ENS cap holds at once for x402 payments.

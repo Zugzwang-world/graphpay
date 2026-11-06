@@ -79,6 +79,7 @@ Short records, one file each (skill `adr`). Lab decisions are adopted from `plan
 | [ADR-0074](ADR-0074-the-deck-is-the-stage.md) | The deck is the stage, with the live phones driving it; one screen | accepted |
 | [ADR-0075](ADR-0075-the-grok-desk-produces-the-assets.md) | The Grok desk produces the assets; its prompts stay in the repo | accepted |
 | [ADR-0076](ADR-0076-the-sdks-stay-ui-free.md) | The SDKs stay free of UI; the demo app is the reference; a React kit next | accepted |
+| [ADR-0078](ADR-0078-the-owners-cap-reaches-the-policy-through-the-watcher.md) | The owner's cap reaches the spending policy through the watcher, never above the configured cap (narrows E-11) | accepted |
 
 ## Proposed in the pack, recorded by the owning session when taken
 
