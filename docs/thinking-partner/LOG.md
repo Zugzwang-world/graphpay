@@ -31,7 +31,7 @@ One line per PR: time (IST) · activity · result · PR link. Append under your 
 - 09:45 IST · arkiv · Friday item 15: drafts of `arkiv/friction.md`, `how-you-use-arkiv.md`, `swarm.md` · https://github.com/Zugzwang-world/graphpay/pull/77 (merged)
 - 09:55 IST · arkiv · Friday items 4–5 (menu): Swarm gateway probe, `menu` entity, 3 cast menus on Swarm and Arkiv, verified; `swarm.md` filled in · https://github.com/Zugzwang-world/graphpay/pull/82
 - 11:05 IST · arkiv · fix: the writer no longer adopts another instance of the same key's transaction at our nonce (T1's finding); reviewer pass · https://github.com/Zugzwang-world/graphpay/pull/97
-- 12:50 IST · arkiv · one image on Swarm: optional `image` on a menu item, the team's fox uploaded, Kesar Kingdom's `menu` row patched to v2 · PR link below
+- 12:50 IST · arkiv · one image on Swarm: optional `image` on a menu item, the team's fox uploaded, Kesar Kingdom's `menu` row patched to v2 · https://github.com/Zugzwang-world/graphpay/pull/109
 
 ## agents
 
