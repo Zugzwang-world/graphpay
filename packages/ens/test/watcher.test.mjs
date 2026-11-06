@@ -1,10 +1,11 @@
 // The watcher with a fake chain and recording sinks (planning/PROMPTS/06-ens-gate-kill-watcher.md):
-// a renew after an unregister does not un-revoke; an owner raising the ENS cap leaves the policy
-// alone; marks are set only after the sink succeeded; the policy sink never creates a policy.
+// a renew after an unregister does not un-revoke; an owner's ENS cap reaches a live policy only
+// bounded by the configured cap; marks are set only after the sink succeeded; the policy sink
+// never creates a policy.
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { zeroAddress } from 'viem';
-import { createEnsWatcher, createPolicySink, KEYS, labelId, memoryCheckpoint, namehash, namespacePlan, STATUS, WHITECHAIN_COIN_TYPE } from '../index.mjs';
+import { decodeFunctionData, encodeFunctionResult, zeroAddress } from 'viem';
+import { createEnsWatcher, createPolicySink, KEYS, labelId, memoryCheckpoint, namehash, namespacePlan, profileAbi, STATUS, WHITECHAIN_COIN_TYPE } from '../index.mjs';
 
 const REG = '0x3333333333333333333333333333333333333333';
 const RES = '0x4444444444444444444444444444444444444444';
@@ -30,11 +31,17 @@ function world(over = {}) {
     getBlockNumber: async () => w.head,
     getBlock: async () => ({ timestamp: w.nowTs }),
     getLogs: async () => w.logs ?? [],
-    readContract: async ({ functionName }) => {
+    readContract: async ({ functionName, args }) => {
       if (functionName === 'getSubregistry') return REG;
       if (functionName === 'getResolver') return w.state.status === STATUS.REGISTERED ? RES : zeroAddress;
       if (functionName === 'getState') return w.state;
-      throw new Error(`fake chain: ${functionName}`); // the universal resolver reads fail: textStatus stays unknown
+      // the universal resolver answers only the texts in `w.texts`; any other read fails (textStatus stays unknown)
+      if (functionName === 'resolve' && w.texts) {
+        const [, key] = decodeFunctionData({ abi: profileAbi, data: args[1] }).args;
+        if (w.textFails) throw new Error('resolver read failed');
+        if (key in w.texts) return [encodeFunctionResult({ abi: profileAbi, functionName: 'text', result: w.texts[key] }), RES];
+      }
+      throw new Error(`fake chain: ${functionName}`);
     },
   };
   w.sink = {
@@ -119,14 +126,58 @@ test('watcher: a plain renew moves only the expiry (read back from the registry)
   assert.deepEqual(w.patches, [{ node: NODE, expiry: 2_000_000_000n }]);
 });
 
-test('watcher: an owner raising graphpay.cap_micro changes the node only, never the policy', async () => {
-  const w = world();
+test("watcher: the owner's graphpay.cap_micro goes to the sink as the owner's cap for a live name at its epoch, read as it is now", async () => {
+  const w = world({ texts: { [KEYS.capMicro]: '300' } });
   const watcher = watcherOf(w);
   await watcher.start();
-  await watcher.handle([log('TextUpdated', { recordId: 1n, key: KEYS.capMicro, value: '900000000000' }, RES)]);
+  // a replayed batch carries the older value first: both events send the record's current value
+  await watcher.handle([log('TextUpdated', { recordId: 1n, key: KEYS.capMicro, value: '250' }, RES), log('TextUpdated', { recordId: 1n, key: KEYS.capMicro, value: '300' }, RES)]);
+  assert.deepEqual(w.policyCalls, [{ node: NODE, epoch: 0, ownerCapMicro: 300n }, { node: NODE, epoch: 0, ownerCapMicro: 300n }]);
+  assert.deepEqual(w.patches, [{ node: NODE, ensCapMicro: '250' }, { node: NODE, ensCapMicro: '300' }]);
+  assert.deepEqual(w.invalidated, [agent.name, agent.name]);
+});
+
+test("watcher: no owner's cap reaches the sink for a malformed record, a lapsed name or one that is no longer REGISTERED", async () => {
+  const w = world({ texts: { [KEYS.capMicro]: '' } });
+  const watcher = watcherOf(w);
+  await watcher.start();
+  const capEvent = () => watcher.handle([log('TextUpdated', { recordId: 1n, key: KEYS.capMicro, value: '1' }, RES)]);
+  for (const value of ['', '1.5', '-1', '01', 'abc']) {
+    w.texts[KEYS.capMicro] = value;
+    await capEvent();
+  }
   assert.deepEqual(w.policyCalls, []);
-  assert.deepEqual(w.patches, [{ node: NODE, ensCapMicro: '900000000000' }]);
-  assert.deepEqual(w.invalidated, [agent.name]);
+  w.texts[KEYS.capMicro] = '1';
+  w.nowTs = 3_000_000_000n; // past the expiry
+  await capEvent();
+  assert.deepEqual(w.policyCalls, []);
+  w.nowTs = 1_000n;
+  w.state = { ...w.state, status: STATUS.AVAILABLE }; // a stale event: the name was unregistered since
+  await capEvent();
+  assert.deepEqual(w.policyCalls, []);
+});
+
+test("watcher: a failed cap read or write never holds up the batch (a kill behind it still revokes); the ticker tries the cap again", async () => {
+  const w = world({ texts: { [KEYS.capMicro]: '2' }, textFails: true });
+  const watcher = watcherOf(w);
+  await watcher.start();
+  await watcher.handle([log('TextUpdated', { recordId: 1n, key: KEYS.capMicro, value: '2' }, RES)]);
+  assert.deepEqual(w.policyCalls, []); // the read failed: nothing sent, nothing thrown
+  w.textFails = false;
+  await watcher.tick();
+  assert.deepEqual(w.policyCalls, [{ node: NODE, epoch: 0, ownerCapMicro: 2n }]);
+  await watcher.tick(); // applied: not sent again
+  assert.equal(w.policyCalls.length, 1);
+  // a cap event and a kill in one batch: the cap read fails, the kill still revokes
+  w.textFails = true;
+  const killed = { status: STATUS.AVAILABLE, expiry: 1_500n, latestOwner: zeroAddress, tokenId: TOKEN, resource: 9n };
+  await watcher.handle([log('TextUpdated', { recordId: 1n, key: KEYS.capMicro, value: '3' }, RES)]);
+  w.state = killed;
+  await watcher.handle([log('LabelUnregistered', { tokenId: TOKEN })]);
+  assert.deepEqual(w.policyCalls.at(-1), { node: NODE, epoch: 0, revoked: true });
+  w.textFails = false;
+  await watcher.tick(); // revoked since: the pending cap is dropped, not sent
+  assert.deepEqual(w.policyCalls.at(-1), { node: NODE, epoch: 0, revoked: true });
 });
 
 test('watcher: a status text patches the node and clears the gate cache; a paused name that was killed stays revoked', async () => {
@@ -246,6 +297,25 @@ test('policy sink: never creates a policy; a revoke needs no list and writes cap
   assert.deepEqual(written.pop(), { node: NODE, epoch: 0, wallet: cfg.wallet, revoked: true, capMicro: 0n, expiry: 0n });
   assert.equal((await mk(policy({ revoked: true, dailyCapMicro: 0n })).updatePolicy({ node: NODE, epoch: 0, revoked: true })).inStep, true);
   assert.match((await mk(policy({ epoch: 4 })).updatePolicy({ node: NODE, epoch: 3, revoked: true })).skipped, /newer epoch/);
+});
+
+test("policy sink: the owner's cap lowers a live policy to min(owner, configured), never raises it, and moves nothing else", async () => {
+  const written = [];
+  const mk = (cur, configured = () => cfg) => createPolicySink({ configured, readPolicy: async () => cur, writePolicy: async (c) => written.push(c) });
+  await mk(policy({ expiry: 77n })).updatePolicy({ node: NODE, epoch: 0, ownerCapMicro: 2_000_000n });
+  assert.deepEqual(written.pop(), { node: NODE, epoch: 0, wallet: cfg.wallet, revoked: false, capMicro: 2_000_000n, expiry: 77n });
+  // above the configured cap: the configured cap, which the chain already holds
+  assert.equal((await mk(policy()).updatePolicy({ node: NODE, epoch: 0, ownerCapMicro: 900_000_000_000n })).inStep, true);
+  // back up from a lowered pass, but never past the configured cap
+  await mk(policy({ dailyCapMicro: 2_000_000n })).updatePolicy({ node: NODE, epoch: 0, ownerCapMicro: 900_000_000_000n });
+  assert.equal(written.pop().capMicro, cfg.capMicro);
+  await mk(policy()).updatePolicy({ node: NODE, epoch: 0, ownerCapMicro: 0n });
+  assert.equal(written.pop().capMicro, 0n);
+  assert.match((await mk(policy({ revoked: true, dailyCapMicro: 0n })).updatePolicy({ node: NODE, epoch: 0, ownerCapMicro: 1n })).skipped, /revoked/);
+  assert.match((await mk(policy({ epoch: 1 })).updatePolicy({ node: NODE, epoch: 0, ownerCapMicro: 1n })).skipped, /epoch/);
+  assert.match((await mk(policy(), () => undefined).updatePolicy({ node: NODE, epoch: 0, ownerCapMicro: 1n })).skipped, /no configured/);
+  assert.match((await mk(policy({ wallet: zeroAddress })).updatePolicy({ node: NODE, epoch: 0, ownerCapMicro: 1n })).skipped, /never creates/);
+  assert.equal(written.length, 0);
 });
 
 test('policy sink: reopening takes the configured cap and never an ENS value; a plain renew keeps the cap and a never-expiring policy', async () => {
