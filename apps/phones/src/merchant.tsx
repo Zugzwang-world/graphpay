@@ -30,6 +30,35 @@ const RETRIES = 10;
 const NOT_YET = new Set(['NOT_DELIVERABLE', 'NO_SUCH_ORDER', 'STILL_PENDING', 'TOO_SOON']);
 const notYet = (error: unknown) => error instanceof Refusal && (NOT_YET.has(error.code) || error.status === 429);
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+// The shop's own money actions run by themselves only on the live site: a localhost replay of a
+// recorded errand would otherwise dispatch and refund a real order through GRAPHPAY_DEV_API.
+const AUTO = typeof window !== 'undefined' && window.location.hostname !== 'localhost';
+// Once per order, even across a reload of this frame (the stage's replay is the first guard).
+const ONCE = 'graphpay.refunded.';
+const refundedHere = (orderId: string): boolean => {
+  try {
+    return window.sessionStorage.getItem(ONCE + orderId.toLowerCase()) !== null;
+  } catch {
+    return false;
+  }
+};
+const storageWorks = (): boolean => {
+  try {
+    window.sessionStorage.setItem(`${ONCE}probe`, '1');
+    window.sessionStorage.removeItem(`${ONCE}probe`);
+    return true;
+  } catch {
+    return false;
+  }
+};
+const markRefunded = (orderId: string, on: boolean): void => {
+  try {
+    if (on) window.sessionStorage.setItem(ONCE + orderId.toLowerCase(), String(Date.now()));
+    else window.sessionStorage.removeItem(ONCE + orderId.toLowerCase());
+  } catch {
+    // no storage: the stage's replay still guards a reload
+  }
+};
 
 interface Dispatch {
   orderId: string;
@@ -50,6 +79,8 @@ interface RefundAsk {
   entityKey: string | null;
   at: number;
   phase: 'asked' | 'accepting' | 'refunded' | 'error';
+  // True once the risk agent's checks passed and it accepted.
+  checked: boolean;
   tx: string | null;
   decisionAt: number | null;
   error: string | null;
@@ -208,16 +239,25 @@ export function MerchantPhone() {
                 entityKey: typeof d.entityKey === 'string' ? d.entityKey : null,
                 at: e.at,
                 phase: 'asked',
+                checked: false,
                 tx: null,
                 decisionAt: null,
                 error: null,
               },
         );
-      } else if ((e.key === 'refund-accepted' || e.key === 'refund') && typeof e.data?.orderId === 'string') {
-        // This phone's own answers, sent back by the stage after a reload: never accepted twice.
+      } else if (e.key === 'refund' && typeof e.data?.orderId === 'string') {
+        // This phone's own answers, sent back by the stage after a reload: never refunded twice.
         const d = e.data;
         accepting.current = (d.orderId as string).toLowerCase();
-        setAsk((a) => (same(a, d.orderId) ? (e.key === 'refund' ? { ...a!, phase: 'refunded', tx: typeof d.transaction === 'string' ? d.transaction : a!.tx, decisionAt: e.at } : a!.phase === 'refunded' ? a : { ...a!, phase: 'accepting' }) : a));
+        setAsk((a) => (same(a, d.orderId) ? { ...a!, phase: 'refunded', checked: true, tx: typeof d.transaction === 'string' ? d.transaction : a!.tx, decisionAt: e.at } : a));
+      } else if (e.key === 'refund-accepted' && typeof e.data?.orderId === 'string') {
+        // Accepted before a reload: if its refund may have been sent from here, it is not sent again;
+        // if it never left (the reload came during the guard's wait), the risk agent accepts again.
+        const id = e.data.orderId as string;
+        if (refundedHere(id) || !storageWorks()) {
+          accepting.current = id.toLowerCase();
+          setAsk((a) => (same(a, id) && a!.phase === 'asked' ? { ...a!, phase: 'accepting', checked: true } : a));
+        }
       } else if (e.key === 'dispatched' && typeof e.data?.orderId === 'string') {
         // Likewise for the dispatch: shown as it was, never sent twice.
         const id = e.data.orderId;
@@ -238,8 +278,8 @@ export function MerchantPhone() {
   const [dispatch, setDispatch] = useState<Dispatch | null>(null);
   const dispatchRef = useRef<Dispatch | null>(null);
   dispatchRef.current = dispatch;
-  const ours = (model.order?.shop ?? model.best) === cast.merchant.ens;
-  const paidOrderId = embedded && ours && model.paid ? model.paid.orderId : null;
+  const ours = (model.quote?.shop ?? model.order?.shop ?? model.best) === cast.merchant.ens;
+  const paidOrderId = AUTO && embedded && ours && model.paid ? model.paid.orderId : null;
   const dispatching = useRef<string | null>(null);
   useEffect(() => {
     if (!paidOrderId || dispatching.current === paidOrderId) return;
@@ -271,25 +311,37 @@ export function MerchantPhone() {
   // it checked, then the real refund goes out (POST /api/merchant/refund), after the per-order guard.
   const accepting = useRef<string | null>(null);
   useEffect(() => {
-    if (!ask || ask.phase !== 'asked' || accepting.current === ask.orderId.toLowerCase()) return;
-    accepting.current = ask.orderId.toLowerCase();
+    if (!AUTO || !ask || ask.phase !== 'asked' || accepting.current === ask.orderId.toLowerCase()) return;
     const { orderId, amountMicro } = ask;
+    accepting.current = orderId.toLowerCase();
+    const mine = (a: RefundAsk | null) => a !== null && a.orderId.toLowerCase() === orderId.toLowerCase();
+    const fail = (error: string) => setAsk((a) => (mine(a) ? { ...a!, phase: 'error', error } : a));
+    // The risk agent's checks, so its line is true: this phone dispatched this order, the amount is
+    // no more than was paid, and no refund for it went out from here before.
+    const d = dispatchRef.current;
+    const paidMicro = model.paid && model.paid.orderId.toLowerCase() === orderId.toLowerCase() ? BigInt(Math.round(Number(model.paid.amountUsdt) * 1e6)) : null;
+    if (refundedHere(orderId)) return fail('This order was already refunded from this phone.');
+    if (!/^[1-9][0-9]{0,15}$/.test(amountMicro)) return fail('Not accepted: the amount is not readable.');
+    if (!d || d.phase !== 'dispatched' || d.orderId.toLowerCase() !== orderId.toLowerCase()) return fail('Not accepted: the order is not marked dispatched yet.');
+    if (paidMicro === null || BigInt(amountMicro) > paidMicro) return fail('Not accepted: the refund is more than was paid.');
     void (async () => {
-      setAsk((a) => (a ? { ...a, phase: 'accepting', error: null } : a));
+      setAsk((a) => (mine(a) ? { ...a!, phase: 'accepting', checked: true, error: null } : a));
       postEvent('refund-accepted', [], { orderId, amountMicro });
-      const d = dispatchRef.current;
-      const wait = d && d.orderId.toLowerCase() === orderId.toLowerCase() ? d.sentAt + ORDER_GUARD_MS - Date.now() : 0;
+      const wait = d.sentAt + ORDER_GUARD_MS - Date.now();
       if (wait > 0) await sleep(wait);
       for (let attempt = 0; attempt < RETRIES; attempt++) {
         try {
+          markRefunded(orderId, true);
           const answer = await postJson<{ transaction?: string | null; amountMicro?: string }>('/api/merchant/refund', { orderId, amountMicro });
           const tx = answer.transaction ?? null;
-          setAsk((a) => (a ? { ...a, phase: 'refunded', tx, decisionAt: Date.now() } : a));
+          setAsk((a) => (mine(a) ? { ...a!, phase: 'refunded', tx, decisionAt: Date.now() } : a));
           postEvent('refund', tx ? [{ label: 'Refund on Whitechain', href: links.whitechainTx(tx) }] : [], { orderId, amountMicro: answer.amountMicro ?? amountMicro, transaction: tx });
           return;
         } catch (error) {
+          // Refused before anything was signed: this phone may try again later.
+          if (notYet(error) || (error instanceof Refusal && error.status >= 400 && error.status < 500)) markRefunded(orderId, false);
           if (!notYet(error) || attempt === RETRIES - 1) {
-            setAsk((a) => (a ? { ...a, phase: 'error', error: error instanceof Refusal ? error.message : 'The refund did not go through. Try again in a minute.' } : a));
+            fail(error instanceof Refusal ? error.message : 'The refund did not go through. Try again in a minute.');
             return;
           }
           await sleep(error instanceof Refusal && error.code === 'TOO_SOON' ? 8_000 : RETRY_MS);
@@ -297,6 +349,11 @@ export function MerchantPhone() {
       }
     })();
   }, [ask]);
+  // Only after an error: the risk agent looks at the request again (its once-only guard still holds).
+  const retryRefund = () => {
+    accepting.current = null;
+    setAsk((a) => (a && a.phase === 'error' ? { ...a, phase: 'asked', checked: false, error: null } : a));
+  };
 
   // The `req:` edge of the request confirms it on Arkiv.
   const reqEdge = ask ? rows.find((r) => r.kind === 'request' && r.ref.startsWith(`req:${ask.orderId}`)) : undefined;
@@ -394,9 +451,14 @@ export function MerchantPhone() {
               </Line>
             ) : null}
             {ask && ask.phase !== 'asked' ? (
-              <Line role="risk" text={refundLines.riskAccept(ask.amountMicro, model.paid?.amountUsdt ?? null, Boolean(ask.swarmRef))} tone="ok">
+              <Line role="risk" text={ask.checked ? refundLines.riskAccept(ask.amountMicro, model.paid?.amountUsdt ?? null, Boolean(ask.swarmRef)) : (ask.error ?? '')} tone={ask.checked ? 'ok' : 'bad'}>
                 {ask.phase === 'accepting' ? <p className="text-caption font-bold text-muted">Sending the money back on {networks.whitechain}.</p> : null}
-                {ask.error ? <p className="text-caption font-bold text-bad">{ask.error}</p> : null}
+                {ask.checked && ask.error ? <p className="text-caption font-bold text-bad">{ask.error}</p> : null}
+                {ask.phase === 'error' ? (
+                  <button type="button" onClick={retryRefund} className="self-start rounded-full border border-line bg-surface px-4 py-2 text-caption font-bold text-ink">
+                    Try again
+                  </button>
+                ) : null}
               </Line>
             ) : null}
             {ask?.phase === 'refunded' ? (

@@ -161,9 +161,9 @@ function NpmCard({ name, line, readme }: { name: string; line: string; readme: s
 }
 
 // Scene 7: one payment written, the two lab meters (speed and data), the arkiv-graph card.
-// Scene 7's two meters: the lab benchmark on 9,612 payments (the founder's figures, 7 Nov). The
-// top-10 question: GraphPay answered in 0.65 s and 31 KB, plain Arkiv in 1.17 s and about 1 MB with
-// every page fetched at once. Speed and data only.
+// Scene 7's two meters: the lab benchmark on 9,612 payments (planning/SPEC/BENCHMARK.md §4, the M
+// row, 4 Nov). The top-10 question: GraphPay answered in 0.65 s and 31 KB, plain Arkiv in 1.17 s and
+// about 1 MB (976 KB) with every page fetched at once. Speed and data only.
 const LAB = 'lab, 9,612 payments';
 const METERS = [
   { key: 'speed', from: 1, to: 1.8, text: (v: number) => `${v.toFixed(1)}x faster`, fine: '0.65 s against 1.17 s' },
