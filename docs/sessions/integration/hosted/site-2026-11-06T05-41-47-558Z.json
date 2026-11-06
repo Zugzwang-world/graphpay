@@ -1,0 +1,177 @@
+{
+  "site": "https://graphpay-event.vercel.app",
+  "startedAt": "2026-11-06T05:41:47.558Z",
+  "request": "Just landed in Mumbai. Get me the best gulab jamun near me under 6 USDT by 8 pm.",
+  "events": {
+    "message": 16,
+    "guard": 6,
+    "agent.start": 7,
+    "tool.call": 19,
+    "tool.result": 19,
+    "agent.end": 7
+  },
+  "frames": 76,
+  "status": 200,
+  "runId": "6c98cb73-ef6b-4874-9bb5-9c7ec76b5dc9",
+  "agentEnds": [
+    {
+      "agent": "scout.vitalik.graphpay.eth",
+      "role": "scout",
+      "model": "kimi-k3.1-pro-highspeed",
+      "usageTokens": 3198,
+      "error": null,
+      "output": {
+        "offers": [
+          {
+            "shop": "jamun-junction.graphpay.eth",
+            "sku": "gulab-jamun-12",
+            "item": "gulab jamun",
+            "quantity": 12,
+            "priceUsdt": "3.300000",
+            "etaMinutes": 25,
+            "distanceKm": 0.9
+          },
+          {
+            "shop": "syrup-street.graphpay.eth",
+            "sku": "gulab-jamun-12",
+            "item": "gulab jamun",
+            "quantity": 12,
+            "priceUsdt": "4.200000",
+            "etaMinutes": 50,
+            "distanceKm": 1.4
+          },
+          {
+            "shop": "kesar-kingdom.graphpay.eth",
+            "sku": "gulab-jamun-12",
+            "item": "gulab jamun",
+            "quantity": 12,
+            "priceUsdt": "4.800000",
+            "etaMinutes": 45,
+            "distanceKm": 2.1
+          }
+        ]
+      }
+    },
+    {
+      "agent": "analyst.vitalik.graphpay.eth",
+      "role": "analyst",
+      "model": "kimi-k3.1-pro-highspeed",
+      "usageTokens": 154301,
+      "error": null,
+      "output": {
+        "ranking": [
+          {
+            "ens": "kesar-kingdom.graphpay.eth",
+            "score": 94.84,
+            "eligible": true,
+            "reasons": [
+              "Eligible: D90 refund rate 2.33% is at most 10%, and on-time rate 97.17% is at least 80%.",
+              "257 orders, 6 refunds, 248 deliveries, 241 on-time deliveries, 4 fails, and 0 disputes.",
+              "Trust score is (0.9717 on-time rate − 0.0233 refund rate) × 100 = 94.84."
+            ]
+          },
+          {
+            "ens": "syrup-street.graphpay.eth",
+            "score": 89.84,
+            "eligible": true,
+            "reasons": [
+              "Eligible: D90 refund rate 3.38% is at most 10%, and on-time rate 93.22% is at least 80%.",
+              "59 orders, 2 refunds, 59 deliveries, 55 on-time deliveries, 0 fails, and 0 disputes.",
+              "Trust score is (0.9322 on-time rate − 0.0338 refund rate) × 100 = 89.84."
+            ]
+          },
+          {
+            "ens": "jamun-junction.graphpay.eth",
+            "score": 52.78,
+            "eligible": false,
+            "reasons": [
+              "Ineligible: D90 refund rate 18.51% exceeds 10%, and on-time rate 71.29% is below 80%.",
+              "108 orders, 20 refunds, 108 deliveries, 77 on-time deliveries, 0 fails, and 0 disputes.",
+              "Trust score is (0.7129 on-time rate − 0.1851 refund rate) × 100 = 52.78; a lower price cannot override either eligibility failure."
+            ]
+          }
+        ],
+        "recommendation": "kesar-kingdom.graphpay.eth",
+        "notes": "All quoted reputation figures are synthetic/mock GraphPay data. Ranking uses D90 reputation, not price. Kesar Kingdom is the highest-trust eligible Mumbai sweets candidate, but this recommendation is conditional: the graph result did not verify gulab jamun stock, the total price for 12 against the 6.000000 USDT budget, or delivery by 2026-11-06T20:00:00+05:30. All three reputation results had source TRUNCATED, and the explain trace also reported a row-cap truncation. Shop-discovery explain ID: 45976b284afe; reputation explain ID: a2d543babd76."
+      }
+    },
+    {
+      "agent": "risk.kesar-kingdom.graphpay.eth",
+      "role": "risk",
+      "model": "kimi-k3.1-pro-highspeed",
+      "usageTokens": 8608,
+      "error": null,
+      "output": {
+        "decision": "approve",
+        "reasons": [
+          "ENS name is ACTIVE and the agent's GraphPay status is active.",
+          "Synthetic/mock Arkiv data shows 1 order in the D90 window, 0 cancellations (0% cancel rate), and 0 disputes.",
+          "Synthetic/mock Arkiv data shows 0.00 USDT spent today; adding this 4.80 USDT order gives 4.80 USDT, within the 6.00 USDT daily cap."
+        ]
+      }
+    },
+    {
+      "agent": "storefront.kesar-kingdom.graphpay.eth",
+      "role": "storefront",
+      "model": "kimi-k3.1-pro-highspeed",
+      "usageTokens": 1375,
+      "error": null,
+      "output": {
+        "quoteUsdt": "4.80",
+        "etaMinutes": 45,
+        "message": "Synthetic/mock quote from kesar-kingdom.graphpay.eth: 12 gulab jamun for 4.80 USDT, with an estimated preparation time of 45 minutes."
+      }
+    },
+    {
+      "agent": "dispatch.kesar-kingdom.graphpay.eth",
+      "role": "dispatch",
+      "model": "kimi-k3.1-pro-highspeed",
+      "usageTokens": 1784,
+      "error": null,
+      "output": {
+        "confirmed": true,
+        "orderId": "0x4bac3de2031e97537391e22a1ef0567a1ddd9dc87705760211ade2b31961d171",
+        "etaIso": "2026-11-06T06:29:25.341Z",
+        "message": "Delivery confirmed by the synthetic/mock dispatch tool; arrival is expected before the deadline."
+      }
+    },
+    {
+      "agent": "payer.vitalik.graphpay.eth",
+      "role": "payer",
+      "model": "kimi-k3.1-pro-highspeed",
+      "usageTokens": 2611,
+      "error": null,
+      "output": {
+        "status": "paid",
+        "reason": "Synthetic order for 12 gulab jamun paid at the quoted price of 4.80 USDT.",
+        "receiptTransaction": "0x8617754857a8eb1fb1483b4f18fb6fa6a4f1607241d3f08c7ccd062de1b8863a"
+      }
+    },
+    {
+      "agent": "concierge.vitalik.graphpay.eth",
+      "role": "concierge",
+      "model": "kimi-k3.1-pro-highspeed",
+      "usageTokens": 5813,
+      "error": null,
+      "output": {
+        "summary": "Chose and paid Kesar Kingdom 4.80 USDT for 12 gulab jamun, with a 45-minute ETA. It was the highest-ranked eligible shop with an in-budget, on-time offer. Syrup Street (4.20 USDT) ranked lower; Jamun Junction (3.30 USDT) was ineligible due to its 18.5% refund rate and 71.3% on-time rate. All figures and payment data are synthetic/mock.",
+        "chosenShop": "kesar-kingdom.graphpay.eth"
+      }
+    }
+  ],
+  "result": {
+    "status": "paid",
+    "chosenShop": "kesar-kingdom.graphpay.eth",
+    "priceUsdt": "4.800000",
+    "orderId": "0x4bac3de2031e97537391e22a1ef0567a1ddd9dc87705760211ade2b31961d171",
+    "receipt": {
+      "transaction": "0x8617754857a8eb1fb1483b4f18fb6fa6a4f1607241d3f08c7ccd062de1b8863a",
+      "explorerUrl": "https://explorer.testnet.whitechain.io/tx/0x8617754857a8eb1fb1483b4f18fb6fa6a4f1607241d3f08c7ccd062de1b8863a",
+      "amountUsdt": "4.800000"
+    },
+    "refusals": [],
+    "error": null
+  },
+  "seconds": 171.2,
+  "endedAt": "2026-11-06T05:44:38.771Z"
+}
