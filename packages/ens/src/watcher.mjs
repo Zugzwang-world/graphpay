@@ -34,7 +34,6 @@ export const RESOLVER_EVENTS = eventsOf(permissionedResolverAbi, ['TextUpdated',
 
 const LOG_RANGE = 1000n;
 const CAP_TRIES = 5; // a failed owner's-cap sync is tried again on this many ticks, then dropped
-const CAP_EVENTS_KEPT = 1000; // cap events already marked (a replay marks nothing again)
 // Each poll re-reads the last blocks too: the public RPC is load balanced and a log query can lag the head
 // that getBlockNumber reported. Every handler re-reads chain state, so a replayed event changes nothing.
 const REPLAY_BLOCKS = 6n;
@@ -61,7 +60,7 @@ export function createEnsWatcher({
 }) {
   const tracked = new Map(); // name → { name, node, label, registry, resolver, epoch, expiry, revoked, expired, textStatus }
   const untracked = new Set();
-  const capEvents = new Set();
+  const capMarked = new Set(); // names whose cap changed in the batch being handled
   let polls = 0;
   let queue = Promise.resolve();
   const serial = (fn) => {
@@ -189,14 +188,11 @@ export function createEnsWatcher({
       gate?.invalidate(t.name);
     } else if (key === KEYS.capMicro) {
       await patch(t, { ensCapMicro: value }); // shown on the node
-      // Synced once after the batch (kills first); a replayed event is not marked again.
-      const id = `${ev.transactionHash}:${ev.logIndex}`;
-      if (!capEvents.has(id)) {
-        capEvents.add(id);
-        if (capEvents.size > CAP_EVENTS_KEPT) capEvents.delete(capEvents.values().next().value);
-        t.capDue = true;
-        t.capTries = 0;
-      }
+      // Synced once after the batch, kills first. A replayed event marks it again, so one stale read of
+      // the record is corrected by the next poll's read.
+      t.capDue = true;
+      t.capTries = 0;
+      capMarked.add(t);
       gate?.invalidate(t.name);
     } else if (key === KEYS.acceptsText) {
       reader?.invalidateAccepts(t.name);
@@ -248,8 +244,11 @@ export function createEnsWatcher({
         throw Object.assign(new Error(`watcher: ${ev.eventName} at block ${ev.blockNumber} failed: ${e.shortMessage ?? e.message}`), { blockNumber: ev.blockNumber, cause: e });
       }
     }
-    // The owner's caps last, once per name: every kill and revocation in the batch went first.
-    for (const t of tracked.values()) if (t.capDue) await syncCap(t);
+    // The owner's caps last, once per name marked in this batch: every kill and revocation in it went
+    // first. Names left due by a failure are the ticker's (its tries are counted per tick).
+    const marked = [...capMarked];
+    capMarked.clear();
+    for (const t of marked) if (t.capDue) await syncCap(t);
     return logs.length;
   }
 

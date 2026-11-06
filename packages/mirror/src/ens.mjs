@@ -141,7 +141,7 @@ export async function startEnsWatcher({ env, values, whitechain, checkout, log }
       // Built from a policy read earlier: if another policy writer moved it since, send nothing.
       if (expected && policyMoved(expected, await readPolicy(p.node))) {
         log(`ens watcher: the policy of ${p.node.slice(0, 10)}… moved since it was read; setPolicy not sent`);
-        return;
+        return { moved: true };
       }
       // The nonce is left to viem (read at send time), which narrows the window with T1's scripts.
       const request = { address: checkout, abi: checkoutAbi, functionName: 'setPolicy', args: [p.node, p.epoch, p.wallet, p.revoked, p.capMicro, p.expiry], account, chain: whitechain.chain };

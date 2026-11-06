@@ -9,9 +9,15 @@
 //   readPolicy(node) → { epoch, wallet, revoked, dailyCapMicro, expiry }   the checkout's policy (wallet 0x0 = none)
 //   writePolicy({ node, epoch, wallet, revoked, capMicro, expiry }, { expected? })   one setPolicy, serialised by
 //     the caller; with `expected` (the policy this write was built from) the caller re-reads it just
-//     before signing and sends nothing if it moved (another policy writer acted in between)
+//     before signing and sends nothing if it moved (another policy writer acted in between), answering
+//     { moved: true }: the sink then throws, so the watcher's batch (or the cap's tick) tries again
 
 import { isAddressEqual, zeroAddress } from 'viem';
+
+const MOVED = 'the policy moved since it was read (another policy writer acted); tried again';
+async function written(write) {
+  if ((await write)?.moved) throw new Error(MOVED);
+}
 
 const asRead = (p) => ({ epoch: Number(p.epoch), wallet: p.wallet, revoked: Boolean(p.revoked), dailyCapMicro: BigInt(p.dailyCapMicro), expiry: BigInt(p.expiry) });
 
@@ -34,7 +40,7 @@ export function createPolicySink({ configured, readPolicy, writePolicy, log = ()
     const capMicro = ownerCapMicro < limit ? ownerCapMicro : limit;
     if (BigInt(cur.dailyCapMicro) === capMicro) return { inStep: true };
     const next = { epoch, wallet: cur.wallet, revoked: false, capMicro, expiry: BigInt(cur.expiry) };
-    await writePolicy({ node, ...next }, { expected: asRead(cur) });
+    await written(writePolicy({ node, ...next }, { expected: asRead(cur) }));
     log(`policy sink: setPolicy epoch ${epoch} cap ${capMicro} (the owner's ${ownerCapMicro}, at most the configured ${limit})`);
     return { written: next };
   }
@@ -72,7 +78,7 @@ export function createPolicySink({ configured, readPolicy, writePolicy, log = ()
     if (same) return { inStep: true };
     // A revocation is always sent (idempotent, and a kill must never wait on a race); anything that
     // keeps or reopens a pass is sent only if the policy is still the one it was built from.
-    await writePolicy({ node, ...next }, next.revoked ? {} : { expected: asRead(cur) });
+    await written(writePolicy({ node, ...next }, next.revoked ? {} : { expected: asRead(cur) }));
     log(`policy sink: setPolicy epoch ${next.epoch} revoked ${next.revoked}`);
     return { written: next };
   }

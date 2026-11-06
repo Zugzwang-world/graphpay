@@ -39,6 +39,11 @@ function world(over = {}) {
       if (functionName === 'resolve' && w.texts) {
         const [, key] = decodeFunctionData({ abi: profileAbi, data: args[1] }).args;
         if (w.textFails) throw new Error('resolver read failed');
+        if (key === KEYS.capMicro && w.staleOnce !== undefined) {
+          const stale = w.staleOnce; // a lagging RPC node answers an older value once
+          w.staleOnce = undefined;
+          return [encodeFunctionResult({ abi: profileAbi, functionName: 'text', result: stale }), RES];
+        }
         if (key in w.texts) return [encodeFunctionResult({ abi: profileAbi, functionName: 'text', result: w.texts[key] }), RES];
       }
       throw new Error(`fake chain: ${functionName}`);
@@ -126,7 +131,7 @@ test('watcher: a plain renew moves only the expiry (read back from the registry)
   assert.deepEqual(w.patches, [{ node: NODE, expiry: 2_000_000_000n }]);
 });
 
-test("watcher: the owner's graphpay.cap_micro reaches the sink once per batch, read as it is now; a replay marks nothing again", async () => {
+test("watcher: the owner's graphpay.cap_micro reaches the sink once per batch, read as it is now; a replay reads it again", async () => {
   const w = world({ texts: { [KEYS.capMicro]: '300' } });
   const watcher = watcherOf(w);
   await watcher.start();
@@ -136,9 +141,17 @@ test("watcher: the owner's graphpay.cap_micro reaches the sink once per batch, r
   assert.deepEqual(w.policyCalls, [{ node: NODE, epoch: 0, ownerCapMicro: 300n }]);
   assert.deepEqual(w.patches, [{ node: NODE, ensCapMicro: '250' }, { node: NODE, ensCapMicro: '300' }]);
   assert.deepEqual(w.invalidated, [agent.name, agent.name]);
-  // the same events again (the poll window overlaps): no read, no sync
+  // the same events again (the poll window overlaps): read again (the real sink writes nothing when equal)
   await watcher.handle(batch);
-  assert.equal(w.policyCalls.length, 1);
+  assert.deepEqual(w.policyCalls.at(-1), { node: NODE, epoch: 0, ownerCapMicro: 300n });
+  // a lagging node answers an old value once: the next replay's read corrects it
+  w.texts[KEYS.capMicro] = '100';
+  w.staleOnce = '300';
+  const change = [log('TextUpdated', { recordId: 1n, key: KEYS.capMicro, value: '100' }, RES)];
+  await watcher.handle(change);
+  assert.deepEqual(w.policyCalls.at(-1), { node: NODE, epoch: 0, ownerCapMicro: 300n });
+  await watcher.handle(change);
+  assert.deepEqual(w.policyCalls.at(-1), { node: NODE, epoch: 0, ownerCapMicro: 100n });
   // a record in the gate's own format (digits only) is read as the gate reads it
   w.texts[KEYS.capMicro] = '0100';
   await watcher.handle([log('TextUpdated', { recordId: 1n, key: KEYS.capMicro, value: '0100' }, RES)]);
@@ -177,9 +190,11 @@ test("watcher: in one batch the kill goes first and the cap is dropped; a failed
   assert.deepEqual(w.policyCalls, [{ node: NODE, epoch: 0, ownerCapMicro: 2n }]);
   await watcher.tick(); // applied: not sent again
   assert.equal(w.policyCalls.length, 1);
-  // a read that keeps failing is dropped after five tries, with a line
+  // empty polls spend no tries; a read that keeps failing is dropped after five ticks, with a line
   w.textFails = true;
   await watcher.handle([log('TextUpdated', { recordId: 1n, key: KEYS.capMicro, value: '4' }, RES)]);
+  for (let i = 0; i < 6; i += 1) await watcher.handle([]);
+  assert.ok(!lines.some((l) => /dropped/.test(l)));
   for (let i = 0; i < 8; i += 1) await watcher.tick();
   assert.equal(w.policyCalls.length, 1);
   assert.ok(lines.some((l) => /dropped after 5 tries/.test(l)));
@@ -336,6 +351,12 @@ test("policy sink: the owner's cap sets a live policy to min(owner, configured),
   assert.ok(opts.every((o) => o?.expected && o.expected.revoked === false));
   await mk(policy()).updatePolicy({ node: NODE, epoch: 0, revoked: true });
   assert.deepEqual(opts.at(-1), {});
+});
+
+test('policy sink: a write the caller did not send because the policy moved is an error (tried again), never a success', async () => {
+  const moved = createPolicySink({ configured: () => cfg, readPolicy: async () => policy({ expiry: 50n }), writePolicy: async () => ({ moved: true }) });
+  await assert.rejects(moved.updatePolicy({ node: NODE, epoch: 0, ownerCapMicro: 1n }), /moved/);
+  await assert.rejects(moved.updatePolicy({ node: NODE, epoch: 0, expiry: 99n }), /moved/); // a renew
 });
 
 test('policy sink: policyMoved says when the chain no longer holds the policy a write was built from', () => {
