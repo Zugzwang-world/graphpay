@@ -20,6 +20,8 @@ declare module '@graphpay/facilitator' {
   export function errorNames(error: unknown): string;
   export function decodePaymentRequiredHeader(header: string): { accepts?: { payTo: string; amount: string; asset: string; network: string }[] } & Record<string, unknown>;
   export function graphPayOrderClient(options: Record<string, unknown>): Any;
+  // The bounded EIP-2612 approval of Permit2 a payer signs when its allowance is short (micro-USDT).
+  export const DEFAULT_APPROVAL_MICRO: bigint;
   export class x402Client {
     register(network: string, scheme: Any): x402Client;
     setSpendControls(controls: Record<string, unknown>): x402Client;
