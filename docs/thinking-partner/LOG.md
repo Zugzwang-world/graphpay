@@ -24,7 +24,7 @@ One line per PR: time (IST) · activity · result · PR link. Append under your 
 ## identity
 - 04:25 IST · identity · M6 done: the ENS watcher library and policy sink (reviewed twice), B8's MCP call in the acceptance script · [PR #40](https://github.com/Zugzwang-world/graphpay/pull/40)
 - 05:00 IST · identity · B7: fork test for the epoch on re-registration (after a lapse and after an unregister: e + 1); fork tests moved to disposable-2/3; B9 (a) payee comparison in the acceptance script, passes for the settled shop · [PR #83](https://github.com/Zugzwang-world/graphpay/pull/83), [PR #84](https://github.com/Zugzwang-world/graphpay/pull/84)
-- identity · ENS cap of the payer set to 100 test USDT a day (owner action `owner.mjs cap`, Sepolia block 12075031) · PR link in the next line
+- identity · ENS cap of the payer set to 100 test USDT a day (owner action `owner.mjs cap`, Sepolia block 12075031) · [PR #106](https://github.com/Zugzwang-world/graphpay/pull/106)
 
 ## arkiv
 
