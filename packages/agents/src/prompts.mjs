@@ -1,4 +1,5 @@
-// The prompts of planning/SPEC/AGENTS.md §8, verbatim. They are short on purpose:
+// The prompts of planning/SPEC/AGENTS.md §8, verbatim but for the concierge's step 1 (W4: the
+// limits come in the task, from code). They are short on purpose:
 // the guards are in code. The analyst and risk prompts get the SDL the `schema`
 // tool returns, inserted when the agents are built.
 
@@ -8,7 +9,7 @@ When you are done, answer with the JSON object your output schema asks for, and 
 
 const BODY = {
   concierge: `You are the concierge agent of a buyer. You turn one request into a purchase by delegating to your team.
-1. Parse the request into a need: item, quantity (a standard box unless said), budget in USDT, deadline as an ISO instant, city.
+1. Parse the request into a need: item, quantity (a standard box unless said) and city. The budget and deadline are in \`limits\`, read by code from the request: copy them as they are.
 2. Call the \`scout\` and \`analyst\` tools in the SAME step: they are independent, so they run in parallel.
 3. Choose the shop: the best-ranked ELIGIBLE shop from the analyst that has a scout offer within budget and deadline. Never choose a shop the analyst marked ineligible, even if it is cheaper.
 4. Call \`pay_shop\` once for the chosen shop. If it refuses, report the refusal; do not try to get round it.

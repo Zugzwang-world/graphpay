@@ -29,6 +29,24 @@ const GUARD_OF = {
 
 const ceilDiv = (a, b) => (a + b - 1n) / b;
 
+// What the concierge reads of its team's reports (W4: shorter tool replies): what it chooses
+// on. The run log, the phones and the explainer keep the whole reports.
+const offerView = (o) => ({ shop: o.shop, priceUsdt: o.priceUsdt, etaMinutes: o.etaMinutes, distanceKm: o.distanceKm });
+export function scoutView(out) {
+  if (!Array.isArray(out?.offers)) return out;
+  return { offers: out.offers.map(offerView), synthetic: true, ...(out.scoutNote ? { scoutNote: out.scoutNote } : {}) };
+}
+export function analystView(out) {
+  if (!Array.isArray(out?.ranking)) return out;
+  const notes = out.analystView?.notes;
+  return {
+    ranking: out.ranking.map((r) => ({ ens: r.ens, score: Number(r.score.toFixed(3)), eligible: r.eligible, reasons: r.reasons })),
+    explainId: out.explainId ?? null,
+    analystView: { recommendation: out.analystView?.recommendation ?? null, ...(typeof notes === 'string' ? { notes: notes.slice(0, 300) } : {}) },
+    synthetic: true,
+  };
+}
+
 // The offer of one catalog for the need, priced by code: per piece
 // (`unitPriceMicro`) or per pack (`priceMicro` for `quantity`), rounded up.
 export function offerFor(shopEns, catalog, need) {
@@ -229,12 +247,14 @@ export async function runBuyerTeam(ctx) {
       description: 'Your scout: finds the shops that sell the item in the city and their offers. Call it in the same step as analyst.',
       inputSchema: z.object({ need: NeedProposal }),
       executed,
+      modelView: scoutView,
       execute: async ({ need }) => scoutPhase(need),
     }),
     analyst: tracedTool(log, names.concierge, 'analyst', {
       description: 'Your analyst: ranks the shops by trust from the GraphPay graph (90 days). Call it in the same step as scout.',
       inputSchema: z.object({ need: NeedProposal }),
       executed,
+      modelView: analystView,
       execute: async ({ need }) => analystPhase(need),
     }),
     pay_shop: tracedTool(log, names.concierge, 'pay_shop', {
@@ -249,6 +269,8 @@ export async function runBuyerTeam(ctx) {
     buyer: persona,
     now: ctx.nowIso,
     timezone: ctx.timezoneLabel,
+    // Code read these from the request (G1): the model copies them, no date arithmetic.
+    limits: { budgetUsdt: state.mandate.budgetUsdt, deadlineIso: state.mandate.deadlineIso },
     defaults: { food: { quantity: cast.food.quantity, item: cast.food.item } },
   };
   return runAgent({ role: 'concierge', ens: names.concierge, task, tools, executed, ...common });

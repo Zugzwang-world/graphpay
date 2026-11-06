@@ -82,11 +82,11 @@ Started 23:02 IST, Fri 6 Nov (session `local_b65be40a-eb20-4d86-b784-7d2aa1a9352
 
 ## w4-agents
 
-Updated 23:21 IST, Fri 6 Nov (W4 Agents, session `local_3404db4e-486c-4f86-8b3a-67ceb53ef025`).
-- **Item 1, the relative deadline ([#153](https://github.com/Zugzwang-world/graphpay/pull/153), merged 23:18 IST):** the request says "delivered within an hour", and code reads the hour from the moment of the request, so errands work at any hour. The guard checks each shop's ETA against that hour.
-- **Item 2, measuring ([#157](https://github.com/Zugzwang-world/graphpay/pull/157)):** every agent's end event now carries each of its model calls: tokens in and cached, out and reasoning, cost, the tools it asked for, and on live runs the seconds. `scripts/agents/site-errand.mjs` runs one live errand on the site and prints the table.
-- **Found:** on production the analyst's GraphQL answer and its explain trace each carry about 16,800 characters of Arkiv entity keys, which the model never uses (the data is 600 characters).
-- **Next:** one live errand as the baseline, then the cuts, then three live errands in a row that pay.
+Updated 23:35 IST, Fri 6 Nov (W4 Agents, session `local_3404db4e-486c-4f86-8b3a-67ceb53ef025`).
+- **Item 1, the relative deadline ([#153](https://github.com/Zugzwang-world/graphpay/pull/153), merged 23:18 IST):** the request says "delivered within an hour"; code reads the hour from the moment of the request, so errands work at any hour.
+- **Item 2, measuring ([#157](https://github.com/Zugzwang-world/graphpay/pull/157), merged 23:26 IST):** every agent's end event carries each model call (tokens in and cached, out and reasoning, cost, tools, seconds).
+- **The live baseline (23:30 IST):** paid 4.80 in 91.4 s; 19 model calls, 33,287 tokens, $0.1455; 62.6 s of it was the models.
+- **Item 3, first cut (in its PR):** the routine agents think at Kimi's low effort; the model reads short tool replies (the screens keep the whole data); the concierge gets the limits from code. Next: measure it live, then move the routine steps into code.
 - **Blockers:** none.
 
 ## w5-ops

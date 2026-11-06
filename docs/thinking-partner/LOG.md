@@ -126,6 +126,8 @@ One line per PR: time (IST) · activity · result · PR link. Append under your 
 
 - 23:18 IST · w4-agents · item 1 (merged): the request says "delivered within an hour"; code reads the span from the request, so errands work at any hour (mocks: paid at 23:50, 23:59 and 03:00 IST) · https://github.com/Zugzwang-world/graphpay/pull/153
 - 23:21 IST · w4-agents · item 2: each agent's end event carries its model calls (tokens in, cached, out, reasoning, cost, tools; seconds on live runs); a script runs one live site errand and prints the table · https://github.com/Zugzwang-world/graphpay/pull/157
+- 23:30 IST · w4-agents · the live baseline on the site: paid 4.80 in 91.4 s, 19 model calls, 33,287 tokens, $0.1455 (tx 0xeac3…abe6) · no PR (a live run)
+- 23:35 IST · w4-agents · item 3, first cut: routine agents at low effort, short tool replies for the model, the concierge gets code's limits · PR link to follow
 
 ## w5-ops
 

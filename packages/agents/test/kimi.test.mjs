@@ -13,10 +13,13 @@ const KEY = ['kimi', 'test', 'Q'.repeat(24)].join('-');
 const env = { KIMI_API_KEY: KEY };
 const roles = Object.keys(story.agentModels.presets.testing.roles);
 
-test('the testing, video and live presets are Kimi at high; Anthropic stays as named fallbacks', () => {
+// W4: the concierge and the analyst decide, so they stay at high; the routine roles run at low.
+const HIGH = new Set(['concierge', 'analyst']);
+
+test('the testing, video and live presets are Kimi, high for the concierge and the analyst and low for the routine roles; Anthropic stays as named fallbacks', () => {
   const presets = story.agentModels.presets;
   for (const [name, model] of [['testing', 'kimi-k3.1-pro'], ['video', 'kimi-k3.1-pro-highspeed'], ['live', 'kimi-k3.1-pro-highspeed']]) {
-    for (const role of roles) assert.deepEqual({ ...presets[name].roles[role] }, { provider: 'moonshot', model, effort: 'high', maxTokens: 32000 }, `${name}/${role}`);
+    for (const role of roles) assert.deepEqual({ ...presets[name].roles[role] }, { provider: 'moonshot', model, effort: HIGH.has(role) ? 'high' : 'low', maxTokens: 32000 }, `${name}/${role}`);
   }
   assert.equal(story.agentModels.active, 'testing');
   for (const name of ['anthropic-testing', 'anthropic-video', 'anthropic-live']) {
@@ -76,7 +79,8 @@ test('requests carry the key only to the configured host, the preset effort and 
     assert.equal(r.url, `${config.models.moonshot.apiBaseUrl}/chat/completions`);
     assert.equal(r.headers.authorization, `Bearer ${KEY}`);
     assert.equal(r.body.model, settings.model);
-    assert.equal(r.body.reasoning_effort, 'high', 'the effort is fixed for the whole errand');
+    assert.equal(r.body.reasoning_effort, settings.effort, 'the effort is fixed for the whole errand');
+    assert.equal(r.body.reasoning_effort, 'low', 'the scout is a routine role');
     assert.equal(r.body.max_tokens ?? r.body.max_completion_tokens, 32000, 'max output tokens are always set');
     assert.equal('temperature' in r.body, false, 'temperature is fixed by the model and never sent');
   }
