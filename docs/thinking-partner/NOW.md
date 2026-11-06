@@ -1,20 +1,30 @@
 # NOW
 
-Updated 08:30 IST, Fri 6 Nov (Coordinator)
+Updated 09:35 IST, Fri 6 Nov (Coordinator)
 
 ## Summary (Coordinator only)
 
-Updated 08:30 IST, Fri 6 Nov. **Good morning. The core works end to end on the real testnets, and the night's work is merged.**
-- Acceptance: **42 pass, 0 fail**, 1 blocked (D7, the benchmark at size M, waiting for your story), 5 not run (B7, F1, F3, D10 and B9 wait on other tracks).
-- Live on https://graphpay-event.vercel.app: the hosted facilitator, shop and recorder, the renewal cron, the website with both phones, the race, the map and the explainer lanes.
-- Done with real payments: the ENS gate and the kill switch, the mirror, and the checkout kit with its demo store (the store's own Vercel project comes next).
+Updated 09:35 IST, Fri 6 Nov.
 
-**Plan usage:** 82%, unchanged since 05:31; the sessions have been idle overnight, waiting for you. Every session pauses gracefully at 92% (ADR-0062); the reset is Fri 21:30 IST.
+**The core is done on the real testnets.** Acceptance: **42 pass, 0 fail**, 1 blocked (D7, the benchmark at size M, waiting for the story), 5 not run (B7, F1, F3, D10 and B9 wait on other tracks). Live on https://graphpay-event.vercel.app: the hosted facilitator, shop and recorder, the renewal cron, the website with both phones, the race, the map and the explainer lanes. The checkout kit and demo store are proved with a real payment.
 
-**What's needed from you now** (details in `OPEN.md` and `relays/records.md`):
-1. **The story brief** to the Coordinator. It drives the demo cast (item 6) and the large city's seeding (latest start 14:00).
-2. **Any message in the Coordinator session.** The app caps its messages until you type, and it has to wake the idle sessions (T5 first).
-3. **Your call on the remaining ~10 points of budget.** The recommendation, in order: the story swap and the demo cast, both phone views, rehearsal 1 at 12:00, the `arkiv/` files and the sponsor files (Submission from 13:00). The video, rehearsal 2 and the npm publish come after the 21:30 reset.
+**The SDK publish, in progress (ADR-0063, by about 13:00):**
+- `@graphpay_ethglobal/arkiv-graph` (T3) and `@graphpay_ethglobal/agentpay` (T6), both on Sonnet 5.5 and doing fresh starts.
+- The names are free on npm, and the `graphpay_ethglobal` organisation is the founder's.
+- The issue labels `arkiv-graph`, `agentpay` and `feedback`, and an issue template per package, are in place.
+- Next: the founder's `npm login` when both pass pack, install and quickstart (about 12:00).
+
+**The story lock: overdue** against 08:30. The latest is 13:00, because the large city must start seeding by 14:00.
+
+**Plan usage:** 83% at 09:12; every session pauses at 92% (ADR-0062); the reset is Fri 21:30 IST.
+
+**Open founder items** (`OPEN.md`, "Founder now"):
+- the story brief;
+- the npm login at publish time;
+- the front-end team's PR #70, which belongs in `apps/demo-ui` (ADR-0065), and who writes `FRONTEND_HANDOVER.md`;
+- the disclosure, if not sent.
+
+**Blocked:** T5 (both phone views) is idle until the Coordinator wakes it, which it does now that the founder has typed. D7 and item 6 wait for the story.
 
 ## foundation
 

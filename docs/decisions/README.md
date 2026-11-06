@@ -59,12 +59,15 @@ Short records, one file each (skill `adr`). Lab decisions are adopted from `plan
 | [ADR-0054](ADR-0054-the-stand-in-token-is-retired.md) | The stand-in token is retired | accepted |
 | [ADR-0055](ADR-0055-live-events-poll-over-https.md) | Live events poll over HTTPS | accepted |
 | [ADR-0056](ADR-0056-the-mirror-keeps-the-mac-awake-and-resumes.md) | The mirror keeps the Mac awake and resumes | accepted |
-| [ADR-0057](ADR-0057-arkiv-graph-is-a-generic-sdk-published-on-npm.md) | arkiv-graph is a generic SDK, published as @graphpay/arkiv-graph | accepted |
+| [ADR-0057](ADR-0057-arkiv-graph-is-a-generic-sdk-published-on-npm.md) | arkiv-graph is a generic SDK, published as @graphpay/arkiv-graph | accepted (name and timing superseded by ADR-0063) |
 | [ADR-0058](ADR-0058-the-shop-box-query-uses-i32-ranges.md) | The shop box query uses i32 ranges | accepted |
 | [ADR-0059](ADR-0059-non-paying-agents-publish-a-zero-cap-in-ens.md) | Non-paying agents publish a zero cap in ENS | accepted |
 | [ADR-0060](ADR-0060-hosted-graphql-and-mcp-are-thin-stateless-routes.md) | Hosted GraphQL and MCP are thin, stateless routes | accepted |
 | [ADR-0061](ADR-0061-swarm-public-content-through-the-gateway-encrypt-client-side.md) | Swarm: public content through the gateway, evidence encrypted client-side | accepted |
 | [ADR-0062](ADR-0062-pause-every-session-at-92-percent-of-the-weekly-limit.md) | Every session pauses gracefully at 92% of the weekly plan limit | accepted |
+| [ADR-0063](ADR-0063-both-sdks-on-npm-as-graphpay-ethglobal-by-13-00.md) | Both SDKs on npm under @graphpay_ethglobal by 13:00 Friday | accepted |
+| [ADR-0064](ADR-0064-one-sdk-per-partner-lane-and-the-same-kit-moment.md) | One SDK per partner lane, and the "same kit, different business" moment | accepted |
+| [ADR-0065](ADR-0065-the-founders-team-builds-apps-demo-ui-in-parallel.md) | The founder's team builds its own UI in apps/demo-ui, in parallel | accepted |
 
 ## Proposed in the pack, recorded by the owning session when taken
 
