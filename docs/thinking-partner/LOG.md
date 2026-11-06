@@ -34,8 +34,8 @@ One line per PR: time (IST) · activity · result · PR link. Append under your 
 - 03:40 IST · arkiv · fix: a reputation is labelled synthetic when any tally row it reads is, so real cast shops with labelled history say so (Join's finding via the Coordinator); ArkivSim test · https://github.com/Zugzwang-world/graphpay/pull/30 (merged 03:41)
 - 03:42 IST · arkiv · M9 at S: live benchmark, D6 passes (Q2: Graph Arkiv 2 reads, plain 5, 6 in parallel; every answer right), race function for /api/race, batched out()/in(), byte meter fix · https://github.com/Zugzwang-world/graphpay/pull/31 (merged 03:45)
 - 03:50 IST · arkiv · Friday item 1: `shop_open`, `agent_presence`, `handoff` rows (W_DIRECTORY, lapse by themselves, renewals never past now + lifetime), GraphQL `shops(openNow)`, `agentsOnline`, `handoffs`, the agents' hooks · https://github.com/Zugzwang-world/graphpay/pull/35
-- 09:50 IST · arkiv · SDK publish prep: renamed to @graphpay_ethglobal/arkiv-graph, 0.1.0, connect/createStore, README quickstart, leaderboard, CHANGELOG, FEEDBACK, MIT; pack, install and run pass · PR link below
-- 10:40 IST · arkiv · Friday item 15: drafts of `arkiv/friction.md`, `how-you-use-arkiv.md`, `swarm.md` (pending) · PR link below
+- 09:50 IST · arkiv · SDK publish prep: renamed to @graphpay_ethglobal/arkiv-graph, 0.1.0, connect/createStore, README quickstart, leaderboard, CHANGELOG, FEEDBACK, MIT; pack, install and run pass · https://github.com/Zugzwang-world/graphpay/pull/80
+- 10:40 IST · arkiv · Friday item 15: drafts of `arkiv/friction.md`, `how-you-use-arkiv.md`, `swarm.md` (pending) · https://github.com/Zugzwang-world/graphpay/pull/80
 
 ## agents
 
@@ -80,7 +80,7 @@ One line per PR: time (IST) · activity · result · PR link. Append under your 
 - 04:10 IST · agentpay · opened: the first real test payment through the SDK (0.01 test USDT, rehearsal agent → good shop, https://explorer.testnet.whitechain.io/tx/0xfbd7d307b1b0c08f3af015b4bdb03aaeed12d0c2d18c2553432cb4679ff14c7e), its script and tx log · https://github.com/Zugzwang-world/graphpay/pull/41 (merged)
 - 04:20 IST · agentpay · opened: A4, the SDK merchant settling through T1's facilitator on a fork (in process and over HTTP; bad token and a gate refusal send nothing), 4 fork tests; the CSV's cached-head fix · https://github.com/Zugzwang-world/graphpay/pull/47 (merged)
 - 05:30 IST · agentpay · opened: the merchant's log reads fit the public RPCs' block-range caps (10,000, then 1,000 on a refusal; T5's report), checked on the real chain; fork tests write test USDT on the fork instead of drawing on FUNDER · https://github.com/Zugzwang-world/graphpay/pull/64
-- 09:50 IST · agentpay · opened: `@graphpay_ethglobal/agentpay` 0.1.0 ready to publish (renamed, self-contained, chain 1874 only, own relayer with anti-drain limits on, sandbox and `deployCheckout`, sweet shop and cab examples, MIT, lane test; packed, installed in an empty folder, quickstart passes) · PR link below
+- 09:50 IST · agentpay · opened: `@graphpay_ethglobal/agentpay` 0.1.0 ready to publish (renamed, self-contained, chain 1874 only, own relayer with anti-drain limits on, sandbox and `deployCheckout`, sweet shop and cab examples, MIT, lane test; packed, installed in an empty folder, quickstart passes) · https://github.com/Zugzwang-world/graphpay/pull/80
 
 ## records
 

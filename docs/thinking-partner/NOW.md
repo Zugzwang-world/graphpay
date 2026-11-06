@@ -73,7 +73,7 @@ Updated 09:40 IST, Fri 6 Nov (T5 Web). **On `main`:** both phones' buttons excep
 
 ## agentpay
 
-Updated 09:50 IST, Fri 6 Nov (T6 AgentPay, Sonnet 5.5). **`@graphpay_ethglobal/agentpay` 0.1.0 is ready to publish: pack, install in an empty folder and the README quickstart all pass on Node 22.** The reviewer pass is in the PR (below). The Coordinator publishes after the founder's npm login.
+Updated 09:50 IST, Fri 6 Nov (T6 AgentPay, Sonnet 5.5). **`@graphpay_ethglobal/agentpay` 0.1.0 is ready to publish: pack, install in an empty folder and the README quickstart all pass on Node 22.** The reviewer pass is clean after two blocking fixes (PR 80). The Coordinator publishes after the founder's npm login.
 - The package is renamed (T5's checkout kit imports it; changed in the same PR, told T5). It is self-contained: the ABI, EIP-712 shapes and defaults are inlined, and there is no workspace dependency.
 - Safety: chain 1874 only (client creation and before every signing and send); no default hosted facilitator or relayer; anti-drain limits on by default and impossible to switch off; a lane test fails if agentpay imports our Arkiv or ENS packages.
 - Outside developers cannot use our deployed checkout (only its relayers settle). The quickstart runs a local anvil fork with their own checkout (`startSandbox`); on the real testnet they deploy their own with `deployCheckout`.
