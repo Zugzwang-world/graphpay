@@ -126,7 +126,8 @@ test('a directory read that fails is tried once more; a second failure leaves no
     throw new Error('arkiv 429');
   };
   const failed = await runErrand(opts(down));
-  assert.equal(failed.runLog.result.status, 'no-purchase');
+  assert.equal(failed.runLog.result.status, 'refused');
+  assert.deepEqual(refusals(failed.runLog), ['NO_OFFER']);
   assert.equal(down.hooks.signed.length, 0);
   assert.match(events(failed.runLog, 'agent.end').find((e) => e.role === 'scout').error, /arkiv 429/);
 });
@@ -143,6 +144,44 @@ test('when the graph tools cannot be listed, the analyst still ends, nothing is 
   const { runLog } = await runErrand({ now: NOON_IST, mode: 'mock', retryMs: 0, cast: world.cast, hooks: world.hooks, mcp: world.mcp, mockModels: world.mockModels });
   assert.ok(events(runLog, 'agent.end').some((e) => e.role === 'analyst'));
   assert.ok(guards(runLog, false).some((g) => g.guard === 'G2' && /GRAPH_READ_FAILED/.test(g.detail)));
-  assert.equal(runLog.result.status, 'no-purchase');
+  assert.equal(runLog.result.status, 'refused');
+  assert.deepEqual(refusals(runLog), ['NO_ELIGIBLE_SHOP']);
   assert.equal(world.hooks.signed.length, 0);
+});
+
+test('a run stopped before paying pays nothing: no quote, no 402, no signature', async () => {
+  const ac = new AbortController();
+  const { runLog, world } = await run({ signal: ac.signal, onEvent: (e) => e.type === 'agent.end' && e.role === 'scout' && ac.abort() });
+  assert.equal(world.hooks.signed.length, 0);
+  assert.equal(world.hooks.quotes.entries.length, 0, 'no 402 was asked for');
+  assert.ok(refusals(runLog).includes('STOPPED'));
+  assert.notEqual(runLog.result.status, 'paid');
+});
+
+test("a failed concierge model leaves the model's choice and prose empty; code's purchase is recorded, and the screens see no refusal", async () => {
+  const { runLog } = await run({ faults: { concierge: 'empty' } });
+  assert.equal(runLog.result.status, 'paid');
+  assert.equal(runLog.result.chosenShop, good);
+  assert.equal(runLog.result.modelChoice, null);
+  assert.equal(runLog.result.narrative, null);
+  const end = events(runLog, 'agent.end').find((e) => e.role === 'concierge');
+  assert.equal(end.error, undefined);
+  assert.match(end.modelError, /empty reply/);
+});
+
+test('the trap is vetoed however the model spells it', async () => {
+  const { runLog, world } = await run({ play: { concierge: 'trap-upper' } });
+  assert.equal(runLog.result.status, 'refused');
+  assert.deepEqual(refusals(runLog), ['SHOP_NOT_ELIGIBLE']);
+  assert.equal(world.hooks.signed.length, 0);
+});
+
+test('an eligible pick that does not fit the limits is a slip, not a veto: code pays its best fitting offer', async () => {
+  // Within 48 minutes the good shop (45) fits and the runner-up (50) does not.
+  const { runLog, world } = await run({ play: { concierge: 'late-pick' }, request: cast.order.request.replace('an hour', '48 minutes') });
+  assert.equal(runLog.result.status, 'paid');
+  assert.equal(runLog.result.chosenShop, good);
+  assert.deepEqual(refusals(runLog), ['MISSES_DEADLINE']);
+  assert.equal(world.hooks.signed.length, 1);
+  assert.ok(guards(runLog, true).some((g) => g.guard === 'G2' && /does not fit the limits \(MISSES_DEADLINE\)/.test(g.detail)));
 });

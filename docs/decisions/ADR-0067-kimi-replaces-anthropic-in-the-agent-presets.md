@@ -16,3 +16,7 @@ The Anthropic key has no credit left. Kimi's API reasons on every call, keeps re
 ## Amendment, Fri 6 Nov 23:45 IST (night Coordinator): the routine roles at low
 
 The founder's W4 brief for the night run ("lower Kimi's reasoning effort for the routine agents", `docs/thinking-partner/briefs/2258-w4-agents.md`) is the founder's word this decision asks for. Since #162 (23:40 IST), the concierge and the analyst stay at `high`, and the scout, payer, storefront, risk and dispatch roles run at `low`, in the `testing`, `video` and `live` presets. The models, the preset mechanism and `AGENT_PRESET` are unchanged. The trap veto and every visible message stay; W4 records the before-and-after tokens and seconds in its relay.
+
+## Amendment, Sat 7 Nov 00:10 IST (W4 Agents): the analyst at low too
+
+With the routine steps in code (ADR-0077), the analyst's one remaining call ranks data that code read, and code's ranking stands either way (G2); its opinion no longer reaches the concierge. So the analyst runs at `low` with the other routine roles, and only the concierge, whose choice decides which shop is paid, stays at `high`, in the `testing`, `video` and `live` presets. Measured on Kimi over mock services: the analyst's call took 9.7 to 18.6 s at high and about 3 s at low.

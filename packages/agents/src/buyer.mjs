@@ -11,7 +11,7 @@ import { adoptNeed } from './mandate.mjs';
 import { displayUsdt, fromMicro, microFrom, toMicro } from './money.mjs';
 import { createPayer, knownContracts } from './payer.mjs';
 import { rankShops, volumeReference } from './scoring.mjs';
-import { bestFit, payGuard } from './state.mjs';
+import { bestFit, payGuard, whyNoFit } from './state.mjs';
 import { clip, errorText } from './scrub.mjs';
 import { promptFor } from './prompts.mjs';
 import { STEPS } from './activity.mjs';
@@ -29,6 +29,8 @@ const GUARD_OF = {
 };
 
 const ceilDiv = (a, b) => (a + b - 1n) / b;
+// The pay guard's refusals that say an eligible shop does not fit the limits (not a veto).
+const FITS = new Set(['NO_OFFER', 'OVER_BUDGET', 'MISSES_DEADLINE']);
 
 // What the concierge reads of its team's reports (W4: shorter tool replies): what it chooses
 // on. The run log, the phones and the explainer keep the whole reports.
@@ -143,8 +145,8 @@ export async function runBuyerTeam(ctx) {
           log,
           meter,
           run: async () => {
-            const listed = await retryOnce(() => callTool(tools.directory_list, { category: need.category, city: need.city }));
-            await Promise.allSettled(listed.shops.map((shopEns) => callTool(tools.catalog_read, { shopEns })));
+            const listed = await retryOnce(() => callTool(tools.directory_list, { category: need.category, city: need.city }, signal));
+            await Promise.allSettled(listed.shops.map((shopEns) => callTool(tools.catalog_read, { shopEns }, signal)));
             return { offers: [...state.offers.values()] };
           },
         });
@@ -222,7 +224,7 @@ export async function runBuyerTeam(ctx) {
     const query = async () => {
       try {
         if (!tools?.graphql) throw new Error('the graph tools are not available');
-        return rankingFromAnswer(await callTool(tools.graphql, { query: RANKING_QUERY, variables }));
+        return rankingFromAnswer(await callTool(tools.graphql, { query: RANKING_QUERY, variables }, signal));
       } catch (error) {
         return { ok: false, reason: 'GRAPH_READ_FAILED', detail: errorText(error) };
       }
@@ -233,7 +235,7 @@ export async function runBuyerTeam(ctx) {
       read = await query();
     }
     adoptRanking(read);
-    if (read.ok && read.explainId && tools?.explain) await callTool(tools.explain, { explainId: read.explainId }).catch(() => null);
+    if (read.ok && read.explainId && tools?.explain) await callTool(tools.explain, { explainId: read.explainId }, signal).catch(() => null);
     const graph = read.ok ? { ...MODEL_VIEW.graphql(read.answer), shown: 'the full answer and its reads are on the human’s screen' } : { error: read.reason };
     const asked = await askModel({ role: 'analyst', ens: names.analyst, task: { ...task, graph }, models, log, meter, signal, prompt: promptFor('analyst-data') });
     const out = compareAnalyst(asked.output);
@@ -310,8 +312,12 @@ export async function runBuyerTeam(ctx) {
             log,
             meter,
             run: async () => {
-              const q = await callTool(p.tools.get_quote, {});
-              if (q?.ok) await callTool(p.tools.pay_order, {});
+              const q = signal?.aborted ? null : await callTool(p.tools.get_quote, {}, signal);
+              if (q?.ok && !signal?.aborted) await callTool(p.tools.pay_order, {}, signal);
+              if (signal?.aborted && !state.payment) {
+                state.payment = { shopEns, status: 'refused', reason: 'STOPPED', detail: 'the run was stopped before paying; nothing was signed' };
+                state.refusals.push({ reason: 'STOPPED', detail: state.payment.detail, agent: payer.ens });
+              }
               const o = state.payment ?? { status: 'refused', reason: 'NO_QUOTE', detail: 'the shop did not quote' };
               return { status: o.status === 'no-purchase' ? 'refused' : o.status, reason: clip(String(o.reason ?? o.detail ?? 'settled')), receiptTransaction: o.receipt?.transaction ?? null };
             },
@@ -393,7 +399,7 @@ export async function runBuyerTeam(ctx) {
     }
     const { need: kind, item, quantity, budgetUsdt, deadlineIso, city } = state.codeNeed;
     const need = { need: kind, item, quantity, budgetUsdt, deadlineIso, city };
-    const report = (name) => callTool(tools[name], { need }).catch(() => null);
+    const report = (name) => callTool(tools[name], { need }, signal).catch(() => null);
     const [scoutOut, analystOut] = await Promise.all([report('scout'), report('analyst')]);
     const asked = await askModel({
       role: 'concierge',
@@ -405,26 +411,54 @@ export async function runBuyerTeam(ctx) {
       signal,
       prompt: promptFor('concierge-choose'),
     });
-    let shop = typeof asked.output?.chosenShop === 'string' && asked.output.chosenShop !== '' ? asked.output.chosenShop : null;
-    if (!(state.ranking ?? []).some((r) => r.ens === shop)) {
+    const end = (extra = {}) => {
+      // A failed model leaves its answer null (the result's modelChoice and narrative stay the
+      // model's); the failure is `modelError`, not `error`, because code carried the step.
+      endAgent({ ens: names.concierge, role: 'concierge', log, meter, startedAt, output: asked.output, usageTokens: asked.usageTokens, settings: asked.settings, calls: asked.calls, modelError: asked.output ? null : asked.error, ...extra });
+      return { output: asked.output, error: asked.output ? null : asked.error, usageTokens: asked.usageTokens };
+    };
+    const stopped = () => {
+      if (!signal?.aborted) return false;
+      state.refusals.push({ reason: 'STOPPED', detail: 'the run was stopped before paying; nothing was paid', agent: names.concierge });
+      log.guard('ERRAND', false, 'STOPPED: the run was stopped before paying; nothing was paid');
+      return true;
+    };
+    if (stopped()) return end();
+    // The model's name for a shop, matched to the ranking without regard to case or spaces.
+    const named = typeof asked.output?.chosenShop === 'string' ? asked.output.chosenShop.trim().toLowerCase() : '';
+    let shop = (state.ranking ?? []).find((r) => r.ens.toLowerCase() === named)?.ens ?? null;
+    const noFit = () => {
+      const missing = [!state.scoutDone && 'the scout', !state.analystDone && 'the analyst'].filter(Boolean);
+      if (missing.length) {
+        state.refusals.push({ reason: 'PHASE_NOT_READY', detail: `${missing.join(' and ')} did not report`, agent: names.concierge });
+        log.guard('G12', false, `PHASE_NOT_READY: ${missing.join(' and ')} did not report; no purchase`);
+        return;
+      }
+      const why = whyNoFit(state, clock());
+      state.refusals.push({ ...why, agent: names.concierge });
+      log.guard(GUARD_OF[why.reason] ?? 'G3', false, `${why.reason}: ${why.detail}; no eligible shop has an offer within the budget and the deadline (${state.offers.size} offers): no purchase`);
+    };
+    if (!shop) {
       const best = bestFit(state, clock());
-      const named = shop ? `"${clip(shop, 80)}", which is not in the ranking` : 'no shop';
+      const said = named ? `"${clip(asked.output.chosenShop, 80)}", which is not in the ranking` : 'no shop';
       if (best) {
-        log.guard('G2', true, `the concierge named ${named}${asked.error ? ` (${asked.error})` : ''}; code's best eligible offer within the limits is ${best}: paying it`);
+        log.guard('G2', true, `the concierge named ${said}${asked.error ? ` (${asked.error})` : ''}; code's best eligible offer within the limits is ${best}: paying it`);
         shop = best;
       } else {
-        shop = null;
-        const missing = [!state.scoutDone && 'the scout', !state.analystDone && 'the analyst'].filter(Boolean);
-        if (missing.length) log.guard('G12', false, `${missing.join(' and ')} did not report: no purchase`);
-        else log.guard('G3', false, `no eligible shop has an offer within the budget and the deadline (${state.offers.size} offers): no purchase`);
+        noFit();
+        return end();
       }
     }
-    const paid = shop ? await callTool(tools.pay_shop, { shopEns: shop }).catch(() => null) : null;
-    const output = asked.output ?? {
-      summary: paid?.status === 'paid' ? `Paid ${shop} ${paid.amountUsdt} USDT: code's best eligible offer within the limits (SYNTHETIC).` : 'No purchase (SYNTHETIC).',
-      chosenShop: shop,
-    };
-    endAgent({ ens: names.concierge, role: 'concierge', log, meter, startedAt, output, usageTokens: asked.usageTokens, settings: asked.settings, calls: asked.calls });
-    return { output, error: null, usageTokens: asked.usageTokens };
+    let paid = await callTool(tools.pay_shop, { shopEns: shop }, signal).catch(() => null);
+    // An eligible shop that does not fit the limits is the model's slip, not a veto: code pays its
+    // best fitting offer instead. The trap (SHOP_NOT_ELIGIBLE) and every other refusal end the errand.
+    if (paid?.status === 'refused' && FITS.has(paid.reason) && !state.paying && !state.payment && !signal?.aborted) {
+      const best = bestFit(state, clock());
+      if (best && best !== shop) {
+        log.guard('G2', true, `${shop} does not fit the limits (${paid.reason}); code's best eligible offer within the limits is ${best}: paying it`);
+        paid = await callTool(tools.pay_shop, { shopEns: best }, signal).catch(() => null);
+      }
+    }
+    return end();
   }
 }

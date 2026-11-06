@@ -77,3 +77,21 @@ export function bestFit(state, now) {
   }
   return null;
 }
+
+// Why nothing fits (W4: the refusal a no-purchase carries, so the screens can say so): the reason
+// for the best-ranked eligible shop, in payGuard's words, or that no shop is eligible.
+export function whyNoFit(state, now) {
+  const top = (state.ranking ?? []).find((r) => r.eligible);
+  if (!top) return { reason: 'NO_ELIGIBLE_SHOP', detail: 'no shop in the ranking is eligible' };
+  const offer = state.offers.get(top.ens);
+  if (!offer || offer.item !== state.need?.item || offer.quantity !== state.need?.quantity) {
+    return { reason: 'NO_OFFER', detail: `the scout found no offer from ${top.ens} for ${state.need?.quantity} ${state.need?.item}` };
+  }
+  if (toMicro(offer.priceUsdt) > state.mandate.budgetMicro - state.spentMicro - state.reservedMicro) {
+    return { reason: 'OVER_BUDGET', detail: `${offer.priceUsdt} is above what is left of the ${state.mandate.budgetUsdt} budget` };
+  }
+  if (!(now + offer.etaMinutes * 60_000 <= Date.parse(state.mandate.deadlineIso))) {
+    return { reason: 'MISSES_DEADLINE', detail: `${top.ens} arrives after the deadline ${state.mandate.deadlineIso}` };
+  }
+  return { reason: 'NO_OFFER', detail: 'no eligible offer fits the limits' };
+}

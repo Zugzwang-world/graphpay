@@ -45,9 +45,12 @@ export async function runAgent({ role, ens, task, tools, models, log, meter, sdl
   return { output: asked.output, error: asked.error, usageTokens: asked.usageTokens };
 }
 
-// agent.end for one agent: its output (or its error) and every model call it made.
-export function endAgent({ ens, role, log, meter, startedAt, output, error, usageTokens = 0, settings = null, calls = [] }) {
+// agent.end for one agent: its output (or its error) and every model call it made. `modelError`
+// records a model that gave no answer while code carried the step (the screens show an `error`
+// as a refusal, so a step code completed has none).
+export function endAgent({ ens, role, log, meter, startedAt, output, error, usageTokens = 0, settings = null, calls = [], modelError = null }) {
   const extra = { usageTokens, model: settings ? settings.model : 'code', effort: settings ? settings.effort : null, calls };
+  if (modelError) extra.modelError = log.scrub(modelError);
   if (startedAt !== null && startedAt !== undefined) extra.seconds = Number(((meter.now() - startedAt) / 1000).toFixed(2));
   if (error) log.agentEnd(ens, role, null, { ...extra, error: log.scrub(error) });
   else log.agentEnd(ens, role, output, extra);
@@ -73,16 +76,22 @@ export async function runCodeAgent({ role, ens, task, log, meter, run }) {
 
 let codeCalls = 0;
 // Code calls one of an agent's traced tools itself: the same tool.call and tool.result events as
-// when the model calls it.
-export function callTool(tool, input) {
+// when the model calls it. `signal` reaches the tool as the SDK's abortSignal would.
+export function callTool(tool, input, signal) {
   codeCalls += 1;
-  return tool.execute(input, { toolCallId: `code-${codeCalls}`, messages: [] });
+  return tool.execute(input, { toolCallId: `code-${codeCalls}`, messages: [], ...(signal ? { abortSignal: signal } : {}) });
 }
 
 // The model part of an agent: the loop, the parsed and checked answer, and its calls. No
 // agent.start or agent.end (the caller writes them). `prompt` overrides the role's prompt.
 export async function askModel({ role, ens, task, tools = {}, models, log, meter, sdl, executed = new Set(), signal, prompt }) {
-  const { model, settings, callSettings } = models(role);
+  let chosen;
+  try {
+    chosen = models(role);
+  } catch (e) {
+    return { output: null, error: `agent error: ${errorText(e)}`, usageTokens: 0, settings: null, calls: [] };
+  }
+  const { model, settings, callSettings } = chosen;
   const prompted = PROMPTED_JSON.has(settings.provider);
   const instructions = prompt ?? promptFor(role, { sdl });
   const calls = []; // one record per model call (models.mjs createMeter)

@@ -77,14 +77,14 @@ export function createShopGateway(ctx) {
     const code = [];
     let ens = null;
     try {
-      ens = await callTool(tools.ens_check, { name: req.payer });
+      ens = await callTool(tools.ens_check, { name: req.payer }, signal);
     } catch (error) {
       code.push(`ENS read failed (${errorText(error)}): refused`);
     }
     if (ens && ens.status !== 'ACTIVE') code.push(`ENS says ${ens.status}`);
     let standing = null;
     try {
-      standing = parseBuyerRisk(askText(await callTool(tools.ask, { intent: 'buyer_risk', ens: [req.payer], window: 'D90', verify: false })), req.payer);
+      standing = parseBuyerRisk(askText(await callTool(tools.ask, { intent: 'buyer_risk', ens: [req.payer], window: 'D90', verify: false }, signal)), req.payer);
     } catch {
       standing = null;
     }
@@ -170,7 +170,7 @@ export function createShopGateway(ctx) {
           log,
           meter,
           run: async () => {
-            const q = await callTool(tools.catalog_quote, { item: req.item, quantity: req.quantity });
+            const q = await callTool(tools.catalog_quote, { item: req.item, quantity: req.quantity }, signal);
             return q?.ok ? { quoteUsdt: q.priceUsdt, etaMinutes: q.etaMinutes, message: 'Quoted from the catalog (SYNTHETIC).' } : { quoteUsdt: null, etaMinutes: null, message: 'We do not sell that.' };
           },
         });
@@ -248,7 +248,7 @@ export function createShopGateway(ctx) {
         log,
         meter,
         run: async () => {
-          const c = await callTool(tools.dispatch_confirm, task);
+          const c = await callTool(tools.dispatch_confirm, task, signal);
           return { confirmed: c?.confirmed === true, orderId: String(c?.orderId ?? bound.orderId), etaIso: String(c?.etaIso ?? ''), message: c?.confirmed ? 'Delivery confirmed (SYNTHETIC courier).' : 'Not confirmed: the shop API has no payment for this order.' };
         },
       });

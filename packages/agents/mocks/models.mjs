@@ -80,7 +80,9 @@ function chooseFrom(task, play) {
   const now = Date.parse(task.now);
   const fits = (o) => Number(o.priceUsdt) <= Number(task.limits.budgetUsdt) && now + o.etaMinutes * 60_000 <= deadline;
   if (play === 'no-choice') return null;
-  if (play === 'unknown-choice') return 'the dosa place near the station';
+  if (play === 'unknown-choice') return 'a shop that is not in the ranking';
+  if (play === 'trap-upper') return (task.ranking ?? []).find((r) => !r.eligible)?.ens.toUpperCase() ?? null;
+  if (play === 'late-pick') return (task.ranking ?? []).filter((r) => r.eligible).at(-1)?.ens ?? null;
   if (play === 'price-only') return [...offers].sort((a, b) => Number(a.priceUsdt) - Number(b.priceUsdt))[0]?.shop ?? null;
   if (play === 'trusts-analyst') return task.analyst?.recommendation ?? null;
   return (task.ranking ?? []).find((r) => r.eligible && offers.some((o) => o.shop === r.ens && fits(o)))?.ens ?? null;

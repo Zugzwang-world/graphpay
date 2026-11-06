@@ -218,10 +218,11 @@ test("the guard checks each shop's ETA against the span from the request: within
   assert.equal(picked.runLog.result.status, 'refused');
   assert.deepEqual(refusals(picked.runLog), ['MISSES_DEADLINE']);
   assert.equal(picked.world.hooks.signed.length, 0);
-  // With the routine steps in code, nothing fits and nothing is paid, and the feed says why.
+  // With the routine steps in code, nothing fits and nothing is paid; the result and the feed say why.
   const { runLog, world } = await run({ request: cast.order.request.replace('an hour', '30 minutes') });
-  assert.equal(runLog.result.status, 'no-purchase');
-  assert.ok(guards(runLog, false).some((g) => g.guard === 'G3' && /no eligible shop has an offer within the budget and the deadline/.test(g.detail)));
+  assert.equal(runLog.result.status, 'refused');
+  assert.deepEqual(refusals(runLog), ['MISSES_DEADLINE']);
+  assert.ok(guards(runLog, false).some((g) => g.guard === 'G3' && /MISSES_DEADLINE: .*no eligible shop has an offer within the budget and the deadline/.test(g.detail)));
   assert.equal(world.hooks.signed.length, 0);
 });
 
