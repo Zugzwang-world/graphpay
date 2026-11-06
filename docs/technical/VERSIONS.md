@@ -105,4 +105,4 @@ No new package versions: every dependency is a pin already verified above, so th
 | `ai` | 7.0.162 | the agents pin; `tool({ description, inputSchema, execute })` as `packages/agents/src/tools.mjs` uses it | verified |
 | `@modelcontextprotocol/sdk` | 1.32.2 | the money-graph pin; `McpServer.registerTool(name, { description, inputSchema }, handler)` as `packages/money-graph` uses it | verified |
 | anvil (fork tests only, not a package) | 1.9.0 (Homebrew, commit `6056c58`) | `anvil --version` on this Mac; `--fork-url` to the public Whitechain RPC keeps chain id 1874 | verified |
-| `@graphpay_ethglobal/arkiv-graph` | 0.1.0 (to publish; deps `@arkiv-network/sdk` 1.0.1, `viem` ^2.57.16) | `pnpm pack`, install of the tarball in an empty folder on Node 22.23.4 and the README quickstart run, Fri 6 Nov 09:45 IST | verified |
+| `@graphpay_ethglobal/arkiv-graph` | 0.1.1 (0.1.0 is on npm without the writer fix; deps `@arkiv-network/sdk` 1.0.1, `viem` ^2.57.16) | `pnpm pack`, install of the tarball in an empty folder on Node 22.23.4 and the README quickstart run, Fri 6 Nov 09:45 IST | verified |
