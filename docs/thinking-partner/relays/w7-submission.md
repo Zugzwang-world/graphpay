@@ -1,6 +1,6 @@
 # Relay: w7-submission (the night Submission stream)
 
-Updated 23:30 IST, Fri 6 Nov, by W7 Submission (`local_abd77623-de22-4fe2-a0a9-865fdd43dba2`). Brief: [`briefs/2258-w7-submission.md`](../briefs/2258-w7-submission.md).
+Updated 23:32 IST, Fri 6 Nov, by W7 Submission (`local_abd77623-de22-4fe2-a0a9-865fdd43dba2`). Brief: [`briefs/2258-w7-submission.md`](../briefs/2258-w7-submission.md).
 
 ## Plain language
 
@@ -8,11 +8,14 @@ W7 writes what a judge reads, so the founder can paste the ETHGlobal submission 
 
 **Landed:** the README ([#154](https://github.com/Zugzwang-world/graphpay/pull/154), 23:24 IST). It says what GraphPay is, gives the live link, carries the fictional-persona sentence, and has a "verify each claim" table where every payment, refund, renewal, ENS action and Arkiv receipt opens on a public explorer. A root MIT `LICENSE` came with it.
 
-**In this step's PR:**
-- **AI_USAGE.md:** Claude Code wrote the code; Claude on the web helped plan; Kimi runs the agents; a Grok bot desk made the assets, with its prompts in `assets/grok/`; all images are AI-generated. Every session is listed with its model, the night run included. The team's phone apps are credited to ajatshatru01, whose #70 commit lists GitHub Copilot as co-author.
-- **The five Arkiv files, finished:** `friction.md` gains two rows reproduced tonight; `reach.md` and `why-arkiv.md` are new; `how-you-use-arkiv.md` and `swarm.md` are brought to the live state.
+**Also landed:** AI_USAGE.md and the five Arkiv files ([#159](https://github.com/Zugzwang-world/graphpay/pull/159), 23:30 IST).
 
-**Next:** `WHITECHAIN_FEEDBACK.md` and `docs/submission/ENS.md`, then the form text, `docs/submission/ETHGLOBAL.md`. Then a pass after W1's new shop names, W2's race at M and W6's 1.0.0 SDKs.
+**In this step's PR:**
+- **`WHITECHAIN_FEEDBACK.md`**, at the root, as Whitechain's rules ask: what we built, what worked, gas measured on the event build, friction ranked by cost, and docs we would add.
+- **`docs/submission/ENS.md`**, the ENS partner note: the namespace, and what ENS decides at pay time, each with its evidence.
+- Two README claims made exact: the agent's scoped keys, and where the payee read is recorded.
+
+**Next:** the form text, `docs/submission/ETHGLOBAL.md`. Then a pass after W1's new shop names, W2's race at M and W6's 1.0.0 SDKs.
 
 **The founder must:** review the README; confirm the team list; record the video and paste its link into the form; submit by 08:00 IST.
 
@@ -37,6 +40,11 @@ W7 writes what a judge reads, so the founder can paste the ETHGlobal submission 
   - The map lists 16 shops, 10 labelled synthetic.
   - New row: the Swarm pointers.
 - **swarm.md:** the dosa menus (Filter & Fold v3). The menu's sha-256 equals the row's `content_hash`, and the dish photo's equals its recorded hash (both fetched tonight). The phones' build reads them keyless (`apps/phones/menu-images.mjs`).
+- **WHITECHAIN_FEEDBACK.md:**
+  - Every gas number is a transaction read back from the explorer.
+  - The standard contracts were checked with `eth_getCode` at 23:29 IST: Permit2, Multicall3, EntryPoint v0.7, x402's Permit2 proxy, the deterministic deployer.
+  - Friction, by cost: the `eth_getLogs` range caps (10,000 and about 1,000 blocks), getting test USDT, "verified" against "fully verified", the faucet amount, WebSockets on a paid tier.
+- **ENS.md:** the payer's resume transaction was verified on Sepolia (23:00 IST, from Vitalik's wallet to the payer's resolver). B7 and B9 are cited as what they are: a fork test, and the payee read recorded in C2.
 - **Corrections made:**
   - Explain ids live per server instance (the last 200), so the docs link no fixed explain id.
   - The GraphQL and explorer links now percent-encode their parentheses, so every renderer keeps them whole.

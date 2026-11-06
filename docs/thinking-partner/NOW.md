@@ -108,10 +108,10 @@ Started 23:02 IST, Fri 6 Nov (session `local_b6205da6-b613-4662-872a-6d4879c66fa
 
 ## w7-submission
 
-Updated 23:30 IST, Fri 6 Nov (W7 Submission, `local_abd77623-de22-4fe2-a0a9-865fdd43dba2`; relay `relays/w7-submission.md`).
-- **Landed:** the README with its "verify each claim" table and a root MIT `LICENSE` ([#154](https://github.com/Zugzwang-world/graphpay/pull/154), 23:24 IST).
-- **In this PR:** AI_USAGE.md (Claude Code wrote the code, Claude planned, Kimi runs the agents, the Grok desk made the assets, all images AI-generated, every session and model) and the five Arkiv files, finished: `friction.md` (two new rows: the key's quota, the bool literal), `reach.md` and `why-arkiv.md` (new), `how-you-use-arkiv.md`, `swarm.md` (the dosa menus, hashes checked).
-- **Next:** `WHITECHAIN_FEEDBACK.md` and `docs/submission/ENS.md`, then `docs/submission/ETHGLOBAL.md` (the form text).
+Updated 23:32 IST, Fri 6 Nov (W7 Submission, `local_abd77623-de22-4fe2-a0a9-865fdd43dba2`; relay `relays/w7-submission.md`).
+- **Landed:** the README and a root MIT `LICENSE` ([#154](https://github.com/Zugzwang-world/graphpay/pull/154), 23:24 IST); AI_USAGE.md and the five Arkiv files ([#159](https://github.com/Zugzwang-world/graphpay/pull/159), 23:30 IST).
+- **In this PR:** `WHITECHAIN_FEEDBACK.md` (what we built, what worked, gas measured on the event build, friction ranked by cost, docs we would add) and `docs/submission/ENS.md` (the namespace, what ENS decides, with evidence); two README claims made exact.
+- **Next:** `docs/submission/ETHGLOBAL.md`, the form text.
 - **Waits on:** W1's new shop names, W2's menus and race at M, W6's SDK 1.0.0; each gets a pass after it lands.
 - **Blockers:** none.
 
