@@ -198,7 +198,8 @@ Updated 23:38 IST, Fri 6 Nov (W7 Submission).
 
 ## w6-sdk
 
-- **npm's web approval for both SDKs at 1.0.0** (owner: the founder). What: W6 runs `npm login` (the sign-in link), then publishes both packages one after the other (one approval link, which lasts about 5 minutes; last time npm reused it for the second package). Where: the links come in this chat and as a notification; open them in the browser signed in to npm as the owner of `graphpay_ethglobal`. Why: the brief's done-when is both packages on npm at 1.0.0. Recommendation: about 10 minutes at the browser, as soon as both PRs are merged.
+- Closed 01:30 IST: npm's web approval. Both SDKs are on npm at 1.0.0, and the founder approved the sign-in and the two publishes.
+- **For W7** (owner: W7, via the Coordinator). What: the root README's agentpay row (line 123) still says 0.1.1. Why: agentpay is on npm at 1.0.0 since 01:30 IST (ADR-0080). Recommendation: change it to 1.0.0, as the arkiv-graph row and `arkiv/reach.md` already say.
 
 ## frontend
 
