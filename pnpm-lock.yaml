@@ -54,9 +54,6 @@ importers:
 
   apps/web:
     dependencies:
-      '@graphpay/arkiv-graph':
-        specifier: workspace:*
-        version: link:../../packages/arkiv-graph
       '@graphpay/city':
         specifier: workspace:*
         version: link:../../packages/city
@@ -78,6 +75,9 @@ importers:
       '@graphpay/shop':
         specifier: workspace:*
         version: link:../../packages/shop
+      '@graphpay_ethglobal/arkiv-graph':
+        specifier: workspace:*
+        version: link:../../packages/arkiv-graph
       next:
         specifier: 16.4.5
         version: 16.4.5(@opentelemetry/api@1.10.0)(@types/node@22.20.5)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
@@ -142,9 +142,6 @@ importers:
       '@graphpay/agents':
         specifier: workspace:*
         version: link:../packages/agents
-      '@graphpay/arkiv-graph':
-        specifier: workspace:*
-        version: link:../packages/arkiv-graph
       '@graphpay/config':
         specifier: workspace:*
         version: link:../packages/config
@@ -166,6 +163,9 @@ importers:
       '@graphpay/shop':
         specifier: workspace:*
         version: link:../packages/shop
+      '@graphpay_ethglobal/arkiv-graph':
+        specifier: workspace:*
+        version: link:../packages/arkiv-graph
       '@x402/core':
         specifier: 2.30.0
         version: 2.30.0
@@ -231,7 +231,7 @@ importers:
         specifier: 1.0.1
         version: 1.0.1(typescript@5.9.3)(viem@2.57.16(typescript@5.9.3)(zod@4.6.7))
       viem:
-        specifier: 2.57.16
+        specifier: ^2.57.16
         version: 2.57.16(typescript@5.9.3)(zod@4.6.7)
 
   packages/checkout-kit:
@@ -258,15 +258,15 @@ importers:
       '@arkiv-network/sdk':
         specifier: 1.0.1
         version: 1.0.1(typescript@5.9.3)(viem@2.57.16(typescript@5.9.3)(zod@4.6.7))
-      '@graphpay/arkiv-graph':
-        specifier: workspace:*
-        version: link:../arkiv-graph
       '@graphpay/config':
         specifier: workspace:*
         version: link:../config
       '@graphpay/money-graph':
         specifier: workspace:*
         version: link:../money-graph
+      '@graphpay_ethglobal/arkiv-graph':
+        specifier: workspace:*
+        version: link:../arkiv-graph
       viem:
         specifier: 2.57.16
         version: 2.57.16(typescript@5.9.3)(zod@4.6.7)
@@ -314,9 +314,6 @@ importers:
       '@arkiv-network/sdk':
         specifier: 1.0.1
         version: 1.0.1(typescript@5.9.3)(viem@2.57.16(typescript@5.9.3)(zod@4.6.7))
-      '@graphpay/arkiv-graph':
-        specifier: workspace:*
-        version: link:../arkiv-graph
       '@graphpay/config':
         specifier: workspace:*
         version: link:../config
@@ -329,6 +326,9 @@ importers:
       '@graphpay/money-graph':
         specifier: workspace:*
         version: link:../money-graph
+      '@graphpay_ethglobal/arkiv-graph':
+        specifier: workspace:*
+        version: link:../arkiv-graph
       viem:
         specifier: 2.57.16
         version: 2.57.16(typescript@5.9.3)(zod@4.6.7)
@@ -338,12 +338,12 @@ importers:
       '@arkiv-network/sdk':
         specifier: 1.0.1
         version: 1.0.1(typescript@5.9.3)(viem@2.57.16(typescript@5.9.3)(zod@4.6.7))
-      '@graphpay/arkiv-graph':
-        specifier: workspace:*
-        version: link:../arkiv-graph
       '@graphpay/config':
         specifier: workspace:*
         version: link:../config
+      '@graphpay_ethglobal/arkiv-graph':
+        specifier: workspace:*
+        version: link:../arkiv-graph
       '@modelcontextprotocol/sdk':
         specifier: 1.32.2
         version: 1.32.2(zod@4.6.7)

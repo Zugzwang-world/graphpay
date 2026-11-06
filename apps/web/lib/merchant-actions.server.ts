@@ -35,6 +35,8 @@ export interface OrderState {
   amountMicro: bigint;
   refundedMicro: bigint;
   merchant: string;
+  shopNode: string;
+  buyerNode: string;
 }
 
 export interface Chain {
@@ -67,9 +69,9 @@ async function liveChain(): Promise<Chain> {
   return { publicClient: w.publicClient, walletClient: walletClient as unknown as Chain['walletClient'], checkout: checkout as `0x${string}`, chainId: w.chain.id, token: config.whitechain.tokens.usdt.address as `0x${string}` };
 }
 
-export async function readOrder(chain: Chain, orderId: string): Promise<OrderState> {
-  const o = (await chain.publicClient.readContract({ address: chain.checkout, abi: checkoutAbi, functionName: 'orders', args: [orderId as Hex] })) as { status: number | bigint; amountMicro: bigint; refundedMicro: bigint; merchant: string };
-  return { status: ORDER_STATUS[Number(o.status)] ?? 'NONE', amountMicro: o.amountMicro, refundedMicro: o.refundedMicro, merchant: o.merchant };
+export async function readOrder(chain: Pick<Chain, 'publicClient' | 'checkout'>, orderId: string): Promise<OrderState> {
+  const o = (await chain.publicClient.readContract({ address: chain.checkout, abi: checkoutAbi, functionName: 'orders', args: [orderId as Hex] })) as { status: number | bigint; amountMicro: bigint; refundedMicro: bigint; merchant: string; shopNode: string; buyerNode: string };
+  return { status: ORDER_STATUS[Number(o.status)] ?? 'NONE', amountMicro: o.amountMicro, refundedMicro: o.refundedMicro, merchant: o.merchant, shopNode: o.shopNode, buyerNode: o.buyerNode };
 }
 
 // One send at a time on this instance (one nonce), so two clicks never race into a second send. The

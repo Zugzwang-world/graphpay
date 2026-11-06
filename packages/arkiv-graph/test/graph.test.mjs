@@ -168,9 +168,11 @@ test('boundary: no payment words, project entity names or project imports in src
   };
   const root = new URL('..', import.meta.url).pathname;
   walk(`${root}src`);
-  files.push(`${root}index.mjs`);
+  walk(`${root}examples`);
+  files.push(`${root}index.mjs`, `${root}README.md`, `${root}CHANGELOG.md`, `${root}FEEDBACK.md`);
   for (const f of files) {
-    const text = readFileSync(f, 'utf8');
+    // The docs may name the project that built the package; its source may not.
+    const text = readFileSync(f, 'utf8').replace(/graphpay[\w./@-]*/gi, '');
     const hit = words.exec(text);
     assert.equal(hit, null, `${f.slice(root.length)} mentions "${hit?.[0]}"`);
     assert.doesNotMatch(text, /from '@graphpay\//, `${f.slice(root.length)} imports a project package`);

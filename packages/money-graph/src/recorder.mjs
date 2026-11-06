@@ -6,7 +6,7 @@
 import { ExpirationTime } from '@arkiv-network/sdk';
 import { normalizedName, nodeOf } from './identity.mjs';
 import { ENTITIES, LIFETIME } from './model.mjs';
-import { dayOf } from '@graphpay/arkiv-graph';
+import { dayOf } from '@graphpay_ethglobal/arkiv-graph';
 
 export const RECORDER_KINDS = ['fail', 'request'];
 

@@ -46,6 +46,7 @@ export declare function patchValues(def: EntityDef, values: Record<string, unkno
 export declare function plainRow(row: Record<string, unknown>): Row;
 export declare function jsonBytes(value: unknown): Hex;
 export declare function fromJsonBytes(hex: string): any;
+export declare function nodeKeyOf(name: string): Hex;
 export declare function dayOf(ts: number | bigint): number;
 
 export declare function checkedOwner(address: string, label?: string): Hex;
@@ -97,3 +98,19 @@ export declare const EXECUTE_ABI: readonly unknown[];
 export declare const EVENTS_ABI: readonly unknown[];
 export declare function parseQuery(text: string): { where: unknown; orderBy: { name: string; tag: string; direction: 'ASC' | 'DESC' } | null; leaves: number; depth: number };
 export declare function renderQuery(node: unknown): string;
+
+export declare const ENTITY_ADDRESS: Hex;
+export interface Connection { backend: 'sim' | 'node'; publicClient: PublicArkivClient; walletClient: WalletArkivClient | null; writer: Writer | null; owner: Hex | null; stats: TransportStats; sim: ArkivSim | null; chainId: number }
+export declare function connect(options?: { rpcUrl?: string; chainId?: number; privateKey?: Hex; log?: (entry: Record<string, unknown>) => void; sim?: ArkivSim }): Promise<Connection>;
+
+export type Filter = { [field: string]: { eq?: unknown; in?: unknown[]; gt?: unknown; gte?: unknown; lt?: unknown; lte?: unknown; between?: [unknown, unknown]; startsWith?: string; exists?: true } } | { AND?: Filter[]; OR?: Filter[] };
+export interface ExplainTrace { explainId: string; backend: string; calls: number; queries: string[]; ms: number; bytes: number; entityKeys: Hex[]; blockNumber: string | null; warnings: string[]; notes: string[]; truncated: boolean; reads: Record<string, unknown>[] }
+export interface Store {
+  owner: Hex; graph: Graph;
+  load(): Promise<GraphState>;
+  write(events: GraphEvent[], options?: { split?: boolean }): Promise<{ applied: string[]; skipped: string[]; txs: SentTx[] }>;
+  query(entity: string, options?: { filter?: Filter; orderBy?: { field: string; direction?: 'asc' | 'desc' }; limit?: number }): Promise<{ rows: Row[]; explain: ExplainTrace; truncated: boolean }>;
+  explainStore: { get(id: string): ExplainTrace | null; size(): number };
+}
+export declare function createStore(options: { graph: Graph; arkiv: Connection; stream?: string | null; days?: number; labels?: Record<string, unknown>; createNodes?: boolean }): Store;
+export { ExpirationTime } from '@arkiv-network/sdk';

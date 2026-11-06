@@ -13,7 +13,7 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { activeCast, config, disposableEntry } from '@graphpay/config';
 import { connectArkiv, ENTITIES, writerAddresses } from '@graphpay/money-graph';
-import { readAll } from '@graphpay/arkiv-graph';
+import { readAll } from '@graphpay_ethglobal/arkiv-graph';
 import { erc20Abi, keccak256, toHex } from 'viem';
 import { clientsFor } from '../scripts/lib/chains.mjs';
 import { loadEnv } from '../scripts/lib/env-loader.mjs';

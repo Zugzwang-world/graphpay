@@ -12,7 +12,7 @@
 
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { generatePrivateKey } from 'viem/accounts';
-import { readAll } from '@graphpay/arkiv-graph';
+import { readAll } from '@graphpay_ethglobal/arkiv-graph';
 import { story, config } from '@graphpay/config';
 import { ENTITIES, connectArkiv, graph, newSim, nodeOf, seedOwner, writerAddresses } from '@graphpay/money-graph';
 import { generateCity, truthOf, seedGraph, seedPlain, seedDirectory, wipe, newManifest, ledgerEvents } from '../index.mjs';

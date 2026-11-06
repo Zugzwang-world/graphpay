@@ -6,7 +6,7 @@ import { mkdtempSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { test } from 'node:test';
-import { jsonBytes, readAll } from '@graphpay/arkiv-graph';
+import { jsonBytes, readAll } from '@graphpay_ethglobal/arkiv-graph';
 import { connectArkiv, ENTITIES, newSim, recordEdge } from '@graphpay/money-graph';
 import { generatePrivateKey } from 'viem/accounts';
 import { Actors } from '../src/actors.mjs';

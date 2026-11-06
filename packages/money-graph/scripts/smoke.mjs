@@ -7,7 +7,7 @@
 import { addr, str, u64 } from '@arkiv-network/sdk';
 import { and, eq, or } from '@arkiv-network/sdk/query';
 import { connectArkiv, ENTITIES, writerAddresses } from '../index.mjs';
-import { scope } from '@graphpay/arkiv-graph';
+import { scope } from '@graphpay_ethglobal/arkiv-graph';
 import { loadSecrets } from './lib.mjs';
 
 const env = loadSecrets();

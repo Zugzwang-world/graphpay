@@ -1,11 +1,11 @@
-// GraphPay's money graph, defined on @graphpay/arkiv-graph (planning/SPEC/ARKIV_GRAPH.md §3
+// GraphPay's money graph, defined on @graphpay_ethglobal/arkiv-graph (planning/SPEC/ARKIV_GRAPH.md §3
 // as amended by docs/plan/amendments/M7-arkiv.md §1–§5): actors are nodes keyed by
 // namehash(ENS) and epoch, every event is a readonly edge, tallies keep absolute
 // counters per node, epoch and window, pair links keep count and sum per payer–shop
 // pair for the money kinds. Plus the shop directory and quotes (W_DIRECTORY) and the
 // plain model the benchmark compares against. Addresses come from the config file.
 
-import { defineGraph, defineEntity, checkedOwner } from '@graphpay/arkiv-graph';
+import { defineGraph, defineEntity, checkedOwner } from '@graphpay_ethglobal/arkiv-graph';
 import { config, network } from '@graphpay/config';
 
 export const PROJECT = config.arkiv.project;

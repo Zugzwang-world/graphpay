@@ -1,30 +1,22 @@
 # NOW
 
-Updated 09:35 IST, Fri 6 Nov (Coordinator)
+Updated 09:46 IST, Fri 6 Nov (Coordinator)
 
 ## Summary (Coordinator only)
 
-Updated 09:35 IST, Fri 6 Nov.
+Updated 09:46 IST, Fri 6 Nov.
 
-**The core is done on the real testnets.** Acceptance: **42 pass, 0 fail**, 1 blocked (D7, the benchmark at size M, waiting for the story), 5 not run (B7, F1, F3, D10 and B9 wait on other tracks). Live on https://graphpay-event.vercel.app: the hosted facilitator, shop and recorder, the renewal cron, the website with both phones, the race, the map and the explainer lanes. The checkout kit and demo store are proved with a real payment.
+**Standing rule (the founder, ADR-0066): no target times.** Every task starts the moment it's given, runs as fast as it can, and is reported when done. Fixed: the submission, Sat 09:00 IST, and the presentation, Sat 09:30 IST. Everything else is an event.
 
-**The SDK publish, in progress (ADR-0063, by about 13:00):**
-- `@graphpay_ethglobal/arkiv-graph` (T3) and `@graphpay_ethglobal/agentpay` (T6), both on Sonnet 5.5 and doing fresh starts.
-- The names are free on npm, and the `graphpay_ethglobal` organisation is the founder's.
-- The issue labels `arkiv-graph`, `agentpay` and `feedback`, and an issue template per package, are in place.
-- Next: the founder's `npm login` when both pass pack, install and quickstart (about 12:00).
-
-**The story lock: overdue** against 08:30. The latest is 13:00, because the large city must start seeding by 14:00.
-
-**Plan usage:** 83% at 09:12; every session pauses at 92% (ADR-0062); the reset is Fri 21:30 IST.
-
-**Open founder items** (`OPEN.md`, "Founder now"):
-- the story brief;
-- the npm login at publish time;
-- the front-end team's PR #70, which belongs in `apps/demo-ui` (ADR-0065), and who writes `FRONTEND_HANDOVER.md`;
-- the disclosure, if not sent.
-
-**Blocked:** T5 (both phone views) is idle until the Coordinator wakes it, which it does now that the founder has typed. D7 and item 6 wait for the story.
+- **The core is done on the real testnets.** Acceptance: 42 pass, 0 fail, 1 blocked (D7: the large city), 5 not run (other tracks' items).
+- **The SDKs (ADR-0063):**
+  - `@graphpay_ethglobal/arkiv-graph` 0.1.0 is ready (#74: pack, install and quickstart pass);
+  - `@graphpay_ethglobal/agentpay` is being finished by T6 now;
+  - the founder's npm login comes the moment both are ready, and then the publish.
+- **The story lock** starts the demo cast and the large city's seeding the moment it happens.
+- **Running:** T6 (agentpay), T3 (the `arkiv/` write-ups), T5 (both phone views). The others wait for the story lock or for unblocked items.
+- **Plan usage:** 83%; every session pauses at 92% (ADR-0062).
+- **Open founder items** (`OPEN.md`): the story lock; npm login when both SDKs are ready; PR #70 belongs in `apps/demo-ui`; who writes `FRONTEND_HANDOVER.md`; the disclosure, if not sent.
 
 ## foundation
 
@@ -32,10 +24,11 @@ M0 is done and handed over (PRs #1–#7); see `relays/foundation.md`.
 
 ## payments
 
-Updated 05:11 IST, Fri 6 Nov (T1).
+Updated 09:47 IST, Fri 6 Nov (T1).
 - **M4 is done: payments run from the public site.** The shop, our facilitator, the refusal recorder and the renewal job are live on https://graphpay-event.vercel.app. A 0.40 payment went through the public URL with no gas from the payer ([explorer](https://explorer.testnet.whitechain.io/tx/0x06d43ca9a501342a1177d3a48383dc1611505863bab15a396aa38bc02aee6e01)), the repeat answered "already paid", every protected route refuses without its passcode or token, and the renewal job renewed a 2-minute demo subscription on its own ([explorer](https://explorer.testnet.whitechain.io/tx/0x48b14aa45f56d487dee743721416a359fed96296b3ad0ababf546838f55e480f)).
 - Join's agents now pay through the hosted facilitator, so no two processes share a key.
-- Next: the Friday items after the story lock. Blockers: none.
+- F3 done: the relayer's safety floor refuses a payment before sending (`docs/sessions/payments/f3.json`).
+- Next: the demo cast's policies, which start once the story locks. Blockers: none.
 
 ## identity
 Updated 04:25 IST. **M6 is built: the gate is merged (PR #34); the watcher PR is open.** The watcher keeps the payment policy and the Arkiv node standing in step with ENS: a kill revokes the policy, a pause shows on the node, a lapse is caught by a 30 s ticker, and it never creates a policy or copies an ENS cap into one. Join hosts it in the workers process.
@@ -45,13 +38,13 @@ Updated 04:25 IST. **M6 is built: the gate is merged (PR #34); the watcher PR is
 
 ## arkiv
 
-Updated 03:50 IST, Fri 6 Nov (T3).
+Updated 10:40 IST, Fri 6 Nov (T3).
 
-- **Where we are:** M9 (the live benchmark) merged at 03:45 (PR #31): ranking the city's shops by sales takes Graph Arkiv 2 reads against plain Arkiv's 5; acceptance D6 passes. The labelling fix merged at 03:41 (PR #30).
-- **This step (Friday item 1):** the "live" rows behind the map and the explainer. A shop's Open toggle, an agent at work, and one agent handing work to another are now short-lived Arkiv rows that disappear by themselves when nobody renews them. GraphQL can ask which shops are open now, which agents are online, and a run's handoffs.
+- **Where we are:** the SDK `@graphpay_ethglobal/arkiv-graph` 0.1.0 is merged and ready to publish (PR #74; the Coordinator publishes with T6's package). Now Friday item 15: the Arkiv judges' drafts.
+- **This step:** `arkiv/friction.md` (7 gaps we hit at the event, each with a repro, plus the open booth questions), `arkiv/how-you-use-arkiv.md` (feature to what the user sees, with what is shipped and what is only built) and `arkiv/swarm.md` (honestly "pending"; nothing uploaded yet).
 - **Running:** nothing.
-- **Blockers:** none. The website's Open toggle and the agent run still have to call these (T5 and T4; OPEN).
-- **Next:** Swarm: the menu upload through the public gateway (the Coordinator's conditions), then refund evidence encrypted in our own code.
+- **Blockers:** none. Swarm goes next only if weekly usage is under about 88% (now 84%).
+- **Next:** Swarm: a probe upload through the public gateway, then the menu.
 
 ## agents
 
@@ -73,10 +66,10 @@ Updated 05:41 IST, Fri 6 Nov. **M13's hosted run passed on the production domain
 
 ## website
 
-Updated 06:10 IST, Fri 6 Nov (T5 Web; Coordinator's clock). **On `main`:** everything through M16, the map, the lanes and the real kit payment (M16 proved on the chain). **In a PR:** the merchant phone's **Mark dispatched** and **Refund** buttons (Friday item 12): the shop's own key signs on the server, behind the passcode; the order must be this shop's, a refund can never exceed what the contract says is left, the shop wallet's float is checked first, and a send whose receipt is late keeps its hash and locks the order so a retry cannot pay twice. Reviewer pass done. Not tried on the real chain from here (a live dispatch or refund changes real demo state).
-- Running: nothing. Needs the shop's key on Vercel (the hosted shop already uses it for deliveries, so it is probably set).
-- Blockers: the store's CSV export waits for T6's PR 64.
-- Next: the customer's refund request, re-order and subscribe buttons (they sign as the payer agent; a reviewer pass each); the store's Sunday box. Fresh start file: `docs/sessions/website/resume.md`.
+Updated 09:40 IST, Fri 6 Nov (T5 Web). **On `main`:** both phones' buttons except the three below, the map, the lanes, race, M16 (one real kit payment). **In a PR (`web/customer-actions`):** the customer phone's **Request refund**: a refund request written to Arkiv with the recorder's key (moves no money); the order is always the payer agent's newest payment, checked on the chain; one request per order per minute. Reviewer pass in progress.
+- Running: nothing.
+- Blockers: Re-order needs `PAYER_PRIVATE_KEY` in Vercel; Subscribe and Cancel need a hosted subscription endpoint from T1; Kill a disposable agent waits for T2 (all in OPEN).
+- Next: Re-order (the payer agent signs through the hosted shop, a reviewer pass). Fresh start file: `docs/sessions/website/resume.md`.
 
 ## agentpay
 

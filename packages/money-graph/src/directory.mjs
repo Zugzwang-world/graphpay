@@ -5,7 +5,7 @@
 
 import { ExpirationTime, bool, i32, key, str } from '@arkiv-network/sdk';
 import { and, asc, between, eq, gt } from '@arkiv-network/sdk/query';
-import { checkedOwner, findOne, fromJsonBytes, jsonBytes, scope, trustedRows } from '@graphpay/arkiv-graph';
+import { checkedOwner, findOne, fromJsonBytes, jsonBytes, scope, trustedRows } from '@graphpay_ethglobal/arkiv-graph';
 import { identityKey, nodeOf, normalizedName } from './identity.mjs';
 import { ENTITIES, LIFETIME, writerAddresses } from './model.mjs';
 

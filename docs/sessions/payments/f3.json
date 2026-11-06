@@ -1,0 +1,51 @@
+{
+  "check": "F3",
+  "run": "production build of apps/web, local next start, hosted env, MIN_RELAYER_BALANCE_WBT raised",
+  "at": "2026-11-06T04:16:55.317Z",
+  "relayer": "0x1AB82871c3E1Be64717269D45F08cA9d54C1EBf6",
+  "floorWbt": "1001",
+  "balanceWei": "794659557124942758",
+  "settle": {
+    "success": false,
+    "errorReason": "relayer_floor",
+    "transaction": "",
+    "network": "eip155:1874",
+    "payer": "0x5cB23cCEFE5585ff1d9E81330AC88DbEb0119b6e"
+  },
+  "relayerNonce": {
+    "before": 13,
+    "after": 13
+  },
+  "checks": [
+    {
+      "name": "the local production build answers /api/facilitator/health",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "health shows the raised floor",
+      "ok": true,
+      "detail": "floor 1001 WBT"
+    },
+    {
+      "name": "health shows the balance below it",
+      "ok": true,
+      "detail": "0.794659557124942758 WBT"
+    },
+    {
+      "name": "the local shop answers 402 (no facilitator call yet)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "settle is refused before sending, naming the floor",
+      "ok": true,
+      "detail": "relayer_floor"
+    },
+    {
+      "name": "no transaction: the relayer nonce is unchanged",
+      "ok": true,
+      "detail": "13 before and after"
+    }
+  ]
+}

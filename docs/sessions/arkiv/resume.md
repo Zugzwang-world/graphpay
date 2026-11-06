@@ -1,5 +1,21 @@
 # T3 Arkiv: resume here (fresh start)
 
+## BRIEF (09:30 IST, Fri 6 Nov; from the Coordinator, ADR-0063): publish `@graphpay/arkiv-graph` on npm by about 13:00
+
+You are on Sonnet 5.5 at high. Pause at 92% of the weekly plan (check `mcp__ccd_session_mgmt__get_usage`, "Weekly · all models"; it was 83%): start nothing new, push, update this file, end the turn.
+
+**Ready by about 12:00 IST:** tell the Coordinator when pack, install and quickstart pass. The Coordinator publishes with `pnpm publish` after the founder's npm login. The scope is `@graphpay` (the founder is creating the organisation; never `graphpay_ethglobal`). After the submission, versions are frozen until judging ends.
+
+The work, in `packages/arkiv-graph`:
+1. **README quickstart that works in 5 minutes:** install, define a graph (nodes, edges, totals), write, query, explain. Default to ArkivSim (in memory, no keys); show Rabdi with the developer's own key. One small non-payments example: the leaderboard. A `CHANGELOG.md` for 0.1.0. `package.json`: `"version": "0.1.0"`, `"publishConfig": { "access": "public" }`, a `files` list, license, repository, homepage, bugs, keywords.
+2. **Self-contained:** no workspace-only dependencies (every dependency resolves from npm). Then `pnpm pack`, install the tarball in an empty folder outside the repo, and run the quickstart there on Node 22 (`fnm exec --using=22.23.4`). Check the tarball's file list: no secrets, no keyed URLs, none of our writer wallets as defaults (the SDK boundary, ADR-0057: nothing payment-specific, GraphPay code imports only the package's exports).
+3. **`FEEDBACK.md`** in the package: give feedback as a GitHub issue with the label `sdk:arkiv-graph` (the Coordinator is creating the labels and an issue template), and what we want to learn from developers.
+4. **Credit** the unscoped `arkiv-graph` project (SantiagoDevRel) and say how ours differs (ADR-0057; FACTS records its description).
+5. **Reviewer agent pass** before the PR merges (it ships code others install).
+Small PRs, auto-merge (skill `ship`), thinking-partner update in the PR (skill `relay`). Everything else below is the state at 03:50 IST; it is older than what merged since.
+
+## State as of 03:50 IST (older)
+
 Updated 03:50 IST, Fri 6 Nov. Read this, then `docs/plan/sessions/T3-arkiv.md`, then `docs/sessions/arkiv/README.md` (API) and `seeding.md` (city runbook).
 
 ## Done

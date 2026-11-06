@@ -2,6 +2,10 @@
 
 Activity `records`; your own worktree; branches `coord/*`. You take over from main, the M0 session, at the handover and stay until Saturday's pitch. You keep the night moving and the records true, lock the story, load the big city and run the Friday acceptance; you build no track's features. Read `CLAUDE.md`, `planning/README.md` and `docs/plan/MASTER_PLAN.md` first.
 
+## Standing rule (the founder, Fri 09:46 IST; ADR-0066)
+
+**No target times for any task, the Coordinator's or any session's.** Every task starts the moment it's given, runs as fast as it can, and is reported when it's done, never by a clock time. Only the deadlines we don't control remain: **the submission, Sat 09:00 IST**, and **the presentation, Sat 09:30 IST**. Dependencies are stated as events: the large city seeds the moment the story locks; the founder's npm login comes the moment both SDKs are ready. Any time later in this file is history, not a target. The M14 records go out on events, not on a clock.
+
 ## Goal and milestones, in order
 
 ### At start

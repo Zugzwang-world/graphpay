@@ -12,7 +12,7 @@
 
 import { ExpirationTime, str, u64 } from '@arkiv-network/sdk';
 import { eq, gt, lte, startsWith } from '@arkiv-network/sdk/query';
-import { findOne, fromJsonBytes, jsonBytes, LIMITS, operationBytes, readAll } from '@graphpay/arkiv-graph';
+import { findOne, fromJsonBytes, jsonBytes, LIMITS, operationBytes, readAll } from '@graphpay_ethglobal/arkiv-graph';
 import { createLedger, ENTITIES, graph, LIFETIME, nodeOf, normalizedName, readHeartbeats, toGraphEvent, writeHeartbeat, writerAddresses } from '@graphpay/money-graph';
 import { BLOCK_DONE, comparePosition } from './ids.mjs';
 import { RECORDER_STREAM } from './recorder.mjs';
