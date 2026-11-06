@@ -14,7 +14,7 @@ const ring: Record<string, string> = {
 export function AgentAvatar({ agent, label, status = 'active', activity = 'idle', size = 48 }: { agent: AgentRef; label: string; status?: AgentStatus; activity?: AgentVisualState; size?: number }) {
   const [details, setDetails] = useState(false);
   const color = ring[agent.role] ?? 'var(--color-agent-fallback)';
-  const visual = status === 'revoked' ? 'revoked' : status === 'paused' ? 'paused' : activity;
+  const visual = activity === 'refused' || activity === 'rejected' ? activity : status === 'revoked' ? 'revoked' : status === 'paused' ? 'paused' : activity;
   return <span className="relative inline-flex shrink-0 flex-col items-center gap-1">
     <button type="button" onClick={() => setDetails((value) => !value)} aria-label={`${label}, ${agent.ens}, ${status}`} aria-expanded={details} title={`${agent.ens} · ${status}`} className={clsx('relative flex items-center justify-center rounded-full border-[3px] bg-surface font-heading font-bold text-ink shadow-card', `avatar-${visual}`, visual === 'revoked' && 'grayscale opacity-60')} style={{ width: size, height: size, borderColor: color }}>
       <span style={{ fontSize: size * 0.43 }}>{label.charAt(0).toUpperCase()}</span>

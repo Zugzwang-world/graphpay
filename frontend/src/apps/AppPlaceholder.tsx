@@ -17,6 +17,9 @@ import { Mascot, type FoxPose } from '@/components/shared/Mascot';
 import { StatusTracker } from '@/components/shared/StatusTracker';
 import { useSoundPreference } from '@/components/shared/SoundPreference';
 import type { Money } from '@/demo/contract';
+import { CustomerJourneyProvider, useCustomerJourney } from './customer/CustomerJourneyProvider';
+import { CustomerDesk } from './customer/CustomerDesk';
+import { CustomerQuoteSheet } from './customer/CustomerQuoteSheet';
 
 const customerPages: AppPage[] = [
   { id: 'desk', label: copy.customer.pages.desk },
@@ -34,17 +37,22 @@ const merchantPages: AppPage[] = [
 
 /** F3 scaffold: navigation and state previews are real; journey pages follow in F5–F10. */
 export function AppPlaceholder({ app }: { app: 'customer' | 'merchant' }) {
-  const { snapshot } = useDemo();
+  const { snapshot, generation } = useDemo();
   const pages = app === 'customer' ? customerPages : merchantPages;
   const title = app === 'customer' ? story.customer.name : story.shop.name;
   const cap = snapshot?.agents.find((agent) => agent.pass && agent.ref.role === story.spendingPass.payingRole)?.pass?.cap.amount;
   const subtitle = app === 'customer' && cap ? fill(copy.customer.desk.subtitle, { cap }) : undefined;
-  return <AppShell app={app} pages={pages} homeTitle={title} subtitle={subtitle} renderPage={(page) => <PlaceholderPage app={app} page={page} pages={pages} />} />;
+  const shell = <AppShell app={app} pages={pages} homeTitle={title} subtitle={subtitle} renderPage={(page) => <><PlaceholderPage app={app} page={page} pages={pages} />{app === 'customer' && <LiveQuoteSheet />}</>} />;
+  return app === 'customer' ? <CustomerJourneyProvider key={generation}>{shell}</CustomerJourneyProvider> : shell;
+}
+
+function LiveQuoteSheet() {
+  const preview = usePreviewState();
+  return preview === 'live' ? <CustomerQuoteSheet /> : null;
 }
 
 function PlaceholderPage({ app, page, pages }: { app: 'customer' | 'merchant'; page: string; pages: AppPage[] }) {
   const { snapshot, adapter } = useDemo();
-  const { playWee } = useSoundPreference();
   const navigate = useAppNavigation();
   const preview = usePreviewState();
   const orders = snapshot?.orders.filter((order) => app === 'customer' ? order.owner.ens === story.customer.ens : order.status !== 'ordered') ?? [];
@@ -57,14 +65,24 @@ function PlaceholderPage({ app, page, pages }: { app: 'customer' | 'merchant'; p
   if (preview === 'refused') return <div className="flex flex-col gap-3 p-4"><ErrorState message={`${copy.dev.refusedTitle}: ${copy.dev.refusedDetail}`} recoverable={false} /><ExplorerLink link={sampleLink} /></div>;
   if (preview === 'success') return <div className="p-4"><ReceiptCard title={`${pageLabel}: ${copy.dev.successTitle}`} amount={usdt('4.00')} rows={[{ label: copy.customer.quote.total, value: <MoneyAmount amount={usdt('4.00')} /> }]} links={[sampleLink]} footer={copy.common.cannotBeEdited} /></div>;
   if (preview === 'components') return <ComponentGallery />;
+  if (app === 'customer' && page === 'desk') return <CustomerDesk />;
+  if (app === 'customer' && page === 'orders') return <CustomerOrderHandoff />;
 
   return <div className="flex flex-col gap-3 px-4 pt-4 pb-8">
     <p className="rounded-card border border-line bg-surface p-4 text-body text-muted shadow-card">{copy.placeholder[app]}</p>
     {home && app === 'merchant' && snapshot && <button type="button" className="min-h-11 rounded-full bg-brand px-4 text-body font-bold text-white" onClick={() => void adapter.setShopOpen(!snapshot.shop.open)}>{snapshot.shop.open ? copy.merchant.home.toggleOpen : copy.merchant.home.toggleClosed}</button>}
-    {home && app === 'customer' && snapshot && <button type="button" className="min-h-11 rounded-full bg-brand px-4 text-body font-bold text-white disabled:opacity-50" disabled={snapshot.errandRunning} onClick={() => { playWee(); void adapter.sendPrompt(story.quickPrompts[0]!.text); }}>{story.quickPrompts[0]!.text}</button>}
     {home && <ul className="flex flex-col gap-2">{[...orders].reverse().map((order) => <li key={order.id} className="flex items-center justify-between gap-2 rounded-card border border-line bg-surface px-4 py-3 shadow-card"><span className="text-body">#{order.number} {order.items[0]?.name}</span><span className="tabular text-caption text-muted">{formatMoney(order.total)} · {orderChip(order)}</span></li>)}</ul>}
     {!home && <EmptyState title={pageLabel} detail={copy.dev.emptyDetail} action={copy.dev.backHome} onAction={() => navigate(pages[0]!.id)} />}
   </div>;
+}
+
+function CustomerOrderHandoff() {
+  const { state } = useCustomerJourney();
+  const { snapshot } = useDemo();
+  const navigate = useAppNavigation();
+  const order = snapshot?.orders.find((entry) => entry.id === state.selectedOrderId);
+  if (!order) return <div className="p-4"><EmptyState title={copy.customer.orders.title} detail={copy.customer.orders.empty[0]} action={copy.customer.orders.askAgents} onAction={() => navigate('desk')} /></div>;
+  return <div className="flex flex-col gap-3 p-4"><ReceiptCard title={fill(copy.customer.orders.detailTitle, { number: order.number })} amount={order.total} status={order.status} rows={[{ label: copy.customer.quote.from, value: order.shop.name }]} links={order.links} /><button type="button" className="min-h-11 rounded-full border border-line px-4 text-body font-bold" onClick={() => navigate('desk')}>{copy.dev.backHome}</button></div>;
 }
 
 const sampleLink = { label: copy.common.viewTx, url: 'mock:preview', mock: true } as const;

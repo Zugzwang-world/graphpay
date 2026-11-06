@@ -183,6 +183,12 @@ export const copy = {
         'Ready when you are, {customer}. Ask for anything in {city}.',
       ],
       graphRead: 'Asked GraphPay: {shops} shops, answered in {reads} reads',
+      graphReadPending: 'Asked GraphPay, answered in {reads} reads',
+      threadLabel: 'Agent conversation',
+      workingLabel: 'Working',
+      shopFacts: '{distance} km · {paid} paid orders · {refunds} refunded · {repeat} repeat buyers',
+      rejectedReason: 'Rejected: {reason}',
+      quoteCardView: 'Open quote and receipt',
       working: {
         concierge: ['{agent} is planning the errand…', '{agent} is lining up the team…'],
         scout: ['{agent} is checking shops near {area}…', '{agent} is comparing prices…'],

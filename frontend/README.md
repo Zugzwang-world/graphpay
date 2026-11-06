@@ -22,6 +22,8 @@ F3 state previews: in dev, use the floating **Preview** control or `?state=loadi
 
 F4 components are also in `?state=components`: the keyboard, validated amount entry, tracker, agent avatar, fox poses and sound buttons. The simulated keyboard opens on a laptop; a touch device at phone width uses its native keyboard. The fox is an inline SVG redrawn from `Context/mascot/mascot-01.jpg`, with wave, idle, smile, squint and head-only behavior. Audio is synthesized after a user gesture and shares the header mute control.
 
+F5 customer journey: open the shop on the merchant phone, then tap a quick prompt or type on the customer desk. The thread follows the adapter's agent, graph, shop comparison, quote, and payment events. A quote opens its sheet automatically; after settlement, **View order** opens a receipt handoff on Orders. The full Orders list and actions arrive in F7. Reset returns the shop to Closed so the refusal path can be tried too. Quote links remain visibly marked as mock.
+
 ## How the mock engine works
 
 - **One store for both phones.** `MockAdapter` (`src/demo/mock-adapter.ts`) holds the in-memory state. Both apps read it through `DemoProvider` and the same snapshot, so an action in one phone appears live in the other.
@@ -129,7 +131,7 @@ All are marked `PROPOSED (mock only)` in `src/demo/contract.ts`.
 - [x] **F2** Stage: dark stage, two iPhone frames, strip, narrow-width switch
 - [x] **F3** Shared components 1: header and coin hamburger, page strip, chips, sheets, states, dev state switcher
 - [x] **F4** Shared components 2: iOS keyboard, AmountEntry, StatusTracker, AgentAvatar, sounds, SVG fox
-- [ ] **F5** Customer journey 1: desk, shop cards, quote and receipt
+- [x] **F5** Customer journey 1: desk, shop cards, quote and receipt
 - [ ] **F6** Merchant journey 1: Shop Home, order detail
 - [ ] **F7** Refund: orders, refund wizard, refund requests
 - [ ] **F8** Renewals: customer and merchant

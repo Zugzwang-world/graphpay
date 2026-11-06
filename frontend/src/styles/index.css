@@ -201,7 +201,40 @@
 .fox-squint svg { transform: rotate(-4deg); transform-origin: center; }
 .fox-paused *, .fox-paused svg { animation-play-state: paused !important; }
 
+@keyframes thread-blob {
+  0% { opacity: .45; transform: translate(30px, 88px) scale(.16, .45); border-radius: 50%; }
+  35% { opacity: 1; transform: translate(17px, 46px) scale(.68, .82); border-radius: 42%; }
+  72% { transform: translate(0, 0) scale(1.07, .93); border-radius: 28%; }
+  100% { transform: translate(0, 0) scale(1); }
+}
+@keyframes thread-agent-in {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes thread-dot {
+  50% { opacity: .25; transform: translateY(-3px); }
+}
+@keyframes quote-sheet-in {
+  from { opacity: .75; transform: translateY(100%); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes payment-coin-across {
+  from { opacity: 0; left: 0; transform: translateY(3px) scale(.65); }
+  20% { opacity: 1; }
+  80% { opacity: 1; }
+  to { opacity: 0; left: calc(100% - 28px); transform: translateY(-4px) scale(1); }
+}
+.thread-user-enter { transform-origin: right bottom; animation: thread-blob 760ms var(--ease-out) both; }
+.thread-agent-enter { animation: thread-agent-in 250ms var(--ease-out) both; }
+.thread-dots i { width: 4px; height: 4px; border-radius: 50%; background: currentColor; animation: thread-dot 900ms ease-in-out infinite; }
+.thread-dots i:nth-child(2) { animation-delay: 150ms; }
+.thread-dots i:nth-child(3) { animation-delay: 300ms; }
+.quote-sheet-enter { animation: quote-sheet-in 280ms var(--ease-out) both; }
+.payment-coin { left: 0; animation: payment-coin-across 1.4s ease-in-out infinite; }
+
 @media (prefers-reduced-motion: reduce) {
   .keyboard-enter { animation-name: none; }
   .tracker-check, .tracker-current, [class*="avatar-"], [class*="fox-"] * { animation-name: none !important; }
+  .thread-user-enter, .thread-agent-enter, .quote-sheet-enter { animation: page-fade 120ms ease-out both !important; }
+  .thread-dots i, .payment-coin { animation: none !important; }
 }
