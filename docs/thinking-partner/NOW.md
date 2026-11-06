@@ -94,17 +94,18 @@ Updated 00:15 IST, Sat 7 Nov (W2 City, session `local_da212093-3d02-4768-9314-ab
 
 ## w3-payments
 
-Updated 00:15 IST, Sat 7 Nov (W3 Payments, session `local_b65be40a-eb20-4d86-b784-7d2aa1a93527`).
-- **Re-order (item 1, done, #155):** "Another coffee" paid 0.80 live at 23:34 IST ([0xf1d7…2b4a](https://explorer.testnet.whitechain.io/tx/0xf1d7cb5654de6cc09ede0a404818a009f7429d9d149e3e564222d4a4d3ae2b4a)). Its order, pay and deliver edges are on Arkiv ([explain](https://graphpay-event.vercel.app/api/explain/8391bb5c1b6b)).
-- **Subscriptions (item 2, done live, #173):**
-  - subscribed at 23:59 IST, 2.40 stored on chain, first box charged at once ([0xf3f7…c393](https://explorer.testnet.whitechain.io/tx/0xf3f7586090fb37cf4b04963216dabc7b89915f02afb19f71fb81ca138e53c393));
-  - the cron renewed it at 00:02 ([0x8d40…de83](https://explorer.testnet.whitechain.io/tx/0x8d40d556382f40313dafaf712d3c174d7cc8365176c8813f04e849f93338de83));
-  - cancelled with the payer agent's own signature ([0x70ed…7b42](https://explorer.testnet.whitechain.io/tx/0x70ed2b3ffa63b81fa426631c70cb39591f8b80c077455930d05e63de04077b42)).
-  - Its Arkiv edges land after the mirror's pause for W2 (about 00:19).
-- **Refund decline (item 3):** #163, reviewed; its blocking items are fixed and confirmed.
-- **Limits (item 4):**
-  - over the pass and the agent's refused cap raise: #169, reviewed, hardening now;
-  - the owner's cap change: built, and waits for the Coordinator's call on the policy half (POLICY_WRITER stays local, ADR-0021).
+Updated 00:25 IST, Sat 7 Nov (W3 Payments, session `local_b65be40a-eb20-4d86-b784-7d2aa1a93527`). Every money action of the brief works live, with its explorer link and Arkiv record, except the owner's cap change, which waits for W1's watcher.
+- **Re-order, done (#155):** "Another coffee" paid 0.80 at 23:34 IST ([tx](https://explorer.testnet.whitechain.io/tx/0xf1d7cb5654de6cc09ede0a404818a009f7429d9d149e3e564222d4a4d3ae2b4a), [Arkiv](https://graphpay-event.vercel.app/api/explain/8391bb5c1b6b)).
+- **Subscriptions, done (#173):**
+  - subscribed at 2.40, stored on chain, first box charged at once ([tx](https://explorer.testnet.whitechain.io/tx/0xf3f7586090fb37cf4b04963216dabc7b89915f02afb19f71fb81ca138e53c393));
+  - the cron renewed it ([tx](https://explorer.testnet.whitechain.io/tx/0x8d40d556382f40313dafaf712d3c174d7cc8365176c8813f04e849f93338de83));
+  - cancelled with the payer's own signature ([tx](https://explorer.testnet.whitechain.io/tx/0x70ed2b3ffa63b81fa426631c70cb39591f8b80c077455930d05e63de04077b42));
+  - [Arkiv](https://graphpay-event.vercel.app/api/explain/23281094e730).
+- **Refund decline, done (#163):** request, then the shop's decline, both on Arkiv ([explain](https://graphpay-event.vercel.app/api/explain/033a073bd39e)).
+- **Limits (#169):**
+  - over the pass: 480 against 300, refused `CAP_EXCEEDED`, nothing sent ([Arkiv](https://rabdi.explorer.arkiv.network/entity/0x49163142476bc996134f3a4b0cac473f9698fa0781f39895206b138cfab1dc19));
+  - the agent's own cap raise: refused `EACUnauthorizedAccountRoles`, simulated, nothing sent ([Arkiv](https://rabdi.explorer.arkiv.network/tx/0xabc41f475312767e363e073ec872c3ff4b3556883901201dca53f1dafd444144)).
+- **Next:** the owner's cap change (#179, ADR-0078), live once W1's watcher PR merges and W5 restarts the workers.
 - Blockers: none.
 
 ## w4-agents
