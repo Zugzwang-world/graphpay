@@ -1,34 +1,34 @@
 {
   "gateway": "https://api.gateway.ethswarm.org",
   "synthetic": true,
-  "writtenAt": "2026-11-06T07:17:05.417Z",
+  "writtenAt": "2026-11-06T12:58:59.966Z",
   "menus": [
     {
       "shopEns": "kesar-kingdom.graphpay.eth",
       "entityKey": "0x0f32e7cd190884066418a9fb32df6f5807e5bc3f8b59f3a7776f99e3e1de273f",
-      "txHash": "0x23ab408597c199d1cce86ae46fbbdf3c2642fe0a4a86dfba063b5c3390c93e45",
-      "reference": "5110dca84647bf9e98b896ccd8865ab14f33cbbdb4391064660682a422d26b22",
-      "link": "https://api.gateway.ethswarm.org/bzz/5110dca84647bf9e98b896ccd8865ab14f33cbbdb4391064660682a422d26b22/menu.json",
-      "version": 2,
-      "contentHash": "291002e89e6c6b8ff0c1c92a1f82af1350fd22e08c1b99445b54c9bae45c4d20"
+      "txHash": "0x43955ea40b8f1ab4632e9c4a25ce73df1a8a77fc01495464f03606ace112cc56",
+      "reference": "25f880463e2702eb5a2e265aa3c78004d5083f430aee1347189e8bb2c6f033dd",
+      "link": "https://api.gateway.ethswarm.org/bzz/25f880463e2702eb5a2e265aa3c78004d5083f430aee1347189e8bb2c6f033dd/menu.json",
+      "version": 3,
+      "contentHash": "0acda655af7bb9a1b733f47edc83ae5739994cf21157a32b72a095b80c4ffe1f"
     },
     {
       "shopEns": "jamun-junction.graphpay.eth",
       "entityKey": "0x5386e7bec45d6ec3bd1af082805e938f89044a2c6cc19b27a408ced26351087e",
-      "txHash": null,
-      "reference": "ccf03dd4eacfcd317da97d53cde31fa0b887fec0d76e84aab1f6e9c973af51e4",
-      "link": "https://api.gateway.ethswarm.org/bzz/ccf03dd4eacfcd317da97d53cde31fa0b887fec0d76e84aab1f6e9c973af51e4/menu.json",
-      "version": 1,
-      "contentHash": "af813da7b8301e3d07de844c59bd7851ec29d3d4d38e8bc188fbe54e490c2187"
+      "txHash": "0x5fc76a71255a8c56c6690b083bfae4bfd0ac65f9b552fd90a0776b04ff9fb85e",
+      "reference": "141cfdf398981b1bac0935f11fb26e074d75e4c3b0dfad152cc8fc6c7f40fbed",
+      "link": "https://api.gateway.ethswarm.org/bzz/141cfdf398981b1bac0935f11fb26e074d75e4c3b0dfad152cc8fc6c7f40fbed/menu.json",
+      "version": 2,
+      "contentHash": "4497c5602ffc3bdeb302ff29cb57804808824bd017aa64265e13d019c54b48b4"
     },
     {
       "shopEns": "syrup-street.graphpay.eth",
       "entityKey": "0x109d491bd3d26ce9b92dd010b5186c843037859a27a99a94b181742911cc5f32",
-      "txHash": null,
-      "reference": "df04b7d9abdd31eff73fa18a1ba7fc0058c042a248f92c5567816a6e5d264384",
-      "link": "https://api.gateway.ethswarm.org/bzz/df04b7d9abdd31eff73fa18a1ba7fc0058c042a248f92c5567816a6e5d264384/menu.json",
-      "version": 1,
-      "contentHash": "ba33ba6333c67164e090445e31b569630561d59c8d1721dec1bd6f8bfa3973ff"
+      "txHash": "0x6ba6410054d99af498935ba43a70c0d02d4e0dc967455d97b75003b95fdaab17",
+      "reference": "8715e3f878425cfc8013a3004a90705fe994d145a407309b5bfd37484407a122",
+      "link": "https://api.gateway.ethswarm.org/bzz/8715e3f878425cfc8013a3004a90705fe994d145a407309b5bfd37484407a122/menu.json",
+      "version": 2,
+      "contentHash": "795ca826a82617808c264ecf3b78629edeb7ac9f899d3c079774fa206b471579"
     }
   ]
 }

@@ -12,6 +12,7 @@ import { useSite } from './site-context';
 type View = 'story' | 'live';
 
 const BACK_TO_STORY_MS = 12_000;
+const STUCK_RUN_MS = 240_000;
 
 export function MiddleSwitch() {
   const { run } = useSite();
@@ -19,10 +20,16 @@ export function MiddleSwitch() {
   const picked = useRef(false);
   const back = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  // The live view comes up with a run; if the run's stream drops before its result, the deck
+  // still returns after the longest an errand takes.
   useEffect(() => {
     if (!run.runId) return;
     picked.current = false;
     setView('live');
+    const stuck = setTimeout(() => {
+      if (!picked.current) setView('story');
+    }, STUCK_RUN_MS);
+    return () => clearTimeout(stuck);
   }, [run.runId]);
 
   useEffect(() => {

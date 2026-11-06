@@ -144,6 +144,17 @@ Updated 17:46 IST, Fri 6 Nov (Coordinator).
 - **Waiting on:** T1's and T2's cap transactions, Join's reliable errand, and T3's Swarm image.
 - **Next:** tell the founder when the pass is 100 and the errand pays reliably, then when phase 2 works.
 
+## booth
+
+Updated 18:45 IST, Fri 6 Nov (Booth session).
+- **Done this step:** the booth run is live, in the brief's order.
+  - The team's pause and resume (#132) is merged and works on production from Vitalik's phone.
+  - Grok's story is on screen (#135): masala dosa near BKC, Filter & Fold, Idli Index and Tawa Tangle; ENS names, wallets, stats, caps and prices unchanged; menus on Swarm with one dish image.
+  - The draft deck sits in the middle with a Story / Live run switch, and the page does not scroll on laptops (#136).
+  - Two live errands (the most the brief allows) vetoed Tawa Tangle and paid 4.80 to the good shop's wallet, delivered.
+- **Waiting on:** nothing.
+- **Next:** the founder's demo check; what not to tap is in `docs/sessions/booth/demo-note.md` (re-order, Revoke, Change cap).
+
 ## submission
 
 Not started (the Submission session, M17, from Fri 13:00; submit by Sat 08:00 IST).

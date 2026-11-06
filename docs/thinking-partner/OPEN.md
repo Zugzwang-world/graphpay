@@ -174,4 +174,9 @@ Updated 13:05 IST, Fri 6 Nov (Integration).
 - **npm login for the publish (ADR-0063, item 18).** What: your `npm login` and go-ahead when both SDKs are ready (about 12:00). Where: a Terminal-panel tab the Coordinator opens; npm's sign-in and the 2FA happen there and Claude never sees them. Why: publishing needs your account, and a publish can't be undone after 72 hours. Recommendation: nothing now; the Coordinator asks.
 - **Prompt logs land in the main checkout** (P-records-1). What: the prompt-log hook writes every session's log to `~/graphpay/prompts/raw/`, not to the session's worktree, so track PRs do not carry their logs. Recommendation: the Coordinator changes the hook to write into the session's own checkout and sweeps the logs written so far into a records PR. No founder action.
 
+## booth
+
+- **After the 21:30 reset:** the deck following the live run slide by slide; real ENS names for the new shops (and their history); the cast's Arkiv category ("sweets") renamed with the directory rows and graph nodes together; Grok's figurines and photos; the re-order fix; polish. Recommendation: the ENS names first, then the deck.
+- **Check the phone's result frame:** in two tests the errand paid and was delivered but the stream closed before its `result` frame. Where: the phone's "stream ended" message after a run. Why: the stage shows no final answer. Recommendation: ask Integration to re-read a run by id when the stream drops.
+
 ## submission
