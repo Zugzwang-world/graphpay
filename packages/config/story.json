@@ -418,7 +418,8 @@
         "approxEdges": 1000,
         "seed": "tonight, test story",
         "owner": "W_SEED_EVENT",
-        "cast": "test"
+        "cast": "test",
+        "end": "2026-11-05"
       },
       "M": {
         "approxEdges": 10000,

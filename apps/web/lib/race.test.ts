@@ -6,18 +6,43 @@ import { story } from '@graphpay/config';
 import { RACE_QUESTIONS, connectArkiv, newSim, writerAddresses } from '@graphpay/money-graph';
 import { generateCity, newManifest, seedGraph, seedPlain } from '@graphpay/city';
 import { createRaceLock, kbOf, parseBenchCsv, parseRaceQuery } from './race.ts';
-import { SEEDED_END, runRace, type RaceFrame } from './race.server.ts';
+import { PLAIN_RACE_GAP_MS, RACE_SIZE, SEEDED_END, SEEDED_SIZES, plainRaceRefusal, runRace, type RaceFrame } from './race.server.ts';
 
 const q = (s: string) => parseRaceQuery(new URLSearchParams(s), RACE_QUESTIONS);
 
 test('a race query is validated: question, side, size and pages in flight', () => {
-  assert.deepEqual(q('question=Q2&mode=graph'), { question: 'Q2', mode: 'graph', inFlight: 1 });
-  assert.deepEqual(q('question=Q2&mode=plain&inFlight=all&size=S'), { question: 'Q2', mode: 'plain', inFlight: 'all' });
+  assert.deepEqual(q('question=Q2&mode=graph'), { question: 'Q2', mode: 'graph', inFlight: 1, size: 'S' });
+  assert.deepEqual(q('question=Q2&mode=plain&inFlight=all&size=S'), { question: 'Q2', mode: 'plain', inFlight: 'all', size: 'S' });
   // The graph side has no pages: whatever is asked, it is read once.
-  assert.deepEqual(q('question=Q5&mode=graph&inFlight=8'), { question: 'Q5', mode: 'graph', inFlight: 1 });
+  assert.deepEqual(q('question=Q5&mode=graph&inFlight=8'), { question: 'Q5', mode: 'graph', inFlight: 1, size: 'S' });
   for (const bad of ['question=Q3&mode=graph', 'question=Q2', 'question=Q2&mode=plain&inFlight=1000', 'question=Q2&mode=plain&size=M', 'mode=graph']) {
     assert.ok('error' in q(bad), bad);
   }
+  // A size is read only when it is seeded; without one the race takes the size race mode shows.
+  const seeded = { sizes: ['S', 'M'], size: 'M' };
+  assert.deepEqual(parseRaceQuery(new URLSearchParams('question=Q2&mode=graph'), RACE_QUESTIONS, seeded), { question: 'Q2', mode: 'graph', inFlight: 1, size: 'M' });
+  assert.deepEqual(parseRaceQuery(new URLSearchParams('question=Q2&mode=graph&size=S'), RACE_QUESTIONS, seeded), { question: 'Q2', mode: 'graph', inFlight: 1, size: 'S' });
+  assert.ok('error' in parseRaceQuery(new URLSearchParams('question=Q2&mode=graph&size=L'), RACE_QUESTIONS, seeded));
+});
+
+test('race mode reads only the seeded cities, each at the end date it was seeded with', () => {
+  assert.ok(SEEDED_SIZES.includes('S'));
+  assert.ok(SEEDED_SIZES.includes(RACE_SIZE));
+  const sizes = (story.syntheticCity as { sizes: Record<string, { end?: string }> }).sizes;
+  for (const size of SEEDED_SIZES) assert.match(sizes[size]?.end ?? '', /^\d{4}-\d{2}-\d{2}$/);
+});
+
+test('a plain race on a big city runs once per gap; the graph side and the small city are never held', () => {
+  // S has 490 payment rows: never held.
+  assert.equal(plainRaceRefusal({ mode: 'plain', size: 'S' }), null);
+  assert.equal(plainRaceRefusal({ mode: 'plain', size: 'S' }), null);
+  if (!SEEDED_SIZES.includes('M')) return;
+  const t0 = 1_800_000_000_000;
+  assert.equal(plainRaceRefusal({ mode: 'graph', size: 'M' }, t0), null);
+  assert.equal(plainRaceRefusal({ mode: 'plain', size: 'M' }, t0), null);
+  assert.match(plainRaceRefusal({ mode: 'plain', size: 'M' }, t0 + 1_000) ?? '', /next can start in/);
+  assert.equal(plainRaceRefusal({ mode: 'graph', size: 'M' }, t0 + 1_000), null);
+  assert.equal(plainRaceRefusal({ mode: 'plain', size: 'M' }, t0 + PLAIN_RACE_GAP_MS), null);
 });
 
 test('one race per side at a time', () => {
@@ -58,7 +83,7 @@ before(async () => {
 for (const [mode, inFlight, reads] of [['graph', 1, 2], ['plain', 1, 5], ['plain', 'all', 6]] as const) {
   test(`the live race on the seeded city: ${mode} (${inFlight} in flight) ticks per read, then answers correctly in ${reads} reads`, async () => {
     const frames: RaceFrame[] = [];
-    await runRace({ question: 'Q2', mode, inFlight }, (f) => frames.push(f), connect);
+    await runRace({ question: 'Q2', mode, inFlight, size: 'S' }, (f) => frames.push(f), connect);
     const calls = frames.filter((f) => f.event === 'call');
     const answer = frames.at(-1);
     assert.equal(answer?.event, 'answer');

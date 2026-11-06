@@ -2,13 +2,13 @@ import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import type { Metadata } from 'next';
 import { RaceView, type RaceQuestion } from '@/components/race-view';
-import { siteModel } from '@/lib/site.server';
+import { RACE_SIZE, seededCity } from '@/lib/race.server';
 import { kbOf, parseBenchCsv, type BenchRow } from '@/lib/race';
 
 export const metadata: Metadata = { title: 'Race mode' };
 
-// The event's own live benchmark, committed by M9 (bench/results/questions-S.csv, read at
-// build time). Reads and bytes only: no time is the result (ADR-0042).
+// The event's own live benchmark of the city race mode shows (bench/results/questions-<size>.csv,
+// read at build time). Reads and bytes only: no time is the result (ADR-0042).
 const LABELS: Record<string, string> = {
   Q1: 'the featured shop’s refund rate and 90-day orders',
   Q2: 'the top 10 shops by sales, city-wide',
@@ -18,9 +18,9 @@ const LABELS: Record<string, string> = {
   Q6: 'the featured shop’s depth-2 neighbourhood over this week’s payments',
 };
 
-function benchRows(): BenchRow[] {
+function benchRows(size: string): BenchRow[] {
   try {
-    return parseBenchCsv(readFileSync(join(process.cwd(), '../../bench/results/questions-S.csv'), 'utf8'));
+    return parseBenchCsv(readFileSync(join(process.cwd(), `../../bench/results/questions-${size}.csv`), 'utf8'));
   } catch {
     return [];
   }
@@ -29,13 +29,15 @@ function benchRows(): BenchRow[] {
 const yesNo = (v: boolean) => (v ? 'yes' : 'no');
 
 export default function RacePage() {
-  const bench = benchRows();
-  const model = siteModel();
-  const trap = model.shops.find((s) => s.storyRole === 'trap');
+  const bench = benchRows(RACE_SIZE);
+  const q2 = bench.find((r) => r.question === 'Q2');
+  // The names the race asks about are the raced city's own (its pinned cast; ADR-0077).
+  const { city, truth } = seededCity(RACE_SIZE);
+  const trap = city.byRole.trap;
   const questions: RaceQuestion[] = [
     { id: 'Q2', label: 'top 10 shops by sales, city-wide' },
-    { id: 'Q1', label: `refund rate and 90-day orders of ${model.merchant.ens}` },
-    ...(trap ? [{ id: 'Q5', label: `a payment path from ${model.payer.ens} to ${trap.ens} within 3 hops` }] : []),
+    { id: 'Q1', label: `refund rate and 90-day orders of ${city.byRole.good}` },
+    ...(trap ? [{ id: 'Q5', label: `a payment path from ${city.personaAgents.payer} to ${trap} within 3 hops` }] : []),
   ];
   return (
     <div className="page page-wide">
@@ -46,10 +48,14 @@ export default function RacePage() {
       </p>
       <p>
         <span className="chip" data-tone="synthetic">
-          synthetic city, size S
+          synthetic city, size {RACE_SIZE}
         </span>
       </p>
-      <RaceView questions={questions} cityNote="The small city is seeded tonight; the larger one waits for the final story (ADR-0049)." />
+      <RaceView
+        questions={questions}
+        size={RACE_SIZE}
+        cityNote={`Size ${RACE_SIZE}: ${city.shops.length} shops and ${truth.q2.payRows.toLocaleString('en-IN')} payment and renewal rows, labelled synthetic.`}
+      />
       <section className="bench" aria-label="The event's benchmark">
         <h2>The event’s benchmark</h2>
         {bench.length === 0 ? (
@@ -57,7 +63,7 @@ export default function RacePage() {
         ) : (
           <>
             <p className="muted">
-              Measured live on Arkiv’s testnet over the synthetic size S city. Each count is Arkiv reads (JSON-RPC calls); bytes are request plus response bodies.
+              Measured live on Arkiv’s testnet over the synthetic size {RACE_SIZE} city. Each count is Arkiv reads (JSON-RPC calls); bytes are request plus response bodies.
             </p>
             <div className="table-wrap">
               <table>
@@ -92,7 +98,7 @@ export default function RacePage() {
               </table>
             </div>
             <p className="muted small">
-              Graph Arkiv wins where an answer is an aggregate (the city-wide top 10: 2 reads against 5 or 6), not on every question. Plain code credits a re-registered shop’s earlier holder to the new one, so it is wrong by identity on the top 10.
+              Graph Arkiv wins where an answer is an aggregate (the city-wide top 10: {q2 ? `${q2.graphReads} reads against ${q2.plainReads}` : 'a couple of reads against every payment row'}), not on every question. Plain code credits a re-registered shop’s earlier holder to the new one, so it is wrong by identity on the top 10.
             </p>
           </>
         )}

@@ -9,22 +9,23 @@ export interface RaceQuery {
   question: string;
   mode: RaceMode;
   inFlight: InFlight;
+  size: string;
 }
 
 const IN_FLIGHT: Record<string, InFlight> = { '1': 1, '4': 4, '8': 8, '16': 16, all: 'all' };
 
-// Only the small city is seeded; the larger one waits for the founder's final story
-// (ADR-0049), so any other size is refused rather than read.
-export function parseRaceQuery(params: URLSearchParams, allowed: readonly string[]): RaceQuery | { error: string } {
+// Only a seeded city is read (a size with its end date in the story, ADR-0077); any other size
+// is refused rather than read. Without a size the race takes the one race mode shows.
+export function parseRaceQuery(params: URLSearchParams, allowed: readonly string[], { sizes = ['S'], size: shown = 'S' }: { sizes?: readonly string[]; size?: string } = {}): RaceQuery | { error: string } {
   const question = params.get('question') ?? '';
   if (!allowed.includes(question)) return { error: `question is one of ${allowed.join(', ')}` };
   const mode = params.get('mode');
   if (mode !== 'graph' && mode !== 'plain') return { error: 'mode is graph or plain' };
-  const size = params.get('size') ?? 'S';
-  if (size !== 'S') return { error: 'only the size S city is seeded' };
+  const size = params.get('size') ?? shown;
+  if (!sizes.includes(size)) return { error: `size is one of the seeded cities: ${sizes.join(', ')}` };
   const inFlight = IN_FLIGHT[params.get('inFlight') ?? '1'];
   if (inFlight === undefined) return { error: 'inFlight is 1, 4, 8, 16 or all' };
-  return { question, mode, inFlight: mode === 'plain' ? inFlight : 1 };
+  return { question, mode, inFlight: mode === 'plain' ? inFlight : 1, size };
 }
 
 // At most one race per side at a time on this server instance: a race is a burst of
@@ -51,7 +52,7 @@ export interface BenchRow {
   graphRight: boolean;
 }
 
-// bench/results/questions-S.csv: a comment line, a header, then one row per question and
+// bench/results/questions-<size>.csv: a comment line, a header, then one row per question and
 // mode. The table keeps reads, bytes and the three correctness columns; times stay in the CSV.
 export function parseBenchCsv(csv: string): BenchRow[] {
   const lines = csv.split(/\r?\n/).filter((l) => l !== '' && !l.startsWith('#'));

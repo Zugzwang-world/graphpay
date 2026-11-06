@@ -5,7 +5,7 @@ import { RACE_QUESTIONS } from '@graphpay/money-graph';
 import { allowed } from '../graphql/arkiv.server.ts';
 import { json } from '../../../lib/http.ts';
 import { createRaceLock, parseRaceQuery } from '../../../lib/race.ts';
-import { runRace } from '../../../lib/race.server.ts';
+import { RACE_SIZE, SEEDED_SIZES, plainRaceRefusal, runRace } from '../../../lib/race.server.ts';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 60;
@@ -14,10 +14,15 @@ const lock = createRaceLock();
 
 export async function GET(request: Request): Promise<Response> {
   if (!allowed(request, 20)) return json({ error: 'too many requests' }, 429);
-  const query = parseRaceQuery(new URL(request.url).searchParams, RACE_QUESTIONS);
+  const query = parseRaceQuery(new URL(request.url).searchParams, RACE_QUESTIONS, { sizes: SEEDED_SIZES, size: RACE_SIZE });
   if ('error' in query) return json({ error: query.error }, 400);
   const release = lock.take(query.mode);
   if (!release) return json({ error: 'a race is already running on this side' }, 429);
+  const refused = plainRaceRefusal(query);
+  if (refused) {
+    release();
+    return json({ error: refused }, 429);
+  }
 
   const encoder = new TextEncoder();
   const body = new ReadableStream<Uint8Array>({

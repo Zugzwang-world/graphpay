@@ -56,7 +56,7 @@ function SideCard({ title, side, subtitle }: { title: string; side: Side; subtit
   );
 }
 
-export function RaceView({ questions, cityNote }: { questions: RaceQuestion[]; cityNote: string }) {
+export function RaceView({ questions, size, cityNote }: { questions: RaceQuestion[]; size: string; cityNote: string }) {
   const [question, setQuestion] = useState(questions[0]?.id ?? 'Q2');
   const [inFlight, setInFlight] = useState<InFlight>('8');
   const [graph, setGraph] = useState<Side>(IDLE);
@@ -66,7 +66,7 @@ export function RaceView({ questions, cityNote }: { questions: RaceQuestion[]; c
 
   const runSide = async (mode: Mode, set: (update: (prev: Side) => Side) => void, signal: AbortSignal) => {
     set(() => ({ ...IDLE, status: 'running' }));
-    const params = new URLSearchParams({ question, size: 'S', mode });
+    const params = new URLSearchParams({ question, size, mode });
     if (mode === 'plain') params.set('inFlight', inFlight);
     const outcome = await streamEvents(
       `/api/race?${params}`,
@@ -118,8 +118,8 @@ export function RaceView({ questions, cityNote }: { questions: RaceQuestion[]; c
         </label>
         <label>
           <span className="small muted">City size</span>
-          <select value="S" disabled aria-describedby="size-note">
-            <option value="S">S</option>
+          <select value={size} disabled aria-describedby="size-note">
+            <option value={size}>{size}</option>
           </select>
         </label>
         <label>
