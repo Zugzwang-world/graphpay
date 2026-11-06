@@ -11,8 +11,8 @@
 
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { ExpirationTime, key } from '@arkiv-network/sdk';
-import { eq } from '@arkiv-network/sdk/query';
-import { findOne } from '@graphpay_ethglobal/arkiv-graph';
+import { eq, or } from '@arkiv-network/sdk/query';
+import { findOne, readAll } from '@graphpay_ethglobal/arkiv-graph';
 import { castEntries, config, story } from '@graphpay/config';
 import { ENTITIES, LIFETIME, connectArkiv, identityKey, microDegrees, nodeOf, shopValues } from '@graphpay/money-graph';
 import { pinnedCast } from '../index.mjs';
@@ -60,29 +60,63 @@ if (!execute) {
 
 const { loadSecrets } = await import('../../money-graph/scripts/lib.mjs');
 const env = loadSecrets();
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+// The keyless endpoint meters queries (arkiv_query) on their own window, per IP, and the running
+// mirror on this Mac shares it: this script never takes the last 40% of it. The transport's and
+// the writer's events are logged as names and numbers only, never a URL.
+const queries = { remaining: null, limit: null, resetAt: 0 };
+const arkivLog = (e) => {
+  if (e.method === 'arkiv_query' && e.ratelimit) Object.assign(queries, { remaining: e.ratelimit.remaining, limit: e.ratelimit.limit, resetAt: Date.now() + e.ratelimit.reset * 1000 });
+  if (e.event) log(`arkiv: ${e.event}${e.nonce !== undefined ? ` nonce ${e.nonce}` : ''}${e.kind ? ` ${e.kind}` : ''}`);
+  else if (e.status && e.status !== 200) log(`arkiv: HTTP ${e.status} on ${e.method}`);
+};
+async function withinQueryBudget() {
+  if (queries.limit === null || queries.remaining >= queries.limit * 0.4 || Date.now() >= queries.resetAt) return;
+  log(`pausing ${Math.ceil((queries.resetAt - Date.now()) / 1000)} s: ${queries.remaining} of ${queries.limit} queries left in this window`);
+  await sleep(queries.resetAt - Date.now() + 2_000);
+}
+// The mirror heartbeats every 30 to 40 s from the same wallet; a part sent in the gap after a beat
+// does not race it for a nonce (a batch of parts takes up to about 12 s, the next beat comes 30 s
+// after the last). Its last beat comes from its local status endpoint (no Arkiv read).
+const MIRROR_STATUS = `http://127.0.0.1:${env.MIRROR_PORT ?? 8788}/status`;
+async function betweenBeats() {
+  for (const start = Date.now(); Date.now() - start < 60_000; ) {
+    let last = null;
+    try {
+      last = (await (await fetch(MIRROR_STATUS, { signal: AbortSignal.timeout(2_000) })).json()).lastBeat ?? null;
+    } catch {
+      return; // no mirror on this Mac: nothing to keep clear of
+    }
+    const age = Date.now() - last;
+    if (last === null || age > 45_000 || (age >= 1_000 && age <= 16_000)) return;
+    await sleep(age < 1_000 ? 1_000 - age : 1_000);
+  }
+}
 
-// The mirror's own rule: a nonce another write took is retried after a pause. Two more cases
-// are the same event seen from the writer's recovery: the transaction found at our pinned nonce
+// The mirror's own rule: a nonce another write took is retried after a pause. One more case is
+// the same event seen from the writer's recovery: the transaction found at our pinned nonce
 // created no entity where ours creates some (the mirror's heartbeat took the nonce; a signed
-// transaction lands only at its own nonce, so ours never will), and a read that timed out.
-// Every retry re-reads the checkpoint and the rows, so nothing is written twice.
+// transaction lands only at its own nonce, so ours never will). And the keyless endpoint's
+// transient failures (a timeout, a failed request). Every retry re-reads the checkpoint and the
+// rows and sends at the confirmed nonce, so at most one copy of a part can land.
 const retryable = (err) =>
   err?.code === 'NONCE_TAKEN' ||
-  /nonce \d+ is ahead of the confirmed|created 0 entities for [1-9]\d* creates|took too long to respond/.test(err?.message ?? '');
+  /nonce \d+ is ahead of the confirmed|created 0 entities for [1-9]\d* creates|took too long to respond|HTTP request failed|fetch failed|ECONNRESET|socket hang up|Too Many Requests/.test(err?.message ?? '');
 async function retrying(fn, tries = 30) {
   for (let i = 1; ; i += 1) {
     try {
       return await fn();
     } catch (err) {
       if (i >= tries || !retryable(err)) throw err;
-      log(`retry ${i}: ${err.code ?? err.name ?? 'write'} (${/took too long/.test(err.message ?? '') ? 'a read timed out' : 'another write took the nonce'})`);
-      await new Promise((r) => setTimeout(r, 3_000));
+      log(`retry ${i}: ${err.code ?? err.name ?? 'write'} (${/created 0 entities|NONCE|ahead of/.test(`${err.code} ${err.message}`) ? 'another write took the nonce' : 'the endpoint failed a request'})`);
+      await sleep(3_000);
+      await withinQueryBudget();
     }
   }
 }
 
 if (stores.includes('directory')) {
-  const dir = await connectArkiv({ backend: 'rabdi', env, role: 'W_DIRECTORY' });
+  const dir = await connectArkiv({ backend: 'rabdi', env, role: 'W_DIRECTORY', log: arkivLog });
   const creates = [];
   const patches = [];
   for (const s of shops) {
@@ -107,17 +141,26 @@ if (stores.includes('directory')) {
 }
 
 if (stores.includes('nodes') || stores.includes('history')) {
-  const arkiv = await connectArkiv({ backend: 'rabdi', env, role: 'W_LEDGER' });
+  const arkiv = await connectArkiv({ backend: 'rabdi', env, role: 'W_LEDGER', log: arkivLog });
   // Its own stream name: this process never writes the mirror's chain stream.
   const ledger = arkivLedger({ arkiv, stream: 'city:cast-final', log });
-  const known = new Map((await ledger.readActors()).map((a) => [nodeOf(a.ens), a]));
+  // Which of these actors have node rows: one query on their keys, not a read of every W_LEDGER row.
+  const known = new Set();
+  const look = async (list) => {
+    const keys = [...new Set(list.map((a) => nodeOf(a.ens)))];
+    for (let i = 0; i < keys.length; i += 24) {
+      const rows = await readAll(arkiv.publicClient, ENTITIES.node, { owner: arkiv.owner, where: [or(...keys.slice(i, i + 24).map((k) => eq('node', key(k))))] });
+      for (const r of rows) known.add(r.node.toLowerCase());
+    }
+  };
   const missing = (list) => list.filter((a) => !known.has(nodeOf(a.ens)));
+  await retrying(() => look([...castNodes, ...historyBuyers()]));
 
   if (stores.includes('nodes')) {
     const fresh = missing(castNodes);
     if (fresh.length > 0) {
       await retrying(async () => ledger.registerActors(missing(fresh), { nonce: await ledger.confirmedNonce() }));
-      for (const a of fresh) known.set(nodeOf(a.ens), a);
+      for (const a of fresh) known.add(nodeOf(a.ens));
     }
     manifest.written.nodes = { created: fresh.map((a) => a.ens) };
     log(`nodes: ${fresh.length} created, ${castNodes.length - fresh.length} already on Arkiv`);
@@ -138,12 +181,26 @@ if (stores.includes('nodes') || stores.includes('history')) {
     const plan = planHistory(paramsFor(endDay));
     ledger.openHistory(plan.stream);
     const buyers = historyBuyers().map((b) => ({ ...b, dataset: plan.stream }));
-    if (missing(buyers).length > 0) await retrying(async () => ledger.registerActors(missing(buyers), { nonce: await ledger.confirmedNonce() }));
+    if (missing(buyers).length > 0) {
+      await retrying(async () => ledger.registerActors(missing(buyers), { nonce: await ledger.confirmedNonce() }));
+      for (const b of buyers) known.add(nodeOf(b.ens));
+    }
     const actors = new Actors();
     for (const a of [...castNodes, ...buyers]) actors.register(a);
     log(`history: stream ${plan.stream}, ${plan.events.length} events${own ? ` (resuming at ${own.events})` : ''}; ${streams.length} history stream(s) on Arkiv before`);
     before ??= Number(await arkiv.publicClient.getBalance({ address: arkiv.owner }));
-    const out = await writeHistory({ ledger, plan, actors, run: (fn) => retrying(fn), log });
+    const out = await writeHistory({
+      ledger,
+      plan,
+      actors,
+      run: (fn) =>
+        retrying(async () => {
+          await withinQueryBudget();
+          await betweenBeats();
+          return fn();
+        }),
+      log,
+    });
     const after = Number(await arkiv.publicClient.getBalance({ address: arkiv.owner }));
     const cp = await ledger.readCheckpoint(plan.stream);
     manifest.written.history = { stream: plan.stream, endDay, events: plan.events.length, written: out.written, done: out.done, checkpointEvents: cp?.events ?? null, tglm: ((before - after) / 1e18).toFixed(6) };

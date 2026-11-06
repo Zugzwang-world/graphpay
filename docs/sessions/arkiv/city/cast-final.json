@@ -1,0 +1,82 @@
+{
+  "synthetic": true,
+  "cast": "final",
+  "category": "south-indian",
+  "scale": 0.05,
+  "shops": [
+    {
+      "role": "good",
+      "ens": "filter-and-fold.graphpay.eth",
+      "shopKey": "0xb42c90424563dfee65fbde045b484e79930b9f5b4e547f31be998aae06952bb3",
+      "category": "south-indian",
+      "area": "Bandra Kurla Complex",
+      "lat": 19066700,
+      "lng": 72865100,
+      "name": "Filter & Fold",
+      "entityKey": "0x55d06edbe05b3027c6fbea811794beb0834705bf8af7fe0103d3b3205e01ed8b"
+    },
+    {
+      "role": "trap",
+      "ens": "tawa-tangle.graphpay.eth",
+      "shopKey": "0x7a9a6d3f6a208be95db5de8f3660e39f2a3de8e18f4755bf8a7147cc85ce45cf",
+      "category": "south-indian",
+      "area": "Kalina",
+      "lat": 19079400,
+      "lng": 72865800,
+      "name": "Tawa Tangle",
+      "entityKey": "0x20f52fd0fcbb931c2101ae28b9bd4696224ef7cf22903031283b52e30e9ee6e4"
+    },
+    {
+      "role": "runner-up",
+      "ens": "idli-index.graphpay.eth",
+      "shopKey": "0x5701e4f06ea1a8def02bdd4cc940301e34702ef81107a467b60878c8213b4bcf",
+      "category": "south-indian",
+      "area": "Bandra East",
+      "lat": 19062200,
+      "lng": 72850300,
+      "name": "Idli Index",
+      "entityKey": "0x4adeacd4e8201ac311f2d98135650e3dea48a8e6d9a8ef4546377aa07a69271d"
+    }
+  ],
+  "nodes": [
+    "filter-and-fold.graphpay.eth",
+    "storefront.filter-and-fold.graphpay.eth",
+    "risk.filter-and-fold.graphpay.eth",
+    "dispatch.filter-and-fold.graphpay.eth",
+    "tawa-tangle.graphpay.eth",
+    "storefront.tawa-tangle.graphpay.eth",
+    "risk.tawa-tangle.graphpay.eth",
+    "dispatch.tawa-tangle.graphpay.eth",
+    "idli-index.graphpay.eth",
+    "storefront.idli-index.graphpay.eth",
+    "risk.idli-index.graphpay.eth",
+    "dispatch.idli-index.graphpay.eth"
+  ],
+  "written": {
+    "directory": {
+      "creates": 3,
+      "patches": 0,
+      "txs": [
+        "0x5878324627c9f5fa6344c8e680af438335f16c2e6cc407c58048b2dd0bf2dcb0"
+      ]
+    },
+    "nodes": {
+      "created": [
+        "filter-and-fold.graphpay.eth",
+        "storefront.filter-and-fold.graphpay.eth",
+        "risk.filter-and-fold.graphpay.eth",
+        "dispatch.filter-and-fold.graphpay.eth",
+        "tawa-tangle.graphpay.eth",
+        "storefront.tawa-tangle.graphpay.eth",
+        "risk.tawa-tangle.graphpay.eth",
+        "dispatch.tawa-tangle.graphpay.eth",
+        "idli-index.graphpay.eth",
+        "storefront.idli-index.graphpay.eth",
+        "risk.idli-index.graphpay.eth",
+        "dispatch.idli-index.graphpay.eth"
+      ]
+    }
+  },
+  "started": "2026-11-06T17:49:05.406Z",
+  "finished": "2026-11-06T17:49:23.289Z"
+}
