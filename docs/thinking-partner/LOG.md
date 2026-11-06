@@ -108,4 +108,8 @@ One line per PR: time (IST) · activity · result · PR link. Append under your 
 - 16:58 IST · records · NOW: the integration is live, all four phases (the home page is the stage; the founder's test script); refund and re-order failing, with T5 and T1 · https://github.com/Zugzwang-world/graphpay/pull/130
 - 17:46 IST · records · NOW: the merchant refund and the re-order work live after #129 and #131; every stage button has worked · https://github.com/Zugzwang-world/graphpay/pull/134
 
+## booth
+
+- 18:45 IST · booth · the team's pause and resume (#132), the Grok swap on screen (#135), the deck in the middle with one screen (#136); two live errands paid 4.80 to Filter & Fold · https://github.com/Zugzwang-world/graphpay/pull/136
+
 ## submission
