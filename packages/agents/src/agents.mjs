@@ -38,6 +38,8 @@ export async function runAgent({ role, ens, task, tools, models, log, meter, sdl
   const { model, settings, callSettings } = models(role);
   log.agentStart(ens, role, task);
   const prompted = PROMPTED_JSON.has(settings.provider);
+  const startedAt = meter?.timing ? meter.now() : null;
+  const calls = []; // one record per model call (models.mjs createMeter)
   let steps = 0;
   let usageTokens = 0;
   const agent = new ToolLoopAgent({
@@ -52,7 +54,8 @@ export async function runAgent({ role, ens, task, tools, models, log, meter, sdl
     onStepFinish: (step) => {
       steps += 1;
       usageTokens += step.usage?.totalTokens ?? 0;
-      meter?.step(role, settings, step);
+      const call = meter?.step(role, settings, step);
+      if (call) calls.push(call);
       // A call the SDK refused before `execute` (bad input) still belongs in the log.
       for (const part of step.content ?? []) {
         if (part.type === 'tool-error' && !executed.has(part.toolCallId)) {
@@ -96,7 +99,8 @@ export async function runAgent({ role, ens, task, tools, models, log, meter, sdl
   } catch (e) {
     error = noAnswerReason(e, steps);
   }
-  const extra = { usageTokens, model: settings.model };
+  const extra = { usageTokens, model: settings.model, effort: settings.effort, calls };
+  if (startedAt !== null) extra.seconds = Number(((meter.now() - startedAt) / 1000).toFixed(2));
   if (error) log.agentEnd(ens, role, null, { ...extra, error: log.scrub(error) });
   else log.agentEnd(ens, role, output, extra);
   return { output, error, usageTokens };

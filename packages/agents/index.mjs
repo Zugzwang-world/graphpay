@@ -18,6 +18,7 @@ export { promptFor, TAIL } from './src/prompts.mjs';
 export { createRunLog, RUN_SCHEMA } from './src/runlog.mjs';
 export { BUYER_POLICY, buyerRiskReasons, eligibilityReasons, rankShops, scoreShop, SHOP_POLICY, talliesFromNodes, volumeReference } from './src/scoring.mjs';
 export { createScrubber, scrubDeep } from './src/scrub.mjs';
+export { usageOf, usageTable } from './src/usage.mjs';
 export { createShopGateway } from './src/shop.mjs';
 export { createRunState, payGuard } from './src/state.mjs';
 export { base64JsonCodec, checkPaymentRequired, header, interpretSettlement, onStorefront } from './src/x402.mjs';
