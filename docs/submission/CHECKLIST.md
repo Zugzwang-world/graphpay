@@ -10,7 +10,7 @@
 | Seed the synthetic city; measure the race | Arkiv | done at size S; size M with W2 | S: acceptance D6 passes, [`bench/BENCHMARK-LIVE.md`](../../bench/BENCHMARK-LIVE.md); M: W2 tonight |
 | README with the writer wallets and a runnable query | Arkiv | done | [README, Arkiv](../../README.md#arkiv-the-money-graph) and its [keyless query](../../README.md#query-arkiv-yourself-one-command-no-keys) |
 | `schema.md`, `friction.md`, `why-arkiv.md`, `how-you-use-arkiv.md` | Arkiv | done | [`arkiv/`](../../arkiv/); every friction row has an event-day repro |
-| `reach.md`; the package published; a live GraphQL URL | Arkiv | done | [`arkiv/reach.md`](../../arkiv/reach.md); [npm](https://www.npmjs.com/package/@graphpay_ethglobal/arkiv-graph); [GraphQL](https://graphpay-event.vercel.app/api/graphql?query=%7Bnode%28ens%3A%22kesar-kingdom.graphpay.eth%22%29%7Bcategory%20tally%7Borders%20refunds%7D%7D%7D) |
+| `reach.md`; the package published; a live GraphQL URL | Arkiv | done | [`arkiv/reach.md`](../../arkiv/reach.md); [npm](https://www.npmjs.com/package/@graphpay_ethglobal/arkiv-graph); [GraphQL](https://graphpay-event.vercel.app/api/graphql?query=%7Bnode%28ens%3A%22filter-and-fold.graphpay.eth%22%29%7Bcategory%20tally%7Borders%20refunds%7D%7D%7D) |
 | `swarm.md`, seven items | Arkiv (Swarm) | done, item 6 waits for the video | [`arkiv/swarm.md`](../../arkiv/swarm.md) |
 | Test USDT `0xcedf…55a7` in hand | Whitechain | done | ADR-0045; [`docs/technical/WALLETS.md`](../technical/WALLETS.md) |
 | The relayer funded with WBT | Whitechain | done | 0.774 WBT against a 0.3 floor at 23:05 IST: [health](https://graphpay-event.vercel.app/api/facilitator/health) |

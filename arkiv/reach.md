@@ -26,7 +26,7 @@ The package README has the five-minute quickstart, the Rabdi connection, the con
 
 ## 2. The live money graph over GraphQL
 
-`https://graphpay-event.vercel.app/api/graphql` takes GET (`?query=`) or POST. Every answer carries `extensions.arkiv`: the calls, the exact Arkiv queries, the bytes, the entity keys and an explain id. Try [a shop's tallies](https://graphpay-event.vercel.app/api/graphql?query=%7Bnode%28ens%3A%22kesar-kingdom.graphpay.eth%22%29%7Bcategory%20tally%7Borders%20refunds%7D%7D%7D). The schema has `node`, `top`, `path`, `neighborhood`, `edges`, `order`, `shops` (a box query by `i32` coordinates), `agentsOnline` and `handoffs`. An explain id opens again at `/api/explain/<id>` (JSON) or `/explain/<id>` (a page) while the server instance keeps it (the last 200 answers); the trace in the answer itself is the lasting copy.
+`https://graphpay-event.vercel.app/api/graphql` takes GET (`?query=`) or POST. Every answer carries `extensions.arkiv`: the calls, the exact Arkiv queries, the bytes, the entity keys and an explain id. Try [a shop's tallies](https://graphpay-event.vercel.app/api/graphql?query=%7Bnode%28ens%3A%22filter-and-fold.graphpay.eth%22%29%7Bcategory%20tally%7Borders%20refunds%7D%7D%7D). The schema has `node`, `top`, `path`, `neighborhood`, `edges`, `order`, `shops` (a box query by `i32` coordinates), `agentsOnline` and `handoffs`. An explain id opens again at `/api/explain/<id>` (JSON) or `/explain/<id>` (a page) while the server instance keeps it (the last 200 answers); the trace in the answer itself is the lasting copy.
 
 ## 3. An MCP server any agent can add
 
