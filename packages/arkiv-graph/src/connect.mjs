@@ -43,8 +43,8 @@ export async function connect({ rpcUrl, chainId, privateKey, log, sim } = {}) {
   }
   const transport = arkivTransport({ url, fetchFn, secrets, log });
   const chain = arkivChain({ id });
-  const { publicClient, walletClient, stats } = arkivClients({ transport, chain, account, pollingInterval: live ? 1_000 : 20 });
+  const { publicClient, walletClient, stats, sentHashes } = arkivClients({ transport, chain, account, pollingInterval: live ? 1_000 : 20 });
   await assertChain(publicClient, id);
-  const writer = walletClient ? createWriter({ walletClient, publicClient, entityContract: ENTITY_ADDRESS, log }) : null;
+  const writer = walletClient ? createWriter({ walletClient, publicClient, entityContract: ENTITY_ADDRESS, sentHashes, log }) : null;
   return { backend: live ? 'node' : 'sim', publicClient, walletClient, writer, owner: account ? account.address.toLowerCase() : null, stats, sim: simulator, chainId: id };
 }

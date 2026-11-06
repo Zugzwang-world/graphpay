@@ -6,7 +6,7 @@ First release. Built at ETHGlobal Mumbai (5 to 7 November 2026) and in use there
 
 - `defineGraph`: nodes, edges, totals (counters moved by edge kinds, in `all` and `day` windows), pair links and stream checkpoints. One atomic batch per event.
 - `connect` and `createStore`: ArkivSim by default, or an Arkiv node with your own RPC URL, chain id and key; `load`, `write` and `query`, with an explain trace on every query.
-- The safe writer: split by size, recovery after an uncertain send, refusal of a nonce another transaction holds, errors with the RPC URL and key redacted.
+- The safe writer: split by size, recovery after an uncertain send, refusal of a nonce another transaction holds, detection of a receipt that belongs to another instance of the same key (the transport records the hashes it sends and the writer compares), errors with the RPC URL and key redacted.
 - Owner-scoped reads: `readAll`, `findOne`, `countRows`, and a read engine that chunks long OR lists to fit the node's predicate limit and marks answers `truncated` when a cap bites.
 - A filter compiler: `eq`, `in`, `gt`, `gte`, `lt`, `lte`, `between`, `startsWith`, `exists`, `AND`, `OR`, typed by column.
 - ArkivSim: an in-memory Arkiv node for tests, with fault injection and a movable clock.
