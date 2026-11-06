@@ -283,7 +283,7 @@ export async function runBuyerTeam(ctx) {
       log.message(names.concierge, payer.ens, `pay ${shopEns}: ${need.quantity} × ${need.item}, at most ${displayUsdt(guard.priceMicro)} USDT`, STEPS.pay);
       const executed = new Set();
       // The shop's client; an in-process gateway (createShopGateway) shares this errand's log and models.
-      const team = { log, models, meter, sdl, clock, signal, codec: hooks.x402, steps: ctx.steps };
+      const team = { log, models, meter, sdl, clock, signal, codec: hooks.x402, steps: ctx.steps, retryMs: ctx.retryMs };
       const p = createPayer({
         approved,
         state,

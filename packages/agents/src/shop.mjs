@@ -50,6 +50,17 @@ export function createShopGateway(ctx) {
   // W4: the shop's routine steps run in code (the same events); `steps: 'model'` is the original
   // flow, where the models make every call.
   const byModel = ctx.steps === 'model';
+  // A read that throws (a dropped connection, a rate limit) is tried once more a moment later;
+  // a read that answers is never retried, and a second failure still refuses (fail closed).
+  const retryMs = ctx.retryMs ?? 1000;
+  const once = async (fn) => {
+    try {
+      return await fn();
+    } catch {
+      if (retryMs > 0) await new Promise((ok) => setTimeout(ok, retryMs));
+      return fn();
+    }
+  };
 
   // The risk check in code: ENS and Arkiv must both say active, then the policy.
   // An ENS read error is a refusal, never "active" (G8).
@@ -57,12 +68,16 @@ export function createShopGateway(ctx) {
     const reasons = [];
     let ens = null;
     try {
-      ens = await hooks.ensCheck(payerEns);
+      ens = await once(() => hooks.ensCheck(payerEns));
     } catch (error) {
       reasons.push(`ENS read failed (${errorText(error)}): refused`);
     }
     if (ens && ens.status !== 'ACTIVE') reasons.push(`ENS says ${ens.status}`);
-    const read = await readBuyerStanding(mcp, payerEns);
+    let read = await readBuyerStanding(mcp, payerEns);
+    if (!read.ok && read.thrown) {
+      if (retryMs > 0) await new Promise((ok) => setTimeout(ok, retryMs));
+      read = await readBuyerStanding(mcp, payerEns);
+    }
     if (!read.ok) reasons.push(`no readable standing on Arkiv: ${read.detail}`);
     else reasons.push(...buyerRiskReasons(read.standing, amountMicro));
     return reasons;
@@ -77,14 +92,14 @@ export function createShopGateway(ctx) {
     const code = [];
     let ens = null;
     try {
-      ens = await callTool(tools.ens_check, { name: req.payer }, signal);
+      ens = await once(() => callTool(tools.ens_check, { name: req.payer }, signal));
     } catch (error) {
       code.push(`ENS read failed (${errorText(error)}): refused`);
     }
     if (ens && ens.status !== 'ACTIVE') code.push(`ENS says ${ens.status}`);
     let standing = null;
     try {
-      standing = parseBuyerRisk(askText(await callTool(tools.ask, { intent: 'buyer_risk', ens: [req.payer], window: 'D90', verify: false }, signal)), req.payer);
+      standing = parseBuyerRisk(askText(await once(() => callTool(tools.ask, { intent: 'buyer_risk', ens: [req.payer], window: 'D90', verify: false }, signal))), req.payer);
     } catch {
       standing = null;
     }

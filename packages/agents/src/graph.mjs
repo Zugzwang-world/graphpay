@@ -93,7 +93,7 @@ export async function readBuyerStanding(mcp, ens) {
   try {
     answer = await mcp.call('ask', { intent: 'buyer_risk', ens: [ens], window: 'D90', verify: false });
   } catch (error) {
-    return { ok: false, reason: 'GRAPH_READ_FAILED', detail: errorText(error) };
+    return { ok: false, reason: 'GRAPH_READ_FAILED', detail: errorText(error), thrown: true };
   }
   const standing = parseBuyerRisk(answer?.text, ens);
   if (!standing) return { ok: false, reason: 'GRAPH_READ_FAILED', detail: `no readable standing for ${ens}` };

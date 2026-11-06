@@ -13,7 +13,7 @@ const trap = cast.shopByRole('trap').ens;
 const payer = cast.payers.payer.ens;
 const NOON_IST = Date.parse('2026-11-06T06:30:00.000Z');
 
-const run = (options = {}) => runMockErrand({ now: NOON_IST, ...options });
+const run = (options = {}) => runMockErrand({ now: NOON_IST, retryMs: 0, ...options });
 const events = (runLog, type) => runLog.events.filter((e) => e.type === type);
 const guards = (runLog, ok) => events(runLog, 'guard').filter((e) => e.ok === ok);
 const refusals = (runLog) => runLog.result.refusals.map((r) => r.reason);

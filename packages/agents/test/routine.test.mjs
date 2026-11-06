@@ -185,3 +185,31 @@ test('an eligible pick that does not fit the limits is a slip, not a veto: code 
   assert.equal(world.hooks.signed.length, 1);
   assert.ok(guards(runLog, true).some((g) => g.guard === 'G2' && /does not fit the limits \(MISSES_DEADLINE\)/.test(g.detail)));
 });
+
+test("the shop's buyer check tries a read that throws once more: a dropped connection does not refuse the buyer, a second failure still does", async () => {
+  const flaky = (failures) => {
+    const world = createMockWorld({ now: NOON_IST });
+    const call = world.mcp.call.bind(world.mcp);
+    const tools = world.mcp.tools.bind(world.mcp);
+    let left = failures;
+    world.mcp.call = async (name, args) => {
+      if (name === 'ask' && left-- > 0) throw new TypeError('fetch failed');
+      return call(name, args);
+    };
+    world.mcp.tools = async () => {
+      const t = await tools();
+      const ask = t.ask;
+      return { ...t, ask: { ...ask, execute: async (input, options) => { if (left-- > 0) throw new TypeError('fetch failed'); return ask.execute(input, options); } } };
+    };
+    return world;
+  };
+  const opts = (world) => ({ now: NOON_IST, mode: 'mock', retryMs: 0, cast: world.cast, hooks: world.hooks, mcp: world.mcp, mockModels: world.mockModels });
+  const once = flaky(1);
+  const recovered = await runErrand(opts(once));
+  assert.equal(recovered.runLog.result.status, 'paid');
+  const twice = flaky(10);
+  const refused = await runErrand(opts(twice));
+  assert.equal(refused.runLog.result.status, 'refused');
+  assert.deepEqual(refusals(refused.runLog), ['SHOP_REFUSED']);
+  assert.equal(twice.hooks.signed.length, 0);
+});
