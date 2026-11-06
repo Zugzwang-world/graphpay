@@ -12,7 +12,7 @@ The money graph on Arkiv: the safe writer, the engine (GraphQL, explain, hosted 
 | M7b engine, GraphQL, explain, MCP | `07b-graph-engine-graphql-mcp.md` | `M7-arkiv.md` §6 (discovery) and §8 (the hosted MCP; ADR-0037) |
 | M8 city and seeding | `08-city-and-seeding.md` | `M7-arkiv.md` §3 and §8: size S only (ADR-0049); ADR-0043, ADR-0050 |
 | M9 live benchmark | `09-live-benchmark.md` | `M7-arkiv.md` §8: reads, not speed (ADR-0042) |
-| Friday | `docs/plan/MASTER_PLAN.md` §4 | items 1 (heartbeat and handoff entities), 4–5 (Swarm; ADR-0039), 6 (the demo cast's `shop` rows), 10 (the link builder), 15 (`arkiv/` drafts), 18 (publish the SDK as `@graphpay/arkiv-graph`; ADR-0057) |
+| Friday | `docs/plan/MASTER_PLAN.md` §4 | items 1 (heartbeat and handoff entities), 4–5 (Swarm; ADR-0039), 6 (the demo cast's `shop` rows), 10 (the link builder), 15 (`arkiv/` drafts), 18 (publish the SDK as `@graphpay_ethglobal/arkiv-graph` by 13:00; ADR-0063) |
 
 ## Gates
 
@@ -22,7 +22,7 @@ The money graph on Arkiv: the safe writer, the engine (GraphQL, explain, hosted 
 
 ## Owns
 
-`packages/arkiv-graph` (`@graphpay/arkiv-graph`, the generic SDK), `packages/money-graph` (`@graphpay/money-graph`, GraphPay's payment model over it; ADR-0057), `packages/city`, `bench/`, `apps/web/app/api/{graphql,explain,mcp}`, `arkiv/schema.md`, the drafts of `arkiv/friction.md`, `how-you-use-arkiv.md` and `swarm.md` until Submission takes them, `docs/sessions/arkiv/`. In the Coordinator's `packages/config/`, only the `arkiv` writer addresses, by a PR that says so.
+`packages/arkiv-graph` (published as `@graphpay_ethglobal/arkiv-graph`, the generic SDK; ADR-0063), `packages/money-graph` (`@graphpay/money-graph`, GraphPay's payment model over it; ADR-0057), `packages/city`, `bench/`, `apps/web/app/api/{graphql,explain,mcp}`, `arkiv/schema.md`, the drafts of `arkiv/friction.md`, `how-you-use-arkiv.md` and `swarm.md` until Submission takes them, `docs/sessions/arkiv/`. In the Coordinator's `packages/config/`, only the `arkiv` writer addresses, by a PR that says so.
 
 ## Acceptance checks
 

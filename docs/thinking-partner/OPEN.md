@@ -4,13 +4,19 @@ The founder's to-dos and open questions. Each item says what, where, why and wha
 
 ## Founder now (Coordinator only)
 
-1. **Plug in the charger and keep the lid open, now.** Why: the lid closed at 02:14 and the Mac slept until 03:01 ("Clamshell Sleep" in `pmset -g log`), so every session lost about 47 minutes; it also runs on battery (100%, discharging). A closed lid always sleeps, and an empty battery stops every session and the mirror. Recommendation: charger in, lid open, the app open, until Saturday's pitch.
-2. **Plan usage: decided 04:15 IST, every session pauses gracefully at 92% (ADR-0062); all track sessions at high.** 79% at 04:33 IST, and it resets Fri 21:30 IST. The Coordinator enforces the pause and notifies you. Still yours, optionally: the Coordinator's own effort (Opus 5.5, high) in its model menu.
-3. **Send ETHGlobal the written pre-event disclosure, if not sent yet.** Where: the Hacker Dashboard or an organiser; paste-ready text in `docs/plan/DISCLOSURE_MESSAGE.md`. Why: the rules require written disclosure of pre-existing work.
-4. **Lock the final story config** (the story-config brief goes to the Coordinator). Why: the demo cast, products, prices, places and demo steps come only from it (ADR-0047), and the large city is seeded only from the locked story (ADR-0049). When: by **Fri 08:30 IST** for rehearsal 1; at the latest **Fri 13:00**, because the M seeding's latest safe start is 14:00.
-5. **Optional, before Friday's publish: claim the npm organisation `graphpay`.** Where: npmjs.com, signed in with your account → Add Organization → `graphpay`, free plan (public packages). Why: only the scope's owner can publish `@graphpay/arkiv-graph` (ADR-0057); the scope is unclaimed at 01:05 IST and anyone could take it before Friday. Recommendation: do it when convenient; the Coordinator asks for the npm login itself when the package is ready (Friday item 18).
+Updated 09:35 IST, Fri 6 Nov.
 
-**Closed tonight:** the six track sessions and the Coordinator started (00:44–00:46 IST); the Ankr session's worktree and branch (removed at 23:09), the Vercel GitHub link (connected 22:42 IST; checks in `NOW.md`), the personal Ankr URL (stored, verified 22:51 IST: chain 1874, HTTPS), test USDT (150 arrived 21:54 IST; distributed, ADR-0045) and tGLM (FUNDER held 12.86; every planned wallet funded).
+1. **Lock the story: overdue against 08:30.** Send the story brief to the Coordinator. Why: the demo cast (item 6), rehearsal 1 at 12:00, and the large city, whose seeding must start by 14:00, all depend on it. The latest is **13:00**.
+2. **npm login when the packages are ready** (ADR-0063). The Coordinator tells you when `@graphpay_ethglobal/arkiv-graph` and `@graphpay_ethglobal/agentpay` pass pack, install and quickstart, by about 12:00. You run `npm login` in a Terminal tab and approve the prompts; the Coordinator publishes with `pnpm publish --access public`.
+3. **Plan usage: 83% at 09:12, every session pauses at 92% (ADR-0062), and the reset is Fri 21:30 IST.** Extra usage with a cap is still the way to rule out a stop before the reset. Recommendation: the story swap, both phone views, the SDK publish and rehearsal 1 first.
+4. **The front-end team (ADR-0065).**
+   - PR #70 (ajatshatru01) puts the UI in a root `frontend/` folder with its own npm lockfile. Ask them to move it to `apps/demo-ui` as a pnpm workspace app, and confirm every committer is on the ETHGlobal team.
+   - `FRONTEND_HANDOVER.md` doesn't exist yet. Recommendation: T5 writes it from `apps/web`'s routes and the GraphQL and MCP APIs (about 30 minutes on Sonnet). Say "yes" and the Coordinator asks T5.
+5. **Test USDT at FUNDER: 15.54.** Today's known real runs need 2: DISPOSABLE_2 for the video and DISPOSABLE_3 for the pitch, 1 each, so it's covered. If the locked story renames the paying agents, each new paying wallet needs its plan amount (payer 30, acceptance 20, persona 10, deal hunter 2; up to about 62 for a set), and that needs a test-USDT top-up. Recommendation: keep the test cast's wallet labels for the paying agents (E-14).
+6. **Send ETHGlobal the written pre-event disclosure, if not sent yet** (`docs/plan/DISCLOSURE_MESSAGE.md`).
+7. **Keep the charger in and the lid open** until Saturday's pitch.
+
+**Closed 09:30:** "ADR-0059 appears twice" was a wrong reference: the npm line in the records section said ADR-0059 instead of ADR-0057, and there is only one ADR-0059 (T2's zero cap). Fixed; the npm publish is now ADR-0063. **Closed tonight:** the six track sessions and the Coordinator started (00:44–00:46 IST); the Ankr session's worktree and branch (removed at 23:09), the Vercel GitHub link (connected 22:42 IST; checks in `NOW.md`), the personal Ankr URL (stored, verified 22:51 IST: chain 1874, HTTPS), test USDT (150 arrived 21:54 IST; distributed, ADR-0045) and tGLM (FUNDER held 12.86; every planned wallet funded).
 
 ## Funding (the Coordinator)
 
@@ -116,7 +122,7 @@ Updated 05:41 IST, Fri 6 Nov. Nothing for the founder now. Closed: C4(a) (passed
 
 ## records
 
-- **npm login for the Friday publish (ADR-0059, item 18).** What: your npm login and go-ahead when the package is ready, after CP4 and T3's item 18. Where: a Terminal-panel tab the Coordinator opens; npm's sign-in and any one-time code happen there and Claude never sees them. Why: publishing needs your account, and a publish cannot be undone after 72 hours. Recommendation: nothing now; the Coordinator asks.
+- **npm login for the publish (ADR-0063, item 18).** What: your `npm login` and go-ahead when both SDKs are ready (about 12:00). Where: a Terminal-panel tab the Coordinator opens; npm's sign-in and the 2FA happen there and Claude never sees them. Why: publishing needs your account, and a publish can't be undone after 72 hours. Recommendation: nothing now; the Coordinator asks.
 - **Prompt logs land in the main checkout** (P-records-1). What: the prompt-log hook writes every session's log to `~/graphpay/prompts/raw/`, not to the session's worktree, so track PRs do not carry their logs. Recommendation: the Coordinator changes the hook to write into the session's own checkout and sweeps the logs written so far into a records PR. No founder action.
 
 ## submission

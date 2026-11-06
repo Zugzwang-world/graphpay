@@ -9,7 +9,7 @@ M17: everything a judge or a sponsor reads is in the repo, true and linked, and 
 | step | source | also apply |
 |---|---|---|
 | sponsor files, README | `planning/PROMPTS/17-submission.md`; `planning/SPONSOR_CHECKLIST.md` §1, §2, §4, §5 | the tracks of ADR-0051: Arkiv "Build on Arkiv" with the Swarm bonus, ENS "Best Use of ENSv2", Whitechain Operate (§3, Scale, is not entered); the ~20-line drop-in (ADR-0032); full AI disclosure (ADR-0028) |
-| the `arkiv/` files | `docs/plan/MASTER_PLAN.md` §4 item 15 | finish T3's drafts of `friction.md`, `how-you-use-arkiv.md` and `swarm.md`; write `reach.md` and `why-arkiv.md`; `reach.md` leads with `npm i @graphpay/arkiv-graph` and links the package (Friday item 18, ADR-0057; it replaces the pack's `arkiv-graphql`) |
+| the `arkiv/` files | `docs/plan/MASTER_PLAN.md` §4 item 15 | finish T3's drafts of `friction.md`, `how-you-use-arkiv.md` and `swarm.md`; write `reach.md` and `why-arkiv.md`; `reach.md` leads with `npm i @graphpay_ethglobal/arkiv-graph` and links the package (Friday item 18, ADR-0057 and ADR-0063; it replaces the pack's `arkiv-graphql`) |
 | video shot list, narration | `planning/WEBSITE_SPEC.md` §11 | the founder's own voice, a Mac screen recording at real speed; the ENS moment as `docs/plan/amendments/M5-ens.md` §5 words it |
 | submission text, checklist | `SPONSOR_CHECKLIST.md` §6 | every row done with a link, or listed as a founder action |
 
