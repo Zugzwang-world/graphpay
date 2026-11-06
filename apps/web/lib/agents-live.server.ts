@@ -5,6 +5,9 @@
 // waiting, and the server log names what is missing. The shipped site has no fake path.
 
 import { createLiveRunner, liveRunnerMissing } from '@graphpay/integration/live-runner';
+
+// Server only: this module holds the path to the payer's key; it must never reach a browser bundle.
+if (typeof window !== 'undefined') throw new Error('agents-live.server.ts is server-only');
 import type { RunResult } from './contracts.ts';
 import type { ErrandRunner } from './run-registry.server.ts';
 

@@ -36,6 +36,12 @@ export interface Registry {
   get(id: string): Run | null;
 }
 
+// The runner's refusals the visitor can act on (live-runner.mjs codes), as fixed lines.
+const FAILED_LINES: Record<string, string> = {
+  RATE_LIMITED: 'rate limited: too many errands this hour on this server; try again later',
+  BUSY: 'busy: the last errand is still finishing; try again in a minute',
+};
+
 const SECRET_NAME = /(?:_PASSCODE|_RPC_URL|_PRIVATE_KEY|_API_KEY|_ACCESS_KEY|_TOKEN|_SECRET)$/;
 const MAX_FRAMES = 2000;
 
@@ -84,9 +90,12 @@ export function createRegistry({ keepMs = 5 * 60_000, maxRunMs = 280_000, now = 
           const limited = new Promise<never>((_, reject) => abort.signal.addEventListener('abort', () => reject(new Error('time limit'))));
           const result = await Promise.race([runner({ runId: run.id, request, signal: abort.signal, onEvent: (event) => emit(run, { event: 'trace', data: event }) }), limited]);
           emit(run, { event: 'result', data: scrubSecrets(result) });
-        } catch {
-          // The cause can hold a URL or key: only a fixed line leaves the server.
-          emit(run, { event: 'failed', data: { error: abort.signal.aborted ? 'the errand ran out of time' : 'the errand failed' } });
+        } catch (error) {
+          // The cause can hold a URL or key: only a fixed line leaves the server, chosen by the
+          // runner's error code (never its message).
+          const code = (error as { code?: unknown } | null)?.code;
+          const line = abort.signal.aborted ? 'the errand ran out of time' : (FAILED_LINES[String(code)] ?? 'the errand failed');
+          emit(run, { event: 'failed', data: { error: line } });
         } finally {
           clearTimeout(limit);
           run.done = true;

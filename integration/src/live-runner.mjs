@@ -51,7 +51,8 @@ async function clientsFor(key, env) {
 }
 
 // env: the server's environment (process.env on Vercel). log: one line, no secrets.
-export function createLiveRunner(env = process.env, { log = () => {}, now = Date.now } = {}) {
+// buildParts: the tests' seam for the start-up (clients, connections, the stack); the default builds them live.
+export function createLiveRunner(env = process.env, { log = () => {}, now = Date.now, buildParts = null } = {}) {
   if (liveRunnerMissing(env).length) return null;
   const runEnv = { ...env, AGENT_PRESET: 'live', AGENT_MODE: 'live' }; // the live preset only
   const started = [];
@@ -84,7 +85,7 @@ export function createLiveRunner(env = process.env, { log = () => {}, now = Date
   };
 
   async function errand({ runId, request, onEvent, signal }) {
-    parts ??= build().catch((e) => {
+    parts ??= (buildParts ?? build)().catch((e) => {
       parts = null;
       log(`live runner: start-up failed (${e.code ?? e.name})`); // the name only: messages can carry URLs
       throw e;
