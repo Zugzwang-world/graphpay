@@ -1,36 +1,32 @@
 # NOW
 
-Updated 12:47 IST, Fri 6 Nov (Coordinator)
+Updated 12:59 IST, Fri 6 Nov (Coordinator)
 
 ## Summary (Coordinator only)
 
-Updated 12:47 IST, Fri 6 Nov. **Standing rule (ADR-0066): no target times.** Only the submission (Sat 09:00 IST) and the presentation (Sat 09:30 IST) are fixed.
+Updated 12:59 IST, Fri 6 Nov. **Standing rule (ADR-0066): no target times.** Only the submission (Sat 09:00 IST) and the presentation (Sat 09:30 IST) are fixed.
 
-**Now: the integration proof of concept** (the 1240 briefs). A new Integration session builds option A, and every other session supports it or stays idle.
+**Now: the integration proof of concept** (the 1240 briefs).
 
-- **Done:**
-  - #70 is squash-merged, credited to the team (8abe39a). `frontend/` is on main.
-  - The founder's 150 test USDT landed at FUNDER (11:44). PAYER now holds 125 test USDT, and VITALIK 0.02 Sepolia ETH.
-  - The founder's decisions are recorded:
-    - ADR-0069: public access, with no passcode and no rate limits for visitors;
-    - ADR-0070: option A;
-    - ADR-0071: Mr. Vitalik stays, the payer's pass is 100 a day, and the story swap comes after the founder's run;
-    - ADR-0062: payments and merges allowed up to 97% for this work.
-  - The CLAUDE.md model line now names Kimi, and so does the README.
+- **Landed:**
+  - **Phase 1:** the team's two phones are on our site at `/live`, around the explainer, with live read-only data (#111). T5 reviewed it: no blockers.
+  - **The payer's pass is 100 test USDT a day,** on-chain (T1's policy transaction, #107) and in ENS (T2's record). PAYER holds 125 test USDT.
+  - **The reliable errand, first part:** the signed payment is retried when the shop says "retry is safe", the hourly cap is gone, and one errand runs at a time (#108, #112).
+  - **The read limits** are raised tenfold for shared venue Wi-Fi (#113).
+  - **One image on Swarm:** the team's fox, on Kesar Kingdom's gulab jamun (#109).
+  - **#70 is merged** (the team's front end), and **the decisions are recorded:** ADR-0069 to ADR-0071 and ADR-0062 amendment 2 (#110).
 - **In progress:**
-  - **The payer's pass to 100 a day:** the story config is in PR #105. T1 writes the on-chain policy and T2 the ENS cap record.
-  - **A reliable errand:** Join leads, with T4. It fixes the planning stop, the quote write and the settle send, removes the six-an-hour cap, proves the errand on the mocks and then in at most two live errands, then rewrites C6 and F2 for public access.
-  - **T3:** one image of our own on Swarm, for one menu item.
-  - **T5:** reviews the Integration session's PRs. The feed and export are already fixed (#104).
-  - **The Vercel build step:** now in git (PR #105), so commits that touch `frontend/`, `apps/phones/` or `integration/` build.
+  - **Settle safety:** T1's #114 (reviewer: ship).
+  - **Join's live proof:** at most two live errands, then C6 and F2 rewritten for public access.
+  - **Phase 2:** the passcode switch (Integration, then a reviewer pass and T5's review), then the live errand on the new stage. The founder tests after that.
 - **Idle until the founder's run:**
   - the story swap and Grok's assets;
   - the kill;
   - subscribe, cancel, caps and decline;
   - Kimi tuning;
   - the big city;
-  - the Submission session.
-- **Usage:** 89%. Every session pauses at 97%; the reset is at 21:30 IST.
+  - Submission.
+- **Usage:** 90%. Every session pauses at 97%, likely around 15:30 to 16:30 IST at today's pace, until the 21:30 reset.
 
 ## foundation
 
