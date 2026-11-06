@@ -1,0 +1,45 @@
+{
+  "startedAt": "2026-11-06T00:07:29.876Z",
+  "agent": "scout.vitalik.graphpay.eth",
+  "shop": "kesar-kingdom.graphpay.eth",
+  "policyBefore": {
+    "wallet": "0xf11b49E5D216BF324794890369d077718F9a4F8f",
+    "epoch": 0,
+    "revoked": false,
+    "dailyCapMicro": "1000000",
+    "expiry": "0"
+  },
+  "revoke": {
+    "tx": "0x4fc9dabb3d9c1a16f56c30aeac5a18bda720c8dabab7f5b881359f89ef5534bc",
+    "explorer": "https://explorer.testnet.whitechain.io/tx/0x4fc9dabb3d9c1a16f56c30aeac5a18bda720c8dabab7f5b881359f89ef5534bc",
+    "gasUsed": 38394
+  },
+  "attempt": {
+    "status": 402,
+    "reason": "AGENT_REVOKED",
+    "orderId": "0x6af2397b92461068b29850e41167e9bed2018606793ed8e0dfba85526989b4ef",
+    "tx": "0x312d31320300c20205ac46a66501ac4738c2ac572ef1abebd21534765aee6021",
+    "explorer": "https://explorer.testnet.whitechain.io/tx/0x312d31320300c20205ac46a66501ac4738c2ac572ef1abebd21534765aee6021",
+    "gasUsed": 136574,
+    "paymentFailed": {
+      "reason": 1,
+      "logIndex": 1,
+      "ref": "1874:0x312d31320300c20205ac46a66501ac4738c2ac572ef1abebd21534765aee6021:1"
+    }
+  },
+  "restore": {
+    "tx": "0xbafe960b7e34da24e8b84da0822f89ca4ad965263bda9c2bf082b9002d0511a7",
+    "explorer": "https://explorer.testnet.whitechain.io/tx/0xbafe960b7e34da24e8b84da0822f89ca4ad965263bda9c2bf082b9002d0511a7",
+    "gasUsed": 38382
+  },
+  "policyAfter": {
+    "wallet": "0xf11b49E5D216BF324794890369d077718F9a4F8f",
+    "epoch": 0,
+    "revoked": false,
+    "dailyCapMicro": "1000000",
+    "expiry": "0"
+  },
+  "restoredExactly": true,
+  "pass": true,
+  "endedAt": "2026-11-06T00:08:13.273Z"
+}

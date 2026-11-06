@@ -87,9 +87,10 @@ export function checks(root, env) {
       const shared = addrs.filter((a, i) => addrs.indexOf(a) !== i);
       return { pass: rows.length > 0 && carried.every((c) => c === 'FUNDER' || c === 'OPERATOR') && shared.length === 0, what: 'the event wallets are fresh, except FUNDER and OPERATOR', measured: { roles: rows.length, carried, sharedAddresses: shared.length }, expected: 'only FUNDER and OPERATOR carried; no two roles share an address', evidence: { cmd: 'pnpm -s wallets:addresses (addresses only)' } };
     },
+    F1: async () => noSecrets(root),
     C2: async () => hosted(root, 'C2'),
     C3: async () => hosted(root, 'C3', env),
-    C4: async () => hosted(root, 'C4'),
+    C4: async () => hosted(root, 'C4', env),
     C5: async () => hosted(root, 'C5'),
     C6: async () => hosted(root, 'C6'),
     F2: async () => hosted(root, 'F2'),
@@ -284,12 +285,12 @@ function latestHosted(root, paidOnly) {
   const dir = join(root, 'docs/sessions/integration/hosted');
   if (!existsSync(dir)) return null;
   const files = readdirSync(dir)
-    .filter((f) => f.endsWith('.json') && (!paidOnly || f.startsWith('paid-')))
+    .filter((f) => f.endsWith('.json') && (paidOnly ? f.startsWith('paid-') : /^(paid|read)-/.test(f)))
     .map((f) => ({ f: `docs/sessions/integration/hosted/${f}`, run: JSON.parse(readFileSync(join(dir, f), 'utf8')) }))
     .sort((a, b) => (a.run.startedAt < b.run.startedAt ? 1 : -1));
   return files[0] ?? null;
 }
-async function hosted(root, id, env) {
+async function hosted(root, id, env = {}) {
   const what = HOSTED_WHAT[id];
   const h = latestHosted(root, !['C6', 'F2'].includes(id));
   const row = h?.run.rows?.[id];
@@ -302,6 +303,34 @@ async function hosted(root, id, env) {
     return { pass, ...(pass === null ? { why: `not run yet: ${Object.keys(parts).filter((k) => parts[k] === null).join(', ')}` } : {}), what, measured: { ...parts, refundTx: row.refund ?? null, reorderTx: row.reorder ?? null, renewalTx: renewal.measured }, expected: 'Refunded(800000, full false), payer +0.80, gas 75,344 ±15%; re-order OrderCreated(kind 1, parent) + PaymentSettled 1.20, gas 252,082 ±15%; SubscriptionRenewed(cycle 2) + PaymentSettled of a kind-2 order, gas 201,555 ±15%', evidence: { ...evidence, renewal: renewal.evidence } };
   }
   if (id === 'C4') {
+    // (a) from integration/c4a.mjs (the revoke, the refused payment, the restore), and the
+    // mirror's on-chain fail edge for its PaymentFailed log, exactly once.
+    const dir = join(root, 'docs/sessions/integration/hosted');
+    const c4a = existsSync(dir) ? readdirSync(dir).filter((f) => f.startsWith('c4a-')).sort().at(-1) : null;
+    if (c4a) {
+      const k = JSON.parse(readFileSync(join(dir, c4a), 'utf8'));
+      const ref = k.attempt?.paymentFailed?.ref;
+      const arkiv = await connectArkiv({ backend: 'rabdi', env: {} });
+      // Counted by ref (no capped read), and the edge's key from the mirror's own write.
+      const { refCounts, mirrorTxOf } = await import('../packages/mirror/src/checks.mjs');
+      const counted = ref ? await refCounts(arkiv.publicClient, { owner: writerAddresses().W_LEDGER, events: [{ id: ref, name: 'PaymentFailed' }] }) : null;
+      const written = ref ? await mirrorTxOf(arkiv.publicClient, { ref, owner: writerAddresses().W_LEDGER }) : null;
+      const edges = counted ? Array.from({ length: counted.wrong.length ? counted.wrong[0].edges : 1 }, () => ({ $key: written?.edgeKey ?? null, kind: 'fail', ref })) : [];
+      // The chain again: the PaymentFailed log (reason 1, AGENT_REVOKED) for that order, and the
+      // revoke and restore receipts; the scout's policy is not revoked now.
+      const { decodeEventLog } = await import('viem');
+      const { checkoutAbi } = await import('../packages/contracts/index.mjs');
+      const wc = await clientsFor('whitechain', env);
+      const checkout = config.whitechain.contracts.checkout.address;
+      const ok = async (h) => h && (await wc.publicClient.getTransactionReceipt({ hash: h })).status === 'success';
+      const rc = k.attempt?.tx ? await wc.publicClient.getTransactionReceipt({ hash: k.attempt.tx }) : null;
+      const log = rc?.logs.find((l) => l.logIndex === k.attempt.paymentFailed?.logIndex && l.address.toLowerCase() === checkout.toLowerCase());
+      const ev = log ? decodeEventLog({ abi: checkoutAbi, data: log.data, topics: log.topics }) : null;
+      const node = (await import('../packages/money-graph/index.mjs')).nodeOf(k.agent);
+      const now = await wc.publicClient.readContract({ address: checkout, abi: checkoutAbi, functionName: 'policies', args: [node] });
+      const chain = ev?.eventName === 'PaymentFailed' && Number(ev.args.reason) === 1 && ev.args.orderId.toLowerCase() === String(k.attempt.orderId).toLowerCase() && (await ok(k.revoke?.tx)) && (await ok(k.restore?.tx)) && !now.revoked;
+      row.a = { pass: k.pass === true && chain && edges.length === 1 && edges[0].kind === 'fail', chainChecked: chain, file: `docs/sessions/integration/hosted/${c4a}`, attempt: k.attempt, revoke: k.revoke?.explorer, restore: k.restore?.explorer, restoredExactly: k.restoredExactly, failEdges: edges.map((e) => ({ entityKey: e.$key, kind: e.kind, ref: e.ref })) };
+    }
     const pass = row.a?.pass === false || row.b?.pass === false ? false : row.a?.pass === true && row.b?.pass === true ? true : null;
     return { pass, ...(pass === null ? { why: `(a) ${row.a?.why ?? 'not run'}; (b) ${row.b?.pass ? 'passes' : 'not run'}` } : {}), what, measured: row, expected: '(a) PaymentFailed(AGENT_REVOKED), gas 160,525 ±15%, an on-chain fail edge; (b) 402 CAP_EXCEEDED, no transaction, an off-chain fail edge', evidence };
   }
@@ -337,4 +366,30 @@ async function hostedRenewal(root, env) {
   const byRelayer = await wc.publicClient.readContract({ address: config.whitechain.contracts.checkout.address, abi: checkoutAbi, functionName: 'isRelayer', args: [receipt.from] });
   const pass = receipt.status === 'success' && byRelayer && settled?.args.amountMicro === BigInt(story.renewal.priceMicro) && Number(renewed?.args.cycle) === 2 && Number(created?.args.kind) === 2 && Boolean(settled) && gas >= Math.floor(201_555 * 0.85) && gas <= Math.ceil(201_555 * 1.15);
   return { pass, measured: { cycle: renewed ? Number(renewed.args.cycle) : null, orderKind: created ? Number(created.args.kind) : null, settledMicro: settled ? String(settled.args.amountMicro) : null, gasUsed: gas, from: receipt.from, fromIsRelayer: byRelayer }, evidence: { tx: `${config.networks.whitechain.explorer}/tx/${hash}`, by: "the hosted cron as RENEWER (T1's M4)", subscription: "the rehearsal agent's 120 s demo subscription (C3 asks only for cycle 2 and a kind-2 PaymentSettled)" } };
+}
+
+// F1: the secret scan over the tree (pnpm check), over `git log -p` of every branch (the same
+// shapes, labels only), the tracked env files, and the production env's types on Vercel (names
+// and types only; the project from config site.vercel).
+async function noSecrets(root) {
+  const { findSecrets } = await import('../scripts/lib/secret-shapes.mjs');
+  const tree = sh(root, process.execPath, ['scripts/check.mjs']);
+  const log = sh(root, 'git', ['log', '-p', '--all', '--no-color', '--no-ext-diff', '--format=@@COMMIT %H'], { maxBuffer: 1 << 30 });
+  const byLabel = {};
+  const commits = String(log.stdout).split('@@COMMIT ').slice(1);
+  const hit = new Set();
+  for (const c of commits) {
+    for (const f of findSecrets(c)) {
+      byLabel[f.label] = (byLabel[f.label] ?? 0) + 1;
+      hit.add(c.slice(0, 8));
+    }
+  }
+  const envFiles = String(sh(root, 'git', ['ls-files']).stdout).split('\n').filter((f) => /(^|\/)\.env/.test(f));
+  const { projectId, team } = config.site.vercel;
+  const ls = sh(root, 'vercel', ['env', 'ls', 'production', '--project', projectId, '--scope', team]);
+  const vars = String(ls.stdout).split('\n').map((l) => l.trim().split(/\s+/)).filter((p) => /^[A-Z][A-Z0-9_]+$/.test(p[0] ?? '') && p[1]).map((p) => ({ name: p[0], type: p[1] }));
+  const secretShaped = vars.filter((v) => /(KEY|TOKEN|SECRET|PASSCODE|RPC_URL)$/.test(v.name));
+  const exposed = secretShaped.filter((v) => !['Hidden', 'Secret', 'Sensitive', 'Encrypted'].includes(v.type)).map((v) => v.name);
+  const pass = tree.status === 0 && log.status === 0 && commits.length > 0 && hit.size === 0 && envFiles.every((f) => /(^|\/)\.env\.example$/.test(f)) && ls.status === 0 && vars.length > 0 && exposed.length === 0;
+  return { pass, what: 'no secrets are in the repo', measured: { tree: lastLines(tree.stdout, 1)[0] ?? null, history: { commits: commits.length, findings: byLabel, commitsWithFindings: [...hit] }, trackedEnvFiles: envFiles, vercelProduction: { vars: vars.length, secretShaped: secretShaped.length, notHidden: exposed } }, expected: 'no secret shapes in the tree or the history of every branch; only .env.example tracked; every key and token on Vercel Hidden or Secret', evidence: { cmds: ['node scripts/check.mjs', 'git log -p --all (scanned in process, labels only)', 'git ls-files', 'vercel env ls production (names and types)'] } };
 }
