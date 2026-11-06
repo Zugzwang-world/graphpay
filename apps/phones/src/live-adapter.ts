@@ -97,6 +97,16 @@ function postToStage(event: string, data: string): void {
   window.parent.postMessage({ type: RUN_FRAME, event, data }, window.location.origin);
 }
 
+// What happens on this phone moves the deck in the middle of /live (apps/web/lib/deck-map.ts keeps the
+// one table of keys and slides). Only the key and real explorer links are posted; the deck never acts
+// on a phone.
+const PHONE_EVENT = 'graphpay.phone-event';
+type DeckKey = 'refund-request' | 'refund' | 'paused' | 'resumed' | 'shop-open' | 'renewal';
+function postToDeck(key: DeckKey, links: Link[] = []): void {
+  if (window.parent === window) return;
+  window.parent.postMessage({ type: PHONE_EVENT, key, chips: links.map((l) => ({ label: l.label, href: l.url })) }, window.location.origin);
+}
+
 export class LiveAdapter implements DemoAdapter {
   readonly mode = 'live' as const;
   private listeners = new Set<(e: DemoEvent) => void>();
@@ -252,6 +262,7 @@ export class LiveAdapter implements DemoAdapter {
   async requestRefund(orderId: string, input: { amount: Money; reason: string }): Promise<void> {
     await this.post('/api/customer/refund-request', { orderId, amountMicro: String(amountToMicro(input.amount.amount)), reason: input.reason });
     this.emit({ type: 'refund.requested', orderId, amount: input.amount, reason: input.reason });
+    postToDeck('refund-request');
   }
   startRenewal(): Promise<void> {
     return this.notYet();
@@ -280,6 +291,7 @@ export class LiveAdapter implements DemoAdapter {
     this.renewOpen = open ? setInterval(() => void this.post('/api/merchant/open', { on: true }).catch(() => undefined), RENEW_OPEN_MS) : null;
     this.last.open = open;
     this.emit({ type: 'shop.status', open });
+    postToDeck('shop-open');
   }
   // The merchant marks the order delivered on Whitechain; the stream brings the new state.
   async dispatch(orderId: string): Promise<void> {
@@ -287,6 +299,7 @@ export class LiveAdapter implements DemoAdapter {
   }
   async approveRefund(orderId: string, amount: Money): Promise<void> {
     await this.post('/api/merchant/refund', { orderId, amountMicro: String(amountToMicro(amount.amount)) });
+    postToDeck('refund');
   }
   declineRefund(): Promise<void> {
     return this.notYet();
@@ -310,6 +323,7 @@ export class LiveAdapter implements DemoAdapter {
     const links = body.sepoliaTx ? [sepoliaLink(body.sepoliaTx)] : [];
     this.last.status = paused ? 'paused' : 'active';
     this.emit({ type: 'agent.permission', agent: this.payerRef, change: paused ? 'paused' : 'resumed', links });
+    postToDeck(paused ? 'paused' : 'resumed', links);
   }
 
   // A POST to our own routes; a refusal is thrown with the route's own words, as the phones show it.
@@ -383,6 +397,7 @@ export class LiveAdapter implements DemoAdapter {
     const status = statusOf(state.agent.status);
     if (this.last.status !== null && status !== this.last.status) {
       this.emit({ type: 'agent.permission', agent: this.payerRef, change: status === 'active' ? 'resumed' : status, links: [] });
+      postToDeck(status === 'active' ? 'resumed' : 'paused');
     }
     this.last.status = status;
     if (state.spentTodayMicro !== null && state.spentTodayMicro !== this.last.used) {
@@ -395,8 +410,11 @@ export class LiveAdapter implements DemoAdapter {
     const map = await getJson<MapAnswer>('/api/map');
     const open = map?.shops.find((s) => s.ens === story.shop.ens)?.open;
     if (open === undefined || open === this.last.open) return;
+    const known = this.last.open !== null;
     this.last.open = open;
     this.emit({ type: 'shop.status', open });
+    // The first reading is only what the shop already was; a change after it moves the deck.
+    if (known) postToDeck('shop-open');
   }
 
   // The merchant stream ends itself before the function limit; reconnect from the last edge seen.
@@ -432,7 +450,14 @@ export class LiveAdapter implements DemoAdapter {
     this.emit({ type: 'order.updated', order });
     if (row.ts < this.openedAt) return;
     if (row.kind === 'pay' || row.kind === 'renew') this.emit({ type: 'merchant.notification', kind: row.kind === 'renew' ? 'renewal' : 'new_order', orderId: order.id });
-    if (row.kind === 'request') this.emit({ type: 'merchant.notification', kind: 'refund_request', orderId: order.id });
-    if (row.kind === 'refund' && row.tx) this.emit({ type: 'refund.settled', orderId: order.id, amount: usdt(row.amountMicro), links: [txLink(row.tx)] });
+    if (row.kind === 'renew') postToDeck('renewal');
+    if (row.kind === 'request') {
+      this.emit({ type: 'merchant.notification', kind: 'refund_request', orderId: order.id });
+      postToDeck('refund-request');
+    }
+    if (row.kind === 'refund' && row.tx) {
+      this.emit({ type: 'refund.settled', orderId: order.id, amount: usdt(row.amountMicro), links: [txLink(row.tx)] });
+      postToDeck('refund', [txLink(row.tx)]);
+    }
   }
 }

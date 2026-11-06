@@ -1103,7 +1103,11 @@ function apply(i, k) {
   root.querySelectorAll('[data-x]').forEach(el => { el.classList.toggle('out', k >= Number(el.dataset.x)); });
   root.querySelectorAll('[data-l]').forEach(el => { const l = Number(el.dataset.l); el.classList.toggle('lit', k >= l); el.classList.toggle('now', k === l); });
 }
+// The embedded deck follows the phones (the page posts `graphpay.deck`); PIN is the table row that
+// moved the deck here, so the strip names it; any browsing (Back, Next, keys) clears it.
+let pinNext = null, PIN = null, onShow = null;
 function show(i, k) {
+  PIN = pinNext; pinNext = null;
   i = Math.max(0, Math.min(slides.length - 1, i));
   const max = slides[i].steps || 0;
   k = Math.max(0, Math.min(max, k));
@@ -1116,6 +1120,7 @@ function show(i, k) {
   const h = `#s${i + 1}`;
   if (location.hash !== h) { try { history.replaceState(null, '', h); } catch (e) {} }
   updateNotes();
+  if (onShow) onShow();
 }
 function stopAuto() { clearTimeout(autoT); autoT = null; }
 function schedule() {
@@ -1185,24 +1190,44 @@ setInterval(() => {
   el.textContent = t0 ? `Elapsed ${fmt(Date.now() - t0)}. This slide ${fmt(Date.now() - slideT0)}.` : 'The clock starts when you first advance.';
 }, 500);
 if (EMBED) {
+  // The strip under the deck. Its title is the title of the slide on screen, so the two always agree;
+  // the row of the page's table (lib/deck-map.ts) for that slide gives the step and the links.
   const strip = document.createElement('div');
-  strip.id = 'livestrip'; strip.hidden = true;
+  strip.id = 'livestrip';
   document.body.appendChild(strip);
+  document.documentElement.classList.add('has-strip');
   const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  let ENTRIES = [], OF = 7, REACHED = 0, LIVE = false;
+  const entryAt = (i, k) => {
+    if (PIN) { const p = ENTRIES.find(e => e.key === PIN && e.slide === i + 1); if (p) return p; }
+    const here = ENTRIES.filter(e => e.slide === i + 1 && e.from <= k);
+    const top = Math.max(-1, ...here.map(e => e.from));
+    return here.find(e => e.from === top) || ENTRIES.find(e => e.slide === i + 1) || null;
+  };
+  function renderStrip() {
+    const e = entryAt(S, KS);
+    const pills = Array.from({ length: OF }, (_, n) => `<i class="${e && e.errand === n + 1 ? 'now' : n + 1 <= REACHED ? 'on' : ''}"></i>`).join('');
+    const note = e ? (e.errand ? `${LIVE ? 'live, ' : ''}step ${e.errand} of ${OF}` : e.label) : 'browsing the deck';
+    const chips = (e ? e.chips : []).filter(c => typeof c.href === 'string' && /^(https:\/\/|\/)/.test(c.href)).map(c => `<a class="${c.tone === 'ok' ? 'ok' : ''}" href="${esc(c.href)}" target="_blank" rel="noopener">${esc(c.label)} ↗</a>`).join('');
+    strip.innerHTML = `<div class="pills">${pills}</div><div class="st"><b>${esc(slides[S].title)}</b><span>${esc(note)}</span></div>${chips}`;
+  }
+  onShow = renderStrip;
   addEventListener('message', ev => {
     const m = ev.data;
     if (ev.origin !== location.origin || !m || m.type !== 'graphpay.deck') return;
-    const i = Math.max(1, Math.min(slides.length, Number(m.slide) || 1)) - 1;
+    if (Array.isArray(m.entries)) {
+      ENTRIES = m.entries.filter(e => e && typeof e.key === 'string' && Number.isInteger(e.slide) && e.slide >= 1 && e.slide <= slides.length).map(e => ({ key: e.key, slide: e.slide, step: e.step == null ? null : Number(e.step), from: Number(e.from) || 0, errand: e.errand || 0, label: String(e.label || ''), chips: Array.isArray(e.chips) ? e.chips : [] }));
+    }
+    OF = Number(m.of) || 7; REACHED = Math.max(0, Number(m.reached) || 0); LIVE = !!m.live;
+    if (!m.go) { renderStrip(); return; }
     stopAuto();
-    show(i, m.step == null ? (slides[i].steps || 0) : m.step);
-    const st = m.stage || {};
-    const pills = Array.from({ length: st.of || 0 }, (_, n) => `<i class="${n + 1 < st.index ? 'on' : n + 1 === st.index ? 'now' : ''}"></i>`).join('');
-    const chips = (m.chips || []).filter(c => typeof c.href === 'string' && /^(https:\/\/|\/)/.test(c.href)).map(c => `<a class="${c.tone === 'ok' ? 'ok' : ''}" href="${esc(c.href)}" target="_blank" rel="noopener">${esc(c.label)} ↗</a>`).join('');
-    strip.innerHTML = `<div class="pills">${pills}</div><div class="st"><b>${esc(st.title || '')}</b><span>${m.live ? 'live, step ' : 'step '}${st.index} of ${st.of}</span></div>${chips}`;
-    strip.hidden = false;
-    document.documentElement.classList.add('has-strip');
-    fit();
+    if (m.home) { show(0, 0); return; }
+    const e = ENTRIES.find(x => x.key === m.key);
+    if (!e) { renderStrip(); return; }
+    pinNext = e.key;
+    show(e.slide - 1, e.step == null ? (slides[e.slide - 1].steps || 0) : e.step);
   });
+  renderStrip();
 }
 fit();
 show(fromHash(), 0);

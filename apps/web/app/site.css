@@ -789,28 +789,6 @@ select {
   color: var(--kesar);
 }
 
-.phone-links {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 16px;
-  padding: 14px 18px;
-  border-radius: var(--radius-l);
-  border: 1px dashed var(--varq-15);
-}
-
-.phone-links figure {
-  margin: 0;
-  display: grid;
-  gap: 6px;
-  justify-items: center;
-}
-
-.phone-links > p {
-  flex: 1;
-  min-width: 180px;
-}
-
 /* Plain pages */
 .page {
   max-width: 880px;
@@ -1108,17 +1086,10 @@ pre.query {
     min-height: 0;
   }
   .stage-middle {
-    grid-template-rows: minmax(0, 1fr) auto;
+    grid-template-rows: minmax(0, 1fr);
     min-height: 0;
   }
   .live-phone {
     width: calc((100dvh - var(--topbar-h) - 64px) * 414 / 868);
-  }
-  .phone-links {
-    padding: 8px 14px;
-    gap: 12px;
-  }
-  .phone-links > p {
-    display: none;
   }
 }
