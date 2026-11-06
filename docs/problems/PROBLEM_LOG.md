@@ -135,6 +135,7 @@ Fix:
 - No restart while the mirror waits: `scripts/ops/workers-watchdog.mjs` restarts the workers only after 30 minutes with neither a good poll nor a further scan.
 - A hold file pauses the watchdog for a maintenance window (W2's history writes, 23:59 to 00:13 IST).
 - W2 spaces D7's heavy reads.
+- The mirror no longer parks the checkout kit's payment from the zero node (a wallet with no ENS name, which can never be registered). Its two events had held the checkpoint at block 12,326,024, so every restart re-scanned about 72,000 blocks, 6 to 9 minutes (the 01:08 IST re-read showed a paid order 9 minutes late).
 Prevention:
 - A fresh Arkiv access key takes the mirror off the shared window (the founder).
 - Never restart a stalled mirror before a reset could have passed (25 minutes), unless the process is gone.

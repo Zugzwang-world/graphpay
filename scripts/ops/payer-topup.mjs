@@ -19,11 +19,14 @@
 // - the source's nonce is pinned;
 // - gas is estimated;
 // - the receipt and its exact Transfer log are checked.
-// A payment the payer makes between this script's read and fundUsdt's own pinned read raises the
-// send by that payment, at most one order; the floors leave room for it.
+// The planned amount is a hard ceiling (fundUsdt's maxNeed): if the payer's balance moves between
+// this script's read and fundUsdt's own pinned read, or a node has not seen an earlier transfer,
+// nothing is sent. Its only runner tonight is W5 Ops (OPEN, w5-ops): two sessions running it at
+// once, one per source, would each pass the nonce check.
 // A dry run unless both --execute and --real. Prints roles, addresses, amounts and hashes only.
 
-import { readFileSync } from 'node:fs';
+import { readFileSync, realpathSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
 import { erc20Abi, formatUnits, namehash, parseUnits } from 'viem';
 import { privateKeyToAccount } from 'viem/accounts';
 import { activeCast, castEntries, config } from '../../packages/config/index.mjs';
@@ -69,7 +72,6 @@ export function parseFlags(argv) {
 }
 
 let values = new Map();
-installErrorBoundary(() => values);
 
 async function main() {
   const flags = parseFlags(process.argv.slice(2));
@@ -124,7 +126,7 @@ async function main() {
 
   // fundUsdt's log and stops speak of "FUNDER" as the sender; here the sender is source.role.
   const relabel = (s) => s.replace(/FUNDER/g, source.role);
-  const { stops } = await fundUsdt({ c, funder: privateKeyToAccount(values.get(`${source.role}_PRIVATE_KEY`)), targets: { [role.payer]: fmt(have + amount) }, addresses, token, reserve: source.reserve, real, log: (line) => console.log(relabel(line)) });
+  const { stops } = await fundUsdt({ c, funder: privateKeyToAccount(values.get(`${source.role}_PRIVATE_KEY`)), targets: { [role.payer]: fmt(have + amount) }, maxNeed: { [role.payer]: amount }, addresses, token, reserve: source.reserve, real, log: (line) => console.log(relabel(line)) });
   if (stops.length > 0) {
     for (const why of stops) console.log(`STOP: ${relabel(why)}`);
     process.exitCode = 1;
@@ -133,5 +135,16 @@ async function main() {
   if (real) console.log(`${role.payer} now has ${fmt(await balance(role.payer))} test USDT`);
 }
 
-const invoked = process.argv[1] && new URL(import.meta.url).pathname === (await import('node:fs')).realpathSync(process.argv[1]);
-if (invoked) await main();
+// Runs only as a script; the tests import parseFlags, with no .env and no error handler.
+function invokedDirectly() {
+  try {
+    return realpathSync(process.argv[1]) === realpathSync(fileURLToPath(import.meta.url));
+  } catch {
+    return false;
+  }
+}
+
+if (invokedDirectly()) {
+  installErrorBoundary(() => values);
+  await main();
+}
