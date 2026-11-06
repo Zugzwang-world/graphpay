@@ -37,7 +37,10 @@ Driver: `packages/city/scripts/seed.mjs`. Generator: `packages/city/src/generate
 ## Progress (size M)
 
 - 00:00 IST, Sat 7 Nov: the graph store started from W_SEED_M_EVENT (8.5 tGLM). Dry run on ArkivSim: 9,996 events, every row count equal to a direct load; estimate about 6.0 tGLM (`sim-check-M.json`).
-- SEED_M_RESULT
+- 00:00 to 00:36 IST: the graph store wrote batches 0 to 126 (332 transactions, 1.64 tGLM; `seed-M-graph.json`). Batch 127's second transaction was refused by Rabdi (`Store(Entity(Store(HandleInvalid)))`) after its first had landed.
+- 00:49 IST: the landed part of batch 127 was undone, 32 creates deleted in one transaction (`undo-M-batch-127.json`). The store is exactly batches 0 to 126.
+- 00:57 IST: **the founder trimmed M to what was seeded** (ADR-0080): the first 3,175 events, 9 Jul to 14 Aug, all 606 actors and 123 shops, 1,387 payment and renewal rows. It is pinned as `syntheticCity.sizes.M.seededEvents`. The plain store and the directory rows were not written; race mode stays at S.
+- The seeder now undoes a batch refused part-way and sends it again, and resumes a stopped run at its batch (`--from-batch`, `--undo-from-nonce`; `packages/city/test/seed.test.mjs`).
 
 ## Progress (size S)
 

@@ -39,9 +39,15 @@ test('size M is the final cast at ranks 1 to 3 and the story\'s places behind th
   assert.equal(background.length, places.length);
   assert.deepEqual(new Set(background.map((s) => s.ens)), new Set(places.map((p) => `${p.label}.${city.simRoot}`)));
   for (const s of background) assert.ok(!s.cast && s.category === final.category && Number.isFinite(s.lat));
-  assert.ok(city.events.length > 9_000 && city.events.length < 11_000, `${city.events.length} events`);
-  assert.equal(new Set(city.events.filter((e) => e.to.ens === city.reShop).map((e) => e.to.epoch)).size, 2);
   assert.equal(story.syntheticCity.sizes.M.cast, 'final');
+  // As seeded: the first seededEvents of the whole 120-day city, in time order (ADR-0080).
+  assert.equal(city.events.length, story.syntheticCity.sizes.M.seededEvents);
+  const whole = structuredClone(story);
+  delete whole.syntheticCity.sizes.M.seededEvents;
+  const full = generateCity({ story: whole, size: 'M', end: '2026-11-06' });
+  assert.ok(full.events.length > 9_000 && full.events.length < 11_000, `${full.events.length} events`);
+  assert.equal(new Set(full.events.filter((e) => e.to.ens === full.reShop).map((e) => e.to.epoch)).size, 2);
+  assert.deepEqual(city.events.map((e) => e.ref), full.events.slice(0, city.events.length).map((e) => e.ref));
 });
 
 // A seeded city is generated again exactly as it was seeded (ADR-0077): its truth file in

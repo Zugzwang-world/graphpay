@@ -423,10 +423,11 @@
       },
       "M": {
         "approxEdges": 10000,
-        "seed": "with the final cast (ADR-0077)",
+        "seed": "with the final cast (ADR-0077), seeded in part: the founder trimmed it at its first 3,175 events in time order (127 batches of 25; 9 Jul to 14 Aug, 1,387 payment and renewal rows), graph store only (ADR-0080)",
         "owner": "W_SEED_M_EVENT",
         "cast": "final",
-        "places": true
+        "places": true,
+        "seededEvents": 3175
       }
     },
     "generator": {

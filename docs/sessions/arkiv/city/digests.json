@@ -1,5 +1,5 @@
 {
-  "about": "Digests of each seeded city's events and actors (packages/city/src/digest.mjs), checked by packages/city/test/city.test.mjs. S: computed with the generator and story of d917262, the commit that seeded it on 2026-11-05, and equal to today's. M: computed with the commit that seeded it on 2026-11-07 IST (ADR-0077).",
+  "about": "Digests of each seeded city's events and actors (packages/city/src/digest.mjs), checked by packages/city/test/city.test.mjs. S: computed with the generator and story of d917262, the commit that seeded it on 2026-11-05, and equal to today's. M: the city as seeded on 2026-11-07 IST, its first 3,175 events (ADR-0077, ADR-0080).",
   "S": {
     "end": "2026-11-05",
     "events": "4107d34f4b922bf573c88b0de8f42c2d02eeb3613fc031066459318f71b89e10",
@@ -7,7 +7,7 @@
   },
   "M": {
     "end": "2026-11-06",
-    "events": "bcec37ed7d440734b216513fb3ecf1cb855e0e3a50b04d314dc124000c258d46",
+    "events": "59a54c568feee0b1c2e809f9aed0f1541505bfb48ecae46ff079974b5fd069c5",
     "actors": "a6840326d4dfc3a473c5a6c582b9b2b9711345b55d64af005259595ae81e583e"
   }
 }

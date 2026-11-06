@@ -199,5 +199,7 @@ export function generateCity({ story, size, end, root = config.root.ens }) {
   }
 
   events.sort((a, b) => a.ts - b.ts || (a.ref < b.ref ? -1 : 1));
+  // A size seeded only in part is its first `seededEvents` events in time order: the city as seeded.
+  if (Number.isInteger(sizeSpec.seededEvents)) events.splice(sizeSpec.seededEvents);
   return { size, dataset, end, startTs, endTs, lastDay, root, simRoot, actors, shops, events, reShop: reShop?.ens ?? null, reRegisteredAt: reTs, persona: persona.ens, personaAgents: Object.fromEntries(Object.entries(personaAgents).map(([k, a]) => [k, a.ens])), byRole: Object.fromEntries(Object.entries(byRole).map(([k, s]) => [k, s.ens])) };
 }

@@ -30,7 +30,7 @@ Every entity GraphPay writes to Arkiv Rabdi (chain 7794095), defined in `package
 | `record` | the seed wallets (plain store) | `from_name`* str, `to_name`* str, `kind`* str, `amount_micro` u64, `day`* u64, `ts` u64, `ref` str, `synthetic` bool, `dataset` str, `payload` bytes? | the benchmark's plain baseline | yes | 14 days |
 | `profile` | the seed wallets (plain store) | `name`* str, `kind`* str, `owner_name`* str?, `synthetic` bool, `dataset` str | the plain baseline | no | 14 days |
 
-The synthetic cities' graph rows (`node`, `edge`, `tally`, `link`) are written by W_SEED_EVENT (size S) and W_SEED_M_EVENT (size M) and read only when a request opts in, one dataset per owner. Their shops are listed in the `shop` directory by W_DIRECTORY with `synthetic = true` (ADR-0043).
+The synthetic cities' graph rows (`node`, `edge`, `tally`, `link`) are written by W_SEED_EVENT (size S) and W_SEED_M_EVENT (size M) and read only when a request opts in, one dataset per owner. Their shops are listed in the `shop` directory by W_DIRECTORY with `synthetic = true` (ADR-0043). Size M (`graphpay-city-v1-M`) is the first 3,175 events of its generated city, graph store only, and its shops are not in the directory (ADR-0080).
 
 ## Casts (ADR-0077)
 
