@@ -103,6 +103,7 @@ One line per PR: time (IST) · activity · result · PR link. Append under your 
 - 12:47 IST · records · merged: feat(config): the payer's daily cap is 100; funding targets; the Vercel build step in git · https://github.com/Zugzwang-world/graphpay/pull/105
 - 21:49 IST · records · merged: docs(records): the Coordinator's resume at 21:45 IST · https://github.com/Zugzwang-world/graphpay/pull/147
 - 22:49 IST · records · full sync: TRACKER (new, 55 rows), NOW, OPEN by owner, LOG catch-up and roll-up, every relay (+ phones, booth, sync), ADR-0072 to ADR-0076, the acceptance report (read-only: 35/8/1/4), the fresh-Coordinator handover; completed briefs archived · https://github.com/Zugzwang-world/graphpay/pull/150
+- 23:10 IST · records · night Coordinator takeover: payer resumed (Sepolia 0x34cddd47…f949), Filter & Fold open, the day sessions retired, the night roster (W1 to W7) in NOW, TRACKER owners moved to the streams, retired relays and finished briefs archived · coord/night-takeover
 
 ## booth
 
@@ -118,6 +119,10 @@ One line per PR: time (IST) · activity · result · PR link. Append under your 
 
 ## submission
 
+## w5-ops
+
+- 23:10 IST · w5-ops · the payer's pass is 300 a day for tonight (policy and ENS, ADR-0071 amendment); PAYER back to 125 test USDT from FUNDER · https://github.com/Zugzwang-world/graphpay/pull/152
+
 ## w3-payments
 
-- 23:40 IST · w3-payments · in PR: fix(pay): "Another coffee" re-orders the filter coffee for 0.80 (order.reorder.sku)
+- 23:40 IST · w3-payments · in PR: fix(pay): "Another coffee" re-orders the filter coffee for 0.80 (order.reorder.sku) · https://github.com/Zugzwang-world/graphpay/pull/155

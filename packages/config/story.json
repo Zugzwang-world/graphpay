@@ -51,7 +51,7 @@
       "displayName": "Payer",
       "walletRole": "PAYER",
       "pays": true,
-      "capMicro": 100000000,
+      "capMicro": 300000000,
       "avatar": "/phones/grok/agents/payer"
     }
   ],
