@@ -96,6 +96,7 @@ for (const route of PASSCODE_ROUTES) {
 for (const route of PASSCODE_ROUTES) {
   test(`${route.path} under public access reaches the route without a passcode`, { skip: !publicAccess({}) && 'the config switch is off' }, async () => {
     delete process.env.GRAPHPAY_PUBLIC_ACCESS;
+    delete process.env.DEMO_PASSCODE;
     try {
       const response = await post(route.path, {});
       assert.ok(response.status === 204 || response.status === 503, `${route.path}: ${response.status}`);

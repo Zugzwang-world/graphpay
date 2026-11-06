@@ -2,6 +2,9 @@ import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { Busy, MAX_WAITING, Refusal, markDispatched, refundOrder, shopKeyConfigured, shopKeyName, type Chain } from './merchant-actions.server.ts';
 
+// These tests check the gated mode; the public-access guards are tested on their own.
+process.env.GRAPHPAY_PUBLIC_ACCESS = '0';
+
 const SHOP_WALLET = `0x${'aa'.repeat(20)}` as const;
 const OTHER = `0x${'bb'.repeat(20)}`;
 let n = 0;
@@ -166,4 +169,17 @@ test('a reverted receipt is an error, not a pending send, and does not lock the 
   await assert.rejects(markDispatched(order, reverted.chain), /reverted/);
   const next = fakeChain({ status: 2 });
   assert.equal((await markDispatched(order, next.chain)).status, 'confirmed');
+});
+
+test('public access: a visitor acts only on the story persona’s orders, once per order per cooldown', async () => {
+  const { visitorGuard, ORDER_COOLDOWN_MS } = await import('./merchant-actions.server.ts');
+  const persona = `0x${'aa'.repeat(32)}`;
+  const order = { status: 'PAID', amountMicro: 1n, refundedMicro: 0n, merchant: '0x0000000000000000000000000000000000000001', shopNode: `0x${'00'.repeat(32)}`, buyerNode: persona } as const;
+  const id = `0x${'0b'.repeat(32)}`;
+  assert.throws(() => visitorGuard({ ...order, buyerNode: `0x${'bb'.repeat(32)}` }, id, { open: true, now: 0, persona }), (e: unknown) => e instanceof Refusal && e.code === 'NOT_THE_STORY_BUYER' && e.status === 403);
+  visitorGuard(order, id, { open: true, now: 1_000, persona });
+  assert.throws(() => visitorGuard(order, id, { open: true, now: 1_000 + ORDER_COOLDOWN_MS - 1, persona }), (e: unknown) => e instanceof Refusal && e.code === 'TOO_SOON');
+  visitorGuard(order, id, { open: true, now: 1_000 + ORDER_COOLDOWN_MS, persona });
+  // The gated mode keeps the passcode as its only gate.
+  visitorGuard({ ...order, buyerNode: `0x${'bb'.repeat(32)}` }, id, { open: false, persona });
 });

@@ -58,7 +58,7 @@ export default function HowPage() {
 
       <section>
         <h2>The website’s routes</h2>
-        <p className="muted">Every route that makes anyone sign runs on the server behind the demo passcode, sent in a header and never in a URL.</p>
+        <p className="muted">Every route that makes anyone sign runs on the server. Visitors need no passcode (testnets only); the on-chain pass and caps bound what they can spend, and the keys between our own servers stay secret.</p>
         <div className="table-wrap">
           <table className="routes">
             <thead>
