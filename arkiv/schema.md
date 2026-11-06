@@ -32,6 +32,16 @@ Every entity GraphPay writes to Arkiv Rabdi (chain 7794095), defined in `package
 
 The synthetic cities' graph rows (`node`, `edge`, `tally`, `link`) are written by W_SEED_EVENT (size S) and W_SEED_M_EVENT (size M) and read only when a request opts in, one dataset per owner. Their shops are listed in the `shop` directory by W_DIRECTORY with `synthetic = true` (ADR-0043).
 
+## Casts (ADR-0077)
+
+Each seeded city, and the live graph, is written with a cast pinned in `story.json` → `syntheticCity.casts`: the shops' labels, `category`, places and the renewal price, by story role. A seeded city is generated again from its own cast, so its rows and its truth do not move when the live story changes.
+
+- **`test`** (size S, seeded 5 Nov): kesar-kingdom, syrup-street, jamun-junction; category `sweets`. Their live rows stay on Arkiv as history.
+- **`final`** (the dosa story, ADR-0073): filter-and-fold, idli-index, tawa-tangle, at epoch 0, category `south-indian`, with the Grok pack's places. W2 wrote these before W1's label flip, with `node packages/city/scripts/cast.mjs` (manifest `docs/sessions/arkiv/city/cast-final.json`):
+  - their `shop` rows (W_DIRECTORY, real listings);
+  - their `node` rows and their shop agents' (W_LEDGER, the values the mirror writes for a cast actor);
+  - their labelled synthetic history (W_LEDGER): the stream `history:test:v1:x0.05:d20763:99fe16f5`, with the story's refund and on-time rates over 90 days and its orders at 5%, the same scale and code (`packages/mirror/src/history.mjs`) as the test cast's history.
+
 ## Write path
 
 One serialised writer per wallet, the confirmed nonce, the event's rows and the checkpoint in one atomic batch, find-by-nonce after an uncertain send (ADR-0023). Measured on Rabdi: a steady money event (edge, four tally patches, link and checkpoint patches) costs 377,893 gas; the first event between two actors (seven creates) 1,301,681 (`docs/technical/FACTS.md`, T3 rows).

@@ -51,7 +51,7 @@ Short records, one file each (skill `adr`). Lab decisions are adopted from `plan
 | [ADR-0046](ADR-0046-the-payee-comes-from-ens-at-pay-time.md) | The payee comes from ENS at pay time | accepted |
 | [ADR-0047](ADR-0047-one-story-config-nothing-story-specific-in-code.md) | One story config: nothing story-specific in code | accepted |
 | [ADR-0048](ADR-0048-agent-model-presets-in-the-story-config.md) | Agent model presets in the story config | accepted |
-| [ADR-0049](ADR-0049-the-big-city-waits-for-the-locked-story.md) | The big city waits for the locked story | accepted |
+| [ADR-0049](ADR-0049-the-big-city-waits-for-the-locked-story.md) | The big city waits for the locked story | accepted (gate superseded by ADR-0077) |
 | [ADR-0050](ADR-0050-mumbai-real-places-fictional-shops.md) | Mumbai: real places, fictional shops | accepted |
 | [ADR-0051](ADR-0051-prize-tracks.md) | Prize tracks | accepted |
 | [ADR-0052](ADR-0052-pitch-frame-and-wording.md) | Pitch frame and wording | accepted |
@@ -79,6 +79,7 @@ Short records, one file each (skill `adr`). Lab decisions are adopted from `plan
 | [ADR-0074](ADR-0074-the-deck-is-the-stage.md) | The deck is the stage, with the live phones driving it; one screen | accepted |
 | [ADR-0075](ADR-0075-the-grok-desk-produces-the-assets.md) | The Grok desk produces the assets; its prompts stay in the repo | accepted |
 | [ADR-0076](ADR-0076-the-sdks-stay-ui-free.md) | The SDKs stay free of UI; the demo app is the reference; a React kit next | accepted |
+| [ADR-0077](ADR-0077-each-seeded-city-keeps-its-own-cast.md) | Each seeded city keeps its own cast; the big city M is seeded with the final cast | accepted |
 
 ## Proposed in the pack, recorded by the owning session when taken
 
