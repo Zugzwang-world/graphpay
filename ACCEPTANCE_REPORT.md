@@ -1,8 +1,8 @@
 # Acceptance report
 
-Written by `pnpm acceptance` at 2026-11-06T04:17:41.451Z. Checks and pass criteria: `planning/ACCEPTANCE_TESTS.md` and `docs/plan/ACCEPTANCE_ADDITIONS.md`. Only D7 may be `blocked` (C7 and E3 no longer wait on supply, ADR-0054); a check without a result is `not run`, never `pass`.
+Written by `pnpm acceptance` at 2026-11-06T04:19:22.390Z. Checks and pass criteria: `planning/ACCEPTANCE_TESTS.md` and `docs/plan/ACCEPTANCE_ADDITIONS.md`. Only D7 may be `blocked` (C7 and E3 no longer wait on supply, ADR-0054); a check without a result is `not run`, never `pass`.
 
-**44 pass, 0 fail, 1 blocked, 3 not run** (of 48).
+**45 pass, 0 fail, 1 blocked, 2 not run** (of 48).
 
 | id | check | status | note |
 |---|---|---|---|
@@ -53,7 +53,7 @@ Written by `pnpm acceptance` at 2026-11-06T04:17:41.451Z. Checks and pass criter
 | E8 | Every counting errand records its time and cost (ADR-0048) | pass |  |
 | F1 | No secrets are in the repo | pass |  |
 | F2 | Spending endpoints are passcode-gated | pass |  |
-| F3 | The relayer's safety floor is enforced | not run | no runner yet |
+| F3 | The relayer's safety floor is enforced | pass |  |
 
 ## A1: CI is green (at M0 the `contracts` job runs a placeholder Foundry project)
 
@@ -1749,6 +1749,38 @@ Status: **pass**.
     "before": 11,
     "after": 11
   }
+}
+```
+
+## F3: The relayer's safety floor is enforced
+
+Status: **pass**.
+
+### F3 (2026-11-06T04:19:22.383Z)
+
+- What: the relayer's safety floor is enforced
+- Pass: true
+- Expected: the payment refused before sending, naming the floor; no transaction (relayer nonce unchanged); health shows the floor and the balance
+- Evidence: `{"file":"docs/sessions/payments/f3.json","by":"T1, a local production build with the hosted env (not a preview; the record says why)","at":"2026-11-06T04:16:55.317Z"}`
+
+```json
+{
+  "reason": "relayer_floor",
+  "transaction": "",
+  "relayerNonce": {
+    "before": 13,
+    "after": 13
+  },
+  "floorWbt": "1001",
+  "balanceWei": "794659557124942758",
+  "checks": [
+    "ok the local production build answers /api/facilitator/health",
+    "ok health shows the raised floor",
+    "ok health shows the balance below it",
+    "ok the local shop answers 402 (no facilitator call yet)",
+    "ok settle is refused before sending, naming the floor",
+    "ok no transaction: the relayer nonce is unchanged"
+  ]
 }
 ```
 

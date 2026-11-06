@@ -61,7 +61,7 @@ Updated 02:40 IST. **M10 is merged; the presence and handoff hooks are built** (
 - Blockers: none. Next: merge, then wait for Join's M12 counting run; re-run the live errand if time allows.
 ## integration
 
-Updated 09:47 IST, Fri 6 Nov. **M13 is done on the real networks. The acceptance report: 44 pass, 0 fail, 1 blocked (the big city), 3 not run, all three other tracks' items.**
+Updated 09:47 IST, Fri 6 Nov. **M13 is done on the real networks. The acceptance report: 45 pass, 0 fail, 1 blocked (the big city), 2 not run, both T2's.**
 - As the acceptance agent, through the hosted shop and our hosted facilitator: paid 4.80 with no gas of its own, and the shop delivered. The same request again answered "already paid" and sent nothing. The shop refunded 0.80, and the agent re-ordered 3 for 1.20. One more 0.40 was refused for being over its 6.00 daily cap: nothing was sent, and the refusal is recorded on Arkiv.
 - A revoked agent is stopped on-chain: the policy writer revoked the scout agent's spending policy, the scout's next payment was refused and recorded by the contract (AGENT_REVOKED), the policy was restored exactly, and the mirror wrote the refusal to Arkiv once after a clean restart.
 - No secrets in the repo (F1): the tree and the history of all 313 commits on every branch are clean, no env file is tracked, and every key and token on Vercel is hidden.
@@ -69,7 +69,8 @@ Updated 09:47 IST, Fri 6 Nov. **M13 is done on the real networks. The acceptance
 - All 17 spending routes refuse a caller without the passcode or token (401), and nothing is sent.
 - Also wired: five other tracks' checks from their recorded evidence (A3, A4, A9, A10, B3).
 - Running: `pnpm workers` with T2's watcher. Local scripts no longer relay; every payment goes through the hosted facilitator.
-- Not run yet, none of them Join's: B7 and B9 (T2's), F3 (T1's).
+- F3 (the relayer's safety floor) passes from T1's record (PR 78).
+- Not run yet, both T2's: B7 and B9.
 - Next: the item-6 bootstrap of the demo cast, when the story locks.
 
 ## website
