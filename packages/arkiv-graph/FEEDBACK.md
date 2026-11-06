@@ -1,6 +1,6 @@
 # Feedback
 
-This is 0.1.0, published during a hackathon. We would like it to be useful to you, and we learn most from people who try it.
+This is 0.1.x, published during a hackathon. We would like it to be useful to you, and we learn most from people who try it.
 
 ## How to tell us
 
