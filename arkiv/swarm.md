@@ -6,17 +6,18 @@ The seven items below follow the Swarm section of the event addendum.
 
 ## 1. What lives on Swarm, and what lives on Arkiv
 
-- **On Swarm (done):** a shop's **menu** as public JSON (synthetic story data, no personal data), one small file per shop, uploaded as a one-file collection named `menu.json`.
+- **On Swarm (done):** a shop's **menu** as public JSON (synthetic story data, no personal data), one small file per shop, uploaded as a one-file collection named `menu.json`; and one small image we own (the team's fox) for one item.
 - **On Swarm (not built, dropped):** a **refund photo**, which would have been encrypted in our own code before leaving the server.
 - **On Arkiv (done):** the `menu` row (W_DIRECTORY, mutable): `shop_key`, `shop_ens`, `version`, `swarm_ref` (64 hex), `content_hash` (sha-256 of the bytes) and `size`. **(not built, dropped):** the `refund_evidence` row (`order_id`, `shop_key`, `buyer_key`, and the per-file key wrapped with a server-only key). Arkiv holds the pointer and the proof of what was uploaded; Swarm holds the bytes.
 
 ## 2. One entity key, its reference and an openable link
 
-Kesar Kingdom's menu (a synthetic story shop), version 1:
+Kesar Kingdom's menu (a synthetic story shop), version 2 (it carries one image):
 
-- **Arkiv `menu` entity:** `0x0f32e7cd190884066418a9fb32df6f5807e5bc3f8b59f3a7776f99e3e1de273f` ([explorer](https://rabdi.explorer.arkiv.network/entity/0x0f32e7cd190884066418a9fb32df6f5807e5bc3f8b59f3a7776f99e3e1de273f)), created in tx [0xe088…35b2](https://rabdi.explorer.arkiv.network/tx/0xe08819acde1f50d2a21fc93c1b39abee3145c3f7362b35cdda3480d5200835b2).
-- **Swarm reference (64 hex):** `7812ec17664eac04ac47b56aa9137bd1ca470fe3f30960d76e9637423f6dd3c1`
-- **Open it:** <https://api.gateway.ethswarm.org/bzz/7812ec17664eac04ac47b56aa9137bd1ca470fe3f30960d76e9637423f6dd3c1/menu.json>
+- **Arkiv `menu` entity:** `0x0f32e7cd190884066418a9fb32df6f5807e5bc3f8b59f3a7776f99e3e1de273f` ([explorer](https://rabdi.explorer.arkiv.network/entity/0x0f32e7cd190884066418a9fb32df6f5807e5bc3f8b59f3a7776f99e3e1de273f)), created in tx [0xe088…35b2](https://rabdi.explorer.arkiv.network/tx/0xe08819acde1f50d2a21fc93c1b39abee3145c3f7362b35cdda3480d5200835b2) and patched to version 2 in tx [0x23ab…3e45](https://rabdi.explorer.arkiv.network/tx/0x23ab408597c199d1cce86ae46fbbdf3c2642fe0a4a86dfba063b5c3390c93e45).
+- **Swarm reference (64 hex), version 2:** `5110dca84647bf9e98b896ccd8865ab14f33cbbdb4391064660682a422d26b22`
+- **Open it:** <https://api.gateway.ethswarm.org/bzz/5110dca84647bf9e98b896ccd8865ab14f33cbbdb4391064660682a422d26b22/menu.json>
+- **Its image** (the gulab jamun item; the team's own fox, drawn in `frontend/src/components/shared/Mascot.tsx`, 1,583 bytes, copy in `docs/sessions/arkiv/menu-image-fox.svg`): reference `c58e8183bd299aedf9212284e47986626c6d580657aa416ea2c2dd924f51163b`, sha-256 `ad28315288e68ea908537aafb52ba260785cacad9c4a8f6c5012bc110399e437`, link <https://api.gateway.ethswarm.org/bzz/c58e8183bd299aedf9212284e47986626c6d580657aa416ea2c2dd924f51163b/menu-image-fox.svg>. The menu item holds `image: { ref, name, contentType, sha256, bytes }`; menus without an image read and verify as before.
 
 The other two cast shops' menus are in `docs/sessions/arkiv/swarm-menus.json` (entity key, transaction, reference and link for each).
 

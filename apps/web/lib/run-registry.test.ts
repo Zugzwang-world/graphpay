@@ -133,7 +133,7 @@ test('the runner is told the run id the site knows the run by (the handoff rows 
 
 test("a runner's refusal code picks a fixed line; its message never leaves the server", async () => {
   const lines: string[] = [];
-  for (const code of ['LIVE_RUNNER_RATE_LIMITED', 'LIVE_RUNNER_BUSY', 'RATE_LIMITED', 'constructor', undefined]) {
+  for (const code of ['LIVE_RUNNER_BUSY', 'LIVE_RUNNER_RATE_LIMITED', 'RATE_LIMITED', 'constructor', undefined]) {
     const registry = createRegistry();
     const runner: ErrandRunner = async () => {
       throw Object.assign(new Error('https://rpc.example/secret-key-1234567890 failed'), code === undefined ? {} : { code });
@@ -147,7 +147,7 @@ test("a runner's refusal code picks a fixed line; its message never leaves the s
     assert.ok(failed && failed.event === 'failed' && typeof failed.data.error === 'string');
     lines.push(failed.data.error);
   }
-  assert.match(lines[0] ?? "", /^rate limited/);
-  assert.match(lines[1] ?? "", /^busy/);
-  assert.deepEqual(lines.slice(2), ['the errand failed', 'the errand failed', 'the errand failed']);
+  assert.match(lines[0] ?? "", /^busy/);
+  // No rate limit any more (the founder): an old or foreign code is the plain line.
+  assert.deepEqual(lines.slice(1), ['the errand failed', 'the errand failed', 'the errand failed', 'the errand failed']);
 });

@@ -25,6 +25,7 @@ One line per PR: time (IST) · activity · result · PR link. Append under your 
 ## identity
 - 04:25 IST · identity · M6 done: the ENS watcher library and policy sink (reviewed twice), B8's MCP call in the acceptance script · [PR #40](https://github.com/Zugzwang-world/graphpay/pull/40)
 - 05:00 IST · identity · B7: fork test for the epoch on re-registration (after a lapse and after an unregister: e + 1); fork tests moved to disposable-2/3; B9 (a) payee comparison in the acceptance script, passes for the settled shop · [PR #83](https://github.com/Zugzwang-world/graphpay/pull/83), [PR #84](https://github.com/Zugzwang-world/graphpay/pull/84)
+- identity · ENS cap of the payer set to 100 test USDT a day (owner action `owner.mjs cap`, Sepolia block 12075031) · [PR #106](https://github.com/Zugzwang-world/graphpay/pull/106)
 
 ## arkiv
 
@@ -32,6 +33,7 @@ One line per PR: time (IST) · activity · result · PR link. Append under your 
 - 09:45 IST · arkiv · Friday item 15: drafts of `arkiv/friction.md`, `how-you-use-arkiv.md`, `swarm.md` · https://github.com/Zugzwang-world/graphpay/pull/77 (merged)
 - 09:55 IST · arkiv · Friday items 4–5 (menu): Swarm gateway probe, `menu` entity, 3 cast menus on Swarm and Arkiv, verified; `swarm.md` filled in · https://github.com/Zugzwang-world/graphpay/pull/82
 - 11:05 IST · arkiv · fix: the writer no longer adopts another instance of the same key's transaction at our nonce (T1's finding); reviewer pass · https://github.com/Zugzwang-world/graphpay/pull/97
+- 12:50 IST · arkiv · one image on Swarm: optional `image` on a menu item, the team's fox uploaded, Kesar Kingdom's `menu` row patched to v2 · https://github.com/Zugzwang-world/graphpay/pull/109
 
 ## agents
 
@@ -49,6 +51,10 @@ One line per PR: time (IST) · activity · result · PR link. Append under your 
 - 05:41 IST · integration · opened: C4(a) passes (the scout agent revoked, refused on-chain AGENT_REVOKED, restored exactly; the mirror's fail edge once after a paused restart); the report at 42 pass, 0 fail; then F1 (no secrets in the tree, the history of every branch or Vercel), 43 pass · https://github.com/Zugzwang-world/graphpay/pull/67
 - 09:47 IST · integration · opened: D10 passes (the hosted shop's quote on Arkiv: owner W_DIRECTORY, 15 minutes, valid_until 10 minutes); the report at 44 pass, 0 fail, 1 blocked, 3 not run (M13 done); then F3 from T1's record, 45 pass · https://github.com/Zugzwang-world/graphpay/pull/79
 - 10:36 IST · integration · opened: the e2e stack on the hosted shop and facilitator; D11's presence half passes (6.7 s to appear, lapsed 14.98 min after the end, owner W_DIRECTORY) · https://github.com/Zugzwang-world/graphpay/pull/85
+
+## phones
+
+- 13:05 IST · phones · phase 1: the team's two phones on our site at `/live`, built from `frontend/` (#70, `8abe39a`) with their Vite, on live read-only data (agents, pass, Open flag, real orders with explorer links, the merchant stream) · https://github.com/Zugzwang-world/graphpay/pull/111
 
 ## website
 
@@ -85,5 +91,6 @@ One line per PR: time (IST) · activity · result · PR link. Append under your 
 - 10:50 IST · records · handover: arkiv-graph 0.1.0 and agentpay 0.1.0 on npm (registry quickstarts pass; FACTS, README, Arkiv file); Kimi key stored and on Vercel; ADR-0068 (the team's site, the server-side runner); the Coordinator's resume file · coord/handover
 - 11:15 IST · records · the new Coordinator took over (tick, keep-awake, every session told); ADR-0062 amended (95%: no new real payment, merge or publish, resumes written; 97%: pause); #93 conflict resolved and merged; arkiv-graph 0.1.1 checked for publish; LOG rolled up before 04:00 · https://github.com/Zugzwang-world/graphpay/pull/101
 - 11:46 IST · records · integration audit (`docs/plan/integration-audit.md`, three read-only sub-agents; option A recommended); both SDKs 0.1.1 published and checked from the registry (FACTS, README, Arkiv file); Founder now: the payer's cap, the Kimi cost, the CLAUDE.md line · https://github.com/Zugzwang-world/graphpay/pull/103
+- 12:47 IST · records · the 1240 support brief: #70 merged (8abe39a, credited to ajatshatru01); PAYER 125 test USDT and VITALIK 0.02 Sepolia ETH (#105, with the payer cap 100 and the Vercel ignoreCommand); ADR-0069 (public access), ADR-0070 (option A), ADR-0071 (the story for the founder's run), ADR-0062 amendment 2; CLAUDE.md and README name Kimi · https://github.com/Zugzwang-world/graphpay/pull/110
 
 ## submission

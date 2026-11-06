@@ -1,36 +1,36 @@
 # NOW
 
-Updated 11:46 IST, Fri 6 Nov (Coordinator)
+Updated 12:47 IST, Fri 6 Nov (Coordinator)
 
 ## Summary (Coordinator only)
 
-Updated 11:46 IST, Fri 6 Nov. **Standing rule (ADR-0066): no target times.** Only the submission (Sat 09:00 IST) and the presentation (Sat 09:30 IST) are fixed.
+Updated 12:47 IST, Fri 6 Nov. **Standing rule (ADR-0066): no target times.** Only the submission (Sat 09:00 IST) and the presentation (Sat 09:30 IST) are fixed.
 
-- **The integration audit is done:** `docs/plan/integration-audit.md` (read-only; three sub-agents).
-  - **The team's phones:** they build, and their 40 tests pass. PR #70 is still open, not merged. They run on mock data only: there is no live adapter and no passcode step yet.
-  - **Our back end:**
-    - live: customer state, the merchant feed, shops, the errand and the renewal cron;
-    - wired but never run on production: refund, re-order, pause, the Open toggle;
-    - not live: subscribe and cancel, and the kill.
-  - **Recommended:** serve their phones as static pages on our domain, inside T5's stage. Their folder stays untouched, and our live adapter and a build-time story projection connect them.
-  - **Top risks:**
-    - usage: the 95% line is 7 points away, against 4 to 8 points of estimated integration work;
-    - the payer's cap is spent until Sat 05:30 IST;
-    - the merchant feed stops showing new orders after four more;
-    - the Kimi balance.
-- **The first production purchase** (11:11 IST): the site's live runner on Kimi paid 4.80 to Kesar Kingdom in 171 s. No Arkiv write has failed since the clash fixes.
-- **Both SDKs are 0.1.1 on npm** (11:34 and 11:35 IST). Both were checked from the registry: arkiv-graph has the writer fix, and agentpay has a clean manifest.
-- **Usage:** 88%.
-  - At 95%: no new real payment, merge or publish.
-  - At 97%: every session pauses.
-  - The weekly reset is at 21:30 IST.
-- **Open founder items** (`OPEN.md`):
-  - lock the story, with the paying agents' daily caps;
-  - the Kimi balance;
-  - the team's fixes;
-  - the CLAUDE.md model line;
-  - the Submission session;
-  - this session's effort.
+**Now: the integration proof of concept** (the 1240 briefs). A new Integration session builds option A, and every other session supports it or stays idle.
+
+- **Done:**
+  - #70 is squash-merged, credited to the team (8abe39a). `frontend/` is on main.
+  - The founder's 150 test USDT landed at FUNDER (11:44). PAYER now holds 125 test USDT, and VITALIK 0.02 Sepolia ETH.
+  - The founder's decisions are recorded:
+    - ADR-0069: public access, with no passcode and no rate limits for visitors;
+    - ADR-0070: option A;
+    - ADR-0071: Mr. Vitalik stays, the payer's pass is 100 a day, and the story swap comes after the founder's run;
+    - ADR-0062: payments and merges allowed up to 97% for this work.
+  - The CLAUDE.md model line now names Kimi, and so does the README.
+- **In progress:**
+  - **The payer's pass to 100 a day:** the story config is in PR #105. T1 writes the on-chain policy and T2 the ENS cap record.
+  - **A reliable errand:** Join leads, with T4. It fixes the planning stop, the quote write and the settle send, removes the six-an-hour cap, proves the errand on the mocks and then in at most two live errands, then rewrites C6 and F2 for public access.
+  - **T3:** one image of our own on Swarm, for one menu item.
+  - **T5:** reviews the Integration session's PRs. The feed and export are already fixed (#104).
+  - **The Vercel build step:** now in git (PR #105), so commits that touch `frontend/`, `apps/phones/` or `integration/` build.
+- **Idle until the founder's run:**
+  - the story swap and Grok's assets;
+  - the kill;
+  - subscribe, cancel, caps and decline;
+  - Kimi tuning;
+  - the big city;
+  - the Submission session.
+- **Usage:** 89%. Every session pauses at 97%; the reset is at 21:30 IST.
 
 ## foundation
 
@@ -52,6 +52,7 @@ Updated 05:00 IST. **M6 is done and merged (gate #34, watcher #40); B7 is covere
 - Running: nothing. Blockers: none. B6/B7/E7 real timings wait for Join's workers process to host the watcher.
 - B9 (a): the payee comparison now runs in the acceptance script and passes for Kesar Kingdom (the one shop with a settled payment); the other two are skipped until they have one.
 - Next: the demo cast's ENS names the moment the story locks (Coordinator will say).
+- **Payer cap (founder's support brief):** the payer's ENS `graphpay.cap_micro` is 100000000 (100 test USDT a day) on Sepolia, [transaction](https://sepolia.etherscan.io/tx/0x8898d10728f998983c7747aae50389392bb9ce276b7e2dbadaed509ede674c16). The gate takes the lower of this and the on-chain policy cap, so T1's policy update sets the effective cap.
 
 ## arkiv
 
@@ -84,6 +85,16 @@ Updated 10:36 IST, Fri 6 Nov. **M13 is done on the real networks. The acceptance
 - Not run yet, both T2's: B7 and B9.
 - Next: the item-6 bootstrap of the demo cast, when the story locks.
 
+## phones
+
+Updated 13:05 IST, Fri 6 Nov (Integration). **Phase 1 of the integration brief: the team's two phones run on our site, on live data, at `/live`.**
+- `apps/phones/` builds the team's customer and merchant apps from `frontend/` (unchanged, pinned at their #70, `8abe39a`) with their own Vite, wrapped in our live adapter, into `/phones/customer.html` and `/phones/merchant.html`.
+- `/live` is a copy of T5's stage: the two phones in frames, the explainer in the middle. The home page is unchanged.
+- Read-only for now: Vitalik's agents and the payer's pass, the shop's Open flag, and every real order (paid, delivered, refunded) with real explorer links. New orders arrive live from the merchant stream.
+- One story: their story file is replaced at build time by a projection of `packages/config/story.json`; images and avatars pass through when the story gets them.
+- Buttons answer "connected in the next step" until phases 2 and 3.
+- Next: phase 2, Vitalik's ask runs the real errand.
+
 ## website
 
 Updated 10:45 IST, Fri 6 Nov (T5 Web). **On `main`:** everything through Request refund (#73), the merchant phone's buttons, the map, the lanes, race, M16. **In a PR (`web/reorder-live`):** the customer phone's **Re-order**: the payer agent signs one payment for the story's re-order of its newest order through the hosted shop; the order, price and shop come from the chain and the story; a second tap is held off until a signature can no longer settle. Reviewer pass done (three double-payment findings fixed; two taps on two servers at once is a known limit, in OPEN).
@@ -100,16 +111,15 @@ Updated 11:09 IST, Fri 6 Nov (T6 AgentPay, Sonnet 5.5). **0.1.0 merged (PR 80); 
 
 ## records
 
-Updated 11:46 IST, Fri 6 Nov (Coordinator).
+Updated 12:47 IST, Fri 6 Nov (Coordinator).
 - **Done this step:**
-  - the integration audit, with three read-only sub-agents (`docs/plan/integration-audit.md`);
-  - both SDKs published as 0.1.1 and checked from the registry;
-  - "Founder now" refreshed.
-- **Running:** the 10-minute tick and keep-awake.
-- **Next:**
-  - the founder's choice of hosting option (then its ADR);
-  - the integration brief;
-  - the story lock.
+  - #70 merged;
+  - the funding moves (PAYER to 125 test USDT, VITALIK to 0.02 Sepolia ETH);
+  - ADR-0069, ADR-0070 and ADR-0071, and the second amendment to ADR-0062;
+  - CLAUDE.md and the README;
+  - the Vercel `ignoreCommand`.
+- **Waiting on:** T1's and T2's cap transactions, Join's reliable errand, and T3's Swarm image.
+- **Next:** tell the founder when the pass is 100 and the errand pays reliably, then when phase 2 works.
 
 ## submission
 

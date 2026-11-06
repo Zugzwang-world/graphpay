@@ -38,7 +38,6 @@ export interface Registry {
 
 // The runner's refusals the visitor can act on (live-runner.mjs codes), as fixed lines.
 const FAILED_LINES: Record<string, string> = {
-  LIVE_RUNNER_RATE_LIMITED: 'rate limited: too many errands this hour on this server; try again later',
   LIVE_RUNNER_BUSY: 'busy: the last errand is still finishing; try again in a minute',
 };
 

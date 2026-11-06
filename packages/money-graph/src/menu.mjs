@@ -15,7 +15,35 @@ import { sha256Hex } from './swarm.mjs';
 export const MENU_FILE = 'menu.json';
 const REFERENCE = /^[0-9a-f]{64}$/;
 
+const IMAGE_TYPES = new Set(['image/svg+xml', 'image/png', 'image/jpeg', 'image/webp']);
+const IMAGE_MAX_BYTES = 64 * 1024;
+
+// An item's optional image, as the menu document carries it: where it is on Swarm (a 64-hex
+// reference, the file name) and what it should hash to. Never inline bytes.
+function imageField(image) {
+  if (!REFERENCE.test(image?.ref ?? '')) throw new Error('money-graph: a menu image reference is 64 hex digits');
+  if (!/^[A-Za-z0-9._-]{1,64}$/.test(image.name ?? '')) throw new Error('money-graph: a menu image needs a plain file name');
+  if (!IMAGE_TYPES.has(image.contentType)) throw new Error(`money-graph: a menu image is one of ${[...IMAGE_TYPES].join(', ')}`);
+  if (!/^[0-9a-f]{64}$/.test(image.sha256 ?? '')) throw new Error('money-graph: a menu image needs its sha-256');
+  return { ref: image.ref, name: image.name, contentType: image.contentType, sha256: image.sha256, bytes: Number(image.bytes) };
+}
+
+// Uploads one small image we own through the gateway, reads it back and checks the hash;
+// returns the descriptor an item's `image` field holds.
+export async function uploadMenuImage(swarm, { bytes, name, contentType }) {
+  if (!IMAGE_TYPES.has(contentType)) throw new Error(`money-graph: a menu image is one of ${[...IMAGE_TYPES].join(', ')}`);
+  if (!(bytes instanceof Uint8Array) || bytes.length === 0 || bytes.length > IMAGE_MAX_BYTES) throw new Error(`money-graph: a menu image is 1 to ${IMAGE_MAX_BYTES} bytes`);
+  const { reference } = await swarm.upload(bytes, { name, contentType });
+  const back = await swarm.read(reference, name);
+  if (!back || sha256Hex(back) !== sha256Hex(bytes)) throw new Error('money-graph: the gateway did not return the image we uploaded');
+  return imageField({ ref: reference, name, contentType, sha256: sha256Hex(bytes), bytes: bytes.length });
+}
+
+// Where an item's image opens (a menu without images has none).
+export const menuImageLink = (swarm, image) => swarm.link(image.ref, image.name);
+
 // The public document: only what the shop publishes anyway. Prices are micro-USDT (6 decimals).
+// An item may carry an `image` (see uploadMenuImage); menus without one read as before.
 export function menuDocument({ shopEns, name, items, version, synthetic = true }) {
   if (!Array.isArray(items) || items.length === 0) throw new Error('money-graph: a menu needs at least one item');
   return {
@@ -23,7 +51,7 @@ export function menuDocument({ shopEns, name, items, version, synthetic = true }
     synthetic: Boolean(synthetic),
     version,
     shop: { ens: normalizedName(shopEns), name },
-    items: items.map((i) => ({ sku: i.sku, name: i.name, unit: i.unit, quantity: i.quantity, priceMicro: i.priceMicro })),
+    items: items.map((i) => ({ sku: i.sku, name: i.name, unit: i.unit, quantity: i.quantity, priceMicro: i.priceMicro, ...(i.image ? { image: imageField(i.image) } : {}) })),
   };
 }
 
@@ -93,8 +121,8 @@ export async function readMenu(publicClient, swarm, { shopEns, epoch = 0, owner 
   return { row, document: verified ? JSON.parse(new TextDecoder().decode(bytes)) : null, link: swarm.link(row.swarm_ref, MENU_FILE), reuploaded, verified, missing: false };
 }
 
-// The active story's cast menus: [{ shopEns, name, items }] from the story config.
+// The active story's cast menus: [{ key, shopEns, name, items }] from the story config.
 export function castMenus(cast = activeCast()) {
   const names = new Map(castEntries(cast).filter((e) => e.kind === 'shop').map((e) => [e.key, e.ensName]));
-  return cast.shops.map((s) => ({ shopEns: names.get(s.key), name: s.displayName, items: s.products, synthetic: true }));
+  return cast.shops.map((s) => ({ key: s.key, shopEns: names.get(s.key), name: s.displayName, items: s.products, synthetic: true }));
 }
