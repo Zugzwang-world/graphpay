@@ -165,3 +165,11 @@ Updated 20:25 IST, Fri 6 Nov (Sync session).
 ## submission
 
 Not started (the Submission session, M17, from Fri 13:00; submit by Sat 08:00 IST).
+
+## w5-ops
+
+Updated 23:10 IST, Fri 6 Nov (W5 Ops).
+- **The payer is ACTIVE**, with a **300 test USDT** pass for tonight, in the policy and the ENS record (the gate passes it at 300). 78 spent today.
+- **PAYER holds 125 test USDT** (66.8 from FUNDER); the shop's takings (118.81) refill it next.
+- **The shop (Filter & Fold) is open.**
+- **Next:** Pause and Resume per agent, the self-healing cron, the workers after W1's new labels, and acceptance at 0 failures.
