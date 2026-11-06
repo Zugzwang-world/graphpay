@@ -32,6 +32,7 @@ export const SITE_ROUTES: SiteRoute[] = [
   { method: 'POST', path: '/api/merchant/dispatch', gate: 'visitor', does: 'mark the order delivered', signs: 'the merchant', waitingFor: "the shop's key on this server (the Coordinator sets it in Vercel)" },
   { method: 'POST', path: '/api/merchant/open', gate: 'visitor', does: "list the shop as open on Arkiv (renewed every 5 min while on) or take it off", signs: 'W_DIRECTORY (Arkiv)', waitingFor: 'the W_DIRECTORY key on this server (the Coordinator sets it in Vercel)' },
   { method: 'POST', path: '/api/merchant/refund', gate: 'visitor', does: 'partial or full refund', signs: 'the merchant', waitingFor: "the shop's key on this server (the Coordinator sets it in Vercel)" },
+  { method: 'POST', path: '/api/merchant/refund-decline', gate: 'visitor', does: 'decline a refund request: a request edge from the shop to the payer agent on Arkiv', signs: 'the recorder (W_SYNC)', waitingFor: "the recorder's key on this server (the Coordinator sets it in Vercel)" },
   { method: 'GET', path: '/api/merchant/export.csv', gate: 'open', does: "the accountant's CSV from GraphQL", signs: null, waitingFor: null },
   { method: 'GET', path: '/api/race', gate: 'rate limit', does: 'one side of the race, live and uncached (SSE)', signs: null, waitingFor: null },
   { method: 'GET', path: '/api/map', gate: 'open', does: 'the shop directory, open shops and agents at work, from the graph', signs: null, waitingFor: null },

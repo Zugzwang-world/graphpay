@@ -34,6 +34,10 @@ const WORDS: Record<string, string> = {
 
 export const kindWord = (kind: string): string => WORDS[kind] ?? kind;
 
+// The shop's answer to a refund request is a `request` edge too, the other way round (ref `dec:`,
+// lib/refund-decline.server.ts): it is a decline, and it moves no money.
+const isDecline = (e: Pick<TrailEdge, 'kind' | 'ref'>) => e.kind === 'request' && e.ref.startsWith('dec:');
+
 export interface TrailStep {
   word: string;
   kind: string;
@@ -50,11 +54,11 @@ export function trailOf(edges: TrailEdge[]): TrailStep[] {
   return [...edges]
     .sort((a, b) => Number(BigInt(a.ts) - BigInt(b.ts)) || (a.ref < b.ref ? -1 : 1))
     .map((e) => ({
-      word: kindWord(e.kind),
+      word: isDecline(e) ? 'Refund declined' : kindWord(e.kind),
       kind: e.kind,
       from: e.from.ens,
       to: e.to.ens,
-      amountMicro: BigInt(e.amountMicro) > 0n ? e.amountMicro : null,
+      amountMicro: BigInt(e.amountMicro) > 0n && !isDecline(e) ? e.amountMicro : null,
       ts: Number(e.ts),
       settlementTx: settlementTxOf(e.ref),
       synthetic: e.synthetic,
