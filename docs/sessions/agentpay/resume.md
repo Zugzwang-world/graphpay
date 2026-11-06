@@ -1,5 +1,10 @@
 # T6 AgentPay: resume
 
+## 11:09 IST Fri 6 Nov: 0.1.0 merged (PR 80); 0.1.1 in its PR
+
+- 0.1.1: manifest without workspace devDependencies (root `package.json` carries them for tests), sandbox exit-hook cleanup, constructor-order test. Packed and installed in an empty folder; examples pass. No venue feedback yet (`gh issue list --label agentpay`).
+- Next: the Coordinator publishes 0.1.1 and runs the examples from the registry; any feedback becomes 0.1.x before the post-submission freeze. Pause rule: 95% no new publish/merge/payment, 97% clean stop (Coordinator, 11:00 IST).
+
 ## 09:50 IST Fri 6 Nov: 0.1.0 ready to publish (ADR-0063, the Coordinator's 09:40 corrections)
 
 - Package `@graphpay_ethglobal/agentpay` 0.1.0 (MIT): renamed (T5's checkout-kit import changed in the same PR; T5 told), self-contained (`src/vendor/`, regenerate with `node packages/agentpay/scripts/vendor.mjs`), `files` list, CHANGELOG, FEEDBACK.md, LICENSE, issue template `.github/ISSUE_TEMPLATE/agentpay-feedback.yml` (labels `agentpay`, `feedback`).

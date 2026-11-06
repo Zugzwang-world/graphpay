@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.1 (2026-11-06)
+
+- The published manifest no longer lists GraphPay's private workspace packages as devDependencies (they were used only by this repository's tests).
+- The sandbox removes its exit hook when stopped.
+- No API change.
+
 ## 0.1.0 (2026-11-06)
 
 First public release. **Testnet only: Whitechain Sepolia (chain 1874).**

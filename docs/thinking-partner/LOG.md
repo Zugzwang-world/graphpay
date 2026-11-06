@@ -88,6 +88,7 @@ One line per PR: time (IST) · activity · result · PR link. Append under your 
 - 04:20 IST · agentpay · opened: A4, the SDK merchant settling through T1's facilitator on a fork (in process and over HTTP; bad token and a gate refusal send nothing), 4 fork tests; the CSV's cached-head fix · https://github.com/Zugzwang-world/graphpay/pull/47 (merged)
 - 05:30 IST · agentpay · opened: the merchant's log reads fit the public RPCs' block-range caps (10,000, then 1,000 on a refusal; T5's report), checked on the real chain; fork tests write test USDT on the fork instead of drawing on FUNDER · https://github.com/Zugzwang-world/graphpay/pull/64
 - 09:50 IST · agentpay · opened: `@graphpay_ethglobal/agentpay` 0.1.0 ready to publish (renamed, self-contained, chain 1874 only, own relayer with anti-drain limits on, sandbox and `deployCheckout`, sweet shop and cab examples, MIT, lane test; packed, installed in an empty folder, quickstart passes) · https://github.com/Zugzwang-world/graphpay/pull/80
+- 11:09 IST · agentpay · opened: 0.1.1, the published manifest drops the workspace devDependencies (tests use the root ones), sandbox exit-hook and constructor-order test; packed and run from an empty folder · https://github.com/Zugzwang-world/graphpay/pull/99
 
 ## records
 

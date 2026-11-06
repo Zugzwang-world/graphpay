@@ -67,9 +67,10 @@ test('the shipped files name no secret, keyed URL or hosted GraphPay service', (
   }
 });
 
-test('the package is public, MIT, 0.1.0 with a files list', () => {
+test('the package is public, MIT, 0.1.1 with a files list', () => {
   assert.equal(pkg.name, '@graphpay_ethglobal/agentpay');
-  assert.equal(pkg.version, '0.1.0');
+  assert.equal(pkg.version, '0.1.1');
+  assert.deepEqual(Object.keys(pkg.devDependencies ?? {}).filter((d) => d.startsWith('@graphpay/')), [], 'the published manifest names no workspace package');
   assert.equal(pkg.license, 'MIT');
   assert.equal(pkg.publishConfig.access, 'public');
   assert.ok(!pkg.private);
@@ -148,4 +149,17 @@ test('the vendored checkout creation code is the verified one, and deployCheckou
   assert.equal(keccak256(checkoutCreationCode), '0x9f009ad51cd39e24c0c0b5c8943099e1e6a38a44bae20d238deefac75e36f216');
   const ctor = checkoutAbi.find((e) => e.type === 'constructor');
   assert.deepEqual(ctor.inputs.map((i) => i.name), ['token', 'permit2', 'admin', 'relayer', 'policyWriter']);
+});
+
+test('deployCheckout passes token, permit2, admin, relayer, policyWriter to the constructor, in that order', async () => {
+  const [relayer, policyWriter] = [privateKeyToAccount(generatePrivateKey()).address, privateKeyToAccount(generatePrivateKey()).address];
+  let sent;
+  const walletClient = { account, getChainId: async () => 1874, deployContract: async (args) => ((sent = args), `0x${'ab'.repeat(32)}`) };
+  const publicClient = { getChainId: async () => 1874, waitForTransactionReceipt: async () => ({ status: 'success', contractAddress: relayer, blockNumber: 7n }) };
+  const net = whitechainNetwork();
+  const out = await deployCheckout({ walletClient, publicClient, relayer, policyWriter });
+  assert.deepEqual(sent.args, [net.token.address, net.permit2, account.address, relayer, policyWriter]);
+  assert.equal(sent.bytecode, checkoutCreationCode);
+  assert.equal(out.network.checkout, relayer);
+  assert.equal(out.deployBlock, 7n);
 });

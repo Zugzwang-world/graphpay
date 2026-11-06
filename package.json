@@ -38,6 +38,9 @@
   },
   "devDependencies": {
     "viem": "2.57.16",
-    "@anthropic-ai/sdk": "1.5.0"
+    "@anthropic-ai/sdk": "1.5.0",
+    "@graphpay/config": "workspace:*",
+    "@graphpay/contracts": "workspace:*",
+    "@graphpay/facilitator": "workspace:*"
   }
 }
