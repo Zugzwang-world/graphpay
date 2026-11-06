@@ -26,7 +26,7 @@ The package README has the five-minute quickstart, the Rabdi connection, the con
 
 ## 2. The live money graph over GraphQL
 
-`https://graphpay-event.vercel.app/api/graphql` takes GET (`?query=`) or POST. Every answer carries `extensions.arkiv`: the calls, the exact Arkiv queries, the bytes, the entity keys and an explain id. Try [a shop's tallies](https://graphpay-event.vercel.app/api/graphql?query=%7Bnode%28ens%3A%22kesar-kingdom.graphpay.eth%22%29%7Bcategory%20tally%7Borders%20refunds%7D%7D%7D). The schema has `node`, `top`, `path`, `neighborhood`, `edges`, `order`, `shops` (a box query by `i32` coordinates), `agentsOnline` and `handoffs`. An explain id opens again at `/api/explain/<id>` (JSON) or `/explain/<id>` (a page) while the server instance keeps it (the last 200 answers); the trace in the answer itself is the lasting copy.
+`https://graphpay-event.vercel.app/api/graphql` takes GET (`?query=`) or POST. Every answer carries `extensions.arkiv`: the calls, the exact Arkiv queries, the bytes, the entity keys and an explain id. Try [a shop's tallies](https://graphpay-event.vercel.app/api/graphql?query=%7Bnode%28ens%3A%22filter-and-fold.graphpay.eth%22%29%7Bcategory%20tally%7Borders%20refunds%7D%7D%7D). The schema has `node`, `top`, `path`, `neighborhood`, `edges`, `order`, `shops` (a box query by `i32` coordinates), `agentsOnline` and `handoffs`. An explain id opens again at `/api/explain/<id>` (JSON) or `/explain/<id>` (a page) while the server instance keeps it (the last 200 answers); the trace in the answer itself is the lasting copy.
 
 ## 3. An MCP server any agent can add
 
@@ -42,7 +42,7 @@ The README's [keyless query](../README.md#query-arkiv-yourself-one-command-no-ke
 
 ## Installs and feedback
 
-- **Published** (Fri 6 Nov 2026, IST): 0.1.0 at 10:14 and 0.1.1 at 11:34; `latest` is 0.1.1 (the registry, read 23:25 IST; [`docs/technical/FACTS.md`](../docs/technical/FACTS.md) has the shasums). Each version was installed from the registry in an empty folder outside the repo, and its quickstart ran ([`docs/sessions/records/resume.md`](../docs/sessions/records/resume.md)).
+- **Published** (IST): 0.1.0 at 10:14 and 0.1.1 at 11:34 on Fri 6 Nov, and **1.0.0 at 00:34 on Sat 7 Nov**; `latest` is 1.0.0 (the registry, read 00:37 IST; shasum `2bde2d21…6adf16b`, 21 files). 1.0.0 is the same API, with five bugs fixed (each with a test that fails on 0.1.1), every export documented and typed, and the quickstart first ([#174](https://github.com/Zugzwang-world/graphpay/pull/174)); it was packed and installed from the tarball in an empty folder before the publish, and our ten-line quickstart above runs on it unchanged. Each 0.1.x version was installed from the registry in an empty folder outside the repo, and its quickstart ran ([`docs/sessions/records/resume.md`](../docs/sessions/records/resume.md); [`docs/technical/FACTS.md`](../docs/technical/FACTS.md) has the shasums).
 - **Downloads:** npm's public download counter has no data yet for a package published today (`api.npmjs.org` answered "not found" at 23:25 IST), so we claim no install numbers.
 - **Feedback:** a GitHub issue template adds the labels `arkiv-graph` and `feedback` ([open one](https://github.com/Zugzwang-world/graphpay/issues/new?template=arkiv-graph-feedback.yml)); what we were asked and what we did goes in [`FEEDBACK.md`](../packages/arkiv-graph/FEEDBACK.md). No issue had been opened by 23:25 IST.
 - **Freeze:** the published versions stay frozen from the submission until judging ends (ADR-0063).

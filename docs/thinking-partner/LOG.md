@@ -132,13 +132,18 @@ One line per PR: time (IST) · activity · result · PR link. Append under your 
 - 23:43 IST · w7-submission · the video shot list and the submission checklist (docs/submission/VIDEO.md, CHECKLIST.md); wording fixes; the README links the disclosure · https://github.com/Zugzwang-world/graphpay/pull/166
 - 23:46 IST · w7-submission · keep current: AI_USAGE.md records W4's effort split (#162); the README notes W1's new shop names on Sepolia (#158) · https://github.com/Zugzwang-world/graphpay/pull/170
 - 00:13 IST · w7-submission · an independent audit's 17 findings fixed across the submission files (exact claims: the kit payment by script, the first facilitator payment, receipts lapse at 30 days, the Swarm photo stored not shown); #172 and #173 folded in · https://github.com/Zugzwang-world/graphpay/pull/178
-- 00:18 IST · w7-submission · keep current: the live 0.80 coffee re-order and the live Sunday-box subscription (subscribe, cron renewal, cancel) in the README and the form text; the kill on /customer (#175); the refund Decline route (#163) · this PR
+- 00:18 IST · w7-submission · keep current: the live 0.80 coffee re-order and the live Sunday-box subscription (subscribe, cron renewal, cancel) in the README and the form text; the kill on /customer (#175); the refund Decline route (#163) · https://github.com/Zugzwang-world/graphpay/pull/180
+- 00:25 IST · w7-submission · keep current: W4's routine steps in code (3 model calls, 55 s; #182, ADR-0078) in AI_USAGE and the form text; W3's live limits (#169) in the README and ENS.md · https://github.com/Zugzwang-world/graphpay/pull/187
+- 00:29 IST · w7-submission · keep current: the production kill (#183; unregister, revoke, refusal on Arkiv, each checked on its chain) is the evidence in the README, the form text, ENS.md and the checklist · https://github.com/Zugzwang-world/graphpay/pull/193
+- 00:33 IST · w7-submission · the label flip (#189): every live link and the ENS snippet use filter-and-fold.graphpay.eth, history keeps the old names, category south-indian; W4's production errand (55.5 s, 3 calls, #192) in AI_USAGE, the README and the shot list · https://github.com/Zugzwang-world/graphpay/pull/195
+- 00:37 IST · w7-submission · arkiv-graph 1.0.0 on npm (00:34 IST) in the README and reach.md; agentpay still 0.1.1 · this PR
 
 ## w1-identity
 
 - 23:35 IST · w1-identity · the new shop names filter-and-fold, idli-index and tawa-tangle on Sepolia, each with its three agents, on the old shops' wallets (30 txs; ENS acceptance reads 100 pass) · https://github.com/Zugzwang-world/graphpay/pull/158
 - 00:00 IST · w1-identity · the kill: POST /api/customer/kill-disposable (owner unregisters a ready spare, the watcher revokes, the next payment refused and recorded), the spare keeper and its workers hook; spare disposable-2 live and funded; spare keys 2–9 in Vercel · https://github.com/Zugzwang-world/graphpay/pull/175
 - 00:20 IST · w1-identity · the kill proven on production: disposable-2 unregistered by the site (00:16), its pass revoked by the watcher 9 s later, its next payment refused ENS_EXPIRED_OR_REVOKED and recorded on Arkiv, fresh spare disposable-3 ready (00:19); evidence kill-disposable-2.json · https://github.com/Zugzwang-world/graphpay/pull/183
+- 00:26 IST · w1-identity · the story flip: the shops go by filter-and-fold, idli-index and tawa-tangle on ENS, category south-indian (labels and category only; the phones' Nov 5 recording replayed under the new names) · https://github.com/Zugzwang-world/graphpay/pull/189
 
 ## w4-agents
 
@@ -149,14 +154,22 @@ One line per PR: time (IST) · activity · result · PR link. Append under your 
 - 23:49 IST · w4-agents · the first cut live on the site: paid 4.80 in 87.6 s, 19 calls, 33,346 tokens, $0.1435 (tx 0xd4fd…9d2f): 4% faster, so the calls themselves must go · no PR (a live run)
 - 23:52 IST · w4-agents · item 3, second cut: the routine steps in code, one model call each for the concierge, analyst and risk agent (3 calls in all; Kimi on mocks 14 s, $0.027) · https://github.com/Zugzwang-world/graphpay/pull/182
 - 00:15 IST · w4-agents · the second cut proven live before merging (local runner, production services): paid 4.80 in 55.2 s, 3 calls, 2,886 tokens, $0.0247 (tx 0xfe0a…70d5); the reviewer says ship · https://github.com/Zugzwang-world/graphpay/pull/182
+- 00:24 IST · w4-agents · code mode live on the site: paid 4.80 in 55.5 s, 3 calls, 2,852 tokens, $0.0269 (tx 0x194b…f0e5); then holding for W1's label flip and W5's restart · https://github.com/Zugzwang-world/graphpay/pull/192
 
 ## w5-ops
 
 - 23:10 IST · w5-ops · the payer's pass is 300 a day for tonight (policy and ENS, ADR-0071 amendment); PAYER back to 125 test USDT from FUNDER · https://github.com/Zugzwang-world/graphpay/pull/152
 - 23:40 IST · w5-ops · Pause and Resume per agent (payer and scout; the others say why); the self-healing cron: a paused agent resumes after 2 min, a closed shop reopens after 5 · https://github.com/Zugzwang-world/graphpay/pull/172
+- 00:35 IST · w5-ops · acceptance: B2, C3, C7, E3, D8 and E1 updated to tonight's decisions (reviewed twice); B2, C7 and E3 pass read-only, C3 waits for a fresh e2e:hosted after 05:30 IST, E1 for a fresh errand · https://github.com/Zugzwang-world/graphpay/pull/188
+- 00:35 IST · w5-ops · the workers under a watchdog (a 30-minute fuse, longer than Arkiv's rate-limit reset; a hold file for maintenance windows), the ENS watcher's poll interval as a setting, P-w5-ops-1 · https://github.com/Zugzwang-world/graphpay/pull/194
 
 ## w3-payments
 
+- 23:34 IST · w3-payments · merged: fix(pay): "Another coffee" re-orders the filter coffee for 0.80; paid live (tx 0xf1d7…2b4a), its order, pay and deliver edges on Arkiv · https://github.com/Zugzwang-world/graphpay/pull/155
+- 00:03 IST · w3-payments · merged: feat(pay): subscribe and cancel the Sunday box; live: subscribed 2.40 (tx 0xf3f7…c393), the cron renewed it (0x8d40…de83), cancelled by the payer's signature (0x70ed…7b42); edges on Arkiv · https://github.com/Zugzwang-world/graphpay/pull/173
+- 00:17 IST · w3-payments · merged: feat(pay): the shop declines a refund request; live: request then decline on Arkiv (0xf103…54fa, 0xff07…3b20) · https://github.com/Zugzwang-world/graphpay/pull/163
+- 00:21 IST · w3-payments · merged: feat(pay): the limits live: 480 over a 300 pass refused CAP_EXCEEDED, nothing sent, recorded; the agent's own cap raise refused EACUnauthorizedAccountRoles, recorded (0xabc4…4144) · https://github.com/Zugzwang-world/graphpay/pull/169
+- 00:25 IST · w3-payments · in PR: feat(pay): the owner changes the payer's cap; the policy follows through the watcher (ADR-0078) · https://github.com/Zugzwang-world/graphpay/pull/179
 - 23:34 IST · w3-payments · merged: fix(pay): "Another coffee" re-orders the filter coffee for 0.80; paid live, tx 0xf1d7…2b4a, its edges on Arkiv · https://github.com/Zugzwang-world/graphpay/pull/155
 - 00:00 IST · w3-payments · in PR: feat(pay): subscribe and cancel the Sunday box on the demo clock; the cron renews within the signed allowance
 - 23:45 IST · w3-payments · in PR: feat(pay): the shop can decline a refund request, recorded on Arkiv (reviewer's two blocking items fixed: a refund the graph has not shown yet stops a decline; the order page words it "Refund declined") · https://github.com/Zugzwang-world/graphpay/pull/163

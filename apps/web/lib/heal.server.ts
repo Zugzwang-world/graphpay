@@ -206,7 +206,7 @@ export function heal(options: { sources?: HealSources; actions?: HealActions; no
             return;
           }
           shop.done = shop.action === 'renew' ? 'renewed' : 'reopened';
-          if (shop.action === 'reopen') log(`heal: ${shop.ens} reopened${shop.closedAt === null ? ' (no listing left)' : ` (closed at ${shop.closedAt})`}`);
+          log(shop.action === 'reopen' ? `heal: ${shop.ens} reopened${shop.closedAt === null ? ' (no listing left)' : ` (closed at ${shop.closedAt})`}` : `heal: ${shop.ens} listing renewed (it had until ${shop.openUntil})`);
           shop.open = true;
           shop.openUntil = opened.openUntil;
           shop.closedAt = null;

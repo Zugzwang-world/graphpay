@@ -34,7 +34,7 @@ With Postgres each of these is a cron job that can fail silently (ADR-0035).
 
 ## 5. Reads for any agent
 
-The question an agent asks is the same for every agent, so the answer is public: the [GraphQL endpoint](https://graphpay-event.vercel.app/api/graphql?query=%7Bnode%28ens%3A%22kesar-kingdom.graphpay.eth%22%29%7Bcategory%20tally%7Borders%20refunds%7D%7D%7D) returns the exact Arkiv queries behind each answer, and the MCP server is published in ENS (`graphpay.eth` → `agent-endpoint[mcp]`), so an agent can find it from the name alone. Decentralized, secure and verifiable: the rows are public, every reader can check the writer, and every answer shows its reads.
+The question an agent asks is the same for every agent, so the answer is public: the [GraphQL endpoint](https://graphpay-event.vercel.app/api/graphql?query=%7Bnode%28ens%3A%22filter-and-fold.graphpay.eth%22%29%7Bcategory%20tally%7Borders%20refunds%7D%7D%7D) returns the exact Arkiv queries behind each answer, and the MCP server is published in ENS (`graphpay.eth` → `agent-endpoint[mcp]`), so an agent can find it from the name alone. Decentralized, secure and verifiable: the rows are public, every reader can check the writer, and every answer shows its reads.
 
 ## What it costs, honestly
 

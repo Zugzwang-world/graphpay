@@ -73,15 +73,13 @@ Updated 23:10 IST, Fri 6 Nov (night Coordinator, `local_1caa580c-…`).
 
 ## w1-identity
 
-Updated 00:20 IST, Sat 7 Nov (W1 Identity, session `local_45f7cf5d-c31e-4dbf-b849-466f3067bdd3`).
-- **Done: the new shop names** are on ENS, on the old wallets (#158).
-- **Done: the kill works live** (#175). At 00:16 IST the site killed `disposable-2`.
-  - The owner's unregister landed on Sepolia, and the watcher revoked its pass on Whitechain 9 s later.
-  - Its next payment was refused `ENS_EXPIRED_OR_REVOKED`, and the refusal is recorded on Arkiv.
-  - A fresh spare, `disposable-3`, was ready at 00:19 (made by hand this once). Evidence: `docs/sessions/identity/kill-disposable-2.json`.
-- **Ready:** the `story.json` flip (labels and category; branch `claude/w1-flip`). It waits for the Coordinator's go after W2.
-- **In review:** the owner's cap reaching the payer's pass through the watcher, for W3's cap route (#179).
-- **Next:** the flip on the go; after W5's restart, the workers make each fresh spare themselves.
+Updated 00:26 IST, Sat 7 Nov (W1 Identity, session `local_45f7cf5d-c31e-4dbf-b849-466f3067bdd3`).
+- **Done:** the new shop names on ENS (#158); the kill, live and proven at 00:16 IST (#175, #183).
+- **Now: the story flip** (this PR, on the Coordinator's go after W2's history). The shops go by `filter-and-fold`, `idli-index` and `tawa-tangle`, category south-indian.
+  - W4 holds errands until W5's restart.
+- **Next:**
+  1. W5 restarts the workers on the new names; that also loads the spare keeper and the owner's-cap change.
+  2. One live errand pays Filter & Fold through `filter-and-fold.graphpay.eth`.
 
 ## w2-city
 
@@ -94,36 +92,44 @@ Updated 00:15 IST, Sat 7 Nov (W2 City, session `local_da212093-3d02-4768-9314-ab
 
 ## w3-payments
 
-Updated 00:15 IST, Sat 7 Nov (W3 Payments, session `local_b65be40a-eb20-4d86-b784-7d2aa1a93527`).
-- **Re-order (item 1, done, #155):** "Another coffee" paid 0.80 live at 23:34 IST ([0xf1d7…2b4a](https://explorer.testnet.whitechain.io/tx/0xf1d7cb5654de6cc09ede0a404818a009f7429d9d149e3e564222d4a4d3ae2b4a)). Its order, pay and deliver edges are on Arkiv ([explain](https://graphpay-event.vercel.app/api/explain/8391bb5c1b6b)).
-- **Subscriptions (item 2, done live, #173):**
-  - subscribed at 23:59 IST, 2.40 stored on chain, first box charged at once ([0xf3f7…c393](https://explorer.testnet.whitechain.io/tx/0xf3f7586090fb37cf4b04963216dabc7b89915f02afb19f71fb81ca138e53c393));
-  - the cron renewed it at 00:02 ([0x8d40…de83](https://explorer.testnet.whitechain.io/tx/0x8d40d556382f40313dafaf712d3c174d7cc8365176c8813f04e849f93338de83));
-  - cancelled with the payer agent's own signature ([0x70ed…7b42](https://explorer.testnet.whitechain.io/tx/0x70ed2b3ffa63b81fa426631c70cb39591f8b80c077455930d05e63de04077b42)).
-  - Its Arkiv edges land after the mirror's pause for W2 (about 00:19).
-- **Refund decline (item 3):** #163, reviewed; its blocking items are fixed and confirmed.
-- **Limits (item 4):**
-  - over the pass and the agent's refused cap raise: #169, reviewed, hardening now;
-  - the owner's cap change: built, and waits for the Coordinator's call on the policy half (POLICY_WRITER stays local, ADR-0021).
+Updated 00:25 IST, Sat 7 Nov (W3 Payments, session `local_b65be40a-eb20-4d86-b784-7d2aa1a93527`). Every money action of the brief works live, with its explorer link and Arkiv record, except the owner's cap change, which waits for W1's watcher.
+- **Re-order, done (#155):** "Another coffee" paid 0.80 at 23:34 IST ([tx](https://explorer.testnet.whitechain.io/tx/0xf1d7cb5654de6cc09ede0a404818a009f7429d9d149e3e564222d4a4d3ae2b4a), [Arkiv](https://graphpay-event.vercel.app/api/explain/8391bb5c1b6b)).
+- **Subscriptions, done (#173):**
+  - subscribed at 2.40, stored on chain, first box charged at once ([tx](https://explorer.testnet.whitechain.io/tx/0xf3f7586090fb37cf4b04963216dabc7b89915f02afb19f71fb81ca138e53c393));
+  - the cron renewed it ([tx](https://explorer.testnet.whitechain.io/tx/0x8d40d556382f40313dafaf712d3c174d7cc8365176c8813f04e849f93338de83));
+  - cancelled with the payer's own signature ([tx](https://explorer.testnet.whitechain.io/tx/0x70ed2b3ffa63b81fa426631c70cb39591f8b80c077455930d05e63de04077b42));
+  - [Arkiv](https://graphpay-event.vercel.app/api/explain/23281094e730).
+- **Refund decline, done (#163):** request, then the shop's decline, both on Arkiv ([explain](https://graphpay-event.vercel.app/api/explain/033a073bd39e)).
+- **Limits (#169):**
+  - over the pass: 480 against 300, refused `CAP_EXCEEDED`, nothing sent ([Arkiv](https://rabdi.explorer.arkiv.network/entity/0x49163142476bc996134f3a4b0cac473f9698fa0781f39895206b138cfab1dc19));
+  - the agent's own cap raise: refused `EACUnauthorizedAccountRoles`, simulated, nothing sent ([Arkiv](https://rabdi.explorer.arkiv.network/tx/0xabc41f475312767e363e073ec872c3ff4b3556883901201dca53f1dafd444144)).
+- **Next:** the owner's cap change (#179, ADR-0078), live once W1's watcher PR merges and W5 restarts the workers.
 - Blockers: none.
 
 ## w4-agents
 
-Updated 00:17 IST, Sat 7 Nov (W4 Agents, session `local_3404db4e-486c-4f86-8b3a-67ceb53ef025`).
-- **Done:** item 1, the relative deadline ([#153](https://github.com/Zugzwang-world/graphpay/pull/153)); item 2, every model call measured ([#157](https://github.com/Zugzwang-world/graphpay/pull/157)); item 3's first cut ([#162](https://github.com/Zugzwang-world/graphpay/pull/162)).
-- **Item 3, second cut ([#182](https://github.com/Zugzwang-world/graphpay/pull/182); the reviewer says ship):** the routine steps in code, one model call each for the concierge, the analyst and the risk agent. **Proven live before merging:** paid 4.80 in 55.2 s with 3 model calls, 2,886 tokens and $0.0247 (the baseline: 91.4 s, 19 calls, 33,287 tokens, $0.1455). The screens get the same data.
-- **Found tonight:** the payer was paused by a visitor twice (W5's self-healing now resumes it); a dropped Arkiv read made the shop refuse the buyer once (now tried once more).
-- **Next:** merge, then three live errands in a row on the site.
+Updated 00:27 IST, Sat 7 Nov (W4 Agents, session `local_3404db4e-486c-4f86-8b3a-67ceb53ef025`).
+- **Done:** item 1, the relative deadline ([#153](https://github.com/Zugzwang-world/graphpay/pull/153)); item 2, every model call measured ([#157](https://github.com/Zugzwang-world/graphpay/pull/157)); item 3, the routine steps in code ([#162](https://github.com/Zugzwang-world/graphpay/pull/162), [#182](https://github.com/Zugzwang-world/graphpay/pull/182), live since 00:22 IST).
+- **Live on the site, 00:24 IST:** paid 4.80 in 55.5 s with 3 model calls, 2,852 tokens and $0.0269. The baseline at 23:30 IST: 91.4 s, 19 calls, 33,287 tokens, $0.1455.
+- **Holding** live errands at W1's request until W5 restarts the workers on the new shop names; then three live errands in a row (item 4).
+- **Where the rest goes:** the models take 13 s; the 402 step (13.6 s) and the settlement (13.3 s) are outside the agents (told the Coordinator).
 - **Blockers:** none.
 
 ## w5-ops
 
-Updated 23:50 IST, Fri 6 Nov (W5 Ops).
-- **The payer is ACTIVE**, with a **300 test USDT** pass for tonight (policy and ENS; #152). PAYER holds 125 test USDT.
+Updated 00:35 IST, Sat 7 Nov (W5 Ops).
+- **The payer is ACTIVE**, with a 300 test USDT pass for tonight (117.2 spent at 00:30 IST) (#152).
 - **The shop (Filter & Fold) is open.**
-- **The mirror hung at 23:29 IST** (the same silent stall as at 22:02). W5 restarted the workers at 23:43 IST from a dedicated checkout of main (`.claude/worktrees/w5-workers`, pid 79148). It caught up by 23:49 IST: 2 blocks behind, nothing new parked.
-- **In review:** Pause and Resume per agent (payer and scout only; the others say why), and the self-healing cron: a paused agent resumes after 2 minutes, a closed shop reopens after 5. The reviewer's blocking finding and nine others are fixed; it is checking the fixes.
-- **Next:** prove both live on production; restart the workers after W1's label flip; acceptance at 0 failures.
+- **Live since 00:06 IST: Pause per agent and self-healing** (#172).
+  - Only Payer and Scout can be paused; Concierge and Analyst answer why not.
+  - A paused agent resumes by itself about 2 minutes after the pause. Proven on the Scout and the Payer, with the cron's own transactions.
+  - A closed shop is open again within 5 minutes.
+  - The phones still pause only the payer until they send the tapped agent (OPEN, "frontend").
+- **The mirror** waits out Arkiv's shared rate-limit window at times. That is what the 22:02, 23:29 and 00:23 IST stalls were. It resumes by itself.
+  - A watchdog keeps the workers running and restarts them only after 30 minutes with no progress.
+  - The real fix is the founder's new Arkiv key.
+- **Acceptance** (#188, in review): B2, C7 and E3 now pass. C3 waits for a fresh hosted run after 05:30 IST, E1 for a fresh errand after W1's label flip, and D4 and D8 for a full run.
+- **Next:** restart the workers on W1's flip, run one errand to prove the mirror on the new shops, then the full acceptance run.
 
 ## w6-sdk
 
@@ -134,13 +140,17 @@ Updated 00:12 IST, Sat 7 Nov (W6 SDK, session `local_b6205da6-b613-4662-872a-6d4
 
 ## w7-submission
 
-Updated 00:18 IST, Sat 7 Nov (W7 Submission, `local_abd77623-de22-4fe2-a0a9-865fdd43dba2`; relay `relays/w7-submission.md`).
+Updated 00:37 IST, Sat 7 Nov (W7 Submission, `local_abd77623-de22-4fe2-a0a9-865fdd43dba2`; relay `relays/w7-submission.md`).
 - **The brief is done:** the form text is in one file, [`docs/submission/ETHGLOBAL.md`](../submission/ETHGLOBAL.md), and every claim in it links to evidence. Landed: the README and a root `LICENSE` ([#154](https://github.com/Zugzwang-world/graphpay/pull/154)); AI_USAGE.md and the five Arkiv files ([#159](https://github.com/Zugzwang-world/graphpay/pull/159)); the Whitechain and ENS notes ([#161](https://github.com/Zugzwang-world/graphpay/pull/161)); the form text ([#164](https://github.com/Zugzwang-world/graphpay/pull/164)).
 - **Also landed:** the video shot list and the submission checklist ([#166](https://github.com/Zugzwang-world/graphpay/pull/166)).
 - **Also landed:** AI_USAGE's effort split and W1's names in the README ([#170](https://github.com/Zugzwang-world/graphpay/pull/170)).
 - **Also landed:** the audit's 17 fixes ([#178](https://github.com/Zugzwang-world/graphpay/pull/178)).
-- **In this PR:** the live 0.80 re-order and the live subscription (subscribe, the cron's renewal, cancel) as evidence; the kill on `/customer` (#175); the refund Decline route (#163).
-- **Running:** keep-current mode, a pass after each night stream lands (W1 names, W2 race at M and menus, W6 SDK 1.0.0, W3 links).
+- **Also landed:** the live re-order and subscription as evidence, the kill on `/customer` ([#180](https://github.com/Zugzwang-world/graphpay/pull/180)).
+- **Also landed:** W4's code-mode agents and W3's limits in the docs ([#187](https://github.com/Zugzwang-world/graphpay/pull/187)).
+- **Also landed:** the production kill as evidence ([#193](https://github.com/Zugzwang-world/graphpay/pull/193)).
+- **Also landed:** the label flip across the docs, W4's production errand ([#195](https://github.com/Zugzwang-world/graphpay/pull/195)).
+- **In this PR:** arkiv-graph 1.0.0 on npm (00:34 IST) in the README and `reach.md`.
+- **Running:** keep-current mode, a pass after each night stream lands (W2's race at M and menus under the new names, agentpay 1.0.0 on npm, the regenerated acceptance report).
 - **Blockers:** none.
 
 ## before the night (retired day sessions)
