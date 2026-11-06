@@ -4,31 +4,25 @@ The founder's to-dos and open questions. Each item says what, where, why and wha
 
 ## Founder now (Coordinator only)
 
-Updated 12:47 IST, Fri 6 Nov (Coordinator). **Standing rule (ADR-0066): no target times.** Only the submission (Sat 09:00 IST) and the presentation (Sat 09:30 IST) are fixed.
+Updated 21:41 IST, Fri 6 Nov (Coordinator). **Standing rule (ADR-0066): no target times.** Only the submission (Sat 09:00 IST) and the presentation (Sat 09:30 IST) are fixed.
 
-1. **Your test run (phase 2).**
-   - **What:** test the live errand on the new stage.
-   - **When:** I tell you once the errand pays reliably and the Integration session's stage is live.
-   - **How:** no passcode is needed any more (ADR-0069).
-2. **The Kimi balance.**
-   - **What:** a production errand costs $0.71 to $3.55, and with public access anyone can run errands, one at a time.
-   - **Recommendation:** check the balance on the Kimi platform, and top up enough for your run, the video and the pitch.
-3. **The story swap:** the dosa and BKC cast, with Grok's assets, comes after your run (ADR-0071). Send the story and the assets then.
-4. **Start the Submission session** after your run, or after the 21:30 reset.
-5. **Plan usage: 89%.** Merges and real payments are allowed up to 97% for the integration and its support, and every session pauses at 97% (ADR-0062, amendment 2). The reset is at 21:30 IST.
+1. **Start the Submission session now.** Usage reset to 0%. It writes the sponsor files and the submission text (`docs/plan/sessions/submission.md`, Sonnet 5.5, high).
+2. **Production's Arkiv reads are failing,** since at least 21:36 IST. The map and the customer phone's live state answer 502. T3 is on it; the Coordinator tells you when they're back. Until then, don't demo the live state.
+3. **Decide what else goes into tomorrow's demo,** from the Booth's open list:
+   - real ENS names for the dosa shops (T2) and their history (T3);
+   - the big city (T3; 100 to 130 minutes of seeding);
+   - caps, the kill and subscriptions (T1, T2).
+   - **Recommendation:** fix the Arkiv reads first, then only what the video and the pitch show.
+4. **The video** in your own voice (the event's rule), once the reads are back.
+5. **The Kimi balance:** a production errand costs $0.71 to $3.55, and with public access anyone can run errands. Top up enough for the video and the pitch.
 6. **This session's effort:** it runs at max; the plan says high. Switch it in this session's model menu. Only you can.
 7. **The written pre-event disclosure,** if not sent (`docs/plan/DISCLOSURE_MESSAGE.md`).
 8. **Keep the charger in and the lid open** until the presentation.
 
-**Closed 12:47:**
-- #70 merged, credited to ajatshatru01.
-- The CLAUDE.md model line now names Kimi.
-- Your 150 test USDT moved on: PAYER holds 125.
-- The payer's cap goes to 100 a day: the story config is in #105, and T1 and T2 write it on-chain.
-
-**Closed 11:49:**
-- The integration audit merged (#103).
-- Both SDKs are on npm as 0.1.1.
+**Closed since 17:46:**
+- your test run;
+- the Booth's deck and the story on screen;
+- #132, merged and credited to ajatshatru01.
 
 ## Funding (the Coordinator)
 
