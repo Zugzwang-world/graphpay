@@ -1,6 +1,6 @@
 # Relay: w7-submission (the night Submission stream)
 
-Updated 23:40 IST, Fri 6 Nov, by W7 Submission (`local_abd77623-de22-4fe2-a0a9-865fdd43dba2`). Brief: [`briefs/2258-w7-submission.md`](../briefs/2258-w7-submission.md).
+Updated 23:43 IST, Fri 6 Nov, by W7 Submission (`local_abd77623-de22-4fe2-a0a9-865fdd43dba2`). Brief: [`briefs/2258-w7-submission.md`](../briefs/2258-w7-submission.md).
 
 ## Plain language
 
@@ -13,7 +13,9 @@ W7 writes what a judge reads, so the founder can paste the ETHGlobal submission 
   - The Arkiv files: friction, reach, why Arkiv, how we use it, Swarm.
 - **The Whitechain and ENS notes** ([#161](https://github.com/Zugzwang-world/graphpay/pull/161)): `WHITECHAIN_FEEDBACK.md` at the root, and `docs/submission/ENS.md`.
 
-**In this step's PR:** [`docs/submission/ETHGLOBAL.md`](../../submission/ETHGLOBAL.md), the form text: name, one-liner (90 characters), description, how it's made, links, and one block for each of the three partner prizes, with a "before you press Submit" list for the founder.
+- **The form text** ([#164](https://github.com/Zugzwang-world/graphpay/pull/164)): [`docs/submission/ETHGLOBAL.md`](../../submission/ETHGLOBAL.md), with name, one-liner (90 characters), description, how it's made, links, one block for each of the three partner prizes, and a "before you press Submit" list. The brief's done-when is met.
+
+**In this step's PR:** the video shot list ([`VIDEO.md`](../../submission/VIDEO.md), prompts for the founder's own words, not a script) and the submission checklist ([`CHECKLIST.md`](../../submission/CHECKLIST.md), `planning/SPONSOR_CHECKLIST.md` §6 row by row), both from the M17 plan; two wording fixes; the README links the disclosure.
 
 **The founder must:**
 - review the README and the partner files;
