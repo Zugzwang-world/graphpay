@@ -84,6 +84,7 @@ Short records, one file each (skill `adr`). Lab decisions are adopted from `plan
 | [ADR-0079](ADR-0079-the-owners-cap-reaches-the-policy-through-the-watcher.md) | The owner's cap reaches the spending policy through the watcher, never above the configured cap (narrows E-11) | accepted |
 | [ADR-0080](ADR-0080-both-sdks-at-1-0-0-then-frozen.md) | Both SDKs at 1.0.0 before the submission, with no new features, then frozen until judging ends (amends ADR-0063) | accepted |
 | [ADR-0081](ADR-0081-the-big-city-is-what-was-seeded-race-mode-stays-at-s.md) | The big city M is what was seeded; race mode stays at S | accepted |
+| [ADR-0082](ADR-0082-the-stage-shows-the-labs-benchmark-labelled-lab.md) | The stage's scene 7 shows the lab's benchmark, labelled "lab" (narrows ADR-0042) | accepted |
 
 ## Proposed in the pack, recorded by the owning session when taken
 
