@@ -12,9 +12,10 @@ import { siteModel } from './site.server.ts';
 
 export const OWNER_CAP_WAITING_FOR = "the owner's and the recorder's keys on this server (the Coordinator sets them in Vercel)";
 export const CAP_COOLDOWN_MS = 20_000;
-// How long the route waits for the policy writer to apply the change (the watcher polls every 2 s and
-// retries a failed write on its 30 s tick).
-export const POLICY_WAIT_MS = 60_000;
+// How long the route waits for the policy writer to apply the change: the watcher polls Sepolia about every
+// 20 s, then sends one setPolicy and waits for its Whitechain receipt (live, 01:17 IST: it landed 61 s after
+// the ENS write), and retries a failed write on its 30 s tick. CHANGE_BUDGET_MS still bounds the whole change.
+export const POLICY_WAIT_MS = 90_000;
 // The whole change must leave the Arkiv write its time inside the route's 300 s (the Sepolia receipt
 // alone can take 180 s and its read-back 60 s): the policy wait is cut to what is left of this.
 export const CHANGE_BUDGET_MS = 260_000;
