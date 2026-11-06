@@ -12,6 +12,7 @@ import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { story } from '../../packages/config/index.mjs';
 import { projectStory } from './story-projection.mjs';
+import { menuImages } from './menu-images.mjs';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const repo = resolve(here, '../..');
@@ -37,7 +38,16 @@ const { build } = await load('vite');
 const react = (await load('@vitejs/plugin-react')).default;
 const tailwindcss = (await load('@tailwindcss/vite')).default;
 
-const projected = JSON.stringify(projectStory(story), null, 2);
+const projection = projectStory(story);
+// A product with no image in the story gets its menu image from Swarm, read through its Arkiv row.
+try {
+  const links = await menuImages(projection.shops.map((s) => s.ens));
+  for (const p of projection.products) p.image ??= links.get(`${p.shop}|${p.id}`) ?? null;
+  console.log(`apps/phones: ${links.size} menu image(s) from Swarm`);
+} catch {
+  console.warn('apps/phones: the menu images could not be read; products stay without images');
+}
+const projected = JSON.stringify(projection, null, 2);
 
 // Their story.json is read through a relative import; serve the projection in its place.
 const storySwap = {

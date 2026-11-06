@@ -1,24 +1,45 @@
 # Relay: phones (the integration session)
 
-Updated 13:05 IST, Fri 6 Nov.
+Updated 17:05 IST, Fri 6 Nov.
 
 ## In plain words
 
-The team built two phone apps (the customer's and the shop's) that ran only on made-up data. Since this step they run on our real site, on real data, at https://graphpay-event.vercel.app/live. Vitalik's phone shows his agents, the payer's daily pass as the contract holds it, and every real order with a link to its transaction on the Whitechain explorer. Kesar Kingdom's phone shows today's orders, and a new order appears on its own when it is paid. The middle of the page is T5's explainer, unchanged.
+The team's two phone apps now run on our real site, on real data, and they are the home page: https://graphpay-event.vercel.app. Nobody needs a login or a passcode.
 
-Nothing is spent yet: the buttons say they are connected in the next step. The team's folder is untouched; their design is exactly theirs.
+- **Vitalik's phone:** his ask runs the real errand. The agents compare the three shops, and the trap shop is rejected for its refunds and late deliveries. The payer pays 4.80 to Kesar Kingdom, with a link to the real transaction. The first paid errand from the stage took about 107 seconds.
+- **Kesar Kingdom's phone:** the order appears live. The shop's Open switch lists it as open on Arkiv.
+- **The middle of the page:** T5's "What just happened" follows the same run, step by step.
+- **Refunds:** a refund request from Vitalik's phone reaches the shop's inbox.
+- **Pause and resume:** both work, through the site's own customer screen.
+- **Not working yet:**
+  - the shop's refund approval fails on the server;
+  - the re-order is refused (`BAD_402`);
+  - both are reported to their owners;
+  - the Swarm image is ready in the data but waits for the team to draw product images.
+
+The team's folder is untouched; their design is exactly theirs.
 
 ## What comes next
 
-1. Vitalik's ask runs the real errand: the agents compare the shops, veto the trap and pay; both phones and the explainer follow it.
-2. The money buttons that already exist on our side (refund request, refund, re-order, dispatch, pause and resume, the Open switch), each used once live.
-3. One menu image from Swarm, `/live` becomes the home page, and a click-by-click script for the founder's run.
+- The owners fix the refund approval and the re-order; then each is tried once from the phones.
+- The team:
+  - hides the actions that aren't built yet, using a flag the adapter fills;
+  - draws product images;
+  - adds a pause switch;
+  - makes repeat buyers optional (OPEN).
+- The story swap (dosa, BKC, new names, photos) is a config and asset change only.
 
 ## Technical
 
-- `apps/phones/build.mjs` runs from `apps/web`'s build, before `next build`. It installs `frontend/` with its own lockfile (`npm ci`), type-checks our entry against their contract with their TypeScript, and builds two pages with their Vite 8, React plugin and Tailwind 4 into `apps/web/public/phones/` (git-ignored).
-- The story swap: a Vite plugin serves `apps/phones/story-projection.mjs`'s projection of `packages/config/story.json` in place of `frontend/src/data/story.json`. No story value is written in code; `pnpm check` is clean.
-- The live adapter (`apps/phones/src/live-adapter.ts`) implements their `DemoAdapter`: the snapshot from `/api/state/customer`, `/api/map` and `/api/merchant/export.csv`; then polls state (15 s) and the map (30 s), and follows `/api/merchant/events`, reconnecting from the last edge. `apps/phones/src/orders.ts` folds ledger rows into their `Order`, with tests (`apps/phones/test/`, run by `apps/web`'s test script).
-- Rows with no settlement transaction are the seeded history; they are left out until the phones can label them (OPEN).
-- `/live` (`apps/web/app/live/page.tsx`) frames each phone page in a same-origin iframe; on a phone the menu links straight to the phone pages.
-- Checks: `pnpm check` clean, the team's 40 tests, `apps/web` 186 tests, typecheck, and the full web build pass on Node 22.23.4.
+- **The build:** `apps/phones/build.mjs`, run by `apps/web`'s build.
+  - It installs `frontend/` (`npm ci --include=dev`), type-checks our entry against their contract, and builds two pages with their Vite into `apps/web/public/phones/`.
+  - Their `story.json` is replaced by a projection of `packages/config/story.json`.
+  - Menu images come from Swarm through each shop's Arkiv menu row: `apps/phones/menu-images.mjs`, keyless, verified by hash, with a 20 s limit, falling back to no image.
+- **The live adapter:** `apps/phones/src/live-adapter.ts`.
+  - The snapshot comes from `/api/state/customer`, `/api/map` and `/api/merchant/export.csv`, then polls and the merchant stream from two days back, with backoff.
+  - Actions POST our routes (public access, ADR-0069).
+  - `errand.ts` maps the run's SSE frames to their events. It is tested against a recorded real paid run.
+  - `orders.ts` folds ledger rows into orders. Chain events and `req:` requests are live; `hist:` rows are seeded history and stay out.
+- **The stage:** `/` and `/live` frame the two pages in same-origin iframes. `LiveRunBridge` takes each frame the customer phone posts and feeds T5's explainer through `setRun`.
+- **Public access:** `site.publicAccess` in the config makes `requirePasscode` a no-op. Server-to-server keys stay. Visitor guards apply to merchant refund and dispatch (the persona's orders only, 30 s per order) and to pause and resume (20 s).
+- **Live errands so far:** 2 of 5. One was refused because the payer was paused by a visitor; one paid.

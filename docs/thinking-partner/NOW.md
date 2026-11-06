@@ -91,15 +91,14 @@ Updated 13:33 IST, Fri 6 Nov. **The live errand pays reliably on the production 
 
 ## phones
 
-Updated 16:35 IST, Fri 6 Nov (Integration).
-- **Phase 2 is live** (#122). The first errand from `/live`:
-  - Vitalik's phone showed the agents' steps and the three shops; the trap was rejected with its refund rate and on-time rate.
-  - The explainer's lanes filled up to the signature.
-  - It was refused because the payer agent is **paused on ENS** (not by this session; asked the Coordinator).
-  - The phone then said the stream ended early. The fix: one frame that fails no longer stops the stream.
-- **Phase 3 in review:** refund request, merchant refund, re-order, dispatch, pause and resume, and the Open switch now call our routes.
-  - Pause and resume have no button in the team's app yet (their agents page is still to come), so I test them through T5's customer screen.
-- Next: one paid errand once the payer is active again; then each button once, live.
+Updated 17:05 IST, Fri 6 Nov (Integration).
+- **The errand pays from the stage:** 4.80 to Kesar Kingdom in about 107 s (tx `0x89ac…b990`). The shops were compared and the trap rejected on Vitalik's phone; the order appeared on the shop's phone; the explainer's lanes filled.
+- **Phase 3, used live:**
+  - works: the Open switch; the refund request (it reaches the shop's inbox after #127); pause and resume (through `/customer`);
+  - fails on the server, reported to the owners: the merchant refund (502) and the re-order (`BAD_402`);
+  - dispatch is automatic (about 6 s after payment).
+- **Phase 4 in review:** `/live` becomes the home page; the gulab jamun's Swarm image is read through its Arkiv menu row into the phones' data; the founder's click-by-click script is `docs/sessions/integration/test-script.md`.
+- Blockers: the two server fixes. The team's flag to hide unbuilt actions.
 
 ## website
 
