@@ -21,10 +21,11 @@ const theirStory = join(frontend, 'src/data/story.json');
 
 if (!existsSync(join(frontend, 'package.json'))) throw new Error('apps/phones: frontend/ is missing; the phones need the team folder');
 
-// Their dependencies, from their own lockfile (they are outside the pnpm workspace).
+// Their dependencies, from their own lockfile (they are outside the pnpm workspace). Their
+// toolchain is in devDependencies, which npm skips under NODE_ENV=production (Vercel).
 if (!existsSync(join(frontend, 'node_modules/.package-lock.json'))) {
   console.log('apps/phones: installing frontend/ dependencies (npm ci)');
-  execFileSync('npm', ['ci', '--no-audit', '--no-fund'], { cwd: frontend, stdio: 'inherit' });
+  execFileSync('npm', ['ci', '--include=dev', '--no-audit', '--no-fund'], { cwd: frontend, stdio: 'inherit' });
 }
 
 // Our entry and adapter against their contract and components, with their TypeScript.
