@@ -7,7 +7,7 @@
 import type { AgentRef, AgentState, DemoAdapter, DemoEvent, DemoSnapshot, Link, Money, Order } from '@/demo/contract';
 import { payingAgent, story } from '@/data/story';
 import { copy, fill } from '@/copy';
-import { amountToMicro, foldOrders, microToAmount, rowFromEdge, rowKey, rowsFromCsv, type FoldContext, type LedgerRow } from './orders';
+import { amountToMicro, foldOrders, isLive, microToAmount, rowFromEdge, rowKey, rowsFromCsv, type FoldContext, type LedgerRow } from './orders';
 import { ErrandMapper, readFrames } from './errand';
 import { txLink } from './links';
 
@@ -102,7 +102,11 @@ export class LiveAdapter implements DemoAdapter {
   private rows = new Map<string, LedgerRow>();
   private seenOrders = new Set<string>();
   private knownOrders = new Set<string>();
-  private cursor = Math.floor(Date.now() / 1000) - 30;
+  // The stream starts two days back: the export carries no refund requests, so the stream's first
+  // answer fills them in (rows already read are skipped).
+  private cursor = Math.floor(Date.now() / 1000) - 2 * 86_400;
+  // Only edges from after the page opened ring the merchant's phone.
+  private readonly openedAt = Math.floor(Date.now() / 1000) - 30;
   private last: { status: AgentState['status'] | null; used: string | null; open: boolean | null } = { status: null, used: null, open: null };
   private timers: ReturnType<typeof setInterval>[] = [];
   private source: EventSource | null = null;
@@ -116,7 +120,7 @@ export class LiveAdapter implements DemoAdapter {
     shops: story.shops.map((s) => ({ ens: s.ens, name: s.name })),
     products: (story.products as LiveProduct[])
       .filter((p) => p.priceMicro && p.quantity)
-      .map((p) => ({ shop: p.shop, name: p.name, short: p.short, unitName: p.unitName ?? p.short, priceMicro: BigInt(p.priceMicro!), quantity: p.quantity! })),
+      .map((p) => ({ id: p.id, shop: p.shop, name: p.name, short: p.short, unitName: p.unitName ?? p.short, priceMicro: BigInt(p.priceMicro!), quantity: p.quantity! })),
     txLink,
   };
 
@@ -282,7 +286,6 @@ export class LiveAdapter implements DemoAdapter {
     const key = rowKey(r);
     if (this.rows.has(key)) return false;
     this.rows.set(key, r);
-    this.cursor = Math.max(this.cursor, r.ts);
     return true;
   }
 
@@ -370,12 +373,14 @@ export class LiveAdapter implements DemoAdapter {
     } catch {
       return;
     }
-    if (!this.addRow(row) || !row.orderId || !row.tx) return;
+    this.cursor = Math.max(this.cursor, row.ts);
+    if (!this.addRow(row) || !row.orderId || !isLive(row)) return;
     const order = this.orders().find((o) => o.id === row.orderId);
     if (!order) return;
     this.emit({ type: 'order.updated', order });
+    if (row.ts < this.openedAt) return;
     if (row.kind === 'pay' || row.kind === 'renew') this.emit({ type: 'merchant.notification', kind: row.kind === 'renew' ? 'renewal' : 'new_order', orderId: order.id });
     if (row.kind === 'request') this.emit({ type: 'merchant.notification', kind: 'refund_request', orderId: order.id });
-    if (row.kind === 'refund') this.emit({ type: 'refund.settled', orderId: order.id, amount: usdt(row.amountMicro), links: [txLink(row.tx)] });
+    if (row.kind === 'refund' && row.tx) this.emit({ type: 'refund.settled', orderId: order.id, amount: usdt(row.amountMicro), links: [txLink(row.tx)] });
   }
 }
