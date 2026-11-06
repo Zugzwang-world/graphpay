@@ -49,16 +49,25 @@ export function createOwnerActions(ctx) {
   const { runner, senderFor, log = console.log } = ctx;
   const client = ctx.retryReads === false ? ctx.client : retryingReads(ctx.client);
 
-  async function setStatus(name, value, step) {
+  // An owner-only text record on a live label (status, cap): idempotent, read back before it returns.
+  async function setRecord(name, key, value, step) {
     const at = await locate(client, name);
     if (at.state.status !== STATUS.REGISTERED) return { changed: false, reason: `${at.name} is ${STATUS_NAME[at.state.status]}, not REGISTERED` };
-    const before = await readText(client, at.name, KEYS.status);
+    const before = await readText(client, at.name, key);
     if (before === value) return { changed: false, reason: `already ${value}`, name: at.name };
     const sender = senderFor(ownerRoleOf(at.name));
-    const data = encodeFunctionData({ abi: permissionedResolverAbi, functionName: 'setText', args: [dnsEncode(at.name), KEYS.status, value] });
+    const data = encodeFunctionData({ abi: permissionedResolverAbi, functionName: 'setText', args: [dnsEncode(at.name), key, value] });
     const { hash, receipt } = await runner.send(step, sender, { to: at.resolver, data });
-    await eventually(async () => (await readText(client, at.name, KEYS.status)) === value, { what: `${step}: ${KEYS.status} reads ${value}` });
-    return { changed: true, name: at.name, hash, receipt };
+    await eventually(async () => (await readText(client, at.name, key)) === value, { what: `${step}: ${key} reads ${value}` });
+    return { changed: true, name: at.name, before, hash, receipt };
+  }
+  const setStatus = (name, value, step) => setRecord(name, KEYS.status, value, step);
+
+  // The published cap (micro-USDT, a decimal string). The gate still enforces min(ENS cap, policy cap).
+  function setCap(name, capMicro) {
+    const value = String(capMicro);
+    if (!/^[1-9]\d*$|^0$/.test(value)) throw new Error(`cap must be a whole number of micro-USDT, got ${value}`);
+    return setRecord(name, KEYS.capMicro, value, 'cap');
   }
 
   // The kill: the owner unregisters the label (§6). One-shot: a killed label (or a lapsed
@@ -79,6 +88,7 @@ export function createOwnerActions(ctx) {
   return {
     pause: (name) => setStatus(name, PAUSED, 'pause'),
     resume: (name) => setStatus(name, ACTIVE, 'resume'),
+    setCap,
     kill,
   };
 }
