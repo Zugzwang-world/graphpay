@@ -75,13 +75,14 @@ Updated 23:10 IST, Fri 6 Nov (night Coordinator, `local_1caa580c-…`).
 
 ## w1-identity
 
-Updated 00:26 IST, Sat 7 Nov (W1 Identity, session `local_45f7cf5d-c31e-4dbf-b849-466f3067bdd3`).
-- **Done:** the new shop names on ENS (#158); the kill, live and proven at 00:16 IST (#175, #183).
-- **Now: the story flip** (this PR, on the Coordinator's go after W2's history). The shops go by `filter-and-fold`, `idli-index` and `tawa-tangle`, category south-indian.
-  - W4 holds errands until W5's restart.
-- **Next:**
-  1. W5 restarts the workers on the new names; that also loads the spare keeper and the owner's-cap change.
-  2. One live errand pays Filter & Fold through `filter-and-fold.graphpay.eth`.
+Updated 01:16 IST, Sat 7 Nov (W1 Identity, session `local_45f7cf5d-c31e-4dbf-b849-466f3067bdd3`).
+- **All three items are done and proven live.**
+  - **The new shop names** are on ENS (#158).
+  - **The story flip** merged at 00:31 (#189).
+  - **A live errand pays Filter & Fold through `filter-and-fold.graphpay.eth`** (01:07, after the 01:00 workers restart). On chain the shop is the new name, the mirror wrote it to the new shop, and ENS acceptance passes 101 of 101.
+  - **The kill** works on production (00:16; #175, #183). A fresh spare is ready, and from now on the workers make the next one after each kill.
+- **Also:** the owner's cap reaches the payer's pass through the watcher, never above the story's cap (#191, for W3's #179).
+- **Running:** nothing. **Next:** on request; `disposable-3` is the next kill's spare.
 
 ## w2-city
 

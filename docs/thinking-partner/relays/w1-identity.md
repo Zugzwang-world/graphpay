@@ -1,46 +1,51 @@
-# Relay: w1-identity (W1 Identity), 00:20 IST, Sat 7 Nov
+# Relay: w1-identity (W1 Identity), 01:16 IST, Sat 7 Nov
 
 ## In plain words
 
-- W1 gives the dosa story's shops their own names on ENS, flips the story to them, and makes the kill work live.
-- **Done: the new shop names are on ENS** (#158): `filter-and-fold.graphpay.eth`, `idli-index.graphpay.eth` and `tawa-tangle.graphpay.eth`, each with its three agents.
+- W1 gave the dosa story's shops their own names on ENS, flipped the story to them, and made the kill work live. **All three are done and proven on the production site.**
+- **The new shop names** (#158) are `filter-and-fold.graphpay.eth`, `idli-index.graphpay.eth` and `tawa-tangle.graphpay.eth`, each with its storefront, risk and dispatch agents.
   - Each pays into the wallet its old shop used, so no money moved.
   - The old names stay registered as history.
-- **Done: the kill works on the production site** (#175). At 00:16 IST the site killed the spare agent `disposable-2.vitalik.graphpay.eth`:
-  1. its owner's wallet unregistered its name on Sepolia;
-  2. 9 s later, the watcher revoked its spending pass on Whitechain;
-  3. its next payment, a 0.80 filter coffee, was refused because the name is gone, and the refusal is recorded on Arkiv;
-  4. a fresh spare, `disposable-3`, was ready with its name, its pass and 1 test USDT at 00:19.
-  - This once I made the fresh spare by hand. From W5's next workers restart, the workers make one after every kill.
-- **Ready: the story flip.** It sets the three labels and the category "south-indian" in `story.json` (branch `claude/w1-flip`, all tests pass). It waits for the Coordinator's go, after W2's Arkiv history.
-- **In review: the owner's cap.** For W3's cap route (#179), a cap the owner sets in ENS reaches the payer's spending pass through the watcher. It can lower the pass, but never lift it above the story's cap.
+- **The story flip** (#189, 00:31 IST): the site, the agents and the mirror now use the new names, with category south-indian.
+- **The proof:** after W5's workers restart (01:00), the first errand paid Filter & Fold 4.80 at 01:07 through its new name.
+  - On chain, the payment names the new shop and pays the old wallet.
+  - The mirror recorded it under the new shop (241 to 242 orders).
+  - Every ENS check passes, including the payee of that order.
+- **The kill** (#175, 00:16 IST): the site's Kill button killed the spare `disposable-2`.
+  - The watcher revoked its pass 9 s later.
+  - Its next payment was refused and recorded on Arkiv.
+  - A fresh spare, `disposable-3`, is ready. From now on the workers make the next spare after each kill by themselves.
+- **For W3** (#191): a cap the owner sets in ENS now reaches the payer's spending pass. It can move it between 0 and the story's cap, never above it.
 
 ## Technical
 
-- **Kill evidence:** `docs/sessions/identity/kill-disposable-2.json`, written by `node scripts/ens/kill-proof.mjs --yes`.
-  - The script reads the spare from GET, POSTs the kill to the production route, then checks the chains and Arkiv itself:
-    - **unregistered:** the name is no longer REGISTERED;
-    - **revoked:** `policies(node).revoked`, and the `AgentPolicySet` transaction;
-    - **recorded:** the `fail` edge, by its ref, through GraphQL `order(id)`;
-    - **fresh spare:** a new spare appears on GET.
-  - The transactions:
-    - Unregister: [0x08f1…fff5](https://sepolia.etherscan.io/tx/0x08f116fc2ceebb93e1de209fcbb2f60ac53c094c25b3b06d7da6eb16f194fff5), Sepolia block 12,078,424, 00:16:24 IST.
-    - Revoke: [0x40d5…233a](https://explorer.testnet.whitechain.io/tx/0x40d51ac52b440bc33bb6ec2686fe53c53b77be370a84970a0790a744bbd8233a), Whitechain block 12,394,425, 00:16:33 IST.
-    - Refusal: 402 `ENS_EXPIRED_OR_REVOKED`, order `0x6602…e934`. Edge `att:0x6602…:0xd2f6…:5426c309`, from `disposable-2.vitalik.graphpay.eth` (the shop's old name, because the flip has not happened yet).
-- **The pre-flight** came first, at no risk. The route's own payment code ran for the long-dead `disposable-1` against production and was refused, with its edge on Arkiv. That proved the payment and record path before spending a spare.
-- **The fresh spare** came from `node scripts/ens/spare.mjs --yes`:
-  - Sepolia: [0x5f1c…10ad](https://sepolia.etherscan.io/tx/0x5f1c91b29e2f198805f48822d4ed0deda18dbbf624d527592252cd56defc10ad), [0xe19f…21f7](https://sepolia.etherscan.io/tx/0xe19f27fa4e65db93119f23301f56ed145a7d131893dde4e93c85ee86505821f7), [0xbec8…5145](https://sepolia.etherscan.io/tx/0xbec80ebc4024e52cd648a6577ee21efa719f926c4bfbd5c8a3eb829129555145).
-  - Its pass: [0x5825…d608](https://explorer.testnet.whitechain.io/tx/0x5825d9ffaeb375b6d0f67750747deddf7aaadef6ed9d8d2ada003fc7a2afd608). Its 1 test USDT: [0x83a3…30d1](https://explorer.testnet.whitechain.io/tx/0x83a3de586ab8039365065ab241219694b7fd8b08893a66786f75d4d9c84130d1).
-  - FUNDER has now spent 2 of the 4 test USDT the Coordinator approved; both rows are in `docs/technical/WALLETS.md` §2b.
-- **Why it was by hand:** the workers running at the kill started at 23:52 IST, before #175. Their watcher revoked the pass (that code was already there), but they don't have the keeper hook yet. W5's restart after the flip loads it.
-- **The owner's cap** (branch `claude/w1-owner-cap`, reviewer running):
-  - On a `graphpay.cap_micro` change, the watcher reads the record as it is now, never the event's value, since a replayed batch would otherwise make the pass flap.
-  - It sends `ownerCapMicro` for a live name at its epoch.
-  - The sink writes min(owner's cap, configured cap) and keeps the wallet, epoch and expiry. It skips a revoked policy, another epoch, or a name outside the configured list.
-  - A failed read or write never holds up a kill in the same batch; the ticker retries it.
+- **The errand:** tx [0xcc69…5cb5](https://explorer.testnet.whitechain.io/tx/0xcc69b7bb16eb17c9dede32da4765a90ca15a6af18397011efae6a9eb599e5cb5) (Whitechain block 12,397,500). The evidence is in `docs/sessions/identity/errand-filter-and-fold.json`:
+  - `PaymentSettled.shopNode` = namehash(`filter-and-fold.graphpay.eth`) `0xc82a07d8…`, and the order's merchant is SHOP_KESAR `0x2694…3E`;
+  - the mirror's `pay` edge for order `0x305c2658…` goes to `filter-and-fold.graphpay.eth`.
+  - `node scripts/ens/acceptance.mjs` (no relabel): 101 pass, 0 fail. B9 (a) checks this order's merchant against the ENS address. idli-index and tawa-tangle are skipped until their first settled payment.
+- **The flip:** six lines in `story.json` (the labels and categories), plus `apps/phones/test/errand.test.ts`, which replays the Nov 5 recording under today's names. The full suite passed.
+- **The order of the night:**
+  1. W2's history went onto Arkiv (#167).
+  2. The flip merged and deployed.
+  3. #191 merged.
+  4. The old-name mirror wrote the 00:25 and 00:31 payments under `kesar-kingdom`.
+  5. W5 restarted the workers once from main `ff67dac` (the mirror is now pid 30776, and the log shows "spare keeper: spare ready: disposable-3").
+  6. The proof errand ran.
+  7. W4 was released, then W3.
+- **The kill evidence:** `docs/sessions/identity/kill-disposable-2.json`.
+  - The unregister: [0x08f1…fff5](https://sepolia.etherscan.io/tx/0x08f116fc2ceebb93e1de209fcbb2f60ac53c094c25b3b06d7da6eb16f194fff5).
+  - The revoke: [0x40d5…233a](https://explorer.testnet.whitechain.io/tx/0x40d51ac52b440bc33bb6ec2686fe53c53b77be370a84970a0790a744bbd8233a).
+  - The refusal: 402 `ENS_EXPIRED_OR_REVOKED`, recorded as a `fail` edge.
+  - The spare keeper: `scripts/ens/spare.mjs`. FUNDER has spent 2 of the 4 test USDT the Coordinator approved (WALLETS.md §2b).
+- **The owner's cap** (#191, with W3's ADR-0079):
+  - On a `graphpay.cap_micro` change, the watcher reads the record as it is now and sends min(owner's cap, configured cap) to the sink. Kills in the same batch go first.
+  - It keeps the chain's wallet, epoch and expiry. It never reopens a revoked pass, and it sends nothing if another policy writer moved the pass since it was read.
+  - Retries are bounded, and the chain id is checked before signing.
+  - One known gap is in the ADR: a cap set while the workers are down waits for the next change.
+- **Reviewer:** run on every signing change (the rename run, the kill route, the keeper, the cap sync). Every blocking finding was fixed before merging.
 
 ## State
 
-- **Running:** this session, `local_45f7cf5d-c31e-4dbf-b849-466f3067bdd3` (brief `briefs/2302-w1-identity.md`).
+- **Running:** nothing (this session, `local_45f7cf5d-c31e-4dbf-b849-466f3067bdd3`; brief `briefs/2302-w1-identity.md`).
 - **Blockers:** none.
-- **Waiting on:** the Coordinator's go for the flip, and W5's restart after it.
+- **Next:** on request. The site's `GET /api/customer/kill-disposable` names `disposable-3` for the next kill. Spare keys up to `DISPOSABLE_9` are in Vercel; 2 of the 4 approved test USDT are left.
