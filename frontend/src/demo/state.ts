@@ -62,6 +62,8 @@ export function applyEvent(s: DemoSnapshot, e: DemoEvent): DemoSnapshot {
       }));
     case 'agent.cap.changed':
       return mapAgent(s, e.agent.ens, (a) => (a.pass ? { ...a, pass: { ...a.pass, cap: e.cap } } : a));
+    case 'agent.pass.period':
+      return mapAgent(s, e.agent.ens, (a) => (a.pass ? { ...a, pass: { ...a.pass, used: e.used, expiresAt: e.expiresAt } } : a));
     case 'cap.change.refused':
       return mapAgent(s, e.agent.ens, (a) => ({
         ...a,

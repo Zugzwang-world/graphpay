@@ -41,7 +41,7 @@ import {
 } from './rules';
 import { story, productById, payingAgent, mainAgent, agentByRole, type StoryProduct } from '@/data/story';
 import { add, cmp, formatMoney, toCents, usdt } from '@/lib/money';
-import { formatDateTime, isoDate } from '@/lib/time';
+import { DAY, formatDateTime, isoDate } from '@/lib/time';
 import { copy, fill } from '@/copy';
 
 /* ---------- clock and scheduler (replaceable in tests) ---------- */
@@ -671,7 +671,16 @@ export class MockAdapter implements DemoAdapter {
       this.emit({ type: 'error', message: copy.mockRenewal.none, recoverable: false });
       return;
     }
-    this.later('renewalCharge', () => this.chargeRenewal(r));
+    this.later('renewalCharge', () => { this.advancePassForRenewal(r); this.chargeRenewal(r); });
+  }
+
+  /** The demo control brings a future scheduled charge forward with its new daily pass period. */
+  private advancePassForRenewal(r: Renewal): void {
+    const agent = this.state.agents.find((candidate) => candidate.ref.ens === r.payingAgent.ens);
+    if (!agent?.pass || !r.nextChargeAt || r.nextChargeAt < agent.pass.expiresAt) return;
+    agent.pass.used = usdt('0');
+    agent.pass.expiresAt = startOfCityDay(r.nextChargeAt) + DAY;
+    this.emit({ type: 'agent.pass.period', agent: agent.ref, used: agent.pass.used, expiresAt: agent.pass.expiresAt });
   }
 
   private chargeRenewal(r: Renewal): void {

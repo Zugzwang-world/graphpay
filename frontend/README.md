@@ -28,6 +28,8 @@ F6 merchant journey: Shop Home starts Closed with an empty day. Opening it plays
 
 F7 refunds: the customer Orders page lists paid orders and opens a detail with live order and refund trackers. Request refund reveals amount, reason and photo in sequence; the photo picker accepts images or PDF files up to 10 MB. The merchant Refund Requests page shows the waiting inbox, lets the shop approve the asked or another amount, or decline with a required note. Both phones read Requested, Accepted, Refunded and Declined from the shared order snapshot. Explorer links stay visibly marked as mock.
 
+F8 renewals: from a customer order, **Make this order a renewal** opens the frequency, day and start-date pickers. The fit check compares one future charge with the payer's period cap. The customer page shows Charged, Skipped (shop closed), and Cancelled states; the merchant page groups charged renewals and expands each customer's order history. **Run next renewal now** brings the next scheduled charge forward and advances the payer's daily pass period when that charge is on a later day. The period change is an event shared by both phones. Closing the shop demonstrates Skip and automatic Retry.
+
 ## How the mock engine works
 
 - **One store for both phones.** `MockAdapter` (`src/demo/mock-adapter.ts`) holds the in-memory state. Both apps read it through `DemoProvider` and the same snapshot, so an action in one phone appears live in the other.
@@ -126,6 +128,7 @@ All are marked `PROPOSED (mock only)` in `src/demo/contract.ts`.
 - `Link.mock`: marks a mock explorer link, so it is never shown as real.
 - `RefusalReason` `shop_closed`; `payment.refused` with `agent`, `attempted`, `renewalId`.
 - Events `shop.status` (the shared open flag), `agent.cap.changed`, `shops.compared` (shop choices for C2) and `demo.reset`.
+- Event `agent.pass.period` keeps both phones in sync when the demo control advances a future renewal into a new daily pass period.
 - `startRenewal(orderId, schedule)` keeps its string signature; the mock encodes the schedule as JSON in it.
 
 ## Milestones
@@ -138,7 +141,7 @@ All are marked `PROPOSED (mock only)` in `src/demo/contract.ts`.
 - [x] **F5** Customer journey 1: desk, shop cards, quote and receipt
 - [x] **F6** Merchant journey 1: Shop Home, order detail
 - [x] **F7** Refund: orders, refund wizard, refund requests
-- [ ] **F8** Renewals: customer and merchant
+- [x] **F8** Renewals: customer and merchant
 - [ ] **F9** Agents and spending pass
 - [ ] **F10** Payouts and export, reorder, empty states
 - [ ] **F11** Polish and QA

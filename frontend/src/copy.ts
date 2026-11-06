@@ -41,8 +41,8 @@ export const copy = {
 
   /** Temporary text inside the phones until the pages are built (F3–F10). */
   placeholder: {
-    customer: 'Renewals and agents arrive in the next milestones.',
-    merchant: 'Renewals and payouts arrive in the next milestones.',
+    customer: 'Agents and spending pass arrive in the next milestone.',
+    merchant: 'Payouts and exports arrive in a later milestone.',
   },
 
   dev: {
@@ -284,6 +284,7 @@ export const copy = {
       ],
       goToOrders: 'Go to Orders',
       setupTitle: 'Set up renewal',
+      alreadySet: 'This order already has a renewal. You can manage it below.',
       howOften: 'How often',
       frequencies: { daily: 'Daily', weekly: 'Weekly', biweekly: 'Every 2 weeks', monthly: 'Monthly' },
       weekday: 'Day',

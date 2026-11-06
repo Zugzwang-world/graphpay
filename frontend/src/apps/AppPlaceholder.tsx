@@ -22,9 +22,11 @@ import { CustomerDesk } from './customer/CustomerDesk';
 import { CustomerQuoteSheet } from './customer/CustomerQuoteSheet';
 import { CustomerOrders } from './customer/CustomerOrders';
 import { RefundWizard } from './customer/RefundWizard';
+import { CustomerRenewals } from './customer/CustomerRenewals';
 import { MerchantHome } from './merchant/MerchantHome';
 import { MerchantOrderDetail } from './merchant/MerchantOrderDetail';
 import { MerchantRefunds } from './merchant/MerchantRefunds';
+import { MerchantRenewals } from './merchant/MerchantRenewals';
 
 const customerPages: AppPage[] = [
   { id: 'desk', label: copy.customer.pages.desk },
@@ -53,15 +55,15 @@ export function AppPlaceholder({ app }: { app: 'customer' | 'merchant' }) {
   const selectedOrder = snapshot?.orders.find((order) => order.id === selectedMerchantOrder);
   return <AppShell app="merchant" pages={merchantPages} homeTitle={story.shop.name} subtitle={subtitle}
     onMenuNavigate={(page) => { if (page === 'refunds') setMerchantRefundFocus(null); }}
-    getPageTitle={(page) => page === 'order-detail' && selectedOrder ? fill(copy.merchant.order.title, { number: selectedOrder.number }) : undefined}
+    getPageTitle={(page) => page === 'order-detail' && selectedOrder ? fill(copy.merchant.order.title, { number: selectedOrder.number }) : page === 'renewals' ? copy.merchant.renewals.title : undefined}
     getPageSubtitle={(page) => page === 'order-detail' && selectedOrder ? fill(copy.merchant.order.via, { owner: selectedOrder.owner.name, agent: selectedOrder.buyer.role }) : undefined}
-    renderPage={(page) => page === 'home' || page === 'order-detail' || page === 'refunds' ? <MerchantRoute page={page} selectedOrder={selectedMerchantOrder} refundFocus={merchantRefundFocus} onSelectOrder={setSelectedMerchantOrder} onRefundFocus={setMerchantRefundFocus} /> : <PlaceholderPage app="merchant" page={page} pages={merchantPages} />} />;
+    renderPage={(page) => page === 'home' || page === 'order-detail' || page === 'refunds' || page === 'renewals' ? <MerchantRoute page={page} selectedOrder={selectedMerchantOrder} refundFocus={merchantRefundFocus} onSelectOrder={setSelectedMerchantOrder} onRefundFocus={setMerchantRefundFocus} /> : <PlaceholderPage app="merchant" page={page} pages={merchantPages} />} />;
 }
 
 function CustomerShell({ subtitle }: { subtitle?: string }) {
   const { selectOrder } = useCustomerJourney();
   return <AppShell app="customer" pages={customerPages} homeTitle={story.customer.name} subtitle={subtitle}
-    onMenuNavigate={(page) => { if (page === 'orders' || page === 'refund') selectOrder(null); }}
+    onMenuNavigate={(page) => { if (page === 'orders' || page === 'refund' || page === 'renewals') selectOrder(null); }}
     renderPage={(page) => <><PlaceholderPage app="customer" page={page} pages={customerPages} /><LiveQuoteSheet /></>} />;
 }
 
@@ -70,6 +72,7 @@ function MerchantRoute({ page, selectedOrder, refundFocus, onSelectOrder, onRefu
   const navigate = useAppNavigation();
   if (page === 'order-detail') return <MerchantOrderDetail orderId={selectedOrder} onRefund={() => { onRefundFocus(selectedOrder); navigate('refunds'); }} />;
   if (page === 'refunds') return <MerchantRefunds focusedOrderId={refundFocus} onHome={() => navigate('home')} />;
+  if (page === 'renewals') return <MerchantRenewals />;
   return <MerchantHome onOrderDetails={(id) => { onSelectOrder(id); void adapter.markOrderSeen?.(id); navigate('order-detail'); }} />;
 }
 
@@ -95,6 +98,7 @@ function PlaceholderPage({ app, page, pages }: { app: 'customer' | 'merchant'; p
   if (app === 'customer' && page === 'desk') return <CustomerDesk />;
   if (app === 'customer' && page === 'orders') return <CustomerOrders />;
   if (app === 'customer' && page === 'refund') return <RefundWizard />;
+  if (app === 'customer' && page === 'renewals') return <CustomerRenewals />;
 
   return <div className="flex flex-col gap-3 px-4 pt-4 pb-8">
     <p className="rounded-card border border-line bg-surface p-4 text-body text-muted shadow-card">{copy.placeholder[app]}</p>

@@ -240,6 +240,8 @@ export type DemoEvent =
   | { type: 'shop.status'; open: boolean }
   /** PROPOSED (mock only): the owner changed an agent's cap. */
   | { type: 'agent.cap.changed'; agent: AgentRef; cap: Money; links: Link[] }
+  /** PROPOSED (mock only): Run next renewal now advanced the agent's daily pass period. */
+  | { type: 'agent.pass.period'; agent: AgentRef; used: Money; expiresAt: number }
   /** PROPOSED (mock only): shop choices for the thread (C2). */
   | { type: 'shops.compared'; errandId?: string; choices: ShopChoice[] }
   /** PROPOSED (mock only): the demo was reset; reload the snapshot. */

@@ -238,11 +238,13 @@
 .merchant-meme-enter { animation: merchant-meme-in 220ms var(--ease-out) both; }
 .merchant-new-row { animation: merchant-row-in 330ms var(--ease-out) both, merchant-row-pulse 2s ease-in-out 330ms 2; }
 .merchant-summary-enter { animation: merchant-meme-in 200ms var(--ease-out) both; }
+.renewal-arrive { animation: merchant-row-in 330ms var(--ease-out) both, merchant-row-pulse 2s ease-in-out 330ms 1; }
+.renewal-history-enter { animation: merchant-meme-in 200ms var(--ease-out) both; }
 
 @media (prefers-reduced-motion: reduce) {
   .keyboard-enter { animation-name: none; }
   .tracker-check, .tracker-current, [class*="avatar-"], [class*="fox-"] * { animation-name: none !important; }
   .thread-user-enter, .thread-agent-enter, .quote-sheet-enter { animation: page-fade 120ms ease-out both !important; }
   .thread-dots i, .payment-coin { animation: none !important; }
-  .merchant-meme-enter, .merchant-new-row, .merchant-summary-enter { animation: page-fade 120ms ease-out both !important; }
+  .merchant-meme-enter, .merchant-new-row, .merchant-summary-enter, .renewal-arrive, .renewal-history-enter { animation: page-fade 120ms ease-out both !important; }
 }
