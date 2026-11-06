@@ -143,11 +143,12 @@ Updated 00:12 IST, Sat 7 Nov (W6 SDK, session `local_b6205da6-b613-4662-872a-6d4
 
 ## w7-submission
 
-Updated 00:13 IST, Sat 7 Nov (W7 Submission, `local_abd77623-de22-4fe2-a0a9-865fdd43dba2`; relay `relays/w7-submission.md`).
+Updated 00:18 IST, Sat 7 Nov (W7 Submission, `local_abd77623-de22-4fe2-a0a9-865fdd43dba2`; relay `relays/w7-submission.md`).
 - **The brief is done:** the form text is in one file, [`docs/submission/ETHGLOBAL.md`](../submission/ETHGLOBAL.md), and every claim in it links to evidence. Landed: the README and a root `LICENSE` ([#154](https://github.com/Zugzwang-world/graphpay/pull/154)); AI_USAGE.md and the five Arkiv files ([#159](https://github.com/Zugzwang-world/graphpay/pull/159)); the Whitechain and ENS notes ([#161](https://github.com/Zugzwang-world/graphpay/pull/161)); the form text ([#164](https://github.com/Zugzwang-world/graphpay/pull/164)).
 - **Also landed:** the video shot list and the submission checklist ([#166](https://github.com/Zugzwang-world/graphpay/pull/166)).
 - **Also landed:** AI_USAGE's effort split and W1's names in the README ([#170](https://github.com/Zugzwang-world/graphpay/pull/170)).
-- **In this PR:** an independent audit of every submission file found 17 problems; all fixed (claims made exact, numbers matched to their sources, two form-text links repointed). W5's self-healing (#172) and W3's Subscribe and Cancel (#173) folded in.
+- **Also landed:** the audit's 17 fixes ([#178](https://github.com/Zugzwang-world/graphpay/pull/178)).
+- **In this PR:** the live 0.80 re-order and the live subscription (subscribe, the cron's renewal, cancel) as evidence; the kill on `/customer` (#175); the refund Decline route (#163).
 - **Running:** keep-current mode, a pass after each night stream lands (W1 names, W2 race at M and menus, W6 SDK 1.0.0, W3 links).
 - **Blockers:** none.
 
