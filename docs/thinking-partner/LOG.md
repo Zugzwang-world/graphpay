@@ -148,3 +148,7 @@ One line per PR: time (IST) · activity · result · PR link. Append under your 
 ## w3-payments
 
 - 23:40 IST · w3-payments · in PR: fix(pay): "Another coffee" re-orders the filter coffee for 0.80 (order.reorder.sku) · https://github.com/Zugzwang-world/graphpay/pull/155
+
+## w6-sdk
+
+- 23:55 IST · w6-sdk · arkiv-graph 1.0.0: five bugs fixed (paging past rows that do not fit, row lifetimes, atomic split writes, refused batches, the predicate budget), every export documented and typed, the quickstart first, the reference app linked · sdk/arkiv-graph-1.0.0

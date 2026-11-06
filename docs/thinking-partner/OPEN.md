@@ -168,6 +168,10 @@ Updated 23:38 IST, Fri 6 Nov (W7 Submission).
 
 - **Acceptance E1 reads the old clock deadline** (owner: the Coordinator, who regenerates acceptance). What: `acceptance/checks.mjs` E1 expects the run's deadline to contain `T23:59:00` (`order.deadlineLocal`); the request now says "delivered within an hour". Why: E1 would fail on every fresh run. Recommendation: expect the deadline one hour after the run's request, to the minute (`result.mandate.deadlineIso`); E1 needs a fresh `e2e:food` run anyway.
 
+## w6-sdk
+
+- **npm's web approval for both SDKs at 1.0.0** (owner: the founder). What: W6 runs `npm login` (the sign-in link), then publishes both packages one after the other (one approval link, which lasts about 5 minutes; last time npm reused it for the second package). Where: the links come in this chat and as a notification; open them in the browser signed in to npm as the owner of `graphpay_ethglobal`. Why: the brief's done-when is both packages on npm at 1.0.0. Recommendation: about 10 minutes at the browser, as soon as both PRs are merged.
+
 ## frontend
 
 - **/customer's "By 23:59" chip** (from w4-agents; owner: the frontend pass). What: `apps/web/components/customer-screen.tsx` shows `order.deadlineLocal`, but the request is now relative. Why: the chip and the request disagree. Recommendation: show "within an hour", or the run's deadline from the result frame (`result.mandate.deadlineIso`); no new route or event is needed.
