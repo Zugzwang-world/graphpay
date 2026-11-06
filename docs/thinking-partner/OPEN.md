@@ -66,6 +66,7 @@ Agents (T4) and Join add one row per full errand run, so the presets can be cali
 | 04:40 | Join e2e:food real, payer | testing | `claude-opus-5-5`, xhigh | 88.8 | $0.2623 | approved by the shop; the signer answered a headers object, so nothing was signed (fixed) |
 | 04:43 | Join e2e:food real, payer (the counting run) | testing | `claude-opus-5-5`, xhigh | 122.1 | $0.2986 | **paid** 4.80 on Whitechain, delivered, refunded 0.80; A–E pass |
 | 10:41–10:42 | Join live runner on the production site (`/api/agents/run`), three runs, payer | live | `kimi-k3.1-pro-highspeed`, high | 11.9, 9.4, 7.6 | ≤ $0.025 each (1,225 and 1,187 tokens; the server's `apiCostUsd` line is in the Vercel log, not read here) | no-purchase: the concierge answered ("I'll find the best gulab jamun options…") and stopped without delegating to the scout and analyst; nothing signed |
+| 10:47 | Join live runner on the production site, payer (after T4's Kimi fix, PR 92) | live | `kimi-k3.1-pro-highspeed`, high | 85.0 | not read (the server's `apiCostUsd` line is in the Vercel log) | refused before signing: the team ranked and chose kesar (0.913), the risk agent approved the payer, then the hosted shop's 402 step answered "quote write failed" (W_DIRECTORY; most likely a clash with this run's presence batches, now held around the 402 step, PR 93); 6 agents, 16 tool calls |
 
 ## Kickoff rules and booth questions (closed; rolled up 06:55 IST)
 
