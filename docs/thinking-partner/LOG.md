@@ -154,6 +154,7 @@ One line per PR: time (IST) · activity · result · PR link. Append under your 
 - 23:34 IST · w3-payments · merged: fix(pay): "Another coffee" re-orders the filter coffee for 0.80; paid live, tx 0xf1d7…2b4a, its edges on Arkiv · https://github.com/Zugzwang-world/graphpay/pull/155
 - 00:00 IST · w3-payments · in PR: feat(pay): subscribe and cancel the Sunday box on the demo clock; the cron renews within the signed allowance
 - 23:45 IST · w3-payments · in PR: feat(pay): the shop can decline a refund request, recorded on Arkiv (reviewer's two blocking items fixed: a refund the graph has not shown yet stops a decline; the order page words it "Refund declined") · https://github.com/Zugzwang-world/graphpay/pull/163
+- 23:55 IST · w3-payments · in PR: feat(pay): the limits live: over the pass refused and recorded; the agent's own cap raise refused, with its revert reason (after review: the attempt goes to the facilitator's verify step only, never settled) · https://github.com/Zugzwang-world/graphpay/pull/169
 
 ## w2-city
 
