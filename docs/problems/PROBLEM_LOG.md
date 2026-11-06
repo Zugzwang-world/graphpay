@@ -61,6 +61,13 @@ Cause: `sendChunk`'s direct path adopted `res.txHash`, which SDK 1.0.1 takes fro
 Fix: `arkivTransport` records the hash of every `eth_sendRawTransaction` it sends (`sentHashes`); the writer treats a returned hash it did not send as a replacement (next nonce, or `NONCE_TAKEN` with a fixed nonce; a pinned resend defers to the recovery path). ArkivSim tests land a transaction from a second transport at the same nonce and fail without the fix.
 Prevention: any new place that builds a writer passes `sentHashes` (both `connect` helpers do); the replacement tests stay.
 
+### P-arkiv-4: the Arkiv access key's quota ran out and every production read failed
+When: 2026-11-06 about 21:36 IST · Activity: arkiv · Cost: the map and the phones' live state showed nothing until the fix; no data lost
+Symptom: `/api/map` answered 502 "the graph did not answer" and `/api/state/customer` 502 "a source did not answer"; chain heads and `eth_chainId` still answered.
+Cause: the keyed endpoint's quota was spent (`429 QUOTA_EXCEEDED`, `arkiv-quota-used-percent: 100`) while its `ratelimit` header still showed plenty of per-window room, so the per-second limit looked fine. It was the booth question about the monthly quota (ADR-0044: "unknown, log the header"). We logged `ratelimit` but not the quota header, and a 429 with that body was treated as a plain failure.
+Fix: `arkivTransport({ fallbackUrl })` repeats a call refused with `QUOTA_EXCEEDED` on the keyless public endpoint and keeps using it for 10 minutes before trying the key again; `connectArkiv` sets it whenever it has a key; tests in `packages/arkiv-graph/test/quota.test.mjs`. Until the deploy, removing `ARKIV_ACCESS_KEY` from the Vercel production environment has the same effect.
+Prevention: the status route should show `arkiv-quota-used-percent`; seeds and benchmark reruns spend the same quota as production, so they should run on the keyless endpoint.
+
 ## records
 
 ### P-records-1: the worktree sessions' prompt logs land in the main checkout

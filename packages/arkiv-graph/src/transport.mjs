@@ -9,7 +9,7 @@ import { createPublicClient, createWalletClient } from '@arkiv-network/sdk';
 import { defineChain, http } from 'viem';
 
 export function newStats() {
-  return { calls: 0, requestBytes: 0, responseBytes: 0, status: {}, lowestRemaining: null, limit: null, waits: 0, byMethod: {} };
+  return { calls: 0, requestBytes: 0, responseBytes: 0, status: {}, lowestRemaining: null, limit: null, waits: 0, fallbacks: 0, byMethod: {} };
 }
 
 // "limit=5000, remaining=4990, reset=10" → { limit, remaining, reset }
@@ -63,10 +63,13 @@ export function isRequestTooLarge(error) {
 // A viem transport to one Arkiv URL. `fetchFn` swaps the network (ArkivSim's fetch);
 // `secrets` are redacted from errors; `stats` collects calls, bytes, statuses and the
 // lowest `ratelimit` remaining; `log` gets { method, status, ms, ratelimit } per call,
-// never the URL.
-export function arkivTransport({ url, fetchFn = globalThis.fetch, secrets = [], timeout = 15_000, stats = newStats(), log = null, lowWater = 0.1, sleep = (ms) => new Promise((r) => setTimeout(r, ms)) } = {}) {
+// never the URL. `fallbackUrl` (a keyless public endpoint) takes over when the primary
+// answers 429 QUOTA_EXCEEDED (a keyed endpoint whose quota ran out): the refused call is
+// repeated there, later calls go there for `fallbackMs`, then the primary is tried again.
+export function arkivTransport({ url, fallbackUrl = null, fallbackMs = 10 * 60_000, fetchFn = globalThis.fetch, secrets = [], timeout = 15_000, stats = newStats(), log = null, lowWater = 0.1, sleep = (ms) => new Promise((r) => setTimeout(r, ms)) } = {}) {
   if (typeof url !== 'string' || url === '') throw new Error('arkiv-graph: an RPC URL is required');
   let waitUntil = 0;
+  let fallbackUntil = 0;
   const metered = async (input, init = {}) => {
     const now = Date.now();
     if (waitUntil > now) {
@@ -79,7 +82,17 @@ export function arkivTransport({ url, fetchFn = globalThis.fetch, secrets = [], 
     stats.calls += 1;
     stats.byMethod[method] = (stats.byMethod[method] ?? 0) + 1;
     stats.requestBytes += Buffer.byteLength(body);
-    const response = await fetchFn(input, init);
+    let response = await fetchFn(fallbackUrl && Date.now() < fallbackUntil ? fallbackUrl : input, init);
+    if (fallbackUrl && response.status === 429 && Date.now() >= fallbackUntil) {
+      const refused = await response.clone().text().catch(() => '');
+      if (/QUOTA_EXCEEDED/.test(refused)) {
+        stats.status[429] = (stats.status[429] ?? 0) + 1;
+        stats.fallbacks += 1;
+        fallbackUntil = Date.now() + fallbackMs;
+        log?.({ event: 'quota-exhausted-fallback', method, fallbackMs });
+        response = await fetchFn(fallbackUrl, init);
+      }
+    }
     stats.status[response.status] = (stats.status[response.status] ?? 0) + 1;
     const rl = parseRateLimit(response.headers.get('ratelimit'));
     if (rl) {

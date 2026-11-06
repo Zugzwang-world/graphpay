@@ -74,12 +74,12 @@ export declare class WriteRevertedError extends Error { txHash?: Hex }
 export declare class WriteUncertainError extends Error { nonce?: number }
 export declare class WriteNonceTakenError extends Error { code: 'NONCE_TAKEN'; nonce: number }
 
-export interface TransportStats { calls: number; requestBytes: number; responseBytes: number; status: Record<string, number>; lowestRemaining: number | null; limit: number | null; waits: number; byMethod: Record<string, number> }
+export interface TransportStats { calls: number; requestBytes: number; responseBytes: number; status: Record<string, number>; lowestRemaining: number | null; limit: number | null; waits: number; fallbacks: number; byMethod: Record<string, number> }
 export declare function newStats(): TransportStats;
 export declare function parseRateLimit(header: string | null): { limit: number; remaining: number; reset?: number } | null;
 export declare function redactError<E>(error: E, secrets: string[]): E;
 export declare function isRequestTooLarge(error: unknown): boolean;
-export declare function arkivTransport(options: { url: string; fetchFn?: typeof fetch; secrets?: string[]; timeout?: number; stats?: TransportStats; log?: (entry: Record<string, unknown>) => void; lowWater?: number }): Transport & { stats: TransportStats; sent: Set<string> };
+export declare function arkivTransport(options: { url: string; fallbackUrl?: string | null; fallbackMs?: number; fetchFn?: typeof fetch; secrets?: string[]; timeout?: number; stats?: TransportStats; log?: (entry: Record<string, unknown>) => void; lowWater?: number }): Transport & { stats: TransportStats; sent: Set<string> };
 export declare function arkivChain(options: { id: number; name?: string; symbol?: string }): Chain;
 export declare function arkivClients(options: { transport: Transport; chain: Chain; account?: unknown; pollingInterval?: number }): { publicClient: PublicArkivClient; walletClient: WalletArkivClient | null; chain: Chain; stats: TransportStats; sentHashes: Set<string> };
 export declare function assertChain(client: PublicArkivClient, expected: number): Promise<number>;
