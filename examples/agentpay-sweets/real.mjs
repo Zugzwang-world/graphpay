@@ -10,7 +10,7 @@ import { appendFileSync, existsSync, readFileSync } from 'node:fs';
 import { erc20Abi, formatEther } from 'viem';
 import { config, story } from '@graphpay/config';
 import { checkoutAbi } from '@graphpay/contracts';
-import { createReferenceRelayer, formatUsdt, readSpendingPass, whitechainNetwork } from '@graphpay/agentpay';
+import { createReferenceRelayer, formatUsdt, readSpendingPass, whitechainNetwork } from '@graphpay_ethglobal/agentpay';
 import { context } from '../../scripts/whitechain/lib.mjs';
 import { shopName, sweetShop, sweetsBuyer } from './index.mjs';
 

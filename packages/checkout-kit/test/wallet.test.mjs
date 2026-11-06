@@ -8,7 +8,7 @@ import { generatePrivateKey, privateKeyToAccount } from 'viem/accounts';
 import { recoverTypedDataAddress } from 'viem';
 import { config } from '@graphpay/config';
 import { permit2Domain, permitWitnessTypes } from '@graphpay/contracts';
-import { whitechainNetwork } from '@graphpay/agentpay';
+import { whitechainNetwork } from '@graphpay_ethglobal/agentpay';
 import { fakeChain, fakeFacilitator } from './fakes.mjs';
 import { createGraphPayShop, networkForClient } from '../index.mjs';
 import { connectWallet, graphpayCheckout } from '../src/client.mjs';

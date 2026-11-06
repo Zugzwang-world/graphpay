@@ -1,11 +1,11 @@
 // The shop side of the kit. `createGraphPayShop` turns a catalog and a payout address into two
-// Fetch route handlers over @graphpay/agentpay's merchant (the 402 flow, settled by our
+// Fetch route handlers over @graphpay_ethglobal/agentpay's merchant (the 402 flow, settled by our
 // facilitator): `catalog` lists what is for sale, `order` is one route that answers 402 with the
 // quote when it is not paid yet and settles the payment when it carries a PAYMENT-SIGNATURE.
 // Prices come from the catalog only, never from the request. Re-orders are the same route with
 // `?parent=<a paid order of this shop by this payer>`.
 import { createHash, timingSafeEqual } from 'node:crypto';
-import { createMerchant, decodeHeader, httpFacilitator, whitechainNetwork } from '@graphpay/agentpay';
+import { createMerchant, decodeHeader, httpFacilitator, whitechainNetwork } from '@graphpay_ethglobal/agentpay';
 import { checkoutAbi } from '@graphpay/contracts';
 
 export const MAX_QUANTITY = 20;

@@ -2,7 +2,7 @@
 // the real test USDT and Permit2: a buyer agent with no gas pays a merchant route with one
 // signature through the reference relayer; guards refuse in code; refund request and refund;
 // CSV export; relayer anti-drain limits; subscription, renewal and cancel.
-//   pnpm --filter @graphpay/agentpay test:fork
+//   pnpm --filter @graphpay_ethglobal/agentpay test:fork
 
 import { after, before, test } from 'node:test';
 import assert from 'node:assert/strict';
