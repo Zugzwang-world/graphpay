@@ -88,6 +88,18 @@ export function checks(root, env) {
       return { pass: rows.length > 0 && carried.every((c) => c === 'FUNDER' || c === 'OPERATOR') && shared.length === 0, what: 'the event wallets are fresh, except FUNDER and OPERATOR', measured: { roles: rows.length, carried, sharedAddresses: shared.length }, expected: 'only FUNDER and OPERATOR carried; no two roles share an address', evidence: { cmd: 'pnpm -s wallets:addresses (addresses only)' } };
     },
     F1: async () => noSecrets(root),
+    // F3: T1's record (docs/sessions/payments/f3.json): the production build run locally with the
+    // hosted env and the floor raised above the relayer's balance (a preview would need the
+    // relayer key in the preview env, and its shop would call the production facilitator).
+    F3: async () => {
+      const f = join(root, 'docs/sessions/payments/f3.json');
+      const what = "the relayer's safety floor is enforced";
+      if (!existsSync(f)) return { pass: null, why: "no F3 record from T1 yet", what, measured: null, expected: '', evidence: {} };
+      const r = JSON.parse(readFileSync(f, 'utf8'));
+      const below = BigInt(r.balanceWei) < BigInt(Math.round(Number(r.floorWbt) * 1e6)) * 10n ** 12n;
+      const pass = r.settle?.success === false && /floor/.test(r.settle?.errorReason ?? '') && r.settle?.transaction === '' && r.relayerNonce?.before === r.relayerNonce?.after && below && r.checks.every((c) => c.ok);
+      return { pass, what, measured: { reason: r.settle?.errorReason, transaction: r.settle?.transaction, relayerNonce: r.relayerNonce, floorWbt: r.floorWbt, balanceWei: r.balanceWei, checks: r.checks.map((c) => `${c.ok ? 'ok' : 'FAIL'} ${c.name}`) }, expected: 'the payment refused before sending, naming the floor; no transaction (relayer nonce unchanged); health shows the floor and the balance', evidence: { file: 'docs/sessions/payments/f3.json', by: "T1, a local production build with the hosted env (not a preview; the record says why)", at: r.at } };
+    },
     C2: async () => hosted(root, 'C2'),
     C3: async () => hosted(root, 'C3', env),
     C4: async () => hosted(root, 'C4', env),
