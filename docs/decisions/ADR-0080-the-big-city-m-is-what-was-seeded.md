@@ -12,7 +12,8 @@ Status: accepted · Date: 2026-11-07 01:05 IST · Decided by: founder (relayed b
 - Rabdi refused a part of batch 127 (`Store(Entity(Store(HandleInvalid)))`). The 32 rows that had landed were deleted (`docs/sessions/arkiv/city/undo-M-batch-127.json`), so the store is exactly batches 0 to 126.
 
 ## Consequences
-- **M as seeded:** 3,175 events, graph store only. It cost 1.65 tGLM in 333 transactions (`docs/sessions/arkiv/city/seed-M-graph.json`), plus one transaction to undo the partial batch.
+- **M as seeded:** 3,175 events, graph store only. It cost 1.6435 tGLM in 333 transactions: the 332 that `docs/sessions/arkiv/city/seed-M-graph.json` counts (1.6366) and the partial batch's one that landed (0.0069). With the transaction that undid it (0.0047), the total is 1.6482 tGLM. The two fees were read from their receipts on Rabdi (`undo-M-batch-127.json`).
+- **The trimmed city's answers** (`docs/sessions/arkiv/city/truth-M.json`): its events end on 14 Aug, while its 90-day windows still end on 6 Nov. Q1 counts 46 of Filter & Fold's 297 orders in its window. Q3 and Q4 come back empty, Q5 finds no path, and the re-registered shop has only its first epoch. These are what the generator says the store holds, not faults in it.
 - **The lab's figures stay labelled "lab":** the lab's 10,000-event M had 4,604 payment rows, so 47 or 48 reads. The seeded M's Q2 would need 14 plain reads (15 with every page at once) against Graph Arkiv's 2. That is a count from the generator, not a measurement, until a plain store is written and D7 is run.
 - **The seeder now recovers:** it undoes a batch the node refuses part-way and sends it again, and a stopped run resumes at its batch (`packages/city/test/seed.test.mjs`).
 - **Acceptance:** D4 and D8 stay at S. D7 stays blocked: there is no plain store at M.

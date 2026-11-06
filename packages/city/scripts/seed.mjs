@@ -27,6 +27,13 @@ const opt = (name, fallback = null) => {
   return i === -1 ? fallback : args[i + 1];
 };
 const flag = (name) => args.includes(`--${name}`);
+// A whole number option: a nonce, a block or a batch.
+const whole = (name) => {
+  const v = opt(name);
+  if (v === null) return null;
+  if (!/^\d+$/.test(v)) throw new Error(`seed: --${name} takes a whole number`);
+  return BigInt(v);
+};
 const size = opt('size');
 const backend = opt('backend', 'sim');
 const end = opt('end');
@@ -157,9 +164,10 @@ if (backend === 'sim') {
           throw error;
         }
       }
-      const fromBatch = Number(opt('from-batch', 0));
-      if (opt('undo-from-nonce') !== null) {
-        const undo = await undoSince(seedConn, null, { nonce: Number(opt('undo-from-nonce')), fromBlock: BigInt(opt('undo-from-block')), toBlock: opt('undo-to-block') === null ? null : BigInt(opt('undo-to-block')) });
+      const fromBatch = Number(whole('from-batch') ?? 0n);
+      if (whole('undo-from-nonce') !== null) {
+        if (whole('undo-from-block') === null) throw new Error('seed: --undo-from-nonce needs --undo-from-block');
+        const undo = await undoSince(seedConn, null, { nonce: Number(whole('undo-from-nonce')), fromBlock: whole('undo-from-block'), toBlock: whole('undo-to-block') });
         log(`undid ${undo.deleted} creates from ${undo.landed.length} landed txs (${undo.landed.map((t) => t.hash).join(' ')}) in ${undo.txs.map((t) => t.hash).join(' ')}`);
         save(`undo-${size}-${Date.now()}.json`, { synthetic: true, size, landed: undo.landed.map((t) => ({ hash: t.hash, nonce: t.nonce, created: t.created.length, updated: t.updated.length })), txs: undo.txs.map((t) => t.hash), deleted: undo.deleted });
       }

@@ -18,7 +18,14 @@ export async function GET(request: Request): Promise<Response> {
   if ('error' in query) return json({ error: query.error }, 400);
   const release = lock.take(query.mode);
   if (!release) return json({ error: 'a race is already running on this side' }, 429);
-  const refused = plainRaceRefusal(query);
+  // Every path that does not start the stream releases the lock, a throw included.
+  let refused: string | null;
+  try {
+    refused = plainRaceRefusal(query);
+  } catch {
+    release();
+    return json({ error: 'the race could not start; try again' }, 500);
+  }
   if (refused) {
     release();
     return json({ error: refused }, 429);

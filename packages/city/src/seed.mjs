@@ -108,14 +108,24 @@ export async function assertEmpty(conn, types) {
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
-// A read the node refused or dropped (a spent query window answers 429) is tried again after a
-// minute, for up to 40 minutes: reads change nothing, so trying again is always safe.
+// A failure worth waiting out: the node answered 429 (a spent query window) or 5xx, or the request
+// timed out or the connection dropped. Anything else (a 4xx, a refusal of ours) is not.
+function transient(error) {
+  for (let e = error, depth = 0; e && depth < 8; e = e.cause, depth += 1) {
+    if (e.status === 429 || (Number.isInteger(e.status) && e.status >= 500)) return true;
+    if (e.name === 'TimeoutError' || /took too long to respond|fetch failed|ECONNRESET|socket hang up/i.test(e.message ?? '')) return true;
+  }
+  return false;
+}
+
+// A read that failed for a transient reason is tried again after a minute, for up to 40 minutes:
+// reads change nothing, so trying again is always safe.
 async function readAgain(fn, log, what) {
   for (let attempt = 1; ; attempt += 1) {
     try {
       return await fn();
     } catch (error) {
-      if (attempt >= 40 || !/HTTP request failed|took too long|fetch failed|429|Too Many Requests/i.test(error.message ?? '')) throw error;
+      if (attempt >= 40 || !transient(error)) throw error;
       log(`${what}: ${(error.shortMessage ?? error.message).split('\n')[0]}; again in 60 s`);
       await sleep(60_000);
     }
@@ -123,14 +133,17 @@ async function readAgain(fn, log, what) {
 }
 
 // This wallet's transactions at or after `nonce`, from `fromBlock` on, once none is pending: what
-// each created and updated (EntityCreated and EntityUpdated logs of the entity contract).
+// each created and patched (the entity contract's EntityCreated and EntityPatched logs).
 async function landedSince(conn, { nonce, fromBlock, toBlock = null }) {
   const owner = conn.owner.toLowerCase();
-  for (let i = 0; i < 60; i += 1) {
+  let settled = false;
+  for (let i = 0; i < 60 && !settled; i += 1) {
     const [latest, pending] = await Promise.all([conn.publicClient.getTransactionCount({ address: owner, blockTag: 'latest' }), conn.publicClient.getTransactionCount({ address: owner, blockTag: 'pending' })]);
-    if (latest === pending) break;
-    await sleep(2_000);
+    settled = latest === pending;
+    if (!settled) await sleep(2_000);
   }
+  // A transaction still pending could land after the scan, so nothing is undone until none is.
+  if (!settled) throw new Error('city: a transaction of this wallet is still pending after 2 minutes; nothing undone, run again later');
   const head = toBlock === null ? await conn.publicClient.getBlockNumber() : BigInt(toBlock);
   const out = [];
   for (let b = BigInt(fromBlock); b <= head; b += 1n) {
@@ -144,12 +157,12 @@ async function landedSince(conn, { nonce, fromBlock, toBlock = null }) {
         try {
           const d = decodeEventLog({ abi: ENTITY_EVENTS_ABI, topics: l.topics, data: l.data });
           if (d.eventName === 'EntityCreated') created.push(d.args.entityKey.toLowerCase());
-          if (d.eventName === 'EntityUpdated') updated.push(d.args.entityKey.toLowerCase());
+          if (d.eventName === 'EntityPatched') updated.push(d.args.entityKey.toLowerCase());
         } catch {
           // an event this ABI does not describe
         }
       }
-      out.push({ hash: tx.hash, nonce: Number(tx.nonce), gasUsed: receipt.gasUsed, effectiveGasPrice: receipt.effectiveGasPrice ?? 0n, created, updated });
+      out.push({ hash: tx.hash, nonce: Number(tx.nonce), blockNumber: b, gasUsed: receipt.gasUsed, effectiveGasPrice: receipt.effectiveGasPrice ?? 0n, created, updated });
     }
   }
   return out;
@@ -179,31 +192,57 @@ export async function undoSince(conn, state, { nonce, fromBlock, toBlock = null 
   return { landed, txs, deleted: created.length, restored: restore.length };
 }
 
+// The block after the last of `txs` to land, and the nonce after its own: where the next batch's
+// transactions can start (null when nothing landed).
+async function positionAfter(conn, txs) {
+  const last = txs.filter((t) => t.blockNumber !== undefined && t.blockNumber !== null).reduce((a, t) => (!a || BigInt(t.blockNumber) > BigInt(a.blockNumber) ? t : a), null);
+  if (!last) return null;
+  const tx = await conn.publicClient.getTransaction({ hash: last.hash });
+  return { block: BigInt(last.blockNumber), nonce: Number(tx.nonce) + 1 };
+}
+
 // The graph store, batch by batch. `fromBatch` resumes a run that stopped there, once undoSince has
 // set Arkiv back to the batch before it. A batch goes out in several transactions, so one the node
 // refuses can leave the ones before it landed: those are undone back to the state the plan was made
 // from, and after a pause for the node the batch is sent again (`retries` times).
-export async function seedGraph(city, conn, { log = () => {}, batchEvents = 25, manifest, fromBatch = 0, retries = 3, pauseMs = 15_000 }) {
+// undoOnFailure: false leaves a failed batch as it landed, as a process that dies would (tests).
+export async function seedGraph(city, conn, { log = () => {}, batchEvents = 25, manifest, fromBatch = 0, retries = 3, pauseMs = 15_000, undoOnFailure = true }) {
+  const events = ledgerEvents(city);
+  if (!Number.isInteger(fromBatch) || fromBatch < 0) throw new Error(`city: fromBatch ${fromBatch} is not a batch number`);
   if (fromBatch === 0) await readAgain(() => assertEmpty(conn, ['edge', 'node', 'tally', 'link']), log, 'graph: the empty check');
+  else {
+    // A run resumes only where the store ends: one edge per event of the batches before, none after.
+    const have = await readAgain(() => countRows(conn.publicClient, ENTITIES.edge, { owner: conn.owner }), log, 'graph: the resume check');
+    const want = Math.min(fromBatch * batchEvents, events.length);
+    if (have !== BigInt(want)) throw new Error(`city: ${conn.owner} holds ${have} edge rows, but batch ${fromBatch + 1} follows ${want}; undo the stopped run's partial batch first`);
+  }
   const ledger = createLedger({ arkiv: conn, synthetic: { dataset: city.dataset }, createNodes: true, reloadOnError: false });
   await readAgain(() => ledger.load(), log, 'graph: the load');
-  const batches = chunks(ledgerEvents(city), batchEvents);
+  const batches = chunks(events, batchEvents);
+  // Where a batch's own transactions can start: after the last receipt of the batch before (a
+  // `latest` read right after a receipt can answer one behind), at the nonce after its last one.
+  let after = null;
   for (let i = fromBatch; i < batches.length; i += 1) {
     for (let attempt = 1; ; attempt += 1) {
-      const fromBlock = await conn.publicClient.getBlockNumber();
-      const nonce = await conn.writer.confirmedNonce();
+      const fromBlock = after ? after.block + 1n : await conn.publicClient.getBlockNumber();
+      const nonce = Math.max(await conn.writer.confirmedNonce(), after?.nonce ?? 0);
       try {
         const r = await ledger.applyBatch(batches[i]);
         account(manifest, r.txs, conn);
+        after = (await positionAfter(conn, r.txs)) ?? after;
         break;
       } catch (error) {
-        if (attempt > retries) {
-          error.batch = i;
-          throw error;
-        }
+        if (!undoOnFailure) throw Object.assign(error, { batch: i, nonce, fromBlock });
+        // What landed of the batch is undone first, back to the state its plan was made from, so a
+        // run that stops here leaves Arkiv exactly at the batch before.
         const undo = await undoSince(conn, ledger.state, { nonce, fromBlock });
         account(manifest, [...undo.landed.map((t) => ({ ...t, creates: t.created.length, patches: t.updated.length })), ...undo.txs], conn);
-        log(`graph batch ${i + 1}: ${(error.shortMessage ?? error.message).split('\n')[0]}; undid ${undo.deleted} creates and ${undo.restored} patches from ${undo.landed.length} landed txs; again in ${pauseMs / 1000} s`);
+        after = (await positionAfter(conn, [...undo.landed, ...undo.txs])) ?? after;
+        log(`graph batch ${i + 1}: ${(error.shortMessage ?? error.message).split('\n')[0]}; undid ${undo.deleted} creates and ${undo.restored} patches from ${undo.landed.length} landed txs${attempt > retries ? '; stopping' : `; again in ${pauseMs / 1000} s`}`);
+        if (attempt > retries) {
+          Object.assign(error, { batch: i, nonce, fromBlock, undone: { deleted: undo.deleted, restored: undo.restored } });
+          throw error;
+        }
         await sleep(pauseMs);
       }
     }
