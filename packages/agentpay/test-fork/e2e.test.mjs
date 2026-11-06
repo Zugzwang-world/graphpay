@@ -17,6 +17,7 @@ import {
   issueSpendingPass,
   revokeSpendingPass,
   readSpendingPass,
+  staticReputation,
   usdt,
 } from '../index.mjs';
 import { chainClock, listen, network, startFork } from './helpers.mjs';
@@ -147,6 +148,23 @@ test('the CSV export reads the order, payment and refund from the chain', async 
   assert.ok(line.includes('0.80'));
 });
 
+test('a refund limit holds for the order in total: small refunds cannot add up past it', async () => {
+  const limit = BigInt(story.order.refundMicro) + 100_000n;
+  const limited = createMerchant({ name: merchantName, address: merchantAccount.address, facilitator: relayer, publicClient: fork.publicClient, walletClient: fork.wallet(merchantAccount), network, clock: clock.now, maxRefundMicro: limit });
+  // The order has had refundMicro refunded already: 0.10 is left under this limit.
+  await assert.rejects(limited.refund(paidOrderId, 200_000n), (e) => e.code === 'OVER_REFUND_MAX');
+  assert.equal((await limited.refund(paidOrderId, 100_000n)).amountMicro, 100_000n);
+  await assert.rejects(limited.refund(paidOrderId, 1n), (e) => e.code === 'OVER_REFUND_MAX');
+});
+
+test('accept asks the reputation provider about the payer of the order', async () => {
+  const withReputation = (reputation) => createMerchant({ name: merchantName, address: merchantAccount.address, facilitator: relayer, publicClient: fork.publicClient, network, clock: clock.now, reputation });
+  const refused = await withReputation(staticReputation({ [agent.ensName]: { risk: 'high', reasons: ['flagged in this test'] } })).accept(paidOrderId);
+  assert.equal(refused.accepted, false);
+  assert.match(refused.reason, /flagged in this test/);
+  assert.equal((await withReputation(staticReputation({})).accept(paidOrderId)).accepted, true);
+});
+
 test('the relayer refuses over its per-order cap and under its balance floor', async () => {
   const small = createReferenceRelayer({ walletClient: fork.wallet(relayerAccount), publicClient: fork.publicClient, network, allowedMerchants: [merchantAccount.address], limits: { maxOrderMicro: 1n }, clock: clock.now });
   const m2 = createMerchant({ name: merchantName, address: merchantAccount.address, facilitator: small, publicClient: fork.publicClient, network, clock: clock.now });
@@ -173,7 +191,12 @@ test('the relayer refuses over its per-order cap and under its balance floor', a
   }
 });
 
-test('a subscription: created with its first charge, renewed when due, cancelled by signature', async () => {
+test('a subscription: refused in code over the daily cap, then created with its first charge, renewed once when due, cancelled by signature', async () => {
+  // The order above took most of today's cap: the plan's first charge is refused before anything is signed.
+  await assert.rejects(buyer.subscribe({ url: `${server.url}/plan` }), (e) => e.code === 'OVER_DAILY_CAP');
+  assert.ok(!events.some((x) => x.e === 'subscribed'));
+  // Room for the plan: the policy writer raises the pass's daily cap.
+  await issueSpendingPass({ walletClient: fork.wallet(writerAccount), publicClient: fork.publicClient, network, name: agent.ensName, wallet: buyerAccount.address, dailyCapMicro: dailyCap * 2n });
   const sub = await buyer.subscribe({ url: `${server.url}/plan` });
   assert.equal(sub.httpStatus, 201, JSON.stringify(sub));
   assert.equal(sub.charged, true);
@@ -181,10 +204,17 @@ test('a subscription: created with its first charge, renewed when due, cancelled
   await fork.warp(story.renewal.demoPeriod.seconds + 5);
   await clock.sync(fork);
   const created = (await fork.publicClient.getTransactionReceipt({ hash: sub.transaction })).blockNumber;
-  const renewed = await merchant.chargeDueRenewals({ fromBlock: created });
-  assert.equal(renewed.length, 1);
-  assert.equal(renewed[0].success, true, JSON.stringify(renewed[0]));
-  assert.ok(events.some((x) => x.e === 'renewal.charged' && x.p.subId === sub.subId && x.p.cycle === 2));
+  // A watcher sees every charge on the chain too: each is still reported once.
+  const watcher = merchant.watchRenewals({ fromBlock: created, intervalMs: 50 });
+  try {
+    const renewed = await merchant.chargeDueRenewals({ fromBlock: created });
+    assert.equal(renewed.length, 1);
+    assert.equal(renewed[0].success, true, JSON.stringify(renewed[0]));
+    await watcher.tick();
+  } finally {
+    watcher.stop();
+  }
+  assert.deepEqual(events.filter((x) => x.e === 'renewal.charged' && x.p.subId === sub.subId).map((x) => x.p.cycle), [1, 2]);
   const c = await buyer.cancel({ url: `${server.url}/cancel`, subId: sub.subId });
   assert.equal(c.httpStatus, 200, JSON.stringify(c));
   const s = await fork.publicClient.readContract({ address: network.checkout, abi: checkoutAbi, functionName: 'subscription', args: [sub.subId] });
