@@ -159,6 +159,10 @@ Updated 23:25 IST, Fri 6 Nov (W7 Submission).
 - **Submit by 08:00 IST** (what: title, description, repo link, three partner prizes; where: `docs/submission/ETHGLOBAL.md`; why: the form closes at 09:00 IST; recommendation: paste from the file once W7 says it is final).
 - Closed: M17 started as the W7 night stream (23:02 IST); the README rewritten with its evidence (this step).
 
+## w3-payments
+
+- **Acceptance follows the 0.80 re-order** (owner: W5). What: `integration/hosted.mjs` C3 quotes `story.order.sku` against the re-order's 0.80, and `acceptance/checks.mjs` C3 expects 1.20. Why: C3 is refused before signing on every fresh run. Recommendation: quote `story.order.reorder.sku` and take the amount from `order.reorder.priceMicro` (W5 is told).
+
 ## w4-agents
 
 - **Acceptance E1 reads the old clock deadline** (owner: the Coordinator, who regenerates acceptance). What: `acceptance/checks.mjs` E1 expects the run's deadline to contain `T23:59:00` (`order.deadlineLocal`); the request now says "delivered within an hour". Why: E1 would fail on every fresh run. Recommendation: expect the deadline one hour after the run's request, to the minute (`result.mandate.deadlineIso`); E1 needs a fresh `e2e:food` run anyway.
@@ -167,3 +171,4 @@ Updated 23:25 IST, Fri 6 Nov (W7 Submission).
 
 - **/customer's "By 23:59" chip** (from w4-agents; owner: the frontend pass). What: `apps/web/components/customer-screen.tsx` shows `order.deadlineLocal`, but the request is now relative. Why: the chip and the request disagree. Recommendation: show "within an hour", or the run's deadline from the result frame (`result.mandate.deadlineIso`); no new route or event is needed.
 - **The deck's errand text** (from w4-agents; owner: the frontend pass). What: `apps/web/public/deck/index.html` keeps a hand copy of the request that still says "by 11:59 pm". Recommendation: copy the new request from `packages/config/story.json` (`order.request`).
+- **Re-order is "another coffee"** (from w3-payments; owner: the frontend pass). What: `POST /api/customer/reorder` (body `{ parentOrderId }`, unchanged) pays the story's re-order, the filter coffee at 0.80; the answer is `{ status: 'paid', orderId, parentOrderId, amountMicro, transaction }`, or `202` with `status: 'pending'`. Recommendation: label the button from `order.reorder.item` and `order.reorder.priceMicro`; no new event.

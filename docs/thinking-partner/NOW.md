@@ -78,7 +78,10 @@ Started 23:02 IST, Fri 6 Nov (session `local_da212093-3d02-4768-9314-ab7be179eb8
 
 ## w3-payments
 
-Started 23:02 IST, Fri 6 Nov (session `local_b65be40a-eb20-4d86-b784-7d2aa1a93527`). W3 rewrites this section at the end of each step.
+Updated 23:50 IST, Fri 6 Nov (W3 Payments, session `local_b65be40a-eb20-4d86-b784-7d2aa1a93527`).
+- **Re-order (item 1, PR #155):** "Another coffee" re-orders the filter coffee for 0.80 (ADR-0073), from `order.reorder` in the story. One live re-order proves it after the deploy.
+- **Next:** subscribe and cancel (item 2), the refund decline (item 3), then the limits (item 4).
+- Blockers: none.
 
 ## w4-agents
 

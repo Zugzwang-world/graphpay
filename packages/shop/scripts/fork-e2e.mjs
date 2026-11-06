@@ -231,7 +231,7 @@ async function main() {
   beat('refund', { amount: usdt(story.order.refundMicro), gas: refund.gasUsed, status: await orderStatus(q.orderId), tx: refund.hash });
 
   // 4. Re-order at the parent's path.
-  const rq = await quote({ item: story.order.sku, qty: String(story.order.reorder.quantity), parent: q.orderId });
+  const rq = await quote({ item: story.order.reorder.sku, qty: String(story.order.reorder.quantity), parent: q.orderId });
   check(rq.priceMicro === String(story.order.reorder.priceMicro), 'the re-order is the catalog price');
   const re = await payFlow(rq);
   check(re.res.status === 200 && re.settlement?.success === true, `re-order answered ${re.res.status} ${JSON.stringify(re.body)}`);

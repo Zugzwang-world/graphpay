@@ -58,7 +58,7 @@ export function liveReorderDeps(): ReorderDeps {
     quote: async ({ parentOrderId, buyer }): Promise<ReorderQuote> => {
       const params = new URLSearchParams({
         shop: model.merchant.ens,
-        item: model.order.sku,
+        item: model.order.reorder.sku,
         qty: String(model.order.reorder.quantity),
         buyer,
         payer: model.payer.ens,

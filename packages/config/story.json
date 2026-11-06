@@ -282,8 +282,10 @@
     "refundMicro": 800000,
     "refundReason": "coffee arrived cold",
     "reorder": {
+      "sku": "filter-and-fold-filter-coffee",
+      "item": "another coffee",
       "quantity": 1,
-      "priceMicro": 4800000
+      "priceMicro": 800000
     }
   },
   "renewal": {
