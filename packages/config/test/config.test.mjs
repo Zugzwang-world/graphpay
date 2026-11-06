@@ -59,7 +59,8 @@ test('every agent preset covers every agent role with a priced model and a valid
       const settings = preset.roles[role];
       assert.ok(settings, `${name}/${role}`);
       assert.ok(config.models.pricingUsdPerMTok[settings.model], `${name}/${role}: ${settings.model} has a price`);
-      assert.ok(config.models.effortLevels.includes(settings.effort), `${name}/${role}: effort`);
+      const efforts = settings.provider === 'moonshot' ? config.models.moonshot.effortLevels : config.models.effortLevels;
+      assert.ok(efforts.includes(settings.effort), `${name}/${role}: effort for ${settings.provider}`);
       assert.ok(settings.maxTokens >= 16000, `${name}/${role}: room for xhigh thinking`);
     }
   }
@@ -83,9 +84,12 @@ const cards = () =>
 
 test('every price card is complete: cache writes 1.25x input for 5 minutes and 2x for 1 hour', () => {
   for (const [what, card] of cards()) {
-    for (const key of ['input', 'output', 'cacheWrite5m', 'cacheWrite1h', 'cacheRead']) {
+    // Kimi's cards (no cache-write price published) carry input, output and cacheRead only.
+    const kimi = what.startsWith('kimi-');
+    for (const key of kimi ? ['input', 'output', 'cacheRead'] : ['input', 'output', 'cacheWrite5m', 'cacheWrite1h', 'cacheRead']) {
       assert.ok(Number.isFinite(card[key]) && card[key] > 0, `${what}: ${key}`);
     }
+    if (kimi) continue;
     near(card.cacheWrite5m, card.input * 1.25, `${what} cacheWrite5m`);
     near(card.cacheWrite1h, card.input * 2, `${what} cacheWrite1h`);
   }
@@ -107,7 +111,7 @@ test('API cost: every token kind at its configured price', () => {
 });
 
 test('API cost: 1-hour cache writes at cacheWrite1h from usage.cache_creation, other writes at the 5-minute rate', () => {
-  for (const [model, card] of Object.entries(PRICES)) {
+  for (const [model, card] of Object.entries(PRICES).filter(([, c]) => c.cacheWrite5m)) {
     const both = { cache_creation_input_tokens: 3e4, cache_creation: { ephemeral_5m_input_tokens: 1e4, ephemeral_1h_input_tokens: 2e4 } };
     near(apiCostUsd(model, both), (1e4 * card.cacheWrite5m + 2e4 * card.cacheWrite1h) / 1e6, `${model} by TTL`);
     // No breakdown (or a null one): every write is a 5-minute write.

@@ -79,7 +79,8 @@ function buildResult(state, concierge) {
 // services behind interfaces (index.d.ts); mocks/ has a full set.
 export async function runErrand(options = {}) {
   const env = options.env ?? process.env;
-  const mode = options.mode ?? resolveAgentMode(env); // an AGENT_MODE typo throws here, before anything runs
+  const asked = options.mode ?? resolveAgentMode(env); // an AGENT_MODE typo throws here, before anything runs
+  const mode = asked === 'anthropic' ? 'live' : asked; // the old name of live
   const cast = options.cast ?? teamCast();
   const models = options.models ?? createModelFactory({ mode, env, mocks: options.mockModels });
   const payerKey = options.buyer ?? 'payer';

@@ -15,9 +15,17 @@ Two optional members of `LiveHooks`, no-ops when absent (hooks absent or recordi
 - Fire and forget: a throw or rejection never blocks or fails a step; it is scrubbed into the log as a `HOOKS` guard (`ok: true`, "the errand goes on"). A hook that never settles holds nothing. Hook calls after the errand ends are dropped.
 - Mocks: `createMockActivity({ fail: 'sync' | 'async', hang })` returns recording `presence` and `handoff` (spread into the mock hooks). Tests: `packages/agents/test/activity.test.mjs`. Errand options `presenceRenewMs`, `setTimer`, `clearTimer` exist for tests.
 
+## Kimi as the provider (ADR-0067)
+
+- Presets: `testing`, `video`, `live` are `moonshot` (`kimi-k3.1-pro`, `kimi-k3.1-pro-highspeed`) at `high`, `maxTokens` 32000; the Anthropic ones are `anthropic-testing|video|live`. `AGENT_PRESET=anthropic-testing` runs the old setup (needs `ANTHROPIC_API_KEY`).
+- Mode: `AGENT_MODE=live` (old name `anthropic` still works). The factory (`packages/agents/src/models.mjs`) needs the key of every provider the preset uses (`KIMI_API_KEY` for Kimi), passes it and the config's base URL explicitly, and never reads a shell base-URL variable.
+- Kimi requests: `reasoning_effort` from the preset, `max_tokens` always set, no temperature (fixed at 1.0 by the model); the history sent back keeps `reasoning_content`, `tool_calls` and one tool message per call (tested with a fake server in `test/kimi.test.mjs`). The Kimi model is not wrapped in the final-text-block middleware: a chat-completions reply is one content string, so history is exactly what the API returned.
+- Cost: `moonshotUsage` maps cached tokens to the cached price and everything else in the prompt (cache-write tokens included, assumption: no write price is published) to the input price; output includes reasoning tokens.
+- Join: `integration/e2e-food.mjs` calls `runErrand({ mode: 'anthropic' })` (accepted, means live) and needs `KIMI_API_KEY` in the env it passes, now that the active preset is Kimi.
+
 ## Deviations from the pack
 
-- Models come from the story presets (`agentPreset(role)`, ADR-0048), not `AGENT_MODEL`; `AGENT_PRESET` overrides. Grok (`AGENT_PROVIDER`) is not built (optional); a preset naming another provider fails closed.
+- Models come from the story presets (`agentPreset(role)`, ADR-0048), not `AGENT_MODEL`; `AGENT_PRESET` overrides. Providers: anthropic and moonshot (Kimi, ADR-0067). Grok (`AGENT_PROVIDER`) is not built (optional); a preset naming another provider fails closed.
 - The model-facing output schemas (`WIRE_OUTPUTS`) are bare types; code validates the reply against the strict `OUTPUTS` after the call, because native structured output drops bounds and patterns.
 - The need and limits are adopted from the request by code (G1); `directory_list` searches for the adopted need whatever the model types.
 - `pay_shop` guard also needs the scout's offer for the chosen shop to fit budget and deadline, and a refusal ends the errand (one payment slot).

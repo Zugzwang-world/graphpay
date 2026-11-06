@@ -215,6 +215,9 @@ importers:
       '@ai-sdk/anthropic':
         specifier: 4.0.96
         version: 4.0.96(zod@4.6.7)
+      '@ai-sdk/moonshotai':
+        specifier: 3.0.84
+        version: 3.0.84(zod@4.6.7)
       '@graphpay/config':
         specifier: workspace:*
         version: link:../config
@@ -406,6 +409,12 @@ packages:
 
   '@ai-sdk/mcp@2.0.90':
     resolution: {integrity: sha512-OCjo4WpxpEtJ6ZIhoni9KxKfSHNua33Ox/gpUNtY+CU1TlZxMVBu5P0jbMNlUxTyqgD0UDtyw5IiU1PAE9Jwgw==}
+    engines: {node: '>=22'}
+    peerDependencies:
+      zod: ^3.25.76 || ^4.1.8
+
+  '@ai-sdk/moonshotai@3.0.84':
+    resolution: {integrity: sha512-i1o4ebNi92SHAld1SCxNBIyde8UhRl161HAu5GgJq9gueVTCClyBTpDrawExoxq0YVLfOdsLBgkXI6iPOpZqHw==}
     engines: {node: '>=22'}
     peerDependencies:
       zod: ^3.25.76 || ^4.1.8
@@ -1409,6 +1418,12 @@ snapshots:
       '@ai-sdk/provider-utils': 5.0.74(zod@4.6.7)
       cross-spawn: 7.0.6
       pkce-challenge: 5.0.1
+      zod: 4.6.7
+
+  '@ai-sdk/moonshotai@3.0.84(zod@4.6.7)':
+    dependencies:
+      '@ai-sdk/provider': 4.0.35
+      '@ai-sdk/provider-utils': 5.0.74(zod@4.6.7)
       zod: 4.6.7
 
   '@ai-sdk/provider-utils@5.0.74(zod@4.6.7)':
