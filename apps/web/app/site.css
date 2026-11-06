@@ -185,6 +185,16 @@
   }
 }
 
+/* The team's phones on /live: each is its own page (/phones/), framed at the phone's own
+   aspect ratio (their 414 × 868 frame, bezel included) and scaled to the viewport's height. */
+.live-phone {
+  display: block;
+  width: max(320px, min(414px, calc((100dvh - var(--topbar-h) - 72px) * 414 / 868)));
+  aspect-ratio: 414 / 868;
+  border: 0;
+  background: transparent;
+}
+
 .home-menu {
   display: none;
 }
