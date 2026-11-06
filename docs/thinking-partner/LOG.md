@@ -146,4 +146,5 @@ One line per PR: time (IST) · activity · result · PR link. Append under your 
 
 ## w3-payments
 
-- 23:40 IST · w3-payments · in PR: fix(pay): "Another coffee" re-orders the filter coffee for 0.80 (order.reorder.sku) · https://github.com/Zugzwang-world/graphpay/pull/155
+- 23:34 IST · w3-payments · merged: fix(pay): "Another coffee" re-orders the filter coffee for 0.80; paid live, tx 0xf1d7…2b4a, its edges on Arkiv · https://github.com/Zugzwang-world/graphpay/pull/155
+- 00:00 IST · w3-payments · in PR: feat(pay): subscribe and cancel the Sunday box on the demo clock; the cron renews within the signed allowance
