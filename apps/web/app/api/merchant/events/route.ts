@@ -8,6 +8,10 @@ import { sharedShopEdges } from '../../../../lib/merchant-feed.server.ts';
 import { edgeKey, freshEdges, toEvent } from '../../../../lib/merchant-feed.ts';
 import { json } from '../../../../lib/http.ts';
 
+// Requests a minute per client on this instance. A whole venue can sit behind one IP (ADR-0069), so this is a
+// ceiling against a runaway client, not a limit a crowd reaches; each read is shared and cached behind it.
+const READ_LIMIT = 300;
+
 export const dynamic = 'force-dynamic';
 export const maxDuration = 60;
 
@@ -17,7 +21,7 @@ const STREAM_MS = 50_000;
 const LOOKBACK_S = 30;
 
 export async function GET(request: Request): Promise<Response> {
-  if (!allowed(request, 30)) return json({ error: 'too many requests' }, 429);
+  if (!allowed(request, READ_LIMIT)) return json({ error: 'too many requests' }, 429);
   const sinceParam = new URL(request.url).searchParams.get('since');
   const since = sinceParam !== null && /^\d{1,12}$/.test(sinceParam) ? Number(sinceParam) : null;
   const shop = siteModel().merchant.ens;

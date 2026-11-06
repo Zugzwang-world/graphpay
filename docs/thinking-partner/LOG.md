@@ -70,6 +70,7 @@ One line per PR: time (IST) · activity · result · PR link. Append under your 
 - 09:50 IST · website · opened: the customer phone's Request refund (Friday item 11): a request edge on Arkiv from the recorder's key behind the passcode, reviewer pass; the website relay trimmed to about 700 words · https://github.com/Zugzwang-world/graphpay/pull/73
 - 10:50 IST · website · opened: the customer phone's Re-order (Friday item 11): the payer agent's one signed payment through the hosted shop behind the passcode, reviewer pass (three double-payment findings fixed) · https://github.com/Zugzwang-world/graphpay/pull/81
 - 12:20 IST · website · opened: the merchant feed and the accountant CSV no longer cut the newest rows (integration audit): full-size graph answers, a flag when full, a window that shrinks to fit · https://github.com/Zugzwang-world/graphpay/pull/104
+- 13:05 IST · website · opened: the read limits for the CSV, events, state and map raised tenfold (a venue on one IP never meets a 429; ceiling kept) · https://github.com/Zugzwang-world/graphpay/pull/113
 
 ## agentpay
 - 04:05 IST · agentpay · opened: `@graphpay/agentpay` V1, the two-sided SDK (buyer pass and guards, merchant middleware, facilitator interface and reference relayer, AI SDK and MCP tools, the sweet shop and ride examples), 36 offline and 13 fork tests, reviewer's 2 blocking fixed · https://github.com/Zugzwang-world/graphpay/pull/38
