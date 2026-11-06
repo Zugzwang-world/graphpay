@@ -95,12 +95,18 @@ Started 23:02 IST, Fri 6 Nov (session `local_da212093-3d02-4768-9314-ab7be179eb8
 
 ## w3-payments
 
-Updated 23:45 IST, Fri 6 Nov (W3 Payments, session `local_b65be40a-eb20-4d86-b784-7d2aa1a93527`).
-- **Re-order (item 1, done, #155):** "Another coffee" paid 0.80 live at 23:34 IST ([0xf1d7…2b4a](https://explorer.testnet.whitechain.io/tx/0xf1d7cb5654de6cc09ede0a404818a009f7429d9d149e3e564222d4a4d3ae2b4a)). Its Arkiv edges wait for the mirror, stalled since about 23:29 IST (W5 told).
-- **Subscribe and cancel (item 2):** in review; proven end to end on an anvil fork.
-- **Refund decline (item 3):** in its PR.
-- **Next:** the limits (item 4).
-- **Blocker:** the mirror stall (W5). It holds every Arkiv record that comes from the chain.
+Updated 00:15 IST, Sat 7 Nov (W3 Payments, session `local_b65be40a-eb20-4d86-b784-7d2aa1a93527`).
+- **Re-order (item 1, done, #155):** "Another coffee" paid 0.80 live at 23:34 IST ([0xf1d7…2b4a](https://explorer.testnet.whitechain.io/tx/0xf1d7cb5654de6cc09ede0a404818a009f7429d9d149e3e564222d4a4d3ae2b4a)). Its order, pay and deliver edges are on Arkiv ([explain](https://graphpay-event.vercel.app/api/explain/8391bb5c1b6b)).
+- **Subscriptions (item 2, done live, #173):**
+  - subscribed at 23:59 IST, 2.40 stored on chain, first box charged at once ([0xf3f7…c393](https://explorer.testnet.whitechain.io/tx/0xf3f7586090fb37cf4b04963216dabc7b89915f02afb19f71fb81ca138e53c393));
+  - the cron renewed it at 00:02 ([0x8d40…de83](https://explorer.testnet.whitechain.io/tx/0x8d40d556382f40313dafaf712d3c174d7cc8365176c8813f04e849f93338de83));
+  - cancelled with the payer agent's own signature ([0x70ed…7b42](https://explorer.testnet.whitechain.io/tx/0x70ed2b3ffa63b81fa426631c70cb39591f8b80c077455930d05e63de04077b42)).
+  - Its Arkiv edges land after the mirror's pause for W2 (about 00:19).
+- **Refund decline (item 3):** #163, reviewed; its blocking items are fixed and confirmed.
+- **Limits (item 4):**
+  - over the pass and the agent's refused cap raise: #169, reviewed, hardening now;
+  - the owner's cap change: built, and waits for the Coordinator's call on the policy half (POLICY_WRITER stays local, ADR-0021).
+- Blockers: none.
 
 ## w4-agents
 
