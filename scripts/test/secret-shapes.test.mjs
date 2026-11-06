@@ -77,8 +77,18 @@ test('the committed BIP-39 wordlist equals the standard list', () => {
   assert.deepEqual(ours, [...english]);
 });
 
-test('a Kimi key is caught, including an admin key, and an Anthropic key keeps its own label', () => {
+test('a Kimi key is caught, including an admin key and one with _ or -, and an Anthropic key keeps its own label', () => {
   assert.deepEqual(labels(`key ${['sk', 'admin', 'A'.repeat(40)].join('-')} end`), ['kimi-api-key']);
+  assert.deepEqual(labels(`key ${['sk', `${'B'.repeat(10)}_${'C'.repeat(20)}-${'D'.repeat(20)}`].join('-')} end`), ['kimi-api-key']);
   assert.deepEqual(labels(`key ${SAMPLES['anthropic-api-key']} end`), ['anthropic-api-key']);
   assert.deepEqual(labels('the prefix sk- alone or sk-short is fine'), []);
+});
+
+test('a key that starts a line or follows a tab is caught in JSON text (prompt logs, diffs)', () => {
+  for (const label of ['kimi-api-key', 'xai-api-key', 'jwt', 'github-token', 'github-fine-grained-token']) {
+    for (const sep of ['\n', '\t', '\r']) {
+      const line = JSON.stringify({ prompt: `here it is:${sep}${SAMPLES[label]}` });
+      assert.ok(labels(line).includes(label), `${label} after ${JSON.stringify(sep)}`);
+    }
+  }
 });
