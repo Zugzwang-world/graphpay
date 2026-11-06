@@ -131,6 +131,8 @@ Updated 13:05 IST, Fri 6 Nov (Integration).
 - **Watch (founder): the Open switch has no cooldown.** What: each toggle is one W_DIRECTORY write on Arkiv. Why: a visitor can toggle it repeatedly; W_DIRECTORY holds 0.48 tGLM. Recommendation: accept for the demo and watch the balance; a cooldown is a one-line change if needed.
 - **For the team: optional repeat buyers on the shop card.** What: `ShopChoice.repeatBuyers` is required, but the graph has no repeat-buyer count, so the live card shows a dash. Where: `frontend/src/apps/customer/CustomerDesk.tsx` (`shopFacts`). Recommendation: make it optional and leave it out of the line when unknown.
 - **For the team: a pause and resume button (F9).** What: the live adapter's `pauseAgent` and `resumeAgent` work, but no screen calls them yet. Recommendation: the agents page's switch calls them for the paying agent.
+- **For the team: draw product images (Swarm).** What: the phones' data now carries Kesar Kingdom's gulab jamun image from Swarm (read through its Arkiv menu row); order items carry `productId`. Where: `frontend/src/apps/customer/CustomerOrders.tsx` and the quote sheet. Recommendation: show `productById(item.productId)?.image` as a small thumbnail when it is set. Done-when needs one image on Vitalik's phone.
+- **For T5 and T1: the merchant refund and the re-order fail on production.** What: `POST /api/merchant/refund` answers 502 ("merchant refund failed: error", nothing sent; a read-only simulation passes); `POST /api/customer/reorder` answers 409 `BAD_402`. Recommendation: log the cause chain, fix, then the integration session tries each once from the phones.
 
 ## website
 
