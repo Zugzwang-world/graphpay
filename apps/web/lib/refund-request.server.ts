@@ -9,6 +9,7 @@ import { sharedCustomerState } from './customer-state.server.ts';
 import { readOrder, type OrderState } from './merchant-actions.server.ts';
 import { syncConnection, whitechain } from './payments.server.ts';
 import { checkoutAddress, siteModel } from './site.server.ts';
+import { MAX_SYNC_WRITES_PER_MINUTE, forgetSyncWrites, takeSyncWrite } from './sync-writes.server.ts';
 
 export const REFUND_WAITING_FOR = "the recorder's key on this server (the Coordinator sets it in Vercel)";
 const KEY_SHAPE = /^0x[0-9a-fA-F]{64}$/;
@@ -58,14 +59,16 @@ const liveDeps: RefundDeps = {
 
 const recent = new Map<string, number>();
 const inFlight = new Set<string>();
-const writes: number[] = [];
-export const MAX_WRITES_PER_MINUTE = 6;
+// Shared with the shop's declines (lib/sync-writes.server.ts).
+export const MAX_WRITES_PER_MINUTE = MAX_SYNC_WRITES_PER_MINUTE;
 
-// Plain printable text only: the reason is written to a public graph.
+// Plain printable text only: the reason is written to a public graph. No contact details or links
+// either (no personal data, ADR-0003): no @, / or :, and no run of six digits or more.
 export function cleanReason(value: unknown): string {
   if (typeof value !== 'string') throw new RefundRefusal('BAD_REASON', 400);
   const text = value.replace(/\s+/g, ' ').trim();
   if (text.length === 0 || text.length > REASON_MAX || /[^\p{L}\p{M}\p{N}\p{P}\p{Zs}\p{Sc}]/u.test(text)) throw new RefundRefusal('BAD_REASON', 400);
+  if (/[@/:]/.test(text) || /\p{N}{6,}/u.test(text)) throw new RefundRefusal('BAD_REASON', 400);
   return text;
 }
 
@@ -95,10 +98,7 @@ export async function requestRefund(input: { orderId?: unknown; amountMicro: unk
   const lastAt = recent.get(key);
   if (inFlight.has(key) || (lastAt !== undefined && now - lastAt < COOLDOWN_MS)) throw new RefundRefusal('TOO_SOON', 429);
   // A cap on all orders too: W_SYNC's nonce is shared with the facilitator's refusal recorder.
-  const cutoff = now - 60_000;
-  while (writes.length && writes[0]! <= cutoff) writes.shift();
-  if (writes.length >= MAX_WRITES_PER_MINUTE) throw new RefundRefusal('TOO_SOON', 429);
-  writes.push(now);
+  if (!takeSyncWrite(now)) throw new RefundRefusal('TOO_SOON', 429);
   inFlight.add(key);
   try {
     const ts = Math.floor(now / 1000);
@@ -125,5 +125,5 @@ export async function requestRefund(input: { orderId?: unknown; amountMicro: unk
 export function forgetRefundRequests(): void {
   recent.clear();
   inFlight.clear();
-  writes.length = 0;
+  forgetSyncWrites();
 }

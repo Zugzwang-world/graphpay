@@ -148,4 +148,4 @@ One line per PR: time (IST) · activity · result · PR link. Append under your 
 ## w3-payments
 
 - 23:34 IST · w3-payments · merged: fix(pay): "Another coffee" re-orders the filter coffee for 0.80; paid live, tx 0xf1d7…2b4a · https://github.com/Zugzwang-world/graphpay/pull/155
-- 23:45 IST · w3-payments · in PR: feat(pay): the shop can decline a refund request, recorded on Arkiv
+- 23:45 IST · w3-payments · in PR: feat(pay): the shop can decline a refund request, recorded on Arkiv (reviewer's two blocking items fixed: a refund the graph has not shown yet stops a decline; the order page words it "Refund declined") · https://github.com/Zugzwang-world/graphpay/pull/163
