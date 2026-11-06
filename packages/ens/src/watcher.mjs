@@ -3,10 +3,11 @@
 // events of the tracked names with one shared checkpoint and keeps the Whitechain AgentPolicy
 // and the Arkiv node standing in step with ENS state.
 //
-// What it never does: create a policy, copy an ENS address into one, or let an ENS cap raise one.
-// Policies (wallet and cap) come from the payments setup's configured list, through the sink. The
-// owner's ENS cap reaches a live policy only as min(owner's cap, configured cap), through the sink
-// (the Coordinator's decision, Fri 6 Nov): a stolen owner key can lower a pass, never lift one.
+// What it never does: create a policy, copy an ENS address into one, or let an ENS cap take one
+// above the configured cap. Policies (wallet and cap) come from the payments setup's configured
+// list, through the sink. The owner's ENS cap reaches a live policy only as min(owner's cap,
+// configured cap), through the sink (the Coordinator's decision, Fri 6 Nov; W3's cap ADR): a stolen
+// owner key can move a pass between 0 and the configured cap, never above it, and never reopen one.
 // A time lapse emits no event, so a ticker compares chain time with the stored expiry. A mark
 // (revoked, expired) is set only after the
 // sink call succeeded, and a failed batch leaves the checkpoint where it was, so the next poll
@@ -32,6 +33,8 @@ export const REGISTRY_EVENTS = eventsOf(permissionedRegistryAbi, ['LabelRegister
 export const RESOLVER_EVENTS = eventsOf(permissionedResolverAbi, ['TextUpdated', 'AddressUpdated']);
 
 const LOG_RANGE = 1000n;
+const CAP_TRIES = 5; // a failed owner's-cap sync is tried again on this many ticks, then dropped
+const CAP_EVENTS_KEPT = 1000; // cap events already marked (a replay marks nothing again)
 // Each poll re-reads the last blocks too: the public RPC is load balanced and a log query can lag the head
 // that getBlockNumber reported. Every handler re-reads chain state, so a replayed event changes nothing.
 const REPLAY_BLOCKS = 6n;
@@ -58,6 +61,7 @@ export function createEnsWatcher({
 }) {
   const tracked = new Map(); // name → { name, node, label, registry, resolver, epoch, expiry, revoked, expired, textStatus }
   const untracked = new Set();
+  const capEvents = new Set();
   let polls = 0;
   let queue = Promise.resolve();
   const serial = (fn) => {
@@ -185,7 +189,14 @@ export function createEnsWatcher({
       gate?.invalidate(t.name);
     } else if (key === KEYS.capMicro) {
       await patch(t, { ensCapMicro: value }); // shown on the node
-      await syncCap(t);
+      // Synced once after the batch (kills first); a replayed event is not marked again.
+      const id = `${ev.transactionHash}:${ev.logIndex}`;
+      if (!capEvents.has(id)) {
+        capEvents.add(id);
+        if (capEvents.size > CAP_EVENTS_KEPT) capEvents.delete(capEvents.values().next().value);
+        t.capDue = true;
+        t.capTries = 0;
+      }
       gate?.invalidate(t.name);
     } else if (key === KEYS.acceptsText) {
       reader?.invalidateAccepts(t.name);
@@ -195,7 +206,7 @@ export function createEnsWatcher({
   // The owner's cap reaches the policy only for a live name at its known epoch, from the record as it
   // is now (a replayed batch carries older values: the event's own is never sent), and the sink bounds
   // it. A failed read or write never holds up the batch, since a kill behind it must go through: the
-  // ticker tries again.
+  // ticker tries again, at most CAP_TRIES times, then the change is logged and dropped.
   async function syncCap(t) {
     if (t.revoked || t.expired || t.epoch === undefined) {
       t.capDue = false;
@@ -204,11 +215,13 @@ export function createEnsWatcher({
     try {
       const st = await registryState(client, t.registry, t.label);
       const value = st.status === STATUS.REGISTERED && st.epoch === t.epoch && st.expiry > BigInt(await now()) ? await readText(client, t.name, KEYS.capMicro) : null;
-      if (value !== null && /^(?:0|[1-9][0-9]*)$/.test(value)) await sink.updatePolicy({ node: t.node, epoch: t.epoch, ownerCapMicro: BigInt(value) });
+      // the gate's own rule for a cap record (gate.mjs): digits only
+      if (value !== null && /^\d+$/.test(value)) await sink.updatePolicy({ node: t.node, epoch: t.epoch, ownerCapMicro: BigInt(value) });
       t.capDue = false;
     } catch (e) {
-      t.capDue = true;
-      log(`watcher: ${t.name} owner's cap not applied yet (${e.shortMessage ?? e.message}); the ticker tries again`);
+      t.capTries = (t.capTries ?? 0) + 1;
+      t.capDue = t.capTries < CAP_TRIES;
+      log(`watcher: ${t.name} owner's cap not applied (${e.shortMessage ?? e.message}); ${t.capDue ? 'the ticker tries again' : `dropped after ${CAP_TRIES} tries`}`);
     }
   }
 
@@ -235,6 +248,8 @@ export function createEnsWatcher({
         throw Object.assign(new Error(`watcher: ${ev.eventName} at block ${ev.blockNumber} failed: ${e.shortMessage ?? e.message}`), { blockNumber: ev.blockNumber, cause: e });
       }
     }
+    // The owner's caps last, once per name: every kill and revocation in the batch went first.
+    for (const t of tracked.values()) if (t.capDue) await syncCap(t);
     return logs.length;
   }
 

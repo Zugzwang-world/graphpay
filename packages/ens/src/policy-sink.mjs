@@ -1,14 +1,25 @@
 // The watcher's policy sink (planning/SPEC/IDENTITY_ENS.md §8): turns "this name's standing
 // changed" into a setPolicy call built only from the chain's own policy and the payments setup's
-// configured cap (to reopen a policy). It never creates a policy (no policy on chain: a no-op),
-// never reads an ENS record, and never lets an ENS address near a policy. The owner's ENS cap,
-// when the watcher passes it, only ever lowers a live policy: min(owner's cap, configured cap)
-// (the Coordinator's decision, Fri 6 Nov; ADR-0021 holds, a stolen owner key cannot lift a pass).
-//   configured(node) → { wallet, capMicro } | undefined   the payments setup's list (only its cap is used, and only to reopen a policy)
+// configured cap. It never creates a policy (no policy on chain: a no-op), never reads an ENS
+// record, and never lets an ENS address near a policy. The owner's ENS cap, when the watcher
+// passes it, sets a live policy's cap to min(owner's cap, configured cap) and nothing else (the
+// Coordinator's decision, Fri 6 Nov; W3's cap ADR): never above the configured cap, never a
+// reopened revocation, another epoch or wallet (ADR-0021 holds for lifting a pass).
+//   configured(node) → { wallet, capMicro } | undefined   the payments setup's list (its cap: the ceiling, and the cap a reopened policy takes)
 //   readPolicy(node) → { epoch, wallet, revoked, dailyCapMicro, expiry }   the checkout's policy (wallet 0x0 = none)
-//   writePolicy({ node, epoch, wallet, revoked, capMicro, expiry })   one setPolicy, serialised by the caller
+//   writePolicy({ node, epoch, wallet, revoked, capMicro, expiry }, { expected? })   one setPolicy, serialised by
+//     the caller; with `expected` (the policy this write was built from) the caller re-reads it just
+//     before signing and sends nothing if it moved (another policy writer acted in between)
 
 import { isAddressEqual, zeroAddress } from 'viem';
+
+const asRead = (p) => ({ epoch: Number(p.epoch), wallet: p.wallet, revoked: Boolean(p.revoked), dailyCapMicro: BigInt(p.dailyCapMicro), expiry: BigInt(p.expiry) });
+
+// True when the chain's policy is no longer the one a write was built from.
+export function policyMoved(expected, now) {
+  const n = asRead(now);
+  return n.epoch !== expected.epoch || !isAddressEqual(n.wallet, expected.wallet) || n.revoked !== expected.revoked || n.dailyCapMicro !== expected.dailyCapMicro || n.expiry !== expected.expiry;
+}
 
 export function createPolicySink({ configured, readPolicy, writePolicy, log = () => {} }) {
   // The owner's cap: the policy takes min(owner's cap, configured cap) and nothing else moves (the
@@ -23,7 +34,7 @@ export function createPolicySink({ configured, readPolicy, writePolicy, log = ()
     const capMicro = ownerCapMicro < limit ? ownerCapMicro : limit;
     if (BigInt(cur.dailyCapMicro) === capMicro) return { inStep: true };
     const next = { epoch, wallet: cur.wallet, revoked: false, capMicro, expiry: BigInt(cur.expiry) };
-    await writePolicy({ node, ...next });
+    await writePolicy({ node, ...next }, { expected: asRead(cur) });
     log(`policy sink: setPolicy epoch ${epoch} cap ${capMicro} (the owner's ${ownerCapMicro}, at most the configured ${limit})`);
     return { written: next };
   }
@@ -59,7 +70,9 @@ export function createPolicySink({ configured, readPolicy, writePolicy, log = ()
       BigInt(cur.dailyCapMicro) === next.capMicro &&
       BigInt(cur.expiry) === next.expiry;
     if (same) return { inStep: true };
-    await writePolicy({ node, ...next });
+    // A revocation is always sent (idempotent, and a kill must never wait on a race); anything that
+    // keeps or reopens a pass is sent only if the policy is still the one it was built from.
+    await writePolicy({ node, ...next }, next.revoked ? {} : { expected: asRead(cur) });
     log(`policy sink: setPolicy epoch ${next.epoch} revoked ${next.revoked}`);
     return { written: next };
   }
