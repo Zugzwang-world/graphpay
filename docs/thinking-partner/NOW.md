@@ -95,9 +95,11 @@ Started 23:02 IST, Fri 6 Nov (session `local_da212093-3d02-4768-9314-ab7be179eb8
 
 ## w3-payments
 
-Updated 23:50 IST, Fri 6 Nov (W3 Payments, session `local_b65be40a-eb20-4d86-b784-7d2aa1a93527`).
-- **Re-order (item 1, PR #155):** "Another coffee" re-orders the filter coffee for 0.80 (ADR-0073), from `order.reorder` in the story. One live re-order proves it after the deploy.
-- **Next:** subscribe and cancel (item 2), the refund decline (item 3), then the limits (item 4).
+Updated 00:00 IST, Sat 7 Nov (W3 Payments, session `local_b65be40a-eb20-4d86-b784-7d2aa1a93527`).
+- **Re-order (item 1, done, #155):** "Another coffee" paid 0.80 live at 23:34 IST ([0xf1d7…2b4a](https://explorer.testnet.whitechain.io/tx/0xf1d7cb5654de6cc09ede0a404818a009f7429d9d149e3e564222d4a4d3ae2b4a)). Its order, pay and deliver edges are on Arkiv ([explain](https://graphpay-event.vercel.app/api/explain/8391bb5c1b6b)).
+- **Subscribe and cancel (item 2):** in its PR, reviewed, hardened, proven end to end on an anvil fork. Live run after the deploy.
+- **Refund decline (item 3):** in review (#163).
+- **Limits (item 4):** over the pass and the agent's refused cap raise in review (#169). The owner's cap change waits for the Coordinator's call on the policy half (POLICY_WRITER stays local, ADR-0021).
 - Blockers: none.
 
 ## w4-agents
@@ -110,15 +112,19 @@ Updated 23:52 IST, Fri 6 Nov (W4 Agents, session `local_3404db4e-486c-4f86-8b3a-
 
 ## w5-ops
 
-Updated 23:10 IST, Fri 6 Nov (W5 Ops).
-- **The payer is ACTIVE**, with a **300 test USDT** pass for tonight, in the policy and the ENS record (the gate passes it at 300). 78 spent today.
-- **PAYER holds 125 test USDT** (66.8 from FUNDER); the shop's takings (118.81) refill it next.
+Updated 23:50 IST, Fri 6 Nov (W5 Ops).
+- **The payer is ACTIVE**, with a **300 test USDT** pass for tonight (policy and ENS; #152). PAYER holds 125 test USDT.
 - **The shop (Filter & Fold) is open.**
-- **Next:** Pause and Resume per agent, the self-healing cron, the workers after W1's new labels, and acceptance at 0 failures.
+- **The mirror hung at 23:29 IST** (the same silent stall as at 22:02). W5 restarted the workers at 23:43 IST from a dedicated checkout of main (`.claude/worktrees/w5-workers`, pid 79148). It caught up by 23:49 IST: 2 blocks behind, nothing new parked.
+- **In review:** Pause and Resume per agent (payer and scout only; the others say why), and the self-healing cron: a paused agent resumes after 2 minutes, a closed shop reopens after 5. The reviewer's blocking finding and nine others are fixed; it is checking the fixes.
+- **Next:** prove both live on production; restart the workers after W1's label flip; acceptance at 0 failures.
 
 ## w6-sdk
 
-Started 23:02 IST, Fri 6 Nov (session `local_b6205da6-b613-4662-872a-6d4879c66faf`). W6 rewrites this section at the end of each step.
+Updated 23:55 IST, Fri 6 Nov (W6 SDK, session `local_b6205da6-b613-4662-872a-6d4879c66faf`; relay `relays/w6-sdk.md`).
+- **Both SDKs go to 1.0.0, with no new features.** No tester feedback arrived (no issues), so W6 audited each README against its code. It found 5 bugs in arkiv-graph and 7 in agentpay; all are fixed, with tests. Both READMEs start with the quickstart and link the live demo and its source.
+- **This step:** arkiv-graph 1.0.0. The live site's tests pass; the read fix changes nothing unless the SDK skips a row.
+- **Next:** agentpay 1.0.0 (its own PR), then the publish. The publish needs the founder's npm login and web approval at the browser (about 5 minutes).
 
 ## w7-submission
 

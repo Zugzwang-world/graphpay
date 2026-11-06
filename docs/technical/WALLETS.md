@@ -89,6 +89,7 @@ FUNDER after (22:20 IST): **2.644484 WBT** (reserve floor 0.2), **0.275894 Sepol
 | Fri 23:0x | the payer's pass is 300 a day for tonight (W5 brief, ADR-0071 amendment): POLICY_WRITER's `setPolicy` on the checkout, cap 300,000,000, all else unchanged (`scripts/whitechain/policy-cap.mjs payer --yes`; 38,370 gas) | [0x608a…b8fd](https://explorer.testnet.whitechain.io/tx/0x608ae1b6a9e380eee452735f311eaef1ad8ac502ee9b16268bacb1eebc30b8fd) |
 | Fri 23:0x | the same pass in ENS: VITALIK sets `graphpay.cap_micro` = 300000000 on payer.vitalik.graphpay.eth (`scripts/ens/owner.mjs cap … --real`; 54,740 gas, Sepolia) | [0x553c…adbc](https://sepolia.etherscan.io/tx/0x553c94e46621fa2fdab64c941a373ba60e07f572fb7fc62d0bcaa7e4c0acadbc) |
 | Fri 23:0x | `--plan usdt` on Whitechain for real (W5): PAYER 66.8 test USDT, back to its 125 target. FUNDER held 199.14208 test USDT before the run (145 more than the 12:4x row; the incoming transfer is not traced here) and 132.34208 after | [0xa47d…3fe0](https://explorer.testnet.whitechain.io/tx/0xa47dc8907a91e0426ce16961972a07451473d20ac6ca3ab0f52fc16137643fe0) |
+| Fri 23:5x | RENEWER's new jobs (W3, `/api/customer/subscribe` and `/unsubscribe`): it sends `createSubscription` (floor 700,000 gas; about 0.0035 WBT at 5 gwei) and `cancelWithSig` for the payer agent's Sunday box, beside the cron's `renew`. Subscribe refuses once RENEWER would fall under the cron's 0.02 WBT floor (`RENEWER_LOW`). Watch its balance: 0.0967 WBT at 23:30 IST | the routes' own answers |
 
 ## 3. Still to fund (waits on later steps)
 
