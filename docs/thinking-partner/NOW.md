@@ -65,10 +65,10 @@ Updated 05:33 IST, Fri 6 Nov. **M13's hosted run passed on the production domain
 
 ## website
 
-Updated 05:40 IST, Fri 6 Nov (T5 Web; the Mac's clock, Coordinator's time). **On `main`:** everything through M16, the Mumbai map and the explainer's agent lanes. **M16's done-when is met on the chain:** one real 4.80 USDT payment from the persona wallet (a human payer, no gas) went through the kit's client and the hosted facilitator to kesar-kingdom and settled (order 0x0864e72a…, block 12326025, `settleOrder` success; the order reads PAID, 4.80, payer the persona wallet).
-- Running: nothing. The store is not deployed (the Coordinator creates the Vercel project in the morning; env names in OPEN).
-- Blockers: the store's CSV export waits for T6's `LOG_CHUNK` fix (the public RPCs cap `eth_getLogs` at 10,000 blocks).
-- Next: the store's Sunday box if time; the explainer lanes and map fill as Join wires the runner. Fresh start file: `docs/sessions/website/resume.md`.
+Updated 06:10 IST, Fri 6 Nov (T5 Web; Coordinator's clock). **On `main`:** everything through M16, the map, the lanes and the real kit payment (M16 proved on the chain). **In a PR:** the merchant phone's **Mark dispatched** and **Refund** buttons (Friday item 12): the shop's own key signs on the server, behind the passcode; the order must be this shop's, a refund can never exceed what the contract says is left, the shop wallet's float is checked first, and a send whose receipt is late keeps its hash and locks the order so a retry cannot pay twice. Reviewer pass done. Not tried on the real chain from here (a live dispatch or refund changes real demo state).
+- Running: nothing. Needs the shop's key on Vercel (the hosted shop already uses it for deliveries, so it is probably set).
+- Blockers: the store's CSV export waits for T6's PR 64.
+- Next: the customer's refund request, re-order and subscribe buttons (they sign as the payer agent; a reviewer pass each); the store's Sunday box. Fresh start file: `docs/sessions/website/resume.md`.
 
 ## agentpay
 
