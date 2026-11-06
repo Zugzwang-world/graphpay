@@ -141,7 +141,8 @@ One line per PR: time (IST) · activity · result · PR link. Append under your 
 - 00:33 IST · w7-submission · the label flip (#189): every live link and the ENS snippet use filter-and-fold.graphpay.eth, history keeps the old names, category south-indian; W4's production errand (55.5 s, 3 calls, #192) in AI_USAGE, the README and the shot list · https://github.com/Zugzwang-world/graphpay/pull/195
 - 00:37 IST · w7-submission · arkiv-graph 1.0.0 on npm (00:34 IST) in the README and reach.md; agentpay still 0.1.1 · https://github.com/Zugzwang-world/graphpay/pull/196
 - 00:48 IST · w7-submission · keep current: the owner's cap route (#179, ADR-0079) in the README and ENS.md; the workers' watchdog (#194) · https://github.com/Zugzwang-world/graphpay/pull/198
-- 00:58 IST · w7-submission · the dosa menus on Swarm (#181) under the new names, with their dish photos, in swarm.md, the README and the form text (menu and photo hashes checked on the gateway) · this PR
+- 00:58 IST · w7-submission · the dosa menus on Swarm (#181) under the new names, with their dish photos, in swarm.md, the README and the form text (menu and photo hashes checked on the gateway) · https://github.com/Zugzwang-world/graphpay/pull/199
+- 01:20 IST · w7-submission · the version-2 menus with storefront photos (#201) in swarm.md, the README and the form text (hashes checked) · this PR
 
 ## w1-identity
 
