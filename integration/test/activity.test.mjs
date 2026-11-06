@@ -31,3 +31,22 @@ test('ArkivSim: hook calls return at once and land as one transaction a phase, r
   const steps = (await handoffsFor(arkiv.publicClient, RUN, { owner: arkiv.owner })).map((h) => h.step);
   assert.deepEqual([...steps].sort(), ['ask', 'check', 'check-back', 'pay', 'quote']);
 });
+
+test('hold(): nothing goes out while held, overlapping holds release at the last one, then it flushes', async () => {
+  const arkiv = await connectArkiv({ backend: 'sim', sim: newSim(), role: 'W_DIRECTORY', privateKey: `0x${randomBytes(32).toString('hex')}`, recoveryMs: 300, pollMs: 20 });
+  const a = batchedActivity(arkiv, { setTimer: () => 1, clearTimer: () => {} });
+  const releaseA = await a.hold();
+  const releaseB = await a.hold();
+  a.handoff(AGENT, `analyst.${OWNER}`, 'quote', { requestId: RUN });
+  const flushed = a.flush();
+  await new Promise((ok) => setTimeout(ok, 50));
+  assert.equal(a.stats.txs, 0); // held
+  releaseA();
+  releaseA(); // a second release of the same hold does nothing
+  await new Promise((ok) => setTimeout(ok, 50));
+  assert.equal(a.stats.txs, 0); // B still holds
+  releaseB();
+  const s = await flushed;
+  assert.equal(s.txs, 1);
+  assert.equal(s.written, 1);
+});
