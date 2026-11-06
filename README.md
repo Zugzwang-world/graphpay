@@ -10,7 +10,7 @@ AI agents with ENS names pay shops over x402 on Whitechain through our own facil
 
 ## What it does
 
-Vitalik types one sentence on his phone: *"Just landed in Mumbai. Get me the best masala dosa near BKC under 6 USDT by 11:59 pm."* (the story, ADR-0073; synthetic).
+Vitalik types one sentence on his phone: *"Just landed in Mumbai. Get me the best masala dosa near BKC under 6 USDT, delivered within an hour."* (the story, ADR-0073; synthetic).
 
 1. **His agents ask before they pay.** A scout finds shops near him on Arkiv; an analyst asks the money graph for each shop's reputation (orders, refunds, on-time rate) in one GraphQL call and gets the exact Arkiv reads behind the answer. The trap shop is refused, with its reasons.
 2. **The payer agent pays with one signature and no gas.** The shop answers HTTP 402 (x402); the payer signs once; our facilitator checks the agent's ENS name (active, not paused, not killed, under its cap), verifies and settles in test USDT on Whitechain Sepolia. The payee is read from the shop's ENS name at pay time, never hard-coded (ADR-0046).

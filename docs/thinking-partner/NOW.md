@@ -77,7 +77,10 @@ Started 23:02 IST, Fri 6 Nov (session `local_b65be40a-eb20-4d86-b784-7d2aa1a9352
 
 ## w4-agents
 
-Started 23:02 IST, Fri 6 Nov (session `local_3404db4e-486c-4f86-8b3a-67ceb53ef025`). W4 rewrites this section at the end of each step.
+Updated 23:25 IST, Fri 6 Nov (W4 Agents, session `local_3404db4e-486c-4f86-8b3a-67ceb53ef025`).
+- **Item 1, the relative deadline ([#153](https://github.com/Zugzwang-world/graphpay/pull/153), merging):** the request now says "delivered within an hour", and code reads the hour from the moment of the request, so errands work at any hour, also after 23:15 and across midnight. The guard checks each shop's ETA against that hour.
+- **Next:** measure every model call of a live errand (tokens, cached, output, seconds), then cut tokens and time without changing the screens, then three live errands in a row that pay.
+- **Blockers:** none.
 
 ## w5-ops
 

@@ -158,3 +158,12 @@ Updated 23:50 IST, Fri 6 Nov (W7 Submission).
 - **The video** (what: 2 to 4 minutes in your own voice, every party shown; where: the link goes into the form text, `docs/submission/ETHGLOBAL.md`, coming next; why: Whitechain's qualification and ETHGlobal's rules; recommendation: record after the night streams land, with the payer active and the shop open).
 - **Submit by 08:00 IST** (what: title, description, repo link, three partner prizes; where: `docs/submission/ETHGLOBAL.md`; why: the form closes at 09:00 IST; recommendation: paste from the file once W7 says it is final).
 - Closed: M17 started as the W7 night stream (23:02 IST); the README rewritten with its evidence (this step).
+
+## w4-agents
+
+- **Acceptance E1 reads the old clock deadline** (owner: the Coordinator, who regenerates acceptance). What: `acceptance/checks.mjs` E1 expects the run's deadline to contain `T23:59:00` (`order.deadlineLocal`); the request now says "delivered within an hour". Why: E1 would fail on every fresh run. Recommendation: expect the deadline one hour after the run's request, to the minute (`result.mandate.deadlineIso`); E1 needs a fresh `e2e:food` run anyway.
+
+## frontend
+
+- **/customer's "By 23:59" chip** (from w4-agents; owner: the frontend pass). What: `apps/web/components/customer-screen.tsx` shows `order.deadlineLocal`, but the request is now relative. Why: the chip and the request disagree. Recommendation: show "within an hour", or the run's deadline from the result frame (`result.mandate.deadlineIso`); no new route or event is needed.
+- **The deck's errand text** (from w4-agents; owner: the frontend pass). What: `apps/web/public/deck/index.html` keeps a hand copy of the request that still says "by 11:59 pm". Recommendation: copy the new request from `packages/config/story.json` (`order.request`).
