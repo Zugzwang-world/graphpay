@@ -5,8 +5,8 @@
 
 import { createHash } from 'node:crypto';
 import { getAddress, isAddressEqual } from 'viem';
-import { checkoutAbi, ORDER_STATUS } from '@graphpay/contracts';
-import { AgentPayError, assertChain, whitechainNetwork } from './network.mjs';
+import { checkoutAbi, ORDER_STATUS } from './vendor/index.mjs';
+import { AgentPayError, assertChain, assertClientChain, whitechainNetwork } from './network.mjs';
 import { canonicalJson, nodeOf, ZERO32, ZERO_ADDRESS } from './order.mjs';
 import { formatUsdt, toMicro } from './money.mjs';
 import { PERIOD_DAYS, readSpendingPass, spentInPeriod } from './pass.mjs';
@@ -63,6 +63,7 @@ export function createBuyerAgent({
 }) {
   if (!account?.address || typeof account.signTypedData !== 'function') throw new Error('createBuyerAgent needs a local account that can sign typed data');
   if (!pass || pass.capMicro === undefined) throw new Error('createBuyerAgent needs a spending pass { capMicro, period }');
+  assertClientChain(publicClient, network);
   const period = pass.period ?? 'day';
   if (!PERIOD_DAYS[period]) throw new Error(`pass period must be one of ${Object.keys(PERIOD_DAYS).join(', ')}`);
   const limits = Object.freeze({

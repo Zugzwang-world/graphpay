@@ -1,6 +1,6 @@
 # Join: resume after a fresh start
 
-Updated 05:33 IST, Fri 6 Nov. Read this first, then `docs/plan/sessions/join.md`.
+Updated 09:47 IST, Fri 6 Nov. Read this first, then `docs/plan/sessions/join.md`.
 
 ## Running now
 
@@ -16,9 +16,9 @@ Updated 05:33 IST, Fri 6 Nov. Read this first, then `docs/plan/sessions/join.md`
 
 ## Next (M13)
 
-1. **C4(a) done 05:38 IST** (`integration/c4a.mjs`, workers paused and restarted, instance 49b837ef3923009c). **Done 05:33 IST (PR on `join/m13-hosted`): the paid hosted run passed C2, C3, C5, C4(b)** (`docs/sessions/integration/hosted/paid-2026-11-06T00-00-52-957Z.json`); the report at 41 pass, 0 fail, 1 blocked, 6 not run. The acceptance payer's 6.00 is spent for this UTC day. `pnpm e2e:hosted` (`integration/hosted.mjs`) runs C2, C3 (re-order; refund with `--refund`, the one local send as SHOP_KESAR, after telling T1), C4(b), C5, C6 and F2 through the production domain; results in `docs/sessions/integration/hosted/`, read by `acceptance/checks.mjs` (`hosted()`). Read-only pass done 05:15 IST: C6 and F2 pass (17 routes, nonce unchanged). The paying run (`ALLOW_REAL_NETWORK=1 pnpm e2e:hosted --yes [--refund]`) only after 05:30 IST, when the acceptance payer's `spentToday` is 0; it refuses otherwise. C3's renewal is read from T1's hosted-cron receipt (`m4-hosted.md`, the `| cron |` row): it passes.
+1. **M13 done:** 44 pass, 0 fail, 1 blocked, 3 not run (B7, B9: T2; F3: T1). D10(c) from `integration/quote-d10.mjs` (a live 402 with a requestId; nothing signed). **C4(a) done 05:38 IST** (`integration/c4a.mjs`, workers paused and restarted, instance 49b837ef3923009c). **Done 05:33 IST (PR on `join/m13-hosted`): the paid hosted run passed C2, C3, C5, C4(b)** (`docs/sessions/integration/hosted/paid-2026-11-06T00-00-52-957Z.json`); the report at 41 pass, 0 fail, 1 blocked, 6 not run. The acceptance payer's 6.00 is spent for this UTC day. `pnpm e2e:hosted` (`integration/hosted.mjs`) runs C2, C3 (re-order; refund with `--refund`, the one local send as SHOP_KESAR, after telling T1), C4(b), C5, C6 and F2 through the production domain; results in `docs/sessions/integration/hosted/`, read by `acceptance/checks.mjs` (`hosted()`). Read-only pass done 05:15 IST: C6 and F2 pass (17 routes, nonce unchanged). The paying run (`ALLOW_REAL_NETWORK=1 pnpm e2e:hosted --yes [--refund]`) only after 05:30 IST, when the acceptance payer's `spentToday` is 0; it refuses otherwise. C3's renewal is read from T1's hosted-cron receipt (`m4-hosted.md`, the `| cron |` row): it passes.
 2. Not covered yet: C4(a) (a POLICY_WRITER revoke of the scout agent while the workers hold that key) and F3 (a preview deployment with the floor raised; T1's). `integration/src/stack.mjs` (e2e:food, e2e:kill) now refuses unless `STACK_LOCAL_RELAY=1`.
-3. Done: `acceptance/tracks.mjs` (A3, A4, A9, A10, B3 pass; B7 waits on T2's fork test; D10(c) needs a recorded quote's expiry). Next: F1 (history scan + Vercel env names), D10(c).
+3. Done: `acceptance/tracks.mjs` (A3, A4, A9, A10, B3 pass; B7 waits on T2's fork test; D10(c) needs a recorded quote's expiry). F1 passes (PR 67). Next: the item-6 bootstrap for the demo cast when the story locks (no target times; report when done).
 4. The website errand runner: `runId: input.runId` and `batchedActivity` + `flush()` (T5's note).
 
 ## Relay key rule

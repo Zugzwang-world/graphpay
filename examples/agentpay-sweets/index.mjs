@@ -1,5 +1,5 @@
 // A sweet shop and a customer agent on the same SDK. Names and prices come from the story config.
-import { createBuyerAgent, createMerchant } from '@graphpay/agentpay';
+import { createBuyerAgent, createMerchant } from '@graphpay_ethglobal/agentpay';
 import { config, story } from '@graphpay/config';
 
 const shop = story.shops.find((s) => s.key === story.order.shop);

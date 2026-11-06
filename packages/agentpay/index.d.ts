@@ -23,6 +23,8 @@ export interface AgentPayNetwork {
 export declare const ALLOWED_CHAIN_IDS: readonly number[];
 export declare function whitechainNetwork(overrides?: Partial<AgentPayNetwork>): AgentPayNetwork;
 export declare function assertChain(publicClient: PublicClient, network: AgentPayNetwork): Promise<number>;
+export declare function assertClientChain(client: { chain?: { id: number } }, network: AgentPayNetwork): void;
+export declare function assertWriteChain(publicClient: PublicClient, walletClient: WalletClient, network: AgentPayNetwork): Promise<void>;
 export declare function explorerTx(network: AgentPayNetwork, hash: Hex): string;
 export declare class AgentPayError extends Error {
   code: string;
@@ -296,6 +298,7 @@ export interface RelayerLimits {
   receiptTimeoutMs: number;
 }
 export declare const RELAYER_DEFAULTS: Readonly<RelayerLimits>;
+export declare function resolveLimits(overrides?: Partial<RelayerLimits>): RelayerLimits;
 export declare function createReferenceRelayer(options: {
   walletClient: WalletClient;
   publicClient: PublicClient;
@@ -391,3 +394,12 @@ export declare function registerTools(server: McpServer, definitions: ToolDefini
 export declare function registerBuyerTools(server: McpServer, buyer: BuyerAgent, options?: { allowedOrigins?: string[] }): McpServer;
 export declare function registerMerchantTools(server: McpServer, merchant: Merchant, options?: { catalog?: Record<string, { name: string; unitPriceMicro: Micro }> }): McpServer;
 export declare function createAgentPayMcpServer(options: { buyer?: BuyerAgent; merchant?: Merchant; buyerOptions?: { allowedOrigins?: string[] }; merchantOptions?: { catalog?: Record<string, { name: string; unitPriceMicro: Micro }> }; name?: string; version?: string }): McpServer;
+
+// --- deploy ------------------------------------------------------------------------------
+export declare function deployCheckout(options: {
+  walletClient: WalletClient;
+  publicClient: PublicClient;
+  relayer: Address;
+  policyWriter: Address;
+  network?: AgentPayNetwork;
+}): Promise<{ address: Address; transactionHash: Hex; deployBlock: bigint; network: AgentPayNetwork }>;

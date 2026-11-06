@@ -2,7 +2,7 @@
 // the production domain, and the payer agent's buyer, which answers the shop's 402 with one
 // signature under its on-chain spending pass. The key is read from the env by role name, never
 // leaves this file and is never logged. This is the only file here that imports the SDK.
-import { createBuyerAgent, whitechainNetwork } from '@graphpay/agentpay';
+import { createBuyerAgent, whitechainNetwork } from '@graphpay_ethglobal/agentpay';
 import { activeCast, config } from '@graphpay/config';
 import { privateKeyToAccount } from 'viem/accounts';
 import type { Hex } from 'viem';

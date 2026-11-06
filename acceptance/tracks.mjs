@@ -139,8 +139,24 @@ export function trackChecks(root, env) {
         b: b.refused && b.requotes === 1 && b.status === 'paid' && b.signed === 1 && b.quoteKeys === 2,
         c: null,
       };
+      // (c) from integration/quote-d10.mjs: a live 402 with a requestId at the hosted shop, the
+      // quote entity read on Arkiv (it is gone 15 minutes later, so the file keeps the reading).
+      const dir = join(root, 'docs/sessions/integration/hosted');
+      const qf = existsSync(dir) ? readdirSync(dir).filter((f) => f.startsWith('quote-')).sort().at(-1) : null;
+      let c = null;
+      try {
+        c = qf ? JSON.parse(read(root, `docs/sessions/integration/hosted/${qf}`)) : null;
+      } catch {
+        parts.c = false;
+      }
+      // Re-derived from the raw reading, never the file's own verdict: the owner against the
+      // config, 15 minutes as Arkiv's 2 s blocks (450 ±2), valid_until 600 s ±10 after creation.
+      if (c) {
+        const { writerAddresses } = await import('../packages/money-graph/index.mjs');
+        parts.c = /^0x[0-9a-f]{64}$/.test(String(c.quoteKey)) && String(c.owner).toLowerCase() === writerAddresses().W_DIRECTORY.toLowerCase() && Math.abs(Number(c.lifeBlocks) - (15 * 60) / 2) <= 2 && Math.abs(Number(c.validAfterSeconds) - 600) <= 10;
+      }
       const pass = all(parts);
-      return { pass, ...(pass === null ? { why: `not run: (c) the quote entity's expiry on Arkiv needs a live 402 with requestId (passcode; W_DIRECTORY writes a quote)` } : {}), what: 'an expired or missing quote is refused and the agent re-quotes', measured: { a, b, c: null }, expected: '(a) QUOTE_MISSING, one re-quote that passes; (b) QUOTE_EXPIRED, one re-quote with a new entity key that passes; no signature before the passing check; (c) owner W_DIRECTORY, expiry 15 min after creation (±2 blocks), valid_until 10 min after', evidence: { how: 'in process on the mock world (packages/agents/mocks): createPayer → presignCheck with fake 402s, quote entities and signer; no network, no model, no real signature; the one mock signature follows the passing re-quote', tests: 'packages/agents/test/errand.test.mjs (D10 a, D10 b)' } };
+      return { pass, ...(pass === null ? { why: `not run: (${notRun(parts)})` } : {}), what: 'an expired or missing quote is refused and the agent re-quotes', measured: { a, b, c: c ? { quoteKey: c.quoteKey, owner: c.owner, lifeBlocks: c.lifeBlocks, wantBlocks: c.wantBlocks, blockSeconds: c.blockSeconds, validAfterSeconds: c.validAfterSeconds, file: `docs/sessions/integration/hosted/${qf}` } : null }, expected: '(a) QUOTE_MISSING, one re-quote that passes; (b) QUOTE_EXPIRED, one re-quote with a new entity key that passes; no signature before the passing check; (c) owner W_DIRECTORY, expiry 15 min after creation (±2 blocks), valid_until 10 min after', evidence: { how: '(a), (b) in process on the mock world (packages/agents/mocks): createPayer → presignCheck with fake 402s, quote entities and signer; no network, no model, no real signature; the one mock signature follows the passing re-quote', tests: 'packages/agents/test/errand.test.mjs (D10 a, D10 b)' } };
     },
   };
 }

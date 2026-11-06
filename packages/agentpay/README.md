@@ -1,19 +1,90 @@
-# @graphpay/agentpay
+# @graphpay_ethglobal/agentpay
 
-A two-sided SDK for agentic stablecoin payments on Whitechain. A customer agent pays any merchant route that answers HTTP 402, with **one signature and no gas**, under an **on-chain spending pass**. A merchant prices any route or product, settles through a facilitator and is paid in USDT. Food, shopping and rides use the same order model.
+A two-sided SDK for agentic USDT payments on Whitechain. A customer agent pays any merchant route that answers HTTP 402 with **one signature and no gas**, under an **on-chain spending pass**. A merchant prices any route or product, settles through a facilitator and is paid in USDT. Food, shopping and rides use the same order model.
 
-- **Pay:** the payer signs a Permit2 witness over the order (payee, amount, deadline and order id are inside the signature), plus a bounded EIP-2612 approval the first time. The facilitator pays the gas; it cannot redirect or change the payment.
-- **Spending pass:** `GraphPayCheckout` holds each agent's pass on-chain (the wallet it may pay from, a daily cap, an expiry, a revoke switch) and checks it at settlement. The SDK checks the same pass, plus week and month caps, a per-payment maximum, a merchant allowlist and the human's mandate, **in code, before it signs**.
+- **Pay:** the payer signs a Permit2 witness over the order (payee, amount, deadline and order id are inside the signature), plus a bounded EIP-2612 approval the first time. The relayer pays the gas; it cannot redirect or change the payment.
+- **Spending pass:** the `GraphPayCheckout` contract holds each agent's pass on-chain (the wallet it may pay from, a daily cap, an expiry, a revoke switch) and checks it at settlement. The SDK checks the same pass, plus week and month caps, a per-payment maximum, a merchant allowlist and the human's mandate, **in code, before it signs**.
 - **Merchant:** stateless middleware for Fetch (Next.js), Express and `node:http`; events for `paid`, `refund.requested` and `renewal.charged`; refunds, delivery marks, subscriptions and a CSV export read from the chain.
 - **AI tools:** the same actions as AI SDK tools and MCP tools. No tool takes a cap, an allowlist or a budget as input.
-- **Plug-ins, not dependencies:** identity and reputation come in through two interfaces, `IdentityResolver` and `ReputationProvider`. The SDK imports no identity or memory system.
+- **Plug-ins, not dependencies:** identity and reputation come in through two interfaces, `IdentityResolver` and `ReputationProvider`.
 
-Status: **V1, testnets only** (Whitechain Sepolia, chain 1874). It is not published to npm yet. All story names and amounts in the examples are synthetic.
+**Status: V1, testnet only.** The SDK refuses every chain but Whitechain Sepolia (1874), when a client is created and again before every signature and send. Fixed-price orders only; pre-authorising a variable fare is V2. Version 0.1.0.
+
+## Quickstart (5 minutes, no wallet and no faucet)
+
+You need Node 22 and [Foundry](https://getfoundry.sh) (`anvil`). The sandbox starts a local fork of Whitechain Sepolia, deploys **your own** checkout on it, and makes a relayer, a merchant and a buyer with fresh keys. Nothing touches the real chain and you spend nothing.
+
+```bash
+mkdir agentpay-try && cd agentpay-try && npm init -y && npm pkg set type=module
+npm install @graphpay_ethglobal/agentpay viem
+cp node_modules/@graphpay_ethglobal/agentpay/examples/sweets.mjs .      # or paste the code below into sweets.mjs
+node sweets.mjs
+```
+
+It prints the shop's `paid` event and the agent's `paid 4800000n micro-USDT`. The whole example:
+
+```js
+import { createBuyerAgent, createMerchant, createReferenceRelayer, issueSpendingPass, usdt } from '@graphpay_ethglobal/agentpay';
+import { startSandbox } from '@graphpay_ethglobal/agentpay/sandbox';
+
+const sb = await startSandbox();                       // anvil fork + your own checkout + fresh keys
+const { network, publicClient, accounts, wallet } = sb;
+
+// The shop: one priced route, settled by YOUR relayer (anti-drain limits are on by default).
+const relayer = createReferenceRelayer({ walletClient: wallet(accounts.relayer), publicClient, network, allowedMerchants: [accounts.merchant.address] });
+const shop = createMerchant({ name: 'corner-sweets.example', address: accounts.merchant.address, facilitator: relayer, publicClient, network });
+const route = shop.route(
+  () => ({ items: [{ sku: 'box-12', name: 'box of 12 sweets', unitPriceMicro: usdt('4.80') }], fulfilment: { type: 'delivery' } }),
+  (_req, { order }) => ({ status: 'preparing', orderId: order.orderId }),
+);
+
+// The spending pass, written once by the policy writer: this wallet may spend up to 6 USDT a day.
+await issueSpendingPass({ walletClient: wallet(accounts.policyWriter), publicClient, network, name: 'errands.sam.example', wallet: accounts.buyer.address, dailyCapMicro: usdt('6') });
+
+// The customer agent holds no gas. One signature pays the 402.
+const agent = createBuyerAgent({
+  account: accounts.buyer, publicClient, network, name: 'errands.sam.example',
+  pass: { capMicro: usdt('6'), period: 'day', merchants: ['corner-sweets.example'] },
+  fetch: (url, init) => route(new Request(url, init)),   // straight to the shop's handler; use the default fetch for a real URL
+});
+const result = await agent.pay('https://corner-sweets.example/box');
+console.log(result.status, result.amountMicro);          // 'paid' 4800000n
+sb.stop();
+```
+
+The second example, [`examples/cab.mjs`](examples/cab.mjs), is a **fixed-fare cab ride**: the same SDK with `fulfilment: { type: 'ride', details: { pickup, dropoff, vehicle } }` and a one-fare `perPaymentMaxMicro` on the rider's pass.
+
+## Safety: what this package never does for you
+
+- **Whitechain Sepolia (chain 1874) only.** `whitechainNetwork()` throws for any other chain id, `createBuyerAgent`, `createMerchant` and `createReferenceRelayer` refuse a viem client that names another chain, and every signature and every send is preceded by `eth_chainId`, which must answer 1874. There is no mainnet mode.
+- **No hosted service by default.** The SDK has no URL for any GraphPay facilitator or relayer. `createMerchant` needs a facilitator you pass in, and the reference relayer runs with **your** relayer key, so nobody else spends your gas and you cannot spend ours.
+- **Anti-drain limits, always on.** The reference relayer starts with a balance floor (0.1 WBT), a per-order cap (10.00 USDT), an hourly cap on count (30) and on value (50.00 USDT), a per-payer rate (10 a minute), a gas ceiling per transaction and one transaction at a time (`RELAYER_DEFAULTS`). You may set a limit to another finite number above zero; `0`, `undefined`, `NaN`, `Infinity` and unknown names are refused, so a limit cannot be switched off by accident. It also needs a merchant allowlist.
+- **Keys stay yours.** The SDK reads no environment variable and logs no key or URL. Read your relayer key from your own secret store and pass a viem account in. A buyer's key never leaves its viem account, and no AI tool takes a cap, allowlist or budget as input.
+
+## Using it on the real Whitechain Sepolia
+
+The `GraphPayCheckout` that GraphPay deployed for its own demo lets only its own relayers settle, so **it is not yours to use**: pointing your relayer at it fails with `NotRelayer`. Deploy your own checkout (the same verified contract) with your own funded key, and name your own relayer and policy writer:
+
+```js
+import { createPublicClient, createWalletClient, http } from 'viem';
+import { privateKeyToAccount } from 'viem/accounts';
+import { deployCheckout, createReferenceRelayer, issueSpendingPass, usdt } from '@graphpay_ethglobal/agentpay';
+
+const chain = { id: 1874, name: 'Whitechain Sepolia', nativeCurrency: { name: 'WBT', symbol: 'WBT', decimals: 18 }, rpcUrls: { default: { http: ['https://rpc.testnet.whitechain.io'] } } };
+const publicClient = createPublicClient({ chain, transport: http() });
+const admin = createWalletClient({ account: privateKeyToAccount(ADMIN_KEY), chain, transport: http() });   // funded with WBT from the faucet
+
+const { network } = await deployCheckout({ walletClient: admin, publicClient, relayer: RELAYER_ADDRESS, policyWriter: POLICY_WRITER_ADDRESS });
+// Use `network` in createMerchant / createBuyerAgent / createReferenceRelayer. Keep three different keys:
+// admin (owns the checkout), relayer (gas only, never USDT) and policy writer (writes spending passes).
+```
+
+Buyers need test USDT on Whitechain Sepolia at `network.token.address`, and the relayer, admin and merchant need a little WBT for gas ([faucet](https://faucet.testnet.whitechain.io)). Pass your key in from your own environment; never commit it. Report what you find: see [FEEDBACK.md](FEEDBACK.md).
 
 ## Quickstart: merchant
 
 ```js
-import { createMerchant, httpFacilitator } from '@graphpay/agentpay';
+import { createMerchant, httpFacilitator } from '@graphpay_ethglobal/agentpay';
 
 const merchant = createMerchant({
   name: 'my-shop.example.eth',          // the merchant's name; its namehash is the shop node on-chain
@@ -39,7 +110,7 @@ The pricer is the merchant's own: on the paid retry the SDK re-prices the reques
 ## Quickstart: buyer
 
 ```js
-import { createBuyerAgent, createMandate, usdt } from '@graphpay/agentpay';
+import { createBuyerAgent, createMandate, usdt } from '@graphpay_ethglobal/agentpay';
 
 const buyer = createBuyerAgent({
   account,                              // a viem local account; the key never leaves it
@@ -66,7 +137,7 @@ await issueSpendingPass({ walletClient: policyWriter, publicClient, network, nam
 ## Quickstart: AI agents
 
 ```js
-import { buyerTools, merchantTools, createAgentPayMcpServer } from '@graphpay/agentpay';
+import { buyerTools, merchantTools, createAgentPayMcpServer } from '@graphpay_ethglobal/agentpay';
 
 const tools = buyerTools(buyer, { allowedOrigins: ['https://my-shop.example'] });   // AI SDK 7 tools
 // agentpay_pass_status, agentpay_quote, agentpay_pay, agentpay_request_refund, agentpay_subscribe, agentpay_cancel
@@ -82,14 +153,10 @@ The model proposes, code disposes: a tool can only ask to pay *less* (`maxUsdt`)
 
 ## Examples
 
-Two examples of about 20 lines each, on the same SDK, with names and prices from the story config:
+- [`examples/sweets.mjs`](examples/sweets.mjs): a sweet shop sells a box to a customer agent (the quickstart above).
+- [`examples/cab.mjs`](examples/cab.mjs): a fixed-fare cab ride (V1 is fixed-price; variable-fare pre-authorisation is V2).
 
-- [`examples/agentpay-sweets`](../../examples/agentpay-sweets/index.mjs): a sweet shop sells a box to a customer agent.
-- [`examples/agentpay-ride`](../../examples/agentpay-ride/index.mjs): a fixed-fare cab ride, `fulfilment: { type: 'ride', details: { pickup, dropoff, vehicle } }`.
-
-Both run end to end on an anvil fork of Whitechain Sepolia against the deployed checkout, the real test USDT and Permit2: `pnpm --filter @graphpay/agentpay test:fork`.
-
-On the real Whitechain Sepolia, the sweet-shop example made one labelled test payment of 0.01 test USDT, with one signature and no gas for the agent: [the settlement](https://explorer.testnet.whitechain.io/tx/0xfbd7d307b1b0c08f3af015b4bdb03aaeed12d0c2d18c2553432cb4679ff14c7e) (`examples/agentpay-sweets/real.mjs`, dry run unless `--yes`).
+Both run end to end in the package's own tests on an anvil fork of Whitechain Sepolia. GraphPay's own demo also made one labelled test payment of 0.01 test USDT on the real testnet with this SDK, with one signature and no gas for the agent: [the settlement](https://explorer.testnet.whitechain.io/tx/0xfbd7d307b1b0c08f3af015b4bdb03aaeed12d0c2d18c2553432cb4679ff14c7e).
 
 ## API reference
 
@@ -97,7 +164,7 @@ On the real Whitechain Sepolia, the sweet-shop example made one labelled test pa
 
 | export | what |
 |---|---|
-| `whitechainNetwork(overrides?)` | chain id, checkout, token (USDT, 6 decimals), Permit2 and explorer, from `@graphpay/config`. Refuses any chain but Whitechain Sepolia, a token on the never-use list, or a token without 6 decimals |
+| `whitechainNetwork(overrides?)` | chain id, checkout, token (USDT, 6 decimals), Permit2 and explorer; the defaults are vendored in the package (the checkout default is GraphPay's demo deployment: override `checkout` with your own, see above). Refuses any chain but Whitechain Sepolia, a token on the never-use list, or a token without 6 decimals |
 | `assertChain(publicClient, network)` | `eth_chainId` check; every signer and sender calls it first |
 | `usdt('4.80')` → `4800000n`, `formatUsdt(4800000n)` → `'4.80'` | amounts are bigint micro-USDT everywhere |
 | `AgentPayError` | `code`, `message`, `details` |
@@ -113,7 +180,7 @@ On the real Whitechain Sepolia, the sweet-shop example made one labelled test pa
 
 ### Wire (`graphpay-order` x402 scheme)
 
-x402 v2 headers `PAYMENT-REQUIRED`, `PAYMENT-SIGNATURE`, `PAYMENT-RESPONSE` (base64 JSON). Exactly one requirement `{ scheme: 'graphpay-order', network: 'eip155:1874', asset, amount, payTo, maxTimeoutSeconds, extra: { contract, order, shopName, mandateRequired: true } }`, field for field the scheme of `planning/SPEC/PAYMENTS_WHITECHAIN.md` §5, so any graphpay-order facilitator settles it. The order's details travel in `extensions.agentpay` and are echoed by the payer. A payer identifies itself with `x-agentpay-payer` (wallet) and `x-agentpay-payer-name` on its first request, so the order is built for it.
+x402 v2 headers `PAYMENT-REQUIRED`, `PAYMENT-SIGNATURE`, `PAYMENT-RESPONSE` (base64 JSON). Exactly one requirement `{ scheme: 'graphpay-order', network: 'eip155:1874', asset, amount, payTo, maxTimeoutSeconds, extra: { contract, order, shopName, mandateRequired: true } }`, the graphpay-order scheme, so any graphpay-order facilitator settles it. The order's details travel in `extensions.agentpay` and are echoed by the payer. A payer identifies itself with `x-agentpay-payer` (wallet) and `x-agentpay-payer-name` on its first request, so the order is built for it.
 
 Helpers: `buildRequirement`, `buildPaymentRequired`, `orderOfPaymentRequired` (re-derives the order from the details and checks the requirement against it), `encodeHeader`, `decodeHeader`, and the zod schemas.
 
@@ -139,7 +206,7 @@ Spending pass: `issueSpendingPass`, `revokeSpendingPass`, `readSpendingPass`, `s
 
 `createMerchant({ name, address, facilitator, publicClient, walletClient?, network?, riskCheck?, authorize?, identity?, reputation?, quoteTtlSeconds?, maxRefundMicro?, resourceBase?, clock?, log? })`
 
-`authorize(request)` → boolean gates every request that makes the facilitator spend gas (a paid retry, a subscription, a cancel); GraphPay's hosted routes use it for their passcode. Compare a passcode or token in constant time (`crypto.timingSafeEqual` on hashes); the SDK cannot check how the hook compares. A settlement the facilitator could not confirm (`pending`, `in_flight`, a timeout) is answered 502, never 402, so the payer re-sends the same signature.
+`authorize(request)` → boolean gates every request that makes the facilitator spend gas (a paid retry, a subscription, a cancel); GraphPay's hosted demo routes use it for a passcode. Compare a passcode or token in constant time (`crypto.timingSafeEqual` on hashes); the SDK cannot check how the hook compares. A settlement the facilitator could not confirm (`pending`, `in_flight`, a timeout) is answered 502, never 402, so the payer re-sends the same signature.
 
 | method | what |
 |---|---|
@@ -162,10 +229,10 @@ Spending pass: `issueSpendingPass`, `revokeSpendingPass`, `readSpendingPass`, `s
 
 The interface: `verify(paymentPayload, requirements)`, `settle(paymentPayload, requirements)`, optional `supported()`, `subscribe()`, `renew(subId)`, `cancelSubscription()`.
 
-- `httpFacilitator({ url, authToken })`: the x402 facilitator HTTP API (`POST /verify`, `POST /settle`, `GET /supported`, bearer token), https only. This is the adapter for GraphPay's own facilitator.
+- `httpFacilitator({ url, authToken })`: the x402 facilitator HTTP API (`POST /verify`, `POST /settle`, `GET /supported`, bearer token), https only. This is the adapter for a graphpay-order facilitator you run or trust (there is no default URL).
 - `inProcessFacilitator(f)`: any object with `verify` and `settle` (an `x402Facilitator` with the graphpay-order scheme registered).
-- Both adapters are tested against GraphPay's own facilitator (`@graphpay/facilitator`) on an anvil fork: `test-fork/t1-facilitator.test.mjs`.
-- `createReferenceRelayer({ walletClient, publicClient, allowedMerchants, limits?, identity? })`: a small relayer for tests and small deployments. It checks the payload for free, recovers the signature locally, predicts the on-chain outcome (order status, Permit2 nonce, balance, allowance or approval, the pass), and sends only what will settle, one transaction at a time. Anti-drain limits (`RELAYER_DEFAULTS`): a relayer balance floor (0.1 WBT), a per-order cap (10.00), an hourly cap on count (30) and value (50.00), a per-payer rate (10 a minute) and a gas ceiling per transaction (450,000 for a settlement; the heaviest measured is 312,024).
+- Both adapters are tested against GraphPay's own facilitator on an anvil fork in the GraphPay repository.
+- `createReferenceRelayer({ walletClient, publicClient, allowedMerchants, limits?, identity? })`: a small relayer for tests and small deployments, run with your own relayer key. It checks the payload for free, recovers the signature locally, predicts the on-chain outcome (order status, Permit2 nonce, balance, allowance or approval, the pass), and sends only what will settle, one transaction at a time. Anti-drain limits, on by default and never switched off (`RELAYER_DEFAULTS`, `resolveLimits`): a relayer balance floor (0.1 WBT), a per-order cap (10.00), an hourly cap on count (30) and value (50.00), a per-payer rate (10 a minute) and a gas ceiling per transaction (450,000 for a settlement; the heaviest measured is 312,024).
 
 ### Interfaces
 
@@ -182,11 +249,16 @@ interface ReputationProvider {
 
 `staticIdentity([...])` and `staticReputation({...})` are fixed tables for tests and closed deployments.
 
+### Deploy and sandbox
+
+- `deployCheckout({ walletClient, publicClient, relayer, policyWriter, network? })` deploys your own checkout (the admin is the wallet client's account) and returns `{ address, transactionHash, deployBlock, network }`.
+- `startSandbox({ buyerUsdt?, port? })` from `@graphpay_ethglobal/agentpay/sandbox`: a local anvil fork of Whitechain Sepolia with your own checkout and fresh keys; `stop()` ends it. Local only.
+
 ## How GraphPay uses it
 
 GraphPay ("ask before you pay") is one deployment of this SDK; AgentPay itself stays the Whitechain payments lane and imports none of GraphPay's identity or memory packages.
 
-- **Pay (Whitechain):** GraphPay's checkout is the deployed `GraphPayCheckout`, its addresses come from `@graphpay/config`, and its own facilitator serves the same graphpay-order scheme, reached through `httpFacilitator`.
+- **Pay (Whitechain):** GraphPay runs its own deployed `GraphPayCheckout` and its own facilitator, which serves the same graphpay-order scheme and is reached through `httpFacilitator`.
 - **Identify (ENS):** GraphPay plugs its ENS names in as the `IdentityResolver`: agents and shops are names under `graphpay.eth`, the shop's node is the merchant node on-chain, and the payee is read from ENS at pay time.
 - **Remember (Arkiv):** GraphPay plugs its money graph on Arkiv in as the `ReputationProvider`: before it pays, a buyer agent asks the graph about the shop (refund rate, on-time rate), and a shop's risk check asks about the buyer. Every payment the SDK settles is a `GraphPayCheckout` event, which GraphPay's mirror writes to the money graph.
 - **Stop (kill switch):** the on-chain spending pass is GraphPay's AgentPolicy; pausing an agent revokes the pass, and both the SDK's guards and the contract refuse it.
@@ -199,4 +271,5 @@ GraphPay ("ask before you pay") is one deployment of this SDK; AgentPay itself s
 - Refund requests, the mandate ledger and pending payments are in memory; the chain holds every payment and refund.
 - A human payer has no on-chain pass, so its period cap is kept in process memory only (advisory).
 - Week and month caps sum the pass's current epoch: re-issuing a pass at a new epoch starts a fresh history, as the contract does.
-- Not published to npm yet.
+- The reference relayer is for tests and small deployments; run your own facilitator for anything bigger.
+- Testnet only: Whitechain Sepolia (1874).
