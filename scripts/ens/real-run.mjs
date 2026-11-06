@@ -39,7 +39,9 @@ const has = (name) => process.argv.includes(name);
 const mode = has('--real') ? 'real' : arg('--fork') ? 'fork' : 'dry';
 if (has('--real') && arg('--fork')) throw new Error('use --real or --fork, not both');
 const disposableN = arg('--disposable') ? Number(arg('--disposable')) : undefined;
-const relabel = parseRelabel(arg('--relabel')); // shop key → new label, checked by relabelShops
+// shop key → new label, checked by relabelShops; a bare --relabel is an error, never the old story
+if (process.argv.some((a) => a.startsWith('--relabel='))) throw new Error('use --relabel <shop key>=<label>,…, not --relabel=…');
+const relabel = parseRelabel(has('--relabel') ? (arg('--relabel') ?? '') : undefined);
 const outFile = arg('--out') ?? (mode === 'real' ? 'docs/sessions/identity/namespace.json' : undefined);
 const sepolia = config.networks[config.ens.network];
 
@@ -48,7 +50,10 @@ async function main() {
   envValues = values;
   const addresses = roleAddresses(values);
   const story = activeCast();
-  const plan = namespacePlan({ cast: relabel.size > 0 ? relabelShops(story, relabel) : story });
+  // Owner labels already on chain (the record) are taken too: an old name is never a new one.
+  const recorded = existsSync(outFile ?? '') ? JSON.parse(readFileSync(outFile, 'utf8')).owners ?? [] : [];
+  const alsoTaken = recorded.map((o) => o.name.split('.')[0]);
+  const plan = namespacePlan({ cast: relabel.size > 0 ? relabelShops(story, relabel, { alsoTaken }) : story });
   const extra = disposableN ? [disposableAgent(disposableN)] : [];
   const agents = [...plan.agents, ...extra];
   const roles = [...new Set(['OPERATOR', ...plan.owners.map((o) => o.walletRole), ...agents.map((a) => a.walletRole)])];

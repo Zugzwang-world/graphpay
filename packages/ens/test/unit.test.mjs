@@ -30,6 +30,7 @@ import {
   ownerRecords,
   parseAccepts,
   parseInteropList,
+  parseRelabel,
   permissionedResolverAbi,
   REGISTRY,
   relabelShops,
@@ -218,7 +219,15 @@ test('plan: a relabelled shop keeps its key and wallet role; the old label leave
   assert.throws(() => relabelShops(story, { [first.key]: story.persona.label }), /already a label/);
   assert.throws(() => relabelShops(story, { [first.key]: config.ens.namespace.wildcardLabel }), /already a label/);
   assert.throws(() => relabelShops(story, { [first.key]: label, [rest[0].key]: label }), /already a label/);
-  for (const bad of [`${label}.x`, label.toUpperCase(), `-${label}`, `${label}--x`, '']) assert.throws(() => relabelShops(story, { [first.key]: bad }), /normalised label/, bad);
+  for (const bad of [`${label}.x`, label.toUpperCase(), `-${label}`, `${label}--x`, '', 'a'.repeat(64)]) assert.throws(() => relabelShops(story, { [first.key]: bad }), /normalised label/, bad);
+  // a label already on chain (from the record) is taken too
+  assert.throws(() => relabelShops(story, { [first.key]: label }, { alsoTaken: [label] }), /already a label/);
+});
+
+test('plan: parseRelabel reads <key>=<label> pairs; a flag with no pair or a repeated key is an error, never the old story', () => {
+  assert.deepEqual([...parseRelabel(undefined)], []);
+  assert.deepEqual([...parseRelabel('a=b,c=d')], [['a', 'b'], ['c', 'd']]);
+  for (const bad of ['', ',', 'a', 'a=', '=b', 'a=b=c', 'a=b,a=c', '--real']) assert.throws(() => parseRelabel(bad), /relabel/, bad);
 });
 
 test('records: ENSIP-26 texts point at the hosted MCP and the site; shops publish the payee and accepts', () => {

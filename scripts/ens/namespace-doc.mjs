@@ -14,6 +14,9 @@ const when = (s) => new Date(s * 1000).toISOString().slice(0, 10);
 const addr = (a) => `[\`${a}\`](${explorer}/address/${a})`;
 const tx = (h) => `[${h.slice(0, 10)}…](${explorer}/tx/${h})`;
 const gas = rec.txs.reduce((s, t) => s + t.gasUsed, 0);
+// A renamed shop's old name and its agents stay registered, as history: marked in every table.
+const oldNames = (rec.renamed ?? []).map((r) => r.from);
+const shown = (name) => (oldNames.some((o) => name === o || name.endsWith(`.${o}`)) ? `${name} (history)` : name);
 
 const out = [];
 out.push(`# Namespace under ${rec.root.name} (Ethereum Sepolia, chain ${config.networks[config.ens.network].chainId})`);
@@ -28,30 +31,32 @@ if (rec.renamed?.length) {
   out.push('| old name (history) | new name | wallet | registered (UTC) |');
   out.push('|---|---|---|---|');
   const holderOf = (name) => rec.owners.find((o) => o.name === name)?.holder;
-  for (const r of rec.renamed) out.push(`| ${r.from} | ${r.to} | ${r.walletRole} ${holderOf(r.to) ? addr(holderOf(r.to)) : ''} | ${r.at.slice(0, 16).replace('T', ' ')} |`);
+  // When the new name's registration (step B3) was mined, from its own transaction.
+  const registeredAt = (name) => rec.txs.find((t) => t.step === 'B3' && t.name === name)?.at ?? '';
+  for (const r of rec.renamed) out.push(`| ${r.from} | ${r.to} | ${r.walletRole} ${holderOf(r.to) ? addr(holderOf(r.to)) : ''} | ${registeredAt(r.to).slice(0, 16).replace('T', ' ')} |`);
   out.push('');
 }
 out.push('## Hand-off table (payments policies, Join\'s mirror)');
 out.push('');
-out.push('Read by `node` and `epoch` (fresh ENSv2 names are epoch 0). The wallet is the token holder and the coin type 2147485522 address record. Only paying agents get an AgentPolicy; the others are held by their owner.');
+out.push(`Read by \`node\` and \`epoch\` (fresh ENSv2 names are epoch 0). The wallet is the token holder and the coin type 2147485522 address record. Only paying agents get an AgentPolicy; the others are held by their owner.${oldNames.length ? ' "(history)" marks a renamed shop\'s old name and its agents: still registered, no longer in the story.' : ''}`);
 out.push('');
 out.push('| name | node | epoch | wallet | expiry (UTC date) |');
 out.push('|---|---|---|---|---|');
-for (const a of rec.agents) out.push(`| ${a.name} | \`${a.node}\` | ${a.epoch} | ${addr(a.holder)} | ${when(a.expiry)} |`);
+for (const a of rec.agents) out.push(`| ${shown(a.name)} | \`${a.node}\` | ${a.epoch} | ${addr(a.holder)} | ${when(a.expiry)} |`);
 out.push('');
 out.push('## Root, owners and wildcard');
 out.push('');
 out.push('| name | registry | resolver |');
 out.push('|---|---|---|');
 out.push(`| ${rec.root.name} | ${addr(rec.root.registry)} | ${addr(rec.root.resolver)} |`);
-for (const o of rec.owners) out.push(`| ${o.name} | ${addr(o.registry)} | ${addr(o.resolver)} |`);
+for (const o of rec.owners) out.push(`| ${shown(o.name)} | ${addr(o.registry)} | ${addr(o.resolver)} |`);
 out.push(`| ${rec.wildcard.name} (reserved wildcard) | none | ${addr(rec.wildcard.resolver)} |`);
 out.push('');
 out.push('## Agent resolvers and registries');
 out.push('');
 out.push('| name | registry holding it | resolver |');
 out.push('|---|---|---|');
-for (const a of rec.agents) out.push(`| ${a.name} | ${addr(a.registry)} | ${addr(a.resolver)} |`);
+for (const a of rec.agents) out.push(`| ${shown(a.name)} | ${addr(a.registry)} | ${addr(a.resolver)} |`);
 out.push('');
 out.push('## Transactions');
 out.push('');

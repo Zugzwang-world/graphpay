@@ -83,27 +83,35 @@ export function namespacePlan({ cast = activeCast(), root = config.root.ens } = 
 // The cast with some shops under new ENS labels (`relabel`: shop key → new label). Each shop
 // keeps its key, wallet role and everything else, so a renamed shop's records point at the
 // wallet its old name used and no funds move; the old name is never touched on chain. A new
-// label must be one normalised label, new to the namespace (persona, shops, wildcard).
-export function relabelShops(cast, relabel) {
+// label must be one normalised DNS label (at most 63 bytes), new to the namespace: not the
+// persona's, a shop's, the wildcard's or one of `alsoTaken` (labels already on chain, from the record).
+export function relabelShops(cast, relabel, { alsoTaken = [] } = {}) {
   const map = relabel instanceof Map ? relabel : new Map(Object.entries(relabel ?? {}));
-  const taken = new Set([cast.persona.label, ns().wildcardLabel, ...cast.shops.map((s) => s.label)]);
+  const taken = new Set([cast.persona.label, ns().wildcardLabel, ...cast.shops.map((s) => s.label), ...alsoTaken]);
   const fresh = new Set();
   for (const [key, label] of map) {
     if (!cast.shops.some((s) => s.key === key)) throw new Error(`relabel: ${key} is not a shop of the story`);
-    if (typeof label !== 'string' || !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(label) || normalize(label) !== label) throw new Error(`relabel: ${label} is not one normalised label`);
+    if (typeof label !== 'string' || label.length > 63 || !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(label) || normalize(label) !== label) throw new Error(`relabel: ${label} is not one normalised label`);
     if (taken.has(label) || fresh.has(label)) throw new Error(`relabel: ${label} is already a label of the namespace`);
     fresh.add(label);
   }
   return { ...cast, shops: cast.shops.map((s) => (map.has(s.key) ? { ...s, label: map.get(s.key) } : s)) };
 }
 
-// A `--relabel` argument, `<shop key>=<label>[,…]`, as the map relabelShops takes.
-export function parseRelabel(text = '') {
-  return new Map(text.split(',').filter(Boolean).map((pair) => {
+// A `--relabel` argument, `<shop key>=<label>[,…]`, as the map relabelShops takes. `undefined`
+// (no flag) is no relabel; a flag with no pair, or a key given twice, is an error, never the old story.
+export function parseRelabel(text) {
+  if (text === undefined) return new Map();
+  const pairs = String(text).split(',').filter(Boolean);
+  if (pairs.length === 0) throw new Error('relabel: no <shop key>=<label> pair given');
+  const map = new Map();
+  for (const pair of pairs) {
     const [key, label, extra] = pair.split('=');
     if (!key || !label || extra !== undefined) throw new Error(`relabel takes <shop key>=<label> pairs, got ${pair}`);
-    return [key.trim(), label.trim()];
-  }));
+    if (map.has(key.trim())) throw new Error(`relabel: ${key.trim()} is given twice`);
+    map.set(key.trim(), label.trim());
+  }
+  return map;
 }
 
 // disposable-<n> under the persona, held by DISPOSABLE_<n> (a fresh wallet per kill).
