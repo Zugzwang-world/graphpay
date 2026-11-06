@@ -40,14 +40,13 @@ The shop dispatches a paid order on its own about 6 seconds after payment, so a 
 2. Choose an amount below 4.80 (for example 0.80), type a reason, and send. Only the newest order can be refunded from here.
 3. On Kesar Kingdom's phone, open **Refund requests**: the request shows as waiting. Tap **Approve**, then **Confirm**.
 4. Expect: both phones show the refund as Refunded, with its transaction link.
-   - **Known issue (16:50 IST):** the approval answered "the refund could not be sent" twice, and nothing was sent. The route's owner is on it. Skip this step until OPEN says it is fixed.
    - Refunds and dispatches act only on Vitalik's orders, and one order can be changed at most once every 30 seconds.
 
 ## 6. Re-order
 
 1. On Vitalik's phone, in Orders, open the order and tap **Re-order**.
 2. Expect: a paid re-order of 3 pieces (1.20) with its transaction link, and a new order on the shop's phone.
-   - **Known issue (16:55 IST):** the re-order was refused with `BAD_402`, and nothing was paid. The route's owner is on it.
+   - Vitalik's thread shows no receipt card for a re-order (the team's thread draws receipts only for quotes); the new order is in **Orders**.
 
 ## 7. Pause and resume
 

@@ -101,14 +101,18 @@ Updated 13:33 IST, Fri 6 Nov. **The live errand pays reliably on the production 
 
 ## phones
 
-Updated 17:05 IST, Fri 6 Nov (Integration).
-- **The errand pays from the stage:** 4.80 to Kesar Kingdom in about 107 s (tx `0x89ac…b990`). The shops were compared and the trap rejected on Vitalik's phone; the order appeared on the shop's phone; the explainer's lanes filled.
-- **Phase 3, used live:**
-  - works: the Open switch; the refund request (it reaches the shop's inbox after #127); pause and resume (through `/customer`);
-  - fails on the server, reported to the owners: the merchant refund (502) and the re-order (`BAD_402`);
-  - dispatch is automatic (about 6 s after payment).
-- **Phase 4 in review:** `/live` becomes the home page; the gulab jamun's Swarm image is read through its Arkiv menu row into the phones' data; the founder's click-by-click script is `docs/sessions/integration/test-script.md`.
-- Blockers: the two server fixes. The team's flag to hide unbuilt actions.
+Updated 17:20 IST, Fri 6 Nov (Integration).
+- **All four phases are live.** The home page is the team's two phones on live data around T5's explainer, with no passcode.
+- **Proven live, each once:**
+  - the errand paid 4.80 (tx `0x89ac…b990`, about 107 s);
+  - the Open switch;
+  - the refund request;
+  - the merchant refund of 0.80 (tx `0xcd44…c425`, after T5's #129);
+  - the re-order of 1.20 (tx `0x78ac…78ef`, after #131);
+  - pause and resume;
+  - dispatch is automatic.
+- Waiting on the team (OPEN): product images (the Swarm image is in the data), hiding unbuilt actions, a pause switch, optional repeat buyers, a receipt card for a re-order.
+- The founder's script: `docs/sessions/integration/test-script.md`.
 
 ## website
 
