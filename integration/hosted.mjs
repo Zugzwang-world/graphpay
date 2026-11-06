@@ -6,7 +6,8 @@
 //              401 without and with a wrong key; the visitor routes are open; nothing is sent)
 //   --yes      also, as the acceptance payer (its story wallet role) on a fresh UTC day:
 //              C2 pay 4.80 (402 → payer-side gate and ENS payee read → sign → 200), C5 the same
-//              request again, C3's re-order of 3 for 1.20, C4(b) 0.40 more (over the 6.00 cap)
+//              request again, C3's re-order (the story's order.reorder: its own sku when it has
+//              one, else the order's item), C4(b) one more order, over the acceptance cap
 //   --refund   also C3's refund(order, 0.80), the one local send, as SHOP_KESAR (the hosted
 //              merchant refund route is not live yet); only after the hosted delivery's receipt
 // C3's renewal is the hosted cron's (T1's evidence); C4(a) and F3 are not run here.
@@ -247,8 +248,9 @@ if (send) {
     c3.refund.pass = ev?.args.amountMicro === BigInt(story.order.refundMicro) && ev?.args.full === false && after - before === BigInt(story.order.refundMicro) && within(c3.refund.gasUsed, 75_344, 75_344);
     say(`C3 refund ${c3.refund.pass ? 'ok' : 'FAIL'}: ${c3.refund.explorer} gas ${c3.refund.gasUsed}`);
   }
-  // C3: the re-order of 3 for 1.20 through the hosted reorder route.
-  const qr = await quote({ shop: shop.ensName, item: story.order.sku, qty: String(story.order.reorder.quantity), buyer: persona.ensName, payer: payer.ensName, wallet: wallet.address, parent: q0.orderId });
+  // C3: the story's re-order through the hosted reorder route: its own item when it names one
+  // (ADR-0073: "another coffee", 0.80), else the order's.
+  const qr = await quote({ shop: shop.ensName, item: story.order.reorder.sku ?? story.order.sku, qty: String(story.order.reorder.quantity), buyer: persona.ensName, payer: payer.ensName, wallet: wallet.address, parent: q0.orderId });
   const re = await payOnce(qr, new URL(qr.payUrl).pathname, { mandate: `M13 C3 ${out.startedAt}`, max: story.order.reorder.priceMicro, payee });
   if (re.status === 200) {
     const rc = await pub.waitForTransactionReceipt({ hash: re.body.transaction, timeout: 120_000 });
@@ -260,7 +262,7 @@ if (send) {
   } else c3.reorder = { pass: false, response: { stage: re.stage, status: re.status, body: re.body, gate: re.gate } };
   say(`C3 re-order ${c3.reorder.pass ? 'ok' : 'FAIL'}: ${c3.reorder.explorer ?? JSON.stringify(c3.reorder.response)}`);
 
-  // C4(b): 0.40 more is over the 6.00 cap: refused off-chain (signed ungated, so the hosted
+  // C4(b): one more order is over the acceptance cap: refused off-chain (signed ungated, so the hosted
   // facilitator refuses it and its recorder writes the off-chain fail edge).
   const one = await quote({ shop: shop.ensName, item: story.order.sku, qty: '1', buyer: persona.ensName, payer: payer.ensName, wallet: wallet.address });
   // Only when it is really over the cap: otherwise the ungated 0.40 would settle.

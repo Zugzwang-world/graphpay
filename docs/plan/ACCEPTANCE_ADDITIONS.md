@@ -44,12 +44,15 @@ Additions to `planning/ACCEPTANCE_TESTS.md` from `planning/EVENT_ADDENDUM.md` (i
 |---|---|
 | A5 | W_DIRECTORY (D7) joins the fresh roles; no two roles share an address. |
 | B1 | "18 of 18 cast names" becomes every name of the active cast plus both working agents. The address record checked is coin type 2147485522: each paying agent's own wallet, each shop's merchant wallet. |
-| B2 | "13 of 13" becomes every agent of the active cast. |
+| B2 | "13 of 13" becomes every agent of the active cast. A pass used up today still counts, and the report names it: `CAP_EXCEEDED` is the gate's last step, after the name, the epoch, the status and the policy have passed. Under public access anyone can spend the payer's pass (ADR-0069), and C4(b) spends the acceptance agent's on purpose (W5, Fri 6 Nov 23:55 IST). |
 | B3 | As the agent's key (ACCEPTANCE_PAYER): `setText(<name>, "agent-context", <text>)` lands (tx); `setAddress(<name>, 2147485522, <own wallet>)` succeeds in simulation; simulated `setText` of `graphpay.cap_micro` ("999000000"), `graphpay.status`, `x-graphpay-accepts` and `agent-endpoint[mcp]`, and `setAddress(<name>, 60, …)`, each revert `EACUnauthorizedAccountRoles`, and none is sent. Evidence: the Sepolia tx link and the revert reasons. |
 | B4 | (D3) Read each cast shop's text record `x-graphpay-accepts` (`getEnsText`), parse it, parse a malformed copy, run the ERC-7930 encoder test. Pass: the value is `0x0001000002075214cedfb56113143d55b2358b8cfbb0deb5ad2f55a7` (28 bytes) and equals the config's value; parse gives `{ chainId: 1874, token: <configured test USDT> }`; the malformed copy gives no preference; no `payment-preference` data record is read or written. Evidence: the value, the parse output, the test output. |
 | C2 | Evidence also lists the quote entity key and the ENS payee read that the payer checked before signing. |
+| C3 | The re-order is the story's `order.reorder` (ADR-0073: "another coffee", 0.80, its own sku), not "3 for 1.20". The renewal's `PaymentSettled` equals its `SubscriptionRenewed` amount: the subscription's own price, not today's story price (#140 moved it from 0.40 to 2.40) (W5, Fri 6 Nov 23:55 IST). |
+| C7 | The qualifying payment is the one recorded in `docs/sessions/payments/c7.json` (made once by `usdt-ready`), found again as exactly one W_LEDGER pay edge from the acceptance payer; never the first pay edge found (the agent also paid C3's re-order). E3 is the same payment (W5, Fri 6 Nov 23:55 IST). |
 | D6 | Calls stay exact as written. "Times" becomes "recorded in the CSV, not a pass criterion" (D2), and the `fail (network)` clause is dropped. |
 | D7 | As D6, at size M; `blocked: waiting for the locked story` until the founder locks it (ADR-0049). |
+| E1 | The request is the story's `order.request`, and the budget the story's. The deadline is the one the request's words give at the run's time: a clock time is today's, a span ("within an hour", #153) counts from the request, to the minute; the mandate's hash covers it (W5, Fri 6 Nov 23:55 IST). |
 | E2 | The shop names come from the cast's roles (good, trap, runner-up); with the test cast these are kesar-kingdom, jamun-junction and syrup-street. |
 | F2 | The route list includes every route that makes W_DIRECTORY sign (the 402 step that writes a quote; on Friday, the Open toggle). |
 
