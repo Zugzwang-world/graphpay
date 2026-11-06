@@ -57,7 +57,8 @@ One line per PR: time (IST) · activity · result · PR link. Append under your 
 - 13:05 IST · phones · phase 1: the team's two phones on our site at `/live`, built from `frontend/` (#70, `8abe39a`) with their Vite, on live read-only data (agents, pass, Open flag, real orders with explorer links, the merchant stream) · https://github.com/Zugzwang-world/graphpay/pull/111
 - 13:30 IST · phones · fix: production deploys failed since #111 (Vercel's NODE_ENV=production made npm skip the team's toolchain); the phones build now installs frontend/'s dev dependencies · https://github.com/Zugzwang-world/graphpay/pull/116
 - 13:50 IST · phones · public access (ADR-0069): the passcode check is a no-op behind the config's `site.publicAccess`; visitor guards on merchant refund and dispatch (the persona's orders only, 30 s per order) and pause and resume (20 s); reviewer: no blocking · https://github.com/Zugzwang-world/graphpay/pull/117
-- 14:20 IST · phones · phase 2: Vitalik's ask on the phone runs the real errand (`/api/agents/run`); its frames drive the thread, shop cards, quote sheet and receipt, and each frame is posted to `/live`'s explainer; the merchant stream backs off with jitter · PR link follows
+- 14:20 IST · phones · phase 2: Vitalik's ask on the phone runs the real errand (`/api/agents/run`); its frames drive the thread, shop cards, quote sheet and receipt, and each frame is posted to `/live`'s explainer; the merchant stream backs off with jitter · https://github.com/Zugzwang-world/graphpay/pull/122
+- 16:35 IST · phones · phase 2 live: the first errand from `/live` compared the shops and vetoed the trap on Vitalik's phone; the explainer's lanes filled to the signature; it was refused because the payer was paused on ENS (not by this session). Phase 3: refund request, refund, re-order, dispatch, pause and resume and the Open switch wired; a frame that fails to apply no longer stops the stream · PR link follows
 
 ## website
 
