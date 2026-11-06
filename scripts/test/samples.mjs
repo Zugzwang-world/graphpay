@@ -6,6 +6,7 @@ export const hex = (n, c = 'a') => c.repeat(n);
 export const SAMPLES = {
   'anthropic-api-key': ['sk', 'ant', 'api03', 'x'.repeat(40)].join('-'),
   'xai-api-key': ['xai', 'Q'.repeat(30)].join('-'),
+  'kimi-api-key': ['sk', 'K'.repeat(48)].join('-'),
   jwt: [`eyJ${'h'.repeat(10)}`, `eyJ${'p'.repeat(12)}`, 's'.repeat(20)].join('.'),
   'hex-private-key': ['FUNDER', 'PRIVATE', 'KEY'].join('_') + '=0x' + hex(64, 'b'),
   'pem-private-key': ['-----BEGIN', 'PRIVATE', 'KEY-----'].join(' '),

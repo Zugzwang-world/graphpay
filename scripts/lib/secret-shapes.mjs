@@ -14,6 +14,9 @@ const BIP39 = new Set(
 export const SHAPES = [
   { label: 'anthropic-api-key', re: /sk-ant-[A-Za-z0-9_-]{20,}/g },
   { label: 'xai-api-key', re: /(?<![A-Za-z0-9])xai-[A-Za-z0-9]{20,}/g },
+  // Kimi (Moonshot AI) keys start sk- (admin keys sk-admin-); the length is undocumented (FACTS, 2026-11-06),
+  // so a conservative minimum. It also catches other sk- style keys; Anthropic's sk-ant- has its own rule.
+  { label: 'kimi-api-key', re: /(?<![A-Za-z0-9_-])sk-(?!ant-)(?:admin-)?[A-Za-z0-9]{32,}/g },
   { label: 'jwt', re: /(?<![A-Za-z0-9_-])eyJ[A-Za-z0-9_-]{8,}\.eyJ[A-Za-z0-9_-]{8,}\.[A-Za-z0-9_-]{8,}/g },
   // "private key", "priv key", "secret key", "signer key" as private_key, private-key or privatekey,
   // then within 16 spaces an optional ':' or '=', an optional quote and 64 hex digits.

@@ -76,3 +76,9 @@ test('the committed BIP-39 wordlist equals the standard list', () => {
   assert.equal(ours.length, 2048);
   assert.deepEqual(ours, [...english]);
 });
+
+test('a Kimi key is caught, including an admin key, and an Anthropic key keeps its own label', () => {
+  assert.deepEqual(labels(`key ${['sk', 'admin', 'A'.repeat(40)].join('-')} end`), ['kimi-api-key']);
+  assert.deepEqual(labels(`key ${SAMPLES['anthropic-api-key']} end`), ['anthropic-api-key']);
+  assert.deepEqual(labels('the prefix sk- alone or sk-short is fine'), []);
+});
