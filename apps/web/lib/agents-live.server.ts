@@ -1,12 +1,20 @@
-// The errand runner behind POST /api/agents/run. Join wires the real one in M12
-// (`e2e:food`): the buyer team over live ENS, Arkiv, the shop API and the signer.
-// Until then there is none, and the route says so: the shipped site has no fake path.
+// The errand runner behind POST /api/agents/run: Join's live runner (@graphpay/integration,
+// live-runner.mjs), the buyer team on the `live` preset over live ENS, Arkiv, the MCP and the
+// hosted shop and facilitator, as the story's payer agent. Server side only: its keys are this
+// server's environment. Until every name it needs is set there is none: the route says it is
+// waiting, and the server log names what is missing. The shipped site has no fake path.
 
+import { createLiveRunner, liveRunnerMissing } from '@graphpay/integration/live-runner';
+import type { RunResult } from './contracts.ts';
 import type { ErrandRunner } from './run-registry.server.ts';
 
-export const RUNNER_WAITING_FOR = 'M12 live wiring of the agents (Join)';
+export const RUNNER_WAITING_FOR = "the live runner's server settings (Join)";
+// The names (never values) it still needs go to the server log only.
+const missing = liveRunnerMissing(process.env);
+if (missing.length && process.env.NODE_ENV === 'production') console.log(`agents: the live runner waits for ${missing.join(', ')}`);
 
 let override: ErrandRunner | null = null;
+let live: ErrandRunner | null | undefined;
 
 // For tests only: nothing in the shipped site calls this.
 export function setErrandRunnerForTests(runner: ErrandRunner | null): void {
@@ -15,5 +23,10 @@ export function setErrandRunnerForTests(runner: ErrandRunner | null): void {
 }
 
 export function errandRunner(): ErrandRunner | null {
-  return override;
+  if (override) return override;
+  if (live === undefined) {
+    const runner = createLiveRunner(process.env, { log: (line) => console.log(line) });
+    live = runner ? (input) => runner(input) as Promise<RunResult> : null;
+  }
+  return live;
 }
