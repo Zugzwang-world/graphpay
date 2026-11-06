@@ -1,4 +1,4 @@
-# Relay: records (the Coordinator), 06:55 IST, Fri 6 Nov
+# Relay: records (the Coordinator), 08:30 IST, Fri 6 Nov: the morning relay
 
 ## Where we are
 
@@ -22,7 +22,7 @@ Merged Friday items:
 - 13: the explainer lanes;
 - the phones' Pause/Resume and merchant actions.
 
-Plan usage has held at **82%** since 05:31: the sessions are mostly idle, waiting for the morning.
+Plan usage has held at **82%** since 05:31: the sessions have been idle overnight, waiting for the founder. Nothing has changed since 06:55 apart from the time.
 
 ## What the founder needs to do at 08:30
 
