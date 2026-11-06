@@ -4,10 +4,11 @@
 // `/api/merchant/events` stream). Spending actions arrive in the next phases; until then
 // they answer with an error event and change nothing.
 
-import type { AgentRef, AgentState, DemoAdapter, DemoEvent, DemoSnapshot, Link, Money, Order } from '@/demo/contract';
+import type { AgentRef, AgentState, DemoAdapter, DemoEvent, DemoSnapshot, Money, Order } from '@/demo/contract';
 import { payingAgent, story } from '@/data/story';
-import { copy, fill } from '@/copy';
 import { foldOrders, microToAmount, rowFromEdge, rowKey, rowsFromCsv, type FoldContext, type LedgerRow } from './orders';
+import { ErrandMapper, readFrames } from './errand';
+import { txLink } from './links';
 
 interface CustomerState {
   agent: { ens: string; status: 'ACTIVE' | 'PAUSED' | 'REVOKED' | 'EXPIRED' | 'UNKNOWN' };
@@ -25,7 +26,10 @@ type LiveProduct = (typeof story.products)[number] & { priceMicro?: string; quan
 
 const STATE_POLL_MS = 15_000;
 const MAP_POLL_MS = 30_000;
+// The merchant stream reconnects after RECONNECT_MS, doubling on each failure up to RECONNECT_MAX_MS,
+// with jitter, so phones behind one IP never retry in step.
 const RECONNECT_MS = 1_500;
+const RECONNECT_MAX_MS = 30_000;
 const DAY_MS = 86_400_000;
 
 const usdt = (micro: string | bigint): Money => ({ amount: microToAmount(BigInt(micro)), currency: 'USDT' });
@@ -48,9 +52,6 @@ async function getText(path: string): Promise<string | null> {
   }
 }
 
-export function txLink(tx: string): Link {
-  return { label: fill(copy.common.viewTxWhitechain, { chain: story.explorers.whitechainLabel }), url: `${story.explorers.whitechain.replace(/\/+$/, '')}/tx/${tx}` };
-}
 
 // The phones' three agent states. A name the server could not read never shows as active.
 function statusOf(s: CustomerState['agent']['status'] | undefined): AgentState['status'] {
@@ -67,6 +68,13 @@ function periodEnd(state: CustomerState | null, now: number): number {
   return expiry !== null && Number.isFinite(expiry) && expiry < day ? expiry : day;
 }
 
+// The /live page's explainer follows the errand from these frames (apps/web/components/live-run-bridge.tsx).
+const RUN_FRAME = 'graphpay.run-frame';
+function postToStage(event: string, data: string): void {
+  if (window.parent === window) return;
+  window.parent.postMessage({ type: RUN_FRAME, event, data }, window.location.origin);
+}
+
 export class LiveAdapter implements DemoAdapter {
   readonly mode = 'live' as const;
   private listeners = new Set<(e: DemoEvent) => void>();
@@ -78,6 +86,7 @@ export class LiveAdapter implements DemoAdapter {
   private timers: ReturnType<typeof setInterval>[] = [];
   private source: EventSource | null = null;
   private reconnect: ReturnType<typeof setTimeout> | null = null;
+  private failures = 0;
   private readonly payer = payingAgent();
   private readonly payerRef: AgentRef = { ens: this.payer.ens, role: this.payer.role, owner: story.customer.ens };
   private readonly ctx: FoldContext = {
@@ -126,8 +135,21 @@ export class LiveAdapter implements DemoAdapter {
   }
 
   // customer
-  sendPrompt(): Promise<void> {
-    return this.notYet();
+  // The errand runs on our server (POST /api/agents/run, one at a time); its frames become the
+  // phones' events, and each frame is also posted to the /live page for the explainer.
+  async sendPrompt(text: string): Promise<void> {
+    const res = await fetch('/api/agents/run', { method: 'POST', headers: { 'content-type': 'application/json', accept: 'text/event-stream' }, body: JSON.stringify({ request: text }), cache: 'no-store' });
+    if (!res.ok || !res.body) {
+      const body = (await res.json().catch(() => null)) as { error?: unknown } | null;
+      throw new Error(res.status === 409 ? 'Another errand is running right now. Try again in a minute.' : typeof body?.error === 'string' ? body.error : `The errand did not start (HTTP ${res.status}).`);
+    }
+    const mapper = new ErrandMapper(story, txLink);
+    void readFrames(res.body, (event, data) => {
+      postToStage(event, data);
+      for (const e of mapper.map(event, data)) this.emit(e);
+    }).then(() => {
+      for (const e of mapper.end()) this.emit(e);
+    });
   }
   reorder(): Promise<void> {
     return this.notYet();
@@ -258,12 +280,17 @@ export class LiveAdapter implements DemoAdapter {
     if (this.source || this.listeners.size === 0) return;
     const source = new EventSource(`/api/merchant/events?since=${this.cursor}`);
     this.source = source;
+    source.addEventListener('ready', () => {
+      this.failures = 0;
+    });
     source.addEventListener('edge', (msg) => this.onEdge((msg as MessageEvent<string>).data));
     source.addEventListener('error', () => {
       source.close();
       if (this.source !== source) return;
       this.source = null;
-      if (this.listeners.size > 0) this.reconnect = setTimeout(() => this.connect(), RECONNECT_MS);
+      const delay = Math.min(RECONNECT_MAX_MS, RECONNECT_MS * 2 ** this.failures) * (0.75 + Math.random() / 2);
+      this.failures += 1;
+      if (this.listeners.size > 0) this.reconnect = setTimeout(() => this.connect(), delay);
     });
   }
 
