@@ -81,7 +81,11 @@ Started 23:02 IST, Fri 6 Nov (session `local_3404db4e-486c-4f86-8b3a-67ceb53ef02
 
 ## w5-ops
 
-Started 23:02 IST, Fri 6 Nov (session `local_29b84e36-bafe-4ba2-9315-4c2a94a0a19e`). W5 rewrites this section at the end of each step.
+Updated 23:10 IST, Fri 6 Nov (W5 Ops).
+- **The payer is ACTIVE**, with a **300 test USDT** pass for tonight, in the policy and the ENS record (the gate passes it at 300). 78 spent today.
+- **PAYER holds 125 test USDT** (66.8 from FUNDER); the shop's takings (118.81) refill it next.
+- **The shop (Filter & Fold) is open.**
+- **Next:** Pause and Resume per agent, the self-healing cron, the workers after W1's new labels, and acceptance at 0 failures.
 
 ## w6-sdk
 
