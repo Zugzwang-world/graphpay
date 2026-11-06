@@ -1,12 +1,12 @@
 # NOW
 
-Updated 23:22 IST, Fri 6 Nov (night Coordinator)
+Updated 23:33 IST, Fri 6 Nov (night Coordinator)
 
 ## Summary (Coordinator only)
 
-Updated 23:22 IST, Fri 6 Nov. **Only the submission (Sat 09:00 IST) and the presentation (09:30 IST) are fixed** (ADR-0066). Every deliverable's status is in [`TRACKER.md`](TRACKER.md).
+Updated 23:33 IST, Fri 6 Nov. **Only the submission (Sat 09:00 IST) and the presentation (09:30 IST) are fixed** (ADR-0066). Every deliverable's status is in [`TRACKER.md`](TRACKER.md).
 
-**Urgent: the Mac is on battery** (68% at 23:17 IST, about 3 h 15 min left). It would die around 02:30 IST, taking the mirror and every night session with it. **Plug in the charger and keep the lid open.**
+**The Mac is charging again** (65% at 23:27 IST). Keep the charger in and the lid open until the presentation: the mirror and every night session run on it.
 
 **The night run** ([brief](briefs/2259-night-coordinator.md)): seven streams, each in its own session and worktree, on Opus 5.5 at max. The usage guardrails are off tonight, and no contract is redeployed.
 
@@ -30,9 +30,11 @@ The Coordinator times each step. If a merge breaks the live errand, revert first
 
 **Landed tonight:**
 - **W5:** the payer's pass is **300 test USDT a day** for tonight, in the policy and the ENS record, and PAYER is back to 125 test USDT ([#152](https://github.com/Zugzwang-world/graphpay/pull/152)).
-- **W4:** the request says "delivered within an hour", and the deadline counts from the request, so errands can buy at any hour ([#153](https://github.com/Zugzwang-world/graphpay/pull/153), live since 23:18 IST). W4 proves it with live errands next.
+- **W4:** the request says "delivered within an hour", and the deadline counts from the request, so errands can buy at any hour ([#153](https://github.com/Zugzwang-world/graphpay/pull/153), live since 23:18 IST). Every model call now goes into the run log with its tokens and seconds ([#157](https://github.com/Zugzwang-world/graphpay/pull/157)). W4 runs a live errand as its baseline next.
+- **W7:** the README, with a "verify each claim" table of 24 checked transactions, the persona note, the partner sections and the team; a root MIT license ([#154](https://github.com/Zugzwang-world/graphpay/pull/154)).
+- **W1:** the three new shop names are live on ENS (Sepolia), each with its storefront, risk and dispatch agents, on the old shops' wallets, so no funds move (30 transactions; ENS reads 100 pass). The record is [#158](https://github.com/Zugzwang-world/graphpay/pull/158).
 
-**In PR:** W7's README ([#154](https://github.com/Zugzwang-world/graphpay/pull/154)) and W3's 0.80 coffee re-order ([#155](https://github.com/Zugzwang-world/graphpay/pull/155)). W1's three new shop names are registering on Sepolia; W2 is writing the new shops' history.
+**In PR:** W3's 0.80 coffee re-order ([#155](https://github.com/Zugzwang-world/graphpay/pull/155), reviewer: no blocking issues). W2 is writing the new shops' history (63 of 1,258 rows at 23:27 IST); W1 flips the labels after it.
 
 **Live now** (23:17 IST):
 - **The payer is ACTIVE:** resumed at 23:00 IST ([Sepolia tx](https://sepolia.etherscan.io/tx/0x34cddd47d2230e305b4f0a9546b8dfba51d37b7bee4c0336d54a4f556397f949)). 78 of tonight's 300 test USDT are spent; the pass resets at 05:30 IST.
@@ -49,7 +51,7 @@ The Coordinator times each step. If a merge breaks the live errand, revert first
 - Acceptance: 35 pass, 8 fail (W5).
 
 **Founder now** (OPEN):
-1. The charger.
+1. Keep the charger in.
 2. The Arkiv key.
 3. The Kimi balance, and more test USDT to FUNDER.
 4. npm's web approval when W6 asks.

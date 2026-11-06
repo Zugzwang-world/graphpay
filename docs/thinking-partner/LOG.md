@@ -104,7 +104,8 @@ One line per PR: time (IST) · activity · result · PR link. Append under your 
 - 21:49 IST · records · merged: docs(records): the Coordinator's resume at 21:45 IST · https://github.com/Zugzwang-world/graphpay/pull/147
 - 22:49 IST · records · full sync: TRACKER (new, 55 rows), NOW, OPEN by owner, LOG catch-up and roll-up, every relay (+ phones, booth, sync), ADR-0072 to ADR-0076, the acceptance report (read-only: 35/8/1/4), the fresh-Coordinator handover; completed briefs archived · https://github.com/Zugzwang-world/graphpay/pull/150
 - 23:10 IST · records · night Coordinator takeover: payer resumed (Sepolia 0x34cddd47…f949), Filter & Fold open, the day sessions retired, the night roster (W1 to W7) in NOW, TRACKER owners moved to the streams, retired relays and finished briefs archived · https://github.com/Zugzwang-world/graphpay/pull/151
-- 23:22 IST · records · NOW and TRACKER after W5's pass at 300 (#152) and W4's relative deadline (#153); the outgoing Coordinator's last prompt log · coord/night-records
+- 23:22 IST · records · NOW and TRACKER after W5's pass at 300 (#152) and W4's relative deadline (#153); the outgoing Coordinator's last prompt log · https://github.com/Zugzwang-world/graphpay/pull/156
+- 23:33 IST · records · NOW and TRACKER: the Mac charging, W7's README (#154), W1's new names on ENS (#158), W4's run-log metrics (#157) · coord/night-records-2
 
 ## booth
 
