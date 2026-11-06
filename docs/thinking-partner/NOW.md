@@ -146,12 +146,10 @@ Updated 17:46 IST, Fri 6 Nov (Coordinator).
 
 ## booth
 
-Updated 19:20 IST, Fri 6 Nov (Booth session).
-- **Done this step (part 2):** all merged and live.
-  - A dropped errand stream no longer offers "Try again": the phone recovers the run by its id and shows the paid order (#138).
-  - The deck in the middle follows the live run through seven steps with its explorer chips and "Replay the last run"; the Live run tab is gone (#139).
-  - Grok's figurines (by agent state) and dish and storefront photos are in the phones; the renewal shows 2.40; the good shop's combo reads "Ghee roast masala dosa + filter coffee" (#140).
-  - One live errand in Chrome: all seven deck steps, 4.80 paid to Filter & Fold, both phones updated, no "stream ended".
+Updated 20:25 IST, Fri 6 Nov (Sync session).
+- **sync (done, merged and live):** the phones drive the deck. Every errand step and every phone event (refund request, the shop's refund, pause, resume, the Open switch, a renewal) moves the deck to its slide with its explorer links, from one table (`apps/web/lib/deck-map.ts`); the strip's title is the slide's own title, so the two agree. Back and Next only browse. Figurines are large, with no ring or badge. No QR strip; the deck has the height back (#143, #144).
+- **The no-purchase errands** (19:31 to 19:35) were the clock: the good shop needs 45 min and the request said "by 8 pm". The story deadline is now "by 11:59 pm" (#142). Not a bug.
+- **Checked on production in Chrome:** one live errand (all seven steps in sync, paid 4.80, order #4B28), a 0.80 refund from Vitalik's phone to Filter & Fold's, Pause then Resume on the Payer card. Payer active, shop open.
 - **Waiting on:** nothing. **Next:** the founder's demo check; what not to tap is in `docs/sessions/booth/demo-note.md`.
 
 ## submission

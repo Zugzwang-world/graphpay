@@ -1,6 +1,6 @@
 # Booth session: resume
 
-Updated 19:20 IST, Fri 6 Nov, after part 2 (`docs/thinking-partner/briefs/1900-booth-run-part2.md`). Part 2 is all merged; the part 1 text below stays as it was.
+Updated 20:25 IST, Fri 6 Nov, after the Sync session (see below); before that, 19:20 IST after part 2 (`docs/thinking-partner/briefs/1900-booth-run-part2.md`). Part 2 is all merged; the part 1 text below stays as it was.
 
 ## Part 2: done and merged
 1. **No double payment** (#138): `apps/phones/src/errand.ts` and `live-adapter.ts` recover a dropped run by its id (replay `/api/agents/run/<id>/events`, skipping applied frames), then poll `/api/state/customer` for the payer's newest order; no "Try again" for a run that may have paid. Keep-alive every 5 s. Cause of the drop not proven; it did not happen in Chrome.
@@ -11,6 +11,19 @@ Updated 19:20 IST, Fri 6 Nov, after part 2 (`docs/thinking-partner/briefs/1900-b
 Checked in Chrome on production, one live errand (the second and last of part 2 was not needed): the deck went through all 7 steps and stayed on the record slide with the links; Tawa Tangle rejected; the dish photos on the cards; the paid card on Vitalik's phone (4.80, order #4020 on the shop's phone); no "stream ended". Payer active, shop open.
 
 Still open after 21:30: the real ENS names and history, the big city, re-order (1 x 4.80 now) and caps and kill and subscriptions, the menu photos (no menu screen), animation beyond the state images, the deck's non-demo slides checked one by one, the Arkiv category ("sweets").
+
+
+## Sync session (20:25 IST): done and merged
+Brief `docs/thinking-partner/briefs/1945-booth-sync.md` (Sonnet 5.5, High). Worktree `.claude/worktrees/booth-sync-session-0ad693`.
+0. **The no-purchase errands** (19:31 to 19:35, three of them, 37 to 73 s): not a bug. The good shop's scenario ETA is 45 min and the request said "by 8 pm", so after 19:15 the deadline guard (G3, `MISSES_DEADLINE`) left no shop that could deliver and the concierge ended without paying. Found from the Vercel runtime logs (`live errand <id>: no-purchase, 54.4 s`; the run itself is gone from memory after 5 min). Fix (#142): `story.json` request "by 11:59 pm", `deadlineLocal` 23:59, the deck copy, the acceptance check and the mandate test.
+1. **The phones drive the deck** (#143, #144): `apps/web/lib/deck-map.ts` (one table, with a test that each row's title is the deck's slide title); the phones post `graphpay.phone-event` from `apps/phones/src/live-adapter.ts`; `apps/web/components/middle-switch.tsx` moves the deck; the deck (`apps/web/public/deck/index.html`) draws the strip from the table's rows. A status poll that lags a pause or resume is silenced for 90 s after the phone's own action (#144).
+2. **Figurines:** `apps/phones/grok-crop.py` (Pillow, a local tool) crops each agent's five states tight; `AgentAvatar` draws them large with no ring or badge. `grok-images.mjs` no longer touches the agents.
+3. **No QR strip** on `/live`; `qr-code.tsx` and its CSS are gone (the `uqr` dependency stays in `apps/web/package.json`, unused).
+
+Checked in Chrome on production, one live errand (order #4B28, 4.80 to Filter & Fold, all seven steps in sync); a 0.80 refund requested on Vitalik's phone (photo attached by script) and approved on Filter & Fold's; Pause then Resume on the Payer card. Payer active, shop open, no errand running.
+Another order (#2623, 8:18 pm) appeared on the shop's phone that was not mine (someone else ran an errand).
+
+Still open after 21:30: highlighting the part of a phone that matches the deck, animation beyond the state images, the real ENS names and the big city, re-order, caps, the kill and subscriptions; the deck's title slide overlaps its thread line at short window heights (cosmetic, pre-existing).
 
 ---
 
