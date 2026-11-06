@@ -61,7 +61,9 @@ function serve(handler) {
 
 // env: the loaded .env. whitechain, sepolia: checked clients (clientsFor). directory, sync:
 // Arkiv connections as W_DIRECTORY and W_SYNC. shopKeyOf(shopEns): the directory's shop key.
-export async function startStack({ env, whitechain, sepolia, directory, sync, shopKeyOf, log = () => {} }) {
+// merchantKeys: false (hosted only) loads no merchant key and has no merchant actions (the site's
+// live runner never refunds).
+export async function startStack({ env, whitechain, sepolia, directory, sync, shopKeyOf, merchantKeys = true, log = () => {} }) {
   if (env.ALLOW_REAL_NETWORK !== '1') throw new Error('stack: the real network needs ALLOW_REAL_NETWORK=1');
   // Since M4 the hosted shop and facilitator are the default: the hosted facilitator relays as
   // FACILITATOR, and a local relayer would race its nonces, so it runs only on an explicit opt-in.
@@ -82,12 +84,15 @@ export async function startStack({ env, whitechain, sepolia, directory, sync, sh
   await checks();
 
   const shops = storyShops();
-  const merchants = Object.fromEntries(shops.map((s) => [s.key, key(s.walletRole).address]));
-  const walletClients = Object.fromEntries(shops.map((s) => [s.key, whitechain.walletClient(key(s.walletRole))]));
+  if (!merchantKeys && !hosted) throw new Error('stack: the local stack needs the merchant keys');
+  const merchants = merchantKeys ? Object.fromEntries(shops.map((s) => [s.key, key(s.walletRole).address])) : {};
+  const walletClients = merchantKeys ? Object.fromEntries(shops.map((s) => [s.key, whitechain.walletClient(key(s.walletRole))])) : {};
   const orderStatus = async (orderId) => ({ status: STATUS[Number((await pub.readContract({ address: checkout, abi: checkoutAbi, functionName: 'orders', args: [orderId] })).status)] });
   const local = merchantActions({ publicClient: pub, walletClients, checkout, chain: whitechain.chain });
   // Hosted, the shop delivers with the same merchant key: a refund here waits for it to be quiet.
-  const merchant = !hosted
+  const merchant = !merchantKeys
+    ? null
+    : !hosted
     ? local
     : {
         async refund(shopKey, orderId, amountMicro, reason) {
