@@ -117,7 +117,13 @@ One line per PR: time (IST) · activity · result · PR link. Append under your 
 - 19:12 IST · booth · merged: docs(records): booth part 2: demo note, resume, NOW, LOG · https://github.com/Zugzwang-world/graphpay/pull/141
 - 20:23 IST · booth · merged: docs(records): sync: demo note, resume, NOW, LOG · https://github.com/Zugzwang-world/graphpay/pull/145
 
-## submission
+## w7-submission
+
+- 23:25 IST · w7-submission · the README rewritten with a verify-each-claim table (24 transactions checked on the explorers), a keyless Arkiv query, the persona sentence, the team; a root MIT LICENSE · this PR
+
+## w4-agents
+
+- 23:25 IST · w4-agents · item 1: the request says "delivered within an hour"; code reads the span from the request, so errands work at any hour (mocks: paid at 23:50, 23:59 and 03:00 IST) · https://github.com/Zugzwang-world/graphpay/pull/153
 
 ## w5-ops
 

@@ -98,7 +98,9 @@ export async function reorder(input: { parentOrderId?: unknown }, deps: ReorderD
   // The buyer name the first order used: whichever of the payer agent and its person hashes to the order's buyer.
   const buyer = [model.payer.ens, model.persona.ens].find((ens) => namehash(ens).toLowerCase() === parent.buyerNode.toLowerCase());
   if (!buyer) throw new ReorderRefusal('NOT_OURS');
-  if (parent.status !== 'PAID' && parent.status !== 'DELIVERED') throw new ReorderRefusal('NOT_REORDERABLE');
+  // A refunded order may be ordered again (the checkout and the shop accept it: the coffee that was
+  // refunded is exactly what "another coffee" replaces); an unpaid or cancelled one may not.
+  if (parent.status !== 'PAID' && parent.status !== 'DELIVERED' && parent.status !== 'REFUNDED') throw new ReorderRefusal('NOT_REORDERABLE');
 
   const now = deps.now();
   const agentKey = `agent:${model.payer.ens}`;

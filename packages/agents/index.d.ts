@@ -221,7 +221,8 @@ export interface ModelChoice {
 export type ModelFactory = (role: Role) => ModelChoice;
 
 export interface ErrandOptions {
-  /** Default: the story order's request (packages/config/story.json). */
+  /** Default: the story order's request (packages/config/story.json). Code reads its budget and its
+   * deadline: a clock time today ("by 8 pm") or a span from the request ("within an hour"). */
   request?: string;
   /** ms; fixes the clock for deterministic runs. */
   now?: number;

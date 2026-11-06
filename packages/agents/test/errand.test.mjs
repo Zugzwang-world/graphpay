@@ -203,6 +203,22 @@ test('a PaymentFailed the chain recorded is final; a refusal before sending is f
   assert.equal(refused.state.spentMicro, 0n);
 });
 
+test('the story errand pays at any hour: its deadline is an hour from the request, even after 23:15 and across midnight', async () => {
+  for (const at of ['2026-11-06T17:50:00.000Z', '2026-11-06T18:29:00.000Z', '2026-11-06T21:30:00.000Z']) {
+    const { runLog } = await run({ now: Date.parse(at) });
+    assert.equal(runLog.result.status, 'paid', at);
+    assert.equal(runLog.result.chosenShop, good, at);
+    assert.equal(Date.parse(runLog.result.mandate.deadlineIso), Date.parse(at) + 3_600_000, at);
+  }
+});
+
+test("the guard checks each shop's ETA against the span from the request: within 30 minutes no eligible shop can deliver", async () => {
+  const { runLog, world } = await run({ request: cast.order.request.replace('an hour', '30 minutes') });
+  assert.equal(runLog.result.status, 'refused');
+  assert.deepEqual(refusals(runLog), ['MISSES_DEADLINE']);
+  assert.equal(world.hooks.signed.length, 0);
+});
+
 test('no readable budget or deadline: no agent runs', async () => {
   const { runLog, world } = await run({ request: 'Get me something sweet, quickly.' });
   assert.equal(runLog.result.status, 'refused');

@@ -80,7 +80,10 @@ Updated 23:50 IST, Fri 6 Nov (W3 Payments, session `local_b65be40a-eb20-4d86-b78
 
 ## w4-agents
 
-Started 23:02 IST, Fri 6 Nov (session `local_3404db4e-486c-4f86-8b3a-67ceb53ef025`). W4 rewrites this section at the end of each step.
+Updated 23:25 IST, Fri 6 Nov (W4 Agents, session `local_3404db4e-486c-4f86-8b3a-67ceb53ef025`).
+- **Item 1, the relative deadline ([#153](https://github.com/Zugzwang-world/graphpay/pull/153), merging):** the request now says "delivered within an hour", and code reads the hour from the moment of the request, so errands work at any hour, also after 23:15 and across midnight. The guard checks each shop's ETA against that hour.
+- **Next:** measure every model call of a live errand (tokens, cached, output, seconds), then cut tokens and time without changing the screens, then three live errands in a row that pay.
+- **Blockers:** none.
 
 ## w5-ops
 
@@ -96,7 +99,11 @@ Started 23:02 IST, Fri 6 Nov (session `local_b6205da6-b613-4662-872a-6d4879c66fa
 
 ## w7-submission
 
-Started 23:02 IST, Fri 6 Nov (session `local_abd77623-de22-4fe2-a0a9-865fdd43dba2`). W7 rewrites this section at the end of each step.
+Updated 23:25 IST, Fri 6 Nov (W7 Submission, `local_abd77623-de22-4fe2-a0a9-865fdd43dba2`; relay `relays/w7-submission.md`).
+- **Landed:** the README, with a "verify each claim" table (24 transactions checked on their explorers at about 23:10 IST), a runnable Arkiv query with no keys, the fictional-persona sentence, the team; a root MIT `LICENSE`.
+- **Running:** AI_USAGE.md, then the Arkiv files, `WHITECHAIN_FEEDBACK.md`, `docs/submission/ENS.md`, and `docs/submission/ETHGLOBAL.md` (the form text).
+- **Waits on:** W1's new shop names, W2's menus and race at M, W6's SDK 1.0.0; each gets a pass after it lands.
+- **Blockers:** none.
 
 ## before the night (retired day sessions)
 
