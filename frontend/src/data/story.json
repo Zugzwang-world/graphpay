@@ -1,0 +1,49 @@
+{
+  "about": "Front-end story data (DESIGN_INSTRUCTIONS.md Appendix B). Placeholder names that will change. Every value is synthetic sample data, not a measurement. Keep everything story-specific here and in src/copy.ts, never in components.",
+  "synthetic": true,
+  "city": { "name": "Mumbai", "timeZone": "Asia/Kolkata", "timeZoneLabel": "IST", "currency": "USDT" },
+  "customer": { "name": "Priya", "ens": "priya.graphpay.eth", "avatar": null },
+  "agents": [
+    { "role": "concierge", "label": "Concierge", "ens": "concierge.priya.graphpay.eth", "main": true, "pays": false, "capUsdt": "0.00", "does": "Runs your errands and manages the team" },
+    { "role": "scout", "label": "Scout", "ens": "scout.priya.graphpay.eth", "main": false, "pays": true, "capUsdt": "1.00", "does": "Finds shops and prices" },
+    { "role": "analyst", "label": "Analyst", "ens": "analyst.priya.graphpay.eth", "main": false, "pays": false, "capUsdt": "0.00", "does": "Checks shop records" },
+    { "role": "payer", "label": "Payer", "ens": "payer.priya.graphpay.eth", "main": false, "pays": true, "capUsdt": "6.00", "does": "Pays within your pass" }
+  ],
+  "shop": {
+    "name": "Kesar Kingdom",
+    "ens": "kesar-kingdom.graphpay.eth",
+    "area": "Dadar",
+    "image": null,
+    "agents": [
+      { "role": "storefront", "label": "Storefront", "ens": "storefront.kesar-kingdom.graphpay.eth", "main": true },
+      { "role": "risk", "label": "Risk", "ens": "risk.kesar-kingdom.graphpay.eth", "main": false },
+      { "role": "dispatch", "label": "Dispatch", "ens": "dispatch.kesar-kingdom.graphpay.eth", "main": false }
+    ]
+  },
+  "shops": [
+    { "name": "Kesar Kingdom", "ens": "kesar-kingdom.graphpay.eth", "storyRole": "good", "priceUsdt": "4.00", "distanceKm": 1.2, "paidOrders": 1204, "refundRate": "1%", "repeatBuyers": 312, "onTimeRate": "97%", "open": true },
+    { "name": "Syrup Street", "ens": "syrup-street.graphpay.eth", "storyRole": "runner-up", "priceUsdt": "4.20", "distanceKm": 1.4, "paidOrders": 1204, "refundRate": "3%", "repeatBuyers": 188, "onTimeRate": "92%", "open": true },
+    { "name": "Jamun Junction", "ens": "jamun-junction.graphpay.eth", "storyRole": "trap", "priceUsdt": "3.20", "distanceKm": 0.9, "paidOrders": 2190, "refundRate": "18%", "repeatBuyers": 41, "onTimeRate": "71%", "open": true, "rejectedBecause": "18% of orders refunded" }
+  ],
+  "products": [
+    { "id": "gulab-jamun-6", "shop": "kesar-kingdom.graphpay.eth", "name": "Gulab jamun, box of 6", "short": "Gulab jamun × 6", "priceUsdt": "4.00", "image": null },
+    { "id": "kaju-katli-250", "shop": "kesar-kingdom.graphpay.eth", "name": "Kaju katli 250 g", "short": "Kaju katli 250 g", "priceUsdt": "6.00", "image": null }
+  ],
+  "quickPrompts": [
+    { "text": "Best gulab jamun under 6 USDT by 8 pm", "kind": "ask", "productId": "gulab-jamun-6" },
+    { "text": "Re-order my usual", "kind": "reorder", "productId": "gulab-jamun-6" }
+  ],
+  "spendingPass": { "capUsdt": "6.00", "period": "day", "usedTodayUsdt": "2.00", "payingRole": "payer" },
+  "renewal": { "productId": "gulab-jamun-6", "item": "Gulab jamun × 6", "schedule": "every Sunday", "amountUsdt": "4.00" },
+  "buyerReputation": { "orders": 42, "refunds": 0, "since": "2025", "riskVerdict": "safe to accept" },
+  "otherCustomer": { "name": "Vikram", "ens": "vikram.graphpay.eth", "agentEns": "payer.vikram.graphpay.eth", "schedule": "Daily", "productId": "gulab-jamun-6" },
+  "demo": { "capRaiseAttemptUsdt": "50.00", "quoteValidityMinutes": 15 },
+  "explorers": {
+    "whitechain": "https://explorer.testnet.whitechain.io",
+    "whitechainLabel": "Whitechain",
+    "ens": "https://sepolia.app.ens.domains",
+    "ensLabel": "Ethereum Sepolia",
+    "arkiv": "https://rabdi.explorer.arkiv.network",
+    "arkivLabel": "Arkiv"
+  }
+}
