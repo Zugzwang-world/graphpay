@@ -1,53 +1,29 @@
 # NOW
 
-Updated 17:46 IST, Fri 6 Nov (Coordinator)
+Updated 21:41 IST, Fri 6 Nov (Coordinator)
 
 ## Summary (Coordinator only)
 
-Updated 13:32 IST, Fri 6 Nov. **Standing rule (ADR-0066): no target times.** Only the submission (Sat 09:00 IST) and the presentation (Sat 09:30 IST) are fixed.
+Updated 21:41 IST, Fri 6 Nov. **Standing rule (ADR-0066): no target times.** Only the submission (Sat 09:00 IST) and the presentation (Sat 09:30 IST) are fixed.
 
-**Now: the integration proof of concept** (the 1240 briefs).
-
-- **The errand pays reliably on production** (Join, 13:32 IST).
-  - Two live errands through the site's runner each paid 4.80 to Kesar Kingdom, with no retry needed: 129 s ([tx](https://explorer.testnet.whitechain.io/tx/0x9749a7f766282021a4e0e255276b938e53c608f55985a68b4b59b08d852a1e1a)) and 115 s ([tx](https://explorer.testnet.whitechain.io/tx/0x11588a5e47611c1e9095219ab95b8907d8b0f59a602f56d8b12d11a16cfa0a13)).
-  - With the 11:14 run, that is three paid in a row. All seven agents ran each time, and no Arkiv write or settle failed.
-  - The fixes: #92, #93, #96, #97, #108, #112 and #114.
-- **The payer's pass is 100 test USDT a day,** on-chain and in ENS. 14.40 is spent today, and PAYER held 125 before these runs.
-- **Public access is live** (#117, ADR-0069): visitors meet no passcode, and the keys between our own servers stay.
-- **Phase 1 is live at `/live`:** the team's phones around the explainer (#111).
-  - Production deploys had failed from #111 until #116 fixed the build (Vercel had skipped the phones' build tools). Production now runs `ff12990`.
-- **The integration is live: all four phases are merged and deployed.**
-  - The PRs: #111, #116, #117, #122, #124, #127 and #128.
-  - **The home page https://graphpay-event.vercel.app is the live stage:** the team's two phones around T5's explainer, with no passcode.
-  - **The founder's click-by-click script:** `docs/sessions/integration/test-script.md`.
-  - **Proven live:**
-    - the errand: 4.80 paid from the stage in about 107 s;
-    - the Open switch;
-    - the refund request, which reaches the shop's inbox;
-    - pause and resume.
-  - **The refund and re-order work too, after their fixes** (#129, #131), one try each at 17:4x IST:
-    - the merchant refund: 0.80 on #6741 ([tx](https://explorer.testnet.whitechain.io/tx/0xcd442a5e6675e0eae8a66bc17ee3913af1b673e39a54a28d4a14a0fab58bc425)), shown on both phones;
-    - the re-order: 1.20, order #2F8A ([tx](https://explorer.testnet.whitechain.io/tx/0x78acbc3fbf50a15bbe3920bdcfe9e47a032fa43db81b5710c1d369e8a83778ef)), delivered.
-  - **Every button on the stage has now worked live.** Dispatch is automatic. The payer has spent 20.40 of 100 today.
-  - **One small item for the team:** a re-order gets no receipt card in Vitalik's thread (their screen draws receipts only for quotes). The order still appears under Orders.
-- **Phase 2 works end to end** (#122):
-  - An errand asked from `/live` at 16:34 IST paid 4.80 to Kesar Kingdom in about 107 s ([tx](https://explorer.testnet.whitechain.io/tx/0x89acd9521341763f6f6a37893eec921c9548d7a0b5984597d56088a5f5d5b990)).
-  - Vitalik's phone showed the agents' steps, the three shops (the trap rejected, with reasons) and the quote going from signed to paid. Kesar's phone showed the order, and the explainer showed the lanes.
-  - Rough edges:
-    - Kimi's closing line said "mock" (being removed);
-    - the repeat-buyers count shows a dash (no data);
-    - there is no Dispatch button on a fresh order (the shop delivers itself).
-- **Phase 3 is live** (#124): the money buttons that exist are wired live. The Integration session is testing each one once.
-- **A visitor paused the payer** at 15:45 IST. Pause is public now. On the founder's go the Coordinator resumed it at 16:33 IST. The payer is active, with 19.20 of 100 spent today.
-- **Join next:** C6 and F2 rewritten for public access.
-- **Idle until the founder's run:**
-  - the story swap;
-  - the kill;
-  - subscribe, cancel, caps and decline;
-  - Kimi tuning;
+- **Usage reset at 21:30 IST:** 0% of the new week, which resets again Fri 13 Nov. The Coordinator has resumed its tick.
+- **Failing now: production's Arkiv reads** (since at least 21:36 IST).
+  - `/api/map` and `/api/state/customer` answer 502 ("the graph did not answer"), so the phones' live state is blank.
+  - The chains themselves answer, and nothing has deployed since about 20:13 IST.
+  - T3 is diagnosing.
+- **The live stage** is https://graphpay-event.vercel.app: the team's phones around the deck, with no passcode.
+  - The Booth sessions (#135 to #145) put the Grok dosa story on screen: Filter & Fold, Idli Index and Tawa Tangle. The ENS labels are unchanged.
+  - The deck follows the live run.
+  - #132 (the team's pause and resume) is merged, credited to ajatshatru01.
+- **Proven live today:** the errand (paid 4.80 several times), the Open switch, the refund request, the merchant refund, the re-order, and pause and resume.
+  - The payer's pass is 100 test USDT a day. Both SDKs are 0.1.1 on npm.
+- **Open (the Booth's list):**
+  - real ENS names for the new shops, and moving their history (the Arkiv category is still "sweets");
   - the big city;
-  - Submission.
-- **Usage: 92% at 16:09 IST**, rising about one point an hour while the sessions were idle. Every session pauses at 97%; the weekly reset is at 21:30 IST (in 5 h 20 min).
+  - the re-order's own SKU;
+  - caps, the kill and subscriptions;
+  - the deck's non-demo slides.
+- **Next:** the Submission session; the founder's demo check (`docs/sessions/booth/demo-note.md` says what not to tap); the video.
 
 ## foundation
 
