@@ -83,11 +83,10 @@ Updated 10:45 IST, Fri 6 Nov (T5 Web). **On `main`:** everything through Request
 
 ## agentpay
 
-Updated 09:50 IST, Fri 6 Nov (T6 AgentPay, Sonnet 5.5). **`@graphpay_ethglobal/agentpay` 0.1.0 is ready to publish: pack, install in an empty folder and the README quickstart all pass on Node 22.** The reviewer pass is clean after two blocking fixes (PR 80). The Coordinator publishes after the founder's npm login.
-- The package is renamed (T5's checkout kit imports it; changed in the same PR, told T5). It is self-contained: the ABI, EIP-712 shapes and defaults are inlined, and there is no workspace dependency.
-- Safety: chain 1874 only (client creation and before every signing and send); no default hosted facilitator or relayer; anti-drain limits on by default and impossible to switch off; a lane test fails if agentpay imports our Arkiv or ENS packages.
-- Outside developers cannot use our deployed checkout (only its relayers settle). The quickstart runs a local anvil fork with their own checkout (`startSandbox`); on the real testnet they deploy their own with `deployCheckout`.
-- Running: nothing. Blockers: none. Next: the reviewer's findings, the PR, then tell the Coordinator; a 0.1.x API reference can follow.
+Updated 11:09 IST, Fri 6 Nov (T6 AgentPay, Sonnet 5.5). **0.1.0 merged (PR 80); 0.1.1 is in its PR: the published manifest no longer names the three private workspace packages.** The Coordinator publishes it after the founder's approval link, then installs it from the registry and runs the examples. No venue feedback has arrived yet (no issues with the `agentpay` label).
+- 0.1.1 packed and installed from the tarball in an empty folder; both examples pass there; 57 offline and 19 fork tests pass. The tests now get the workspace packages from the root `devDependencies`.
+- Also: the sandbox removes its exit hook when stopped, and a test pins the checkout constructor argument order. No API change, no payment-code change.
+- Running: nothing. Blockers: none. Next: any venue feedback becomes a 0.1.x fix before the post-submission freeze.
 
 ## records
 

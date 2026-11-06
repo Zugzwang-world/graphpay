@@ -1,6 +1,8 @@
 # Relay: agentpay (T6 AgentPay SDK)
 
-Updated 09:50 IST, Fri 6 Nov. 0.1.0 is ready to publish. The earlier V1 work is merged (PRs 38, 41, 47, 64); this step is the publish PR.
+Updated 11:09 IST, Fri 6 Nov. 0.1.0 is merged (PR 80); 0.1.1 is in its PR. The earlier V1 work is merged (PRs 38, 41, 47, 64).
+
+**0.1.1 (small):** the published package no longer lists GraphPay's private workspace packages as devDependencies; this repository's tests get them from the root workspace instead. The sandbox removes its exit hook when stopped, and a test pins the checkout constructor argument order (the reviewer's two minor notes). No API change; no venue feedback has arrived yet. The Coordinator publishes it with the founder's approval link and then runs the examples from the registry.
 
 ## In plain words
 

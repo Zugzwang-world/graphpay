@@ -1,6 +1,6 @@
 {
   "name": "@graphpay_ethglobal/agentpay",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "type": "module",
   "description": "AgentPay: a two-sided SDK for agentic USDT payments on Whitechain Sepolia. An AI agent pays an HTTP 402 with one signature and no gas under an on-chain spending pass; a merchant prices any route, settles through a facilitator and gets paid.",
   "license": "MIT",
@@ -14,7 +14,18 @@
   "bugs": {
     "url": "https://github.com/Zugzwang-world/graphpay/issues?q=label%3Aagentpay"
   },
-  "keywords": ["x402", "http-402", "agent-payments", "ai-agents", "usdt", "stablecoin", "whitechain", "mcp", "permit2", "eip-712"],
+  "keywords": [
+    "x402",
+    "http-402",
+    "agent-payments",
+    "ai-agents",
+    "usdt",
+    "stablecoin",
+    "whitechain",
+    "mcp",
+    "permit2",
+    "eip-712"
+  ],
   "engines": {
     "node": ">=22"
   },
@@ -57,9 +68,6 @@
     "zod": "4.6.7"
   },
   "devDependencies": {
-    "@graphpay/config": "workspace:*",
-    "@graphpay/contracts": "workspace:*",
-    "@graphpay/facilitator": "workspace:*",
     "@x402/core": "2.30.0"
   }
 }

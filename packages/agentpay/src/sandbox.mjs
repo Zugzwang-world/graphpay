@@ -72,7 +72,10 @@ export async function startSandbox({ buyerUsdt = 20_000_000n, port = 18_000 } = 
   }
   if (!launched) throw lastError;
   const { child, url, chainId } = launched;
-  const stop = () => child.kill('SIGTERM');
+  const stop = () => {
+    process.removeListener('exit', stop);
+    child.kill('SIGTERM');
+  };
   process.once('exit', stop); // a crash of the caller never leaves a fork running
   try {
     if (chainId !== 1874) throw new AgentPayError('WRONG_CHAIN', `the fork answered chain ${chainId}, not 1874`);
