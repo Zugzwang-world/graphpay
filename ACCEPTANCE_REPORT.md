@@ -1,8 +1,8 @@
 # Acceptance report
 
-Written by `pnpm acceptance` at 2026-11-06T00:14:29.305Z. Checks and pass criteria: `planning/ACCEPTANCE_TESTS.md` and `docs/plan/ACCEPTANCE_ADDITIONS.md`. Only D7 may be `blocked` (C7 and E3 no longer wait on supply, ADR-0054); a check without a result is `not run`, never `pass`.
+Written by `pnpm acceptance` at 2026-11-06T04:17:41.451Z. Checks and pass criteria: `planning/ACCEPTANCE_TESTS.md` and `docs/plan/ACCEPTANCE_ADDITIONS.md`. Only D7 may be `blocked` (C7 and E3 no longer wait on supply, ADR-0054); a check without a result is `not run`, never `pass`.
 
-**43 pass, 0 fail, 1 blocked, 4 not run** (of 48).
+**44 pass, 0 fail, 1 blocked, 3 not run** (of 48).
 
 | id | check | status | note |
 |---|---|---|---|
@@ -41,7 +41,7 @@ Written by `pnpm acceptance` at 2026-11-06T00:14:29.305Z. Checks and pass criter
 | D7 | Benchmark at size M, if seeded | blocked | waiting for the locked story (the M city is seeded only after the founder locks it) |
 | D8 | The geo query returns only shops inside the box, and only from our writers | pass |  |
 | D9 | A receipt cannot be edited | pass |  |
-| D10 | An expired or missing quote is refused and the agent re-quotes | not run | not run: (c) the quote entity's expiry on Arkiv needs a live 402 with requestId (passcode; W_DIRECTORY writes a quote) |
+| D10 | An expired or missing quote is refused and the agent re-quotes | pass |  |
 | D15 | The mirror resumes after a sleep or a network drop (ADR-0056) | pass |  |
 | E1 | Vitalik's request | pass |  |
 | E2 | The agents choose Kesar Kingdom, never the trap | pass |  |
@@ -1299,14 +1299,14 @@ Status: **pass**.
 
 ## D10: An expired or missing quote is refused and the agent re-quotes
 
-Status: **not run** (not run: (c) the quote entity's expiry on Arkiv needs a live 402 with requestId (passcode; W_DIRECTORY writes a quote)).
+Status: **pass**.
 
-### D10 (2026-11-05T23:52:24.196Z)
+### D10 (2026-11-06T04:17:41.444Z)
 
 - What: an expired or missing quote is refused and the agent re-quotes
-- Pass: null
+- Pass: true
 - Expected: (a) QUOTE_MISSING, one re-quote that passes; (b) QUOTE_EXPIRED, one re-quote with a new entity key that passes; no signature before the passing check; (c) owner W_DIRECTORY, expiry 15 min after creation (±2 blocks), valid_until 10 min after
-- Evidence: `{"how":"in process on the mock world (packages/agents/mocks): createPayer → presignCheck with fake 402s, quote entities and signer; no network, no model, no real signature; the one mock signature follows the passing re-quote","tests":"packages/agents/test/errand.test.mjs (D10 a, D10 b)"}`
+- Evidence: `{"how":"(a), (b) in process on the mock world (packages/agents/mocks): createPayer → presignCheck with fake 402s, quote entities and signer; no network, no model, no real signature; the one mock signature follows the passing re-quote","tests":"packages/agents/test/errand.test.mjs (D10 a, D10 b)"}`
 
 ```json
 {
@@ -1330,7 +1330,15 @@ Status: **not run** (not run: (c) the quote entity's expiry on Arkiv needs a liv
       "QUOTE_EXPIRED: re-quoting once (new quote, new 402)"
     ]
   },
-  "c": null
+  "c": {
+    "quoteKey": "0x1fced134518db48adb16d628520187f3fe1beb6d43317aa56bd23034d3658dc4",
+    "owner": "0x146002b43A9Fb8EB963699e77Ed18579dC30A6e4",
+    "lifeBlocks": 450,
+    "wantBlocks": 450,
+    "blockSeconds": 2,
+    "validAfterSeconds": 596,
+    "file": "docs/sessions/integration/hosted/quote-2026-11-06T04-17-21-900Z.json"
+  }
 }
 ```
 

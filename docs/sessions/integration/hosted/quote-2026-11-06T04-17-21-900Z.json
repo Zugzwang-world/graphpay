@@ -1,0 +1,18 @@
+{
+  "startedAt": "2026-11-06T04:17:21.900Z",
+  "requestId": "0xad15daad9d31c24a7e2411cb272eddd3039ad534a7387e6a81b3c27a14779648",
+  "quoteKey": "0x1fced134518db48adb16d628520187f3fe1beb6d43317aa56bd23034d3658dc4",
+  "explorer": "https://rabdi.explorer.arkiv.network/entity/0x1fced134518db48adb16d628520187f3fe1beb6d43317aa56bd23034d3658dc4",
+  "owner": "0x146002b43A9Fb8EB963699e77Ed18579dC30A6e4",
+  "wDirectory": "0x146002b43a9fb8eb963699e77ed18579dc30a6e4",
+  "createdBlock": "276442",
+  "createdAt": "2026-11-06T04:17:26.000Z",
+  "expiresAtBlock": "276892",
+  "blockSeconds": 2,
+  "lifeBlocks": 450,
+  "wantBlocks": 450,
+  "validUntil": "1793939242",
+  "validAfterSeconds": 596,
+  "signed": false,
+  "pass": true
+}

@@ -139,8 +139,14 @@ export function trackChecks(root, env) {
         b: b.refused && b.requotes === 1 && b.status === 'paid' && b.signed === 1 && b.quoteKeys === 2,
         c: null,
       };
+      // (c) from integration/quote-d10.mjs: a live 402 with a requestId at the hosted shop, the
+      // quote entity read on Arkiv (it is gone 15 minutes later, so the file keeps the reading).
+      const dir = join(root, 'docs/sessions/integration/hosted');
+      const qf = existsSync(dir) ? readdirSync(dir).filter((f) => f.startsWith('quote-')).sort().at(-1) : null;
+      const c = qf ? JSON.parse(read(root, `docs/sessions/integration/hosted/${qf}`)) : null;
+      if (c) parts.c = c.pass === true && c.signed === false;
       const pass = all(parts);
-      return { pass, ...(pass === null ? { why: `not run: (c) the quote entity's expiry on Arkiv needs a live 402 with requestId (passcode; W_DIRECTORY writes a quote)` } : {}), what: 'an expired or missing quote is refused and the agent re-quotes', measured: { a, b, c: null }, expected: '(a) QUOTE_MISSING, one re-quote that passes; (b) QUOTE_EXPIRED, one re-quote with a new entity key that passes; no signature before the passing check; (c) owner W_DIRECTORY, expiry 15 min after creation (±2 blocks), valid_until 10 min after', evidence: { how: 'in process on the mock world (packages/agents/mocks): createPayer → presignCheck with fake 402s, quote entities and signer; no network, no model, no real signature; the one mock signature follows the passing re-quote', tests: 'packages/agents/test/errand.test.mjs (D10 a, D10 b)' } };
+      return { pass, ...(pass === null ? { why: `not run: (${notRun(parts)})` } : {}), what: 'an expired or missing quote is refused and the agent re-quotes', measured: { a, b, c: c ? { quoteKey: c.quoteKey, owner: c.owner, lifeBlocks: c.lifeBlocks, wantBlocks: c.wantBlocks, blockSeconds: c.blockSeconds, validAfterSeconds: c.validAfterSeconds, file: `docs/sessions/integration/hosted/${qf}` } : null }, expected: '(a) QUOTE_MISSING, one re-quote that passes; (b) QUOTE_EXPIRED, one re-quote with a new entity key that passes; no signature before the passing check; (c) owner W_DIRECTORY, expiry 15 min after creation (±2 blocks), valid_until 10 min after', evidence: { how: '(a), (b) in process on the mock world (packages/agents/mocks): createPayer → presignCheck with fake 402s, quote entities and signer; no network, no model, no real signature; the one mock signature follows the passing re-quote', tests: 'packages/agents/test/errand.test.mjs (D10 a, D10 b)' } };
     },
   };
 }
