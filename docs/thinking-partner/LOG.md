@@ -144,7 +144,8 @@ One line per PR: time (IST) · activity · result · PR link. Append under your 
 - 00:48 IST · w7-submission · keep current: the owner's cap route (#179, ADR-0079) in the README and ENS.md; the workers' watchdog (#194) · https://github.com/Zugzwang-world/graphpay/pull/198
 - 00:58 IST · w7-submission · the dosa menus on Swarm (#181) under the new names, with their dish photos, in swarm.md, the README and the form text (menu and photo hashes checked on the gateway) · https://github.com/Zugzwang-world/graphpay/pull/199
 - 01:20 IST · w7-submission · the version-2 menus with storefront photos (#201) in swarm.md, the README and the form text (hashes checked) · https://github.com/Zugzwang-world/graphpay/pull/205
-- 01:24 IST · w7-submission · the first errand under the new name (#202, 01:07 IST, checked on the explorer) headlines the README, the form text and ENS.md · this PR
+- 01:24 IST · w7-submission · the first errand under the new name (#202, 01:07 IST, checked on the explorer) headlines the README, the form text and ENS.md · https://github.com/Zugzwang-world/graphpay/pull/208
+- 01:28 IST · w7-submission · the owner's cap change live (300 to 250 and back, ENS and policy; #207) and W4's three errands in a row (47 s, 3 calls, $0.027; #206), every transaction checked · this PR
 
 ## w1-identity
 

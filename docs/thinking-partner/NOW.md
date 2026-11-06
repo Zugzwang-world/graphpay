@@ -147,7 +147,7 @@ Updated 00:12 IST, Sat 7 Nov (W6 SDK, session `local_b6205da6-b613-4662-872a-6d4
 
 ## w7-submission
 
-Updated 01:24 IST, Sat 7 Nov (W7 Submission, `local_abd77623-de22-4fe2-a0a9-865fdd43dba2`; relay `relays/w7-submission.md`).
+Updated 01:28 IST, Sat 7 Nov (W7 Submission, `local_abd77623-de22-4fe2-a0a9-865fdd43dba2`; relay `relays/w7-submission.md`).
 - **The brief is done:** the form text is in one file, [`docs/submission/ETHGLOBAL.md`](../submission/ETHGLOBAL.md), and every claim in it links to evidence. Landed: the README and a root `LICENSE` ([#154](https://github.com/Zugzwang-world/graphpay/pull/154)); AI_USAGE.md and the five Arkiv files ([#159](https://github.com/Zugzwang-world/graphpay/pull/159)); the Whitechain and ENS notes ([#161](https://github.com/Zugzwang-world/graphpay/pull/161)); the form text ([#164](https://github.com/Zugzwang-world/graphpay/pull/164)).
 - **Also landed:** the video shot list and the submission checklist ([#166](https://github.com/Zugzwang-world/graphpay/pull/166)).
 - **Also landed:** AI_USAGE's effort split and W1's names in the README ([#170](https://github.com/Zugzwang-world/graphpay/pull/170)).
@@ -160,7 +160,8 @@ Updated 01:24 IST, Sat 7 Nov (W7 Submission, `local_abd77623-de22-4fe2-a0a9-865f
 - **Also landed:** the owner's cap route and the watchdog ([#198](https://github.com/Zugzwang-world/graphpay/pull/198)).
 - **Also landed:** the dosa menus on Swarm under the new names ([#199](https://github.com/Zugzwang-world/graphpay/pull/199)).
 - **Also landed:** the version-2 menus with storefront photos ([#205](https://github.com/Zugzwang-world/graphpay/pull/205)).
-- **In this PR:** the first errand under the new name (01:07 IST, #202) as the headline evidence.
+- **Also landed:** the first errand under the new name as the headline ([#208](https://github.com/Zugzwang-world/graphpay/pull/208)).
+- **In this PR:** the owner's cap change live (#207) and W4's three errands in a row (#206).
 - **Running:** keep-current mode, a pass after each night stream lands (W2's race on the trimmed big city, agentpay 1.0.0 on npm, the regenerated acceptance report).
 - **Blockers:** none.
 
