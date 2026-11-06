@@ -162,11 +162,14 @@ Updated 23:38 IST, Fri 6 Nov (W7 Submission).
 
 ## w3-payments
 
-- **Acceptance follows the 0.80 re-order** (owner: W5). What: `integration/hosted.mjs` C3 quotes `story.order.sku` against the re-order's 0.80, and `acceptance/checks.mjs` C3 expects 1.20. Why: C3 is refused before signing on every fresh run. Recommendation: quote `story.order.reorder.sku` and take the amount from `order.reorder.priceMicro` (W5 is told).
-
-## w3-payments
-
-- **Acceptance follows the 0.80 re-order** (owner: W5). What: `integration/hosted.mjs` C3 quotes `story.order.sku` against the re-order's 0.80, and `acceptance/checks.mjs` C3 expects 1.20. Why: C3 is refused before signing on every fresh run. Recommendation: quote `story.order.reorder.sku` and take the amount from `order.reorder.priceMicro` (W5 is told).
+- **The owner's cap change goes live with W1's watcher** (owner: W3, with W1 and W5). What: `POST /api/customer/cap` (#179) writes the owner's ENS cap. The policy follows through the watcher on the Mac, never above the configured cap (ADR-0078). Why: until W1's watcher change is merged and W5 has restarted the workers, the route answers `policy.applied: false`. Recommendation: merge W1's PR, restart the workers, and W3 proves it once, 300 → 250 → 300.
+- **The "everyone" quantity** (owner: founder; default taken). What: `order.overPass.quantity` is 100, a synthetic story value; the brief gives no headcount. Why: any figure above the pass is refused the same way. Recommendation: keep 100, or set the real headcount in `story.json`.
+- Closed tonight:
+  - the 0.80 re-order (#155);
+  - subscribe, renew and cancel (#173);
+  - the refund decline (#163);
+  - over the pass and the refused cap raise (#169);
+  - acceptance C3 on the re-order's own item (W5).
 
 ## w4-agents
 
