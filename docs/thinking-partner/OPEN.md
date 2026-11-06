@@ -46,36 +46,10 @@ Current balances and every transfer are in `docs/technical/WALLETS.md` (§2 for 
 
 Agents (T4) and Join add one row per full errand run, so the presets can be calibrated on Friday (ADR-0048). Cost comes from `apiCostUsd` and the prices in the config.
 
+The rows before the night run (Thursday's probes to Friday 23:00 IST) are in [`docs/archive/preset-calibration-before-the-night.md`](../archive/preset-calibration-before-the-night.md).
+
 | time (IST) | run | preset | model, effort | seconds per errand | API cost per errand | notes |
 |---|---|---|---|---|---|---|
-| 22:54 | M0 probe (one-word reply, not an errand) | testing | `claude-opus-5-5`, xhigh | 2.2 | $0.0005 | accepted |
-| 22:54 | M0 probe (one-word reply, not an errand) | video | `claude-opus-5-5`, xhigh | 1.6 | $0.0006 | accepted |
-| 22:54 | M0 probe (one word, then three short turns) | live | `claude-haiku-5-5`, xhigh | 0.9; turns 0.9 / 0.9 / 1.9 | under $0.0002 in all | accepted; no empty reply, no `max_tokens`; once the same answer in two text blocks (read the final block) |
-| 01:29 | T4 M10 live run 1 (mock services) | testing | `claude-opus-5-5`, xhigh | 94.1 | $0.2857 | paid the good shop; 19 calls, 47,456 tokens; risk reply over the strict schema |
-| 01:31 | T4 M10 live run 2 | testing | `claude-opus-5-5`, xhigh | 73.2 | $0.3050 | paid the good shop; 20 calls, 51,639 tokens |
-| 01:33 | T4 M10 live run 3 | testing | `claude-opus-5-5`, xhigh | 85.1 | $0.3049 | paid the good shop; 20 calls, 50,916 tokens |
-| 01:34 | T4 M10 live run 4 | testing | `claude-opus-5-5`, xhigh | 139.5 | $0.2903 | paid the good shop; 19 calls, 46,989 tokens |
-| 01:36 | T4 M10 live run 5 | testing | `claude-opus-5-5`, xhigh | 321.0 | $0.2965 | paid the good shop; 19 calls, 47,287 tokens; one slow model call (range 73 to 321 s) |
-| 04:32 | Join e2e:food real, rehearsal (live hooks, real shop) | testing | `claude-opus-5-5`, xhigh | 56.5 | $0.2289 | refused by kesar's risk check: the MCP's buyer_risk table bug (fixed, PR 48) and rehearsal's real 1/6 cancel rate (correct by policy) |
-| 04:40 | Join e2e:food real, payer | testing | `claude-opus-5-5`, xhigh | 88.8 | $0.2623 | approved by the shop; the signer answered a headers object, so nothing was signed (fixed) |
-| 04:43 | Join e2e:food real, payer (the counting run) | testing | `claude-opus-5-5`, xhigh | 122.1 | $0.2986 | **paid** 4.80 on Whitechain, delivered, refunded 0.80; A–E pass |
-| 10:41–10:42 | Join live runner on the production site (`/api/agents/run`), three runs, payer | live | `kimi-k3.1-pro-highspeed`, high | 11.9, 9.4, 7.6 | ≤ $0.025 each (1,225 and 1,187 tokens; the server's `apiCostUsd` line is in the Vercel log, not read here) | no-purchase: the concierge answered ("I'll find the best gulab jamun options…") and stopped without delegating to the scout and analyst; nothing signed |
-| 10:31 | T4 Kimi run 0 (mock services, before the fix) | testing | `kimi-k3.1-pro`, high | 6.4 | $0.0042 | **no purchase**: with a `response_format` Kimi answered the JSON at once and called no tool (1 call); fixed in PR 92 by putting the schema in the instructions |
-| 10:32 | T4 Kimi run 1 (mock services, after the fix) | testing | `kimi-k3.1-pro`, high | 123.4 | $0.0687 | paid the good shop; 18 calls, 26,452 tokens |
-| 10:34 | T4 Kimi calibration 1 (mock services) | testing | `kimi-k3.1-pro`, high | 149.7 | $0.0661 | paid the good shop; 19 calls, 28,764 tokens |
-| 10:37 | T4 Kimi calibration 2 | testing | `kimi-k3.1-pro`, high | 126.7 | $0.0586 | paid the good shop; 19 calls, 27,804 tokens |
-| 10:39 | T4 Kimi calibration 3 | testing | `kimi-k3.1-pro`, high | 155.4 | $0.0664 | paid the good shop; 19 calls, 28,697 tokens |
-| 10:41 | T4 Kimi calibration 1 (mock services) | video | `kimi-k3.1-pro-highspeed`, high | 70.0 | $0.1423 | paid the good shop; 19 calls, 28,706 tokens |
-| 10:42 | T4 Kimi calibration 2 | video | `kimi-k3.1-pro-highspeed`, high | 56.0 | $0.1091 | paid the good shop; 19 calls, 27,189 tokens |
-| 10:43 | T4 Kimi calibration 3 | video | `kimi-k3.1-pro-highspeed`, high | 57.2 | $0.1145 | paid the good shop; 19 calls, 27,850 tokens |
-| 10:44 | T4 Kimi calibration 1 (mock services) | live | `kimi-k3.1-pro-highspeed`, high | 58.3 | $0.1139 | paid the good shop; 19 calls, 27,448 tokens |
-| 10:45 | T4 Kimi calibration 2 | live | `kimi-k3.1-pro-highspeed`, high | 60.3 | $0.1210 | paid the good shop; 19 calls, 28,304 tokens |
-| 10:46 | T4 Kimi calibration 3 | live | `kimi-k3.1-pro-highspeed`, high | 64.5 | $0.1249 | paid the good shop; 19 calls, 28,281 tokens; highspeed is about 2.2 times faster than pro and about 1.9 times the cost; Opus 5.5 xhigh was 73 to 321 s at about $0.30 |
-| 10:47 | Join live runner on the production site, payer (after T4's Kimi fix, PR 92) | live | `kimi-k3.1-pro-highspeed`, high | 85.0 | not read (the server's `apiCostUsd` line is in the Vercel log) | refused before signing: the team ranked and chose kesar (0.913), the risk agent approved the payer, then the hosted shop's 402 step answered "quote write failed" (W_DIRECTORY; most likely a clash with this run's presence batches, now held around the 402 step, PR 93); 6 agents, 16 tool calls |
-| 11:08 | Join live runner on the production site, payer (after PR 93's hold) | live | `kimi-k3.1-pro-highspeed`, high | 95.7 | not read (server log) | unsettled: every check passed and the payer signed 4.80, then the hosted facilitator's settle send threw (ContractFunctionExecutionError, T1's log); order NONE, relayer nonce unchanged, nothing sent |
-| 11:11 | Join live runner on the production site, payer (retry) | live | `kimi-k3.1-pro-highspeed`, high | 171.2 | 177,690 tokens: between $0.71 (all input) and $3.55 (all output) at the config's prices, less with cache reads; the exact `apiCostUsd` is in the server log | **paid** 4.80 to kesar on Whitechain, the first live errand through the site: https://explorer.testnet.whitechain.io/tx/0x8617754857a8eb1fb1483b4f18fb6fa6a4f1607241d3f08c7ccd062de1b8863a ; 7 agents, 19 tool calls |
-| 13:28 | Join live runner on the production site, payer (after #108, #112 and T1's settle-safety #114) | live | `kimi-k3.1-pro-highspeed`, high | 128.9 | 32,584 tokens: $0.13–$0.65 at the config's prices (exact `apiCostUsd` in the server log) | **paid** 4.80 to kesar: https://explorer.testnet.whitechain.io/tx/0x9749a7f766282021a4e0e255276b938e53c608f55985a68b4b59b08d852a1e1a ; 7 agents, 16 tool calls, no retry |
-| 13:30 | Join live runner on the production site, payer (the second of the founder's two) | live | `kimi-k3.1-pro-highspeed`, high | 115.1 | 28,712 tokens: $0.11–$0.57 | **paid** 4.80 to kesar: https://explorer.testnet.whitechain.io/tx/0x11588a5e47611c1e9095219ab95b8907d8b0f59a602f56d8b12d11a16cfa0a13 ; 7 agents, 15 tool calls, no retry |
 | 23:30 | W4 baseline: one live errand on the production site (`scripts/agents/site-errand.mjs`), payer | live | `kimi-k3.1-pro-highspeed`, high (every role) | 91.4 | $0.1455 (the sum of the agents' own call costs) | **paid** 4.80 to kesar: https://explorer.testnet.whitechain.io/tx/0xeac35d0ad3cfd0ed77f51bfd76974b545b973d1be69e13b1edb535d48e76abe6 ; 19 calls, 33,287 tokens (29,050 in, 14,592 of them cached; 4,237 out, 2,187 reasoning); 62.6 s of model time; per call in `docs/sessions/w4-agents/runs/` |
 | 23:45 | W4 code mode on mock services (`AGENT_MODE=live AGENT_PRESET=live pnpm agents:errand --runs 2`), before the analyst went to low | live | `kimi-k3.1-pro-highspeed`, concierge and analyst high, risk low; scout, payer, storefront and dispatch in code | 18.2, 27.4 | $0.0359, $0.0530 | paid the good shop, the concierge's own choice; 3 calls, 3,352 and 4,396 tokens; nothing paid on chain (mocks) |
 | 23:47 | W4 code mode on mock services, the analyst at low | live | `kimi-k3.1-pro-highspeed`, concierge high, analyst and risk low; the rest in code | 13.8, 14.3 | $0.0267, $0.0271 | paid the good shop, the concierge's own choice; 3 calls, 2,927 and 3,043 tokens; nothing paid on chain (mocks) |
@@ -93,76 +67,32 @@ Agents (T4) and Join add one row per full errand run, so the presets can be cali
 
 The kickoff rules (the deadline Sat 09:00 IST; AI use documented; spec files in the repo; pre-event work disclosed in writing; the video in the founder's own voice) are in `planning/` and ADR-0028. The organiser said "go all out, use AI the best you can", and we keep full AI disclosure (ADR-0028). Every booth question is closed with the founder's defaults (ADR-0038 to ADR-0044). Prize tracks: ADR-0051; Swarm: ADR-0039 and ADR-0061.
 
-## foundation
+## the day sessions (retired; condensed at the backend's close, 01:55 IST Sat 7 Nov)
 
-- Nothing open. M0 retired Thu 23:58 IST.
-- Closed today: nothing (M0 closed Thursday, #1 to #7).
+**Closed tonight by the night streams:**
+- **W3:** subscribe and cancel, the renewals on the cron, the refund decline, the cap actions ("Dosas for everyone", the agent's own raise, the owner's change) and the 0.80 coffee re-order.
+- **W1:** the dosa shops' ENS names and the kill.
+- **W2:** the dosa shops' history and category.
+- **The founder:** the big city M, trimmed to what was seeded, and race mode kept at S.
+- **W5:** the mirror's write under the new names.
+- **W6:** the SDK READMEs' demo link and the feedback log.
 
-## payments
+The day's closed items are in `git log` and the archived relays (`docs/archive/thinking-partner-relays/`).
 
-- **Subscribe and cancel** (owner: T1). The hosted shop and facilitator have no subscription endpoints, so both phone buttons say "not live yet". Next: build them, if the founder keeps subscriptions in the demo.
-- **Run the next renewal** (owner: T1). It does nothing in live mode; the hosted cron renews due subscriptions by itself, on the 2-minute demo clock. Next: a route for the phone, with subscribe.
-- **Decline refund** (owner: T1). "Not live yet" on the merchant phone. Next: build it if the demo shows it.
-- **The cap actions** (owner: T1). The agent raising its own cap is "not live yet", and "Dosas for everyone" must be refused as over the pass. Next: build both on the real cap checks, if in scope.
-- **The 0.80 coffee re-order** (owner: T1; ADR-0073). The re-order still re-buys the 4.80 combo. Next: the Coordinator adds `order.reorder.sku` (0.80) and its prompt text to `story.json`; the shop and the re-order route follow it.
-- **The CI gate** (owner: Coordinator). The `contracts` job does not block a merge. Next: an aggregator `ci` job that fails unless every job passed; until then, merge contract PRs only on a green `contracts`.
-- Closed today: M3 and M4 (#45, #62); F3, the relayer floor (#78); the quote retry (#96); the payer's cap at 100 on-chain (#107); the settle safety (#114); the merchant addresses (env default kept).
-
-## identity
-
-- **ENS names for the dosa shops** (owner: T2). Filter & Fold, Idli Index and Tawa Tangle, and their agents, still use the test cast's labels. Next: if the founder says yes, register the new names; the Coordinator updates `story.json`; then T3 moves the history.
-- **The kill** (owner: T2, with the Coordinator). `/api/customer/kill-disposable` says "not live yet": it needs T2's provisioning and a funded disposable wallet (`disposable-1` is already killed). Next: if in scope, the Coordinator funds DISPOSABLE_2 (0.005 WBT and 1 test USDT, `pnpm funding`); T2 provisions it (`node scripts/ens/owner.mjs disposable --real`) and wires the route.
-- Closed today: M6 and B8's MCP call (#40); the watcher in the workers (#46); B7 and B9 (a) (#83, #84); the payer's ENS cap at 100 (#106); the `ens_check` wording (the spec's, kept).
-
-## arkiv
-
-- **The dosa shops' history and category** (owner: T3). The history sits under the test cast's names, and the Arkiv category still says "sweets". Next: after T2's names, move the history and rename the category in the directory rows and graph nodes together; re-upload the Swarm menus (`pnpm -s --filter @graphpay/money-graph menus --execute`), and once more before the video.
-- **The big city at size M** (owner: T3). It waits for the locked story (ADR-0049), and `story.json` still says `test`, unlocked. Next: the Coordinator locks it and sets `syntheticCity.reRegisteredShop.epoch` to 1; T3 seeds M, lifts the size guard and runs D7 (`node bench/run.mjs --size M --end <date>`).
-- **The website's GraphQL asks** (owner: T3; default taken). `Shop` has no Arkiv entity `key`, and `Edge` no `entityKey` or `orderKind` (the map's links, three CSV columns). Next: add them if cheap; the demo works without them.
-- Closed today: `Reputation.synthetic` (#30); the race's truth badges (#36); the activity rows, wired (#39, #88); menus and images on Swarm (#82, #109); the writer fix and 0.1.1 on npm (#97, #98, #103); `refund_evidence` dropped (#86); the Arkiv read outage (#148).
-
-## agents
-
-- Nothing open. T4 is idle; Kimi tuning only if asked.
-- Closed today: the Kimi switch (#87, #92) and its calibration (#95); the checkout address in the config.
-
-## integration
-
-- **The mirror's new write** (owner: Join). The mirror restarted on #148 at 21:58 IST and caught up, with no new payment since. Next: once the payer is ACTIVE again, run one errand and check that its event reaches Arkiv.
-- Closed today: the live runner, with the run id and hooks (#88); the reliable errand (#108, #112, #114, #119); no hourly cap (ADR-0069); C6 and F2 for public access (#120); M13, D10 and C4(a) (#66, #67, #79); the lid note (now in "Founder now").
-
-## phones
-
-- **The team's four asks** (owner: the team, through T5's review):
-  - a receipt card for a paid re-order (receipts are drawn only for quotes);
-  - `ShopChoice.repeatBuyers` optional (the live card shows a dash);
+**Still open:**
+- **The CI gate** (owner: Coordinator). The `contracts` job does not block a merge; only `ci` is required. Next: an aggregator job after the event.
+- **The website's GraphQL asks** (owner: frontend pass, default taken): `Shop` has no Arkiv entity `key`, and `Edge` has no `entityKey` or `orderKind`.
+- **The team's four asks** (owner: the team, through the frontend pass):
+  - a receipt card for a paid re-order;
+  - `ShopChoice.repeatBuyers` optional;
   - a "Sample data" chip for seeded orders;
-  - hiding unbuilt buttons (an optional `supports` map the adapter fills), once the founder settles the demo scope.
-- Closed today: the team's phones and controls (#70, #132); phases 1 to 4 (#111, #122, #124, #128); public access (#117); product photos (#140); the route labels (#120); the re-order's prompt text (moved to payments); the Open switch's cooldown (accepted).
-
-## website
-
-- **The read-limit ceiling** (owner: T5). ADR-0069's amendment says no ceilings, but the read limits raised in #113 still cap a runaway client. Next: remove or keep them, and record which in the ADR.
-- **The deck's other slides** (owner: T5). The non-demo slides have not been checked one by one (ADR-0074). Next: check each on production.
-- **The refund-reason table** (owner: T5, with T1). The contract only emits a `uint8`, and the merchant phone sends 1. Next: one table in `@graphpay/contracts` for the mirror, the export and the phones.
-- **The demo store online** (owner: Coordinator, then T5). https://graphpay-store.vercel.app answers "deployment not found" (22:40 IST). Next: create the Vercel project `graphpay-store` from `apps/store`, and set the names it reads (`MERCHANT_ADDRESS`, `FACILITATOR_URL`, `FACILITATOR_AUTH_TOKEN`, `DEMO_PASSCODE`) by helper. Then T5 makes one browser-wallet purchase and checks its export row. Its Sunday box only if time allows.
-- Closed today: Request refund and Refund, live (#73, #129); Re-order, live (#81, #131); the Open toggle; pause and resume; the feed's 50-edge stall and the CSV (#104); the keys `SHOP_KESAR`, `W_SYNC` and `PAYER` on Vercel; the kit's log reads (#64).
-
-## agentpay
-
-- **The README link to the demo app** (owner: T6; T3 for arkiv-graph). ADR-0076 says both package READMEs link to it; neither does yet. Next: add it in the repo; npm shows it only after a 0.1.2 (the founder's login), before the freeze.
-- **Feedback** (owner: T6). No `agentpay` issue yet. Next: log each one in `packages/agentpay/FEEDBACK.md`.
-- Closed today: 0.1.1 on npm (#99, #103); the labels and issue templates; A4 (#47); the log-range fix (#64); the examples' story values (kept in `story.json`); RENEWER's second use (in `WALLETS.md`); FUNDER's test USDT (topped up); the ride (stays on the fork).
-
-## records
-
-- **Keep the stage ready** (owner: Coordinator). Top up PAYER if it falls under about 25 test USDT; push a new Arkiv key to Vercel when the founder has one; the pre-flight (`planning/EVENT_RUNBOOK.md` §4) and a read-only acceptance run before 07:00 IST; freeze both SDK versions at submission.
-- Closed today: the npm login and both publishes; prompt logs in each checkout (#24, #27); the 18 key names on Vercel; ADR-0072 to ADR-0076 and the handover.
-
-## booth
-
-- Nothing open. The dosa shops on chain moved to identity and arkiv, and the 0.80 re-order to payments.
-- Closed today: the story on screen (#135); the deck as the stage (#136, #139); the stream recovery (#138); Grok's figurines and photos (#140); the 11:59 pm deadline (#142); the phones drive the deck (#143, #144).
+  - hiding unbuilt buttons.
+- **The website** (owner: frontend pass):
+  - the read-limit ceilings still in code, against ADR-0069's amendment;
+  - the deck's non-demo slides, never checked one by one;
+  - one refund-reason table (the chain always gets 1);
+  - the demo store, not deployed (https://graphpay-store.vercel.app answers "deployment not found").
+- **Keep the stage ready** (owner: Coordinator, until the presentation): payer ACTIVE, shop open, the workers under the watchdog; push a new Arkiv key to Vercel when the founder has one.
 
 ## w7-submission
 
@@ -204,32 +134,7 @@ Updated 01:35 IST, Sat 7 Nov (W7 Submission, final).
 
 ## frontend
 
-- **Kill a disposable agent** (from w1-identity; owner: the frontend pass). What: the route is live once W1's kill PR is deployed.
-  - `GET /api/customer/kill-disposable` answers `{ spare: { label, name, epoch } | null, live, pool }`. Show the button only while `spare` is set: it is set only when the spare's name and its spending pass are both live. After a kill, the next spare appears within a few minutes.
-  - `POST` (no body) takes 40 to 110 s. It answers `{ label, name, txs: [{ chain: 'sepolia' | 'whitechain', what: 'unregister' | 'revoke', hash }], revoked, payment: { outcome: 'refused' | 'paid' | 'unknown' | 'not-sent', http, reason, orderId, transaction }, recorded: { ref } | null, nextSpare, incomplete }`.
-  - The beat is `payment.outcome` `refused` with `reason` `ENS_EXPIRED_OR_REVOKED`, plus `recorded`. A step that failed after the kill is named in `incomplete`, and the kill stands.
-  - Other answers: `409` while another kill runs, `503` when no spare is ready yet, `502` when the outcome is unclear (then check GET).
-  - Why: the stage's kill beat (demo script step 7, the ENS kill switch). The story is the owner unregistering the agent's name, the watcher revoking its pass, and its next payment refused and recorded on Arkiv.
-  - Recommendation: one presenter-facing button on Vitalik's phone, in an "advanced" corner, since each tap ends one name for good. Show a countdown, then three links: the Sepolia unregister, the Whitechain revoke and the refusal.
-- **/customer's "By 23:59" chip** (from w4-agents; owner: the frontend pass). What: `apps/web/components/customer-screen.tsx` shows `order.deadlineLocal`, but the request is now relative. Why: the chip and the request disagree. Recommendation: show "within an hour", or the run's deadline from the result frame (`result.mandate.deadlineIso`); no new route or event is needed.
-- **The deck's errand text** (from w4-agents; owner: the frontend pass). What: `apps/web/public/deck/index.html` keeps a hand copy of the request that still says "by 11:59 pm". Recommendation: copy the new request from `packages/config/story.json` (`order.request`).
-- **Re-order is "another coffee"** (from w3-payments; owner: the frontend pass). What: `POST /api/customer/reorder` (body `{ parentOrderId }`, unchanged) pays the story's re-order, the filter coffee at 0.80; the answer is `{ status: 'paid', orderId, parentOrderId, amountMicro, transaction }`, or `202` with `status: 'pending'`. Recommendation: label the button from `order.reorder.item` and `order.reorder.priceMicro`; no new event.
-- **Subscribe to the Sunday box** (from w3-payments; owner: the frontend pass). What: `POST /api/customer/subscribe`, body `{}` or `{ plan }`, where `plan` must be the story's. The persona subscribes and the payer agent pays 2.40 (`renewal.priceMicro`) on the labelled 2-minute demo clock (`renewal.demoPeriod`). The first box is charged in the same transaction, and the cron charges the next ones, at most `maxCharges` (3) in all.
-  - Answer: `{ status: 'active' | 'pending', subId, plan, item, sku, shopEns, priceMicro, periodSeconds, period, maxCharges, allowanceMicro, firstChargeAt, nextChargeAt, transaction, firstCharge: { orderId, charged, failReason } }`.
-  - Refusals: `ALREADY_SUBSCRIBED` (with `subId`), `TOO_SOON` (within 3 min of the last one), `PAYER_NOT_ACTIVE`, `OVER_PASS`, `BALANCE_LOW`, `PAYEE_MISMATCH`, `RENEWER_LOW`, `CHECKOUT_REFUSED` (with `revert`).
-  - Recommendation: wire `startRenewal` to the route and emit `renewal.created` with the first charge's explorer link. Use `renewal.sku` for its product; `story-projection.mjs` still uses `order.sku`.
-- **Cancel the subscription** (from w3-payments; owner: the frontend pass). What: `POST /api/customer/unsubscribe`, body `{}` or `{ subId }`, where `subId` must be the payer's own. The payer agent's own signature, gasless. Answer: `{ status: 'cancelled' | 'pending', subId, transaction, effectiveAt }`. Refusals: `NO_SUBSCRIPTION`, `NOT_THIS_SUBSCRIPTION`, `NOT_ACTIVE`. Recommendation: wire `cancelRenewal` and emit `renewal.cancelled`.
-- **The subscription in the customer state** (from w3-payments; owner: the frontend pass). What: `GET /api/state/customer` now fills `subscription`: `{ subId, plan, period, priceMicro, nextChargeAt, renewals: [{ at, transaction }], active, status, cycle, periodSeconds, chargesLeft, item, shopEns }`, newest charge first. Events: each charge is a `renew` edge plus a `pay` edge in the merchant stream. The subscription itself is a `subscribe` edge, and a cancel is a `cancel` edge, both from the persona. Recommendation: fill `snapshot.renewals` from it; when `active` and `chargesLeft` is 0, offer Cancel, since the demo plan has used its charges and a new subscribe waits for the cancel.
-- **Pause and Resume on the tapped card** (from w5-ops; owner: the frontend pass). What: `/api/customer/pause` and `/api/customer/resume` now act on `{ agent: <ENS name> }`; with no agent they still mean the payer. `apps/phones/src/live-adapter.ts` `pauseAgent(ens)` and `resumeAgent(ens)` send `{}` and report every change as the payer's. Why: the W5 brief, "act on the agent whose card was tapped". Recommendation: send `{ agent: ens }`, and emit `agent.permission` for that agent. A card without a spending pass (Concierge, Analyst) gets HTTP 409, `reason: "NO_PASS"`, with an `error` sentence to show as it is; or hide Pause on those cards.
-- **Self-healing on the phones** (from w5-ops; owner: the frontend pass). What: a paused agent resumes by itself after 2 minutes; a closed shop reopens after 5 (the cron `/api/cron/heal`). The pause answer carries `resumesAfterS`. `GET /api/state/heal` gives each pausable agent's `status`, `pausedAt` and `resumesAt`, and the shop's `open`, `openUntil`, `closedAt` and `reopensAt` (ISO times). Why: `/api/state/customer` covers only the payer, and the merchant phone keeps its own Open state, so it shows Closed after the cron reopens the shop. Recommendation: poll `/api/state/heal` with the customer state; show "resumes by itself at …" and "reopens at …".
-- **The menus, the dishes and the storefronts on Swarm** (from w2-city; owner: the frontend pass). What: each shop's `menu` row on Arkiv points to its Swarm `menu.json`. Its `shop.image` is the storefront photo, and each item's `image` is that dish's photo. Each image is `{ ref, name, contentType, sha256, bytes }`, opened at `https://api.gateway.ethswarm.org/bzz/<ref>/<name>`. Read it with `readMenu` (`@graphpay/money-graph`), which checks every hash. The list is `docs/sessions/arkiv/swarm-menus.json`. Recommendation: open the photos from Swarm where the Swarm prize is shown; the phones' own copies are the same files.
-- **The big city's shops are not on the map** (from w2-city; owner: the frontend pass). What: M's 120 synthetic places were held back from the W_DIRECTORY directory. `apps/web/lib/map.server.ts` reads up to 100 synthetic shops on every poll, and the stage's phones poll `/api/map`; Arkiv's keyless query window, shared with the live errand, cannot carry that. Recommendation: filter the map's synthetic query by dataset (`graphpay-city-v1-S`), or show M's places from `story.json` (`syntheticCity.places`) without reading Arkiv.
-- **Race mode's size and its 429** (from w2-city; owner: the frontend pass). What:
-  - `/api/race` reads any seeded size (`size`); without one it takes `syntheticCity.raceSize`, S until M has a plain store.
-  - On a city of more than 1,000 payment rows a plain race starts once every 10 minutes per server, and inside that gap it answers 429 with `{ error }` saying when the next can start. `components/race-view.tsx` shows every 429 as "Another race is running".
-  - The deck's "48 reads" is the lab's 10,000-event city; label it "lab", or show the measured S numbers (2 against 5).
-
-  Recommendation: show the 429's `error` text.
+Folded into [`BACKEND_FOR_FRONTEND.md`](BACKEND_FOR_FRONTEND.md) at the backend's close (01:55 IST, Sat 7 Nov): every route and event, with what each screen should do (its section 9). The frontend items filed under `## w5-ops` below are folded there too.
 
 ## w5-ops
 
