@@ -74,6 +74,7 @@ Agents (T4) and Join add one row per full errand run, so the presets can be cali
 | 11:11 | Join live runner on the production site, payer (retry) | live | `kimi-k3.1-pro-highspeed`, high | 171.2 | 177,690 tokens: between $0.71 (all input) and $3.55 (all output) at the config's prices, less with cache reads; the exact `apiCostUsd` is in the server log | **paid** 4.80 to kesar on Whitechain, the first live errand through the site: https://explorer.testnet.whitechain.io/tx/0x8617754857a8eb1fb1483b4f18fb6fa6a4f1607241d3f08c7ccd062de1b8863a ; 7 agents, 19 tool calls |
 | 13:28 | Join live runner on the production site, payer (after #108, #112 and T1's settle-safety #114) | live | `kimi-k3.1-pro-highspeed`, high | 128.9 | 32,584 tokens: $0.13–$0.65 at the config's prices (exact `apiCostUsd` in the server log) | **paid** 4.80 to kesar: https://explorer.testnet.whitechain.io/tx/0x9749a7f766282021a4e0e255276b938e53c608f55985a68b4b59b08d852a1e1a ; 7 agents, 16 tool calls, no retry |
 | 13:30 | Join live runner on the production site, payer (the second of the founder's two) | live | `kimi-k3.1-pro-highspeed`, high | 115.1 | 28,712 tokens: $0.11–$0.57 | **paid** 4.80 to kesar: https://explorer.testnet.whitechain.io/tx/0x11588a5e47611c1e9095219ab95b8907d8b0f59a602f56d8b12d11a16cfa0a13 ; 7 agents, 15 tool calls, no retry |
+| 23:30 | W4 baseline: one live errand on the production site (`scripts/agents/site-errand.mjs`), payer | live | `kimi-k3.1-pro-highspeed`, high (every role) | 91.4 | $0.1455 (the sum of the agents' own call costs) | **paid** 4.80 to kesar: https://explorer.testnet.whitechain.io/tx/0xeac35d0ad3cfd0ed77f51bfd76974b545b973d1be69e13b1edb535d48e76abe6 ; 19 calls, 33,287 tokens (29,050 in, 14,592 of them cached; 4,237 out, 2,187 reasoning); 62.6 s of model time; per call in `docs/sessions/w4-agents/runs/` |
 
 ## Kickoff rules and booth questions (closed; rolled up 06:55 IST)
 
@@ -152,12 +153,12 @@ The kickoff rules (the deadline Sat 09:00 IST; AI use documented; spec files in 
 
 ## w7-submission
 
-Updated 23:25 IST, Fri 6 Nov (W7 Submission).
-- **Review the README** (what: the new README with its "verify each claim" table; where: `README.md`; why: it is the first thing every judge opens; recommendation: read the persona note, the claims table and the Team section, and tell W7 any change).
-- **The team list** (what: the README names `Zugzwang-world` and `ajatshatru01` by GitHub handle; where: `README.md`, "Team"; why: no other member is recorded in the repo; recommendation: add names, or anyone missing, and confirm each is on the ETHGlobal project).
-- **The video** (what: 2 to 4 minutes in your own voice, every party shown; where: the link goes into the form text, `docs/submission/ETHGLOBAL.md`, coming next; why: Whitechain's qualification and ETHGlobal's rules; recommendation: record after the night streams land, with the payer active and the shop open).
-- **Submit by 08:00 IST** (what: title, description, repo link, three partner prizes; where: `docs/submission/ETHGLOBAL.md`; why: the form closes at 09:00 IST; recommendation: paste from the file once W7 says it is final).
-- Closed: M17 started as the W7 night stream (23:02 IST); the README rewritten with its evidence (this step).
+Updated 23:38 IST, Fri 6 Nov (W7 Submission).
+- **Submit by 08:00 IST** (what: the title, the descriptions, the links and three partner prizes; where: [`docs/submission/ETHGLOBAL.md`](../submission/ETHGLOBAL.md), one block per form field; why: the form closes at 09:00 IST; recommendation: paste from the file after W7's final pass, and tick its "Before you press Submit" list).
+- **The video** (what: 2 to 4 minutes in your own voice, every party shown, from the shot list [`docs/submission/VIDEO.md`](../submission/VIDEO.md); where: its link goes in the form's video field; why: Whitechain's qualification and ETHGlobal's rules; recommendation: record after the night streams land, with the payer active and the shop open).
+- **Review the README and the partner files** (what: the "verify each claim" table, the persona note, the Team section, `arkiv/`, `WHITECHAIN_FEEDBACK.md`, `docs/submission/ENS.md`; why: judges open them first; recommendation: tell W7 any change before 07:00 IST).
+- **The team list** (what: the README names `Zugzwang-world` and `ajatshatru01` by GitHub handle; why: no other member is recorded in the repo; recommendation: add names or anyone missing, and confirm each is on the ETHGlobal project).
+- Closed: the README (#154), AI_USAGE.md and the Arkiv files (#159), the Whitechain and ENS notes (#161), the form text (#164); the shot list and the checklist (this PR).
 
 ## w3-payments
 
