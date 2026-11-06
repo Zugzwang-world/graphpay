@@ -118,11 +118,11 @@ Updated 00:15 IST, Sat 7 Nov (W3 Payments, session `local_b65be40a-eb20-4d86-b78
 
 ## w4-agents
 
-Updated 23:35 IST, Fri 6 Nov (W4 Agents, session `local_3404db4e-486c-4f86-8b3a-67ceb53ef025`).
-- **Item 1, the relative deadline ([#153](https://github.com/Zugzwang-world/graphpay/pull/153), merged 23:18 IST):** the request says "delivered within an hour"; code reads the hour from the moment of the request, so errands work at any hour.
-- **Item 2, measuring ([#157](https://github.com/Zugzwang-world/graphpay/pull/157), merged 23:26 IST):** every agent's end event carries each model call (tokens in and cached, out and reasoning, cost, tools, seconds).
-- **The live baseline (23:30 IST):** paid 4.80 in 91.4 s; 19 model calls, 33,287 tokens, $0.1455; 62.6 s of it was the models.
-- **Item 3, first cut ([#162](https://github.com/Zugzwang-world/graphpay/pull/162)):** the routine agents think at Kimi's low effort; the model reads short tool replies (the screens keep the whole data); the concierge gets the limits from code. Next: measure it live, then move the routine steps into code.
+Updated 00:17 IST, Sat 7 Nov (W4 Agents, session `local_3404db4e-486c-4f86-8b3a-67ceb53ef025`).
+- **Done:** item 1, the relative deadline ([#153](https://github.com/Zugzwang-world/graphpay/pull/153)); item 2, every model call measured ([#157](https://github.com/Zugzwang-world/graphpay/pull/157)); item 3's first cut ([#162](https://github.com/Zugzwang-world/graphpay/pull/162)).
+- **Item 3, second cut ([#182](https://github.com/Zugzwang-world/graphpay/pull/182); the reviewer says ship):** the routine steps in code, one model call each for the concierge, the analyst and the risk agent. **Proven live before merging:** paid 4.80 in 55.2 s with 3 model calls, 2,886 tokens and $0.0247 (the baseline: 91.4 s, 19 calls, 33,287 tokens, $0.1455). The screens get the same data.
+- **Found tonight:** the payer was paused by a visitor twice (W5's self-healing now resumes it); a dropped Arkiv read made the shop refuse the buyer once (now tried once more).
+- **Next:** merge, then three live errands in a row on the site.
 - **Blockers:** none.
 
 ## w5-ops
