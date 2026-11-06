@@ -68,10 +68,15 @@ export interface SiteModel {
   renewal: {
     plan: string;
     item: string;
+    // The plan's product at its shop (a sku of the renewal shop).
+    sku: string;
+    // The renewal shop's ENS name.
+    shopEns: string;
     priceMicro: string;
     period: string;
     weekday: string | null;
-    demoPeriod: { id: string; seconds: number; label: string };
+    // The labelled demo clock; maxCharges bounds what a demo subscription can ever pull.
+    demoPeriod: { id: string; seconds: number; label: string; maxCharges: number };
   };
 }
 
@@ -173,6 +178,8 @@ export function siteModel(): SiteModel {
     renewal: {
       plan: field(renewal, 'plan', isString, 'renewal'),
       item: field(renewal, 'item', isString, 'renewal'),
+      sku: field(renewal, 'sku', isString, 'renewal'),
+      shopEns: ensOf('shop', field(renewal, 'shop', isString, 'renewal')),
       priceMicro: String(field(renewal, 'priceMicro', isNumber, 'renewal')),
       period: field(schedule, 'period', isString, 'renewal.schedule'),
       weekday: isString(schedule.weekday) ? schedule.weekday : null,
@@ -180,6 +187,7 @@ export function siteModel(): SiteModel {
         id: field(demoPeriod, 'id', isString, 'renewal.demoPeriod'),
         seconds: field(demoPeriod, 'seconds', isNumber, 'renewal.demoPeriod'),
         label: field(demoPeriod, 'label', isString, 'renewal.demoPeriod'),
+        maxCharges: field(demoPeriod, 'maxCharges', isNumber, 'renewal.demoPeriod'),
       },
     },
   };
