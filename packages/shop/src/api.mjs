@@ -6,8 +6,9 @@
 //   POST …/orders/:parentId/reorder          the same, for a re-order of a paid order
 // Without PAYMENT-SIGNATURE a pay call answers 402 with exactly one `accepts` entry (after writing
 // the quote to Arkiv when it carries a requestId, M7 amendment §5); with it, the facilitator
-// verifies and settles. alreadyPaid comes from the chain; a facilitator outage is a 502 (a retry
-// is safe: the order id is the Permit2 nonce, so it can never be paid twice).
+// verifies and settles. alreadyPaid comes from the chain. A verify outage is a 502 (retry is safe);
+// a settle outage is a 502 only when the facilitator refused before any send, else a 504 pending
+// (the payment may have gone out; the order id is the Permit2 nonce, so it can never pay twice).
 
 import { createHash, timingSafeEqual } from 'node:crypto';
 import { isAddress, isAddressEqual } from 'viem';

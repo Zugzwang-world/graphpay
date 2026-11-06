@@ -344,7 +344,9 @@ export function createGraphPayFacilitator(deps) {
       }
       gasSpent.add(reserve);
       keep(inflight, ctx.order.orderId, { hash: null, at: clock(), reserve });
-      const hash = await deps.chain.sendSettle(args, gas);
+      // The signed transaction's hash is kept before the broadcast: if the send call errors after the
+      // node took it, a retry waits on that hash instead of sending a second transaction.
+      const hash = await deps.chain.sendSettle(args, gas, { onSigned: (signed) => keep(inflight, ctx.order.orderId, { hash: signed, at: clock(), reserve }) });
       keep(inflight, ctx.order.orderId, { hash, at: clock(), reserve });
       return await decide(ctx, hash, reserve);
     } catch (e) {

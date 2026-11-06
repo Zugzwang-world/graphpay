@@ -92,11 +92,12 @@ export function viemChain({ publicClient, walletClient, account, checkout, token
     // Signed here, so the hash is known before the broadcast: when the broadcast call errors (a
     // transport retry answered "already known" or "nonce too low", a timeout after the node took
     // it), a transaction the node has under that hash is adopted instead of reported as failed.
-    async sendSettle(args, gas) {
+    async sendSettle(args, gas, { onSigned } = {}) {
       if (!(await chainOk())) throw new Error('sendSettle: the RPC is not on the relayer chain');
       const request = await walletClient.prepareTransactionRequest({ account, chain, to: checkout, data: encodeFunctionData({ abi: checkoutAbi, functionName: 'settleOrder', args }), gas });
       const serializedTransaction = await walletClient.signTransaction({ ...request, account, chain });
       const hash = keccak256(serializedTransaction);
+      onSigned?.(hash);
       try {
         return await walletClient.sendRawTransaction({ serializedTransaction });
       } catch (e) {
