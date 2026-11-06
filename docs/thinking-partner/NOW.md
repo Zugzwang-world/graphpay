@@ -73,14 +73,15 @@ Updated 23:10 IST, Fri 6 Nov (night Coordinator, `local_1caa580c-…`).
 
 ## w1-identity
 
-Updated 00:00 IST, Sat 7 Nov (W1 Identity, session `local_45f7cf5d-c31e-4dbf-b849-466f3067bdd3`).
-- **Done:** the new shop names are on ENS, on the old wallets (#158).
-- **Ready:** the `story.json` label flip (branch `claude/w1-flip`, all tests pass). It waits for the Coordinator's go after W2.
-- **In its PR: the kill.**
-  - A funded spare, `disposable-2.vitalik.graphpay.eth`, is live, and spare keys 2 to 9 are in Vercel.
-  - `POST /api/customer/kill-disposable`: the owner unregisters the spare, the watcher revokes its pass, and its next payment is refused and recorded on Arkiv. GET names the spare.
-  - The workers make a fresh spare after each kill (needs W5's restart).
-- **Next:** one kill on production, then a fresh spare.
+Updated 00:20 IST, Sat 7 Nov (W1 Identity, session `local_45f7cf5d-c31e-4dbf-b849-466f3067bdd3`).
+- **Done: the new shop names** are on ENS, on the old wallets (#158).
+- **Done: the kill works live** (#175). At 00:16 IST the site killed `disposable-2`.
+  - The owner's unregister landed on Sepolia, and the watcher revoked its pass on Whitechain 9 s later.
+  - Its next payment was refused `ENS_EXPIRED_OR_REVOKED`, and the refusal is recorded on Arkiv.
+  - A fresh spare, `disposable-3`, was ready at 00:19 (made by hand this once). Evidence: `docs/sessions/identity/kill-disposable-2.json`.
+- **Ready:** the `story.json` flip (labels and category; branch `claude/w1-flip`). It waits for the Coordinator's go after W2.
+- **In review:** the owner's cap reaching the payer's pass through the watcher, for W3's cap route (#179).
+- **Next:** the flip on the go; after W5's restart, the workers make each fresh spare themselves.
 
 ## w2-city
 
