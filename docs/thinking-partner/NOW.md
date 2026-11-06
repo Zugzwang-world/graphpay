@@ -63,10 +63,10 @@ Updated 05:41 IST, Fri 6 Nov. **M13's hosted run passed on the production domain
 
 ## website
 
-Updated 06:10 IST, Fri 6 Nov (T5 Web; Coordinator's clock). **On `main`:** everything through M16, the map, the lanes and the real kit payment (M16 proved on the chain). **In a PR:** the merchant phone's **Mark dispatched** and **Refund** buttons (Friday item 12): the shop's own key signs on the server, behind the passcode; the order must be this shop's, a refund can never exceed what the contract says is left, the shop wallet's float is checked first, and a send whose receipt is late keeps its hash and locks the order so a retry cannot pay twice. Reviewer pass done. Not tried on the real chain from here (a live dispatch or refund changes real demo state).
-- Running: nothing. Needs the shop's key on Vercel (the hosted shop already uses it for deliveries, so it is probably set).
-- Blockers: the store's CSV export waits for T6's PR 64.
-- Next: the customer's refund request, re-order and subscribe buttons (they sign as the payer agent; a reviewer pass each); the store's Sunday box. Fresh start file: `docs/sessions/website/resume.md`.
+Updated 09:40 IST, Fri 6 Nov (T5 Web). **On `main`:** both phones' buttons except the three below, the map, the lanes, race, M16 (one real kit payment). **In a PR (`web/customer-actions`):** the customer phone's **Request refund**: a refund request written to Arkiv with the recorder's key (moves no money); the order is always the payer agent's newest payment, checked on the chain; one request per order per minute. Reviewer pass in progress.
+- Running: nothing.
+- Blockers: Re-order needs `PAYER_PRIVATE_KEY` in Vercel; Subscribe and Cancel need a hosted subscription endpoint from T1; Kill a disposable agent waits for T2 (all in OPEN).
+- Next: Re-order (the payer agent signs through the hosted shop, a reviewer pass). Fresh start file: `docs/sessions/website/resume.md`.
 
 ## agentpay
 

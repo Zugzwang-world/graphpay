@@ -214,6 +214,8 @@ export const facilitator = once('facilitator', async () => {
 const arkivFor = (role: 'W_DIRECTORY' | 'W_SYNC') => once(`arkiv ${role}`, (): Promise<ArkivConnection> => connectArkiv({ backend: 'rabdi', env: process.env, role }));
 const directory = arkivFor('W_DIRECTORY');
 const sync = arkivFor('W_SYNC');
+// The recorder's writer, for the customer's refund request (lib/refund-request.server.ts).
+export const syncConnection = sync;
 
 export interface ShopService {
   handle: Handler;
