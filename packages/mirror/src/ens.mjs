@@ -2,7 +2,8 @@
 // tracked names' registry and resolver events on Sepolia, with the real sinks.
 //   updatePolicy  T2's createPolicySink: setPolicy on the checkout as POLICY_WRITER, built
 //                 from the chain's own policy and the payments setup's configured list
-//                 (scripts/whitechain/plan.mjs); never an ENS cap or address
+//                 (scripts/whitechain/plan.mjs); never an ENS address, and an owner's ENS cap
+//                 only as min(owner's cap, configured cap) on a live policy (W3's cap ADR)
 //   patchNode     logged only: a policy change emits AgentPolicySet, and the mirror writes
 //                 the node's standing from it (one writer path for node rows)
 // Without POLICY_WRITER_PRIVATE_KEY the policy sink logs what it would send. ENS_WATCHER=0
@@ -17,7 +18,7 @@ import { execFile } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { activeCast } from '@graphpay/config';
 import { checkoutAbi } from '@graphpay/contracts';
-import { createEnsGate, createEnsReader, createEnsWatcher, createPolicySink, disposableAgent, memoryCheckpoint, namespacePlan, retryingReads } from '@graphpay/ens';
+import { createEnsGate, createEnsReader, createEnsWatcher, createPolicySink, disposableAgent, memoryCheckpoint, namespacePlan, policyMoved, retryingReads } from '@graphpay/ens';
 import { privateKeyToAccount } from 'viem/accounts';
 import { clientsFor } from '../../../scripts/lib/chains.mjs';
 import { roleAddresses } from '../../../scripts/lib/wallets.mjs';
@@ -126,7 +127,7 @@ export async function startEnsWatcher({ env, values, whitechain, checkout, log }
     account = null;
   }
   let sending = Promise.resolve();
-  const writePolicy = (p) => {
+  const writePolicy = (p, { expected } = {}) => {
     const run = sending.then(async () => {
       if (!account) {
         log(`ens watcher: [no POLICY_WRITER key] would setPolicy ${json(p)}`);
@@ -135,6 +136,13 @@ export async function startEnsWatcher({ env, values, whitechain, checkout, log }
       const pc = whitechain.publicClient;
       const [latest, pending] = await Promise.all([pc.getTransactionCount({ address: account.address, blockTag: 'latest' }), pc.getTransactionCount({ address: account.address, blockTag: 'pending' })]);
       if (pending !== latest) throw new Error(`POLICY_WRITER has a pending transaction (nonce ${latest}); not sending`);
+      const chainId = await pc.getChainId();
+      if (chainId !== whitechain.chain.id) throw new Error(`refused: the RPC reports chain ${chainId}, not ${whitechain.chain.id}; nothing signed`);
+      // Built from a policy read earlier: if another policy writer moved it since, send nothing.
+      if (expected && policyMoved(expected, await readPolicy(p.node))) {
+        log(`ens watcher: the policy of ${p.node.slice(0, 10)}… moved since it was read; setPolicy not sent`);
+        return { moved: true };
+      }
       // The nonce is left to viem (read at send time), which narrows the window with T1's scripts.
       const request = { address: checkout, abi: checkoutAbi, functionName: 'setPolicy', args: [p.node, p.epoch, p.wallet, p.revoked, p.capMicro, p.expiry], account, chain: whitechain.chain };
       const hash = await whitechain.walletClient(account).writeContract(request);
@@ -168,7 +176,10 @@ export async function startEnsWatcher({ env, values, whitechain, checkout, log }
   const started = await watcher.start();
   log(`ens watcher: ${started.tracked} names from block ${started.checkpoint}${account ? '' : ' (no POLICY_WRITER key: policy writes are logged only)'}`);
   keeper.kick('start');
-  const stop = watcher.run({ pollMs: 6_000, tickMs: 30_000, onError: (e) => log(`ens watcher: ${e.shortMessage ?? e.message}`) });
+  // ENS_WATCH_POLL_MS slows the polls when the public Sepolia RPC throttles this machine's log
+  // queries (each poll sends one getLogs per 8 tracked addresses; 28 names since the new shops).
+  const pollMs = Number(process.env.ENS_WATCH_POLL_MS) >= 6_000 ? Number(process.env.ENS_WATCH_POLL_MS) : 6_000;
+  const stop = watcher.run({ pollMs, tickMs: 30_000, onError: (e) => log(`ens watcher: ${e.shortMessage ?? e.message}`) });
   return { stop, watcher };
 }
 

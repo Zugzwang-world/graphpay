@@ -29,8 +29,19 @@ test('the persona buys only in the last week and never from the trap shop; one s
   assert.ok(t.q2.payRows > 400);
 });
 
-test('size M is refused while the story is unlocked', async () => {
-  assert.equal(story.locked, false);
+test('size M is the final cast at ranks 1 to 3 and the story\'s places behind them, labelled synthetic', () => {
+  const city = generateCity({ story, size: 'M', end: '2026-11-06' });
+  const final = story.syntheticCity.casts.final;
+  assert.deepEqual(city.shops.slice(0, 3).map((s) => s.storyRole), ['good', 'trap', 'runner-up']);
+  for (const s of city.shops.slice(0, 3)) assert.equal(s.ens, `${final.shops[s.storyRole].label}.${city.root}`);
+  const places = story.syntheticCity.places.list;
+  const background = city.shops.slice(3);
+  assert.equal(background.length, places.length);
+  assert.deepEqual(new Set(background.map((s) => s.ens)), new Set(places.map((p) => `${p.label}.${city.simRoot}`)));
+  for (const s of background) assert.ok(!s.cast && s.category === final.category && Number.isFinite(s.lat));
+  assert.ok(city.events.length > 9_000 && city.events.length < 11_000, `${city.events.length} events`);
+  assert.equal(new Set(city.events.filter((e) => e.to.ens === city.reShop).map((e) => e.to.epoch)).size, 2);
+  assert.equal(story.syntheticCity.sizes.M.cast, 'final');
 });
 
 // A seeded city is generated again exactly as it was seeded (ADR-0077): its truth file in

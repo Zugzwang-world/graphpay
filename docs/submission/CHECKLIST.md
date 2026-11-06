@@ -10,7 +10,7 @@
 | Seed the synthetic city; measure the race | Arkiv | done at size S; size M with W2 | S: acceptance D6 passes, [`bench/BENCHMARK-LIVE.md`](../../bench/BENCHMARK-LIVE.md); M: W2 tonight |
 | README with the writer wallets and a runnable query | Arkiv | done | [README, Arkiv](../../README.md#arkiv-the-money-graph) and its [keyless query](../../README.md#query-arkiv-yourself-one-command-no-keys) |
 | `schema.md`, `friction.md`, `why-arkiv.md`, `how-you-use-arkiv.md` | Arkiv | done | [`arkiv/`](../../arkiv/); every friction row has an event-day repro |
-| `reach.md`; the package published; a live GraphQL URL | Arkiv | done | [`arkiv/reach.md`](../../arkiv/reach.md); [npm](https://www.npmjs.com/package/@graphpay_ethglobal/arkiv-graph); [GraphQL](https://graphpay-event.vercel.app/api/graphql?query=%7Bnode%28ens%3A%22kesar-kingdom.graphpay.eth%22%29%7Bcategory%20tally%7Borders%20refunds%7D%7D%7D) |
+| `reach.md`; the package published; a live GraphQL URL | Arkiv | done | [`arkiv/reach.md`](../../arkiv/reach.md); [npm](https://www.npmjs.com/package/@graphpay_ethglobal/arkiv-graph); [GraphQL](https://graphpay-event.vercel.app/api/graphql?query=%7Bnode%28ens%3A%22filter-and-fold.graphpay.eth%22%29%7Bcategory%20tally%7Borders%20refunds%7D%7D%7D) |
 | `swarm.md`, seven items | Arkiv (Swarm) | done, item 6 waits for the video | [`arkiv/swarm.md`](../../arkiv/swarm.md) |
 | Test USDT `0xcedf…55a7` in hand | Whitechain | done | ADR-0045; [`docs/technical/WALLETS.md`](../technical/WALLETS.md) |
 | The relayer funded with WBT | Whitechain | done | 0.774 WBT against a 0.3 floor at 23:05 IST: [health](https://graphpay-event.vercel.app/api/facilitator/health) |
@@ -22,7 +22,7 @@
 | The facilitator's health page; the gas and drain section | (Scale, not entered) | done anyway | [health](https://graphpay-event.vercel.app/api/facilitator/health); [README, Whitechain](../../README.md#whitechain-payments) |
 | `WHITECHAIN_FEEDBACK.md` from the event build's runs | Whitechain | done | [`WHITECHAIN_FEEDBACK.md`](../../WHITECHAIN_FEEDBACK.md) |
 | The root name, registries, resolvers and agents on Sepolia | ENS | done | [`docs/sessions/identity/namespace.md`](../sessions/identity/namespace.md); [`ENS.md`](ENS.md) |
-| The ENS moments rehearsed on the live URL | ENS | partly | Pause and resume run from the phones; the kill and the refused cap write are proven by acceptance (B3, B6, E7) but have no phone button yet |
+| The ENS moments rehearsed on the live URL | ENS | mostly | Pause and resume run from the phones; the kill is a button on `/customer` since #175 (when a spare agent is ready), run once on production at 00:16 IST (#183); the refused cap write is proven by acceptance (B3) and has no button |
 | The live demo opens for judges | ENS, all | done | public, no passcode (ADR-0069): https://graphpay-event.vercel.app |
 | `AI_USAGE.md` and the disclosure, linked from the README | all | done | [`AI_USAGE.md`](../../AI_USAGE.md); the README's "How this was built" |
 | A public repo: commits through the event, a license, no secrets | all | done | MIT [`LICENSE`](../../LICENSE); acceptance A2 and F1 pass ([`ACCEPTANCE_REPORT.md`](../../ACCEPTANCE_REPORT.md)) |

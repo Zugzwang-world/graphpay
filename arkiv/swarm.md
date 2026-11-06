@@ -12,7 +12,7 @@ The seven items below follow the Swarm section of the event addendum.
 
 ## 2. One entity key, its reference and an openable link
 
-Filter & Fold's menu (a synthetic story shop; its ENS name is still the test cast's `kesar-kingdom.graphpay.eth`), version 3, the dosa story:
+Filter & Fold's menu (a synthetic story shop), version 3, the dosa story. The row is under the shop's earlier ENS name, `kesar-kingdom.graphpay.eth`; the shop goes by `filter-and-fold.graphpay.eth` since the label flip ([#189](https://github.com/Zugzwang-world/graphpay/pull/189)), and the city stream writes its menus under the new names:
 
 - **Arkiv `menu` entity:** `0x0f32e7cd190884066418a9fb32df6f5807e5bc3f8b59f3a7776f99e3e1de273f` ([explorer](https://rabdi.explorer.arkiv.network/entity/0x0f32e7cd190884066418a9fb32df6f5807e5bc3f8b59f3a7776f99e3e1de273f)), patched to version 3 in [0x4395…cc56](https://rabdi.explorer.arkiv.network/tx/0x43955ea40b8f1ab4632e9c4a25ce73df1a8a77fc01495464f03606ace112cc56) (Fri 6 Nov, 18:28 IST, from W_DIRECTORY).
 - **Swarm reference (64 hex):** `25f880463e2702eb5a2e265aa3c78004d5083f430aee1347189e8bb2c6f033dd`

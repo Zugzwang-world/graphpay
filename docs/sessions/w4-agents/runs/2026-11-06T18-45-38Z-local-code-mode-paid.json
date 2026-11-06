@@ -1,0 +1,167 @@
+{
+  "site": "local live runner (this branch) over the production shop, facilitator, ENS and Arkiv",
+  "runId": "w4-local-1793990738508",
+  "seconds": 55.2,
+  "result": {
+    "status": "paid",
+    "chosenShop": "kesar-kingdom.graphpay.eth",
+    "transaction": "0xfe0a4327fb7dca69d7363f05c73a8cc15b486b57184fc2f1e72c6812785070d5",
+    "explorerUrl": "https://explorer.testnet.whitechain.io/tx/0xfe0a4327fb7dca69d7363f05c73a8cc15b486b57184fc2f1e72c6812785070d5",
+    "refusals": []
+  },
+  "usage": {
+    "agents": [
+      {
+        "agent": "scout.vitalik.graphpay.eth",
+        "role": "scout",
+        "model": "code",
+        "effort": null,
+        "seconds": 2.59,
+        "calls": 0,
+        "input": 0,
+        "cached": 0,
+        "output": 0,
+        "reasoning": 0,
+        "usd": 0,
+        "modelSeconds": 0,
+        "perCall": []
+      },
+      {
+        "agent": "analyst.vitalik.graphpay.eth",
+        "role": "analyst",
+        "model": "kimi-k3.1-pro-highspeed",
+        "effort": "low",
+        "seconds": 7.99,
+        "calls": 1,
+        "input": 701,
+        "cached": 256,
+        "output": 428,
+        "reasoning": 219,
+        "usd": 0.010391,
+        "modelSeconds": 5.75,
+        "perCall": [
+          {
+            "input": 701,
+            "cached": 256,
+            "output": 428,
+            "reasoning": 219,
+            "usd": 0.010391,
+            "tools": [],
+            "seconds": 5.75,
+            "toolSeconds": 0
+          }
+        ]
+      },
+      {
+        "agent": "risk.kesar-kingdom.graphpay.eth",
+        "role": "risk",
+        "model": "kimi-k3.1-pro-highspeed",
+        "effort": "low",
+        "seconds": 7.23,
+        "calls": 1,
+        "input": 465,
+        "cached": 256,
+        "output": 197,
+        "reasoning": 114,
+        "usd": 0.004827,
+        "modelSeconds": 2.69,
+        "perCall": [
+          {
+            "input": 465,
+            "cached": 256,
+            "output": 197,
+            "reasoning": 114,
+            "usd": 0.004827,
+            "tools": [],
+            "seconds": 2.69,
+            "toolSeconds": 0
+          }
+        ]
+      },
+      {
+        "agent": "storefront.kesar-kingdom.graphpay.eth",
+        "role": "storefront",
+        "model": "code",
+        "effort": null,
+        "seconds": 0,
+        "calls": 0,
+        "input": 0,
+        "cached": 0,
+        "output": 0,
+        "reasoning": 0,
+        "usd": 0,
+        "modelSeconds": 0,
+        "perCall": []
+      },
+      {
+        "agent": "dispatch.kesar-kingdom.graphpay.eth",
+        "role": "dispatch",
+        "model": "code",
+        "effort": null,
+        "seconds": 0.54,
+        "calls": 0,
+        "input": 0,
+        "cached": 0,
+        "output": 0,
+        "reasoning": 0,
+        "usd": 0,
+        "modelSeconds": 0,
+        "perCall": []
+      },
+      {
+        "agent": "payer.vitalik.graphpay.eth",
+        "role": "payer",
+        "model": "code",
+        "effort": null,
+        "seconds": 41.7,
+        "calls": 0,
+        "input": 0,
+        "cached": 0,
+        "output": 0,
+        "reasoning": 0,
+        "usd": 0,
+        "modelSeconds": 0,
+        "perCall": []
+      },
+      {
+        "agent": "concierge.vitalik.graphpay.eth",
+        "role": "concierge",
+        "model": "kimi-k3.1-pro-highspeed",
+        "effort": "high",
+        "seconds": 54.86,
+        "calls": 1,
+        "input": 718,
+        "cached": 256,
+        "output": 377,
+        "reasoning": 272,
+        "usd": 0.009439,
+        "modelSeconds": 5.15,
+        "perCall": [
+          {
+            "input": 718,
+            "cached": 256,
+            "output": 377,
+            "reasoning": 272,
+            "usd": 0.009439,
+            "tools": [],
+            "seconds": 5.15,
+            "toolSeconds": 0
+          }
+        ]
+      }
+    ],
+    "total": {
+      "agents": 7,
+      "calls": 3,
+      "input": 1884,
+      "cached": 768,
+      "output": 1002,
+      "reasoning": 605,
+      "usd": 0.024657,
+      "modelSeconds": 13.59
+    }
+  },
+  "synthetic": true,
+  "secondsWithRunnerStartUp": 65.2,
+  "secondsSource": "the runner's own line: live errand w4-local-1793990738508: paid, 55.2 s"
+}

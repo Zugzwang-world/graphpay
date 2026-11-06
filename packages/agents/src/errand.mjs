@@ -39,16 +39,21 @@ function castView(cast, payer) {
   };
 }
 
-function modelLabel(mode, models) {
+// W4: with the routine steps in code these roles make no model call at all.
+export const CODE_ROLES = Object.freeze(['scout', 'payer', 'storefront', 'dispatch']);
+export const STEP_MODES = Object.freeze(['code', 'model']);
+
+function modelLabel(mode, models, steps) {
   if (mode === 'mock') return 'mock';
   const seen = new Set();
   let preset = '';
   for (const role of ['concierge', 'scout', 'analyst', 'payer', 'storefront', 'risk', 'dispatch']) {
+    if (steps === 'code' && CODE_ROLES.includes(role)) continue;
     const { settings } = models(role);
     preset = settings.preset;
     seen.add(`${settings.model} @ ${settings.effort}`);
   }
-  return `${preset}: ${[...seen].join(', ')}`;
+  return `${preset}: ${[...seen].join(', ')}${steps === 'code' ? `; in code: ${CODE_ROLES.join(', ')}` : ''}`;
 }
 
 // G13: the status, price, receipt and delivery plan come from what the tools did.
@@ -82,6 +87,10 @@ export async function runErrand(options = {}) {
   const env = options.env ?? process.env;
   const asked = options.mode ?? resolveAgentMode(env); // an AGENT_MODE typo throws here, before anything runs
   const mode = asked === 'anthropic' ? 'live' : asked; // the old name of live
+  // W4: 'code' (the default) does the routine steps in code and asks each model once for its
+  // judgment; 'model' is the original flow, where the models make every call.
+  const steps = options.steps ?? 'code';
+  if (!STEP_MODES.includes(steps)) throw new Error(`steps must be one of ${STEP_MODES.join(', ')}`);
   const cast = options.cast ?? teamCast();
   const models = options.models ?? createModelFactory({ mode, env, mocks: options.mockModels });
   const payerKey = options.buyer ?? 'payer';
@@ -133,6 +142,8 @@ export async function runErrand(options = {}) {
         clock,
         signal: options.signal,
         payerKey,
+        steps,
+        retryMs: options.retryMs,
         dryRun: options.dryRun === true,
         request,
         nowIso: localIso(now, cast.city.timeZone),
@@ -151,7 +162,7 @@ export async function runErrand(options = {}) {
     label,
     runId,
     mode,
-    model: modelLabel(mode, models),
+    model: modelLabel(mode, models, steps),
     synthetic: true,
     cast: castView(cast, payer),
     request,

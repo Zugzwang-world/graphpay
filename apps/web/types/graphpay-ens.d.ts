@@ -21,6 +21,8 @@ declare module '@graphpay/ens' {
   export interface OwnerActions {
     pause(name: string): Promise<OwnerActionResult>;
     resume(name: string): Promise<OwnerActionResult>;
+    // The published cap (micro-USDT), read back before it answers (optional here so fakes need not have it).
+    setCap?(name: string, capMicro: bigint | string): Promise<OwnerActionResult>;
   }
   // The kill: the owner's `unregister`, one-shot per label ("killed earlier" on a second call).
   export interface OwnerKill {
@@ -51,4 +53,8 @@ declare module '@graphpay/ens' {
     invalidate(name?: string): void;
   }
   export function createEnsGate(options: { client: PublicClient; expectedEpoch?: unknown; policyCapMicro?: unknown; spentToday?: unknown }): EnsGate;
+  // KEYS and permissionedResolverAbi are declared above (self-healing); the limits use them too.
+  export function dnsEncode(name: string): `0x${string}`;
+  // The registry walk the gate uses: the leaf's resolver and state, or the reason it fails.
+  export function walkName(client: PublicClient, name: string): Promise<({ ok: true; name: string; node: `0x${string}`; resolver: `0x${string}`; epoch: number; expiry: bigint } & Record<string, unknown>) | { ok: false; reason: string; detail?: string }>;
 }

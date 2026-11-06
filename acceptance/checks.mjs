@@ -5,15 +5,16 @@
 // workers process is the only W_LEDGER writer while it runs).
 
 import { spawnSync } from 'node:child_process';
-import { existsSync, readdirSync, readFileSync } from 'node:fs';
+import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 import { activeCast, castEntries, config, story } from '../packages/config/index.mjs';
 import { clientsFor } from '../scripts/lib/chains.mjs';
 import { createPayerGate } from '../integration/src/gate.mjs';
 import { connectArkiv, createGraphEngine, ENTITIES, runGraphql, writerAddresses } from '../packages/money-graph/index.mjs';
-import { readAll } from '../packages/arkiv-graph/index.mjs';
+import { compileFilter, findOne, readAll } from '../packages/arkiv-graph/index.mjs';
 import { trackChecks } from './tracks.mjs';
 
+const usd = (micro) => (Number(micro) / 1e6).toFixed(2);
 const sh = (root, cmd, args, opts = {}) => spawnSync(cmd, args, { cwd: root, encoding: 'utf8', timeout: 10 * 60_000, ...opts });
 const lastLines = (s, n = 4) => String(s ?? '').trim().split('\n').slice(-n);
 
@@ -43,7 +44,8 @@ export function latestRun(root) {
 export function checks(root, env) {
   const cast = activeCast();
   const entries = castEntries(cast);
-  const payers = entries.filter((e) => e.kind === 'buyer-agent' && e.pays).map((e) => e.ensName);
+  const paying = entries.filter((e) => e.kind === 'buyer-agent' && e.pays);
+  const payers = paying.map((e) => e.ensName);
   let ensScript = null;
   const ens = () => (ensScript ??= sh(root, process.execPath, ['scripts/ens/acceptance.mjs']));
   const fromEns = (id, what) => () => {
@@ -70,8 +72,20 @@ export function checks(root, env) {
       const firstEnd = Math.min(...['scout', 'analyst'].map((role) => idx('agent.end', role)).filter((i) => i >= 0));
       const m = r.run.agents.result.mandate;
       const request = ev.find((e) => e.type === 'message')?.text;
-      const pass = request === story.order.request && m?.budgetUsdt === (story.order.budgetMicro / 1e6).toFixed(6) && (m?.deadlineIso ?? '').includes(`T${story.order.deadlineLocal}:00`) && idx('agent.start', 'scout') < firstEnd && idx('agent.start', 'analyst') < firstEnd;
-      return { pass, what: "the human's request", measured: { request, mandate: m, scoutStart: idx('agent.start', 'scout'), analystStart: idx('agent.start', 'analyst'), firstEnd }, expected: 'the exact request; budget 6.000000, deadline 20:00 local; scout and analyst both start before either ends', evidence: { runFile: r.f.slice(root.length + 1) } };
+      // The deadline the words give at the run's time (#153): a clock time is today's, a span
+      // ("within an hour") counts from the request, to the minute. So it lies between the one
+      // read at the run's start and the one read at its end, and the mandate's hash covers it.
+      const { mandateHash, parseMandate, teamCast } = await import('../packages/agents/index.mjs');
+      const team = teamCast();
+      const words = { timeZone: team.city.timeZone, currency: team.city.currency, buyer: team.persona.ens };
+      const [lo, end] = [r.run.startedAt, r.run.endedAt].map((t) => parseMandate(request ?? '', { now: Date.parse(t), ...words }));
+      // A clock deadline that passed while the run was going reads the same instant at its start.
+      const hi = !end.ok && end.reason === 'MANDATE_DEADLINE_PASSED' ? lo : end;
+      const deadlineMs = Date.parse(m?.deadlineIso ?? '');
+      const deadlineOk = lo.ok && hi.ok && deadlineMs >= lo.mandate.deadlineMs && deadlineMs <= hi.mandate.deadlineMs;
+      const hashOk = lo.ok && deadlineOk && mandateHash({ ...words, budgetMicro: lo.mandate.budgetMicro, deadlineMs, request }) === m?.hash;
+      const pass = request === story.order.request && m?.budgetUsdt === (story.order.budgetMicro / 1e6).toFixed(6) && deadlineOk && hashOk && idx('agent.start', 'scout') < firstEnd && idx('agent.start', 'analyst') < firstEnd;
+      return { pass, what: "the human's request", measured: { request, mandate: m, deadlineWindow: lo.ok && hi.ok ? [lo.mandate.deadlineIso, hi.mandate.deadlineIso] : [lo.reason ?? null, hi.reason ?? null], hashOk, scoutStart: idx('agent.start', 'scout'), analystStart: idx('agent.start', 'analyst'), firstEnd }, expected: `the story's request exactly; budget ${(story.order.budgetMicro / 1e6).toFixed(6)}; the deadline the words give at the run's time (a span counts from the request), with the mandate's hash; scout and analyst both start before either ends`, evidence: { runFile: r.f.slice(root.length + 1), startedAt: r.run.startedAt } };
     },
     E2: fromRun('E2', 'the agents choose the good shop, never the trap', 'A', 'explainId; good > runner-up, trap excluded; no trap order or payment; trap balance unchanged'),
     E4: fromRun('E4', 'the mirror writes it to Arkiv', 'C', 'cursor past the settle block; trail order → pay → deliver; refs 1874:<tx>:<logIndex>'),
@@ -119,8 +133,8 @@ export function checks(root, env) {
     C5: async () => hosted(root, 'C5'),
     C6: async () => hosted(root, 'C6'),
     F2: async () => hosted(root, 'F2'),
-    C7: async () => qualifying(env, 'C7'),
-    E3: async () => qualifying(env, 'E3'),
+    C7: async () => qualifying(env, 'C7', root),
+    E3: async () => qualifying(env, 'E3', root),
     E8: async () => {
       const r = e2e();
       const open = readFileSync(join(root, 'docs/thinking-partner/OPEN.md'), 'utf8');
@@ -159,11 +173,18 @@ export function checks(root, env) {
       const wc = await clientsFor('whitechain', env);
       const gate = createPayerGate({ ens: sep.publicClient, whitechain: wc.publicClient });
       const rows = [];
-      for (const name of payers) {
+      for (const { ensName: name, capMicro: castCap } of paying) {
         const r = await gate.ensGate(name, 1n);
-        rows.push({ name, ok: r.ok, reason: r.ok ? null : r.reason, capMicro: r.capMicro ?? null });
+        // CAP_EXCEEDED is the gate's last step: the name, its epoch, its status and its policy all
+        // passed. It counts only for a pass really used up today: the gate's cap is the cast's (above
+        // 0; a cap of 0 means "may not spend") and today's spend has reached it. Anyone can spend the
+        // payer's under public access (ADR-0069); e2e:hosted's C2 and C3 spend the acceptance agent's.
+        // It resets at 00:00 UTC.
+        const m = !r.ok && r.reason === 'CAP_EXCEEDED' ? String(r.detail ?? '').match(/^cap (\d+), spent (\d+)$/) : null;
+        const usedUp = Boolean(m) && BigInt(m[1]) > 0n && castCap !== undefined && BigInt(m[1]) === BigInt(castCap) && BigInt(m[2]) >= BigInt(m[1]);
+        rows.push({ name, ok: r.ok || usedUp, reason: r.ok ? null : r.reason, capMicro: r.capMicro ?? null, ...(m ? { detail: r.detail, passUsedUpToday: usedUp } : {}) });
       }
-      return { pass: rows.every((r) => r.ok), what: 'the gate passes active agents', measured: rows, expected: 'every paying agent of the story passes the full gate (ENS and its checkout policy)', evidence: { checkout: config.whitechain.contracts.checkout.address } };
+      return { pass: rows.every((r) => r.ok), what: 'the gate passes active agents', measured: rows, expected: "every paying agent of the story passes the full gate (ENS and its checkout policy); a pass used up today (CAP_EXCEEDED at the cast's own cap, above 0, spend at the cap) still counts, and is named", evidence: { checkout: config.whitechain.contracts.checkout.address } };
     },
     C1: async () => {
       const a = config.whitechain.contracts.checkout.address;
@@ -217,14 +238,19 @@ export function checks(root, env) {
 let city = null;
 function cityCheck(root, id) {
   if (!city) {
-    const end = JSON.parse(readFileSync(join(root, 'docs/sessions/arkiv/city/check-S.json'), 'utf8')).end;
-    const r = sh(join(root, 'packages/city'), process.execPath, ['scripts/check.mjs', '--size', 'S', '--end', end, '--backend', 'rabdi']);
     const file = join(root, 'docs/sessions/arkiv/city/check-S.json');
-    city = { run: r.status, data: JSON.parse(readFileSync(file, 'utf8')), tail: lastLines(r.stdout + r.stderr, 3) };
+    const end = JSON.parse(readFileSync(file, 'utf8')).end;
+    const before = statSync(file).mtimeMs;
+    // Up to 25 minutes: tonight's Arkiv reads go keyless and slow (#148), past the 10-minute default.
+    const r = sh(join(root, 'packages/city'), process.execPath, ['scripts/check.mjs', '--size', 'S', '--end', end, '--backend', 'rabdi'], { timeout: 25 * 60_000 });
+    // The script exits 1 when any one of its checks fails, so each id reads its own sub-check,
+    // and only from a file this run wrote (a crash also exits 1, and leaves the old file).
+    city = { run: r.status, fresh: statSync(file).mtimeMs > before, data: JSON.parse(readFileSync(file, 'utf8')), tail: lastLines(r.stdout + r.stderr, 3) };
   }
   const c = city.data.checks;
-  if (id === 'D4') return { pass: city.run === 0 && c.q2_top10?.ok === true && c.q2_top10?.calls === 2, what: 'GraphQL\'s top 10 matches the ground truth (seeded S city, synthetic)', measured: c.q2_top10, expected: 'exact order and amounts against the generator\'s identity truth; 2 calls', evidence: { script: 'packages/city/scripts/check.mjs (read-only)', file: 'docs/sessions/arkiv/city/check-S.json', exit: city.run } };
-  return { pass: city.run === 0 && c.d8_discovery?.ok === true, what: 'the geo query returns only shops inside the box, and only from our writers', measured: c.d8_discovery, expected: 'the cast shops only; synthetic ones only when opted in', evidence: { script: 'packages/city/scripts/check.mjs (read-only)', exit: city.run } };
+  const evidence = { script: 'packages/city/scripts/check.mjs (read-only)', file: 'docs/sessions/arkiv/city/check-S.json', exit: city.run, fresh: city.fresh };
+  if (id === 'D4') return { pass: city.fresh && c.q2_top10?.ok === true && c.q2_top10?.calls === 2, what: 'GraphQL\'s top 10 matches the ground truth (seeded S city, synthetic)', measured: c.q2_top10, expected: 'exact order and amounts against the generator\'s identity truth; 2 calls', evidence };
+  return { pass: city.fresh && c.d8_discovery?.ok === true, what: 'the geo query returns only shops inside the box, and only from our writers', measured: c.d8_discovery, expected: 'the cast shops only; synthetic ones only when opted in', evidence };
 }
 
 // E7 and B6 from the one kill (docs/sessions/integration/runs/kill-<label>/kill.json), plus the
@@ -249,49 +275,88 @@ async function killCheck(root, env, id) {
 }
 
 // C7 and E3: the one qualifying payment in test USDT as the acceptance payer (made once by T1's
-// usdt-ready). Found by the mirror's pay edge from that agent, then read from its receipt.
-async function qualifying(env, id) {
+// usdt-ready; its record is docs/sessions/payments/c7.json). Its transaction is taken from that
+// record, never from whichever pay edge comes first (the agent also paid C3's re-order), found
+// again as the mirror's pay edge from that agent, then read from its receipt.
+// C7 and E3 are one payment: measured once per run.
+let qualified = null;
+async function qualifying(env, id, root = process.cwd()) {
+  const what = id === 'C7' ? 'the qualifying payment in test USDT' : 'the payment is made in USDT on Whitechain';
+  qualified ??= measureQualifying(env, root).catch((error) => {
+    qualified = null;
+    throw error;
+  });
+  return { ...(await qualified), what };
+}
+
+// An Arkiv read refused for the shared anonymous budget (HTTP 429) is tried again after a pause.
+async function patient(read, tries = 4) {
+  for (let i = 1; ; i++) {
+    try {
+      return await read();
+    } catch (error) {
+      const limited = error?.status === 429 || error?.cause?.status === 429 || /ANON_COST_LIMITED|429/.test(String(error?.details ?? error?.cause?.details ?? ''));
+      if (!limited || i >= tries) throw error;
+      await new Promise((r) => setTimeout(r, 20_000));
+    }
+  }
+}
+
+async function measureQualifying(env, root) {
   const { decodeEventLog, erc20Abi } = await import('viem');
   const { checkoutAbi } = await import('../packages/contracts/index.mjs');
   const entries = castEntries(activeCast());
   const payer = entries.find((e) => e.kind === 'buyer-agent' && e.key === 'acceptance');
-  const arkiv = await connectArkiv({ backend: 'rabdi', env: {} });
   const { nodeOf } = await import('../packages/money-graph/index.mjs');
   const node = nodeOf(payer.ensName).toLowerCase();
-  const edges = (await readAll(arkiv.publicClient, ENTITIES.edge, { owner: writerAddresses().W_LEDGER, cap: 2000, truncate: true })).filter((e) => e.kind === 'pay' && String(e.from_node).toLowerCase() === node && String(e.ref).startsWith(`${config.networks.whitechain.chainId}:`));
-  const what = id === 'C7' ? 'the qualifying payment in test USDT' : 'the payment is made in USDT on Whitechain';
-  if (edges.length === 0) return { pass: null, why: 'no payment by the acceptance payer yet', what, measured: null, expected: '', evidence: {} };
-  const hash = edges[0].ref.split(':')[1];
+  const recordFile = join(root, 'docs/sessions/payments/c7.json');
+  const record = existsSync(recordFile) ? JSON.parse(readFileSync(recordFile, 'utf8')) : null;
+  if (!record?.tx) return { pass: null, why: 'no qualifying payment recorded yet (docs/sessions/payments/c7.json)', measured: null, expected: '', evidence: {} };
+  const hash = String(record.tx).toLowerCase();
   const wc = await clientsFor('whitechain', env);
   const receipt = await wc.publicClient.getTransactionReceipt({ hash });
   const tx = await wc.publicClient.getTransaction({ hash });
   const checkout = config.whitechain.contracts.checkout.address.toLowerCase();
   const usdt = config.whitechain.tokens.usdt.address.toLowerCase();
   let settled = null;
+  let settledIndex = null;
   let transfer = null;
   for (const l of receipt.logs) {
     try {
       if (l.address.toLowerCase() === checkout) {
         const d = decodeEventLog({ abi: checkoutAbi, data: l.data, topics: l.topics });
-        if (d.eventName === 'PaymentSettled') settled = d.args;
+        if (d.eventName === 'PaymentSettled') [settled, settledIndex] = [d.args, l.logIndex];
       } else if (l.address.toLowerCase() === usdt) {
         const d = decodeEventLog({ abi: erc20Abi, data: l.data, topics: l.topics });
-        if (d.eventName === 'Transfer' && BigInt(d.args.value) === BigInt(story.order.priceMicro)) transfer = d.args;
+        if (d.eventName === 'Transfer') (transfer ??= []).push(d.args);
       }
     } catch {
       // another event
     }
   }
-  const wallets = (await import('../scripts/lib/wallets.mjs')).roleAddresses(Object.entries(env));
-  const payerWallet = wallets[payer.walletRole]?.toLowerCase();
-  const gasless = tx.from.toLowerCase() !== payerWallet;
-  const pass = receipt.status === 'success' && Boolean(settled) && Boolean(transfer) && gasless;
+  // The recorded amount (4.80 when it was paid), not today's story price: the founder's final
+  // story may price the order differently.
+  const amount = BigInt(record.tokenTransferMicro ?? 0);
+  const fromPayer = String(settled?.payerNode ?? '').toLowerCase() === node;
+  const paidOut = (transfer ?? []).find((t) => String(t.from).toLowerCase() === String(settled?.payer ?? '').toLowerCase() && BigInt(t.value) === amount);
+  // Gasless: a relayer of the checkout sent it, never the payer's wallet (read from the event).
+  const byRelayer = await wc.publicClient.readContract({ address: config.whitechain.contracts.checkout.address, abi: checkoutAbi, functionName: 'isRelayer', args: [tx.from] });
+  const gasless = Boolean(settled) && tx.from.toLowerCase() !== String(settled.payer).toLowerCase() && byRelayer === true;
+  // The mirror's pay edge for that PaymentSettled log: exactly one by its ref (one indexed count),
+  // and that one read for its kind, its payer and its amount (not a scan of every edge: tonight's
+  // keyless Arkiv endpoint refuses the large reads).
+  const ref = settledIndex === null ? null : `${config.networks.whitechain.chainId}:${hash}:${settledIndex}`;
+  const arkiv = await connectArkiv({ backend: 'rabdi', env: {} });
+  const { refCounts } = await import('../packages/mirror/src/checks.mjs');
+  const counted = ref ? await patient(() => refCounts(arkiv.publicClient, { owner: writerAddresses().W_LEDGER, events: [{ id: ref, name: 'PaymentSettled' }] })) : null;
+  const edge = ref ? await patient(() => findOne(arkiv.publicClient, ENTITIES.edge, { owner: writerAddresses().W_LEDGER, where: compileFilter(ENTITIES.edge, { ref: { eq: ref } }) ?? [] })) : null;
+  const edgeOk = counted?.pass === true && String(edge?.ref ?? '').toLowerCase() === ref && edge?.kind === 'pay' && String(edge.from_node).toLowerCase() === node && BigInt(edge.amount_micro ?? -1) === amount;
+  const pass = receipt.status === 'success' && Boolean(settled) && BigInt(settled?.amountMicro ?? -1) === amount && amount > 0n && fromPayer && Boolean(paidOut) && gasless && edgeOk;
   return {
     pass,
-    what,
-    measured: { status: receipt.status, paymentSettled: Boolean(settled), usdtTransferMicro: transfer ? String(transfer.value) : null, txFrom: tx.from, payerSentIt: !gasless, gasUsed: String(receipt.gasUsed), block: Number(receipt.blockNumber) },
-    expected: 'PaymentSettled on the USDT checkout; a 4,800,000-unit transfer of the configured test USDT; sent by the relayer (payer gas 0)',
-    evidence: { tx: `${config.networks.whitechain.explorer}/tx/${hash}`, payer: payer.ensName, by: "T1's usdt-ready (M3 part B)" },
+    measured: { status: receipt.status, paymentSettled: Boolean(settled), settledMicro: settled ? String(settled.amountMicro) : null, fromAcceptancePayer: fromPayer, usdtTransferMicro: paidOut ? String(paidOut.value) : null, txFrom: tx.from, byRelayer, payerSentIt: !gasless, gasUsed: String(receipt.gasUsed), block: Number(receipt.blockNumber), payEdge: edge ? { ref, kind: edge.kind, fromAcceptancePayer: String(edge.from_node).toLowerCase() === node, amountMicro: String(edge.amount_micro) } : { ref, found: false }, payEdges: counted?.pass ? 1 : counted?.wrong?.[0]?.edges ?? null },
+    expected: `PaymentSettled on the USDT checkout from the acceptance payer for the recorded ${(Number(amount) / 1e6).toFixed(2)}; the same amount of the configured test USDT transferred from the payer; sent by a relayer (payer gas 0); exactly one pay edge on Arkiv for it, from the acceptance payer, for that amount`,
+    evidence: { tx: `${config.networks.whitechain.explorer}/tx/${hash}`, record: 'docs/sessions/payments/c7.json', payer: payer.ensName, by: "T1's usdt-ready (M3 part B)" },
   };
 }
 
@@ -323,9 +388,14 @@ async function hosted(root, id, env = {}) {
   const evidence = { file: h.f, startedAt: h.run.startedAt, site: h.run.site };
   if (id === 'C3') {
     const renewal = await hostedRenewal(root, env);
-    const parts = { refund: row.refund?.pass ?? null, reorder: row.reorder?.pass ?? null, renewal: renewal.pass };
+    // The recorded re-order counts only when it is the story's re-order now: its amount and,
+    // when the story names one, its sku. A run from before ADR-0073's coffee is not run here.
+    const r = row.reorder;
+    const current = r && String(r.amountMicro) === String(story.order.reorder.priceMicro) && (!story.order.reorder.sku || r.item === story.order.reorder.sku);
+    const reorder = r?.pass === false ? false : current ? (r.pass ?? null) : null;
+    const parts = { refund: row.refund?.pass ?? null, reorder, renewal: renewal.pass };
     const pass = Object.values(parts).includes(false) ? false : Object.values(parts).every((v) => v === true) ? true : null;
-    return { pass, ...(pass === null ? { why: `not run yet: ${Object.keys(parts).filter((k) => parts[k] === null).join(', ')}` } : {}), what, measured: { ...parts, refundTx: row.refund ?? null, reorderTx: row.reorder ?? null, renewalTx: renewal.measured }, expected: 'Refunded(800000, full false), payer +0.80, gas 75,344 ±15%; re-order OrderCreated(kind 1, parent) + PaymentSettled 1.20, gas 252,082 ±15%; SubscriptionRenewed(cycle 2) + PaymentSettled of a kind-2 order, gas 201,555 ±15%', evidence: { ...evidence, renewal: renewal.evidence } };
+    return { pass, ...(pass === null ? { why: `not run yet: ${Object.keys(parts).filter((k) => parts[k] === null).join(', ')}${parts.reorder === null && r ? ' (the latest paid run re-ordered before the story\'s current re-order; run e2e:hosted --yes on a fresh UTC day)' : ''}` } : {}), what, measured: { ...parts, refundTx: row.refund ?? null, reorderTx: row.reorder ?? null, renewalTx: renewal.measured }, expected: `Refunded(${story.order.refundMicro}, full false), payer +${usd(story.order.refundMicro)}, gas 75,344 ±15%; the story's re-order: OrderCreated(kind 1, parent) + PaymentSettled ${usd(story.order.reorder.priceMicro)}, gas 252,082 ±15%; SubscriptionRenewed(cycle 2) + PaymentSettled of a kind-2 order for the subscription's own amount, gas 201,555 ±15%`, evidence: { ...evidence, renewal: renewal.evidence } };
   }
   if (id === 'C4') {
     // (a) from integration/c4a.mjs (the revoke, the refused payment, the restore), and the
@@ -389,8 +459,10 @@ async function hostedRenewal(root, env) {
   const settled = evs.find((e) => e.eventName === 'PaymentSettled');
   const gas = Number(receipt.gasUsed);
   const byRelayer = await wc.publicClient.readContract({ address: config.whitechain.contracts.checkout.address, abi: checkoutAbi, functionName: 'isRelayer', args: [receipt.from] });
-  const pass = receipt.status === 'success' && byRelayer && settled?.args.amountMicro === BigInt(story.renewal.priceMicro) && Number(renewed?.args.cycle) === 2 && Number(created?.args.kind) === 2 && Boolean(settled) && gas >= Math.floor(201_555 * 0.85) && gas <= Math.ceil(201_555 * 1.15);
-  return { pass, measured: { cycle: renewed ? Number(renewed.args.cycle) : null, orderKind: created ? Number(created.args.kind) : null, settledMicro: settled ? String(settled.args.amountMicro) : null, gasUsed: gas, from: receipt.from, fromIsRelayer: byRelayer }, evidence: { tx: `${config.networks.whitechain.explorer}/tx/${hash}`, by: "the hosted cron as RENEWER (T1's M4)", subscription: "the rehearsal agent's 120 s demo subscription (C3 asks only for cycle 2 and a kind-2 PaymentSettled)" } };
+  // The subscription's own amount (SubscriptionRenewed), not today's story price: the recorded
+  // renewal ran at the price of its day (the story's renewal moved from 0.40 to 2.40 in #140).
+  const pass = receipt.status === 'success' && byRelayer && Boolean(renewed) && settled?.args.amountMicro === renewed.args.amountMicro && Number(renewed.args.cycle) === 2 && Number(created?.args.kind) === 2 && gas >= Math.floor(201_555 * 0.85) && gas <= Math.ceil(201_555 * 1.15);
+  return { pass, measured: { cycle: renewed ? Number(renewed.args.cycle) : null, orderKind: created ? Number(created.args.kind) : null, renewedMicro: renewed ? String(renewed.args.amountMicro) : null, settledMicro: settled ? String(settled.args.amountMicro) : null, storyPriceMicro: String(story.renewal.priceMicro), gasUsed: gas, from: receipt.from, fromIsRelayer: byRelayer }, evidence: { tx: `${config.networks.whitechain.explorer}/tx/${hash}`, by: "the hosted cron as RENEWER (T1's M4)", subscription: "the rehearsal agent's 120 s demo subscription (C3 asks only for cycle 2 and a kind-2 PaymentSettled)" } };
 }
 
 // F1: the secret scan over the tree (pnpm check), over `git log -p` of every branch (the same
