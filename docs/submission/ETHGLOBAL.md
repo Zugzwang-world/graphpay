@@ -119,5 +119,5 @@ Limitations: https://github.com/Zugzwang-world/graphpay#limitations
 
 - **W1, the shops' ENS names:** done; the links use `filter-and-fold.graphpay.eth` since the label flip (#189).
 - **W2, the race at size M:** the "two reads where plain code needs five" line becomes the size-M numbers, labelled synthetic with the city size.
-- **W6, the SDKs at 1.0.0:** the package lines, once 1.0.0 is on npm.
+- **W6, the SDKs at 1.0.0:** arkiv-graph 1.0.0 is on npm (Sat 00:34 IST); agentpay's 1.0.0 waits for its publish. The form text names no version, so nothing here changes.
 - **W3, the re-order and subscriptions:** a newer refund, re-order or renewal link, if one replaces these.
