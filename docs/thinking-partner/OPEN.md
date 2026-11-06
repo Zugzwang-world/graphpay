@@ -150,7 +150,7 @@ The kickoff rules (the deadline Sat 09:00 IST; AI use documented; spec files in 
 - Nothing open. The dosa shops on chain moved to identity and arkiv, and the 0.80 re-order to payments.
 - Closed today: the story on screen (#135); the deck as the stage (#136, #139); the stream recovery (#138); Grok's figurines and photos (#140); the 11:59 pm deadline (#142); the phones drive the deck (#143, #144).
 
-## submission
+## w7-submission
 
 Updated 23:50 IST, Fri 6 Nov (W7 Submission).
 - **Review the README** (what: the new README with its "verify each claim" table; where: `README.md`; why: it is the first thing every judge opens; recommendation: read the persona note, the claims table and the Team section, and tell W7 any change).
