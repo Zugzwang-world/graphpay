@@ -77,6 +77,7 @@ Agents (T4) and Join add one row per full errand run, so the presets can be cali
 | 10:44 | T4 Kimi calibration 1 (mock services) | live | `kimi-k3.1-pro-highspeed`, high | 58.3 | $0.1139 | paid the good shop; 19 calls, 27,448 tokens |
 | 10:45 | T4 Kimi calibration 2 | live | `kimi-k3.1-pro-highspeed`, high | 60.3 | $0.1210 | paid the good shop; 19 calls, 28,304 tokens |
 | 10:46 | T4 Kimi calibration 3 | live | `kimi-k3.1-pro-highspeed`, high | 64.5 | $0.1249 | paid the good shop; 19 calls, 28,281 tokens; highspeed is about 2.2 times faster than pro and about 1.9 times the cost; Opus 5.5 xhigh was 73 to 321 s at about $0.30 |
+| 10:47 | Join live runner on the production site, payer (after T4's Kimi fix, PR 92) | live | `kimi-k3.1-pro-highspeed`, high | 85.0 | not read (the server's `apiCostUsd` line is in the Vercel log) | refused before signing: the team ranked and chose kesar (0.913), the risk agent approved the payer, then the hosted shop's 402 step answered "quote write failed" (W_DIRECTORY; most likely a clash with this run's presence batches, now held around the 402 step, PR 93); 6 agents, 16 tool calls |
 
 ## Kickoff rules and booth questions (closed; rolled up 06:55 IST)
 

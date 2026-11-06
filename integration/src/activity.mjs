@@ -19,17 +19,23 @@ export function batchedActivity(arkiv, { flushMs = 2_000, log = () => {}, setTim
   let queue = [];
   let timer = null;
   let chain = Promise.resolve();
+  let held = null; // while set, no batch goes out (another writer with this key is sending)
+  let holds = 0; // overlapping holds: released only when the last one is
+  let releaseHeld = null;
+  // A batch that throws outside its own try never breaks the chain (display rows only).
+  const next = () => (chain = chain.then(flushOnce).catch((err) => log(`activity: a flush failed (${err.code ?? err.name})`)));
   const stats = { queued: 0, written: 0, dropped: 0, txs: 0 };
 
   function schedule() {
     if (timer) return;
     timer = setTimer(() => {
       timer = null;
-      chain = chain.then(flushOnce);
+      next();
     }, flushMs);
   }
 
   async function flushOnce() {
+    while (held) await held;
     const items = queue.slice(0, MAX_OPS);
     queue = queue.slice(items.length);
     const ext = [...renewals].filter((id) => keys.has(id)).slice(0, MAX_OPS - items.length);
@@ -78,6 +84,26 @@ export function batchedActivity(arkiv, { flushMs = 2_000, log = () => {}, setTim
       stats.queued += 1;
       schedule();
     },
+    // Holds the batches back while another process writes with the same key (the hosted shop's
+    // quote at the 402 step): flush first, then hold; the returned function releases them.
+    async hold({ flushMs: capMs = 10_000 } = {}) {
+      // What is queued goes out first, but never holds the 402 step back longer than capMs.
+      let cap;
+      await Promise.race([this.flush().catch(() => {}), new Promise((ok) => (cap = setTimeout(ok, capMs)))]);
+      clearTimeout(cap);
+      if (holds++ === 0) held = new Promise((ok) => (releaseHeld = ok));
+      let done = false;
+      return () => {
+        if (done) return;
+        done = true;
+        if (--holds === 0) {
+          const release = releaseHeld;
+          held = null;
+          releaseHeld = null;
+          release();
+        }
+      };
+    },
     // Sends everything queued now (the end of a run); resolves when it has landed or dropped.
     async flush() {
       if (timer) {
@@ -85,7 +111,7 @@ export function batchedActivity(arkiv, { flushMs = 2_000, log = () => {}, setTim
         timer = null;
       }
       while (queue.length > 0 || [...renewals].some((id) => keys.has(id))) {
-        chain = chain.then(flushOnce);
+        next();
         await chain;
         if (timer) {
           clearTimer(timer);

@@ -10,5 +10,5 @@ export interface LiveErrandInput {
 }
 export declare function createLiveRunner(
   env?: Record<string, string | undefined>,
-  options?: { log?: (line: string) => void; now?: () => number },
+  options?: { log?: (line: string) => void; now?: () => number; buildParts?: (() => Promise<unknown>) | null },
 ): ((input: LiveErrandInput) => Promise<unknown>) | null;
