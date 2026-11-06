@@ -142,6 +142,7 @@ One line per PR: time (IST) · activity · result · PR link. Append under your 
 - 23:35 IST · w4-agents · item 3, first cut: routine agents at low effort, short tool replies for the model, the concierge gets code's limits · https://github.com/Zugzwang-world/graphpay/pull/162
 - 23:49 IST · w4-agents · the first cut live on the site: paid 4.80 in 87.6 s, 19 calls, 33,346 tokens, $0.1435 (tx 0xd4fd…9d2f): 4% faster, so the calls themselves must go · no PR (a live run)
 - 23:52 IST · w4-agents · item 3, second cut: the routine steps in code, one model call each for the concierge, analyst and risk agent (3 calls in all; Kimi on mocks 14 s, $0.027) · PR link to follow
+- 00:15 IST · w4-agents · the second cut proven live before merging (local runner, production services): paid 4.80 in 55.2 s, 3 calls, 2,886 tokens, $0.0247 (tx 0xfe0a…70d5); the reviewer says ship · the same PR
 
 ## w5-ops
 

@@ -104,10 +104,11 @@ Updated 00:00 IST, Sat 7 Nov (W3 Payments, session `local_b65be40a-eb20-4d86-b78
 
 ## w4-agents
 
-Updated 23:52 IST, Fri 6 Nov (W4 Agents, session `local_3404db4e-486c-4f86-8b3a-67ceb53ef025`).
-- **Done:** item 1, the relative deadline ([#153](https://github.com/Zugzwang-world/graphpay/pull/153)); item 2, every model call measured ([#157](https://github.com/Zugzwang-world/graphpay/pull/157)); item 3's first cut, low effort and short tool replies ([#162](https://github.com/Zugzwang-world/graphpay/pull/162)).
-- **Live so far:** the baseline paid in 91.4 s with 19 model calls and $0.1455; the first cut paid in 87.6 s, $0.1435. Each model call costs 1.5 to 4 s even at low effort, so the number of calls is what counts.
-- **Item 3, second cut (in its PR, with the reviewer):** the routine steps in code, one model call each for the concierge, the analyst and the risk agent: 3 calls instead of 19. On Kimi over mock services: 14 s, about 3,000 tokens, $0.027, the same screens. Next: deploy, then three live errands in a row that pay.
+Updated 00:17 IST, Sat 7 Nov (W4 Agents, session `local_3404db4e-486c-4f86-8b3a-67ceb53ef025`).
+- **Done:** item 1, the relative deadline ([#153](https://github.com/Zugzwang-world/graphpay/pull/153)); item 2, every model call measured ([#157](https://github.com/Zugzwang-world/graphpay/pull/157)); item 3's first cut ([#162](https://github.com/Zugzwang-world/graphpay/pull/162)).
+- **Item 3, second cut (in its PR; the reviewer says ship):** the routine steps in code, one model call each for the concierge, the analyst and the risk agent. **Proven live before merging:** paid 4.80 in 55.2 s with 3 model calls, 2,886 tokens and $0.0247 (the baseline: 91.4 s, 19 calls, 33,287 tokens, $0.1455). The screens get the same data.
+- **Found tonight:** the payer was paused by a visitor twice (W5's self-healing now resumes it); a dropped Arkiv read made the shop refuse the buyer once (now tried once more).
+- **Next:** merge, then three live errands in a row on the site.
 - **Blockers:** none.
 
 ## w5-ops
