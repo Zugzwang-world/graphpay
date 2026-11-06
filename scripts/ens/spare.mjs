@@ -19,7 +19,7 @@ import { encodeFunctionData, erc20Abi, formatUnits, getAddress, isAddressEqual, 
 import { privateKeyToAccount } from 'viem/accounts';
 import { activeCast, config } from '../../packages/config/index.mjs';
 import { checkoutAbi } from '../../packages/contracts/index.mjs';
-import { createProvisioner, createTxRunner, disposableAgent, liveDisposable, locate, namehash, namespacePlan, nextFreeDisposable, permissionedRegistryAbi, retryingReads } from '../../packages/ens/index.mjs';
+import { createProvisioner, createTxRunner, disposableAgent, liveDisposable, locate, namehash, namespacePlan, nextFreeDisposable, permissionedRegistryAbi, registryState, retryingReads, STATUS } from '../../packages/ens/index.mjs';
 import { clientsFor } from '../lib/chains.mjs';
 import { loadEnv } from '../lib/env-loader.mjs';
 import { installErrorBoundary, redactor } from '../lib/redact.mjs';
@@ -146,10 +146,13 @@ async function main() {
   const role = roleOf(spare.n);
   const wallet = getAddress(roles[role]);
   if (!isAddressEqual(spare.holder, wallet)) throw new Error(`${spare.name} is held by ${spare.holder}, not ${role}'s wallet`);
-  // Re-read before each send: still REGISTERED, at the same epoch, by the same wallet.
+  // Re-read before each send: still REGISTERED, at the same epoch, by the same wallet. A view of the label
+  // as never registered (AVAILABLE, expiry 0) is a lagging RPC node, never a kill (an unregister leaves
+  // its expiry): the run stops and is tried again, and nothing is revoked on a stale read.
   const stillLive = async () => {
-    const now = await liveDisposable(client, [spare.n]);
-    return Boolean(now && now.epoch === spare.epoch && isAddressEqual(now.holder, wallet));
+    const st = await registryState(client, spare.registry ?? (await locate(client, spare.name)).registry, disposableAgent(spare.n).label);
+    if (st.status === STATUS.AVAILABLE && st.expiry === 0n) throw new Error(`${spare.name} reads as never registered (a lagging RPC node); try again`);
+    return st.status === STATUS.REGISTERED && st.epoch === spare.epoch && isAddressEqual(st.latestOwner, wallet);
   };
 
   // 2. The policy: the payments setup's plan for this name, at its ENS epoch; never lifts a revocation.
@@ -162,7 +165,7 @@ async function main() {
   ]);
   const step = policyAction(planned, onChain, bound);
   if (step.action === 'stop') throw new Error(`${spare.name}: policy step stopped (${step.why})`);
-  if (step.revoked) throw new Error(`${spare.name}: its policy is revoked on chain; a live spare must not be revoked (look before you kill again)`);
+  if (step.revoked) throw Object.assign(new Error(`${spare.name}: its pass is revoked while its name is live, so the site will not offer it. Retire it (node scripts/ens/owner.mjs kill ${spare.name} --real), then run this again for the next spare`), { exitCode: 2 });
   const cap = `${formatUnits(planned.capMicro, token.decimals)}/day`;
   if (step.action === 'skip') console.log(`2. policy ${spare.name} → ${role}, epoch ${planned.epoch}, cap ${cap}: set already`);
   else {
