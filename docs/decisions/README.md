@@ -81,6 +81,7 @@ Short records, one file each (skill `adr`). Lab decisions are adopted from `plan
 | [ADR-0076](ADR-0076-the-sdks-stay-ui-free.md) | The SDKs stay free of UI; the demo app is the reference; a React kit next | accepted |
 | [ADR-0077](ADR-0077-each-seeded-city-keeps-its-own-cast.md) | Each seeded city keeps its own cast; the big city M is seeded with the final cast | accepted |
 | [ADR-0078](ADR-0078-routine-agent-steps-run-in-code.md) | Routine agent steps run in code; each model keeps one judgment call | accepted |
+| [ADR-0079](ADR-0079-the-owners-cap-reaches-the-policy-through-the-watcher.md) | The owner's cap reaches the spending policy through the watcher, never above the configured cap (narrows E-11) | accepted |
 
 ## Proposed in the pack, recorded by the owning session when taken
 
