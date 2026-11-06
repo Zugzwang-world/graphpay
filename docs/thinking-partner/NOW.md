@@ -1,6 +1,6 @@
 # NOW
 
-Updated 16:40 IST, Fri 6 Nov (Coordinator)
+Updated 16:58 IST, Fri 6 Nov (Coordinator)
 
 ## Summary (Coordinator only)
 
@@ -16,6 +16,16 @@ Updated 13:32 IST, Fri 6 Nov. **Standing rule (ADR-0066): no target times.** Onl
 - **Public access is live** (#117, ADR-0069): visitors meet no passcode, and the keys between our own servers stay.
 - **Phase 1 is live at `/live`:** the team's phones around the explainer (#111).
   - Production deploys had failed from #111 until #116 fixed the build (Vercel had skipped the phones' build tools). Production now runs `ff12990`.
+- **The integration is live: all four phases are merged and deployed.**
+  - The PRs: #111, #116, #117, #122, #124, #127 and #128.
+  - **The home page https://graphpay-event.vercel.app is the live stage:** the team's two phones around T5's explainer, with no passcode.
+  - **The founder's click-by-click script:** `docs/sessions/integration/test-script.md`.
+  - **Proven live:**
+    - the errand: 4.80 paid from the stage in about 107 s;
+    - the Open switch;
+    - the refund request, which reaches the shop's inbox;
+    - pause and resume.
+  - **Failing on the server, with their owners, not retried:** the merchant refund (502, T5) and the re-order (BAD_402, T5 and T1).
 - **Phase 2 works end to end** (#122):
   - An errand asked from `/live` at 16:34 IST paid 4.80 to Kesar Kingdom in about 107 s ([tx](https://explorer.testnet.whitechain.io/tx/0x89acd9521341763f6f6a37893eec921c9548d7a0b5984597d56088a5f5d5b990)).
   - Vitalik's phone showed the agents' steps, the three shops (the trap rejected, with reasons) and the quote going from signed to paid. Kesar's phone showed the order, and the explainer showed the lanes.
