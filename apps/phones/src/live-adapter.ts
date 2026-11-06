@@ -101,6 +101,7 @@ function postToStage(event: string, data: string): void {
 // one table of keys and slides). Only the key and real explorer links are posted; the deck never acts
 // on a phone.
 const PHONE_EVENT = 'graphpay.phone-event';
+const PERMISSION_QUIET_MS = 90_000;
 type DeckKey = 'refund-request' | 'refund' | 'paused' | 'resumed' | 'shop-open' | 'renewal';
 function postToDeck(key: DeckKey, links: Link[] = []): void {
   if (window.parent === window) return;
@@ -119,6 +120,8 @@ export class LiveAdapter implements DemoAdapter {
   // Only edges from after the page opened ring the merchant's phone.
   private readonly openedAt = Math.floor(Date.now() / 1000) - 30;
   private last: { status: AgentState['status'] | null; used: string | null; open: boolean | null } = { status: null, used: null, open: null };
+  // When this phone last paused or resumed the payer: the status poll can still read the old state for a while.
+  private permissionAt = 0;
   private timers: ReturnType<typeof setInterval>[] = [];
   private source: EventSource | null = null;
   private reconnect: ReturnType<typeof setTimeout> | null = null;
@@ -322,6 +325,7 @@ export class LiveAdapter implements DemoAdapter {
     const { body } = await this.post<{ changed?: boolean; sepoliaTx?: string | null }>(paused ? '/api/customer/pause' : '/api/customer/resume', {});
     const links = body.sepoliaTx ? [sepoliaLink(body.sepoliaTx)] : [];
     this.last.status = paused ? 'paused' : 'active';
+    this.permissionAt = Date.now();
     this.emit({ type: 'agent.permission', agent: this.payerRef, change: paused ? 'paused' : 'resumed', links });
     postToDeck(paused ? 'paused' : 'resumed', links);
   }
@@ -397,7 +401,8 @@ export class LiveAdapter implements DemoAdapter {
     const status = statusOf(state.agent.status);
     if (this.last.status !== null && status !== this.last.status) {
       this.emit({ type: 'agent.permission', agent: this.payerRef, change: status === 'active' ? 'resumed' : status, links: [] });
-      postToDeck(status === 'active' ? 'resumed' : 'paused');
+      // A change this phone just made is already on the deck; a poll that lags behind it must not undo it.
+      if (Date.now() - this.permissionAt > PERMISSION_QUIET_MS) postToDeck(status === 'active' ? 'resumed' : 'paused');
     }
     this.last.status = status;
     if (state.spentTodayMicro !== null && state.spentTodayMicro !== this.last.used) {
