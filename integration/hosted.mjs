@@ -259,7 +259,7 @@ if (send) {
     const evs = events(rc);
     const created = evs.find((e) => e.eventName === 'OrderCreated');
     const settled = evs.find((e) => e.eventName === 'PaymentSettled');
-    c3.reorder = { tx: re.body.transaction, explorer: whitechain.explorerTx(re.body.transaction), item: reorderItem, quotedMicro: qr.priceMicro ?? null, gasUsed: Number(rc.gasUsed), kind: created ? Number(created.args.kind) : null, parent: created?.args.parentOrderId ?? null, amountMicro: settled?.args.amountMicro ?? null, quoteKey: re.quoteKey };
+    c3.reorder = { tx: re.body.transaction, explorer: whitechain.explorerTx(re.body.transaction), item: qr.sku ?? reorderItem, quotedMicro: qr.priceMicro ?? null, gasUsed: Number(rc.gasUsed), kind: created ? Number(created.args.kind) : null, parent: created?.args.parentOrderId ?? null, amountMicro: settled?.args.amountMicro ?? null, quoteKey: re.quoteKey };
     c3.reorder.pass = c3.reorder.kind === 1 && String(c3.reorder.parent).toLowerCase() === q0.orderId.toLowerCase() && c3.reorder.amountMicro === BigInt(story.order.reorder.priceMicro) && within(c3.reorder.gasUsed, 252_082, 252_082);
   } else c3.reorder = { pass: false, response: { stage: re.stage, status: re.status, body: re.body, gate: re.gate } };
   say(`C3 re-order ${c3.reorder.pass ? 'ok' : 'FAIL'}: ${c3.reorder.explorer ?? JSON.stringify(c3.reorder.response)}`);

@@ -350,7 +350,7 @@ async function measureQualifying(env, root) {
   const { refCounts } = await import('../packages/mirror/src/checks.mjs');
   const counted = ref ? await patient(() => refCounts(arkiv.publicClient, { owner: writerAddresses().W_LEDGER, events: [{ id: ref, name: 'PaymentSettled' }] })) : null;
   const edge = ref ? await patient(() => findOne(arkiv.publicClient, ENTITIES.edge, { owner: writerAddresses().W_LEDGER, where: compileFilter(ENTITIES.edge, { ref: { eq: ref } }) ?? [] })) : null;
-  const edgeOk = counted?.pass === true && edge?.kind === 'pay' && String(edge.from_node).toLowerCase() === node && BigInt(edge.amount_micro ?? -1) === amount;
+  const edgeOk = counted?.pass === true && String(edge?.ref ?? '').toLowerCase() === ref && edge?.kind === 'pay' && String(edge.from_node).toLowerCase() === node && BigInt(edge.amount_micro ?? -1) === amount;
   const pass = receipt.status === 'success' && Boolean(settled) && BigInt(settled?.amountMicro ?? -1) === amount && amount > 0n && fromPayer && Boolean(paidOut) && gasless && edgeOk;
   return {
     pass,
