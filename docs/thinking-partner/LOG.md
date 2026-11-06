@@ -105,7 +105,10 @@ One line per PR: time (IST) · activity · result · PR link. Append under your 
 - 22:49 IST · records · full sync: TRACKER (new, 55 rows), NOW, OPEN by owner, LOG catch-up and roll-up, every relay (+ phones, booth, sync), ADR-0072 to ADR-0076, the acceptance report (read-only: 35/8/1/4), the fresh-Coordinator handover; completed briefs archived · https://github.com/Zugzwang-world/graphpay/pull/150
 - 23:10 IST · records · night Coordinator takeover: payer resumed (Sepolia 0x34cddd47…f949), Filter & Fold open, the day sessions retired, the night roster (W1 to W7) in NOW, TRACKER owners moved to the streams, retired relays and finished briefs archived · https://github.com/Zugzwang-world/graphpay/pull/151
 - 23:22 IST · records · NOW and TRACKER after W5's pass at 300 (#152) and W4's relative deadline (#153); the outgoing Coordinator's last prompt log · https://github.com/Zugzwang-world/graphpay/pull/156
-- 23:33 IST · records · NOW and TRACKER: the Mac charging, W7's README (#154), W1's new names on ENS (#158), W4's run-log metrics (#157) · coord/night-records-2
+- 23:33 IST · records · NOW and TRACKER: the Mac charging, W7's README (#154), W1's new names on ENS (#158), W4's run-log metrics (#157) · https://github.com/Zugzwang-world/graphpay/pull/160
+- 23:45 IST · records · NOW and TRACKER after W3's coffee re-order, W4's low effort and W7's submission files; the mirror's pause explained; ADR-0067 amended and CLAUDE.md's model line to match #162 · https://github.com/Zugzwang-world/graphpay/pull/165
+- 23:52 IST · records · NOW and TRACKER: the mirror back (W5's restart, 23:43 IST), Join archived with its last prompt log and run record, W7's brief done, W2's and W3's PRs in flight · https://github.com/Zugzwang-world/graphpay/pull/171
+- 00:12 IST · records · NOW and TRACKER: W5's per-agent pause and self-healing (#172) replace the bridge loop; W3's subscriptions (#173); W6's arkiv-graph 1.0.0 (#174); the mirror held for W2's history · coord/night-records-5
 
 ## booth
 
@@ -124,7 +127,9 @@ One line per PR: time (IST) · activity · result · PR link. Append under your 
 - 23:25 IST · w7-submission · the README rewritten with a verify-each-claim table (24 transactions checked on the explorers), a keyless Arkiv query, the persona sentence, the team; a root MIT LICENSE · https://github.com/Zugzwang-world/graphpay/pull/154
 - 23:30 IST · w7-submission · AI_USAGE.md (every session and model, Kimi at runtime, the Grok desk, all images AI-generated, the team's Copilot co-author) and the five Arkiv files finished (friction +2 rows, reach and why-arkiv new, how-you-use, swarm) · https://github.com/Zugzwang-world/graphpay/pull/159
 - 23:32 IST · w7-submission · WHITECHAIN_FEEDBACK.md (gas measured on the event build, friction ranked by cost) and docs/submission/ENS.md (what ENS decides, with evidence); two README claims made exact · https://github.com/Zugzwang-world/graphpay/pull/161
-- 23:38 IST · w7-submission · docs/submission/ETHGLOBAL.md: the form text ready to paste, every claim linked, every URL checked · this PR
+- 23:38 IST · w7-submission · docs/submission/ETHGLOBAL.md: the form text ready to paste, every claim linked, every URL checked · https://github.com/Zugzwang-world/graphpay/pull/164
+- 23:43 IST · w7-submission · the video shot list and the submission checklist (docs/submission/VIDEO.md, CHECKLIST.md); wording fixes; the README links the disclosure · https://github.com/Zugzwang-world/graphpay/pull/166
+- 23:46 IST · w7-submission · keep current: AI_USAGE.md records W4's effort split (#162); the README notes W1's new shop names on Sepolia (#158) · this PR
 
 ## w1-identity
 
@@ -140,11 +145,17 @@ One line per PR: time (IST) · activity · result · PR link. Append under your 
 ## w5-ops
 
 - 23:10 IST · w5-ops · the payer's pass is 300 a day for tonight (policy and ENS, ADR-0071 amendment); PAYER back to 125 test USDT from FUNDER · https://github.com/Zugzwang-world/graphpay/pull/152
+- 23:40 IST · w5-ops · Pause and Resume per agent (payer and scout; the others say why); the self-healing cron: a paused agent resumes after 2 min, a closed shop reopens after 5 · https://github.com/Zugzwang-world/graphpay/pull/172
 
 ## w3-payments
 
-- 23:40 IST · w3-payments · in PR: fix(pay): "Another coffee" re-orders the filter coffee for 0.80 (order.reorder.sku) · https://github.com/Zugzwang-world/graphpay/pull/155
+- 23:34 IST · w3-payments · merged: fix(pay): "Another coffee" re-orders the filter coffee for 0.80; paid live, tx 0xf1d7…2b4a, its edges on Arkiv · https://github.com/Zugzwang-world/graphpay/pull/155
+- 00:00 IST · w3-payments · in PR: feat(pay): subscribe and cancel the Sunday box on the demo clock; the cron renews within the signed allowance
 
 ## w2-city
 
-- 23:45 IST · w2-city · item 1, code: each seeded city keeps its own cast, which fixes race Q2 at S and D4 (ADR-0077); the dosa shops' directory and node rows on Arkiv (south-indian), history in progress · https://github.com/Zugzwang-world/graphpay/pull/167
+- 00:15 IST · w2-city · item 1: the dosa shops on Arkiv under their own names at epoch 0 (directory, nodes and the full labelled 90-day history, south-indian; the analyst reads 241, 60 and 110 orders with the story's rates); each seeded city keeps its own cast, which fixes race Q2 at S and D4 (ADR-0077) · https://github.com/Zugzwang-world/graphpay/pull/167
+
+## w6-sdk
+
+- 23:55 IST · w6-sdk · arkiv-graph 1.0.0: five bugs fixed (paging past rows that do not fit, row lifetimes, atomic split writes, refused batches, the predicate budget), every export documented and typed, the quickstart first, the reference app linked · https://github.com/Zugzwang-world/graphpay/pull/174

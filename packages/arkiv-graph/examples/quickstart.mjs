@@ -2,7 +2,7 @@
 // Point it at a node with ARKIV_RPC_URL, ARKIV_CHAIN_ID and ARKIV_PRIVATE_KEY (testnet only).
 import { connect, createStore, defineGraph, nodeKeyOf } from '@graphpay_ethglobal/arkiv-graph';
 
-// 1. Define the graph: node and edge columns, and which edge kinds move which totals.
+// 1. Define the graph: node columns, and which edge kinds move which totals.
 const graph = defineGraph({
   project: 'quickstart',
   node: { columns: ['handle:str'] },
@@ -20,13 +20,14 @@ const arkiv = await connect(
 );
 const store = createStore({ graph, arkiv, stream: 'quickstart' });
 
-// 3. Write events. Each one is a single atomic batch: the edge, both ends' totals, the checkpoint.
+// 3. Write events. Each call is one atomic batch: the edges, both ends' totals, the checkpoint.
+// A position (ascending) lets a replay skip what the checkpoint already counted.
 const person = (handle) => ({ node: nodeKeyOf(handle), epoch: 0, kind: 'person', columns: { handle } });
 const ts = Math.floor(Date.now() / 1000);
 await store.write([
-  { ref: 'e1', kind: 'follow', from: person('ada'), to: person('grace'), ts },
-  { ref: 'e2', kind: 'like', from: person('ada'), to: person('grace'), ts },
-  { ref: 'e3', kind: 'like', from: person('linus'), to: person('grace'), ts },
+  { ref: 'e1', kind: 'follow', from: person('ada'), to: person('grace'), ts, position: { block: 1, logIndex: 0 } },
+  { ref: 'e2', kind: 'like', from: person('ada'), to: person('grace'), ts, position: { block: 1, logIndex: 1 } },
+  { ref: 'e3', kind: 'like', from: person('linus'), to: person('grace'), ts, position: { block: 1, logIndex: 2 } },
 ]);
 
 // 4. Query. Reads are scoped to the one wallet you trust, and every read is traced.

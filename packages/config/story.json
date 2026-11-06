@@ -292,6 +292,7 @@
     "synthetic": true,
     "plan": "sunday-box",
     "item": "Sunday breakfast box",
+    "sku": "filter-and-fold-sunday-breakfast",
     "shop": "kesar-kingdom",
     "priceMicro": 2400000,
     "schedule": {
@@ -301,7 +302,8 @@
     "demoPeriod": {
       "id": "demo-2min",
       "seconds": 120,
-      "label": "2-minute demo period"
+      "label": "2-minute demo period",
+      "maxCharges": 3
     }
   },
   "agentpayExamples": {
