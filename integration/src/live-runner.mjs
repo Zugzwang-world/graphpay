@@ -21,12 +21,17 @@ import { connectMcp } from './mcp.mjs';
 import { startStack, x402Codec } from './stack.mjs';
 
 // What the runner needs on the server (names only; the values are never read into a log).
-export const LIVE_RUNNER_NEEDS = ['ANTHROPIC_API_KEY', 'PAYER_PRIVATE_KEY', 'W_DIRECTORY_PRIVATE_KEY', 'ARKIV_ACCESS_KEY', 'DEMO_PASSCODE', 'ALLOW_REAL_NETWORK'];
+const PAYER = 'payer'; // the cast's stage payer agent (its key in the story config)
+const payerEntry = () => castEntries().find((e) => e.kind === 'buyer-agent' && e.key === PAYER) ?? null;
+export const LIVE_RUNNER_NEEDS = ['ANTHROPIC_API_KEY', `${payerEntry()?.walletRole ?? 'PAYER'}_PRIVATE_KEY`, 'W_DIRECTORY_PRIVATE_KEY', 'ARKIV_ACCESS_KEY', 'DEMO_PASSCODE', 'ALLOW_REAL_NETWORK'];
+// The Arkiv flush of presence and handoffs may not hold the result back longer than this.
+const FLUSH_WAIT_MS = 10_000;
 // At most this many errands per instance in a rolling hour (each one spends test USDT and API).
 export const RUNS_PER_HOUR = 6;
-const PAYER = 'payer';
 
 export function liveRunnerMissing(env = process.env) {
+  if (!payerEntry()) return ['a paying agent named payer in the story'];
+  if (process.env.STACK_LOCAL_RELAY === '1') return ['STACK_LOCAL_RELAY unset (the runner uses the hosted stack only)'];
   return LIVE_RUNNER_NEEDS.filter((name) => !env[name] || (name === 'ALLOW_REAL_NETWORK' && env[name] !== '1'));
 }
 
@@ -46,14 +51,15 @@ export function createLiveRunner(env = process.env, { log = () => {}, now = Date
   if (liveRunnerMissing(env).length) return null;
   const runEnv = { ...env, AGENT_PRESET: 'live', AGENT_MODE: 'anthropic' }; // the live preset only
   const started = [];
+  let busy = false; // one errand at a time in this instance, until its last step has finished
   let parts = null; // the clients, connections and stack, built on the first run of an instance
 
   async function build() {
     const [whitechain, sepolia] = await Promise.all([clientsFor('whitechain', runEnv), clientsFor('sepolia', runEnv)]);
     const [arkiv, directory] = await Promise.all([connectArkiv({ backend: 'rabdi', env: runEnv }), connectArkiv({ backend: 'rabdi', env: runEnv, role: 'W_DIRECTORY' })]);
-    const stack = await startStack({ env: runEnv, whitechain, sepolia, log });
+    const stack = await startStack({ env: runEnv, whitechain, sepolia, merchantKeys: false, log });
     if (!stack.hosted) throw new Error('live runner: the stack must be the hosted one');
-    const payer = castEntries().find((e) => e.kind === 'buyer-agent' && e.key === PAYER);
+    const payer = payerEntry();
     const wallets = { [payer.walletRole]: privateKeyToAccount(runEnv[`${payer.walletRole}_PRIVATE_KEY`]).address };
     const read = createReadHooks({ ens: sepolia.publicClient, arkiv, gate: stack.gate, wallets });
     return { whitechain, directory, stack, payer, read };
@@ -62,16 +68,28 @@ export function createLiveRunner(env = process.env, { log = () => {}, now = Date
   return async function liveErrand({ runId, request, onEvent, signal }) {
     const t = now();
     while (started.length && t - started[0] > 3_600_000) started.shift();
-    if (started.length >= RUNS_PER_HOUR) throw new Error(`rate limited: at most ${RUNS_PER_HOUR} errands an hour`);
+    if (busy) throw Object.assign(new Error('busy: an errand is still finishing on this server'), { code: 'BUSY' });
+    if (started.length >= RUNS_PER_HOUR) throw Object.assign(new Error(`rate limited: at most ${RUNS_PER_HOUR} errands an hour`), { code: 'RATE_LIMITED' });
     started.push(t);
+    busy = true;
+    try {
+      return await errand({ runId, request, onEvent, signal });
+    } finally {
+      busy = false;
+    }
+  };
+
+  async function errand({ runId, request, onEvent, signal }) {
     parts ??= build().catch((e) => {
       parts = null;
+      log(`live runner: start-up failed (${e.code ?? e.name})`); // the name only: messages can carry URLs
       throw e;
     });
     const { stack, payer, read, directory } = await parts;
     const mcp = await connectMcp();
     const activity = batchedActivity(directory, { log });
     const team = teamCast();
+    const gated = stack.gate.gatedSign(stack.signerFor(payer.walletRole));
     const storefront = (shopEns) => `${config.site.url}/storefront/${shopEns.split('.')[0]}`;
     const hooks = {
       ...read,
@@ -79,7 +97,11 @@ export function createLiveRunner(env = process.env, { log = () => {}, now = Date
       catalog: (shopEns) => stack.surfaceFor(shopEns).catalog(),
       storefrontUrl: async (shopEns) => storefront(shopEns),
       // The payer-side ENS gate runs before every signature; nothing is signed if it refuses.
-      sign: stack.gate.gatedSign(stack.signerFor(payer.walletRole)),
+      // After the site has given up on the run (its time limit), nothing more is signed.
+      sign: async (req) => {
+        if (signal?.aborted) throw new Error('the run was stopped; nothing signed');
+        return gated(req);
+      },
       presence: activity.presence,
       handoff: activity.handoff,
     };
@@ -89,8 +111,9 @@ export function createLiveRunner(env = process.env, { log = () => {}, now = Date
       log(`live errand ${runId}: ${runLog.result.status}, ${metrics.seconds.toFixed(1)} s, $${metrics.apiCostUsd.toFixed(4)}`);
       return runLog.result;
     } finally {
-      await activity.flush().catch(() => {});
+      // Display rows only: a slow Arkiv write never holds the result back past FLUSH_WAIT_MS.
+      await Promise.race([activity.flush().catch(() => {}), new Promise((ok) => setTimeout(ok, FLUSH_WAIT_MS))]);
       await Promise.resolve(mcp.close?.()).catch(() => {});
     }
-  };
+  }
 }
