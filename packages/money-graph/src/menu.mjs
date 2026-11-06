@@ -68,6 +68,29 @@ async function currentRow(arkiv, shopKey, owner) {
   return findOne(arkiv.publicClient, ENTITIES.menu, { owner, where: [eq('shop_key', key(shopKey))] });
 }
 
+// W_DIRECTORY is shared with the live site's quotes and activity rows, so a transaction the writer
+// finds by nonce is this write only if it holds this write's row: a create of this type with this
+// shop_key and the `expected` values (a concurrent run's row for the same shop differs in them).
+const same = (a, b) => String(a ?? '').toLowerCase() === String(b ?? '').toLowerCase();
+export function ownCreate(arkiv, def, shopKey, expected = {}) {
+  return async (createdKeys) => {
+    if (!createdKeys?.[0]) return false;
+    const e = await arkiv.publicClient.getEntity(createdKeys[0]);
+    const a = e?.$attributes ?? e?.attributes;
+    if (a?.type?.value !== def.type || !same(a?.shop_key?.value, shopKey)) return false;
+    return Object.entries(expected).every(([k, v]) => v == null || same(a?.[k]?.value, v));
+  };
+}
+
+// The row with this key now carries every one of `expected` (a patch landed, ours or one to the same end).
+export function rowHolds(arkiv, entityKey, expected) {
+  return async () => {
+    const e = await arkiv.publicClient.getEntity(entityKey);
+    const a = e?.$attributes ?? e?.attributes;
+    return Boolean(a) && Object.entries(expected).every(([k, v]) => v == null || same(a?.[k]?.value, v));
+  };
+}
+
 // Uploads the menu, reads it back and checks the hash, then creates or patches the `menu`
 // row. The same bytes as the row already holds change nothing on Arkiv. Scripts only, like
 // writeShop (ADR-0033). Returns { entityKey, txHash|null, reference, link, version, created, unchanged }.
@@ -89,10 +112,11 @@ export async function writeMenu(arkiv, swarm, { shopEns, epoch = 0, document, li
   if (existing) {
     if (existing.swarm_ref === reference && existing.content_hash === values.content_hash) return { entityKey: existing.$key, txHash: null, reference, link, version: doc.version, created: false, unchanged: true };
     const { shop_key: _k, ...set } = values;
-    const { txs } = await arkiv.writer.send({ patches: [{ def: ENTITIES.menu, key: existing.$key, values: set }] });
+    const patched = rowHolds(arkiv, existing.$key, { swarm_ref: values.swarm_ref, content_hash: values.content_hash, version: values.version });
+    const { txs } = await arkiv.writer.send({ patches: [{ def: ENTITIES.menu, key: existing.$key, values: set }] }, { verifyRecovered: patched });
     return { entityKey: existing.$key, txHash: txs[0].hash, reference, link, version: doc.version, created: false, unchanged: false };
   }
-  const { txs, createdKeys } = await arkiv.writer.send({ creates: [{ def: ENTITIES.menu, values, expiration: ExpirationTime.fromDays(lifetimeDays) }] });
+  const { txs, createdKeys } = await arkiv.writer.send({ creates: [{ def: ENTITIES.menu, values, expiration: ExpirationTime.fromDays(lifetimeDays) }] }, { verifyRecovered: ownCreate(arkiv, ENTITIES.menu, shopKey, { swarm_ref: values.swarm_ref, content_hash: values.content_hash }) });
   return { entityKey: createdKeys[0], txHash: txs[0].hash, reference, link, version: doc.version, created: true, unchanged: false };
 }
 

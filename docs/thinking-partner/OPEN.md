@@ -198,6 +198,7 @@ Updated 23:38 IST, Fri 6 Nov (W7 Submission).
 
   Why: the analyst ranks `nodes(category)`, and the new rows are `south-indian`; a labels-only flip would rank the old shops. A test in `packages/city` fails it. Recommendation: one PR.
 - **After the flip, delist the old shops' directory rows** (owner: W2). What: kesar-kingdom, syrup-street and jamun-junction stay listed under their new display names, so until then the map shows each name twice. Why: the old rows feed acceptance D8 at S until acceptance moves to M. Recommendation: W2 delists them once acceptance checks M.
+- **`arkiv/swarm.md` names the old menus** (owner: W7). What: its worked example is Kesar Kingdom's menu (version 2, one fox image). The final cast's menus are in `docs/sessions/arkiv/swarm-menus.json`: entity key, transaction, reference, link, and each image's reference and hash. Why: the Swarm judges open those links. Recommendation: use Filter & Fold's menu as the example ([menu.json](https://api.gateway.ethswarm.org/bzz/1e3df1a9613b7da3250a3247f13a03b29011453368ff683b6411a33c307f389f/menu.json)); the old three stay listed there under `previous`.
 
 ## w6-sdk
 
