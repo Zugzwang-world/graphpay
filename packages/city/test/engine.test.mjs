@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { test, before } from 'node:test';
 import { generatePrivateKey } from 'viem/accounts';
 import { story } from '@graphpay/config';
-import { compileFilter } from '@graphpay/arkiv-graph';
+import { compileFilter } from '@graphpay_ethglobal/arkiv-graph';
 import { ENTITIES, connectArkiv, createGraphEngine, handleMcpRequest, newSim, runGraphql, writerAddresses } from '@graphpay/money-graph';
 import { generateCity, seedDirectory, seedGraph, seedPlain, truthOf, newManifest } from '../index.mjs';
 

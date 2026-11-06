@@ -13,7 +13,7 @@
   },
   "dependencies": {
     "@arkiv-network/sdk": "1.0.1",
-    "@graphpay/arkiv-graph": "workspace:*",
+    "@graphpay_ethglobal/arkiv-graph": "workspace:*",
     "@graphpay/config": "workspace:*",
     "@graphpay/money-graph": "workspace:*",
     "viem": "2.57.16"

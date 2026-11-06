@@ -2,7 +2,7 @@
 
 ## Packages (ADR-0057)
 
-- `@graphpay/arkiv-graph` (`packages/arkiv-graph`): the generic Arkiv graph SDK. Nodes, edges and totals defined by the developer; the safe writer; owner-scoped reads; ArkivSim; the transport. No payment words in its source (a boundary test).
+- `@graphpay_ethglobal/arkiv-graph` (`packages/arkiv-graph`): the generic Arkiv graph SDK. Nodes, edges and totals defined by the developer; the safe writer; owner-scoped reads; ArkivSim; the transport. No payment words in its source (a boundary test).
 - `@graphpay/money-graph` (`packages/money-graph`): GraphPay's layer, through the SDK's public API only. Import everything from the package root.
 
 ## For the other sessions (M7a)

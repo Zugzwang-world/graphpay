@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { ExpirationTime, u64 } from '@arkiv-network/sdk';
-import { entityValues, readAll } from '@graphpay/arkiv-graph';
+import { entityValues, readAll } from '@graphpay_ethglobal/arkiv-graph';
 import { generatePrivateKey } from 'viem/accounts';
 import { encodeFunctionData } from 'viem';
 import {

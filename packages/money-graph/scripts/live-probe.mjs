@@ -10,7 +10,7 @@
 // Prints public addresses, hashes, keys and gas only.
 
 import { connectArkiv, createLedger, discoverShops, boxAround, ENTITIES, ENTITY_CONTRACT, LIFETIME, RABDI, writeShop } from '../index.mjs';
-import { readAll } from '@graphpay/arkiv-graph';
+import { readAll } from '@graphpay_ethglobal/arkiv-graph';
 import { story } from '@graphpay/config';
 import { loadSecrets, simulatePatch } from './lib.mjs';
 

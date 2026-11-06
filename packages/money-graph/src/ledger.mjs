@@ -16,7 +16,7 @@
 import { ExpirationTime } from '@arkiv-network/sdk';
 import { str } from '@arkiv-network/sdk';
 import { eq } from '@arkiv-network/sdk/query';
-import { findOne, readAll } from '@graphpay/arkiv-graph';
+import { findOne, readAll } from '@graphpay_ethglobal/arkiv-graph';
 import { normalizedName, nodeOf } from './identity.mjs';
 import { ENTITIES, LIFETIME, graph } from './model.mjs';
 

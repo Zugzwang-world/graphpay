@@ -35,13 +35,13 @@ Updated 04:25 IST. **M6 is built: the gate is merged (PR #34); the watcher PR is
 
 ## arkiv
 
-Updated 03:50 IST, Fri 6 Nov (T3).
+Updated 09:50 IST, Fri 6 Nov (T3).
 
-- **Where we are:** M9 (the live benchmark) merged at 03:45 (PR #31): ranking the city's shops by sales takes Graph Arkiv 2 reads against plain Arkiv's 5; acceptance D6 passes. The labelling fix merged at 03:41 (PR #30).
-- **This step (Friday item 1):** the "live" rows behind the map and the explainer. A shop's Open toggle, an agent at work, and one agent handing work to another are now short-lived Arkiv rows that disappear by themselves when nobody renews them. GraphQL can ask which shops are open now, which agents are online, and a run's handoffs.
-- **Running:** nothing.
-- **Blockers:** none. The website's Open toggle and the agent run still have to call these (T5 and T4; OPEN).
-- **Next:** Swarm: the menu upload through the public gateway (the Coordinator's conditions), then refund evidence encrypted in our own code.
+- **Where we are:** the SDK is ready to publish as `@graphpay_ethglobal/arkiv-graph` 0.1.0 (the Coordinator's 09:40 corrections applied). The tarball installs in an empty folder on Node 22.23.4 and the README quickstart runs there; the leaderboard example too.
+- **This step (Friday item 18):** a short 5-minute quickstart that runs in memory (ArkivSim) and the same code on Rabdi with the developer's own key; a leaderboard example; CHANGELOG, FEEDBACK (a log), MIT licence; the package renamed everywhere in the repo.
+- **Running:** the reviewer pass; the PR then merges on green.
+- **Blockers:** none for the package. Publishing needs the founder's npm login (the Coordinator publishes).
+- **Next:** tell the Coordinator when the PR has merged and the pack check passes on main, then Swarm (menu upload, refund evidence).
 
 ## agents
 

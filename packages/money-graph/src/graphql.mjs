@@ -8,7 +8,7 @@ import DataLoader from 'dataloader';
 import { u64, str, key } from '@arkiv-network/sdk';
 import { and, between, desc, eq, gte, lte, or } from '@arkiv-network/sdk/query';
 import { GraphQLScalarType, Kind, buildSchema, parse, validate, execute, specifiedRules } from 'graphql';
-import { createEngine, createExplainStore, dayOf, fromJsonBytes } from '@graphpay/arkiv-graph';
+import { createEngine, createExplainStore, dayOf, fromJsonBytes } from '@graphpay_ethglobal/arkiv-graph';
 import { normalizedName, nodeOf } from './identity.mjs';
 import { ENTITIES, MONEY_KINDS, TALLY_COUNTERS, writerAddresses, seedOwner } from './model.mjs';
 import { discoveryFilters } from './directory.mjs';

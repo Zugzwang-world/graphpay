@@ -11,7 +11,7 @@
 
 import { key, str, u64 } from '@arkiv-network/sdk';
 import { asc, eq, gt, gte, or } from '@arkiv-network/sdk/query';
-import { LIMITS, checkedOwner, plainRow, scope } from '@graphpay/arkiv-graph';
+import { LIMITS, checkedOwner, plainRow, scope } from '@graphpay_ethglobal/arkiv-graph';
 import { ENTITIES, seedOwner, writerAddresses } from './model.mjs';
 import { createGraphEngine, rate, runGraphql } from './graphql.mjs';
 import { story as storyConfig } from '@graphpay/config';

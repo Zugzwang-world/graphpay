@@ -20,7 +20,7 @@ import { checkoutAbi } from '@graphpay/contracts';
 import { createEnsReader } from '@graphpay/ens';
 import { decodePaymentRequiredHeader, decodePaymentResponseHeader, graphPayOrderClient, x402Client, x402HTTPClient } from '@graphpay/facilitator';
 import { connectArkiv, ENTITIES, nodeOf, writerAddresses } from '@graphpay/money-graph';
-import { readAll } from '@graphpay/arkiv-graph';
+import { readAll } from '@graphpay_ethglobal/arkiv-graph';
 import { PASSCODE_HEADER, merchantActions } from '@graphpay/shop';
 import { decodeEventLog, keccak256, toHex } from 'viem';
 import { privateKeyToAccount } from 'viem/accounts';

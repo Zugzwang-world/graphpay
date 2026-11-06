@@ -4,7 +4,7 @@
 // every live row of the shop, so it drops out of "open now" at once and the rows lapse on
 // their own within 15 minutes. W_DIRECTORY is the one writer; its key lives only in the
 // server's env.
-import { readAll, type EntityDef } from '@graphpay/arkiv-graph';
+import { readAll, type EntityDef } from '@graphpay_ethglobal/arkiv-graph';
 import { ENTITIES, closeShop, connectArkiv, identityKey, nodeOf, openShop, runGraphql, type ArkivConnection } from '@graphpay/money-graph';
 import { arkivEngine } from '../app/api/graphql/arkiv.server.ts';
 

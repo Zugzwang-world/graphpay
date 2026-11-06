@@ -1,21 +1,49 @@
 {
-  "name": "@graphpay/arkiv-graph",
-  "version": "0.0.0",
-  "private": true,
+  "name": "@graphpay_ethglobal/arkiv-graph",
+  "version": "0.1.0",
+  "description": "A graph layer over Arkiv: define nodes, edges and totals, write them atomically with a safe writer, read them back scoped to a wallet you trust, and explain every read. Includes ArkivSim, an in-memory Arkiv node for tests.",
   "type": "module",
-  "description": "A graph layer over Arkiv: developer-defined nodes, edges and totals, a safe writer, owner-scoped reads and an in-memory Arkiv node for tests.",
+  "license": "MIT",
+  "author": "GraphPay (ETHGlobal Mumbai)",
+  "homepage": "https://github.com/Zugzwang-world/graphpay/tree/main/packages/arkiv-graph#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Zugzwang-world/graphpay.git",
+    "directory": "packages/arkiv-graph"
+  },
+  "bugs": {
+    "url": "https://github.com/Zugzwang-world/graphpay/issues/new?template=arkiv-graph-feedback.yml"
+  },
+  "keywords": ["arkiv", "graph", "sdk", "web3", "ethglobal", "indexing", "totals", "explain", "arkivsim"],
+  "engines": {
+    "node": ">=22"
+  },
   "exports": {
     ".": {
       "types": "./index.d.ts",
       "default": "./index.mjs"
-    }
+    },
+    "./package.json": "./package.json"
   },
   "types": "./index.d.ts",
+  "files": [
+    "index.mjs",
+    "index.d.ts",
+    "src",
+    "examples",
+    "README.md",
+    "CHANGELOG.md",
+    "FEEDBACK.md",
+    "LICENSE"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "test": "node --test \"test/*.test.mjs\""
   },
   "dependencies": {
     "@arkiv-network/sdk": "1.0.1",
-    "viem": "2.57.16"
+    "viem": "^2.57.16"
   }
 }
