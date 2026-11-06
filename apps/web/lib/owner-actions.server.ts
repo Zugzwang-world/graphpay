@@ -1,13 +1,14 @@
-// The owner's pause and resume of the payer agent (WEBSITE_SPEC.md §3, §7): the owner
+// The owner's pause and resume of a buyer agent (WEBSITE_SPEC.md §3, §7): the owner
 // wallet sets `graphpay.status` on the agent's ENS name on Ethereum Sepolia, through
-// @graphpay/ens (M6). The agent is always the story's payer agent, never a name from the
-// request; the owner's key is read from the server's env only, by role name, and never
-// leaves this module. The gate sees the change within its 20 s cache.
+// @graphpay/ens (M6). The agent is the one whose card was tapped, and only one of the
+// story's buyer agents with a spending pass (pickAgent); with none named, the payer. The
+// owner's key is read from the server's env only, by role name, and never leaves this
+// module. The gate sees the change within its 20 s cache.
 import { config, resolveRpc } from '@graphpay/config';
 import { createOwnerActions, createTxRunner, ensChain, ownerRoleOf, type OwnerActions, type OwnerSender } from '@graphpay/ens';
 import { createPublicClient, createWalletClient, http } from 'viem';
 import { privateKeyToAccount } from 'viem/accounts';
-import { siteModel } from './site.server.ts';
+import { siteModel, type ModelAgent, type SiteModel } from './site.server.ts';
 import { publicAccess } from './passcode.ts';
 
 export const OWNER_WAITING_FOR = "the owner's key on this server (the Coordinator sets it in Vercel)";
@@ -21,14 +22,39 @@ export interface OwnerChange {
 
 const KEY_SHAPE = /^0x[0-9a-fA-F]{64}$/;
 
-// The env name of the owner's key for the payer agent: `<ROLE>_PRIVATE_KEY`, the role from
-// the namespace plan (the owner of the agent), never typed here.
+// The env name of the owner's key for an agent: `<ROLE>_PRIVATE_KEY`, the role from the
+// namespace plan (the owner of the agent), never typed here.
 export function ownerKeyName(agentName: string): string {
   return `${ownerRoleOf(agentName)}_PRIVATE_KEY`;
 }
 
-export function ownerConfigured(env: Record<string, string | undefined> = process.env): boolean {
-  return KEY_SHAPE.test(env[ownerKeyName(siteModel().payer.ens)] ?? '');
+export function ownerConfigured(env: Record<string, string | undefined> = process.env, agent: string = siteModel().payer.ens): boolean {
+  return KEY_SHAPE.test(env[ownerKeyName(agent)] ?? '');
+}
+
+// The agents a visitor can pause: the buyer team's agents with a spending pass (the story's
+// `pays` and `capMicro`). The others never pay, so there is nothing to pause.
+export function pausableAgents(model: SiteModel = siteModel()): ModelAgent[] {
+  return model.buyerAgents.filter((a) => a.pays && a.capMicro !== null);
+}
+
+export type AgentPick = { ok: true; agent: ModelAgent } | { ok: false; status: 400 | 409; error: string; reason: 'NOT_AN_AGENT' | 'NO_PASS' };
+
+// The agent a pause or resume acts on: the tapped card's agent, by ENS name (or story key).
+// None named is the payer, as before. A buyer agent without a pass is refused in words the
+// phone can show as they are.
+export function pickAgent(input: unknown, model: SiteModel = siteModel()): AgentPick {
+  if (input === undefined || input === null || input === '') return { ok: true, agent: model.payer };
+  if (typeof input !== 'string') return { ok: false, status: 400, error: 'agent must be an ENS name', reason: 'NOT_AN_AGENT' };
+  const wanted = input.trim().toLowerCase();
+  const agent = model.buyerAgents.find((a) => a.ens === wanted || a.key === wanted);
+  if (!agent) return { ok: false, status: 400, error: 'not an agent of this story', reason: 'NOT_AN_AGENT' };
+  const pausable = pausableAgents(model);
+  if (!pausable.some((a) => a.ens === agent.ens)) {
+    const names = pausable.map((a) => a.displayName).join(' and ');
+    return { ok: false, status: 409, error: `${agent.displayName} has no spending pass, so there is nothing to pause or resume. Only ${names} can be paused.`, reason: 'NO_PASS' };
+  }
+  return { ok: true, agent };
 }
 
 // The Sepolia endpoint is resolved once in a while (every candidate is probed for its chain
@@ -82,8 +108,9 @@ let tail: Promise<unknown> = Promise.resolve();
 let pending = 0;
 export class Busy extends Error {}
 
-// Public access (ADR-0069): one change at most every CHANGE_COOLDOWN_MS on this instance, so a
-// visitor alternating pause and resume cannot drain the owner's Sepolia gas.
+// Public access (ADR-0069): one change at most every CHANGE_COOLDOWN_MS on this instance, for
+// any agent, so a visitor alternating pause and resume cannot drain the owner's Sepolia gas.
+// The self-healing cron passes open: false: its resume never waits on, or starts, the gap.
 export const CHANGE_COOLDOWN_MS = 20_000;
 let lastChange = Number.NEGATIVE_INFINITY;
 

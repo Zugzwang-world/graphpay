@@ -1,0 +1,204 @@
+// The self-healing cron's reads and actions; lib/heal.ts decides. Vercel calls
+// /api/cron/heal every minute (apps/web/vercel.json):
+// - a pausable agent (owner-actions.pausableAgents) paused for RESUME_AFTER_S is resumed by
+//   its owner, through the same queue as the phones' Resume but without the visitors' 20 s gap;
+// - the merchant's listing is renewed before it lapses, and reopened REOPEN_AFTER_S after it
+//   was closed, as W_DIRECTORY (open-toggle).
+// GET /api/state/heal shows the same plans, read-only. A failure is reported as its kind,
+// never its message (a chain error's message can carry an RPC URL).
+import { readAll, type EntityDef } from '@graphpay_ethglobal/arkiv-graph';
+import { ensPublicClient, KEYS, locate, readText, retryingReads } from '@graphpay/ens';
+import { ENTITIES } from '@graphpay/money-graph';
+import { parseAbiItem, type PublicClient } from 'viem';
+import { planAgent, planShop, type AgentPlan, type ShopPlan, type StatusChange } from './heal.ts';
+import { directoryConfigured, directoryConnection, setShopOpen, shopKeyOf } from './open-toggle.server.ts';
+import { changeStatus, failureKind, ownerConfigured, pausableAgents } from './owner-actions.server.ts';
+import { siteModel } from './site.server.ts';
+
+// The resolver's text-record event, as in @graphpay/ens's generated ABI (heal.test.ts checks
+// that they match). keyHash is the indexed key, so one record's changes are one topic filter.
+export const TEXT_UPDATED = parseAbiItem('event TextUpdated(uint256 indexed recordId, string indexed keyHash, string key, string value)');
+// About three hours of Sepolia blocks (12 s each): a pause older than that resumes at once.
+export const LOOKBACK_BLOCKS = 900n;
+const CACHE_MS = 10 * 60_000;
+
+export interface HealSources {
+  // The status record, and its newest change when it reads paused.
+  agentStatus(ens: string): Promise<{ status: string; last: StatusChange | null }>;
+  // The open_until of each of the shop's listing rows still on Arkiv (W_DIRECTORY's own).
+  listings(shopEns: string): Promise<number[]>;
+}
+
+export interface HealActions {
+  resume(ens: string): Promise<{ changed: boolean; sepoliaTx: string | null }>;
+  openShop(shopEns: string): Promise<{ openUntil: number | null }>;
+}
+
+export interface AgentHealth extends AgentPlan {
+  ens: string;
+  done: 'resumed' | 'no change' | null;
+  sepoliaTx: string | null;
+  failed: string | null;
+}
+
+export interface ShopHealth extends ShopPlan {
+  ens: string;
+  done: 'renewed' | 'reopened' | null;
+  failed: string | null;
+}
+
+export interface HealReport {
+  agents: AgentHealth[];
+  shop: ShopHealth | null;
+}
+
+// The Sepolia client, re-resolved every 5 minutes (each candidate is probed for its chain id).
+let ens: { at: number; value: Promise<PublicClient> } | null = null;
+function ensClient(): Promise<PublicClient> {
+  if (!ens || Date.now() - ens.at > 5 * 60_000) {
+    const value = ensPublicClient().then(({ client }) => retryingReads(client, { tries: 3, delayMs: 1000 }));
+    ens = { at: Date.now(), value };
+    value.catch(() => {
+      if (ens?.value === value) ens = null;
+    });
+  }
+  return ens.value;
+}
+
+// A name's resolver and a shop's directory key change only on a new registration: cached.
+const cache = new Map<string, { at: number; value: Promise<`0x${string}`> }>();
+function cached(key: string, load: () => Promise<`0x${string}`>): Promise<`0x${string}`> {
+  const hit = cache.get(key);
+  if (hit && Date.now() - hit.at < CACHE_MS) return hit.value;
+  const value = load();
+  cache.set(key, { at: Date.now(), value });
+  value.catch(() => {
+    if (cache.get(key)?.value === value) cache.delete(key);
+  });
+  return value;
+}
+
+async function lastStatusChange(client: PublicClient, resolver: `0x${string}`): Promise<StatusChange | null> {
+  const head = await client.getBlockNumber({ cacheTime: 0 });
+  const logs = await client.getLogs({ address: resolver, event: TEXT_UPDATED, args: { keyHash: KEYS.status }, fromBlock: head > LOOKBACK_BLOCKS ? head - LOOKBACK_BLOCKS : 0n, toBlock: head });
+  const last = logs.at(-1);
+  if (!last) return null;
+  const block = await client.getBlock({ blockNumber: last.blockNumber });
+  return { value: String(last.args.value ?? ''), at: Number(block.timestamp) };
+}
+
+const shopKey = (shopEns: string) => cached(`shop ${shopEns}`, () => shopKeyOf(shopEns));
+
+export const liveSources: HealSources = {
+  agentStatus: async (name) => {
+    const client = await ensClient();
+    const status = await readText(client, name, KEYS.status);
+    if (status !== 'paused') return { status, last: null };
+    const resolver = await cached(`resolver ${name}`, async () => (await locate(client, name)).resolver);
+    return { status, last: await lastStatusChange(client, resolver) };
+  },
+  listings: async (shopEns) => {
+    const arkiv = await directoryConnection();
+    const key = (await shopKey(shopEns)).toLowerCase();
+    const rows = await readAll(arkiv.publicClient, (ENTITIES as unknown as Record<string, EntityDef>)['shop_open'] as EntityDef, { owner: arkiv.owner as string, cap: 500 });
+    return rows.filter((r) => String(r.shop_key).toLowerCase() === key).map((r) => Number(r.open_until));
+  },
+};
+
+export const liveActions: HealActions = {
+  // open: false: the cron's resume neither waits on nor starts the visitors' 20 s gap.
+  resume: (agent) => changeStatus(false, { agent, open: false }),
+  openShop: async (shopEns) => {
+    const state = await setShopOpen({ arkiv: await directoryConnection(), shopKey: await shopKey(shopEns), shopEns, on: true });
+    return { openUntil: state.openUntil };
+  },
+};
+
+// The plans only: what the next run would do. A read that fails leaves its entry as a failure.
+export async function inspect({ sources = liveSources, nowS = Math.floor(Date.now() / 1000), env = process.env }: { sources?: HealSources; nowS?: number; env?: Record<string, string | undefined> } = {}): Promise<HealReport> {
+  const shopEns = siteModel().merchant.ens;
+  const agents = await Promise.all(
+    pausableAgents().map(async (a): Promise<AgentHealth> => {
+      try {
+        const { status, last } = await sources.agentStatus(a.ens);
+        return { ens: a.ens, ...planAgent(status, last, nowS), done: null, sepoliaTx: null, failed: null };
+      } catch (error) {
+        return { ens: a.ens, status: 'unknown', pausedAt: null, resumesAt: null, action: 'none', done: null, sepoliaTx: null, failed: failureKind(error) };
+      }
+    }),
+  );
+  let shop: ShopHealth | null = null;
+  if (directoryConfigured(env)) {
+    try {
+      shop = { ens: shopEns, ...planShop(await sources.listings(shopEns), nowS), done: null, failed: null };
+    } catch (error) {
+      shop = { ens: shopEns, open: false, openUntil: null, closedAt: null, reopensAt: null, action: 'none', done: null, failed: failureKind(error) };
+    }
+  }
+  return { agents, shop };
+}
+
+// One run at a time on this instance; a run still going when the next minute's call lands
+// makes that call return at once (the chain state, not this flag, decides what is due).
+let running: Promise<HealReport> | null = null;
+
+export function heal(options: { sources?: HealSources; actions?: HealActions; nowS?: number; env?: Record<string, string | undefined>; log?: (line: string) => void } = {}): Promise<HealReport> | null {
+  if (running) return null;
+  const { actions = liveActions, env = process.env, log = console.log } = options;
+  const run = (async (): Promise<HealReport> => {
+    const report = await inspect(options);
+    await Promise.all([
+      ...report.agents.map(async (a) => {
+        if (a.action !== 'resume') return;
+        if (!ownerConfigured(env, a.ens)) {
+          a.failed = 'key';
+          return;
+        }
+        try {
+          const change = await actions.resume(a.ens);
+          a.done = change.changed ? 'resumed' : 'no change';
+          a.sepoliaTx = change.sepoliaTx;
+          log(`heal: ${a.ens} ${a.done}${a.pausedAt === null ? ' (paused before the lookback)' : ` (paused at ${a.pausedAt})`}${change.sepoliaTx ? `, tx ${change.sepoliaTx}` : ''}`);
+        } catch (error) {
+          a.failed = failureKind(error);
+          log(`heal: resuming ${a.ens} failed: ${a.failed}`);
+        }
+      }),
+      (async () => {
+        const shop = report.shop;
+        if (!shop || (shop.action !== 'renew' && shop.action !== 'reopen')) return;
+        try {
+          const opened = await actions.openShop(shop.ens);
+          shop.done = shop.action === 'renew' ? 'renewed' : 'reopened';
+          if (shop.action === 'reopen') log(`heal: ${shop.ens} reopened${shop.closedAt === null ? ' (no listing left)' : ` (closed at ${shop.closedAt})`}`);
+          shop.open = true;
+          shop.openUntil = opened.openUntil;
+          shop.closedAt = null;
+          shop.reopensAt = null;
+        } catch (error) {
+          shop.failed = failureKind(error);
+          log(`heal: listing ${shop.ens} failed: ${shop.failed}`);
+        }
+      })(),
+    ]);
+    return report;
+  })().finally(() => {
+    running = null;
+  });
+  running = run;
+  return run;
+}
+
+// The read-only view for GET /api/state/heal, cached briefly: visitors can call it at will.
+const STATE_TTL_MS = 10_000;
+let state: { at: number; value: Promise<HealReport> } | null = null;
+export function healState(): Promise<HealReport> {
+  if (!state || Date.now() - state.at > STATE_TTL_MS) {
+    const value = inspect();
+    state = { at: Date.now(), value };
+    value.catch(() => {
+      if (state?.value === value) state = null;
+    });
+  }
+  return state.value;
+}

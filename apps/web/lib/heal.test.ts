@@ -1,0 +1,120 @@
+import assert from 'node:assert/strict';
+import { test } from 'node:test';
+import { permissionedResolverAbi } from '@graphpay/ens';
+import { REOPEN_AFTER_S, RENEW_BELOW_S, RESUME_AFTER_S, planAgent, planShop } from './heal.ts';
+import { TEXT_UPDATED, heal, inspect, type HealActions, type HealSources } from './heal.server.ts';
+import { pausableAgents } from './owner-actions.server.ts';
+import { siteModel } from './site.server.ts';
+
+const T = 1_800_000_000;
+
+test('a paused agent resumes RESUME_AFTER_S after its pause, and an active one is left alone', () => {
+  assert.deepEqual(planAgent('active', null, T), { status: 'active', pausedAt: null, resumesAt: null, action: 'none' });
+  const paused = { value: 'paused', at: T };
+  assert.deepEqual(planAgent('paused', paused, T + RESUME_AFTER_S - 1), { status: 'paused', pausedAt: T, resumesAt: T + RESUME_AFTER_S, action: 'wait' });
+  assert.equal(planAgent('paused', paused, T + RESUME_AFTER_S).action, 'resume');
+  // Paused with no change inside the lookback: paused longer ago than the window, so at once.
+  assert.deepEqual(planAgent('paused', null, T), { status: 'paused', pausedAt: null, resumesAt: T, action: 'resume' });
+  // The record says paused but the newest log says active: a lagging log query; never resume on it.
+  assert.equal(planAgent('paused', { value: 'active', at: T }, T + 10 * RESUME_AFTER_S).action, 'unsure');
+});
+
+test('the shop: renewed before it lapses, reopened REOPEN_AFTER_S after a close, at once when no listing is left', () => {
+  assert.equal(planShop([T + RENEW_BELOW_S + 60], T).action, 'none');
+  assert.deepEqual(planShop([T + RENEW_BELOW_S - 1, T - 50], T), { open: true, openUntil: T + RENEW_BELOW_S - 1, closedAt: null, reopensAt: null, action: 'renew' });
+  // A close writes open_until = now on the row; the newest row decides.
+  assert.deepEqual(planShop([T - 60, T - 900], T), { open: false, openUntil: null, closedAt: T - 60, reopensAt: T - 60 + REOPEN_AFTER_S, action: 'wait' });
+  assert.equal(planShop([T - REOPEN_AFTER_S], T).action, 'reopen');
+  assert.deepEqual(planShop([], T), { open: false, openUntil: null, closedAt: null, reopensAt: T, action: 'reopen' });
+  // A row whose open_until is exactly now is closed (the open-now query reads open_until > now).
+  assert.equal(planShop([T], T).open, false);
+});
+
+test("the event filter matches @graphpay/ens's generated resolver ABI", () => {
+  const generated = permissionedResolverAbi.find((x) => x.type === 'event' && x.name === 'TextUpdated');
+  assert.ok(generated, 'the generated ABI has TextUpdated');
+  const shape = (inputs: readonly { name: string; type: string; indexed?: boolean }[] | undefined) => (inputs ?? []).map((i) => `${i.type}${i.indexed ? ' indexed' : ''} ${i.name}`);
+  assert.deepEqual(shape(TEXT_UPDATED.inputs), shape(generated.inputs));
+});
+
+function world({ statuses, listings }: { statuses: Record<string, { status: string; last: { value: string; at: number } | null } | Error>; listings: number[] | Error }) {
+  const calls: string[] = [];
+  const sources: HealSources = {
+    agentStatus: async (ens) => {
+      const s = statuses[ens] ?? { status: 'active', last: null };
+      if (s instanceof Error) throw s;
+      return s;
+    },
+    listings: async () => {
+      if (listings instanceof Error) throw listings;
+      return listings;
+    },
+  };
+  const actions: HealActions = {
+    resume: async (ens) => {
+      calls.push(`resume ${ens}`);
+      return { changed: true, sepoliaTx: `0x${'cd'.repeat(32)}` };
+    },
+    openShop: async (ens) => {
+      calls.push(`open ${ens}`);
+      return { openUntil: T + 900 };
+    },
+  };
+  return { sources, actions, calls };
+}
+
+const env = (agents: string[]) => ({ W_DIRECTORY_PRIVATE_KEY: 'set', ...Object.fromEntries(agents.map((a) => [`${a}`, `0x${'1'.repeat(64)}`])) });
+
+test('a run resumes only the agents that are due, reopens a shop closed long enough, and reports each', async () => {
+  const [payer, scout] = [siteModel().payer, pausableAgents().find((a) => a.key === 'scout')!];
+  const { ownerKeyName } = await import('./owner-actions.server.ts');
+  const keys = env([ownerKeyName(payer.ens), ownerKeyName(scout.ens)]);
+  const w = world({ statuses: { [payer.ens]: { status: 'paused', last: { value: 'paused', at: T - RESUME_AFTER_S } }, [scout.ens]: { status: 'paused', last: { value: 'paused', at: T - 30 } } }, listings: [T - REOPEN_AFTER_S - 1] });
+  const lines: string[] = [];
+  const report = await heal({ sources: w.sources, actions: w.actions, nowS: T, env: keys, log: (l) => lines.push(l) })!;
+  assert.deepEqual(w.calls.sort(), [`open ${siteModel().merchant.ens}`, `resume ${payer.ens}`]);
+  const byEns = Object.fromEntries(report.agents.map((a) => [a.ens, a]));
+  assert.equal(byEns[payer.ens]!.done, 'resumed');
+  assert.equal(byEns[scout.ens]!.action, 'wait');
+  assert.equal(byEns[scout.ens]!.resumesAt, T - 30 + RESUME_AFTER_S);
+  assert.equal(report.shop?.done, 'reopened');
+  assert.equal(report.shop?.open, true);
+  assert.ok(lines.some((l) => l.includes(payer.ens) && l.includes('resumed')));
+  assert.ok(lines.every((l) => !/https?:\/\//.test(l)), 'no URL is logged');
+});
+
+test('a failed read or a missing key acts on nothing and is reported as a kind', async () => {
+  const payer = siteModel().payer;
+  const w = world({ statuses: { [payer.ens]: new Error('fetch failed at https://rpc.example/secret-key') }, listings: new Error('timed out') });
+  const report = await heal({ sources: w.sources, actions: w.actions, nowS: T, env: { W_DIRECTORY_PRIVATE_KEY: 'set' }, log: () => undefined })!;
+  assert.deepEqual(w.calls, []);
+  const p = report.agents.find((a) => a.ens === payer.ens)!;
+  assert.equal(p.failed, 'error');
+  assert.equal(JSON.stringify(report).includes('rpc.example'), false, 'no message reaches the report');
+  assert.equal(report.shop?.failed, 'timeout');
+  // Due, but this server has no owner key: nothing is sent.
+  const due = world({ statuses: { [payer.ens]: { status: 'paused', last: null } }, listings: [T + 3600] });
+  const keyless = await heal({ sources: due.sources, actions: due.actions, nowS: T, env: {}, log: () => undefined })!;
+  assert.deepEqual(due.calls, []);
+  assert.equal(keyless.agents.find((a) => a.ens === payer.ens)!.failed, 'key');
+  assert.equal(keyless.shop, null, 'no directory key: the shop is not looked at');
+});
+
+test('one run at a time on a server; inspect only reads', async () => {
+  const payer = siteModel().payer;
+  let release: () => void = () => undefined;
+  const held = new Promise<void>((r) => (release = r));
+  const w = world({ statuses: {}, listings: [T + 3600] });
+  const slow: HealSources = { ...w.sources, listings: async () => (await held, [T + 3600]) };
+  const keys = { W_DIRECTORY_PRIVATE_KEY: 'set' };
+  const first = heal({ sources: slow, actions: w.actions, nowS: T, env: keys, log: () => undefined });
+  assert.ok(first);
+  assert.equal(heal({ sources: slow, actions: w.actions, nowS: T, env: keys, log: () => undefined }), null);
+  release();
+  await first;
+  const due = world({ statuses: { [payer.ens]: { status: 'paused', last: null } }, listings: [] });
+  const plans = await inspect({ sources: due.sources, nowS: T, env: { W_DIRECTORY_PRIVATE_KEY: 'set' } });
+  assert.deepEqual(due.calls, [], 'inspect sends nothing');
+  assert.equal(plans.agents.find((a) => a.ens === payer.ens)!.action, 'resume');
+  assert.equal(plans.shop?.action, 'reopen');
+});
