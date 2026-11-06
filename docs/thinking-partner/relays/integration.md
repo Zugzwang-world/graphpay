@@ -19,13 +19,15 @@ Five more checks from the other tracks are now wired into the report from their 
 
 - **A revoked agent is stopped by the contract itself (C4a).** With the Coordinator's go, Join paused the workers (they hold the policy writer's key for T2's watcher), revoked the scout agent's spending policy, and let the scout try to pay 0.40: the contract recorded the refusal (AGENT_REVOKED). The policy was restored exactly and read back, and after the restart the mirror wrote that refusal to Arkiv once, resuming from its checkpoint with nothing written twice.
 
-**The acceptance report: 42 pass, 0 fail, 1 blocked (the big city waits for the locked story), 5 not run.**
+- **No secrets are in the repo (F1).** The secret scan passes on the tree and on the history of every branch (313 commits), no env file is tracked, and all 14 secret-shaped variables on Vercel's production environment are hidden.
+
+**The acceptance report: 43 pass, 0 fail, 1 blocked (the big city waits for the locked story), 4 not run.**
 
 ## What is not done, and whose it is
 
 - **B7:** T2's fork tests cover "renew keeps the epoch" but not a new registration after a lapse or an unregister.
 - **D10(c):** the quote's expiry on Arkiv. Parts (a) and (b) pass on the agents' own code, in process and without signing.
-- **F1:** the history scan. Next for Join.
+- **B9:** T2's ENS script still prints no B9 rows (its payee comparison waited for a settled payment; there are several now).
 - **F3:** the relayer's safety floor needs a preview deployment with the floor raised. That is T1's.
 
 ## Technical
@@ -53,7 +55,7 @@ Five more checks from the other tracks are now wired into the report from their 
 - `integration/src/stack.mjs` (used by e2e:food and e2e:kill) refuses to start unless `STACK_LOCAL_RELAY=1`, so it can no longer race the hosted relayer's nonces.
 - `acceptance/tracks.mjs`: A3, A4, A9, A10, B3, B7 and D10, read-only. A4 uses `gh api`, A10 runs the config tests, and B3 reads T2's recorded Sepolia receipt again.
 
-**Reviewer:** no blocking items. Nine should-fix items, all fixed before the paid run: the payee and amount are checked, real 401s only, evidence never overwritten, a slow delivery never ends the run, and the midnight guard.
+**Reviewer (C4a, PR 67):** two blocking items, both fixed: the hosted checks picked the newest file of any kind (the c4a file would have turned C6 and F2 into not run), and a revoke that timed out after broadcast could stay unrestored. Now the restore reads the chain and retries, `--restore` exists, the check re-reads the PaymentFailed log and both receipts on-chain, and the fail edge is counted by ref. **Reviewer (PR 66):** no blocking items. Nine should-fix items, all fixed before the paid run: the payee and amount are checked, real 401s only, evidence never overwritten, a slow delivery never ends the run, and the midnight guard.
 
 **Deviations**
 

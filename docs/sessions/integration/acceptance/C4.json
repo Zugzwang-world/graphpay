@@ -1,6 +1,6 @@
 {
   "id": "C4",
-  "at": "2026-11-06T00:09:35.633Z",
+  "at": "2026-11-06T00:14:29.293Z",
   "pass": true,
   "what": "revoked-agent and over-cap failures are recorded",
   "measured": {
@@ -21,6 +21,7 @@
     },
     "a": {
       "pass": true,
+      "chainChecked": true,
       "file": "docs/sessions/integration/hosted/c4a-2026-11-06T00-07-29-876Z.json",
       "attempt": {
         "status": 402,
