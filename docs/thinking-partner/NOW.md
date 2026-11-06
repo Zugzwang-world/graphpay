@@ -147,23 +147,11 @@ Updated 01:35 IST, Sat 7 Nov (W6 SDK, session `local_b6205da6-b613-4662-872a-6d4
 
 ## w7-submission
 
-Updated 01:28 IST, Sat 7 Nov (W7 Submission, `local_abd77623-de22-4fe2-a0a9-865fdd43dba2`; relay `relays/w7-submission.md`).
-- **The brief is done:** the form text is in one file, [`docs/submission/ETHGLOBAL.md`](../submission/ETHGLOBAL.md), and every claim in it links to evidence. Landed: the README and a root `LICENSE` ([#154](https://github.com/Zugzwang-world/graphpay/pull/154)); AI_USAGE.md and the five Arkiv files ([#159](https://github.com/Zugzwang-world/graphpay/pull/159)); the Whitechain and ENS notes ([#161](https://github.com/Zugzwang-world/graphpay/pull/161)); the form text ([#164](https://github.com/Zugzwang-world/graphpay/pull/164)).
-- **Also landed:** the video shot list and the submission checklist ([#166](https://github.com/Zugzwang-world/graphpay/pull/166)).
-- **Also landed:** AI_USAGE's effort split and W1's names in the README ([#170](https://github.com/Zugzwang-world/graphpay/pull/170)).
-- **Also landed:** the audit's 17 fixes ([#178](https://github.com/Zugzwang-world/graphpay/pull/178)).
-- **Also landed:** the live re-order and subscription as evidence, the kill on `/customer` ([#180](https://github.com/Zugzwang-world/graphpay/pull/180)).
-- **Also landed:** W4's code-mode agents and W3's limits in the docs ([#187](https://github.com/Zugzwang-world/graphpay/pull/187)).
-- **Also landed:** the production kill as evidence ([#193](https://github.com/Zugzwang-world/graphpay/pull/193)).
-- **Also landed:** the label flip across the docs, W4's production errand ([#195](https://github.com/Zugzwang-world/graphpay/pull/195)).
-- **Also landed:** arkiv-graph 1.0.0 in the README and `reach.md` ([#196](https://github.com/Zugzwang-world/graphpay/pull/196)).
-- **Also landed:** the owner's cap route and the watchdog ([#198](https://github.com/Zugzwang-world/graphpay/pull/198)).
-- **Also landed:** the dosa menus on Swarm under the new names ([#199](https://github.com/Zugzwang-world/graphpay/pull/199)).
-- **Also landed:** the version-2 menus with storefront photos ([#205](https://github.com/Zugzwang-world/graphpay/pull/205)).
-- **Also landed:** the first errand under the new name as the headline ([#208](https://github.com/Zugzwang-world/graphpay/pull/208)).
-- **In this PR:** the owner's cap change live (#207) and W4's three errands in a row (#206).
-- **Running:** keep-current mode, a pass after each night stream lands (W2's race on the trimmed big city, agentpay 1.0.0 on npm, the regenerated acceptance report).
-- **Blockers:** none.
+Updated 01:35 IST, Sat 7 Nov (W7 Submission, `local_abd77623-de22-4fe2-a0a9-865fdd43dba2`; relay `relays/w7-submission.md`).
+- **Done:** the form text is in one file, [`docs/submission/ETHGLOBAL.md`](../submission/ETHGLOBAL.md), and every claim in it links to evidence that answered at the close (#154 to #211, then this final PR).
+- **The final pass matches the close** (the founder, about 01:30 IST): race mode at size S only, no M number; both SDKs at 1.0.0 on npm; the flip, the kill, the limits, subscriptions, the re-order, the owner's cap, self-healing, the refund decline and W4's three errands, each with its links.
+- **Running:** nothing. The acceptance report is cited without totals until W5 regenerates it.
+- **Founder:** review the README, confirm the team, record the video, submit from `ETHGLOBAL.md` by 08:00 IST (OPEN, `w7-submission`).
 
 ## before the night (retired day sessions)
 

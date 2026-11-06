@@ -115,9 +115,11 @@ Limitations: https://github.com/Zugzwang-world/graphpay#limitations
 - [ ] The three partner prizes above are selected: Arkiv, ENS, Whitechain Operate.
 - [ ] The live demo opens, the payer agent is active and the shop is open ([live state](https://graphpay-event.vercel.app/api/state/customer)).
 
-## What can still change tonight (W7 updates this file when it lands)
+## State at the close (Sat 7 Nov, 01:33 IST)
 
-- **W1, the shops' ENS names:** done; the links use `filter-and-fold.graphpay.eth` since the label flip (#189).
-- **W2, the race at size M:** the "two reads where plain code needs five" line becomes the size-M numbers, labelled synthetic with the city size.
-- **W6, the SDKs at 1.0.0:** arkiv-graph 1.0.0 is on npm (Sat 00:34 IST); agentpay's 1.0.0 waits for its publish. The form text names no version, so nothing here changes.
-- **W3, the re-order and subscriptions:** a newer refund, re-order or renewal link, if one replaces these.
+The backend closed for the night at about 01:30 IST (the founder). This text matches what is live then:
+- **The shops' ENS names:** `filter-and-fold`, `idli-index` and `tawa-tangle` under `graphpay.eth` since the label flip (#189); the first errand under the new name paid at 01:07 IST (#202).
+- **Race mode stays at size S** (the founder, 01:24 IST). The size-M city was only partly seeded, so no M number appears anywhere.
+- **The SDKs:** both at 1.0.0 on npm (arkiv-graph 00:34 IST, agentpay 01:30 IST). The form text names no version.
+- **Live with their links in the README:** the kill (#183), the limits (#169), subscriptions (#173), the re-order (#155), the owner's cap change (#179), self-healing (#172), W4's three errands in a row (#206), the refund decline (#163).
+- **The acceptance report:** cited without totals until W5's regenerated report lands.

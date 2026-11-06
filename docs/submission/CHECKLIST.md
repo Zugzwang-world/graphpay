@@ -7,7 +7,7 @@
 | Re-read the prize pages and the rules page | all | done | read at M0, Thu 22:02–22:03 IST: [`docs/technical/FACTS.md`](../technical/FACTS.md) (ETHGlobal and Whitechain rows) |
 | Ask the booth and workshop questions; log the answers | all | closed | no answers came; the founder's defaults are final (ADR-0044); the open ones are listed in [`arkiv/friction.md`](../../arkiv/friction.md) |
 | Fund the writer wallets with tGLM | Arkiv | done | [`docs/technical/WALLETS.md`](../technical/WALLETS.md) §2 |
-| Seed the synthetic city; measure the race | Arkiv | done at size S; size M with W2 | S: acceptance D6 passes, [`bench/BENCHMARK-LIVE.md`](../../bench/BENCHMARK-LIVE.md); M: W2 tonight |
+| Seed the synthetic city; measure the race | Arkiv | done at size S | S: acceptance D6 passes, [`bench/BENCHMARK-LIVE.md`](../../bench/BENCHMARK-LIVE.md). M was only partly seeded before the founder stopped it (Sat 00:58 IST); race mode stays at S (the founder, 01:24 IST), and no M number is claimed |
 | README with the writer wallets and a runnable query | Arkiv | done | [README, Arkiv](../../README.md#arkiv-the-money-graph) and its [keyless query](../../README.md#query-arkiv-yourself-one-command-no-keys) |
 | `schema.md`, `friction.md`, `why-arkiv.md`, `how-you-use-arkiv.md` | Arkiv | done | [`arkiv/`](../../arkiv/); every friction row has an event-day repro |
 | `reach.md`; the package published; a live GraphQL URL | Arkiv | done | [`arkiv/reach.md`](../../arkiv/reach.md); [npm](https://www.npmjs.com/package/@graphpay_ethglobal/arkiv-graph); [GraphQL](https://graphpay-event.vercel.app/api/graphql?query=%7Bnode%28ens%3A%22filter-and-fold.graphpay.eth%22%29%7Bcategory%20tally%7Borders%20refunds%7D%7D%7D) |
