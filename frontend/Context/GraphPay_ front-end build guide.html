@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>GraphPay: front-end build guide</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Overpass:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  color-scheme:light;
+  --bg:#EEF1EF; --surface:#FBFCFB; --ink:#18212B; --muted:#56606B; --line:#D3DAD6; --soft:#E3E8E5;
+  --c:#B87400; --u:#2F5BEA; --m:#0B8A6C; --ok:#0B8A6C; --warn:#B87400; --bad:#C0275D; --info:#2F5BEA;
+  --phone:#FFFFFF; --focus:#2F5BEA;
+  box-sizing:border-box; padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --bg:#121922; --surface:#1A232E; --ink:#E7ECEF; --muted:#A3AEB8; --line:#2D3946; --soft:#232E3A;
+    --c:#F2B23A; --u:#7C9BFF; --m:#3CC9A2; --ok:#3CC9A2; --warn:#F2B23A; --bad:#F06A97; --info:#7C9BFF;
+    --phone:#0F151C; --focus:#7C9BFF;
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --bg:#121922; --surface:#1A232E; --ink:#E7ECEF; --muted:#A3AEB8; --line:#2D3946; --soft:#232E3A;
+  --c:#F2B23A; --u:#7C9BFF; --m:#3CC9A2; --ok:#3CC9A2; --warn:#F2B23A; --bad:#F06A97; --info:#7C9BFF;
+  --phone:#0F151C; --focus:#7C9BFF;
+}
+html{scroll-padding-top:env(safe-area-inset-top,0px);background:var(--bg)}
+*,*::before,*::after{box-sizing:inherit}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Overpass","Helvetica Neue",Arial,sans-serif;font-size:17px;line-height:1.5}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--bg)}
+.wrap{max-width:1180px;margin:0 auto;padding:0 24px}
+header.top{padding:40px 0 0}
+h1{font-weight:800;font-size:clamp(32px,4.4vw,52px);line-height:1.05;letter-spacing:-.015em;margin:0 0 12px;max-width:20ch}
+.lede{color:var(--muted);max-width:66ch;margin:0 0 22px;font-size:18px}
+nav.tabs{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);display:flex;flex-wrap:wrap;gap:8px;padding:12px 0;border-bottom:1px solid var(--line)}
+nav.tabs button{font:inherit;font-weight:600;font-size:15px;padding:9px 16px 7px;border-radius:999px;border:1.5px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer}
+nav.tabs button[aria-selected="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+button:focus-visible,a:focus-visible,[tabindex]:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+section.panel{padding:28px 0 64px}
+section.panel[hidden]{display:none}
+h2{font-size:clamp(24px,2.6vw,32px);font-weight:800;line-height:1.1;margin:0 0 8px}
+h3{font-size:19px;font-weight:800;margin:24px 0 8px}
+p.sub{color:var(--muted);margin:0 0 20px;max-width:68ch}
+.muted{color:var(--muted)}
+/* site layout wireframe */
+.site{border:2px solid var(--ink);border-radius:18px;background:var(--surface);padding:14px;display:grid;gap:12px}
+.zone{border:1.5px dashed var(--line);border-radius:12px;padding:12px;cursor:pointer;background:var(--bg);text-align:left;font:inherit;color:inherit;width:100%}
+.zone:hover,.zone[aria-pressed="true"]{border-style:solid;border-color:var(--ink)}
+.zone b{display:block;font-size:15px}
+.zone span{display:block;font-size:13px;color:var(--muted)}
+.site .cols{display:grid;grid-template-columns:1fr 1.5fr 1fr;gap:12px}
+.site .cols .zone{min-height:300px}
+.zone.cz{border-left:6px solid var(--c)} .zone.uz{border-left:6px solid var(--u)} .zone.mz{border-left:6px solid var(--m)}
+.zonedesc{margin-top:14px;padding:14px 16px 12px;border-radius:12px;background:var(--soft)}
+.rules{margin:0;padding:0;list-style:none;border-top:1px solid var(--line)}
+.rules li{padding:12px 0 10px;border-bottom:1px solid var(--line);display:grid;grid-template-columns:220px 1fr;gap:16px}
+.rules li b{font-weight:800}
+/* screens */
+.screens{display:grid;grid-template-columns:280px 1fr;gap:28px;align-items:start}
+.slist h4{margin:14px 0 6px;font-size:15px;display:flex;align-items:center;gap:8px}
+.slist h4::before{content:"";width:12px;height:12px;border-radius:3px;background:var(--k)}
+.slist button{display:block;width:100%;text-align:left;font:inherit;font-size:15px;padding:8px 12px 6px;border:0;border-radius:10px;background:none;color:var(--ink);cursor:pointer}
+.slist button:hover{background:var(--soft)}
+.slist button[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
+.sdetail{display:grid;grid-template-columns:auto 1fr;gap:28px;align-items:start}
+.phone{width:300px;border:10px solid var(--ink);border-radius:36px;background:var(--phone);padding:14px 12px 16px;min-height:560px;display:flex;flex-direction:column;gap:8px;font-size:12.5px;line-height:1.35}
+.phone.wide{width:420px;border-radius:18px;border-width:6px;min-height:420px}
+.w-bar{padding:2px 2px 8px;border-bottom:1px solid var(--line)}
+.w-bar b{display:block;font-size:14px}
+.w-bar span{color:var(--muted);font-size:11.5px}
+.w-chips{display:flex;flex-wrap:wrap;gap:5px}
+.w-chips span{border:1px solid var(--line);border-radius:999px;padding:3px 8px 2px;font-size:11px}
+.w-msg{background:var(--soft);border-radius:10px 10px 10px 2px;padding:7px 9px 6px;max-width:92%}
+.w-msg i{display:block;font-style:normal;font-size:10.5px;color:var(--muted)}
+.w-me{align-self:flex-end;background:var(--ink);color:var(--bg);border-radius:10px 10px 2px 10px;padding:7px 9px 6px;max-width:85%}
+.chip{display:inline-block;font-size:10px;font-weight:800;padding:1px 6px 0;border-radius:999px;margin-left:4px;color:#fff}
+.chip.ok{background:var(--ok)} .chip.warn{background:var(--warn)} .chip.bad{background:var(--bad)} .chip.info{background:var(--info)}
+.w-card{border:1px solid var(--line);border-radius:10px;padding:8px 9px 7px}
+.w-card b{display:block;font-size:12.5px}
+.w-card span{display:block;color:var(--muted);font-size:11.5px}
+.w-card.ok{border-left:4px solid var(--ok)} .w-card.warn{border-left:4px solid var(--warn)} .w-card.bad{border-left:4px solid var(--bad)} .w-card.info{border-left:4px solid var(--info)}
+.w-btn{border-radius:10px;padding:8px 10px 6px;text-align:center;font-weight:800;background:var(--ink);color:var(--bg);font-size:12px}
+.w-btn.ghost{background:none;color:var(--ink);border:1.5px solid var(--ink)}
+.w-btn.danger{background:var(--bad);color:#fff}
+.w-input{border:1.5px solid var(--line);border-radius:999px;padding:7px 12px 5px;color:var(--muted);margin-top:auto}
+.w-tabs{display:flex;gap:4px}
+.w-tabs span{flex:1;text-align:center;padding:5px 0 3px;border-radius:8px;font-size:11px;background:var(--soft)}
+.w-tabs span.on{background:var(--ink);color:var(--bg)}
+.w-row{display:flex;justify-content:space-between;gap:8px;border-bottom:1px solid var(--line);padding:4px 0 3px}
+.w-row span:last-child{font-weight:800}
+.w-tl{display:flex;justify-content:space-between;gap:4px;font-size:10.5px}
+.w-tl span{flex:1;text-align:center;padding-top:14px;position:relative;color:var(--muted)}
+.w-tl span::before{content:"";position:absolute;top:2px;left:50%;width:9px;height:9px;margin-left:-4.5px;border-radius:50%;border:2px solid var(--muted)}
+.w-tl span.done{color:var(--ink);font-weight:800}
+.w-tl span.done::before{background:var(--ok);border-color:var(--ok)}
+.w-toggle{display:flex;justify-content:space-between;align-items:center}
+.w-toggle i{width:34px;height:18px;border-radius:999px;background:var(--ok);position:relative}
+.w-toggle i::after{content:"";position:absolute;right:2px;top:2px;width:14px;height:14px;border-radius:50%;background:#fff}
+.w-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.w-stats div{background:var(--soft);border-radius:8px;padding:6px 6px 4px;text-align:center}
+.w-stats b{display:block;font-size:13px}
+.w-stats span{font-size:10px;color:var(--muted)}
+.w-note{font-size:11px;color:var(--muted);font-style:italic}
+.w-ev{display:grid;grid-template-columns:auto 1fr;gap:8px;align-items:start;border-bottom:1px solid var(--line);padding:5px 0 4px}
+.w-ev em{font-style:normal;font-size:10px;font-weight:800;padding:2px 6px 0;border-radius:6px;color:#fff;background:var(--u)}
+.w-ev em.ens{background:#0A86BF} .w-ev em.ark{background:#7446D8} .w-ev em.wc{background:var(--m)} .w-ev em.ag{background:var(--c)}
+.facts dt{font-weight:800;margin-top:12px}
+.facts dd{margin:4px 0 0}
+.tagline{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px}
+.tag{font-size:13px;padding:3px 10px 1px;border-radius:999px;background:var(--soft);border:1px solid var(--line)}
+.tag.a{border-color:var(--ink)}
+/* journeys */
+.jpick{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 18px}
+.jpick button{font:inherit;font-weight:600;font-size:15px;padding:8px 14px 6px;border-radius:999px;border:1.5px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer}
+.jpick button[aria-pressed="true"]{border-color:var(--ink);background:var(--soft)}
+.jtable{display:grid;grid-template-columns:44px 1fr 1fr 1fr;border:1px solid var(--line);border-radius:14px;overflow:hidden;background:var(--surface)}
+.jtable .h{font-weight:800;font-size:14px;padding:10px 12px 8px;border-bottom:2px solid var(--line)}
+.jtable .h.c{box-shadow:inset 0 4px 0 var(--c)} .jtable .h.u{box-shadow:inset 0 4px 0 var(--u)} .jtable .h.m{box-shadow:inset 0 4px 0 var(--m)}
+.jtable .n{padding:12px 0 10px;text-align:center;font-weight:800;border-bottom:1px solid var(--line);color:var(--muted)}
+.jtable .cell{padding:12px 12px 10px;border-bottom:1px solid var(--line);font-size:15px;min-height:52px}
+.jtable .row.on .n,.jtable .row.on .cell{background:var(--soft)}
+.jtable .row.on .n{color:var(--ink)}
+.row{display:contents}
+.code{font-family:"SFMono-Regular",Menlo,Consolas,monospace;font-size:12.5px;padding:1px 6px;border-radius:6px;background:var(--bg);border:1px solid var(--line);white-space:nowrap}
+.jnav{display:flex;gap:10px;margin-top:14px;align-items:center}
+.jnav button{font:inherit;font-weight:600;padding:9px 14px 7px;border-radius:10px;border:1.5px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer}
+.jnav button:disabled{opacity:.4;cursor:default}
+/* contract */
+.two{display:grid;grid-template-columns:1fr 1fr;gap:28px}
+.clist{list-style:none;margin:0;padding:0;border-top:1px solid var(--line)}
+.clist li{padding:10px 0 8px;border-bottom:1px solid var(--line)}
+.clist li span{display:block;color:var(--muted);font-size:15px}
+.callout{padding:14px 16px 12px;border-radius:12px;background:var(--soft);margin:18px 0}
+/* plan */
+.plan{list-style:none;margin:0;padding:0;counter-reset:p}
+.plan li{display:grid;grid-template-columns:auto 1fr auto;gap:14px;align-items:start;padding:14px 0 12px;border-bottom:1px solid var(--line)}
+.plan input{width:22px;height:22px;margin-top:2px;accent-color:var(--ok)}
+.plan b{display:block;font-weight:800}
+.plan span{color:var(--muted);font-size:15px}
+.plan em{font-style:normal;font-size:14px;color:var(--muted);white-space:nowrap}
+/* prompts */
+.prompt{border:1px solid var(--line);border-radius:12px;background:var(--surface);padding:12px 14px 10px;margin:10px 0;position:relative}
+.prompt p{margin:0;padding-right:84px;font-size:15px}
+.prompt button{position:absolute;top:10px;right:10px;font:inherit;font-size:13px;font-weight:600;padding:6px 10px 4px;border-radius:8px;border:1.5px solid var(--ink);background:none;color:var(--ink);cursor:pointer}
+ul.check{padding-left:22px}
+ul.check li{margin:6px 0}
+footer{color:var(--muted);font-size:14px;border-top:1px solid var(--line);padding:18px 0 48px;margin-top:24px}
+@media (max-width:900px){
+  .site .cols{grid-template-columns:1fr}
+  .site .cols .zone{min-height:auto}
+  .rules li{grid-template-columns:1fr;gap:4px}
+  .screens,.sdetail,.two{grid-template-columns:1fr}
+  .phone{width:100%;max-width:320px}
+  .phone.wide{max-width:100%}
+  .jtable{grid-template-columns:36px 1fr}
+  .jtable .h:not(.first){display:none}
+  .jtable .cell:empty{display:none}
+  .jtable .cell{grid-column:2}
+  .jtable .n{grid-row:span 1}
+}
+@media (prefers-reduced-motion: reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<header class="top wrap">
+  <h1>Build the GraphPay demo website</h1>
+  <p class="lede">A guide for the front-end team. Two phone apps (the customer and the shop) and an “under the hood” panel, side by side on one website. Every button works: first against mock data, then against our live agents, ENS, Arkiv and Whitechain. Read this with FRONTEND_HANDOVER.md, which holds the full spec.</p>
+  <nav class="tabs" id="tabs" role="tablist" aria-label="Guide sections"></nav>
+</header>
+
+<main class="wrap">
+  <section class="panel" id="p-site" role="tabpanel" aria-labelledby="t-site">
+    <h2>The site at a glance</h2>
+    <p class="sub">Tap a region to see what lives there. On a phone, the three regions become a switch: Customer, Under the hood, Merchant.</p>
+    <div class="site">
+      <button type="button" class="zone" data-z="bar"><b>Demo bar</b><span>Guided steps, Reset, Mock or Live badge, passcode</span></button>
+      <div class="cols">
+        <button type="button" class="zone cz" data-z="cust"><b>Customer app</b><span>Phone frame. Chat desk with her agents, orders, refunds, renewals, agents and spending pass</span></button>
+        <button type="button" class="zone uz" data-z="hood"><b>Under the hood</b><span>Live timeline of real steps with explorer links, race mode, graph view</span></button>
+        <button type="button" class="zone mz" data-z="merch"><b>Merchant app</b><span>Phone frame. Orders with a chime, buyer reputation, dispatch, refunds, payouts, CSV export</span></button>
+      </div>
+    </div>
+    <div class="zonedesc" id="zonedesc" aria-live="polite"></div>
+
+    <h3>Seven rules that keep this easy to wire up later</h3>
+    <ul class="rules">
+      <li><b>One contract</b><span>Components talk only to the <span class="code">DemoAdapter</span>. No direct network calls. That’s how mock becomes live in one setting.</span></li>
+      <li><b>Story from a file</b><span>Names, shops, products, prices, prompts and images come from <span class="code">story.json</span>. The story changes Friday morning; the UI must not.</span></li>
+      <li><b>Every button works</b><span>Each one triggers a visible result on the mock adapter. No dead clicks for judges.</span></li>
+      <li><b>Honest states</b><span>Show a “Mock data” badge in mock mode. Never present a fake transaction link as real.</span></li>
+      <li><b>Own designs</b><span>Borrow flow patterns (an order timeline, a refund wizard), never code, assets or screens from other apps.</span></li>
+      <li><b>No secrets in the browser</b><span>No keys in front-end code. Spending sits behind the demo passcode, enforced by the backend.</span></li>
+      <li><b>Small pull requests</b><span>One screen or one journey per PR, CI green, changes inside <span class="code">apps/demo-ui</span> only. Claude Code’s own website lives in <span class="code">apps/web</span>; leave it alone, we compare and combine later.</span></li>
+    </ul>
+  </section>
+
+  <section class="panel" id="p-screens" role="tabpanel" aria-labelledby="t-screens" hidden>
+    <h2>Screens</h2>
+    <p class="sub">Placeholder names (Priya, Kesar Kingdom) come from story.json and will change. Pick a screen to see its wireframe, what it shows, what it calls and what it listens to.</p>
+    <div class="screens">
+      <div class="slist" id="slist"></div>
+      <div class="sdetail" id="sdetail"></div>
+    </div>
+  </section>
+
+  <section class="panel" id="p-journeys" role="tabpanel" aria-labelledby="t-journeys" hidden>
+    <h2>Journeys</h2>
+    <p class="sub">The seven paths a judge can click through. Each must run end to end on the mock adapter, then live. Steps move left to right across the three regions.</p>
+    <div class="jpick" id="jpick"></div>
+    <div class="jtable" id="jtable"></div>
+    <div class="jnav"><button type="button" id="jprev">Previous step</button><button type="button" id="jnext">Next step</button><span class="muted" id="jcount"></span></div>
+  </section>
+
+  <section class="panel" id="p-contract" role="tabpanel" aria-labelledby="t-contract" hidden>
+    <h2>The contract</h2>
+    <p class="sub">The only line between your UI and everything else: <span class="code">apps/demo-ui/src/demo/contract.ts</span>. You build against the mock version; the backend team ships the live one. Changes to this file need both sides to agree.</p>
+    <div class="callout"><b>Mock first, live later.</b> The mock adapter plays scripted journeys from story.json with realistic delays (agents think 1–3 s, payments settle 2–4 s). The live adapter streams the same events from our backend. A single mode setting switches between them.</div>
+    <div class="two">
+      <div><h3>Actions: what the UI calls</h3><ul class="clist" id="actions"></ul></div>
+      <div><h3>Events: what the UI listens to</h3><ul class="clist" id="events"></ul></div>
+    </div>
+  </section>
+
+  <section class="panel" id="p-plan" role="tabpanel" aria-labelledby="t-plan" hidden>
+    <h2>Build plan for Friday</h2>
+    <p class="sub">A sequence, in order. Tick phases off as you go (ticks stay only on this device). Feature freeze is 6 pm.</p>
+    <ol class="plan" id="plan"></ol>
+  </section>
+
+  <section class="panel" id="p-claude" role="tabpanel" aria-labelledby="t-claude" hidden>
+    <h2>Working with Claude</h2>
+    <p class="sub">Claude Code (or any AI coding tool) can build most of this quickly if you give it the right inputs and keep requests small. This is a way of working, not a script.</p>
+    <h3>How to work</h3>
+    <ul class="check">
+      <li>Open Claude Code inside the repo, in your own branch. At the start of each session, point it at FRONTEND_HANDOVER.md, <span class="code">contract.ts</span> and <span class="code">story.json</span>.</li>
+      <li>Ask for one screen or one journey at a time: presentational components, plus a hook that reads from the adapter.</li>
+      <li>Ask for every state: loading, empty, success, refused with a reason, error with retry, and the mock badge.</li>
+      <li>Close the loop visually: run the app, take a screenshot (or let Claude use the browser tools), and ask for specific fixes.</li>
+      <li>If Claude wants to change <span class="code">contract.ts</span> or add a backend call, stop and check with the founder first.</li>
+      <li>Your prompts are logged automatically in this repo. That’s part of our AI disclosure, so write them as you’d want a judge to read them.</li>
+    </ul>
+    <h3>Example requests</h3>
+    <div id="prompts"></div>
+    <h3>Check every pull request for</h3>
+    <ul class="check">
+      <li>No names, prices or addresses typed into components.</li>
+      <li>No network calls outside the adapter.</li>
+      <li>Every button does something visible on the mock.</li>
+      <li>Works at 390 px wide and on a projector.</li>
+      <li>Keyboard focus is visible; every button says what it does.</li>
+      <li>The mock badge shows in mock mode.</li>
+    </ul>
+  </section>
+
+  <footer>Made during ETHGlobal Mumbai for the GraphPay front-end team. Placeholder names and numbers are illustrative; the final story replaces them through story.json.</footer>
+</main>
+
+<script>
+const TABS=[["site","The site"],["screens","Screens"],["journeys","Journeys"],["contract","Contract"],["plan","Build plan"],["claude","Working with Claude"]];
+const ZONES={
+  bar:"<b>Demo bar.</b> Guided step buttons (Ask and pay, Refund, Renewal, Pause agent, Cap refusal, Race, Export), “Run next renewal now”, Reset demo, the Mock or Live badge, and the passcode field. It lets a judge follow the story without knowing where to click.",
+  cust:"<b>Customer app.</b> A chat-style desk where the customer talks to her agent team, plus Amazon-style orders, a refund wizard, renewals, and an agents page with the spending pass and Pause, Resume and Revoke buttons. Phone frame about 390 × 844.",
+  hood:"<b>Under the hood.</b> The live proof. One row per real step with an icon for its system (ENS, Arkiv, Whitechain, agent) and a link to its explorer page. Also race mode (48 reads against 2) and, on Friday, the graph view and Mumbai map.",
+  merch:"<b>Merchant app.</b> An “Open shop” toggle that also enables sound, a new-order pop-up with a chime showing who is buying and their reputation, order detail with Dispatch and refunds, a refund inbox, renewals, payouts and CSV export."
+};
+const SCREENS=[
+ {id:"C1",app:"c",name:"Agent desk",purpose:"The customer’s home: a chat with her agents. Each agent message carries its ENS name and a status chip. Result cards appear inside the thread.",
+  blocks:[["bar","Priya","Agents active, pass 6.00 USDT a day"],["chips",["Best gulab jamun under 6 USDT by 8 pm","Re-order my usual"]],["me","Best gulab jamun under 6 USDT by 8 pm"],["msg","concierge.priya.graphpay.eth","On it. Scout is checking shops near Dadar.","thinking","warn"],["msg","scout.priya.graphpay.eth","Asked GraphPay: 3 shops, answered in 2 reads.","checked","info"],["card","bad","Jamun Junction",["3.20 USDT","Rejected: 18% of orders refunded"]],["card","ok","Kesar Kingdom",["4.00 USDT, 1.2 km","1,204 paid orders, 1% refunded"]],["msg","payer.priya.graphpay.eth","Paying Kesar Kingdom 4.00 USDT within your pass.","paid","ok"],["input","Ask your agents…"]],
+  actions:["sendPrompt"],events:["agent.message","agent.status","graph.read","quote.created","payment.settled","payment.refused"],states:["Agents thinking","Shop rejected with its reason","Payment refused with its reason","Error with retry","Mock badge"]},
+ {id:"C3",app:"c",name:"Quote and receipt",purpose:"Inside the desk: the quote the payer agent accepted, then the paid receipt with its explorer link and who paid the gas.",
+  blocks:[["bar","Order with Kesar Kingdom","Quote valid for 14:52"],["card","info","Quote",["Gulab jamun, box of 6, × 1","Total 4.00 USDT","Pay to kesar-kingdom.graphpay.eth"]],["row","Signed by payer agent","✓"],["card","ok","Paid",["4.00 USDT on Whitechain","Gas paid by GraphPay, you paid 0","View transaction"]],["btn","","View order"]],
+  actions:["(none: the agent pays within the pass)"],events:["quote.created","payment.signed","payment.settled","payment.refused"],states:["Countdown running","Quote expired, re-quoting","Signed, waiting for settlement","Paid with link"]},
+ {id:"C4",app:"c",name:"Orders",purpose:"Amazon-style order list and detail, with a status timeline and the actions that start the other journeys.",
+  blocks:[["tabs",["Orders","Renewals","Agents"],0],["row","Gulab jamun × 6","Paid"],["row","Kaju katli 250 g","Refunded"],["tl",[["Ordered",1],["Paid",1],["Dispatched",1],["Delivered",0]]],["btn","","Request refund"],["btn","ghost","Re-order"],["btn","ghost","Make it a renewal"]],
+  actions:["reorder","startRenewal","(opens the refund wizard)"],events:["order.updated","refund.settled"],states:["Empty: no orders yet","Each timeline stage","Refunded, with link"]},
+ {id:"C5",app:"c",name:"Refund wizard",purpose:"Full or partial amount, a reason and an optional photo, then live status until the refund settles.",
+  blocks:[["bar","Request a refund","Gulab jamun × 6, 4.00 USDT"],["tabs",["Full","Partial"],1],["row","Amount","1.00 USDT"],["input","Reason: two pieces were squashed"],["card","info","Add a photo",["Stored privately, shared with the shop only"]],["btn","","Request refund"],["tl",[["Requested",1],["Accepted",0],["Refunded",0]]]],
+  actions:["requestRefund"],events:["refund.requested","refund.settled","order.updated"],states:["Validation: amount above paid","Waiting for the shop","Declined with the shop’s note","Refunded with link"]},
+ {id:"C6",app:"c",name:"Renewals",purpose:"Active renewals with schedule, next date and how they fit the spending pass.",
+  blocks:[["bar","Renewals",""],["card","ok","Gulab jamun × 6, every Sunday",["Next: Sun 9 Nov","4.00 USDT within your pass"]],["btn","ghost","Cancel renewal"]],
+  actions:["cancelRenewal"],events:["renewal.created","renewal.charged","renewal.cancelled"],states:["Empty: set one up from an order","Charged, with link","Cancelled"]},
+ {id:"C7",app:"c",name:"Agents and spending pass",purpose:"Who can act for her, what each may do, the pass limits, and the controls that stop them. Home of the kill switch and the cap-refusal demo.",
+  blocks:[["bar","Your agents",""],["card","ok","payer.priya.graphpay.eth",["Pays within your pass","Active"]],["row","Spending pass","2.00 of 6.00 used today"],["btn","","Pause agent"],["btn","danger","Revoke agent"],["card","bad","Cap change refused",["The agent tried to raise its cap to 50 USDT","Only Priya can change this cap","View on Sepolia"]],["btn","ghost","Let the agent try to raise its cap"]],
+  actions:["pauseAgent","resumeAgent","revokeAgent","tryRaiseCap"],events:["agent.permission","cap.change.refused","payment.refused"],states:["Active","Paused, with Resume","Revoked (final)","Refused attempt with link"]},
+ {id:"M1",app:"m",name:"Shop home",purpose:"The shop’s day at a glance and the switch that opens it (which also turns on sound).",
+  blocks:[["bar","Kesar Kingdom","Open, sound on"],["toggle","Shop open"],["stats",[["Today","36.00"],["Orders","9"],["Refunds","1"]]],["row","New order from payer.priya…","4.00"],["row","Renewal from vikram…","4.00"]],
+  actions:["setShopOpen"],events:["merchant.notification","order.updated"],states:["Closed","Open with sound","Empty day"]},
+ {id:"M2",app:"m",name:"New order pop-up",purpose:"Slides in with a chime. Shows who is really buying: the buyer agent, its owner, their reputation and the shop’s own risk verdict.",
+  blocks:[["bar","New order","Just now"],["card","ok","payer.priya.graphpay.eth",["Owner: priya.graphpay.eth","42 orders, 0 refunds, since 2025","Risk agent: safe to accept"]],["row","Gulab jamun × 6","4.00 USDT"],["row","Payment","View transaction"],["btn","","Dispatch"],["note","Plays a chime when it arrives"]],
+  actions:["dispatch"],events:["merchant.notification","payment.settled"],states:["Arriving (chime)","Risk agent warns","Dispatched"]},
+ {id:"M3",app:"m",name:"Order detail",purpose:"The full order with its links and the actions after payment.",
+  blocks:[["bar","Order 1042","Priya, via payer agent"],["tl",[["Paid",1],["Dispatched",1],["Delivered",0]]],["row","Payment","View transaction"],["btn","","Dispatch"],["btn","ghost","Refund full"],["btn","ghost","Refund partial"]],
+  actions:["dispatch","approveRefund"],events:["order.updated","refund.settled"],states:["Each stage","Refunded, with link"]},
+ {id:"M4",app:"m",name:"Refund requests",purpose:"An inbox of refund requests with the reason and photo; approve fully, partly, or decline with a note.",
+  blocks:[["bar","Refund requests","1 waiting"],["card","warn","Order 1042, asks 1.00 USDT",["Two pieces were squashed","Photo attached"]],["btn","","Approve 1.00 USDT"],["btn","ghost","Approve another amount"],["btn","ghost","Decline with a note"]],
+  actions:["approveRefund","declineRefund"],events:["refund.requested","refund.settled"],states:["Empty inbox","Approved, settling","Declined"]},
+ {id:"M5",app:"m",name:"Renewals and customers",purpose:"Who keeps coming back, and when the next renewal charges.",
+  blocks:[["bar","Renewals",""],["row","priya.graphpay.eth","Sun"],["row","vikram.graphpay.eth","Daily"],["note","Tap a customer to see their history"]],
+  actions:["(none)"],events:["renewal.created","renewal.charged","renewal.cancelled"],states:["Empty","Charged today"]},
+ {id:"M6",app:"m",name:"Payouts and export",purpose:"Money in, money back, and a CSV for the accountant with a link per row.",
+  blocks:[["bar","Payouts",""],["stats",[["Received","36.00"],["Refunded","1.00"],["Net","35.00"]]],["row","Order 1042","View transaction"],["row","Refund 1042","View transaction"],["btn","","Export CSV"]],
+  actions:["exportCsv"],events:["payment.settled","refund.settled"],states:["Empty period","Export ready"]},
+ {id:"U1",app:"u",name:"Live timeline",wide:true,purpose:"One row per real step, newest at the bottom, each with its system icon and explorer link. This is where judges see that nothing is faked.",
+  blocks:[["ev","ag","Concierge planned the errand"],["ev","ark","GraphPay answered from Arkiv in 2 reads"],["ev","ens","kesar-kingdom.graphpay.eth resolved"],["ev","wc","Payment required: 4.00 USDT"],["ev","ag","Payer agent signed once, no gas"],["ev","wc","Settled on Whitechain: view transaction"],["ev","ark","Receipt written to Arkiv: view entity"]],
+  actions:["(none)"],events:["every event"],states:["Mock rows marked as mock","Grouped by journey"]},
+ {id:"U2",app:"u",name:"Race mode",wide:true,purpose:"The same question answered two ways. Show reads needed, never “slow versus fast”.",
+  blocks:[["bar","Top 10 shops by sales",""],["stats",[["Plain Arkiv","48 reads"],["GraphPay","2 reads"],["Answer","same"]]],["note","Counters run live; both answers listed side by side"]],
+  actions:["runRace"],events:["race.result"],states:["Running","Result"]}
+];
+const APPS={c:["Customer app","var(--c)"],m:["Merchant app","var(--m)"],u:["Under the hood","var(--u)"]};
+const JOURNEYS={
+ pay:{label:"Ask and pay",steps:[
+  ["c","Priya taps the quick prompt.","action","sendPrompt"],
+  ["u","Concierge plans; scout asks GraphPay; the answer comes from Arkiv in 2 reads.","event","graph.read"],
+  ["c","Shop cards appear; the trap shop shows as rejected, with its reason.","event","agent.status"],
+  ["u","The shop’s ENS name resolves to its Whitechain address.","event","ens.resolved"],
+  ["m","The shop’s risk agent checks Priya’s payer agent.","event","agent.message"],
+  ["c","The quote card appears with a 15-minute countdown.","event","quote.created"],
+  ["u","The payer signs; the payment settles; the receipt is written to Arkiv.","event","payment.settled"],
+  ["m","Chime: the new-order pop-up with the buyer’s ENS name and reputation.","event","merchant.notification"],
+  ["m","The shop taps Dispatch.","action","dispatch"],
+  ["c","Priya’s order timeline moves to Dispatched.","event","order.updated"]]},
+ refund:{label:"Refund",steps:[
+  ["c","Orders, then the order, then Request refund: partial, a reason, a photo.","action","requestRefund"],
+  ["m","The request lands in the refund inbox.","event","refund.requested"],
+  ["m","The shop approves a partial refund.","action","approveRefund"],
+  ["u","The refund settles on Whitechain and is recorded on Arkiv; the shop’s refund count moves.","event","refund.settled"],
+  ["c","The order shows Refunded, with its link.","event","order.updated"]]},
+ renew:{label:"Renewal",steps:[
+  ["c","From an order: Make it a renewal, then pick the schedule.","action","startRenewal"],
+  ["u","The renewal is created.","event","renewal.created"],
+  ["c","Demo bar: Run next renewal now.","action","runNextRenewal"],
+  ["u","The renewal is charged within the pass.","event","renewal.charged"],
+  ["m","The renewal order appears for the shop.","event","merchant.notification"],
+  ["c","Priya cancels the renewal.","action","cancelRenewal"]]},
+ pause:{label:"Pause agent",steps:[
+  ["c","Agents, then Pause on the payer agent.","action","pauseAgent"],
+  ["u","The pause is recorded on ENS, with a Sepolia link.","event","agent.permission"],
+  ["c","Priya asks for another order; the agents try to pay.","action","sendPrompt"],
+  ["u","The payment is refused because the agent is paused; the refusal is recorded.","event","payment.refused"],
+  ["c","A refused card with the reason, and a Resume button.","action","resumeAgent"]]},
+ cap:{label:"Cap refusal",steps:[
+  ["c","Agents, then “Let the agent try to raise its cap”.","action","tryRaiseCap"],
+  ["u","ENS permissions refuse the change, with a Sepolia link.","event","cap.change.refused"],
+  ["c","“Only Priya can change this cap.”","",""]]},
+ race:{label:"Race",steps:[
+  ["c","Demo bar: Race.","action","runRace"],
+  ["u","Plain Arkiv needs 48 reads, GraphPay 2, and both give the same answer.","event","race.result"]]},
+ export:{label:"Export",steps:[
+  ["m","Payouts, then Export CSV.","action","exportCsv"],
+  ["m","The file downloads; every row links to its transaction.","",""]]}
+};
+const ACTIONS=[["sendPrompt","Customer desk: send a typed or quick prompt to her agents"],["reorder","Customer orders: repeat an order"],["requestRefund","Refund wizard: amount, reason, optional photo"],["startRenewal","Order detail: turn an order into a renewal"],["cancelRenewal","Renewals: stop future charges"],["pauseAgent, resumeAgent, revokeAgent","Agents page: the kill switch"],["tryRaiseCap","Agents page: demo of a refused permission"],["setShopOpen","Shop home: open or close, enables sound"],["dispatch","Merchant: mark an order dispatched"],["approveRefund, declineRefund","Merchant refund inbox"],["exportCsv","Merchant payouts: download the accountant CSV"],["runRace, runNextRenewal, resetDemo","Demo bar controls"],["getSnapshot, subscribe","On load: initial data, then the live event stream"]];
+const EVENTS=[["agent.message","An agent says something (desk, shop desk, timeline)"],["agent.status","Thinking, checked, quoted, paid, refused, with a reason"],["graph.read","GraphPay answered from Arkiv: reads used, links"],["ens.resolved","A name resolved to an address"],["quote.created","Line items, total, payee, valid-until"],["payment.signed, payment.settled","Signature, then settlement with the explorer link"],["payment.refused","Cap, paused, revoked, trap shop, budget or expired quote"],["order.updated","Any order change; drives both timelines"],["refund.requested, refund.settled","Refund request, then settlement with the link"],["renewal.created, charged, cancelled","Renewal lifecycle"],["agent.permission","Paused, resumed or revoked, with the ENS link"],["cap.change.refused","The refused cap change, with the link"],["arkiv.write","A receipt, refund, quote or renewal written to Arkiv"],["race.result","Reads needed both ways, and whether answers match"],["merchant.notification","New order, refund request or renewal for the shop"],["error","A message and whether retry makes sense"]];
+const PLAN=[["Set up","GitHub access; create the Next.js app in apps/demo-ui (Claude Code’s apps/web stays untouched); add HANDOVER.md there; read this guide; agree design tokens","30 min"],["Shell","Demo bar, two phone frames, the under-the-hood panel, the phone-width switch; contract.ts, a mock adapter skeleton and the story.json loader","1 h"],["Customer app","Screens C1 to C7 on the mock; journeys Ask and pay, Pause agent and Cap refusal run","2–2.5 h"],["Merchant app","Screens M1 to M6 (M7 optional); journeys Refund, Renewal and Export run","2 h"],["Under the hood","Live timeline, race widget, explorer link slots; graph view if time allows","1 h"],["Test","A Playwright test clicks through all seven journeys on the mock and passes in CI","45 min"],["Go live","The backend team plugs in the live adapter; we run the same seven journeys on the real networks together","1–2 h"],["Polish","Motion, sound, empty and error states, a check on the projector, until the 6 pm freeze","rest"]];
+const PROMPTS=["Read apps/demo-ui/HANDOVER.md, apps/demo-ui/src/demo/contract.ts and story.json. Build the demo shell: the demo bar, two phone frames and the under-the-hood panel, responsive down to a phone with a three-way switch. Use only the mock adapter.","Build screen C1, the agent desk. Messages come from the adapter events agent.message and agent.status; each shows the agent’s ENS name and a status chip. Include loading, refused and error states, and the mock badge.","Build the refund wizard C5 and the merchant refund inbox M4, wired to requestRefund and approveRefund on the mock adapter. Then make the Refund journey run end to end across both phones.","Write a Playwright test that runs all seven journeys on the mock adapter and fails if any button does nothing."];
+
+const $=id=>document.getElementById(id);
+const esc=s=>String(s).replace(/[&<>]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]));
+function showTab(id,focus){
+  TABS.forEach(([k])=>{const b=$("t-"+k),p=$("p-"+k);const on=k===id;b.setAttribute("aria-selected",String(on));b.tabIndex=on?0:-1;p.hidden=!on;});
+  if(location.hash!=="#"+id)history.replaceState(null,"","#"+id);
+  if(focus)$("t-"+id).focus();
+}
+function renderTabs(){
+  const nav=$("tabs");
+  TABS.forEach(([k,label])=>{const b=document.createElement("button");b.type="button";b.id="t-"+k;b.setAttribute("role","tab");b.setAttribute("aria-controls","p-"+k);b.textContent=label;b.addEventListener("click",()=>showTab(k));nav.appendChild(b);});
+  nav.addEventListener("keydown",e=>{const i=TABS.findIndex(([k])=>$("t-"+k).getAttribute("aria-selected")==="true");if(e.key==="ArrowRight"){showTab(TABS[(i+1)%TABS.length][0],true);}if(e.key==="ArrowLeft"){showTab(TABS[(i-1+TABS.length)%TABS.length][0],true);}});
+}
+function block(b){
+  const [t]=b;
+  if(t==="bar")return `<div class="w-bar"><b>${esc(b[1])}</b>${b[2]?`<span>${esc(b[2])}</span>`:""}</div>`;
+  if(t==="chips")return `<div class="w-chips">${b[1].map(x=>`<span>${esc(x)}</span>`).join("")}</div>`;
+  if(t==="me")return `<div class="w-me">${esc(b[1])}</div>`;
+  if(t==="msg")return `<div class="w-msg"><i>${esc(b[1])}<span class="chip ${b[4]}">${esc(b[3])}</span></i>${esc(b[2])}</div>`;
+  if(t==="card")return `<div class="w-card ${b[1]}"><b>${esc(b[2])}</b>${b[3].map(x=>`<span>${esc(x)}</span>`).join("")}</div>`;
+  if(t==="btn")return `<div class="w-btn ${b[1]}">${esc(b[2])}</div>`;
+  if(t==="input")return `<div class="w-input">${esc(b[1])}</div>`;
+  if(t==="tabs")return `<div class="w-tabs">${b[1].map((x,i)=>`<span class="${i===b[2]?"on":""}">${esc(x)}</span>`).join("")}</div>`;
+  if(t==="row")return `<div class="w-row"><span>${esc(b[1])}</span><span>${esc(b[2])}</span></div>`;
+  if(t==="tl")return `<div class="w-tl">${b[1].map(([x,d])=>`<span class="${d?"done":""}">${esc(x)}</span>`).join("")}</div>`;
+  if(t==="toggle")return `<div class="w-toggle"><span>${esc(b[1])}</span><i aria-hidden="true"></i></div>`;
+  if(t==="stats")return `<div class="w-stats">${b[1].map(([l,v])=>`<div><b>${esc(v)}</b><span>${esc(l)}</span></div>`).join("")}</div>`;
+  if(t==="note")return `<div class="w-note">${esc(b[1])}</div>`;
+  if(t==="ev")return `<div class="w-ev"><em class="${b[1]}">${{ag:"Agent",ark:"Arkiv",ens:"ENS",wc:"Whitechain"}[b[1]]}</em><span>${esc(b[2])}</span></div>`;
+  return "";
+}
+let curScreen="C1";
+function renderScreens(){
+  const list=$("slist");list.innerHTML="";
+  ["c","m","u"].forEach(app=>{
+    const h=document.createElement("h4");h.textContent=APPS[app][0];h.style.setProperty("--k",APPS[app][1]);list.appendChild(h);
+    SCREENS.filter(s=>s.app===app).forEach(s=>{const b=document.createElement("button");b.type="button";b.textContent=`${s.id}  ${s.name}`;b.dataset.id=s.id;b.setAttribute("aria-pressed",String(s.id===curScreen));b.addEventListener("click",()=>{curScreen=s.id;renderScreens();});list.appendChild(b);});
+  });
+  const s=SCREENS.find(x=>x.id===curScreen);
+  $("sdetail").innerHTML=`<div class="phone ${s.wide?"wide":""}" role="img" aria-label="Wireframe of ${esc(s.name)}">${s.blocks.map(block).join("")}</div>
+  <dl class="facts"><dt>${esc(s.id)}: ${esc(s.name)}</dt><dd>${esc(s.purpose)}</dd>
+  <dt>Calls (actions)</dt><dd class="tagline">${s.actions.map(a=>`<span class="tag a">${esc(a)}</span>`).join("")}</dd>
+  <dt>Listens to (events)</dt><dd class="tagline">${s.events.map(a=>`<span class="tag">${esc(a)}</span>`).join("")}</dd>
+  <dt>States to design</dt><dd class="tagline">${s.states.map(a=>`<span class="tag">${esc(a)}</span>`).join("")}</dd></dl>`;
+}
+let curJ="pay",curStep=0;
+function renderJourneys(){
+  const pick=$("jpick");pick.innerHTML="";
+  Object.entries(JOURNEYS).forEach(([k,j])=>{const b=document.createElement("button");b.type="button";b.textContent=j.label;b.setAttribute("aria-pressed",String(k===curJ));b.addEventListener("click",()=>{curJ=k;curStep=0;renderJourneys();});pick.appendChild(b);});
+  const j=JOURNEYS[curJ];
+  let html=`<div class="h first" aria-hidden="true"></div><div class="h c first">Customer app</div><div class="h u">Under the hood</div><div class="h m">Merchant app</div>`;
+  j.steps.forEach(([col,text,kind,name],i)=>{
+    const tag=kind?`<div style="margin-top:6px"><span class="code">${kind}: ${esc(name)}</span></div>`:"";
+    const cell=c=>`<div class="cell">${c===col?esc(text)+tag:""}</div>`;
+    html+=`<div class="row ${i===curStep?"on":""}"><div class="n">${i+1}</div>${cell("c")}${cell("u")}${cell("m")}</div>`;
+  });
+  $("jtable").innerHTML=html;
+  $("jprev").disabled=curStep===0;$("jnext").disabled=curStep===j.steps.length-1;
+  $("jcount").textContent=`Step ${curStep+1} of ${j.steps.length}`;
+}
+function renderContract(){
+  $("actions").innerHTML=ACTIONS.map(([n,d])=>`<li><span class="code">${esc(n)}</span><span>${esc(d)}</span></li>`).join("");
+  $("events").innerHTML=EVENTS.map(([n,d])=>`<li><span class="code">${esc(n)}</span><span>${esc(d)}</span></li>`).join("");
+}
+function renderPlan(){
+  let saved={};try{saved=JSON.parse(localStorage.getItem("gp-plan")||"{}");}catch(e){saved={};}
+  $("plan").innerHTML=PLAN.map(([t,d,time],i)=>`<li><input type="checkbox" id="pl${i}" ${saved[i]?"checked":""} aria-label="${esc(t)} done"><label for="pl${i}"><b>${i+1}. ${esc(t)}</b><span>${esc(d)}</span></label><em>${esc(time)}</em></li>`).join("");
+  $("plan").addEventListener("change",e=>{const m=e.target.id.match(/^pl(\d+)$/);if(!m)return;saved[m[1]]=e.target.checked;try{localStorage.setItem("gp-plan",JSON.stringify(saved));}catch(err){}});
+}
+function renderPrompts(){
+  $("prompts").innerHTML=PROMPTS.map((p,i)=>`<div class="prompt"><p id="pr${i}">${esc(p)}</p><button type="button" data-i="${i}">Copy</button></div>`).join("");
+  $("prompts").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;const t=PROMPTS[b.dataset.i];const done=()=>{b.textContent="Copied";setTimeout(()=>b.textContent="Copy",1500);};if(navigator.clipboard)navigator.clipboard.writeText(t).then(done,()=>{});else done();});
+}
+function renderZones(){
+  const desc=$("zonedesc");
+  const set=z=>{document.querySelectorAll(".zone").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.z===z)));desc.innerHTML=ZONES[z];};
+  document.querySelectorAll(".zone").forEach(b=>b.addEventListener("click",()=>set(b.dataset.z)));
+  set("cust");
+}
+renderTabs();renderZones();renderScreens();renderJourneys();renderContract();renderPlan();renderPrompts();
+$("jprev").addEventListener("click",()=>{if(curStep>0){curStep--;renderJourneys();}});
+$("jnext").addEventListener("click",()=>{if(curStep<JOURNEYS[curJ].steps.length-1){curStep++;renderJourneys();}});
+const start=(location.hash||"").slice(1);
+showTab(TABS.some(([k])=>k===start)?start:"site");
+window.addEventListener("hashchange",()=>{const h=location.hash.slice(1);if(TABS.some(([k])=>k===h))showTab(h);});
+</script>
+</body>
+</html>

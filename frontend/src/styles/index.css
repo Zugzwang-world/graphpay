@@ -1,0 +1,140 @@
+@import 'tailwindcss';
+@import '@fontsource-variable/baloo-2/wght.css';
+@import '@fontsource-variable/nunito/wght.css';
+
+/*
+ * Design tokens (DESIGN_INSTRUCTIONS.md 4.2 and 4.3).
+ * The default Tailwind palette, spacing and type scale are cleared so that
+ * components can only use these tokens. Choose by meaning, never by look.
+ */
+@theme {
+  --color-*: initial;
+  --color-transparent: transparent;
+  --color-current: currentColor;
+  --color-white: #ffffff;
+  --color-black: #000000;
+
+  /* inside both apps (light only) */
+  --color-bg: #eef1ef;
+  --color-surface: #fbfcfb;
+  --color-phone: #ffffff;
+  --color-ink: #18212b;
+  --color-muted: #56606b;
+  --color-line: #d3dad6;
+  --color-soft: #e3e8e5;
+  --color-brand: #5b4fd6;
+  --color-info: #2f5bea;
+  --color-ok: #0b8a6c;
+  --color-warn: #b87400;
+  --color-bad: #c0275d;
+
+  /* the stage around the phones (dark) */
+  --color-stage: #0b1017;
+  --color-stage-2: #121922;
+  --color-stage-ink: #e8edf2;
+  --color-stage-muted: #9aa6b2;
+  --color-stage-line: #26313d;
+
+  /* iOS system pieces */
+  --color-ios-keyboard: #d1d4db;
+  --color-ios-key: #ffffff;
+  --color-ios-key-dark: #abb0bc;
+  --color-ios-sheet: rgb(242 242 247 / 0.92);
+  --color-ios-blue: #007aff;
+  --color-ios-red: #ff3b30;
+  --color-ios-green: #34c759;
+  --color-ios-separator: rgb(60 60 67 / 0.29);
+
+  /* agent identity colours (Appendix C): rings and dots only */
+  --color-agent-concierge: #f2a43a;
+  --color-agent-scout: #9b7bff;
+  --color-agent-analyst: #ef6f8e;
+  --color-agent-payer: #4fd1c5;
+  --color-agent-storefront: #f6ad55;
+  --color-agent-risk: #e86a6a;
+  --color-agent-dispatch: #7fb0ff;
+  --color-agent-fallback: #8a94a0;
+
+  /*
+   * Spacing: Tailwind's 4 px base is kept so sizes (w-*, h-*) work. Padding,
+   * margin and gap use only the scale 1, 2, 3, 4, 6, 8, 12 (4–48 px); see README.
+   */
+  --spacing: 4px;
+
+  /* type: the whole phone scale is these five sizes */
+  --text-*: initial;
+  --text-caption: 12px;
+  --text-caption--line-height: 1.4;
+  --text-body: 14px;
+  --text-body--line-height: 1.45;
+  --text-section: 16px;
+  --text-section--line-height: 1.3;
+  --text-title: 20px;
+  --text-title--line-height: 1.2;
+  --text-amount: 26px;
+  --text-amount--line-height: 1.15;
+
+  --font-*: initial;
+  --font-heading: 'Baloo 2 Variable', system-ui, sans-serif;
+  --font-body: 'Nunito Variable', system-ui, sans-serif;
+  --font-ios: -apple-system, 'SF Pro Text', 'SF Pro Display', system-ui, 'Segoe UI', sans-serif;
+
+  --radius-*: initial;
+  --radius-input: 12px;
+  --radius-card: 16px;
+  --radius-sheet: 24px;
+  --radius-phone: 55px;
+  --radius-full: 9999px;
+
+  --shadow-*: initial;
+  --shadow-card: 0 1px 2px rgb(24 33 43 / 0.05), 0 2px 8px rgb(24 33 43 / 0.04);
+  --shadow-sheet: 0 -8px 32px rgb(24 33 43 / 0.16);
+  --shadow-phone: 0 32px 80px rgb(0 0 0 / 0.55), 0 0 0 1px rgb(255 255 255 / 0.06);
+
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@layer base {
+  html,
+  body,
+  #root {
+    height: 100%;
+  }
+
+  body {
+    margin: 0;
+    background: var(--color-stage);
+    color: var(--color-stage-ink);
+    font-family: var(--font-body);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-info);
+    outline-offset: 2px;
+  }
+
+  button {
+    cursor: pointer;
+  }
+
+  button:disabled {
+    cursor: not-allowed;
+  }
+}
+
+@utility tabular {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum' 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

@@ -1,0 +1,1157 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>GraphPay draft presentation</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Mukta:wght@400;500;600;700&display=swap">
+<style>
+:root{
+  color-scheme: light;
+  --bg:#ECEEF6; --bg-2:#E1E4F0; --panel:#FFFFFF; --ink:#1C1838; --muted:#5C5878; --line:#CDD0E1;
+  --kesar:#9A5600; --kesar-fill:#F2A43A; --kesar-soft:#F8E3C2;
+  --pista:#2F6E27; --pista-soft:#DCEDD2; --gulab:#A83254; --gulab-soft:#F6D5DF;
+  --sky:#2459BF; --sky-soft:#DCE6FA; --violet:#5B3FBF; --violet-soft:#E4DCFB;
+  --teal:#0E6F69; --teal-soft:#D0EEEB; --amber:#8C5208; --amber-soft:#F6E3C6;
+  --frame:#1B1736; --shadow:0 28px 70px rgba(28,24,56,.20);
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme: dark;
+    --bg:#16122F; --bg-2:#1D1840; --panel:#221C48; --ink:#F4EEDF; --muted:#B4AECB; --line:#3A3272;
+    --kesar:#F5B455; --kesar-fill:#F2A43A; --kesar-soft:#44301A;
+    --pista:#A9D68E; --pista-soft:#203520; --gulab:#F0839F; --gulab-soft:#45202F;
+    --sky:#8DB8FF; --sky-soft:#1C2A50; --violet:#BCA7FF; --violet-soft:#2D2457;
+    --teal:#6FDCD2; --teal-soft:#113A39; --amber:#F8C27A; --amber-soft:#3E2B12;
+    --frame:#05040F; --shadow:0 30px 90px rgba(0,0,0,.5);
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme: dark;
+  --bg:#16122F; --bg-2:#1D1840; --panel:#221C48; --ink:#F4EEDF; --muted:#B4AECB; --line:#3A3272;
+  --kesar:#F5B455; --kesar-fill:#F2A43A; --kesar-soft:#44301A;
+  --pista:#A9D68E; --pista-soft:#203520; --gulab:#F0839F; --gulab-soft:#45202F;
+  --sky:#8DB8FF; --sky-soft:#1C2A50; --violet:#BCA7FF; --violet-soft:#2D2457;
+  --teal:#6FDCD2; --teal-soft:#113A39; --amber:#F8C27A; --amber-soft:#3E2B12;
+  --frame:#05040F; --shadow:0 30px 90px rgba(0,0,0,.5);
+}
+*{box-sizing:border-box}
+html{height:100%; scroll-padding-top:env(safe-area-inset-top,0px);}
+body{height:100%; margin:0; background:var(--bg); color:var(--ink); font-family:"Mukta",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif; overflow:hidden; -webkit-font-smoothing:antialiased;}
+#viewport{position:relative; width:100%; height:100%; overflow:hidden; cursor:pointer;}
+#stage{position:absolute; left:50%; top:50%; width:1920px; height:1080px; transform:translate(-50%,-50%); transform-origin:50% 50%; background:var(--bg); overflow:hidden;}
+.slide{position:absolute; inset:0; display:none;}
+.slide.active{display:block;}
+h1,h2,h3,h4,h5{font-family:"Baloo 2","Mukta",system-ui,sans-serif;}
+[data-k]{opacity:0; transform:translateY(10px); transition:opacity .45s ease, transform .45s ease;}
+[data-k].on{opacity:1; transform:none;}
+[data-x].out{opacity:0 !important; transform:scale(.6,.15) !important; pointer-events:none;}
+
+/* chrome */
+.progress{position:absolute; left:0; right:0; bottom:0; height:6px; background:var(--bg-2);}
+.progress span{display:block; height:100%; width:0; background:var(--kesar-fill); transition:width .4s ease;}
+.count{position:absolute; right:40px; bottom:20px; font-size:22px; color:var(--muted); font-variant-numeric:tabular-nums;}
+.badge{position:absolute; left:40px; bottom:20px; font-size:20px; color:var(--muted);}
+.tag{display:inline-block; padding:3px 12px; border-radius:999px; font-size:18px; font-weight:600; line-height:1.4; white-space:nowrap;}
+.tag.ens{background:var(--sky-soft); color:var(--sky);}
+.tag.arkiv{background:var(--violet-soft); color:var(--violet);}
+.tag.wc{background:var(--teal-soft); color:var(--teal);}
+.tag.swarm{background:var(--amber-soft); color:var(--amber);}
+.tag.big{font-size:28px; padding:6px 22px;}
+.partners{display:flex; gap:10px;}
+.partners .tag{opacity:.28;}
+.partners .tag.lit{opacity:1;}
+
+/* demo layout */
+.is-demo,.is-wide{padding:40px 72px 0;}
+.top{display:flex; justify-content:space-between; align-items:center; height:84px;}
+.top .title{margin:0; font-size:56px; font-weight:800; letter-spacing:-.01em; line-height:1;}
+.cols{display:grid; grid-template-columns:380px 1fr 380px; column-gap:56px; margin-top:16px; height:780px;}
+.device{margin:0; display:flex; flex-direction:column; align-items:center; gap:10px;}
+.device figcaption{font-size:20px; color:var(--muted);}
+.explain{display:flex; flex-direction:column; gap:14px; min-width:0; height:780px;}
+.cap{margin:0; font-size:28px; font-weight:600; line-height:1.25;}
+.viz{position:relative; flex:1; min-height:0;}
+.foot{margin:0; font-size:20px; color:var(--muted); line-height:1.35;}
+
+/* the phone: a desk where agents talk as a team */
+.phone{width:380px; height:740px; border-radius:54px; border:10px solid #05040F; background:#0E0B1F; color:#EFE9DA; box-shadow:var(--shadow); display:flex; flex-direction:column; overflow:hidden;}
+.phone .bar{height:42px; flex:none; display:flex; justify-content:space-between; align-items:center; padding:0 28px; font-size:16px; font-weight:600; color:#9C96B8;}
+.phone .island{width:104px; height:28px; border-radius:16px; background:#05040F;}
+.desk-head{flex:none; display:flex; align-items:center; gap:10px; padding:4px 16px 10px; border-bottom:1px solid #241F45;}
+.stack{display:flex; flex:none;}
+.stack svg{width:30px; height:30px; margin-left:-9px;}
+.stack svg:first-child{margin-left:0;}
+.dh{min-width:0;}
+.dh b{display:block; font-size:19px; line-height:1.15;}
+.dh small{display:block; font-size:13px; color:#9C96B8; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+.chat{flex:1; display:flex; flex-direction:column; justify-content:flex-end; gap:9px; padding:10px 12px; overflow:hidden;}
+.msg{display:grid; grid-template-columns:30px 1fr; gap:8px; align-items:start;}
+.msg .ava svg{width:30px; height:30px; display:block;}
+.mbody{min-width:0;}
+.nm{display:block; font-size:13.5px; font-weight:600; margin-bottom:2px;}
+.txt{background:#1C1838; border-radius:4px 16px 16px 16px; padding:8px 11px; font-size:15px; line-height:1.35; overflow-wrap:anywhere;}
+.msg.me{display:flex; justify-content:flex-end;}
+.msg.me .txt{background:#F2A43A; color:#2A1A05; border-radius:16px 16px 4px 16px; max-width:88%; font-weight:500;}
+.msg.alarm .txt{box-shadow:inset 0 0 0 2px #F0839F;}
+.men{color:var(--c); font-weight:600; white-space:nowrap;}
+.men i{display:inline-block; width:9px; height:9px; border-radius:50%; background:var(--c); margin-right:3px; vertical-align:1px;}
+.msg[data-k]:not(.on),.chat [data-k]:not(.on){display:none;}
+.msg.on{animation:pop .35s ease both;}
+@keyframes pop{from{opacity:0; transform:translateY(8px);} to{opacity:1; transform:none;}}
+.compose{flex:none; margin:6px 12px 14px; padding:10px 14px; border-radius:22px; background:#1C1838; color:#8E88AB; font-size:14px; display:flex; justify-content:space-between; align-items:center;}
+.compose .mic{width:22px; height:22px; border-radius:50%; background:#EFE9DA;}
+.c2{margin-top:6px; background:#100D24; border-radius:12px; padding:8px 10px; font-size:14px; box-shadow:inset 0 0 0 1.5px #F2A43A;}
+.c2.red{box-shadow:inset 0 0 0 1.5px #F0839F;}
+.c2 .r{display:flex; justify-content:space-between; gap:8px; align-items:baseline;}
+.c2 .amt{font-family:"Baloo 2",sans-serif; font-size:26px; font-weight:800; line-height:1.1;}
+.c2 .k2{color:#9C96B8;}
+.c2 .lnk{color:#8DB8FF; text-decoration:underline; text-underline-offset:3px;}
+.okc{color:#A9D68E;} .badc{color:#F0839F;}
+.btns{display:flex; gap:6px; margin-top:6px;}
+.btns span{flex:1; text-align:center; padding:5px 6px; border-radius:10px; background:#2A2450; font-weight:600; font-size:13.5px;}
+.btns span.go{background:#F2A43A; color:#2A1A05;}
+.slot{margin-top:6px; height:92px; border-radius:12px; border:2px dashed #3A3366; display:grid; place-items:center; color:#8E88AB; font-size:13px;}
+.slot.out{display:none;}
+.ph{display:block; width:100%; height:92px; border-radius:12px; margin-top:6px;}
+.prog{display:flex; align-items:baseline; gap:6px;}
+.prog b{font-family:"Baloo 2",sans-serif; font-size:24px; color:#F5B455; font-variant-numeric:tabular-nums;}
+.tog{display:flex; justify-content:space-between; align-items:center; gap:10px;}
+.sw{width:42px; height:24px; border-radius:12px; background:#5A5378; position:relative; flex:none;}
+.sw::after{content:""; position:absolute; top:3px; left:3px; width:18px; height:18px; border-radius:50%; background:#EFE9DA;}
+
+/* table and graph */
+.tbl{position:absolute; inset:0 0 auto 0; background:var(--panel); border-radius:18px; box-shadow:inset 0 0 0 2px var(--line); padding:14px 16px; font-size:16px; transform-origin:50% 40%; transition:opacity .6s ease, transform .6s ease;}
+.tbl .th,.tbl .tr{display:grid; grid-template-columns:80px 260px 230px 80px 90px; gap:10px; align-items:center; height:34px; padding:0 10px; white-space:nowrap;}
+.tbl .th{color:var(--muted); font-weight:600; border-bottom:2px solid var(--line);}
+.tbl .win{position:relative; height:408px; overflow:hidden; margin-top:4px;}
+.tbl .tr{border-bottom:1px solid var(--line); font-variant-numeric:tabular-nums;}
+.tbl .tr .rf{color:var(--gulab); font-weight:600;}
+.tbl .ptr{position:absolute; left:0; right:0; top:0; height:34px; border-radius:8px; background:rgba(242,164,58,.22); box-shadow:inset 0 0 0 2px var(--kesar-fill); opacity:0;}
+.tbl.scanning .ptr{opacity:1;}
+.meters{display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-top:12px;}
+.meters div{background:var(--bg-2); border-radius:12px; padding:8px 12px;}
+.meters b{display:block; font-family:"Baloo 2",sans-serif; font-size:34px; font-weight:800; line-height:1.05; font-variant-numeric:tabular-nums;}
+.meters span{font-size:16px; color:var(--muted);}
+.gwrap{position:absolute; inset:0;}
+.gwrap[data-k]:not(.on){transform:scale(.85);}
+.gwrap[data-k]{transition:opacity .8s ease, transform .8s ease;}
+.gsvg{width:100%; height:100%; display:block; overflow:visible;}
+.gsvg .e{stroke:var(--line); stroke-width:2;}
+.gsvg .e.pay{stroke:var(--violet); stroke-opacity:.45;}
+.gsvg .e.ref{stroke:var(--gulab); stroke-dasharray:6 6;}
+.gsvg .e.own{stroke:var(--sky); stroke-width:4;}
+.gsvg .e.hot{stroke:var(--kesar-fill); stroke-width:5; stroke-opacity:1;}
+.gsvg .n{fill:var(--panel); stroke:var(--muted); stroke-width:2;}
+.gsvg .n.shop{fill:var(--kesar-soft); stroke:var(--kesar-fill); stroke-width:3;}
+.gsvg .n.trap{fill:var(--gulab-soft); stroke:var(--gulab); stroke-width:3;}
+.gsvg .n.me{fill:var(--sky-soft); stroke:var(--sky); stroke-width:3;}
+.gsvg text{font-family:"Mukta",sans-serif; font-size:17px; fill:var(--ink);}
+.gsvg .lb{font-weight:600;}
+.gsvg .mu{fill:var(--muted); font-size:15px;}
+.gsvg .bd rect{fill:var(--panel); stroke:var(--line); stroke-width:2;}
+.gsvg .halo{fill:none; stroke:var(--kesar-fill); stroke-width:5;}
+.gsvg .bd.hl rect{stroke:var(--kesar-fill); stroke-width:4;}
+.gsvg .ov rect{fill:none; stroke:var(--kesar-fill); stroke-width:4;}
+.gsvg .big{font-family:"Baloo 2",sans-serif; font-size:44px; font-weight:800; fill:var(--kesar);}
+.gsvg .tagt{font-family:"Baloo 2",sans-serif; font-size:22px; font-weight:700; fill:var(--kesar);}
+
+/* query panels */
+.qp{border-radius:16px; background:var(--frame); color:#EDE6D6; padding:10px 16px 12px;}
+.qp h5{margin:0 0 6px; font:600 18px "Mukta",sans-serif; color:#C9C3E0; display:flex; justify-content:space-between; align-items:center;}
+.qp pre{margin:0; font-family:ui-monospace,"SFMono-Regular",Menlo,Consolas,monospace; font-size:15px; line-height:1.4; white-space:pre; overflow:hidden;}
+.qp .c{color:#8E88AB;} .qp .s{color:#F5B455;}
+.chip{display:inline-block; padding:2px 10px; border-radius:999px; font:600 15px "Mukta",sans-serif; white-space:nowrap;}
+.chip.bad{background:#45202F; color:#F0839F;}
+.chip.good{background:#44301A; color:#F5B455;}
+.qgrid{display:flex; flex-direction:column; gap:12px;}
+.res{width:100%; border-collapse:collapse; font-size:20px; background:var(--panel); border-radius:14px; overflow:hidden; box-shadow:inset 0 0 0 2px var(--line);}
+.res th,.res td{padding:6px 14px; text-align:left; border-bottom:1px solid var(--line);}
+.res th{color:var(--muted); font-weight:600; font-size:17px;}
+.res .n{text-align:right; font-variant-numeric:tabular-nums;}
+.res tr.trap td{color:var(--gulab); font-weight:600;}
+.res tr.best td{font-weight:700;}
+
+/* x402 sequence */
+.seq{width:100%; height:auto; display:block; overflow:visible;}
+.seq .lane{stroke:var(--line); stroke-width:2; stroke-dasharray:4 6;}
+.seq .lh{font:700 16px "Baloo 2",sans-serif; fill:var(--ink); text-anchor:middle;}
+.seq .lh2{font:500 13px "Mukta",sans-serif; fill:var(--muted); text-anchor:middle;}
+.seq .ar{stroke:var(--muted); stroke-width:2.5; fill:none;}
+.seq .ah{fill:var(--muted);}
+.seq .lab{font:500 15px "Mukta",sans-serif; fill:var(--muted); paint-order:stroke; stroke:var(--bg); stroke-width:5px; stroke-linejoin:round;}
+.seq .num{fill:var(--bg-2); stroke:var(--line); stroke-width:2;}
+.seq .numt{font:700 13px "Mukta",sans-serif; fill:var(--ink); text-anchor:middle;}
+.seq .st.now .ar{stroke:var(--kesar-fill); stroke-width:4;}
+.seq .st.now .ah{fill:var(--kesar-fill);}
+.seq .st.now .lab{fill:var(--ink); font-weight:700;}
+.seq .st.now .num{fill:var(--kesar-fill); stroke:var(--kesar-fill);}
+.seq .st.now .numt{fill:#2A1A05;}
+.caps{position:relative; height:40px; flex:none;}
+.caps p{position:absolute; inset:0; margin:0; font-size:23px; font-weight:600; color:var(--ink);}
+
+/* pipelines and chains */
+.pipe{width:100%; height:auto; display:block; overflow:visible;}
+.pipe text{font-family:"Mukta",sans-serif;}
+.pipe .stn circle{fill:var(--panel); stroke:var(--line); stroke-width:3; transition:all .3s ease;}
+.pipe .stn text{font-size:17px; fill:var(--muted); text-anchor:middle; font-weight:600;}
+.pipe .stn .ic{font-family:"Baloo 2",sans-serif; font-size:20px; font-weight:800; fill:var(--muted);}
+.pipe .stn.lit circle{fill:var(--kesar-soft); stroke:var(--kesar-fill);}
+.pipe .stn.lit text{fill:var(--ink);}
+.pipe .stn.now circle{stroke-width:7;}
+.pipe .lk{stroke:var(--line); stroke-width:4;}
+.pipe .lk.lit{stroke:var(--kesar-fill);}
+.chips{display:flex; flex-wrap:wrap; gap:10px;}
+.chips .tag{font-size:19px;}
+.chain{list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:10px;}
+.chain li{display:grid; grid-template-columns:150px 1fr; gap:16px; align-items:center; padding:10px 16px; border-radius:16px; background:var(--panel); box-shadow:inset 0 0 0 2px var(--line); opacity:.4; transition:all .3s ease;}
+.chain li.lit{opacity:1;}
+.chain li.now{box-shadow:inset 0 0 0 3px var(--kesar-fill);}
+.chain li.stop.lit{box-shadow:inset 0 0 0 3px var(--gulab);}
+.chain .who{font-family:"Baloo 2",sans-serif; font-weight:700; font-size:21px;}
+.chain .what{font-size:21px;}
+.chain small{display:block; font-size:16px; color:var(--muted);}
+
+/* small components */
+.hand{display:grid; grid-template-columns:150px 70px 200px 1fr; align-items:center; gap:14px; margin-top:30px;}
+.h-me{padding:14px; border-radius:18px; background:var(--kesar-fill); color:#2A1A05; font:800 26px "Baloo 2",sans-serif; text-align:center;}
+.h-arrow{height:6px; border-radius:3px; background:var(--kesar-fill);}
+.h-con{display:flex; flex-direction:column; align-items:center; gap:6px; padding:14px; border-radius:18px; background:var(--panel); box-shadow:inset 0 0 0 2px var(--line); font:700 22px "Baloo 2",sans-serif;}
+.h-con svg{width:58px; height:58px;}
+.h-subs{display:flex; flex-direction:column; gap:10px; border-left:5px solid var(--kesar-fill); padding-left:18px;}
+.h-subs div{display:grid; grid-template-columns:40px 110px 1fr; gap:10px; align-items:center; font-size:22px;}
+.h-subs svg{width:36px; height:36px;}
+.h-subs span{color:var(--muted);}
+.h-desk{grid-column:1/-1; margin-top:22px; padding:16px 20px; border-radius:18px; background:var(--panel); box-shadow:inset 0 0 0 2px var(--line); font-size:23px;}
+.tree2{display:flex; flex-direction:column; gap:16px; margin-top:20px;}
+.tnode{align-self:flex-start; padding:8px 16px; border-radius:14px; background:var(--panel); box-shadow:inset 0 0 0 2px var(--line); font-size:22px; font-weight:600;}
+.tnode.root{font:800 28px "Baloo 2",sans-serif;}
+.tnode .who{display:block; font-size:16px; color:var(--muted); font-weight:500;}
+.tbr{margin-left:30px; padding-left:24px; border-left:5px solid var(--kesar-fill); display:flex; flex-direction:column; gap:12px;}
+.leaves{display:flex; flex-wrap:wrap; gap:10px;}
+.leaf{display:flex; align-items:center; gap:8px; padding:4px 12px 4px 6px; border-radius:999px; background:var(--panel); box-shadow:inset 0 0 0 2px var(--line); font-size:19px;}
+.leaf svg{width:28px; height:28px;}
+.forms{display:grid; grid-template-columns:repeat(4,1fr); gap:12px;}
+.form{padding:14px 14px; border-radius:16px; background:var(--panel); box-shadow:inset 0 0 0 2px var(--line); display:flex; flex-direction:column; gap:4px;}
+.form b{font-size:21px; line-height:1.15;}
+.form small{font-size:16px; color:var(--muted);}
+.form.hot{box-shadow:inset 0 0 0 3px var(--kesar-fill);}
+.pair{display:flex; align-items:center; gap:14px; padding:38px 18px 16px; border-radius:18px; background:var(--panel); box-shadow:inset 0 0 0 2px var(--line); font-size:22px;}
+.pair .ln{flex:1; height:6px; border-radius:3px; background:var(--kesar-fill); position:relative;}
+.pair .ln b{position:absolute; left:50%; top:-34px; transform:translateX(-50%); font:800 22px "Baloo 2",sans-serif; color:var(--kesar); white-space:nowrap;}
+.code{margin:0; padding:12px 16px; border-radius:16px; background:var(--frame); color:#EDE6D6; font-family:ui-monospace,Menlo,Consolas,monospace; font-size:16px; line-height:1.4; white-space:pre; overflow:hidden;}
+.code .c{color:#8E88AB;} .code .s{color:#F5B455;}
+.recs{padding:16px 20px; border-radius:20px; background:var(--panel); box-shadow:inset 0 0 0 2px var(--line);}
+.recs h4{margin:0 0 8px; font-size:24px;}
+.recs dl{display:grid; grid-template-columns:170px 1fr 120px; gap:8px 14px; margin:0; font-size:20px; align-items:center;}
+.recs dt{color:var(--muted);}
+.recs dd{margin:0; font-weight:600;}
+.att{display:grid; grid-template-columns:56px 1fr; gap:16px; align-items:center; padding:14px 18px; border-radius:20px; background:var(--panel); margin-top:12px;}
+.att .mk{width:56px; height:56px; border-radius:50%; display:grid; place-items:center; font-size:30px; font-weight:800;}
+.att.ok .mk{background:var(--pista-soft); color:var(--pista);}
+.att.no{box-shadow:inset 0 0 0 2px var(--gulab);}
+.att.no .mk{background:var(--gulab-soft); color:var(--gulab);}
+.att b{display:block; font-size:24px;}
+.att small{font-size:19px; color:var(--muted);}
+
+/* config strip */
+.config{position:absolute; left:72px; right:72px; bottom:54px; display:flex; flex-wrap:wrap; align-items:center; align-content:flex-end; gap:6px 10px; font-size:18px; color:var(--muted);}
+.config .lbl{font-weight:600; color:var(--ink);}
+.config code{font-family:ui-monospace,Menlo,Consolas,monospace; font-size:16px; padding:2px 8px; border-radius:8px; background:var(--bg-2); color:var(--ink);}
+.config .list{margin-left:auto; white-space:nowrap;}
+#stage.no-config .config{display:none;}
+
+/* title, problem, solution */
+.title-s{position:absolute; inset:0; padding:110px 120px;}
+.brand{margin:0; font-size:240px; font-weight:800; line-height:.9; letter-spacing:-.02em;}
+.tagline{margin:22px 0 0; font-family:"Baloo 2",sans-serif; font-size:70px; font-weight:600; color:var(--kesar);}
+.subline{margin:14px 0 0; font-size:32px; color:var(--muted); max-width:40em;}
+.title-s .thread{position:absolute; left:120px; bottom:170px; width:1680px; height:240px; overflow:visible;}
+.t-line{stroke:var(--kesar-fill); stroke-width:8; stroke-linecap:round; stroke-dasharray:1600; stroke-dashoffset:1600; animation:draw 1.6s ease .3s forwards;}
+@keyframes draw{to{stroke-dashoffset:0;}}
+.t-end{fill:var(--kesar-fill);}
+.t-knot{fill:var(--bg); stroke:var(--kesar-fill); stroke-width:8;}
+.t-k{font-family:"Baloo 2",sans-serif; font-size:38px; font-weight:700; fill:var(--ink);}
+.t-p{font-family:"Mukta",sans-serif; font-size:24px; fill:var(--muted);}
+.t-lbl{font-family:"Mukta",sans-serif; font-size:24px; fill:var(--muted);}
+.event{position:absolute; left:120px; bottom:80px; margin:0; font-size:24px; color:var(--muted);}
+.prob2,.sol,.pt,.close-s{position:absolute; inset:0; padding:90px 110px;}
+.head{margin:0; font-size:74px; font-weight:800; line-height:1.04; letter-spacing:-.01em; max-width:16em;}
+.pgrid{display:grid; grid-template-columns:700px 1fr; gap:60px; margin-top:40px; align-items:start;}
+.qs2{list-style:none; margin:0; padding:0;}
+.qs2 li{padding:18px 0; border-top:2px solid var(--line); display:flex; flex-direction:column; gap:4px;}
+.qs2 b{font-family:"Baloo 2",sans-serif; font-size:38px; font-weight:700; line-height:1.1;}
+.qs2 span{font-size:25px; color:var(--muted); line-height:1.35;}
+.coda{margin:30px 0 0; font-size:28px; font-weight:600; line-height:1.3;}
+.chart{margin:0; background:var(--panel); border-radius:24px; box-shadow:inset 0 0 0 2px var(--line); padding:12px;}
+.chart svg{width:100%; height:auto; display:block;}
+.chart text{font-family:"Mukta",sans-serif; font-size:17px; fill:var(--muted);}
+.chart .ax{stroke:var(--line); stroke-width:2;}
+.chart .pl{stroke:var(--gulab); stroke-width:5; fill:none; stroke-linecap:round;}
+.chart .pl.dash{stroke-dasharray:10 10;}
+.chart .gl{stroke:var(--kesar-fill); stroke-width:7; fill:none; stroke-linecap:round;}
+.chart .pt2{fill:var(--gulab);}
+.chart .vl{font-family:"Baloo 2",sans-serif; font-size:26px; font-weight:800; fill:var(--ink);}
+.chart .vg{font-family:"Baloo 2",sans-serif; font-size:26px; font-weight:800; fill:var(--kesar);}
+.pillars{position:relative; display:grid; grid-template-columns:1fr 1.25fr 1fr; gap:44px; margin-top:76px; padding-top:56px;}
+.pillars::before{content:""; position:absolute; left:0; right:0; top:14px; height:6px; border-radius:3px; background:var(--kesar-fill);}
+.pillar{position:relative;}
+.pillar::before{content:""; position:absolute; top:-56px; left:0; width:34px; height:34px; border-radius:50%; background:var(--bg); box-shadow:inset 0 0 0 7px var(--kesar-fill);}
+.pillar h3{margin:12px 0 8px; font-size:54px; font-weight:800; line-height:1;}
+.pillar p{margin:0; font-size:26px; line-height:1.35; color:var(--muted);}
+.pillar.hot{padding:0 0 0 0;}
+.pillar.hot h3{color:var(--kesar);}
+.pillar.hot p{color:var(--ink);}
+
+/* partner slides */
+.pt-head{display:flex; flex-direction:column; align-items:flex-start; gap:16px;}
+.head2{margin:0; font-size:60px; font-weight:800; line-height:1.05; letter-spacing:-.01em; max-width:20em;}
+.pt-grid{display:grid; grid-template-columns:800px 1fr; gap:50px; margin-top:38px; align-items:start;}
+.pt-viz{margin:0; background:var(--panel); border-radius:24px; box-shadow:inset 0 0 0 2px var(--line); padding:16px;}
+.pt-viz svg{width:100%; height:auto; display:block;}
+.tiles{display:grid; grid-template-columns:1fr 1fr; gap:14px;}
+.tile{background:var(--panel); border-radius:20px; padding:14px 18px; box-shadow:inset 0 0 0 2px var(--line);}
+.tile b{display:block; font-family:"Baloo 2",sans-serif; font-size:38px; font-weight:800; line-height:1.05; color:var(--kesar);}
+.tile span{display:block; font-size:20px; font-weight:600; margin-top:2px;}
+.tile small{display:block; font-size:15.5px; color:var(--muted); margin-top:3px;}
+.coda2{position:absolute; left:110px; right:110px; bottom:86px; margin:0; font-size:25px; line-height:1.35;}
+.recap{display:grid; grid-template-columns:300px 1fr; gap:22px 44px; margin:50px 0 0;}
+.recap dt{font-family:"Baloo 2",sans-serif; font-size:34px; font-weight:700; color:var(--kesar);}
+.recap dd{margin:0; font-size:29px; line-height:1.35;}
+.links{position:absolute; left:110px; right:110px; bottom:80px; margin:0; font-size:24px; color:var(--muted);}
+
+/* wide slide */
+.wide-grid{display:grid; grid-template-columns:860px 1fr; gap:56px; margin-top:16px; height:790px;}
+.ent{padding:16px 20px; border-radius:20px; background:var(--panel); box-shadow:inset 0 0 0 2px var(--line);}
+.ent h4{margin:0 0 6px; font-size:26px;}
+.ent dl{display:grid; grid-template-columns:120px 1fr; gap:4px 14px; margin:6px 0; font-size:20px;}
+.ent dt{color:var(--muted);} .ent dd{margin:0; font-weight:600;}
+.ent p{margin:6px 0 0; font-size:19px; color:var(--muted);}
+.map{width:100%; height:100%; overflow:visible;}
+.map .shape{fill:var(--panel); stroke:var(--line); stroke-width:3;}
+.map .ce{stroke:var(--violet); stroke-opacity:.28; stroke-width:1.2;}
+.map .d-s{fill:var(--kesar-fill);} .map .d-a{fill:var(--sky);}
+.map .ring{fill:none; stroke:var(--ink); stroke-width:3;}
+.map .m-thread{fill:none; stroke:var(--kesar-fill); stroke-width:6; stroke-linecap:round;}
+.map .who{font-family:"Baloo 2",sans-serif; font-size:24px; font-weight:700; fill:var(--ink);}
+.map .area{font-family:"Mukta",sans-serif; font-size:18px; fill:var(--muted);}
+.map .note{font-family:"Mukta",sans-serif; font-size:16px; fill:var(--muted);}
+
+/* controls */
+#hud{position:fixed; right:0; bottom:0; padding:10px 14px calc(10px + env(safe-area-inset-bottom,0px)); display:flex; gap:8px; z-index:5; opacity:.4; transition:opacity .2s;}
+#hud:hover,#hud:focus-within{opacity:1;}
+#hud button{font:600 14px "Mukta",system-ui,sans-serif; color:var(--ink); background:var(--panel); border:0; border-radius:999px; padding:8px 14px; box-shadow:inset 0 0 0 2px var(--line); cursor:pointer;}
+#hud button:focus-visible{outline:3px solid var(--kesar-fill); outline-offset:2px;}
+#notes{position:fixed; top:0; right:0; bottom:0; width:min(420px,92vw); padding:calc(18px + env(safe-area-inset-top,0px)) 22px calc(18px + env(safe-area-inset-bottom,0px)); background:var(--panel); color:var(--ink); box-shadow:-20px 0 60px rgba(0,0,0,.25); transform:translateX(105%); transition:transform .25s ease; z-index:6; overflow-y:auto;}
+#notes.open{transform:none;}
+#notes h3{margin:0 0 6px; font-size:24px;}
+#notes .n-meta,#notes .n-clock{color:var(--muted); font-size:15px; margin:0 0 10px; font-variant-numeric:tabular-nums;}
+#notes .n-text{font-size:18px; line-height:1.5; margin:0 0 14px;}
+#notes .keys{font-size:14px; color:var(--muted); border-top:1px solid var(--line); padding-top:10px; line-height:1.6;}
+@media (prefers-reduced-motion: reduce){
+  [data-k]{transition:none; transform:none;}
+  .msg.on{animation:none;}
+  .t-line{animation:none; stroke-dashoffset:0;}
+  .progress span,.tbl,.gwrap[data-k]{transition:none !important;}
+}
+</style>
+</head>
+<body>
+<div id="viewport"><div id="stage" aria-live="polite"></div></div>
+<div id="hud" aria-label="Deck controls">
+  <button type="button" data-act="prev">Back</button>
+  <button type="button" data-act="next">Next</button>
+  <button type="button" data-act="notes">Notes</button>
+  <button type="button" data-act="config">Config</button>
+  <button type="button" data-act="full">Full screen</button>
+</div>
+<aside id="notes" aria-label="Speaker notes">
+  <h3 class="n-title"></h3>
+  <p class="n-meta"></p>
+  <p class="n-clock"></p>
+  <p class="n-text"></p>
+  <div class="keys">Keys: Right arrow or Space for next, Left arrow for back, N notes, C story-config strip, F full screen, T light or dark, R replay this slide. Slides with a sequence play on by themselves after the first click; click again to skip ahead.</div>
+</aside>
+<script>
+(() => {
+/* Sample story config. Names and prices are sample data. Numbers marked "lab" were measured in the pre-event lab and will be re-measured at the event. */
+const STORY = {
+  hero: { name: 'Priya', label: 'priya', area: 'Bandra West', orders: 37 },
+  team: [
+    { id: 'concierge', name: 'Concierge', color: '#F2A43A' },
+    { id: 'scout', name: 'Scout', color: '#9B7BFF' },
+    { id: 'analyst', name: 'Analyst', color: '#EF6F8E' },
+    { id: 'payer', name: 'Payer', color: '#4FD1C5' }
+  ],
+  shopTeam: [
+    { id: 'storefront', name: 'Storefront', color: '#F6AD55' },
+    { id: 'risk', name: 'Risk', color: '#E86A6A' },
+    { id: 'dispatch', name: 'Dispatch', color: '#7FB0FF' }
+  ],
+  errand: { text: 'Get me the best gulab jamun in Mumbai, under 6 USDT, by 8 pm.' },
+  cap: 6,
+  shops: [
+    { name: 'Kesar Kingdom', label: 'kesar-kingdom', area: 'Dadar', price: 4.80, orders: 1240, refunds: 25 },
+    { name: 'Matunga Mithai', label: 'matunga-mithai', area: 'Matunga', price: 5.40, orders: 610, refunds: 37 },
+    { name: 'Jamun Junction', label: 'jamun-junction', area: 'Sion', price: 3.20, orders: 2050, refunds: 377, trap: true }
+  ],
+  order: { id: 'KK-0412', eta: '19:55' },
+  refund: { reason: 'One sweet arrived squashed.', amount: 0.80 },
+  renewal: { item: 'Sunday sweets box', price: 5.50, weeks: 4 },
+  lab: { receipts: 9612, shops: 40, plainReads: 48, graphReads: 2, emuReceipts: 50000, emuPlainReads: 232,
+         payGas: '234,292', payWbt: '0.00117', refundGas: '75,344', refuseGas: '33,000–120,000', arkivTglm: '0.00031' },
+  tx: '0x7f3c…a219', swarmRef: 'b7e1…09cf'
+};
+
+const H = STORY.hero, E = STORY.errand, SH = STORY.shops, shop = SH[0], trap = SH[2], L = STORY.lab;
+const AG = {}; STORY.team.concat(STORY.shopTeam).forEach(a => { AG[a.id] = a; });
+const PARTNERS = [['ens', 'ENS'], ['arkiv', 'Arkiv'], ['wc', 'Whitechain'], ['swarm', 'Swarm']];
+const ens = l => `${l}.graphpay.eth`;
+const sub = (a, p) => `${a}.${p}.graphpay.eth`;
+const payer = sub('payer', H.label);
+const usd = n => Number(n).toFixed(2);
+const num = n => Number(n).toLocaleString('en-IN');
+const pct = (a, b) => (a / b * 100).toFixed(1) + '%';
+const K = k => ` data-k="${k}"`;
+const plain = t => String(t).replace(/<[^>]+>/g, '');
+
+/* desk building blocks */
+const blob = c => `<svg viewBox="0 0 40 40" aria-hidden="true"><path d="M20 2.5C30.6 2.5 37.5 9.7 37.5 20.3 37.5 30.7 30.2 37.5 19.6 37.5 9.2 37.5 2.5 30.3 2.5 20.4 2.5 9.4 9.5 2.5 20 2.5Z" fill="${c}"/><ellipse cx="14.6" cy="18" rx="2.6" ry="3.8" fill="#1A1126"/><ellipse cx="25.4" cy="18" rx="2.6" ry="3.8" fill="#1A1126"/></svg>`;
+const at = id => `<span class="men" style="--c:${AG[id].color}"><i></i>${AG[id].name}</span>`;
+const atP = `<span class="men" style="--c:#F2A43A"><i></i>${H.name}</span>`;
+const M = (k, id, html, cls) => `<div class="msg${cls ? ' ' + cls : ''}"${k ? K(k) : ''}><span class="ava">${blob(AG[id].color)}</span><div class="mbody"><b class="nm" style="color:${AG[id].color}">${AG[id].name}</b><div class="txt">${html}</div></div></div>`;
+const ME = (k, html) => `<div class="msg me"${k ? K(k) : ''}><div class="txt">${html}</div></div>`;
+function desk(side, body, time) {
+  const team = side === 'hero' ? STORY.team : STORY.shopTeam;
+  const title = side === 'hero' ? `${H.name}’s desk` : `${shop.name}’s desk`;
+  const owner = side === 'hero' ? ens(H.label) : ens(shop.label);
+  return `<div class="phone"><div class="bar"><span>${time || '19:42'}</span><span class="island"></span><span>5G</span></div>
+    <div class="desk-head"><div class="stack">${team.map(t => blob(t.color)).join('')}</div><div class="dh"><b>${title}</b><small>${owner}, ${team.length} agents</small></div></div>
+    <div class="chat">${body}</div>
+    <div class="compose"><span>Message the desk</span><i class="mic"></i></div></div>`;
+}
+const partnersHtml = list => `<div class="partners">${PARTNERS.map(([id, name]) => `<span class="tag ${id}${list.includes(id) ? ' lit' : ''}">${name}</span>`).join('')}</div>`;
+function configHtml(sl) {
+  const fields = sl.config && sl.config.length ? sl.config.map(f => `<code>${f}</code>`).join('') : `<span>Nothing to set here: the backend writes it.</span>`;
+  return `<div class="config"><span class="lbl">Story config used here</span>${fields}${sl.list ? `<span class="list">Your list: ${sl.list}</span>` : ''}</div>`;
+}
+
+/* illustrations */
+const PHOTO = `<svg class="ph" viewBox="0 0 300 92" preserveAspectRatio="xMidYMid slice" aria-label="Photo of the sweets, one squashed"><rect width="300" height="92" fill="#2B2448"/><ellipse cx="150" cy="54" rx="128" ry="34" fill="#E9E1CF"/><ellipse cx="150" cy="54" rx="108" ry="25" fill="#F6F0E2"/>${[[88,48],[122,58],[156,46],[188,58],[118,40]].map(([x, y]) => `<circle cx="${x}" cy="${y}" r="14" fill="#8A4317"/><circle cx="${x - 4}" cy="${y - 5}" r="4" fill="#C47A3A"/>`).join('')}<ellipse cx="222" cy="62" rx="24" ry="7" fill="#6B310F"/><ellipse cx="214" cy="59" rx="6" ry="2.4" fill="#A0582A"/></svg>`;
+const MENU = `<svg class="ph" viewBox="0 0 300 92" preserveAspectRatio="xMidYMid slice" aria-label="Menu photo"><rect width="300" height="92" fill="#2B2448"/><rect x="18" y="14" width="120" height="64" rx="10" fill="#3A3366"/>${[[48,46],[78,46],[108,46]].map(([x, y]) => `<circle cx="${x}" cy="${y}" r="13" fill="#8A4317"/><circle cx="${x - 4}" cy="${y - 4}" r="4" fill="#C47A3A"/>`).join('')}<rect x="156" y="22" width="120" height="10" rx="5" fill="#EFE9DA"/><rect x="156" y="42" width="90" height="8" rx="4" fill="#8E88AB"/><rect x="156" y="58" width="104" height="8" rx="4" fill="#8E88AB"/></svg>`;
+
+/* table rows for the scan */
+function mulberry32(a) { return () => { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+const PAYEES = ['kesar-kingdom', 'matunga-mithai', 'jamun-junction', 'shop-07.sim', 'shop-12.sim', 'shop-23.sim', 'shop-31.sim'];
+function rowsHtml(n) {
+  const r = mulberry32(42); let s = '';
+  for (let i = 0; i < n; i++) {
+    const p = PAYEES[Math.floor(r() * PAYEES.length)];
+    const who = i === 5 ? payer : `sim-${String(Math.floor(r() * 9000) + 1000)}.sim.graphpay.eth`;
+    const refund = p === 'jamun-junction' ? r() < 0.4 : r() < 0.06;
+    const amt = (2.5 + r() * 3.5).toFixed(2);
+    s += `<div class="tr"><span>${num(9500 + i * 2 + 1)}</span><span>${who.replace('.graphpay.eth', '')}</span><span>${p}</span><span>${amt}</span><span class="${refund ? 'rf' : ''}">${refund ? 'refund' : 'payment'}</span></div>`;
+  }
+  return s;
+}
+function tableHtml(live, attrs) {
+  return `<div class="tbl${live ? ' live' : ''}"${attrs}>
+    <div class="th"><span>receipt</span><span>payer</span><span>payee</span><span>USDT</span><span>kind</span></div>
+    <div class="win"><div class="rows">${rowsHtml(live ? 48 : 12)}</div><div class="ptr"></div></div>
+    <div class="meters"><div><b class="sc-reads">${live ? 0 : L.plainReads}</b><span>reads of ${L.plainReads}</span></div><div><b class="sc-rcpts">${live ? 0 : num(L.receipts)}</b><span>receipts scanned</span></div><div><b class="sc-mb">${live ? '0.00' : '1.00'}</b><span>MB downloaded, about</span></div></div>
+  </div>`;
+}
+
+/* graph of the same receipts */
+function graphSvg() {
+  const shopsXY = [[230, 290, SH[0]], [470, 130, SH[1]], [700, 300, SH[2]]];
+  const buyers = [[110, 170], [130, 410], [300, 120], [580, 70], [640, 190], [570, 430], [790, 180], [820, 420], [680, 480], [440, 300], [100, 290], [260, 470], [360, 470]];
+  const me = [330, 400];
+  const r = mulberry32(7); let e = '';
+  buyers.forEach(([x, y]) => {
+    const t = shopsXY[Math.floor(r() * 3)];
+    const isRef = t[2].trap && r() < 0.6;
+    e += `<line class="e ${isRef ? 'ref' : 'pay'}" x1="${x}" y1="${y}" x2="${t[0]}" y2="${t[1]}"/>`;
+    if (r() < 0.5) { const t2 = shopsXY[Math.floor(r() * 3)]; e += `<line class="e pay" x1="${x}" y1="${y}" x2="${t2[0]}" y2="${t2[1]}"/>`; }
+  });
+  e += `<line class="e pay" x1="${me[0]}" y1="${me[1]}" x2="230" y2="290"/><line class="e pay" x1="${me[0]}" y1="${me[1]}" x2="470" y2="130"/>`;
+  const nodes = buyers.map(([x, y]) => `<circle class="n" cx="${x}" cy="${y}" r="9"/>`).join('') +
+    `<circle class="n me" cx="${me[0]}" cy="${me[1]}" r="13"/><text class="lb" x="${me[0] + 18}" y="${me[1] + 30}">payer.priya</text>` +
+    shopsXY.map(([x, y, s]) => `<circle class="n ${s.trap ? 'trap' : 'shop'}" cx="${x}" cy="${y}" r="30"/><text class="lb" x="${x}" y="${y - 40}" text-anchor="middle">${s.name}</text>`).join('') +
+    `<text class="mu" x="110" y="150" text-anchor="middle">sim-4412</text><text class="mu" x="790" y="160" text-anchor="middle">sim-1187</text>`;
+  const badges = shopsXY.map(([x, y, s]) => `<g class="bd"><rect x="${x - 90}" y="${y + 38}" width="180" height="52" rx="12"/><text x="${x}" y="${y + 60}" text-anchor="middle" font-size="15">${num(s.orders)} orders</text><text x="${x}" y="${y + 80}" text-anchor="middle" font-size="15">${s.refunds} refunds</text></g>`).join('');
+  const halos = shopsXY.map(([x, y]) => `<circle class="halo" cx="${x}" cy="${y}" r="42"/>`).join('');
+  const hlBadges = shopsXY.map(([x, y]) => `<g class="ov"><rect x="${x - 90}" y="${y + 38}" width="180" height="52" rx="12"/></g>`).join('');
+  return `<svg class="gsvg" viewBox="0 0 900 600" aria-label="The receipts drawn as a graph of ENS names">
+    ${e}${nodes}${badges}
+    <g${K(2)}>${halos}<text class="tagt" x="20" y="580">Read 1: shops near ${H.area}</text></g>
+    <g${K(3)}>${hlBadges}<text class="tagt" x="460" y="580">Read 2: their scoreboards</text><text class="big" x="900" y="40" text-anchor="end"><tspan data-count="2">0</tspan> reads</text></g>
+  </svg>`;
+}
+
+/* buyer check-back graph */
+function buyerSvg() {
+  return `<svg class="gsvg" viewBox="0 0 900 560" aria-label="The buyer agent, its owner and its history">
+    <line class="e own" x1="450" y1="280" x2="450" y2="90"/>
+    <line class="e pay" x1="450" y1="280" x2="210" y2="440" style="stroke-width:6"/>
+    <line class="e pay" x1="450" y1="280" x2="690" y2="440" style="stroke-width:5"/>
+    <circle class="n me" cx="450" cy="280" r="26"/><text class="lb" x="490" y="286">${payer}</text>
+    <circle class="n" cx="450" cy="90" r="22" style="stroke:var(--sky);stroke-width:3"/><text class="lb" x="482" y="96">${ens(H.label)}</text><text class="mu" x="482" y="120">owner, from ENS</text>
+    <circle class="n shop" cx="210" cy="440" r="26"/><text class="lb" x="210" y="492" text-anchor="middle">${shop.name}</text><text class="mu" x="300" y="372" text-anchor="middle">21 orders</text>
+    <circle class="n shop" cx="690" cy="440" r="26"/><text class="lb" x="690" y="492" text-anchor="middle">${SH[1].name}</text><text class="mu" x="600" y="372" text-anchor="middle">16 orders</text>
+    <g${K(2)}><g class="bd hl"><rect x="20" y="170" width="300" height="70" rx="14"/><text x="170" y="200" text-anchor="middle" font-size="20">${H.orders} paid orders</text><text x="170" y="226" text-anchor="middle" font-size="20">0 disputes</text></g><text class="tagt" x="20" y="540">2 reads on GraphPay</text></g>
+    <g${K(3)}><g class="bd hl"><rect x="600" y="170" width="280" height="70" rx="14"/><text x="740" y="200" text-anchor="middle" font-size="20">ENS: switched on</text><text x="740" y="226" text-anchor="middle" font-size="20">epoch 1, owner matches</text></g></g>
+  </svg>`;
+}
+
+/* x402 sequence */
+const LANES6 = [['Priya’s payer', 'agent'], ['Kesar Kingdom', 'shop server'], ['GraphPay', 'facilitator'], ['ENS', 'Sepolia'], ['Whitechain', 'chain 1874'], ['Arkiv', 'Rabdi']];
+const STEPS = [
+  [0, 1, 'GET /order: 6 gulab jamun', 'The payer asks the shop for the order.'],
+  [1, 0, '402 + PAYMENT-REQUIRED: 4.80 USDT', 'The shop answers with a bill: 402 Payment Required.'],
+  [0, 0, 'checks the cap, signs once, no gas', 'Inside today’s 6.00 USDT cap, the payer signs once (Permit2). No gas.'],
+  [0, 1, 'retry + PAYMENT-SIGNATURE', 'The payer repeats the request with the signed payment.'],
+  [1, 2, '/verify', 'The shop asks GraphPay’s facilitator to verify it.'],
+  [2, 3, 'is payer.priya switched on?', 'The facilitator asks ENS whether the agent is still switched on.'],
+  [3, 2, 'yes, epoch 1', 'ENS: switched on, same owner as in the graph.'],
+  [2, 1, 'valid: signature, agent, cap, not paid', 'Signature, agent, cap and order all check out.'],
+  [1, 1, 'packs the order', 'The shop starts packing.'],
+  [1, 2, '/settle', 'The shop asks the facilitator to settle.'],
+  [2, 4, 'submit to GraphPayCheckout', 'Our relayer submits it to the checkout contract and pays the gas.'],
+  [4, 2, 'confirmed: 4.80 USDT to the shop', 'USDT moves from Priya’s payer to the shop.'],
+  [2, 1, 'settled', 'The facilitator confirms the settlement.'],
+  [1, 0, '200 + PAYMENT-RESPONSE: receipt', 'The shop returns the receipt.'],
+  [4, 5, 'mirror writes the line and scoreboards', 'The mirror writes the payment to Arkiv once: line, scoreboards, pair link.']
+];
+function seqSvg() {
+  const x0 = 95, dx = 148, y0 = 92, dy = 34;
+  const xs = LANES6.map((_, i) => x0 + i * dx);
+  let s = `<svg class="seq" viewBox="0 0 900 620" aria-label="x402 payment, step by step">`;
+  LANES6.forEach(([a, b], i) => { s += `<text class="lh" x="${xs[i]}" y="24">${a}</text><text class="lh2" x="${xs[i]}" y="44">${b}</text><line class="lane" x1="${xs[i]}" y1="56" x2="${xs[i]}" y2="610"/>`; });
+  STEPS.forEach(([f, t, label], j) => {
+    const y = y0 + j * dy, n = j + 1;
+    let path, ah, tx, anchor = 'start';
+    if (f === t) {
+      const x = xs[f];
+      path = `M${x} ${y - 8} h34 v16 h-24`; ah = `${x + 4},${y + 8} ${x + 15},${y + 3} ${x + 15},${y + 13}`; tx = x + 44;
+    } else {
+      const xa = xs[f], xb = xs[t], dir = xb > xa ? 1 : -1, end = xb - dir * 4;
+      path = `M${xa} ${y} L${end} ${y}`;
+      ah = dir > 0 ? `${end},${y} ${end - 12},${y - 6} ${end - 12},${y + 6}` : `${end},${y} ${end + 12},${y - 6} ${end + 12},${y + 6}`;
+      tx = Math.min(xa, xb) + 16;
+      if (tx + label.length * 7.6 > 890) { anchor = 'end'; tx = Math.max(xa, xb) - 16; }
+    }
+    s += `<g class="st"${K(n)}><circle class="num" cx="34" cy="${y}" r="13"/><text class="numt" x="34" y="${y + 5}">${n}</text><path class="ar" d="${path}"/><polygon class="ah" points="${ah}"/><text class="lab" x="${tx}" y="${f === t ? y + 5 : y - 7}" text-anchor="${anchor}">${label}</text></g>`;
+  });
+  return s + `</svg>`;
+}
+const seqCaps = () => STEPS.map(([, , , cap], j) => `<p data-k="${j + 1}"${j + 1 < STEPS.length ? ` data-x="${j + 2}"` : ''}>${cap}</p>`).join('');
+
+/* refund pipeline */
+const PIPE = [['Photo', '1'], ['Encrypt', '2'], ['Swarm', '3'], ['Arkiv', '4'], ['Shop', '5'], ['Whitechain', '6'], ['Scoreboard', '7']];
+const PIPE_AT = [2, 3, 4, 5, 6, 7, 8];
+function pipeSvg() {
+  const xs = PIPE.map((_, i) => 70 + i * 127);
+  let s = `<svg class="pipe" viewBox="0 0 900 190" aria-label="The refund’s path">`;
+  for (let i = 0; i < xs.length - 1; i++) s += `<line class="lk" data-l="${PIPE_AT[i + 1]}" x1="${xs[i] + 34}" y1="70" x2="${xs[i + 1] - 34}" y2="70"/>`;
+  PIPE.forEach(([name, ic], i) => { s += `<g class="stn" data-l="${PIPE_AT[i]}"><circle cx="${xs[i]}" cy="70" r="34"/><text class="ic" x="${xs[i]}" y="77">${ic}</text><text x="${xs[i]}" y="140">${name}</text></g>`; });
+  return s + `</svg>`;
+}
+const REFUND_CAPS = ['Priya reports a squashed sweet.', 'She attaches a photo.', 'The photo is encrypted on her phone.', 'The encrypted photo goes to Swarm. Only a reference comes back.', 'Arkiv records the refund request, pointing to the photo.', 'The shop opens the request and the photo.', 'Partial refund: 0.80 USDT back, on Whitechain.', 'The mirror writes the refund. The scoreboard counts it.', 'Refunded. Both desks are up to date.'];
+
+/* stylized Mumbai for the city graph */
+const DX = 40;
+const POLY = [[190,40],[260,25],[330,30],[420,60],[440,140],[452,230],[440,320],[420,400],[395,470],[372,535],[355,600],[345,660],[330,720],[318,770],[298,762],[290,720],[300,680],[278,650],[262,612],[252,575],[240,530],[232,490],[215,450],[200,400],[185,345],[170,285],[150,220],[140,160],[160,95]].map(([x, y]) => [x + DX, y]);
+function inside(x, y) { let c = false; for (let i = 0, j = POLY.length - 1; i < POLY.length; j = i++) { const [xi, yi] = POLY[i], [xj, yj] = POLY[j]; if ((yi > y) !== (yj > y) && x < (xj - xi) * (y - yi) / (yj - yi) + xi) c = !c; } return c; }
+function citySvg() {
+  const r = mulberry32(2026); const pts = [];
+  while (pts.length < 260) { const x = 140 + DX + r() * 320, y = 25 + r() * 750; if (inside(x, y)) pts.push([x, y, r() < 0.12]); }
+  const shops = pts.filter(p => p[2]);
+  let e = '';
+  pts.forEach(([x, y, isShop]) => {
+    if (isShop) return;
+    let best = null, bd = 1e9;
+    shops.forEach(([sx, sy]) => { const d = (sx - x) ** 2 + (sy - y) ** 2; if (d < bd) { bd = d; best = [sx, sy]; } });
+    if (best) e += `<line class="ce" x1="${x.toFixed(1)}" y1="${y.toFixed(1)}" x2="${best[0].toFixed(1)}" y2="${best[1].toFixed(1)}"/>`;
+    if (r() < 0.25) { const s2 = shops[Math.floor(r() * shops.length)]; e += `<line class="ce" x1="${x.toFixed(1)}" y1="${y.toFixed(1)}" x2="${s2[0].toFixed(1)}" y2="${s2[1].toFixed(1)}"/>`; }
+  });
+  const dots = pts.map(([x, y, s]) => `<circle class="${s ? 'd-s' : 'd-a'}" cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${s ? 5 : 3.2}"/>`).join('');
+  const P = [255 + DX, 445], S0 = [295 + DX, 512];
+  return `<svg class="map" viewBox="0 0 640 800" aria-label="Synthetic Mumbai as a payment graph">
+    <path class="shape" d="M${POLY.map(p => p.join(' ')).join(' L')} Z"/>${e}${dots}
+    <path class="m-thread" d="M${P[0]} ${P[1]} Q ${P[0] + 70} ${P[1] + 10} ${S0[0]} ${S0[1]}"/>
+    <circle class="ring" cx="${P[0]}" cy="${P[1]}" r="13"/><circle class="ring" cx="${S0[0]}" cy="${S0[1]}" r="13"/>
+    <text class="who" x="${P[0] - 22}" y="${P[1] - 18}" text-anchor="end">${H.name}</text>
+    <text class="who" x="${S0[0] + 22}" y="${S0[1] + 34}">${shop.name}</text>
+    ${[['Borivali', 205, 110], ['Andheri', 215, 290], ['Ghatkopar', 380, 335], ['Worli', 262, 565], ['Colaba', 300, 752]].map(([t, x, y]) => `<text class="area" x="${x + DX}" y="${y}">${t}</text>`).join('')}
+    <text class="note" x="${140 + DX}" y="796">Stylized, not to scale. Synthetic data.</text>
+  </svg>`;
+}
+
+/* problem chart */
+function chartSvg() {
+  const X = n => 70 + n / 60000 * 650, Y = r => 400 - r / 250 * 360;
+  return `<svg viewBox="0 0 760 470" aria-label="Reads per question as payments grow">
+    <line class="ax" x1="70" y1="400" x2="730" y2="400"/><line class="ax" x1="70" y1="400" x2="70" y2="30"/>
+    <text x="730" y="440" text-anchor="end">payments recorded</text>
+    <text x="78" y="26">reads to answer one question</text>
+    <text x="${X(9612)}" y="424" text-anchor="middle">9,612</text><text x="${X(50000)}" y="424" text-anchor="middle">50,000</text>
+    <path class="pl" d="M${X(945)} ${Y(2)} L${X(9612)} ${Y(48)} L${X(50000)} ${Y(232)}"/>
+    <path class="pl dash" d="M${X(50000)} ${Y(232)} L${X(58000)} ${Y(300)}"/>
+    <path class="gl" d="M${X(945)} ${Y(2)} L${X(58000)} ${Y(2)}"/>
+    <circle class="pt2" cx="${X(9612)}" cy="${Y(48)}" r="8"/><circle class="pt2" cx="${X(50000)}" cy="${Y(232)}" r="8"/>
+    <text class="vl" x="${X(9612) + 16}" y="${Y(48) - 10}">48 reads</text>
+    <text x="${X(9612) + 16}" y="${Y(48) + 14}">measured live</text>
+    <text class="vl" x="${X(50000) - 16}" y="${Y(232) - 12}" text-anchor="end">232 reads</text>
+    <text x="${X(50000) - 16}" y="${Y(232) + 12}" text-anchor="end">emulated</text>
+    <text class="vg" x="${X(30000)}" y="${Y(2) - 14}">GraphPay: 2 reads at any size</text>
+    <text x="${X(945) + 8}" y="462">At 945 payments the two are level.</text>
+  </svg>`;
+}
+
+/* partner visuals */
+function tableToGraphSvg() {
+  let rows = '';
+  for (let i = 0; i < 7; i++) rows += `<rect x="20" y="${60 + i * 34}" width="300" height="28" rx="6" style="fill:var(--bg-2)"/><rect x="30" y="${70 + i * 34}" width="${80 + (i * 37) % 120}" height="8" rx="4" style="fill:var(--muted)"/>`;
+  const nodes = [[520, 90, 1], [700, 120, 1], [610, 250, 1], [470, 210, 0], [560, 330, 0], [740, 260, 0], [660, 360, 0], [450, 330, 0]];
+  const edges = [[3, 0], [3, 2], [4, 2], [5, 1], [5, 2], [6, 2], [7, 0], [7, 2], [6, 1]];
+  return `<svg viewBox="0 0 800 400" aria-label="A table of receipts becomes a graph">
+    <text x="20" y="38" style="font:700 22px 'Baloo 2',sans-serif;fill:var(--ink)">Plain: a growing table</text>
+    ${rows}
+    <path d="M340 190 L410 190" style="stroke:var(--kesar-fill);stroke-width:8" stroke-linecap="round"/><polygon points="420,190 400,176 400,204" style="fill:var(--kesar-fill)"/>
+    <text x="440" y="38" style="font:700 22px 'Baloo 2',sans-serif;fill:var(--ink)">GraphPay: names and lines</text>
+    ${edges.map(([a, b]) => `<line x1="${nodes[a][0]}" y1="${nodes[a][1]}" x2="${nodes[b][0]}" y2="${nodes[b][1]}" style="stroke:var(--violet);stroke-opacity:.5;stroke-width:3"/>`).join('')}
+    ${nodes.map(([x, y, s]) => `<circle cx="${x}" cy="${y}" r="${s ? 24 : 11}" style="fill:${s ? 'var(--kesar-soft)' : 'var(--panel)'};stroke:${s ? 'var(--kesar-fill)' : 'var(--muted)'};stroke-width:3"/>`).join('')}
+    <text x="440" y="392" style="font:16px Mukta,sans-serif;fill:var(--muted)">Big circles: shops with running scoreboards</text>
+  </svg>`;
+}
+function ensSvg() {
+  return `<svg viewBox="0 0 800 400" aria-label="Names, permissions and off switches">
+    <rect x="20" y="20" width="230" height="52" rx="14" style="fill:var(--panel);stroke:var(--line);stroke-width:2"/><text x="135" y="54" text-anchor="middle" style="font:800 24px 'Baloo 2',sans-serif;fill:var(--ink)">graphpay.eth</text>
+    <path d="M60 72 V 140 H 120" style="stroke:var(--kesar-fill);stroke-width:5" fill="none"/>
+    <rect x="120" y="114" width="250" height="52" rx="14" style="fill:var(--panel);stroke:var(--line);stroke-width:2"/><text x="245" y="147" text-anchor="middle" style="font:600 20px Mukta,sans-serif;fill:var(--ink)">priya.graphpay.eth</text>
+    <path d="M160 166 V 230 H 200 M160 230 V 300 H 200" style="stroke:var(--kesar-fill);stroke-width:5" fill="none"/>
+    <rect x="200" y="206" width="250" height="48" rx="14" style="fill:var(--sky-soft)"/><text x="325" y="237" text-anchor="middle" style="font:600 19px Mukta,sans-serif;fill:var(--sky)">payer.priya.graphpay.eth</text>
+    <rect x="200" y="276" width="250" height="48" rx="14" style="fill:var(--sky-soft)"/><text x="325" y="307" text-anchor="middle" style="font:600 19px Mukta,sans-serif;fill:var(--sky)">scout.priya.graphpay.eth</text>
+    <text x="500" y="128" style="font:700 22px 'Baloo 2',sans-serif;fill:var(--ink)">Off switches</text>
+    ${[['Remove', 'hard stop'], ['Expire', 'lapses by itself'], ['Pause', 'status record']].map(([a, b], i) => `<rect x="500" y="${146 + i * 66}" width="270" height="54" rx="14" style="fill:var(--panel);stroke:var(--line);stroke-width:2"/><text x="520" y="${180 + i * 66}" style="font:700 20px Mukta,sans-serif;fill:var(--ink)">${a}</text><text x="620" y="${180 + i * 66}" style="font:17px Mukta,sans-serif;fill:var(--muted)">${b}</text>`).join('')}
+    <text x="20" y="378" style="font:17px Mukta,sans-serif;fill:var(--muted)">Agents edit their own description; only the owner changes the cap.</text>
+  </svg>`;
+}
+function lifecycleSvg() {
+  const st = [['Order', ''], ['Pay', '234,292 gas'], ['Partial refund', '75,344 gas'], ['Renewal', 'same as pay'], ['Cancel', 'no charge'], ['Refused', 'on record']];
+  const xs = st.map((_, i) => 70 + i * 132);
+  return `<svg viewBox="0 0 800 400" aria-label="The payment lifecycle on Whitechain">
+    <line x1="70" y1="150" x2="730" y2="150" style="stroke:var(--kesar-fill);stroke-width:6"/>
+    ${st.map(([a, b], i) => `<circle cx="${xs[i]}" cy="150" r="26" style="fill:${i === 5 ? 'var(--gulab-soft)' : 'var(--kesar-soft)'};stroke:${i === 5 ? 'var(--gulab)' : 'var(--kesar-fill)'};stroke-width:5"/><text x="${xs[i]}" y="210" text-anchor="middle" style="font:700 19px Mukta,sans-serif;fill:var(--ink)">${a}</text><text x="${xs[i]}" y="236" text-anchor="middle" style="font:15px Mukta,sans-serif;fill:var(--muted)">${b}</text>`).join('')}
+    <text x="70" y="60" style="font:700 22px 'Baloo 2',sans-serif;fill:var(--ink)">One checkout contract, the whole lifecycle</text>
+    <text x="70" y="320" style="font:18px Mukta,sans-serif;fill:var(--muted)">The payer signs; our relayer pays the gas. Gas figures are lab measurements</text>
+    <text x="70" y="346" style="font:18px Mukta,sans-serif;fill:var(--muted)">with the real test USDT.</text>
+  </svg>`;
+}
+
+const PLAIN_CODE = `<span class="c">// Plain Arkiv: page through every receipt, add up in the app</span>
+let cursor, page; const orders = {}, refunds = {};
+do {
+  page = await arkiv_query(<span class="s">'type = "receipt" &amp;&amp; dish = "gulab_jamun"'</span>,
+                           { resultsPerPage: 200, cursor });   <span class="c">// 1 read</span>
+  for (const r of page.data) {
+    orders[r.payee] = (orders[r.payee] ?? 0) + 1;
+    if (r.kind === <span class="s">"refund"</span>) refunds[r.payee] = (refunds[r.payee] ?? 0) + 1;
+  }
+  cursor = page.cursor;
+} while (cursor);                                              <span class="c">// 48 reads</span>`;
+const GRAPH_CODE = `<span class="c"># GraphPay: ask the graph</span>
+query {
+  shops(near: <span class="s">"Bandra West"</span>, dish: <span class="s">"gulab jamun"</span>) {    <span class="c"># read 1</span>
+    ens
+    scoreboard { orders refunds refundRate }          <span class="c"># read 2</span>
+  }
+}`;
+const DROPIN = `<span class="c">&lt;!-- any store page, illustrative --&gt;</span>
+&lt;graphpay-checkout shop=<span class="s">"${ens(shop.label)}"</span>
+                   amount=<span class="s">"${usd(shop.price)}"</span> currency=<span class="s">"USDT"</span>&gt;
+&lt;/graphpay-checkout&gt;`;
+
+const slides = [
+  { kind: 'title', title: 'GraphPay', secs: 6, steps: 1,
+    notes: 'This is GraphPay. Before an AI agent pays anyone, it asks, and the answer comes back fast at any scale.',
+    html: `<div class="title-s">
+      <h1 class="brand">GraphPay</h1>
+      <p class="tagline">Ask before you pay.</p>
+      <p class="subline">Identity, memory and payments that keep up when every agent pays.</p>
+      <svg class="thread" viewBox="0 0 1680 240" aria-hidden="true">
+        <line class="t-line" x1="40" y1="100" x2="1640" y2="100"/>
+        <circle class="t-end" cx="40" cy="100" r="14"/><circle class="t-end" cx="1640" cy="100" r="14"/>
+        <text class="t-lbl" x="40" y="160">${H.name}’s agents</text><text class="t-lbl" x="1640" y="160" text-anchor="end">${shop.name}</text>
+        <g${K(1)}>
+          <circle class="t-knot" cx="520" cy="100" r="22"/><text class="t-k" x="520" y="174" text-anchor="middle">Identify</text><text class="t-p" x="520" y="210" text-anchor="middle">ENS</text>
+          <circle class="t-knot" cx="840" cy="100" r="22"/><text class="t-k" x="840" y="174" text-anchor="middle">Remember, fast</text><text class="t-p" x="840" y="210" text-anchor="middle">Arkiv as a graph</text>
+          <circle class="t-knot" cx="1160" cy="100" r="22"/><text class="t-k" x="1160" y="174" text-anchor="middle">Pay</text><text class="t-p" x="1160" y="210" text-anchor="middle">Whitechain</text>
+        </g>
+      </svg>
+      <p class="event">ETHGlobal Mumbai, 5 to 7 November 2026. Built on ENS, Arkiv and Whitechain.</p>
+    </div>` },
+
+  { kind: 'problem', title: 'The problem', secs: 16, steps: 3,
+    notes: `AI agents are starting to pay for us, and soon there will be millions of them. Every payment lands in a ledger that keeps growing. To decide who to trust, a plain Web3 database makes an agent read through the whole thing: ${L.plainReads} reads at ${num(L.receipts)} payments, ${L.emuPlainReads} at ${num(L.emuReceipts)}, and climbing. And the agent itself has no name, no owner and no off switch.`,
+    html: `<div class="prob2">
+      <h2 class="head">When every agent pays, the ledger explodes.</h2>
+      <div class="pgrid">
+        <div>
+          <ul class="qs2">
+            <li${K(1)}><b>Is this shop any good?</b><span>The answer is buried in a ledger that grows with every payment.</span></li>
+            <li${K(1)}><b>Who is this agent?</b><span>A wallet with no name, no owner and no rules anyone can read.</span></li>
+            <li${K(1)}><b>Can I stop it?</b><span>Limits live on someone’s server. A runaway agent keeps spending.</span></li>
+          </ul>
+          <p class="coda"${K(3)}>On a plain Web3 database, every decision reads the whole ledger, and the ledger only grows.</p>
+        </div>
+        <figure class="chart"${K(2)}>${chartSvg()}</figure>
+      </div>
+    </div>` },
+
+  { kind: 'solution', title: 'Our solution', secs: 14, steps: 4,
+    notes: 'GraphPay turns a Web3 database into a graph that agents can ask. ENS gives every agent a name, an owner and an off switch. On Arkiv, every payment becomes a line between two names, and running scoreboards answer in two reads at any size. Whitechain settles USDT in every form a business needs.',
+    html: `<div class="sol">
+      <h2 class="head">GraphPay turns a Web3 database into a graph agents can ask.</h2>
+      <div class="pillars">
+        <div class="pillar"${K(1)}><span class="tag ens">ENS</span><h3>Identify</h3><p>Every person, shop and agent has a name, an owner, limits it can’t change, and an off switch.</p></div>
+        <div class="pillar hot"${K(2)}><span class="tag arkiv">Arkiv</span><h3>Remember, fast</h3><p>Every payment becomes a line between two names. Running scoreboards answer in ${L.graphReads} reads, however big the ledger grows.</p></div>
+        <div class="pillar"${K(3)}><span class="tag wc">Whitechain</span><h3>Pay</h3><p>USDT in every form: agent checkout, store checkout, partial and full refunds, weekly renewals, cancel anytime. No gas for the payer.</p></div>
+      </div>
+      <p class="coda"${K(4)}>Agents that can pay, can be trusted, can be stopped, and decide fast at any scale.</p>
+    </div>` },
+
+  { kind: 'demo', title: 'Two desks, two teams', secs: 8, steps: 3, time: '19:40', partners: ['ens'],
+    cap: 'Every person, shop and agent has an ENS name. Agents work as a team on a shared desk.',
+    notes: `Meet ${H.name} in ${H.area}. Her desk has four agents, each with its own ENS name under hers. Across town, ${shop.name} has its own desk: storefront, risk and dispatch.`,
+    config: ['hero.name', 'hero.ens_label', 'team[].role', 'shop_team[].role', 'shops[0].name', 'shops[0].ens_label'], list: '1',
+    left: M(1, 'concierge', `Hi ${H.name}! Your desk is ready.`) + M(1, 'scout', `I’m ${sub('scout', H.label)}. I find shops.`) + M(1, 'analyst', `I’m ${sub('analyst', H.label)}. I check their records.`) + M(1, 'payer', `I’m ${payer}. I pay, never above ${usd(STORY.cap)} USDT a day.`),
+    right: M(2, 'storefront', `I’m ${sub('storefront', shop.label)}. I take orders and send bills.`) + M(2, 'risk', `I’m ${sub('risk', shop.label)}. I check every buyer.`) + M(2, 'dispatch', `I’m ${sub('dispatch', shop.label)}. I pack and send.`),
+    center: `<div class="tree2"${K(3)}>
+        <div class="tnode root">graphpay.eth</div>
+        <div class="tbr"><div class="tnode"><span class="who">${H.name}</span>${ens(H.label)}</div><div class="leaves">${STORY.team.map(a => `<span class="leaf">${blob(a.color)}${a.id}</span>`).join('')}</div></div>
+        <div class="tbr"><div class="tnode"><span class="who">${shop.name}</span>${ens(shop.label)}</div><div class="leaves">${STORY.shopTeam.map(a => `<span class="leaf">${blob(a.color)}${a.id}</span>`).join('')}</div></div>
+        <p class="foot">Read live from ENS on Sepolia. Each agent’s name sits under its owner’s.</p>
+      </div>` },
+
+  { kind: 'demo', title: 'One message, a whole team', secs: 8, steps: 3, time: '19:42', partners: ['swarm'],
+    cap: 'One message to the concierge, who hands the work to the team.',
+    notes: `${H.name} sends one message. The concierge splits the job on the shared desk: the scout finds shops, the analyst checks their records, the payer waits, inside its daily cap.`,
+    config: ['errand.text', 'errand.budget_usdt', 'errand.deadline', 'agents.payer.cap_per_day', 'shops[0].menu'], list: '26',
+    left: ME(1, E.text) + M(2, 'concierge', `On it. ${at('scout')} find gulab jamun near ${H.area}. ${at('analyst')} check their records. ${at('payer')} stand by: ${usd(STORY.cap)} USDT today.`) + M(3, 'scout', 'Searching.') + M(3, 'payer', 'Standing by.'),
+    right: M(1, 'storefront', `Menu is live: gulab jamun, 6 for ${usd(shop.price)} USDT.${MENU}<span class="k2">Menu photo stored on Swarm</span>`) + M(1, 'dispatch', 'Kitchen open till 10 pm.'),
+    center: `<div class="hand">
+        <div class="h-me"${K(1)}>${H.name}</div>
+        <div class="h-arrow"${K(2)}></div>
+        <div class="h-con"${K(2)}>${blob(AG.concierge.color)}Concierge</div>
+        <div class="h-subs"${K(2)}>
+          <div>${blob(AG.scout.color)}<b>Scout</b><span>finds shops</span></div>
+          <div>${blob(AG.analyst.color)}<b>Analyst</b><span>checks their records</span></div>
+          <div>${blob(AG.payer.color)}<b>Payer</b><span>pays inside the cap</span></div>
+        </div>
+        <div class="h-desk"${K(3)}>They talk on one shared desk, each under its own ENS name, so every message and every payment says exactly who did it.</div>
+      </div>` },
+
+  { kind: 'demo', title: 'Asking a plain Web3 database', secs: 12, steps: 3, time: '19:42', partners: ['arkiv'],
+    cap: 'To rank shops, a plain Arkiv app pages through every receipt and adds them up itself.',
+    notes: `Here is how it works on a plain Web3 database today. Arkiv returns receipts a page at a time. To rank the shops, the scout reads every receipt in the city and does the maths itself: ${L.plainReads} reads and about 1 MB for one question. That was measured in our lab on Arkiv’s Rabdi network.`,
+    config: ['city.size', 'city.shops', 'city.receipts'], list: 'the race item',
+    left: M(1, 'scout', 'Without a graph, I have to read every receipt in the city.') + M(2, 'scout', `<div class="prog"><span>Reading page</span><b class="tick">0</b><span>of ${L.plainReads}</span></div>`) + M(3, 'scout', `Done: ${L.plainReads} reads, about 1 MB, for one question.`),
+    right: M(1, 'storefront', 'Open. 4 orders in the queue.'),
+    center: `<div class="viz">${tableHtml(true, K(1))}<span${K(2)} data-scan="${L.plainReads}"></span></div>
+      <p class="foot"${K(3)}>Each step of the pointer is one read: a page of receipts. Measured in the lab on Arkiv Rabdi: ${num(L.receipts)} receipts, ${L.plainReads} reads, about 1 MB.</p>` },
+
+  { kind: 'demo', title: 'The same receipts, as a graph', secs: 14, steps: 3, time: '19:42', partners: ['arkiv', 'ens'],
+    cap: 'Every payment is a line between two ENS names. Every shop keeps a running scoreboard, updated as it’s written.',
+    notes: 'Now the same receipts, as a graph. The dots are ENS names; the lines are payments, refunds in red. Each shop carries a running scoreboard, updated in the same write as the payment. So the scout asks two things: which shops are near me, and what do their scoreboards say. Two reads, however big the city gets.',
+    config: ['city.graph (derived from payments)'], list: 'the race item, 28',
+    left: M(0, 'scout', `Done: ${L.plainReads} reads, about 1 MB, for one question.`) + M(2, 'scout', `With GraphPay: shops near ${H.area}, 1 read.`) + M(3, 'scout', 'Their scoreboards, 1 more. 2 reads in total.') + M(3, 'analyst', 'Comparing now.'),
+    right: M(0, 'storefront', 'Open. 4 orders in the queue.') + M(3, 'risk', 'Our scoreboard moves with every sale.'),
+    center: `<div class="viz">${tableHtml(false, ' data-x="1"')}<div class="gwrap"${K(1)}>${graphSvg()}</div></div>` },
+
+  { kind: 'demo', title: 'Refund rate, two ways', secs: 14, steps: 3, time: '19:43', partners: ['arkiv'],
+    cap: 'Plain Arkiv can filter and sort, but not add up per shop. GraphPay keeps those totals as it writes.',
+    notes: `Here are the two queries. On plain Arkiv, the app pages through every receipt and counts orders and refunds per shop itself. On GraphPay, one GraphQL query reads the shops and their scoreboards. The refund rate is just refunds divided by orders: ${trap.name} refunds ${trap.refunds} of ${num(trap.orders)}, ${pct(trap.refunds, trap.orders)}. ${shop.name}: ${shop.refunds} of ${num(shop.orders)}, ${pct(shop.refunds, shop.orders)}.`,
+    config: ['shops[].orders', 'shops[].refunds', 'rules.max_refund_rate'], list: '27 and the trap-shop item',
+    left: M(0, 'scout', '2 reads in total.') + M(3, 'analyst', `${at('payer')} ${trap.name}: ${trap.refunds} refunds in ${num(trap.orders)} orders, ${pct(trap.refunds, trap.orders)}. Out. ${shop.name}: ${shop.refunds} in ${num(shop.orders)}, ${pct(shop.refunds, shop.orders)}. Go.`) + M(3, 'payer', `Got it: ${shop.name}.`),
+    right: M(3, 'risk', `Our scoreboard: ${num(shop.orders)} orders, ${shop.refunds} refunds.`),
+    center: `<div class="qgrid">
+        <div class="qp"${K(1)}><h5><span>Plain Arkiv</span><span class="chip bad">${L.plainReads} reads, about 1 MB</span></h5><pre>${PLAIN_CODE}</pre></div>
+        <div class="qp"${K(2)}><h5><span>GraphPay, GraphQL</span><span class="chip good">${L.graphReads} reads</span></h5><pre>${GRAPH_CODE}</pre></div>
+        <table class="res"${K(3)}><tr><th>Shop</th><th class="n">Orders</th><th class="n">Refunds</th><th class="n">Refund rate</th></tr>
+          ${SH.map((s, i) => `<tr class="${s.trap ? 'trap' : (i === 0 ? 'best' : '')}"><td>${s.name}</td><td class="n">${num(s.orders)}</td><td class="n">${s.refunds}</td><td class="n">${pct(s.refunds, s.orders)}</td></tr>`).join('')}
+        </table>
+      </div>` },
+
+  { kind: 'demo', title: 'The shop checks the buyer back', secs: 10, steps: 3, time: '19:43', partners: ['ens', 'arkiv'],
+    cap: 'Trust runs both ways: the shop’s risk agent asks the same graph about the buyer, and ENS about its owner.',
+    notes: `Before it bills, ${shop.name}’s risk agent asks GraphPay about the buyer: whose agent is this, how has it behaved? ${H.orders} paid orders, no disputes. And ENS confirms the agent is switched on and owned by ${H.name}.`,
+    config: ['hero.history.orders', 'hero.history.disputes', 'shops[0].accept_rules'], list: '19',
+    left: M(1, 'payer', `${at('storefront')} 6 gulab jamun, please.`),
+    right: M(1, 'storefront', `${at('risk')} new buyer: ${payer}. Check them?`) + M(2, 'risk', `On GraphPay: owner ${ens(H.label)}, ${H.orders} paid orders, 0 disputes.`) + M(3, 'risk', 'ENS says switched on, same owner. OK to bill.') + M(3, 'storefront', 'Billing now.'),
+    center: `<div class="viz">${buyerSvg()}</div>` },
+
+  { kind: 'demo', title: 'The payment, step by step', secs: 20, steps: STEPS.length, auto: { from: 1, to: STEPS.length, ms: 1100 }, time: '19:44', partners: ['ens', 'wc', 'arkiv'],
+    cap: 'Every step of an x402 payment, live.',
+    notes: 'This is the whole x402 flow, live. The shop answers 402 with a bill. The payer signs once, with no gas. The facilitator verifies the signature and asks ENS whether the agent is still switched on. Then it settles on Whitechain, our relayer pays the gas, and the mirror writes the payment to Arkiv. Both phones follow every step.',
+    config: ['shops[0].price_usdt', 'order.id', 'order.eta', 'agents.payer.cap_per_day'], list: '18, 19, 24',
+    left: M(0, 'payer', `${at('storefront')} 6 gulab jamun, please.`) +
+      M(2, 'payer', `Bill received.<div class="c2"><div class="r"><span class="k2">Order ${STORY.order.id}</span><span class="k2">valid 5 min</span></div><div class="amt">${usd(shop.price)} USDT</div><span class="k2">to ${shop.name}, on Whitechain</span></div>`) +
+      M(3, 'payer', `Inside today’s ${usd(STORY.cap)} cap. Signed once, no gas.`) +
+      M(4, 'payer', 'Sent the signed payment.') +
+      M(9, 'concierge', 'The shop is packing it.') +
+      M(14, 'payer', `Paid.<div class="c2"><div class="r"><span class="okc">Settled</span><span class="k2">gas you paid: 0</span></div><div class="amt">${usd(shop.price)} USDT</div><span class="lnk">${STORY.tx} on the explorer</span></div>`) +
+      M(14, 'concierge', `${atP} done. Arriving by ${STORY.order.eta}.`),
+    right: M(1, 'storefront', `Order request from ${payer}.`) +
+      M(2, 'storefront', `Bill sent: ${usd(shop.price)} USDT, order ${STORY.order.id}.`) +
+      M(5, 'storefront', 'Verifying with GraphPay.') +
+      M(8, 'storefront', 'Valid: signature, agent, cap.') +
+      M(9, 'dispatch', 'Packing 6 gulab jamun.') +
+      M(10, 'storefront', 'Settling on Whitechain.') +
+      M(13, 'storefront', `New order paid.<div class="c2"><div class="amt">${usd(shop.price)} USDT</div><span class="k2">from ${payer}, ${H.orders} orders, 0 disputes</span></div>`) +
+      M(14, 'dispatch', 'Out for delivery.') +
+      M(15, 'risk', `Scoreboard: ${num(shop.orders + 1)} orders.`),
+    center: `<div class="viz">${seqSvg()}</div><div class="caps">${seqCaps()}</div>` },
+
+  { kind: 'demo', title: 'A refund, with proof', secs: 16, steps: 9, auto: { from: 1, to: 9, ms: 1300 }, time: '20:21', partners: ['swarm', 'arkiv', 'wc'],
+    cap: 'The photo goes to Swarm, the request to Arkiv, the money back on Whitechain.',
+    notes: `One sweet arrived squashed. ${H.name} attaches a photo. It’s encrypted on her phone and stored on Swarm; Arkiv keeps only a pointer. The shop sees the photo and refunds ${usd(STORY.refund.amount)} USDT in one tap, on Whitechain. The refund lands on the shop’s scoreboard, where every future agent will see it.`,
+    config: ['refund.reason', 'refund.items', 'refund.amount_usdt', 'refund.photo'], list: '20, 17',
+    left: `<div class="msg me"${K(1)}><div class="txt">${STORY.refund.reason}<div class="slot" data-x="2">Add a photo</div><span${K(2)}>${PHOTO}</span></div></div>` +
+      M(4, 'payer', 'Photo stored on Swarm, encrypted.') +
+      M(5, 'payer', `${at('storefront')} refund request: 1 of 6, photo attached.`) +
+      M(9, 'payer', `Refunded ${usd(STORY.refund.amount)} USDT.`) +
+      M(9, 'concierge', `${atP} sorted.`),
+    right: M(6, 'storefront', `Refund request from ${payer}.${PHOTO}<div class="btns"><span class="go">Partial ${usd(STORY.refund.amount)}</span><span>Full ${usd(shop.price)}</span></div>`) +
+      M(7, 'storefront', `Partial refund sent: ${usd(STORY.refund.amount)} USDT.`) +
+      M(8, 'risk', `Refunds ${shop.refunds} → ${shop.refunds + 1}. Rate ${pct(shop.refunds + 1, shop.orders + 1)}.`),
+    center: `<div>${pipeSvg()}</div><div class="caps">${REFUND_CAPS.map((c, j) => `<p data-k="${j + 1}"${j + 1 < 9 ? ` data-x="${j + 2}"` : ''}>${c}</p>`).join('')}</div>
+      <div class="ent"${K(5)} style="margin-top:6px"><h4>Refund request on Arkiv</h4><dl>
+        <dt>type</dt><dd>refund_request</dd><dt>order</dt><dd>${STORY.order.id}</dd><dt>photo</dt><dd>Swarm ${STORY.swarmRef}, encrypted</dd><dt>asked</dt><dd>${usd(STORY.refund.amount)} USDT, 1 of 6</dd>
+      </dl></div>
+      <div class="chips">
+        <span class="tag swarm"${K(4)}>Swarm reference ${STORY.swarmRef}, encrypted</span>
+        <span class="tag arkiv"${K(5)}>Refund request on Arkiv, pointing to the photo</span>
+        <span class="tag wc"${K(7)}>${L.refundGas} gas per refund (lab)</span>
+        <span class="tag arkiv"${K(8)}>Scoreboard: ${shop.refunds + 1} refunds in ${num(shop.orders + 1)} orders</span>
+      </div>` },
+
+  { kind: 'demo', title: 'Every way a business gets paid', secs: 12, steps: 3, time: 'Sun 10:00', partners: ['wc'],
+    cap: 'Agent checkout, store checkout, refunds, renewals and cancel anytime, on one checkout contract.',
+    notes: `It’s Sunday: ${H.name}’s sweets box renews by itself, inside the same cap, and the pair link between her and the shop grows every week. The shop exports the month for its accountant. And any store can add the same checkout in about 20 lines.`,
+    config: ['renewal.item', 'renewal.price_usdt', 'renewal.day', 'export.month'], list: '21, 22, 23',
+    left: M(1, 'payer', `${STORY.renewal.item} renewed: ${usd(STORY.renewal.price)} USDT. Week ${STORY.renewal.weeks}.`) + M(1, 'concierge', `${atP} you can cancel the box anytime.`),
+    right: M(1, 'storefront', `Repeat buyer: ${STORY.renewal.weeks} Sundays in a row.`) + M(2, 'storefront', 'November exported for the accountant: CSV.'),
+    center: `<div class="forms">
+        <div class="form hot"${K(1)}><b>Agent checkout</b><small>x402, one signature</small></div>
+        <div class="form hot"${K(1)}><b>Weekly renewal</b><small>inside the cap</small></div>
+        <div class="form"${K(1)}><b>Partial refund</b><small>one tap</small></div>
+        <div class="form"${K(1)}><b>Full refund</b><small>one tap</small></div>
+        <div class="form"${K(2)}><b>Cancel anytime</b><small>stops future orders</small></div>
+        <div class="form"${K(2)}><b>Refused, on record</b><small>blocked payments leave a trail</small></div>
+        <div class="form hot"${K(2)}><b>Accountant export</b><small>one file per month</small></div>
+        <div class="form hot"${K(3)}><b>Store checkout</b><small>a drop-in, about 20 lines</small></div>
+      </div>
+      <div class="pair"${K(1)}><span>${H.name}</span><span class="ln"><b>${STORY.renewal.weeks} Sundays</b></span><span>${shop.name}</span></div>
+      <pre class="code"${K(3)}>${DROPIN}</pre>` },
+
+  { kind: 'demo', title: 'Agents can’t raise their own limits', secs: 10, steps: 3, time: 'Sun 20:30', partners: ['ens'],
+    cap: 'Each agent edits only what its owner allows. ENSv2 enforces it, not our app.',
+    notes: 'Agents get only the rights their owner gives them. The payer can update its own description. When it tries to raise its own cap, the change reverts on ENS, and the concierge tells Priya.',
+    config: ['agents.payer.records', 'records.cap_key', 'records.description_key'], list: '2',
+    left: M(1, 'payer', 'Updated my description.') + M(2, 'payer', 'Trying to raise my cap to 60 USDT.', 'alarm') + M(2, 'payer', 'Refused by ENS.') + M(3, 'concierge', `${atP} the payer tried to raise its own cap. Blocked.`),
+    right: M(0, 'storefront', `Repeat buyer: ${STORY.renewal.weeks} Sundays in a row.`),
+    center: `<div class="recs"><h4>${payer}</h4><dl>
+        <dt>description</dt><dd>Pays for ${H.name}’s errands</dd><dd class="okc" style="color:var(--pista)">agent can edit</dd>
+        <dt>cap</dt><dd>${usd(STORY.cap)} USDT a day</dd><dd style="color:var(--gulab)">owner only</dd>
+        <dt>owner</dt><dd>${ens(H.label)}</dd><dd></dd>
+      </dl></div>
+      <div class="att ok"${K(1)}><span class="mk">✓</span><div><b>Edit its own description</b><small>allowed by its role on the name</small></div></div>
+      <div class="att no"${K(2)}><span class="mk">✕</span><div><b>Raise its own cap to 60 USDT</b><small>reverted: EACUnauthorizedAccountRoles</small></div></div>` },
+
+  { kind: 'demo', title: 'Stopped, live', secs: 16, steps: 7, auto: { from: 1, to: 7, ms: 1300 }, time: 'Sun 20:31', partners: ['ens', 'wc'],
+    cap: 'Safety doesn’t depend on the agent behaving: every payment re-checks ENS.',
+    notes: `${H.name} pauses the payer in one tap. The status on its ENS name changes, and both desks see it. Then we demo the worst case: the agent was hijacked and tries to pay anyway. The facilitator asks ENS, sees it’s paused, and refuses. Nothing moves, and the refusal itself is on record on Whitechain.`,
+    config: ['killswitch.method', 'errand_2.text'], list: '3, 27',
+    left: `<div class="msg me"${K(1)}><div class="txt"><div class="tog"><span>Payer</span><span class="sw"></span></div>Paused by you.</div></div>` +
+      M(3, 'concierge', 'Payer is paused on ENS.') +
+      M(4, 'payer', `Signing ${usd(shop.price)} USDT for another box.`, 'alarm') +
+      M(7, 'concierge', `${atP} blocked. No money moved.`),
+    right: M(3, 'risk', `${payer} is paused by its owner.`) + M(5, 'storefront', 'Verifying with GraphPay.') + M(6, 'storefront', 'Refused: agent paused. Nothing moved.'),
+    center: `<ol class="chain">
+        <li data-l="1"><span class="who">${H.name}</span><span class="what">Taps pause<small>one tap on her desk</small></span></li>
+        <li data-l="2"><span class="who">ENS</span><span class="what">Status record: paused<small>a small Sepolia transaction</small></span></li>
+        <li data-l="3"><span class="who">GraphPay</span><span class="what">Watcher updates both desks<small>nothing keeps using stale trust</small></span></li>
+        <li data-l="4"><span class="who">Payer</span><span class="what">Hijacked, it signs anyway<small>the worst case, on purpose</small></span></li>
+        <li data-l="5"><span class="who">Facilitator</span><span class="what">Asks ENS before paying<small>registry state, not cached trust</small></span></li>
+        <li class="stop" data-l="6"><span class="who">Refused</span><span class="what">No USDT moves<small>the shop sees why</small></span></li>
+        <li data-l="7"><span class="who">Whitechain</span><span class="what">The refusal is on record<small>${L.refuseGas} gas (lab)</small></span></li>
+      </ol>` },
+
+  { kind: 'wide', title: 'How one payment is written', secs: 14, steps: 3, partners: ['arkiv', 'ens'],
+    notes: `On plain Arkiv, a payment is one more flat row in a table that grows forever. GraphPay writes the same payment as a graph, in one transaction: a line between two ENS names, both scoreboards bumped, the pair link, and a safety anchor. Zoom out, and that’s our synthetic Mumbai: every dot a name, every line a payment.`,
+    config: ['city.size', 'city.label'], list: '15',
+    html: () => `<header class="top"><h2 class="title">How one payment is written</h2>${partnersHtml(['arkiv', 'ens'])}</header>
+      <div class="wide-grid">
+        <div style="display:flex;flex-direction:column;gap:18px">
+          <div class="ent"${K(1)}><h4>Plain Arkiv: one flat row</h4><dl>
+            <dt>type</dt><dd>receipt</dd><dt>payer</dt><dd>${payer}</dd><dt>payee</dt><dd>${ens(shop.label)}</dd><dt>amount</dt><dd>${usd(shop.price)} USDT</dd><dt>tx</dt><dd>${STORY.tx}</dd>
+          </dl><p>One more row in a table that grows with every payment. Every question reads it again.</p></div>
+          <div class="ent"${K(2)}><h4>GraphPay: the same payment, as a graph</h4>
+            <svg class="gsvg" viewBox="0 0 800 170" style="height:170px" aria-label="One payment as a line between two names">
+              <line class="e hot" x1="120" y1="80" x2="680" y2="80"/>
+              <circle class="n me" cx="120" cy="80" r="26"/><circle class="n shop" cx="680" cy="80" r="30"/>
+              <text class="lb" x="120" y="135" text-anchor="middle">payer.priya</text><text class="lb" x="680" y="135" text-anchor="middle">${shop.name}</text>
+              <text class="tagt" x="400" y="66" text-anchor="middle">${usd(shop.price)} USDT</text>
+              <text class="mu" x="120" y="162" text-anchor="middle">scoreboard +1</text><text class="mu" x="680" y="162" text-anchor="middle">scoreboard +1</text><text class="mu" x="400" y="110" text-anchor="middle">pair link +1</text>
+            </svg>
+            <p>One transaction, about 5 records: the line, two scoreboards, the pair link and a safety anchor. About ${L.arkivTglm} tGLM (lab).</p></div>
+        </div>
+        <div${K(3)} style="position:relative">${citySvg()}</div>
+      </div>${configHtml({ config: ['city.size', 'city.label'], list: '15' })}` },
+
+  { kind: 'partner', title: 'Arkiv', secs: 12, steps: 2,
+    notes: `For Arkiv, we turn a growing table into a graph agents can ask. ${L.plainReads} reads become ${L.graphReads} today, ${L.emuPlainReads} become ${L.graphReads} at ${num(L.emuReceipts)} payments, and the gap grows with the data. It also keeps history with the right owner when a shop changes hands.`,
+    html: `<div class="pt">
+      <div class="pt-head"><span class="tag arkiv big">Arkiv</span><h2 class="head2">From a growing table to a graph agents can ask</h2></div>
+      <div class="pt-grid">
+        <figure class="pt-viz"${K(1)}>${tableToGraphSvg()}</figure>
+        <div class="tiles">
+          <div class="tile"${K(1)}><b>${L.plainReads} → ${L.graphReads}</b><span>reads per question</span><small>${num(L.receipts)} payments, live on Arkiv Rabdi (lab)</small></div>
+          <div class="tile"${K(1)}><b>24× fewer</b><span>reads, and the gap grows</span><small>level at 945 payments</small></div>
+          <div class="tile"${K(1)}><b>${L.emuPlainReads} → ${L.graphReads}</b><span>reads at ${num(L.emuReceipts)} payments</span><small>5 MB down to 32 KB, emulated (lab)</small></div>
+          <div class="tile"${K(2)}><b>Right owner</b><span>when a shop changes hands</span><small>keyed by ENS name plus epoch; the plain way got it wrong (lab)</small></div>
+          <div class="tile"${K(2)}><b>With proof</b><span>every answer lists its reads</span><small>anyone can check it</small></div>
+          <div class="tile"${K(2)}><b>1 transaction</b><span>about 5 records per payment</span><small>about ${L.arkivTglm} tGLM (lab)</small></div>
+        </div>
+      </div>
+      <p class="coda2"${K(2)}>What we add to Arkiv: running totals kept as it writes, a graph keyed by ENS names, and a GraphQL and MCP front door for apps and agents. Swarm bonus: photos encrypted on Swarm, pointed to from Arkiv.</p>
+    </div>` },
+
+  { kind: 'partner', title: 'ENS', secs: 10, steps: 2,
+    notes: 'For ENS: every agent has a name under its owner, permissions it can’t override, and three off switches. Every payment re-checks the name before money moves.',
+    html: `<div class="pt">
+      <div class="pt-head"><span class="tag ens big">ENS</span><h2 class="head2">A name, an owner and an off switch for every agent</h2></div>
+      <div class="pt-grid">
+        <figure class="pt-viz"${K(1)}>${ensSvg()}</figure>
+        <div class="tiles">
+          <div class="tile"${K(1)}><b>13 agents</b><span>4 owners, real ENSv2 names</span><small>on Sepolia (lab)</small></div>
+          <div class="tile"${K(1)}><b>0 transactions</b><span>per synthetic name</span><small>one wildcard names thousands</small></div>
+          <div class="tile"${K(1)}><b>Every payment</b><span>re-checks ENS first</span><small>registry state and epoch</small></div>
+          <div class="tile"${K(2)}><b>Can’t raise its cap</b><span>agents edit only their own records</span><small>reverts: EACUnauthorizedAccountRoles</small></div>
+          <div class="tile"${K(2)}><b>3 off switches</b><span>remove, expire or pause</span><small>the owner’s call</small></div>
+          <div class="tile"${K(2)}><b>Agent records</b><span>description and MCP endpoint</span><small>on each name</small></div>
+        </div>
+      </div>
+      <p class="coda2"${K(2)}>ENSv2 is the spine, not a label: identity, permissions and the off switch all live on the name, read live, never hard-coded.</p>
+    </div>` },
+
+  { kind: 'partner', title: 'Whitechain', secs: 12, steps: 2,
+    notes: 'For Whitechain: a business gets paid in USDT from the first checkout to what comes after. The payer never pays gas, and every number here was measured with the real test USDT.',
+    html: `<div class="pt">
+      <div class="pt-head"><span class="tag wc big">Whitechain</span><h2 class="head2">USDT, every way a business gets paid</h2></div>
+      <div class="pt-grid">
+        <figure class="pt-viz"${K(1)}>${lifecycleSvg()}</figure>
+        <div class="tiles">
+          <div class="tile"${K(1)}><b>0 gas</b><span>for the payer</span><small>one signature; our relayer pays</small></div>
+          <div class="tile"${K(1)}><b>${L.payWbt} WBT</b><span>gas per payment</span><small>${L.payGas} gas, measured (lab)</small></div>
+          <div class="tile"${K(1)}><b>13 events</b><span>the full lifecycle, on-chain</span><small>verified contract (lab)</small></div>
+          <div class="tile"${K(2)}><b>4 roles</b><span>admin, submitter, policy, refunder</span><small>a leaked key can do only one job</small></div>
+          <div class="tile"${K(2)}><b>About 20 lines</b><span>to add checkout to a store</span><small>the drop-in kit</small></div>
+          <div class="tile"${K(2)}><b>Both views</b><span>the shop’s and the customer’s</span><small>on every step</small></div>
+        </div>
+      </div>
+      <p class="coda2"${K(2)}>Agent and store checkout, partial and full refunds, weekly renewals, cancel anytime, and an export for the accountant: a general payments toolkit, not a one-off demo.</p>
+    </div>` },
+
+  { kind: 'close', title: 'Agents that decide fast, pay safely, and can be stopped.', secs: 16, steps: 3,
+    notes: 'When every agent pays, the ledger explodes. GraphPay turns a Web3 database into a graph agents can ask in two reads, gives every agent a name, an owner and an off switch, and settles USDT on Whitechain. Agents that decide fast, pay safely, and can be stopped. Thank you.',
+    html: `<div class="close-s">
+      <h2 class="head">Agents that decide fast, pay safely, and can be stopped.</h2>
+      <dl class="recap">
+        <dt${K(1)}>The problem</dt><dd${K(1)}>Agent payments will explode. On a plain Web3 database, every decision reads the whole ledger, and agents have no name and no off switch.</dd>
+        <dt${K(2)}>Our answer</dt><dd${K(2)}>GraphPay turns Arkiv into a graph agents can ask in ${L.graphReads} reads, gives every agent a name, an owner and an off switch on ENS, and settles USDT on Whitechain.</dd>
+        <dt${K(3)}>What it proves</dt><dd${K(3)}>24× fewer reads today, and the gap grows with every payment. Every agent named, limited and stoppable, live. Gasless USDT with refunds and renewals.</dd>
+      </dl>
+      <p class="links"${K(3)}>Decentralized, secure and verifiable. Live demo and code links go here at submission. Built with AI, fully disclosed.</p>
+    </div>` }
+];
+
+function build(sl) {
+  let inner;
+  if (sl.kind === 'demo') {
+    inner = `<header class="top"><h2 class="title">${sl.title}</h2>${partnersHtml(sl.partners)}</header>
+      <div class="cols">
+        <figure class="device">${desk('hero', sl.left, sl.time)}<figcaption>${H.name}’s phone</figcaption></figure>
+        <div class="explain"><p class="cap">${sl.cap}</p>${sl.center}</div>
+        <figure class="device">${desk('shop', sl.right, sl.time)}<figcaption>${shop.name}’s phone</figcaption></figure>
+      </div>${configHtml(sl)}`;
+  } else {
+    inner = typeof sl.html === 'function' ? sl.html() : sl.html;
+  }
+  const kind = sl.kind === 'demo' ? 'demo' : sl.kind === 'wide' ? 'wide' : sl.kind;
+  return `<section class="slide is-${kind}" aria-label="${plain(sl.title)}">${inner}</section>`;
+}
+
+const stage = document.getElementById('stage');
+const viewport = document.getElementById('viewport');
+const notesEl = document.getElementById('notes');
+stage.innerHTML = slides.map(build).join('') +
+  `<div class="badge">Draft deck: sample names and prices; numbers marked lab were measured before the event</div><div class="count" id="count"></div><div class="progress"><span id="prog"></span></div>`;
+const els = Array.from(stage.querySelectorAll('.slide'));
+const reduce = window.matchMedia ? window.matchMedia('(prefers-reduced-motion: reduce)').matches : false;
+let S = 0, KS = 0, t0 = null, slideT0 = Date.now(), lastS = -1, autoT = null;
+
+function runCounters(root) {
+  const list = root.matches('[data-count]') ? [root] : Array.from(root.querySelectorAll('[data-count]'));
+  list.forEach(el => {
+    const to = Number(el.dataset.count);
+    cancelAnimationFrame(el._raf);
+    if (reduce) { el.textContent = to; return; }
+    const dur = to > 10 ? 1600 : 450, start = performance.now();
+    const tick = now => { const p = Math.min(1, (now - start) / dur); el.textContent = Math.round(to * p); if (p < 1) el._raf = requestAnimationFrame(tick); };
+    el._raf = requestAnimationFrame(tick);
+  });
+}
+function resetCounters(root) {
+  const list = root.matches('[data-count]') ? [root] : Array.from(root.querySelectorAll('[data-count]'));
+  list.forEach(el => { cancelAnimationFrame(el._raf); el.textContent = '0'; });
+}
+function scanParts(trig) {
+  const slide = trig.closest('.slide'); const tbl = slide.querySelector('.tbl.live');
+  return tbl ? { slide, tbl, rows: tbl.querySelector('.rows'), ptr: tbl.querySelector('.ptr'), R: tbl.querySelector('.sc-reads'), C: tbl.querySelector('.sc-rcpts'), MB: tbl.querySelector('.sc-mb'), ticks: slide.querySelectorAll('.tick') } : null;
+}
+function startScan(trig) {
+  const p = scanParts(trig); if (!p) return;
+  const total = Number(trig.dataset.scan), rowH = 34, vis = 12; let i = 0;
+  clearInterval(p.tbl._iv); p.tbl.classList.add('scanning');
+  const step = () => {
+    const off = Math.max(0, i - (vis - 3));
+    p.rows.style.transform = `translateY(${-off * rowH}px)`;
+    p.ptr.style.transform = `translateY(${(i - off) * rowH}px)`;
+    p.R.textContent = i + 1;
+    p.C.textContent = num(Math.round((i + 1) / total * L.receipts));
+    p.MB.textContent = ((i + 1) / total).toFixed(2);
+    p.ticks.forEach(t => { t.textContent = i + 1; });
+    i++;
+    if (i >= total) { clearInterval(p.tbl._iv); setTimeout(() => p.tbl.classList.remove('scanning'), 400); }
+  };
+  if (reduce) { i = total - 1; step(); return; }
+  step(); p.tbl._iv = setInterval(step, 65);
+}
+function resetScan(trig) {
+  const p = scanParts(trig); if (!p) return;
+  clearInterval(p.tbl._iv); p.tbl.classList.remove('scanning');
+  p.rows.style.transform = ''; p.ptr.style.transform = '';
+  p.R.textContent = '0'; p.C.textContent = '0'; p.MB.textContent = '0.00';
+  p.ticks.forEach(t => { t.textContent = '0'; });
+}
+const fmt = ms => { const s = Math.max(0, Math.floor(ms / 1000)); return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`; };
+function updateNotes() {
+  if (S !== lastS) { slideT0 = Date.now(); lastS = S; }
+  const sl = slides[S];
+  const planned = slides.slice(0, S).reduce((a, b) => a + b.secs, 0);
+  const total = slides.reduce((a, b) => a + b.secs, 0);
+  notesEl.querySelector('.n-title').textContent = `${S + 1}. ${plain(sl.title)}`;
+  notesEl.querySelector('.n-meta').textContent = `Target ${sl.secs} s. Planned start ${fmt(planned * 1000)} of ${fmt(total * 1000)}.`;
+  notesEl.querySelector('.n-text').textContent = sl.notes;
+}
+function apply(i, k) {
+  const root = els[i];
+  root.querySelectorAll('[data-k]').forEach(el => {
+    const kk = Number(el.dataset.k), on = kk <= k, was = el.classList.contains('on');
+    el.classList.toggle('on', on);
+    el.classList.toggle('now', kk === k);
+    if (on && !was) { runCounters(el); if (el.hasAttribute('data-scan')) startScan(el); }
+    if (!on && was) { resetCounters(el); if (el.hasAttribute('data-scan')) resetScan(el); }
+  });
+  root.querySelectorAll('[data-x]').forEach(el => { el.classList.toggle('out', k >= Number(el.dataset.x)); });
+  root.querySelectorAll('[data-l]').forEach(el => { const l = Number(el.dataset.l); el.classList.toggle('lit', k >= l); el.classList.toggle('now', k === l); });
+}
+function show(i, k) {
+  i = Math.max(0, Math.min(slides.length - 1, i));
+  const max = slides[i].steps || 0;
+  k = Math.max(0, Math.min(max, k));
+  if (i !== S) els[S].classList.remove('active');
+  els[i].classList.add('active');
+  S = i; KS = k;
+  apply(i, k);
+  document.getElementById('count').textContent = `${i + 1} / ${slides.length}`;
+  document.getElementById('prog').style.width = `${(i + 1) / slides.length * 100}%`;
+  const h = `#s${i + 1}`;
+  if (location.hash !== h) { try { history.replaceState(null, '', h); } catch (e) {} }
+  updateNotes();
+}
+function stopAuto() { clearTimeout(autoT); autoT = null; }
+function schedule() {
+  const a = slides[S].auto;
+  if (a && KS >= a.from && KS < a.to) autoT = setTimeout(() => { autoT = null; next(true); }, reduce ? Math.max(a.ms, 1600) : a.ms);
+}
+function next(fromAuto) {
+  if (!fromAuto) stopAuto();
+  if (!t0) t0 = Date.now();
+  const max = slides[S].steps || 0;
+  if (KS < max) show(S, KS + 1); else if (S < slides.length - 1) show(S + 1, 0);
+  schedule();
+}
+function prev() { stopAuto(); if (KS > 0) show(S, KS - 1); else if (S > 0) show(S - 1, slides[S - 1].steps || 0); }
+function toggleNotes() { notesEl.classList.toggle('open'); }
+function toggleConfig() { stage.classList.toggle('no-config'); }
+function toggleFull() {
+  const d = document;
+  if (!d.fullscreenElement) { const p = d.documentElement.requestFullscreen && d.documentElement.requestFullscreen(); if (p && p.catch) p.catch(() => {}); }
+  else if (d.exitFullscreen) d.exitFullscreen();
+}
+function toggleTheme() {
+  const r = document.documentElement;
+  const dark = r.dataset.theme ? r.dataset.theme === 'dark' : (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
+  r.dataset.theme = dark ? 'light' : 'dark';
+}
+function fit() {
+  const r = viewport.getBoundingClientRect();
+  const s = Math.min(r.width / 1920, r.height / 1080) || 1;
+  stage.style.transform = `translate(-50%, -50%) scale(${s})`;
+}
+function fromHash() { const m = /^#s(\d+)$/.exec(location.hash); return m ? Math.min(slides.length, Math.max(1, Number(m[1]))) - 1 : 0; }
+
+document.addEventListener('keydown', e => {
+  if (e.metaKey || e.ctrlKey || e.altKey) return;
+  const key = e.key;
+  if (key === 'ArrowRight' || key === 'PageDown' || key === ' ' || key === 'Enter') { e.preventDefault(); next(); }
+  else if (key === 'ArrowLeft' || key === 'PageUp') { e.preventDefault(); prev(); }
+  else if (key === 'Home') { stopAuto(); show(0, 0); }
+  else if (key === 'End') { stopAuto(); show(slides.length - 1, slides[slides.length - 1].steps || 0); }
+  else if (key === 'n' || key === 'N') toggleNotes();
+  else if (key === 'c' || key === 'C') toggleConfig();
+  else if (key === 'f' || key === 'F') toggleFull();
+  else if (key === 't' || key === 'T') toggleTheme();
+  else if (key === 'r' || key === 'R') { stopAuto(); show(S, 0); }
+});
+viewport.addEventListener('click', e => {
+  const r = viewport.getBoundingClientRect();
+  if ((e.clientX - r.left) / r.width < 0.33) prev(); else next();
+});
+document.getElementById('hud').addEventListener('click', e => {
+  const b = e.target.closest('button');
+  if (!b) return;
+  const act = { prev, next: () => next(), notes: toggleNotes, config: toggleConfig, full: toggleFull }[b.dataset.act];
+  if (act) act();
+});
+addEventListener('resize', fit);
+addEventListener('hashchange', () => { const i = fromHash(); if (i !== S) { stopAuto(); show(i, 0); } });
+setInterval(() => {
+  const el = notesEl.querySelector('.n-clock');
+  el.textContent = t0 ? `Elapsed ${fmt(Date.now() - t0)}. This slide ${fmt(Date.now() - slideT0)}.` : 'The clock starts when you first advance.';
+}, 500);
+fit();
+show(fromHash(), 0);
+})();
+</script>
+</body>
+</html>
