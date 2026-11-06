@@ -1,6 +1,6 @@
 # ADR-0063: Both SDKs on npm under @graphpay_ethglobal by 13:00 Friday
 
-Status: accepted · Date: 2026-11-06 09:30 IST · Decided by: founder (the 09:35 brief, `docs/thinking-partner/briefs/0935-sdk-publish-and-handoff.md`; it replaces his 09:15 message naming `@graphpay`) · Source: that brief
+Status: accepted · Date: 2026-11-06 09:30 IST · Decided by: founder (the 09:35 brief, `docs/archive/thinking-partner-briefs/0935-sdk-publish-and-handoff.md`; it replaces his 09:15 message naming `@graphpay`) · Source: that brief
 
 ## Decision
 

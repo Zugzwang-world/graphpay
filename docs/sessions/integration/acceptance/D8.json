@@ -1,7 +1,7 @@
 {
   "id": "D8",
-  "at": "2026-11-05T22:53:52.820Z",
-  "pass": true,
+  "at": "2026-11-06T17:09:47.679Z",
+  "pass": false,
   "what": "the geo query returns only shops inside the box, and only from our writers",
   "measured": {
     "ok": true,
@@ -12,6 +12,6 @@
   "expected": "the cast shops only; synthetic ones only when opted in",
   "evidence": {
     "script": "packages/city/scripts/check.mjs (read-only)",
-    "exit": 0
+    "exit": 1
   }
 }

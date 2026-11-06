@@ -1,6 +1,6 @@
 {
   "id": "D10",
-  "at": "2026-11-06T04:21:08.387Z",
+  "at": "2026-11-06T17:09:49.900Z",
   "pass": true,
   "what": "an expired or missing quote is refused and the agent re-quotes",
   "measured": {
@@ -25,13 +25,13 @@
       ]
     },
     "c": {
-      "quoteKey": "0x1fced134518db48adb16d628520187f3fe1beb6d43317aa56bd23034d3658dc4",
+      "quoteKey": "0xf568eba7813d8785ffcf35fd00c51734f2d52c2aa66c83be0793d4d558a56b2e",
       "owner": "0x146002b43A9Fb8EB963699e77Ed18579dC30A6e4",
       "lifeBlocks": 450,
       "wantBlocks": 450,
       "blockSeconds": 2,
       "validAfterSeconds": 596,
-      "file": "docs/sessions/integration/hosted/quote-2026-11-06T04-17-21-900Z.json"
+      "file": "docs/sessions/integration/hosted/quote-2026-11-06T05-19-34-442Z.json"
     }
   },
   "expected": "(a) QUOTE_MISSING, one re-quote that passes; (b) QUOTE_EXPIRED, one re-quote with a new entity key that passes; no signature before the passing check; (c) owner W_DIRECTORY, expiry 15 min after creation (±2 blocks), valid_until 10 min after",

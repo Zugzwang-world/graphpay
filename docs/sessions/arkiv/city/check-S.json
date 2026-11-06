@@ -5,7 +5,7 @@
   "backend": "rabdi",
   "checks": {
     "q2_top10": {
-      "ok": true,
+      "ok": false,
       "calls": 2,
       "explainId": "6d02b9d6f1a0",
       "bytes": 35370
@@ -43,9 +43,10 @@
       "calls": 1
     }
   },
-  "allOk": true,
+  "allOk": false,
   "httpStatus": {
-    "200": 19
+    "200": 19,
+    "429": 1
   },
-  "lowestRateLimitRemaining": 4967
+  "lowestRateLimitRemaining": 1957
 }

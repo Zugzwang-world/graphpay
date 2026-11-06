@@ -1,19 +1,29 @@
-# Identity relay (T2): M6 done (gate merged, watcher in review)
+# Relay: identity (T2 Identity), 22:30 IST, Fri 6 Nov
 
 ## In plain words
 
-Two things now protect every payment. First, the **gate** (merged in PR #34): before an agent pays, its ENS name is checked on the chain itself, and the amount must fit the smaller of the owner's published cap and the payment contract's own cap. Second, the **watcher** (this PR): it listens to the ENS contracts and keeps the payment policy and the money graph's picture of each agent in step. When the owner kills an agent, the watcher revokes its payment policy; when the owner pauses it, the picture shows "paused"; when a name quietly lapses, a 30 second ticker notices.
-
-Two safety rules were tested hard. A killed agent cannot be revived by paying to renew its name (the registry accepts the renew but leaves the name unregistered, and the watcher re-reads the chain before it trusts an event). And an owner who raises the cap in their ENS record gets nothing: the policy cap does not move.
-
-For the demo this makes the kill-switch beat real. What the founder must do: nothing. Join hosts the watcher in the workers process; the Coordinator funds a new disposable wallet only if a second kill is needed.
+- Every agent and shop has a name under `graphpay.eth` on Ethereum Sepolia.
+- Before any payment, the gate reads the agent's name on the chain. It must be active, and the amount must fit the lower of its ENS cap and its on-chain policy cap. The shop's payout address comes from the shop's ENS name.
+- Pause and Resume set the payer agent's status in ENS. A paused agent is refused before anything is signed.
+- The watcher keeps the payment policies in step with ENS. A killed agent's policy is revoked, and paying to renew its name does not revive it.
+- The payer's ENS cap is 100 test USDT a day.
+- **Now:** the payer has been paused since 21:24 IST, because a visitor pressed the public Pause. The founder was asked whether to resume it and make Pause presenter-only.
+- On screen the shops are Filter & Fold, Idli Index and Tawa Tangle. Their ENS names are still the test cast's: kesar-kingdom, syrup-street and jamun-junction.
 
 ## Technical
 
-- **Watcher** (`packages/ens/src/watcher.mjs`, `createEnsWatcher({ client, names, sink, reader, gate, checkpoint })`): registry events (`LabelRegistered`, `LabelUnregistered`, `ExpiryUpdated`, `TokenResource`) and resolver events (`TextUpdated`, `AddressUpdated`) of the tracked names, fetched in 1000-block ranges and 8-address queries (the public Sepolia RPC refuses 19 addresses in one `getLogs`; 10 works), one serial queue, one shared checkpoint. Each poll also re-reads the last 6 blocks, because that RPC is load balanced; every handler re-reads `getState` and ignores a stale event. Epoch from the `TokenResource` of the same transaction. Marks (revoked, expired) are set only after the sink succeeded; a failed batch leaves the checkpoint. A 30 s ticker marks a lapse on the node only. `start()` catches up from chain state (a kill while the watcher was down).
-- **Rules held by tests:** never creates a policy (no policy on chain → skipped); never reads an ENS cap or address into a policy (`updatePolicy` carries no cap or wallet; the sink uses the bound wallet and the configured cap only to reopen); `Address`/accepts changes only clear caches (`invalidatePayee`, `invalidateAccepts`); `graphpay.cap_micro` changes are shown on the node only.
-- **Policy sink** (`policy-sink.mjs`): a revoke writes `revoked=true`, cap 0, expiry 0 from the chain's own policy (it needs no list). Reopening a revoked policy or a new epoch uses the configured cap. A newer on-chain epoch is never lowered.
-- **Reviewer** (two passes): the first found six blocking issues in the first draft (a revoke skipped without a list entry, lost tip events on a lagging RPC, replayed events un-revoking or revoking wrongly, a renew after a lapse lifting a revocation it never set, names never retried); all fixed and covered by tests before this PR.
-- **Tests:** 47 unit, 11 fork (pause bites within 25 s of its receipt; unregister refuses at once; renew after unregister leaves the label RESERVED and the gate refuses it; a lapse then renew keeps the epoch; the watcher revokes once and never un-revokes). Real Sepolia dry run (`scripts/ens/watch.mjs`, logging sinks) runs clean over 22 names.
-- **B8 MCP call:** `scripts/ens/acceptance.mjs` now POSTs `initialize` and `tools/list` to the endpoint the root's ENS record names: it answers with `schema`, `ask`, `graphql`, `explain`.
-- **Not done / next:** B6, B7 and E7 timings on real Sepolia need Join's workers process to host the watcher; B9 (a)'s payee comparison needs T1's first settled payment. Problem log: P-identity-2.
+- Namespace: [#18](https://github.com/Zugzwang-world/graphpay/pull/18) (M5); records in `docs/sessions/identity/namespace.md`.
+- The gate and the owner actions (pause, resume, kill): [#34](https://github.com/Zugzwang-world/graphpay/pull/34). The watcher, the policy sink and B8's MCP call: [#40](https://github.com/Zugzwang-world/graphpay/pull/40) (M6 done).
+- B7, a new registration gets a new epoch (fork test): [#83](https://github.com/Zugzwang-world/graphpay/pull/83). B9 (a), the payee is the shop's ENS address: [#84](https://github.com/Zugzwang-world/graphpay/pull/84).
+- The owner action `cap`, and the payer's ENS cap of 100: [#106](https://github.com/Zugzwang-world/graphpay/pull/106).
+- The watcher runs inside Join's `pnpm workers` on this Mac (its state: `relays/integration.md`).
+- Open:
+  - ENS names for the new shops and their agents (Friday item 6), when the founder says;
+  - a second kill demo needs DISPOSABLE_2 funded (it holds 0 WBT) and the kill button wired (T5);
+  - the acceptance report (13:35 IST) still lists B7 and B9 as not run: B7 needs a Sepolia fork during the run, and B9 (a) passes in T2's own script for the one shop with settled payments.
+
+## State
+
+- **Idle.** Session `local_8ec48e25-b5c3-442f-b70d-a258266170ba`.
+- Resume file: `docs/sessions/identity/resume.md` (after #84; older than #106).
+- Next step: the new shops' ENS names the moment the founder locks them; then re-run `scripts/ens/acceptance.mjs` and `gate-pass.mjs`.

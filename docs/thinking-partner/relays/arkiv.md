@@ -1,20 +1,31 @@
-# Relay: arkiv (T3)
-
-Updated 09:55 IST, Fri 6 Nov. This step: Swarm, the menu part of Friday items 4 and 5 (branch `arkiv/swarm-menu`). Merged before it: the SDK publish prep ([PR #74](https://github.com/Zugzwang-world/graphpay/pull/74)) and the drafts of the Arkiv judges' files ([PR #77](https://github.com/Zugzwang-world/graphpay/pull/77)).
+# Relay: arkiv (T3 Arkiv), 22:30 IST, Fri 6 Nov
 
 ## In plain words
 
-Each cast shop now has a public menu stored on Swarm, and Arkiv holds a pointer to it plus a fingerprint (a hash). Anyone can open the menu from a link; anyone can check that what they got is the file Arkiv points to. If Swarm's public gateway ever loses a file, the next read that has the menu document uploads it again and it comes back under the same address. We tried it on the real gateway first with a tiny labelled test file; it accepted an anonymous upload and returned the same bytes.
-
-The menus are synthetic story data (the test cast), with no personal data. We spent nothing and signed nothing for Swarm: the gateway's operator pays, and we run no node of our own. The encrypted refund photo is not built; it is first in the cut order and needs a secret key from the Coordinator. `arkiv/swarm.md` says what is done and what is not, with the real links.
-
-What you need to do: nothing now. After the final story is locked, the menus should be uploaded again (one command, in OPEN).
+- The money graph on Arkiv remembers every payment, refusal, refund request and quote. Any agent can ask it before it pays, and each answer comes with an explain trace of every read.
+- The city is size S: synthetic history, labelled as such.
+- Each shop's menu is a file on Swarm; Arkiv holds its link and hash.
+- The SDK `@graphpay_ethglobal/arkiv-graph` 0.1.1 is on npm: https://www.npmjs.com/package/@graphpay_ethglobal/arkiv-graph
+- **Tonight's fault, fixed:** at about 21:36 IST our Arkiv access key ran out of quota, so the site's reads failed. T3's #148 repeats a refused read on the keyless public endpoint. Reads came back at 21:54 IST.
+- Still to do, on the founder's word: the big city (size M), the new shops' history under new names, and the category, which still says "sweets".
 
 ## Technical
 
-- **New in `packages/money-graph`:** `src/swarm.mjs` (the gateway client: anonymous upload with the all-zero batch id, never encrypted, a reference must be 64 hex, https only, one retry), `src/menu.mjs` (`menuDocument`, `writeMenu`, `readMenu`, `castMenus`), the `menu` entity in `model.mjs` (W_DIRECTORY, mutable, `shop_key` indexed; 14-day life; trusted from W_DIRECTORY only), `scripts/menus.mjs`. The gateway URL is a new `swarm.gateway` entry in `packages/config/graphpay.config.json` (the Coordinator's file; a one-key addition).
-- **Behaviour:** `writeMenu` uploads, reads back and checks the sha-256, then creates the row or, if the menu changed, uploads the new file and patches the row to version + 1; an identical menu changes nothing on Arkiv. `readMenu` checks the bytes against the row's hash and refuses a mismatch. A row from another wallet is ignored.
-- **Live results:** probe on the gateway (`POST /bytes` 201, read-back sha-256 equal); `POST /bzz?name=menu.json` 201; `GET /bzz/<ref>` without a file name is redirected to a "forbidden" page, so our links carry `/menu.json`. Three `menu` rows created on Rabdi by W_DIRECTORY (first tx [0xe088…35b2](https://rabdi.explorer.arkiv.network/tx/0xe08819acde1f50d2a21fc93c1b39abee3145c3f7362b35cdda3480d5200835b2)); all three read back and verified through the keyless node and the gateway. Keys, references and links: `docs/sessions/arkiv/swarm-menus.json`; one example in `arkiv/swarm.md`.
-- **Tests:** `packages/money-graph/test/menu.test.mjs` (7: the client's headers and refusals, 64-hex guard, write, unchanged rewrite, version 2, lost-and-reuploaded, tampered bytes, foreign owner, cast menus carry no address); money-graph 26 pass in all; `pnpm check` clean.
-- **Not done:** `refund_evidence` (AES-256-GCM in our code, ciphertext as plain bytes, per-file key wrapped with the Swarm wrapping key, a writer refusal of any 128-hex run with a regex test); the demo-video timestamp; menus on the shop pages (T5 reads `readMenu`).
-- **Risks:** the gateway keeps data for a limited time and is meant for testing (said in `swarm.md`). The menu script writes as W_DIRECTORY, so it should not run while the shop seeding runs (ADR-0033).
+- The SDK and the money graph: [#14](https://github.com/Zugzwang-world/graphpay/pull/14) (M7a). The S city, the engine, GraphQL, explain and the hosted MCP: [#21](https://github.com/Zugzwang-world/graphpay/pull/21) (M8, M7b). The benchmark at S: [#31](https://github.com/Zugzwang-world/graphpay/pull/31) (M9). Activity rows: [#35](https://github.com/Zugzwang-world/graphpay/pull/35).
+- Fixes: [#25](https://github.com/Zugzwang-world/graphpay/pull/25), [#30](https://github.com/Zugzwang-world/graphpay/pull/30) (the synthetic label), [#97](https://github.com/Zugzwang-world/graphpay/pull/97) (the writer never adopts another instance's transaction).
+- npm: [#74](https://github.com/Zugzwang-world/graphpay/pull/74) (0.1.0), [#98](https://github.com/Zugzwang-world/graphpay/pull/98) (0.1.1).
+- Swarm: [#82](https://github.com/Zugzwang-world/graphpay/pull/82) (menus), [#86](https://github.com/Zugzwang-world/graphpay/pull/86) (refund evidence dropped on purpose), [#109](https://github.com/Zugzwang-world/graphpay/pull/109) (an optional menu image). The Booth re-published the dosa menus with one dish image ([#135](https://github.com/Zugzwang-world/graphpay/pull/135)); references in `docs/sessions/arkiv/swarm-menus.json`.
+- Judges' drafts: [#77](https://github.com/Zugzwang-world/graphpay/pull/77) (`arkiv/friction.md`, `how-you-use-arkiv.md`, `swarm.md`). The Submission session finishes them.
+- The quota fallback, [#148](https://github.com/Zugzwang-world/graphpay/pull/148): `arkivTransport({ fallbackUrl })` repeats a 429 `QUOTA_EXCEEDED` on the public Rabdi endpoint, stays there 10 minutes, then tries the key again. Web routes, the mirror and the runner all use it. Problem log: P-arkiv-4.
+- Keep `ARKIV_ACCESS_KEY` on Vercel: the live runner requires it.
+- Open:
+  - a quota reset or a new key from the Arkiv team (the founder); the keyless endpoint allows 2,000 calls per window;
+  - size M: 100 to 130 minutes of seeding from W_SEED_M_EVENT (8.5 tGLM), dry run first (`docs/sessions/arkiv/seeding.md`), then D7. At S the race is about 2 reads against 5 to 6;
+  - the new names and the category: directory rows and graph nodes together;
+  - the SDK's README does not link the demo app yet (ADR-0076).
+
+## State
+
+- **Idle after #148.** Session `local_949a2091-02b7-4f63-9c71-efebf8fe215a`.
+- Resume file: `docs/sessions/arkiv/resume.md` (09:42 IST; older than Swarm, the image and #148).
+- Next step: on the founder's word, the M seed or the new names and category.

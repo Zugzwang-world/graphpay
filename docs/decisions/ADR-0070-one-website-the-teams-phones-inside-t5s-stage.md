@@ -1,5 +1,5 @@
 # ADR-0070: One website: the team's phones as static pages inside T5's stage (option A)
-Status: accepted · Date: 2026-11-06 12:40 IST · Decided by: founder · Source: `docs/plan/integration-audit.md` §4, option A; the support brief `docs/thinking-partner/briefs/1240-coordinator-integration-support.md`
+Status: accepted · Date: 2026-11-06 12:40 IST · Decided by: founder · Source: `docs/plan/integration-audit.md` §4, option A; the support brief `docs/archive/thinking-partner-briefs/1240-coordinator-integration-support.md`
 
 ## Decision
 - **The team's folder stays theirs.** Their two phone apps stay in `frontend/`, with their path, their npm lockfile, and their mock dev server and tests. PR #70 was squash-merged under ajatshatru01's name as 8abe39a.

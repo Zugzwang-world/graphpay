@@ -1,13 +1,14 @@
 {
   "id": "A9",
-  "at": "2026-11-05T23:52:19.409Z",
-  "pass": true,
+  "at": "2026-11-06T17:06:10.034Z",
+  "pass": null,
+  "why": "no probe row for anthropic-testing, anthropic-video, anthropic-live",
   "what": "the agent presets are accepted",
   "measured": [
     {
       "preset": "testing",
       "want": [
-        "`claude-opus-5-5`, xhigh"
+        "`kimi-k3.1-pro`, high"
       ],
       "row": {
         "time": "22:54",
@@ -17,12 +18,12 @@
         "cost": "$0.0005",
         "notes": "accepted"
       },
-      "ok": true
+      "ok": false
     },
     {
       "preset": "video",
       "want": [
-        "`claude-opus-5-5`, xhigh"
+        "`kimi-k3.1-pro-highspeed`, high"
       ],
       "row": {
         "time": "22:54",
@@ -32,12 +33,12 @@
         "cost": "$0.0006",
         "notes": "accepted"
       },
-      "ok": true
+      "ok": false
     },
     {
       "preset": "live",
       "want": [
-        "`claude-haiku-5-5`, xhigh"
+        "`kimi-k3.1-pro-highspeed`, high"
       ],
       "row": {
         "time": "22:54",
@@ -47,7 +48,31 @@
         "cost": "under $0.0002 in all",
         "notes": "accepted; no empty reply, no `max_tokens`; once the same answer in two text blocks (read the final block)"
       },
-      "ok": true
+      "ok": false
+    },
+    {
+      "preset": "anthropic-testing",
+      "want": [
+        "`claude-opus-5-5`, xhigh"
+      ],
+      "row": null,
+      "ok": false
+    },
+    {
+      "preset": "anthropic-video",
+      "want": [
+        "`claude-opus-5-5`, xhigh"
+      ],
+      "row": null,
+      "ok": false
+    },
+    {
+      "preset": "anthropic-live",
+      "want": [
+        "`claude-haiku-5-5`, xhigh"
+      ],
+      "row": null,
+      "ok": false
     }
   ],
   "expected": "every preset of story.json's agentModels has a probe row with its model and effort, accepted, seconds and cost recorded; the live preset over three turns",

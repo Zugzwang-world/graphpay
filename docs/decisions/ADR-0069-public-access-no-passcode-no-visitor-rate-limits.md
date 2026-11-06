@@ -1,5 +1,5 @@
 # ADR-0069: Public access: no passcode for visitors, no rate limits for visitors
-Status: accepted · Date: 2026-11-06 12:40 IST · Decided by: founder · Source: the thinking partner's support brief `docs/thinking-partner/briefs/1240-coordinator-integration-support.md`
+Status: accepted · Date: 2026-11-06 12:40 IST · Decided by: founder · Source: the thinking partner's support brief `docs/archive/thinking-partner-briefs/1240-coordinator-integration-support.md`
 
 ## Decision
 - **Visitors meet no passcode.** The site's spending buttons work for anyone. This replaces the passcode rule: the pack's "demo passcode on every spending endpoint" (`planning/SPEC/SECURITY_AND_OPS.md`), pack E-3 for the merchant routes, and the passcode fix in ADR-0068.
@@ -18,3 +18,12 @@ The founder wants visitors and judges to try the live demo without a code. These
   - A visitor can use up the payer's daily cap, which resets at 00:00 UTC (05:30 IST).
   - With no hourly cap, a visitor can also run errands back to back, one at a time per server instance. Each production errand costs $0.71 to $3.55 of Kimi's prepaid balance, and an empty balance stops every errand. Watch the balance.
 - **Unchanged:** the limits held in each instance's memory, such as one errand at a time and the re-order guard.
+
+## Amendment (founder, Fri 6 Nov 22:30 IST): no private links or ceilings
+
+- **For visitors:** public access means no passcode, no private links and no ceilings.
+- **What stays:**
+  - the keys between our own servers;
+  - one errand at a time;
+  - the payer's pass of 100 test USDT a day (ADR-0071).
+- **To do:** the read limits that #113 raised tenfold still carry a ceiling against a runaway client. Removing or keeping that ceiling goes to T5.

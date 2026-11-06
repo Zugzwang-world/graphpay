@@ -64,16 +64,21 @@ Short records, one file each (skill `adr`). Lab decisions are adopted from `plan
 | [ADR-0059](ADR-0059-non-paying-agents-publish-a-zero-cap-in-ens.md) | Non-paying agents publish a zero cap in ENS | accepted |
 | [ADR-0060](ADR-0060-hosted-graphql-and-mcp-are-thin-stateless-routes.md) | Hosted GraphQL and MCP are thin, stateless routes | accepted |
 | [ADR-0061](ADR-0061-swarm-public-content-through-the-gateway-encrypt-client-side.md) | Swarm: public content through the gateway, evidence encrypted client-side | accepted |
-| [ADR-0062](ADR-0062-pause-every-session-at-92-percent-of-the-weekly-limit.md) | Every session pauses gracefully at 92% of the weekly plan limit (amended Fri 11:00 IST: 95% stops new real payments, merges and publishes; 97% pauses every session; amended Fri 12:40 IST: merges and payments allowed up to 97% for the integration, its essentials and the founder's run) | accepted, amended twice |
+| [ADR-0062](ADR-0062-pause-every-session-at-92-percent-of-the-weekly-limit.md) | Every session pauses gracefully at 92% of the weekly plan limit (amended Fri 11:00 IST: 95% stops new real payments, merges and publishes; 97% pauses every session; amended Fri 12:40 IST: merges and payments allowed up to 97% for the integration, its essentials and the founder's run) | accepted, amended three times |
 | [ADR-0063](ADR-0063-both-sdks-on-npm-as-graphpay-ethglobal-by-13-00.md) | Both SDKs on npm under @graphpay_ethglobal by 13:00 Friday | accepted |
 | [ADR-0064](ADR-0064-one-sdk-per-partner-lane-and-the-same-kit-moment.md) | One SDK per partner lane, and the "same kit, different business" moment | accepted |
 | [ADR-0065](ADR-0065-the-founders-team-builds-apps-demo-ui-in-parallel.md) | The founder's team builds its own UI in apps/demo-ui, in parallel | accepted (amended by ADR-0070) |
 | [ADR-0066](ADR-0066-no-target-times-only-events-and-external-deadlines.md) | No target times; only events and the deadlines we don't control | accepted |
 | [ADR-0067](ADR-0067-kimi-replaces-anthropic-in-the-agent-presets.md) | Kimi replaces Anthropic in the agent presets (Anthropic kept as fallbacks) | accepted |
 | [ADR-0068](ADR-0068-the-teams-site-t5-reviews-and-integrates-the-runner-is-server-side.md) | The team's site, with T5 as reviewer and integrator; the live runner runs on the server | accepted (amended by ADR-0070) |
-| [ADR-0069](ADR-0069-public-access-no-passcode-no-visitor-rate-limits.md) | Public access: no passcode for visitors, no rate limits for visitors | accepted |
-| [ADR-0070](ADR-0070-one-website-the-teams-phones-inside-t5s-stage.md) | One website: the team's phones as static pages inside T5's stage (option A) | accepted |
-| [ADR-0071](ADR-0071-the-story-for-the-founders-run.md) | The story for the founder's run: Mr. Vitalik stays, the payer's pass is 100 a day, the dosa and BKC swap comes after | accepted |
+| [ADR-0069](ADR-0069-public-access-no-passcode-no-visitor-rate-limits.md) | Public access: no passcode for visitors, no rate limits for visitors | accepted, amended |
+| [ADR-0070](ADR-0070-one-website-the-teams-phones-inside-t5s-stage.md) | One website: the team's phones as static pages inside T5's stage (option A) | accepted (amended by ADR-0074) |
+| [ADR-0071](ADR-0071-the-story-for-the-founders-run.md) | The story for the founder's run: Mr. Vitalik stays, the payer's pass is 100 a day, the dosa and BKC swap comes after | accepted (story swap superseded by ADR-0073) |
+| [ADR-0072](ADR-0072-mr-vitalik-is-a-fictional-persona.md) | Mr. Vitalik is a fictional persona: his caped smiley agent only, no likeness, no endorsement | accepted |
+| [ADR-0073](ADR-0073-the-story-masala-dosa-near-bkc.md) | The story: masala dosa near BKC (Filter & Fold, Idli Index, Tawa Tangle) | accepted |
+| [ADR-0074](ADR-0074-the-deck-is-the-stage.md) | The deck is the stage, with the live phones driving it; one screen | accepted |
+| [ADR-0075](ADR-0075-the-grok-desk-produces-the-assets.md) | The Grok desk produces the assets; its prompts stay in the repo | accepted |
+| [ADR-0076](ADR-0076-the-sdks-stay-ui-free.md) | The SDKs stay free of UI; the demo app is the reference; a React kit next | accepted |
 
 ## Proposed in the pack, recorded by the owning session when taken
 

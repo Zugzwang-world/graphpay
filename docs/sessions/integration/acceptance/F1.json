@@ -1,19 +1,19 @@
 {
   "id": "F1",
-  "at": "2026-11-06T00:11:30.285Z",
+  "at": "2026-11-06T17:10:05.393Z",
   "pass": true,
   "what": "no secrets are in the repo",
   "measured": {
-    "tree": "check: clean (738 files)",
+    "tree": "check: clean (1143 files)",
     "history": {
-      "commits": 313,
+      "commits": 598,
       "findings": {},
       "commitsWithFindings": []
     },
     "trackedEnvFiles": [],
     "vercelProduction": {
-      "vars": 15,
-      "secretShaped": 14,
+      "vars": 18,
+      "secretShaped": 17,
       "notHidden": []
     }
   },

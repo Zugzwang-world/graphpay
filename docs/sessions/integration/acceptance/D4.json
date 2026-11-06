@@ -1,10 +1,10 @@
 {
   "id": "D4",
-  "at": "2026-11-05T22:53:51.138Z",
-  "pass": true,
+  "at": "2026-11-06T17:09:45.797Z",
+  "pass": false,
   "what": "GraphQL's top 10 matches the ground truth (seeded S city, synthetic)",
   "measured": {
-    "ok": true,
+    "ok": false,
     "calls": 2,
     "explainId": "6d02b9d6f1a0",
     "bytes": 35370
@@ -13,6 +13,6 @@
   "evidence": {
     "script": "packages/city/scripts/check.mjs (read-only)",
     "file": "docs/sessions/arkiv/city/check-S.json",
-    "exit": 0
+    "exit": 1
   }
 }

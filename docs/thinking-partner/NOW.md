@@ -1,31 +1,68 @@
 # NOW
 
-Updated 21:55 IST, Fri 6 Nov (Coordinator)
+Updated 22:49 IST, Fri 6 Nov (Coordinator, full sync)
 
 ## Summary (Coordinator only)
 
-Updated 21:41 IST, Fri 6 Nov. **Standing rule (ADR-0066): no target times.** Only the submission (Sat 09:00 IST) and the presentation (Sat 09:30 IST) are fixed.
+Updated 22:49 IST, Fri 6 Nov. **Only the submission (Sat 09:00 IST) and the presentation (09:30 IST) are fixed** (ADR-0066). Every deliverable's status is in [`TRACKER.md`](TRACKER.md). A fresh Coordinator can start from `docs/sessions/coordinator/handover.md`.
 
-- **Usage reset at 21:30 IST:** 0% of the new week, which resets again Fri 13 Nov. The Coordinator has resumed its tick.
-- **Fixed at 21:54 IST: production's Arkiv reads** (T3, #148).
-  - The cause was that the Arkiv access key's quota ran out: every keyed query got 429 `QUOTA_EXCEEDED`.
-  - The transport now repeats a refused call on the keyless public endpoint, which allows 2,000 calls per window.
-  - `/api/map` and `/api/state/customer` answer 200 again.
-  - The key stays on Vercel, because the live runner requires it. The founder is asked for a quota reset or a new key.
-- **The payer is PAUSED again:** someone pressed the public Pause. It has spent 78.00 of today's 100, so 22 are left until 05:30 IST. PAYER holds 58.2 test USDT, and FUNDER 54.14.
-- **The live stage** is https://graphpay-event.vercel.app: the team's phones around the deck, with no passcode.
-  - The Booth sessions (#135 to #145) put the Grok dosa story on screen: Filter & Fold, Idli Index and Tawa Tangle. The ENS labels are unchanged.
-  - The deck follows the live run.
-  - #132 (the team's pause and resume) is merged, credited to ajatshatru01.
-- **Proven live today:** the errand (paid 4.80 several times), the Open switch, the refund request, the merchant refund, the re-order, and pause and resume.
-  - The payer's pass is 100 test USDT a day. Both SDKs are 0.1.1 on npm.
-- **Open (the Booth's list):**
-  - real ENS names for the new shops, and moving their history (the Arkiv category is still "sweets");
-  - the big city;
-  - the re-order's own SKU;
-  - caps, the kill and subscriptions;
-  - the deck's non-demo slides.
-- **Next:** the Submission session; the founder's demo check (`docs/sessions/booth/demo-note.md` says what not to tap); the video.
+**Urgent: the Mac is on battery** (78% at 22:49 IST, about 5 h 20 min left). It would die around 04:10 IST, before the 09:30 presentation, taking the mirror (`pnpm workers`) and every session with it. **Plug in the charger and keep the lid open.**
+
+**Found by the sync:**
+- Vitalik's phone says "Agents active" while the payer is PAUSED (a status bug in the phones).
+- https://graphpay-store.vercel.app answers 404: the drop-in store is not deployed.
+- `WHITECHAIN_FEEDBACK.md`, which the Whitechain track asks for, does not exist yet (Submission).
+
+**Live and proven** on https://graphpay-event.vercel.app:
+- **One screen:** the deck in the middle, and the team's two live phones driving it (ADR-0074). Public access: no passcode (ADR-0069).
+- **The errand:** the agents pay a shop 4.80 with no gas, after the ENS gate. Examples: [0x8617…863a](https://explorer.testnet.whitechain.io/tx/0x8617754857a8eb1fb1483b4f18fb6fa6a4f1607241d3f08c7ccd062de1b8863a) and [0x89ac…b990](https://explorer.testnet.whitechain.io/tx/0x89acd9521341763f6f6a37893eec921c9548d7a0b5984597d56088a5f5d5b990). The trap shop is refused, with reasons.
+- **The money buttons:**
+  - refund request, then the shop's refund ([0xcd44…c425](https://explorer.testnet.whitechain.io/tx/0xcd442a5e6675e0eae8a66bc17ee3913af1b673e39a54a28d4a14a0fab58bc425));
+  - re-order ([0x78ac…78ef](https://explorer.testnet.whitechain.io/tx/0x78acbc3fbf50a15bbe3920bdcfe9e47a032fa43db81b5710c1d369e8a83778ef));
+  - pause and resume;
+  - the Open switch.
+- **The payer's pass:** 100 test USDT a day, on-chain (#107) and in ENS.
+- **The story on screen:** masala dosa near BKC (ADR-0073), with Grok's figurines and photos (ADR-0075).
+- **Both SDKs on npm at 0.1.1:** [arkiv-graph](https://www.npmjs.com/package/@graphpay_ethglobal/arkiv-graph) and [agentpay](https://www.npmjs.com/package/@graphpay_ethglobal/agentpay).
+
+**Broken or not built:**
+- **The payer has been PAUSED since 21:24 IST** (someone pressed the public Pause). Errands are refused until it is resumed. The founder decides.
+- **The Arkiv access key's quota is used up** (since about 21:36). Reads fall back to the keyless endpoint (#148). The map and the customer state work, but more slowly.
+- **The story on chain:** the dosa shops' ENS names, their history and their Arkiv category ("sweets") are still the test cast's.
+- **Not built:** subscribe and cancel, the kill, the cap actions, the big city at M, and the 0.80 coffee re-order.
+- **Acceptance** (regenerated read-only at 22:40 IST): **35 pass, 8 fail, 1 blocked (D7), 4 not run**, of 48.
+  - B1 and B2: the paused payer, plus a test agent's spent cap (it resets at 05:30 IST).
+  - C3, D4, E1 and D8: their evidence predates the story swap, so they need fresh live runs.
+  - C7 and E3: a bug in the acceptance runner, which reads the 1.20 re-order instead of the 4.80 payment (Join).
+- **Between about 23:14 IST and midnight no errand can buy:** the deadline is 11:59 pm, and the good shop needs 45 minutes. Avoid that window for tests and the video.
+- **The mirror** made no successful poll from 22:02 until at least 22:31 IST, then recovered by 22:39 without a restart. Join and T3 should check why.
+
+**Decisions today:**
+- ADR-0062: amended to 95%/97%, then guardrails off tonight.
+- ADR-0067: Kimi.
+- ADR-0069: public access, with no private links or ceilings.
+- ADR-0070 and ADR-0074: the stage.
+- ADR-0071: the pass is 100.
+- ADR-0072: the fictional persona.
+- ADR-0073: the dosa story.
+- ADR-0075: the Grok desk.
+- ADR-0076: SDKs without UI.
+
+**Founder now** (OPEN):
+1. Start the Submission session.
+2. The payer: resume it, and decide whether Pause becomes presenter-only.
+3. The Arkiv key.
+4. The demo scope.
+5. The video.
+6. The Kimi balance.
+7. The disclosure and team registration.
+
+**Sessions:** all idle except the Coordinator. Ids are in `docs/sessions/coordinator/handover.md` §5.
+- T1 to T6, Join, the Integration session, Booth and Booth Sync are idle.
+- Submission has not started.
+- Retired: the first Coordinator and M0.
+
+**Usage:** about 1% of the week that began at the 21:30 reset. The guardrails are off tonight, and every session runs on Opus 5.5 at max.
 
 ## foundation
 
@@ -112,15 +149,10 @@ Updated 11:09 IST, Fri 6 Nov (T6 AgentPay, Sonnet 5.5). **0.1.0 merged (PR 80); 
 
 ## records
 
-Updated 21:55 IST, Fri 6 Nov (Coordinator).
-- **Done this step:**
-  - #70 merged;
-  - the funding moves (PAYER to 125 test USDT, VITALIK to 0.02 Sepolia ETH);
-  - ADR-0069, ADR-0070 and ADR-0071, and the second amendment to ADR-0062;
-  - CLAUDE.md and the README;
-  - the Vercel `ignoreCommand`.
-- **Waiting on:** T1's and T2's cap transactions, Join's reliable errand, and T3's Swarm image.
-- **Next:** tell the founder when the pass is 100 and the errand pays reliably, then when phase 2 works.
+Updated 22:49 IST, Fri 6 Nov (Coordinator).
+- **Done:** the full sync (TRACKER, NOW, OPEN, LOG, every relay, ADR-0072 to ADR-0076, the acceptance report, the handover).
+- **Running:** the 10-minute tick.
+- **Next:** the founder's answers (Submission, the payer, the Arkiv key), and a fresh Coordinator taking over from the handover.
 
 ## booth
 

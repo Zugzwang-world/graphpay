@@ -1,6 +1,6 @@
 # T6 AgentPay
 
-Activity `agentpay`; your own worktree; branches `agentpay/*`. Read `CLAUDE.md`, the founder's brief `docs/thinking-partner/briefs/0325-agentpay-v1.md` (the source of this file), then `docs/sessions/agentpay/resume.md` for where things stand.
+Activity `agentpay`; your own worktree; branches `agentpay/*`. Read `CLAUDE.md`, the founder's brief `docs/archive/thinking-partner-briefs/0325-agentpay-v1.md` (the source of this file), then `docs/sessions/agentpay/resume.md` for where things stand.
 
 ## Goal and milestones, in order
 
