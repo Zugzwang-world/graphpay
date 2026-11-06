@@ -18,6 +18,7 @@ export function newSim(options = {}) {
 export async function connectArkiv({ backend, env = process.env, role = null, privateKey = null, sim = null, log = null, recoveryMs, pollMs } = {}) {
   const which = backend ?? env.ARKIV_BACKEND ?? 'sim';
   let url;
+  let fallbackUrl = null;
   let fetchFn = globalThis.fetch;
   const secrets = [];
   let label;
@@ -35,6 +36,8 @@ export async function connectArkiv({ backend, env = process.env, role = null, pr
     const accessKey = env[RABDI.accessKeyEnv];
     url = accessKey ? `${RABDI.rpcBase}/${encodeURIComponent(accessKey)}` : RABDI.publicRpcs[0].url;
     if (accessKey) secrets.push(accessKey);
+    // A keyed endpoint has a quota; when it is spent the same reads go to the public one.
+    if (accessKey) fallbackUrl = RABDI.publicRpcs[0].url;
     label = accessKey ? `${RABDI.name} keyed` : `${RABDI.name} public (keyless)`;
   } else {
     throw new Error(`money-graph: unknown ARKIV_BACKEND "${which}" (sim, local or rabdi)`);
@@ -57,7 +60,7 @@ export async function connectArkiv({ backend, env = process.env, role = null, pr
     if (which !== 'sim' && owner !== writers[role]) throw new Error(`money-graph: ${role}'s key does not match its configured address`);
   }
 
-  const transport = arkivTransport({ url, fetchFn, secrets, log });
+  const transport = arkivTransport({ url, fallbackUrl, fetchFn, secrets, log });
   const chain = arkivChain({ id: RABDI.chainId, name: RABDI.name, symbol: RABDI.nativeSymbol });
   const { publicClient, walletClient, stats, sentHashes } = arkivClients({ transport, chain, account, pollingInterval: which === 'sim' ? 20 : 1_000 });
   await assertChain(publicClient, RABDI.chainId);

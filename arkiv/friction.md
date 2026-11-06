@@ -33,7 +33,7 @@ Our own query shapes that are slow because of how we wrote them are left out. If
 
 ## Open questions (no booth answers came; the founder's defaults are final, ADR-0044)
 
-1. **Monthly quota of an access key; is the keyless window per IP?** The node shows only a `ratelimit` header (keyless `limit=2000`, keyed `limit=5000`). We log it and back off near the limit. We saw no 429.
+1. **Quota of an access key, and does the keyless window count per IP?** The key **does** have a quota, and it ran out on Fri 6 Nov at about 21:36 IST: the keyed endpoint then answered queries with HTTP 429 `QUOTA_EXCEEDED` (header `arkiv-quota-used-percent: 100`) while its `ratelimit` header still showed about 4,900 of 5,000 left. The docs we found give no size or reset time. Our seeds, benchmark runs and live polling all shared it. We now fall back to the keyless endpoint (limit 2,000 per short window). Still open: the size of the quota and when it resets.
 2. **A uniqueness or "create if absent" option?** None assumed. A repeated create with the same content duplicates, so we dedupe on a `ref` attribute and a checkpoint (ADR-0023).
 3. **Was the one-off `Revm ... HandleInvalid` error on a 60-delete gas estimate a known issue?** We did not reproduce it at the event.
 4. **The faucet amount per claim.** The page does not show one; our funding holds only what we received.
