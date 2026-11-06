@@ -8,9 +8,9 @@
 import { createHash } from 'node:crypto';
 import { and, or } from '@arkiv-network/sdk/query';
 import { LIMITS } from './schema.mjs';
-import { checkedOwner, scope, trustedRows } from './read.mjs';
+import { checkedOwner, coveredBy, scope, trustedRows } from './read.mjs';
 
-const leaves = (e) => (e.kind === 'and' || e.kind === 'or' ? e.expressions.reduce((n, x) => n + leaves(x), 0) : 1);
+export const leaves = (e) => (e.kind === 'and' || e.kind === 'or' ? e.expressions.reduce((n, x) => n + leaves(x), 0) : 1);
 
 function codeOf(error) {
   for (let e = error, d = 0; e && d < 10; e = e.cause, d += 1) if (typeof e.code === 'number') return e.code;
@@ -76,8 +76,11 @@ export function createEngine({ publicClient, backend, stats = null, rowCap = 500
         if (blockNumber === null || res.blockNumber > blockNumber) blockNumber = res.blockNumber;
         const rows = trustedRows(def, o, res.entities);
         if (rows.length !== res.entities.length) warnings.push(`${res.entities.length - rows.length} ${def.type} rows failed the owner or version check`);
+        const covered = coveredBy(res);
+        if (covered > res.entities.length) warnings.push(`${covered - res.entities.length} ${def.type} rows did not fit the schema and were left out`);
         calls.push({ entity: def.type, query: `${text} LIMIT ${limit} OFFSET ${offset}`, owner: o, limit, offset, orderBy: orderBy ? `${orderBy.name} ${orderBy.direction}` : null, rows: rows.length, ms: Date.now() - t0, bytes: stats ? stats.requestBytes + stats.responseBytes - bytes0 : null, entityKeys: rows.map((r) => r.$key) });
-        return { rows, raw: res.entities.length };
+        // The offset counts the matches a page covered, rows left out for the schema included.
+        return { rows, raw: covered };
       } catch (error) {
         calls.push({ entity: def.type, query: text ?? '(not built)', owner: o, limit, offset, ms: Date.now() - t0, rows: 0, error: error.shortMessage ?? error.message, code: codeOf(error) });
         throw error;

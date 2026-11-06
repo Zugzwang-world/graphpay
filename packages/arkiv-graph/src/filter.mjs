@@ -14,18 +14,21 @@ const OPS = new Set(['eq', 'in', 'gt', 'gte', 'lt', 'lte', 'between', 'startsWit
 function value(type, v, field) {
   switch (type) {
     case 'u64': {
+      // A bigint, a safe integer or a decimal or 0x string: never a boolean, an empty string or
+      // a number too large to be exact.
       let n;
-      try {
-        n = BigInt(v);
-      } catch {
-        throw new Error(`filter: ${field} needs an integer`);
-      }
+      if (typeof v === 'bigint') n = v;
+      else if (typeof v === 'number' && Number.isSafeInteger(v)) n = BigInt(v);
+      else if (typeof v === 'string' && /^(\d+|0x[0-9a-fA-F]+)$/.test(v)) n = BigInt(v);
+      else throw new Error(`filter: ${field} needs an integer (a bigint, a safe integer or a decimal or 0x string)`);
       if (n < 0n || n > 2n ** 64n - 1n) throw new Error(`filter: ${field} is outside u64`);
       return u64(n);
     }
-    case 'i32':
-      if (!Number.isInteger(v) || v < -2147483648 || v > 2147483647) throw new Error(`filter: ${field} is outside i32`);
-      return i32(v);
+    case 'i32': {
+      const n = typeof v === 'bigint' && v >= -2147483648n && v <= 2147483647n ? Number(v) : v;
+      if (!Number.isInteger(n) || n < -2147483648 || n > 2147483647) throw new Error(`filter: ${field} is outside i32`);
+      return i32(n);
+    }
     case 'key':
       if (typeof v !== 'string' || !/^0x[0-9a-fA-F]{64}$/.test(v)) throw new Error(`filter: ${field} needs 32-byte hex`);
       return key(v.toLowerCase());

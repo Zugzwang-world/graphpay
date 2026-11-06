@@ -9,7 +9,24 @@
 // halved again on an HTTP 413 found down the error's cause chain; otherwise a batch
 // that does not fit is an error.
 
-import { ENTITY_EVENTS_ABI } from '@arkiv-network/sdk';
+import {
+  ConflictingMutationError,
+  EmptyPatchError,
+  ENTITY_EVENTS_ABI,
+  EntityTooLargeError,
+  InvalidAttributeNameError,
+  InvalidCreationFlagsError,
+  InvalidExpiryError,
+  InvalidSaltError,
+  InvalidValueError,
+  MissingValueError,
+  NoRandomSourceError,
+  SchemaDefinitionError,
+  SchemaMismatchError,
+  TooManyAttributesError,
+  UnknownAttributeTypeError,
+  UntypedValueError,
+} from '@arkiv-network/sdk';
 import { decodeEventLog } from 'viem';
 import { LIMITS } from './schema.mjs';
 import { isRequestTooLarge } from './transport.mjs';
@@ -77,7 +94,30 @@ export function operationBytes(op) {
 
 const TX_BYTES = 68;
 
+// The SDK's own checks, which refuse a batch while building it, before anything is signed or
+// sent: nothing can have landed, so there is nothing to recover or send again.
+const BEFORE_SEND = [
+  ConflictingMutationError,
+  EmptyPatchError,
+  EntityTooLargeError,
+  InvalidAttributeNameError,
+  InvalidCreationFlagsError,
+  InvalidExpiryError,
+  InvalidSaltError,
+  InvalidValueError,
+  MissingValueError,
+  NoRandomSourceError,
+  SchemaDefinitionError,
+  SchemaMismatchError,
+  TooManyAttributesError,
+  UnknownAttributeTypeError,
+  UntypedValueError,
+];
+
 function classify(error) {
+  for (let e = error, depth = 0; e && depth < 12; e = e.cause, depth += 1) {
+    if (BEFORE_SEND.some((Refused) => e instanceof Refused)) return 'refused';
+  }
   if (isRequestTooLarge(error)) return 'too-large';
   for (let e = error, depth = 0; e && depth < 12; e = e.cause, depth += 1) {
     if (e.name === 'ContractFunctionRevertedError' || e.name === 'ExecutionRevertedError' || e.code === 3) return 'revert';
@@ -115,7 +155,7 @@ export function createWriter({
       try {
         return await fn();
       } catch (error) {
-        if (i >= tries || classify(error) === 'revert') throw error;
+        if (i >= tries || ['revert', 'refused'].includes(classify(error))) throw error;
         await sleep(pollMs * i);
       }
     }
@@ -298,6 +338,9 @@ export function createWriter({
         if (error instanceof WriteRevertedError || error instanceof WriteUncertainError || error instanceof WriteNonceTakenError) throw error;
         const kind = classify(error);
         log({ event: 'send-failed', kind, attempt, nonce, ops: ops.length });
+        // Refused by the SDK before sending: nothing went out. (After an uncertain send, an earlier
+        // copy may still land, so a resend that is refused goes on to find it by its nonce.)
+        if (kind === 'refused' && !pinned) throw error;
         if (kind === 'too-large' && !pinned) {
           if (!split || ops.length < 2) throw error;
           const half = Math.ceil(ops.length / 2);

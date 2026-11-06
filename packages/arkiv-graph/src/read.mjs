@@ -4,7 +4,7 @@
 // is an error, never "any owner".
 
 import { key, str } from '@arkiv-network/sdk';
-import { asc, eq, gt } from '@arkiv-network/sdk/query';
+import { asc, eq, gt, lte } from '@arkiv-network/sdk/query';
 import { LIMITS } from './schema.mjs';
 import { plainRow } from './values.mjs';
 
@@ -34,36 +34,69 @@ export function trustedRows(def, owner, entities) {
   return out;
 }
 
-// Every row of a type owned by `owner` that matches `where`, paged by $key (each row
-// exactly once even while others write). Past `cap` rows it throws, unless
-// `truncate` is set, in which case it stops there.
-export async function readAll(publicClient, def, { owner, where = [], cap = 50_000, truncate = false } = {}) {
-  const o = checkedOwner(owner);
-  const rows = [];
+// How many matches a page covered. The SDK leaves out a matching entity that does not fit
+// the schema (a row written before a column was added, say) but the node counts it toward
+// the limit and the offset, so a page that returns fewer rows than its limit is not the
+// last one unless it also covered fewer matches.
+export const coveredBy = (page) => page.entities.length + (Number.isInteger(page.skipped) ? page.skipped : 0);
+
+// The pages of a type owned by `o` that match `where`, in $key order, each match once even
+// while others write. A page continues from its last row's key. A page whose matches were all
+// left out for the schema has no row to continue from: a page of keys alone (no schema, so
+// nothing is left out) bounds that stretch, and the stretch is read again up to that key, so
+// a row that slid into it (when another expired meanwhile, say) is never stepped over.
+async function* keyPages(publicClient, def, o, where) {
   let last = null;
   for (;;) {
     const filters = [...scope(def), ...where];
     if (last) filters.push(gt('$key', key(last)));
-    const page = await publicClient
-      .select('*')
-      .from(def.schema)
-      .where(...filters)
-      .ownedBy(o)
-      .orderBy(asc('$key'))
-      .limit(LIMITS.pageSize)
-      .fetch();
+    const rows = (...extra) =>
+      publicClient
+        .select('*')
+        .from(def.schema)
+        .where(...filters, ...extra)
+        .ownedBy(o)
+        .orderBy(asc('$key'))
+        .limit(LIMITS.pageSize)
+        .fetch();
+    const page = await rows();
+    yield page;
+    if (coveredBy(page) < LIMITS.pageSize) return;
+    if (page.entities.length > 0) {
+      last = page.entities.at(-1).$key;
+      continue;
+    }
+    const keys = await publicClient.select({ $key: true }).where(...filters).ownedBy(o).orderBy(asc('$key')).limit(LIMITS.pageSize).fetch();
+    if (keys.entities.length === 0) return;
+    const bound = keys.entities.at(-1).$key;
+    const stretch = await rows(lte('$key', key(bound)));
+    yield stretch;
+    last = stretch.entities.length > 0 && coveredBy(stretch) >= LIMITS.pageSize ? stretch.entities.at(-1).$key : bound;
+  }
+}
+
+// Every row of a type owned by `owner` that matches `where`, paged by $key (each row
+// exactly once even while others write). Once it has covered `cap` matches (rows, and rows
+// left out for the schema) with more to come it throws, unless `truncate` is set, in which
+// case it stops there.
+export async function readAll(publicClient, def, { owner, where = [], cap = 50_000, truncate = false } = {}) {
+  const o = checkedOwner(owner);
+  const rows = [];
+  let covered = 0;
+  for await (const page of keyPages(publicClient, def, o, where)) {
     rows.push(...trustedRows(def, o, page.entities));
-    if (page.entities.length < LIMITS.pageSize) break;
-    if (rows.length >= cap) {
+    covered += coveredBy(page);
+    if (coveredBy(page) < LIMITS.pageSize) continue; // the last page, or a stretch read again
+    if (covered >= cap) {
       if (truncate) break;
       throw new Error(`arkiv-graph: more than ${cap} ${def.type} rows; raise the cap or narrow the query`);
     }
-    last = page.entities.at(-1).$key;
   }
   return rows;
 }
 
-// The first matching row, or null (an existence check asks for one row).
+// The first matching row, or null (an existence check asks for one row). A first match
+// that does not fit the schema is read past, in $key order.
 export async function findOne(publicClient, def, { owner, where = [] } = {}) {
   const o = checkedOwner(owner);
   const page = await publicClient
@@ -73,7 +106,12 @@ export async function findOne(publicClient, def, { owner, where = [] } = {}) {
     .ownedBy(o)
     .limit(1)
     .fetch();
-  return trustedRows(def, o, page.entities)[0] ?? null;
+  if (page.entities.length > 0 || coveredBy(page) === 0) return trustedRows(def, o, page.entities)[0] ?? null;
+  for await (const next of keyPages(publicClient, def, o, where)) {
+    const row = trustedRows(def, o, next.entities)[0];
+    if (row) return row;
+  }
+  return null;
 }
 
 // count() of a type owned by `owner` that matches `where`.

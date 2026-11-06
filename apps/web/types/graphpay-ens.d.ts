@@ -40,6 +40,11 @@ declare module '@graphpay/ens' {
   }
   export function liveDisposable(client: PublicClient, numbers: number[], options?: { parentRegistry?: `0x${string}` }): Promise<LiveDisposable | null>;
   export function ensPublicClient(options?: { env?: Record<string, string | undefined> }): Promise<{ client: PublicClient; rpcLabel: string }>;
+  // Self-healing (lib/heal.server.ts): the status record, the agent's own resolver and its event.
+  export const KEYS: Readonly<Record<string, string>> & { readonly status: string; readonly capMicro: string };
+  export function readText(client: PublicClient, name: string, key: string): Promise<string>;
+  export function locate(client: PublicClient, name: string): Promise<{ name: string; label: string; registry: `0x${string}`; resolver: `0x${string}`; state: { status: number } }>;
+  export const permissionedResolverAbi: readonly { type: string; name?: string; inputs?: readonly { name: string; type: string; indexed?: boolean }[] }[];
   export interface EnsGate {
     // Registry state and the public records of a name; status is never "ACTIVE" for a name that could not be read.
     ensCheck(name: string): Promise<{ name: string; registryState: string; status: 'ACTIVE' | 'PAUSED' | 'REVOKED' | 'EXPIRED' | 'UNKNOWN'; records: Record<string, string> }>;
