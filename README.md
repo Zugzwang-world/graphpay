@@ -35,7 +35,7 @@ The model proposes, code disposes (ADR-0019): limits come from the human's words
 
 ## Verify each claim
 
-Every link below opens a public explorer or a live endpoint; nothing needs a login. Amounts are test USDT (`0xcedfB56113143d55b2358b8CFbB0dEB5Ad2f55a7`, 6 decimals). The shops' ENS labels are still the test cast's: the good shop Filter & Fold is `kesar-kingdom.graphpay.eth`. Checked against the explorers on Fri 6 Nov, 23:30 IST.
+Every link below opens a public explorer or a live endpoint; nothing needs a login. Amounts are test USDT (`0xcedfB56113143d55b2358b8CFbB0dEB5Ad2f55a7`, 6 decimals). The shops' ENS labels are still the test cast's: the good shop Filter & Fold is `kesar-kingdom.graphpay.eth`. Checked against the explorers on Fri 6 Nov, about 23:10 IST.
 
 | claim | evidence |
 |---|---|

@@ -1,12 +1,12 @@
 # Relay: w7-submission (the night Submission stream)
 
-Updated 23:50 IST, Fri 6 Nov, by W7 Submission (`local_abd77623-de22-4fe2-a0a9-865fdd43dba2`). Brief: [`briefs/2258-w7-submission.md`](../briefs/2258-w7-submission.md).
+Updated 23:25 IST, Fri 6 Nov, by W7 Submission (`local_abd77623-de22-4fe2-a0a9-865fdd43dba2`). Brief: [`briefs/2258-w7-submission.md`](../briefs/2258-w7-submission.md).
 
 ## Plain language
 
 W7 writes what a judge reads, so the founder can paste the ETHGlobal submission from one file and every claim in it links to evidence.
 
-**Landed in this step:** the README. It now says what GraphPay is, gives the live link, and has a "verify each claim" table: every payment, refund, renewal, ENS action and Arkiv receipt it mentions opens on a public explorer. Each of those 24 transactions was checked on its explorer at about 23:30 IST. It also has the fictional-persona sentence from the brief, the SDKs, the Whitechain, ENS and Arkiv sections the prize rules ask for, a runnable Arkiv query with no keys, the limitations, and the team. A root MIT `LICENSE` is added (the packages were MIT already; the repo root had none).
+**Landed in this step:** the README. It now says what GraphPay is, gives the live link, and has a "verify each claim" table: every payment, refund, renewal, ENS action and Arkiv receipt it mentions opens on a public explorer. Each of those 24 transactions was checked on its explorer at about 23:10 IST. It also has the fictional-persona sentence from the brief, the SDKs, the Whitechain, ENS and Arkiv sections the prize rules ask for, a runnable Arkiv query with no keys, the limitations, and the team. A root MIT `LICENSE` is added (the packages were MIT already; the repo root had none).
 
 **Next, in order:** AI_USAGE.md; the Arkiv files (`friction.md`, `reach.md`, `why-arkiv.md`, `how-you-use-arkiv.md`, `swarm.md`); `WHITECHAIN_FEEDBACK.md` and `docs/submission/ENS.md`; then `docs/submission/ETHGLOBAL.md`, the form text. Then a pass after each night stream lands (W1's new shop names, W2's menus and the race at M, W6's 1.0.0 SDKs).
 
@@ -25,7 +25,7 @@ W7 writes what a judge reads, so the founder can paste the ETHGlobal submission 
 - **The drop-in:** the store's integration is 12 lines in four files, counted by the store's own rule (`apps/store/lib/integration.ts`); the old "about 20" stays the limit its test holds.
 - **Deviations:**
   - The tallies of the good shop include labelled synthetic history (`history-buyer-N.sim…`, `synthetic: true`). The README says so rather than quoting the shop's order count.
-  - The payer's daily cap is not quoted as a number: it read 300 test USDT in ENS at about 23:20 IST, after the 100 of ADR-0071. The README links the live state instead.
+  - The payer's daily cap is not quoted as a number: it reads 300 test USDT in ENS since about 23:10 IST (W5's #152), after the 100 of ADR-0071. The README links the live state instead.
   - The store is not deployed (graphpay-store.vercel.app answers 404), so the README says how to run it locally.
   - The brief's `why.md` is written as `arkiv/why-arkiv.md`, the name the pack, the master plan and the M17 plan use.
 - **Open risks:** the ENS labels change with W1, the race numbers with W2 at M, the SDK versions with W6; each is a find-and-replace in the README and the form text, done after it lands.

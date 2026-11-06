@@ -152,7 +152,7 @@ The kickoff rules (the deadline Sat 09:00 IST; AI use documented; spec files in 
 
 ## w7-submission
 
-Updated 23:50 IST, Fri 6 Nov (W7 Submission).
+Updated 23:25 IST, Fri 6 Nov (W7 Submission).
 - **Review the README** (what: the new README with its "verify each claim" table; where: `README.md`; why: it is the first thing every judge opens; recommendation: read the persona note, the claims table and the Team section, and tell W7 any change).
 - **The team list** (what: the README names `Zugzwang-world` and `ajatshatru01` by GitHub handle; where: `README.md`, "Team"; why: no other member is recorded in the repo; recommendation: add names, or anyone missing, and confirm each is on the ETHGlobal project).
 - **The video** (what: 2 to 4 minutes in your own voice, every party shown; where: the link goes into the form text, `docs/submission/ETHGLOBAL.md`, coming next; why: Whitechain's qualification and ETHGlobal's rules; recommendation: record after the night streams land, with the payer active and the shop open).
