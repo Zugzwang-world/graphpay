@@ -169,7 +169,7 @@ One line per PR: time (IST) · activity · result · PR link. Append under your 
 - 23:40 IST · w5-ops · Pause and Resume per agent (payer and scout; the others say why); the self-healing cron: a paused agent resumes after 2 min, a closed shop reopens after 5 · https://github.com/Zugzwang-world/graphpay/pull/172
 - 00:35 IST · w5-ops · acceptance: B2, C3, C7, E3, D8 and E1 updated to tonight's decisions (reviewed twice); B2, C7 and E3 pass read-only, C3 waits for a fresh e2e:hosted after 05:30 IST, E1 for a fresh errand · https://github.com/Zugzwang-world/graphpay/pull/188
 - 00:35 IST · w5-ops · the workers under a watchdog (a 30-minute fuse, longer than Arkiv's rate-limit reset; a hold file for maintenance windows), the ENS watcher's poll interval as a setting, P-w5-ops-1 · https://github.com/Zugzwang-world/graphpay/pull/194
-- 01:40 IST · w5-ops · the workers on the new names (00:51 restart; a live errand to filter-and-fold at 01:07 shown on Filter & Fold's phone); PAYER refilled from the shop's takings (63.2); the mirror passes the checkout kit's anonymous payment instead of parking it · PR_LINK
+- 01:40 IST · w5-ops · the workers on the new names (00:51 restart; a live errand to filter-and-fold at 01:07 shown on Filter & Fold's phone); PAYER refilled from the shop's takings (63.2); the mirror passes the checkout kit's anonymous payment instead of parking it · https://github.com/Zugzwang-world/graphpay/pull/209
 
 ## w3-payments
 
