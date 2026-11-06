@@ -170,7 +170,7 @@ Secrets live only in the git-ignored `.env` (names in [`env.example`](env.exampl
 
 - **Testnets only,** with test USDT. The demo shops, the cast and the synthetic city are story data, labelled synthetic; the shops' tallies include labelled synthetic history.
 - **Not on the website yet:** the Subscribe and Cancel buttons (subscriptions run on the chain, by script and by the renewal cron), the kill and the cap buttons on the phones (both proven by the acceptance checks), and the encrypted refund photo on Swarm.
-- **The shops' ENS labels** are still the test cast's (`kesar-kingdom`, `syrup-street`, `jamun-junction`) while their display names are the dosa story's.
+- **The shops' ENS labels:** the site still uses the test cast's (`kesar-kingdom`, `syrup-street`, `jamun-junction`). The dosa shops' own names, `filter-and-fold`, `idli-index` and `tawa-tangle` under `graphpay.eth`, were registered on Sepolia on Fri 6 Nov ([#158](https://github.com/Zugzwang-world/graphpay/pull/158)); the site moves to them at the label flip.
 - **Public access:** anyone can press Pause, run an errand or use up the payer's daily cap; the on-chain caps and the relayer's floor bound what that costs (ADR-0069).
 - **Graph Arkiv wins on aggregates, not everywhere:** at size S it ties or needs more reads on some questions ([`bench/BENCHMARK-LIVE.md`](bench/BENCHMARK-LIVE.md)).
 - **The mirror runs on the team's laptop** (`pnpm workers`, ADR-0056); if it stops, receipts reach Arkiv when it resumes, from its checkpoint.
