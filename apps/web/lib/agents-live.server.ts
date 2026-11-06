@@ -6,10 +6,11 @@
 
 import { createLiveRunner, liveRunnerMissing } from '@graphpay/integration/live-runner';
 
-// Server only: this module holds the path to the payer's key; it must never reach a browser bundle.
-if (typeof window !== 'undefined') throw new Error('agents-live.server.ts is server-only');
 import type { RunResult } from './contracts.ts';
 import type { ErrandRunner } from './run-registry.server.ts';
+
+// Fails at run time if this module is ever evaluated in a browser (it runs the payer's signer).
+if (typeof window !== 'undefined') throw new Error('agents-live.server.ts is server-only');
 
 export const RUNNER_WAITING_FOR = "the live runner's server settings (Join)";
 // The names (never values) it still needs go to the server log only.

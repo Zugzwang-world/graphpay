@@ -130,3 +130,24 @@ test('the runner is told the run id the site knows the run by (the handoff rows 
   assert.equal(seen, started.ok ? started.run.id : null);
   assert.match(String(seen), /\S/);
 });
+
+test("a runner's refusal code picks a fixed line; its message never leaves the server", async () => {
+  const lines: string[] = [];
+  for (const code of ['LIVE_RUNNER_RATE_LIMITED', 'LIVE_RUNNER_BUSY', 'RATE_LIMITED', 'constructor', undefined]) {
+    const registry = createRegistry();
+    const runner: ErrandRunner = async () => {
+      throw Object.assign(new Error('https://rpc.example/secret-key-1234567890 failed'), code === undefined ? {} : { code });
+    };
+    const started = registry.start(runner, 'test');
+    assert.ok(started.ok);
+    await tick();
+    const frames = JSON.stringify(started.run.frames);
+    assert.ok(!frames.includes('secret-key') && !frames.includes('rpc.example'), frames);
+    const failed = started.run.frames.find((f) => f.event === 'failed');
+    assert.ok(failed && failed.event === 'failed' && typeof failed.data.error === 'string');
+    lines.push(failed.data.error);
+  }
+  assert.match(lines[0] ?? "", /^rate limited/);
+  assert.match(lines[1] ?? "", /^busy/);
+  assert.deepEqual(lines.slice(2), ['the errand failed', 'the errand failed', 'the errand failed']);
+});

@@ -35,7 +35,7 @@ export const RUNS_PER_HOUR = 6;
 export function liveRunnerMissing(env = process.env) {
   if (!payerEntry()) return ['a paying agent named payer in the story'];
   if (!story.agentModels?.presets?.live) return ['a live preset in the story'];
-  if (process.env.STACK_LOCAL_RELAY === '1') return ['STACK_LOCAL_RELAY unset (the runner uses the hosted stack only)'];
+  if (env.STACK_LOCAL_RELAY === '1' || process.env.STACK_LOCAL_RELAY === '1') return ['STACK_LOCAL_RELAY unset (the runner uses the hosted stack only)'];
   return LIVE_RUNNER_NEEDS.filter((name) => !env[name] || (name === 'ALLOW_REAL_NETWORK' && env[name] !== '1'));
 }
 
@@ -73,8 +73,8 @@ export function createLiveRunner(env = process.env, { log = () => {}, now = Date
   return async function liveErrand({ runId, request, onEvent, signal }) {
     const t = now();
     while (started.length && t - started[0] > 3_600_000) started.shift();
-    if (busy) throw Object.assign(new Error('busy: an errand is still finishing on this server'), { code: 'BUSY' });
-    if (started.length >= RUNS_PER_HOUR) throw Object.assign(new Error(`rate limited: at most ${RUNS_PER_HOUR} errands an hour`), { code: 'RATE_LIMITED' });
+    if (busy) throw Object.assign(new Error('busy: an errand is still finishing on this server'), { code: 'LIVE_RUNNER_BUSY' });
+    if (started.length >= RUNS_PER_HOUR) throw Object.assign(new Error(`rate limited: at most ${RUNS_PER_HOUR} errands an hour`), { code: 'LIVE_RUNNER_RATE_LIMITED' });
     started.push(t);
     busy = true;
     try {
@@ -94,12 +94,29 @@ export function createLiveRunner(env = process.env, { log = () => {}, now = Date
     const mcp = await connectMcp();
     const activity = batchedActivity(directory, { log });
     const team = teamCast();
+    // The hosted shop writes the errand's quote as W_DIRECTORY at the 402 step, from another
+    // instance: this run's presence and handoff batches (the same key) are held around it.
+    const surfaceOf = (shopEns) => {
+      const surface = stack.surfaceFor(shopEns);
+      return {
+        ...surface,
+        async pay(args) {
+          if (args.signature) return surface.pay(args);
+          const release = await activity.hold();
+          try {
+            return await surface.pay(args);
+          } finally {
+            release();
+          }
+        },
+      };
+    };
     const gated = stack.gate.gatedSign(stack.signerFor(payer.walletRole));
     const storefront = (shopEns) => `${config.site.url}/storefront/${shopEns.split('.')[0]}`;
     const hooks = {
       ...read,
       x402: x402Codec,
-      catalog: (shopEns) => stack.surfaceFor(shopEns).catalog(),
+      catalog: (shopEns) => surfaceOf(shopEns).catalog(),
       storefrontUrl: async (shopEns) => storefront(shopEns),
       // The payer-side ENS gate runs before every signature; nothing is signed if it refuses.
       // After the site has given up on the run (its time limit), nothing more is signed.
@@ -110,7 +127,7 @@ export function createLiveRunner(env = process.env, { log = () => {}, now = Date
       presence: activity.presence,
       handoff: activity.handoff,
     };
-    hooks.shopClient = (shopEns, opts) => createShopGateway({ shopEns, surface: stack.surfaceFor(shopEns), mcp, hooks, storefront: storefront(shopEns), names: team.shopAgentNames(shopEns), ...opts });
+    hooks.shopClient = (shopEns, opts) => createShopGateway({ shopEns, surface: surfaceOf(shopEns), mcp, hooks, storefront: storefront(shopEns), names: team.shopAgentNames(shopEns), ...opts });
     try {
       const { runLog, metrics } = await runErrand({ mode: 'live', env: runEnv, buyer: PAYER, hooks, mcp, runId, request, onEvent, signal, secrets: stack.secrets, label: 'live errand on the site (SYNTHETIC story)' });
       log(`live errand ${runId}: ${runLog.result.status}, ${metrics.seconds.toFixed(1)} s, $${metrics.apiCostUsd.toFixed(4)}`);

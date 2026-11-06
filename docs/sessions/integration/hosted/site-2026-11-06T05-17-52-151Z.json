@@ -1,0 +1,33 @@
+{
+  "site": "https://graphpay-event.vercel.app",
+  "startedAt": "2026-11-06T05:17:52.151Z",
+  "request": "Just landed in Mumbai. Get me the best gulab jamun near me under 6 USDT by 8 pm.",
+  "events": {
+    "message": 12,
+    "guard": 6,
+    "agent.start": 6,
+    "tool.call": 16,
+    "tool.result": 16,
+    "agent.end": 6
+  },
+  "frames": 64,
+  "status": 200,
+  "runId": "9908e943-a2a0-4ca7-90c4-df833d154a34",
+  "result": {
+    "status": "refused",
+    "chosenShop": "kesar-kingdom.graphpay.eth",
+    "priceUsdt": null,
+    "orderId": null,
+    "receipt": null,
+    "refusals": [
+      {
+        "reason": "NO_402",
+        "detail": "quote write failed",
+        "agent": "payer.vitalik.graphpay.eth"
+      }
+    ],
+    "error": null
+  },
+  "seconds": 85,
+  "endedAt": "2026-11-06T05:19:17.196Z"
+}

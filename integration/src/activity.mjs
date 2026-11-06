@@ -19,6 +19,7 @@ export function batchedActivity(arkiv, { flushMs = 2_000, log = () => {}, setTim
   let queue = [];
   let timer = null;
   let chain = Promise.resolve();
+  let held = null; // while set, no batch goes out (another writer with this key is sending)
   const stats = { queued: 0, written: 0, dropped: 0, txs: 0 };
 
   function schedule() {
@@ -30,6 +31,7 @@ export function batchedActivity(arkiv, { flushMs = 2_000, log = () => {}, setTim
   }
 
   async function flushOnce() {
+    if (held) await held;
     const items = queue.slice(0, MAX_OPS);
     queue = queue.slice(items.length);
     const ext = [...renewals].filter((id) => keys.has(id)).slice(0, MAX_OPS - items.length);
@@ -77,6 +79,17 @@ export function batchedActivity(arkiv, { flushMs = 2_000, log = () => {}, setTim
       queue.push({ def: ENTITIES.handoff, minutes: LIFETIME.handoffMinutes, values: { request_id: String(requestId), from_agent: normalizedName(from), to_agent: normalizedName(to), step: String(step) } });
       stats.queued += 1;
       schedule();
+    },
+    // Holds the batches back while another process writes with the same key (the hosted shop's
+    // quote at the 402 step): flush first, then hold; the returned function releases them.
+    async hold() {
+      await this.flush();
+      let release;
+      held = new Promise((ok) => (release = ok));
+      return () => {
+        held = null;
+        release();
+      };
     },
     // Sends everything queued now (the end of a run); resolves when it has landed or dropped.
     async flush() {

@@ -38,8 +38,8 @@ export interface Registry {
 
 // The runner's refusals the visitor can act on (live-runner.mjs codes), as fixed lines.
 const FAILED_LINES: Record<string, string> = {
-  RATE_LIMITED: 'rate limited: too many errands this hour on this server; try again later',
-  BUSY: 'busy: the last errand is still finishing; try again in a minute',
+  LIVE_RUNNER_RATE_LIMITED: 'rate limited: too many errands this hour on this server; try again later',
+  LIVE_RUNNER_BUSY: 'busy: the last errand is still finishing; try again in a minute',
 };
 
 const SECRET_NAME = /(?:_PASSCODE|_RPC_URL|_PRIVATE_KEY|_API_KEY|_ACCESS_KEY|_TOKEN|_SECRET)$/;
@@ -94,7 +94,7 @@ export function createRegistry({ keepMs = 5 * 60_000, maxRunMs = 280_000, now = 
           // The cause can hold a URL or key: only a fixed line leaves the server, chosen by the
           // runner's error code (never its message).
           const code = (error as { code?: unknown } | null)?.code;
-          const line = abort.signal.aborted ? 'the errand ran out of time' : (FAILED_LINES[String(code)] ?? 'the errand failed');
+          const line = abort.signal.aborted ? 'the errand ran out of time' : typeof code === 'string' && Object.hasOwn(FAILED_LINES, code) ? (FAILED_LINES[code] ?? 'the errand failed') : 'the errand failed';
           emit(run, { event: 'failed', data: { error: line } });
         } finally {
           clearTimeout(limit);

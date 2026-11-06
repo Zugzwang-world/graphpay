@@ -13,14 +13,14 @@ test('it names what is missing, never a value, and answers null without it', () 
   assert.deepEqual(liveRunnerMissing(noNetwork), ['ALLOW_REAL_NETWORK']);
   assert.deepEqual(liveRunnerMissing({ ...full, ALLOW_REAL_NETWORK: 'yes' }), ['ALLOW_REAL_NETWORK']);
   assert.equal(createLiveRunner(noNetwork), null);
-  for (const line of liveRunnerMissing({})) assert.ok(!line.includes('value-of-'));
+  for (const line of liveRunnerMissing(noNetwork)) assert.ok(!line.includes('value-of-'));
 });
 
 test('the rate limit counts started errands over a rolling hour', async () => {
   let t = 0;
   const run = createLiveRunner(full, { now: () => t, buildParts: async () => Promise.reject(Object.assign(new Error('offline'), { code: 'OFFLINE' })) });
   for (let i = 0; i < RUNS_PER_HOUR; i += 1) await assert.rejects(run(input), { code: 'OFFLINE' });
-  await assert.rejects(run(input), { code: 'RATE_LIMITED' });
+  await assert.rejects(run(input), { code: 'LIVE_RUNNER_RATE_LIMITED' });
   t = 3_600_001;
   await assert.rejects(run(input), { code: 'OFFLINE' });
 });
@@ -29,7 +29,9 @@ test('one errand at a time, until its last step has finished', async () => {
   let release;
   const run = createLiveRunner(full, { buildParts: () => new Promise((_, reject) => (release = () => reject(new Error('done')))) });
   const first = run(input);
-  await assert.rejects(run(input), { code: 'BUSY' });
+  await assert.rejects(run(input), { code: 'LIVE_RUNNER_BUSY' });
   release();
   await assert.rejects(first, /done/);
+  // Cleared after its last step, and a busy refusal took no rate-limit slot.
+  await assert.rejects(Promise.race([run(input), new Promise((_, no) => setTimeout(() => no(new Error('still pending')), 50))]), (e) => e.code !== 'LIVE_RUNNER_BUSY');
 });
