@@ -9,7 +9,6 @@ import { KEYS, createEnsGate, createOwnerActions, createTxRunner, ensChain, ensP
 import { recordEdge } from '@graphpay/money-graph';
 import { createPublicClient, createWalletClient, http, namehash, toHex, type Hex } from 'viem';
 import { privateKeyToAccount } from 'viem/accounts';
-import { sharedCustomerState } from './customer-state.server.ts';
 import { syncConnection, whitechain } from './payments.server.ts';
 import { recorderKeyConfigured } from './refund-request.server.ts';
 import { checkoutAddress, siteModel } from './site.server.ts';
@@ -60,7 +59,10 @@ export function liveOwnerCapDeps(): OwnerCapDeps {
       if (typeof payer?.capMicro !== 'number' || payer.capMicro <= 0) throw new Error('story config: the payer agent has no cap');
       return BigInt(payer.capMicro);
     },
+    floorMicro: () => BigInt(model.order.budgetMicro),
     ensCap: async () => {
+      // A fresh read: the gate's 20 s cache must not give an old value as "before".
+      (await ensGate()).invalidate(model.payer.ens);
       const check = await (await ensGate()).ensCheck(model.payer.ens);
       const value = check.records[KEYS.capMicro] ?? '';
       if (check.status === 'UNKNOWN' || !/^\d{1,19}$/.test(value)) throw new Error('the ENS cap is unreadable');
@@ -73,24 +75,23 @@ export function liveOwnerCapDeps(): OwnerCapDeps {
       (await ensGate()).invalidate(model.payer.ens);
       return { changed: result.changed, sepoliaTx: result.hash ?? null };
     },
-    policyCap: async () => {
+    policy: async () => {
       const w = await whitechain();
-      const policy = (await w.publicClient.readContract({ address: checkoutAddress() as Hex, abi: checkoutAbi, functionName: 'policies', args: [node] })) as { dailyCapMicro: bigint };
-      return BigInt(policy.dailyCapMicro);
+      const policy = (await w.publicClient.readContract({ address: checkoutAddress() as Hex, abi: checkoutAbi, functionName: 'policies', args: [node] })) as { dailyCapMicro: bigint; epoch: number | bigint };
+      return { capMicro: BigInt(policy.dailyCapMicro), epoch: Number(policy.epoch) };
     },
-    record: async ({ capMicro, ensBeforeMicro, policyMicro, applied, sepoliaTx, ts }) => {
-      const epoch = (await sharedCustomerState()).agent.epoch;
-      return recordEdge(await syncConnection(), {
-        // One record per agent and minute (the route allows one change per 20 s per instance).
-        ref: `own:${node.slice(2, 18)}:${Math.floor(ts / 60)}`,
+    record: async ({ capMicro, ensBeforeMicro, ensChanged, policyMicro, applied, sepoliaTx, epoch, ts }) =>
+      recordEdge(await syncConnection(), {
+        // Unique per change (its second and its cap): two changes in one minute are two records.
+        ref: `own:${node.slice(2, 18)}:${ts}:${capMicro}`,
         kind: 'request',
         from: { ens: model.persona.ens, epoch: 0 },
-        to: { ens: model.payer.ens, epoch },
-        amountMicro: capMicro,
+        to: { ens: model.payer.ens, epoch: epoch ?? 0 },
+        // No money moves and nothing is asked of anyone: the figures are in the payload, never the amount.
+        amountMicro: 0n,
         ts,
-        payload: toHex(JSON.stringify({ action: 'set-cap', key: KEYS.capMicro, capMicro: String(capMicro), ensBeforeMicro: String(ensBeforeMicro), policyMicro: String(policyMicro), applied, sepoliaTx })),
-      });
-    },
+        payload: toHex(JSON.stringify({ action: 'set-cap', key: KEYS.capMicro, capMicro: String(capMicro), ensBeforeMicro: String(ensBeforeMicro), ensChanged, policyMicro: policyMicro === null ? null : String(policyMicro), applied, sepoliaTx })),
+      }),
     now: () => Date.now(),
     sleep: (ms) => new Promise((r) => setTimeout(r, ms)),
   };
