@@ -1,6 +1,25 @@
 # T6 AgentPay: resume
 
-Updated 05:30 IST, Fri 6 Nov. Brief: `docs/thinking-partner/briefs/0325-agentpay-v1.md`. Branch prefix `agentpay/`.
+## BRIEF FROM THE COORDINATOR, 09:20 IST Fri 6 Nov (ADR-0063): publish `@graphpay/agentpay` on npm by about 13:00
+
+You are on Sonnet 5.5 at high. **`@graphpay/agentpay` goes on npm by about 13:00 today**, so developers at the venue can try it. The Coordinator publishes with `pnpm publish` after the founder's npm login. The scope is `@graphpay` (never `graphpay_ethglobal`). After the submission, versions are frozen until judging ends. Pause at 92% weekly usage (it was 83% at 09:20).
+
+1. **README quickstart that works in 5 minutes** for an outside developer, plus one example and a CHANGELOG for 0.1.0. `package.json`: `"version": "0.1.0"`, `"publishConfig": { "access": "public" }`, a `files` list, plus license, repository, homepage, bugs and keywords.
+2. **Self-contained:** inline the checkout ABIs into agentpay, so there is no `@graphpay/contracts` or any other workspace dependency. Then `pnpm pack`, install the tarball in an empty folder outside the repo, and run the quickstart there on Node 22. Check the tarball's file list: no secrets, no keyed URLs.
+3. **Safety, the founder's rule:**
+   - testnet only: V1 refuses any chain but 1874, at client creation and before every signing;
+   - no default to our hosted facilitator or our relayer: developers bring their own relayer key (and facilitator), so nobody can spend our gas or break the demo.
+   - Check whether the checkout contract only lets granted relayers settle. If it does, an outside developer cannot use our deployment, so make the 5-minute quickstart a path that really works for them, and tell the Coordinator which.
+4. **FEEDBACK.md:** feedback is a GitHub issue with the label `sdk:agentpay` (the Coordinator is creating the labels and an issue template).
+5. **A reviewer pass is mandatory** (payment and signature code) before the PR merges.
+
+**Ready by about 12:00 IST:** tell the Coordinator (session `local_d1ca442e-73e0-4e15-aa2b-9250fe0cc432`) when pack, install and quickstart pass.
+
+Start line: the Coordinator sends it after this session is cleared. Keep T5's `packages/checkout-kit` working (it uses the public exports named under "State"); it depends on `@graphpay/agentpay` and `@graphpay/contracts` today, so tell T5 before any export or the workspace dependency changes.
+
+---
+
+Updated 09:30 IST, Fri 6 Nov. Brief: `docs/thinking-partner/briefs/0325-agentpay-v1.md`. Branch prefix `agentpay/`.
 
 ## State
 
