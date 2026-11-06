@@ -152,6 +152,9 @@
       "W_SEED_M_EVENT": "0x734Fc394248777046fb80d55AD1f0b0C142a0d64"
     }
   },
+  "swarm": {
+    "gateway": "https://api.gateway.ethswarm.org"
+  },
   "site": {
     "url": "https://graphpay-event.vercel.app",
     "mcpPath": "/api/mcp",

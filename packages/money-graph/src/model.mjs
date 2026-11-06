@@ -130,6 +130,9 @@ export const ENTITIES = {
   // and one agent passing work to another (readonly). Each lapses by itself.
   shop_open: defineEntity('shop_open', { columns: ['shop_key:key/i', 'shop_ens:str', 'open_until:u64'] }, context),
   agent_presence: defineEntity('agent_presence', { columns: ['agent_ens:str/i', 'owner_ens:str/i', 'role:str', 'session:str/i'], readonly: true }, context),
+  // Friday Swarm (ADR-0061), W_DIRECTORY: a shop's public menu on Swarm. The row keeps the 64-hex
+  // reference of the menu and the sha-256 of its bytes; mutable (a new version patches it).
+  menu: defineEntity('menu', { columns: ['shop_key:key/i', 'shop_ens:str', 'version:u64', 'swarm_ref:str', 'content_hash:str', 'size:u64'] }, context),
   handoff: defineEntity('handoff', { columns: ['request_id:str/i', 'from_agent:str', 'to_agent:str', 'step:str'], readonly: true }, context),
 };
 delete ENTITIES.totals;
@@ -150,6 +153,7 @@ export const QUERIES = {
   shop_open: ['shop_key'],
   agent_presence: ['agent_ens', 'owner_ens', 'session'],
   handoff: ['request_id'],
+  menu: ['shop_key'],
 };
 
 export const WRITER_ROLES = ['W_LEDGER', 'W_SYNC', 'W_DIRECTORY', 'W_SEED_EVENT', 'W_SEED_M_EVENT'];
@@ -178,6 +182,7 @@ export function trustedOwners(type, { writers = writerAddresses(), synthetic = n
     case 'shop_open':
     case 'agent_presence':
     case 'handoff':
+    case 'menu':
       return [writers.W_DIRECTORY];
     default:
       throw new Error(`money-graph: no trusted writer for entity type "${type}"`);

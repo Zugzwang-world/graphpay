@@ -38,13 +38,13 @@ Updated 04:25 IST. **M6 is built: the gate is merged (PR #34); the watcher PR is
 
 ## arkiv
 
-Updated 10:40 IST, Fri 6 Nov (T3).
+Updated 09:55 IST, Fri 6 Nov (T3).
 
-- **Where we are:** the SDK `@graphpay_ethglobal/arkiv-graph` 0.1.0 is merged and ready to publish (PR #74; the Coordinator publishes with T6's package). Now Friday item 15: the Arkiv judges' drafts.
-- **This step:** `arkiv/friction.md` (7 gaps we hit at the event, each with a repro, plus the open booth questions), `arkiv/how-you-use-arkiv.md` (feature to what the user sees, with what is shipped and what is only built) and `arkiv/swarm.md` (honestly "pending"; nothing uploaded yet).
-- **Running:** nothing.
-- **Blockers:** none. Swarm goes next only if weekly usage is under about 88% (now 84%).
-- **Next:** Swarm: a probe upload through the public gateway, then the menu.
+- **Where we are:** the SDK 0.1.0 is merged and waits for the npm login (PR #74). The three Arkiv judges' drafts are merged (PR #77). This step: Swarm.
+- **This step (Friday items 4 and 5, the menu part):** the three cast shops' menus (synthetic story data) are public files on Swarm through the public gateway, each referenced by a `menu` row on Arkiv with a hash; read back and verified from Arkiv and the gateway. `arkiv/swarm.md` now has the real entity key, reference and link.
+- **Running:** nothing. **Blockers:** none.
+- **Not done:** the encrypted refund photo (`refund_evidence`); it is first in the cut order and needs the Swarm wrapping key from the Coordinator.
+- **Next:** wait for the Coordinator on `refund_evidence`; otherwise the demo cast `shop` rows once the founder's names land (item 6).
 
 ## agents
 

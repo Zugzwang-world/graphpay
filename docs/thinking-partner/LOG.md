@@ -35,7 +35,8 @@ One line per PR: time (IST) · activity · result · PR link. Append under your 
 - 03:42 IST · arkiv · M9 at S: live benchmark, D6 passes (Q2: Graph Arkiv 2 reads, plain 5, 6 in parallel; every answer right), race function for /api/race, batched out()/in(), byte meter fix · https://github.com/Zugzwang-world/graphpay/pull/31 (merged 03:45)
 - 03:50 IST · arkiv · Friday item 1: `shop_open`, `agent_presence`, `handoff` rows (W_DIRECTORY, lapse by themselves, renewals never past now + lifetime), GraphQL `shops(openNow)`, `agentsOnline`, `handoffs`, the agents' hooks · https://github.com/Zugzwang-world/graphpay/pull/35
 - 09:50 IST · arkiv · SDK publish prep: renamed to @graphpay_ethglobal/arkiv-graph, 0.1.0, connect/createStore, README quickstart, leaderboard, CHANGELOG, FEEDBACK, MIT; pack, install and run pass · PR link below
-- 10:40 IST · arkiv · Friday item 15: drafts of `arkiv/friction.md`, `how-you-use-arkiv.md`, `swarm.md` (pending) · PR link below
+- 09:45 IST · arkiv · Friday item 15: drafts of `arkiv/friction.md`, `how-you-use-arkiv.md`, `swarm.md` · https://github.com/Zugzwang-world/graphpay/pull/77 (merged)
+- 09:55 IST · arkiv · Friday items 4–5 (menu): Swarm gateway probe, `menu` entity, 3 cast menus on Swarm and Arkiv, verified; `swarm.md` filled in · PR link below
 
 ## agents
 
