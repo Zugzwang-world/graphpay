@@ -7,7 +7,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import clsx from 'clsx';
 import { story } from '@/data/story';
-import { foldAll } from '../../web/lib/stage/errand.ts';
+import { emptyErrand, foldAll, foldFrame, type ErrandModel } from '../../web/lib/stage/errand.ts';
 import { customerErrandLines, dispatchLines, endSentence, pauseLines, refundLines, type Line as LineData } from '../../web/lib/stage/lines.ts';
 import { advance, caughtUp, restPace, type Pace } from '../../web/lib/stage/pace.ts';
 import { ERRAND_STEPS, stepIndex, type BeatKey } from '../../web/lib/stage/scenes.ts';
@@ -109,9 +109,18 @@ export function CustomerPhone() {
     let runId: string | null = null;
     let done = false;
     let applied = 0;
+    // The run as this phone has it: once the signature has gone out, a failed or unsettled end (or a
+    // dropped stream) waits for the payer's newest order before anything says the run did not pay.
+    let seen = emptyErrand();
+    let held: { event: string; data: string } | null = null;
+    const signedOut = () => seen.signed || seen.settledTx !== null || seen.paid !== null;
+    const post = (event: string, data: string) => {
+      postFrame(event, data);
+      setFrames((f) => [...f, { event, data, at: Date.now() }]);
+    };
     const apply = (event: string, data: string) => {
       applied += 1;
-      postFrame(event, data);
+      seen = foldFrame(seen, event, data, Date.now());
       if (event === 'started') {
         try {
           runId = (JSON.parse(data) as { runId?: string }).runId ?? null;
@@ -120,7 +129,12 @@ export function CustomerPhone() {
         }
       }
       if (event === 'result' || event === 'failed') done = true;
-      setFrames((f) => [...f, { event, data, at: Date.now() }]);
+      const unpaidEnd = event === 'failed' || (event === 'result' && seen.end?.status !== 'paid');
+      if (unpaidEnd && signedOut()) {
+        held = { event, data };
+        return;
+      }
+      post(event, data);
     };
     await readFrames(res.body, apply);
     // The stream dropped before the end: the run goes on server side, so re-attach to it by its id
@@ -141,7 +155,19 @@ export function CustomerPhone() {
         // the connection dropped again: try once more
       }
     }
-    if (!done) apply('failed', JSON.stringify({ error: 'the errand stream ended before its result' }));
+    const dropped = JSON.stringify({ error: 'the errand stream ended before its result' });
+    if (signedOut() && (held || !done)) {
+      // Past the signature: the payer's newest order decides. Paid goes on as a paid run (the shop's
+      // phone gets it through the stage and dispatches); otherwise the held end is shown as it came.
+      const paid = await confirmPaid(seen);
+      if (paid) {
+        if (!seen.paid) post('trace', JSON.stringify({ type: 'tool.result', agent: payer.ens, tool: 'pay_order', output: { status: 'paid', ...paid } }));
+        post('result', JSON.stringify({ status: 'paid', orderId: paid.orderId, receipt: { transaction: paid.transaction, amountUsdt: paid.amountUsdt }, ranking: [], refusals: [] }));
+      } else {
+        const end: { event: string; data: string } = held ?? { event: 'failed', data: dropped };
+        post(end.event, end.data);
+      }
+    } else if (!done) apply('failed', dropped);
     setRunning(false);
     void refresh();
   }, [running, refresh]);
@@ -392,6 +418,22 @@ export function CustomerPhone() {
       />
     </div>
   );
+}
+
+// After the signature, the payer's newest order (GET /api/state/customer) says whether the payment
+// settled: the run's own order, paid or past it. Tried for about 45 s.
+async function confirmPaid(m: ErrandModel): Promise<{ orderId: string; transaction: string; amountUsdt: string } | null> {
+  const orderId = m.paid?.orderId ?? m.quote?.orderId ?? null;
+  if (!orderId) return null;
+  for (let i = 0; i < 15; i++) {
+    const o = (await getJson<CustomerState>('/api/state/customer'))?.lastOrder;
+    if (o && o.orderId.toLowerCase() === orderId.toLowerCase() && /PAID|DELIVERED|REFUNDED/.test(o.status)) {
+      const transaction = m.paid?.tx ?? m.settledTx ?? o.transaction;
+      if (transaction) return { orderId: o.orderId, transaction, amountUsdt: m.paid?.amountUsdt ?? m.quote?.priceUsdt ?? (Number(o.amountMicro) / 1e6).toFixed(2) };
+    }
+    await new Promise((r) => setTimeout(r, 3_000));
+  }
+  return null;
 }
 
 // This run's steps as a plain list: the history (scene 9) or the fast replay (scene 10).

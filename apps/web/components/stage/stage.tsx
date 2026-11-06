@@ -107,7 +107,10 @@ function FailureNote() {
   const end = d.model.end;
   if (!end) return null;
   const why = end.reason ?? '';
-  const text = /busy/i.test(why)
+  const signed = d.model.signed || d.model.settledTx !== null || d.model.paid !== null;
+  const text = signed && end.status !== 'refused'
+    ? 'The errand stopped after signing. The payment is not confirmed yet.'
+    : /busy/i.test(why)
     ? 'Another errand is running. Try again in a minute.'
     : end.status === 'failed'
       ? 'The errand stopped before it paid. Nothing was paid. Try again in a minute.'
