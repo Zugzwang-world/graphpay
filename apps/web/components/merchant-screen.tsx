@@ -54,7 +54,7 @@ export function MerchantScreen() {
         sound('settled');
       } else if (edge.kind === 'refund') sound('refund');
       else if (edge.kind === 'fail') sound('stopped');
-      const note = edge.kind === 'fail' ? { tone: 'chilli' as const, text: `Refused: ${edge.from} was stopped before paying` } : edge.kind === 'deliver' ? { tone: 'pista' as const, text: 'Marked dispatched' } : null;
+      const note = edge.kind === 'fail' ? { tone: 'chilli' as const, text: `Refused: ${edge.from} was stopped before paying` } : edge.kind === 'deliver' ? { tone: 'pista' as const, text: 'Marked dispatched' } : edge.kind === 'request' ? { tone: 'pista' as const, text: `Refund requested by ${edge.from}: ${formatMicro(edge.amountMicro)} ${model.token.symbol}` } : null;
       if (note) setToasts((prev) => [{ id: `${edge.kind}-${edge.ref}`, ...note }, ...prev].slice(0, 3));
     };
 
@@ -137,7 +137,7 @@ export function MerchantScreen() {
     return () => clearInterval(timer);
   }, [open, listed.state, announce]);
 
-  const orderId = popup?.orderId ?? edges.find((e) => e.kind === 'pay')?.orderId ?? null;
+  const orderId = popup?.orderId ?? edges.find((e) => e.kind === 'pay' || e.kind === 'request')?.orderId ?? null;
 
   const act = async (path: string, body: unknown) => {
     setPending(true);
