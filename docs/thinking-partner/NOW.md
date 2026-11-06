@@ -1,12 +1,12 @@
 # NOW
 
-Updated 23:10 IST, Fri 6 Nov (night Coordinator)
+Updated 23:22 IST, Fri 6 Nov (night Coordinator)
 
 ## Summary (Coordinator only)
 
-Updated 23:10 IST, Fri 6 Nov. **Only the submission (Sat 09:00 IST) and the presentation (09:30 IST) are fixed** (ADR-0066). Every deliverable's status is in [`TRACKER.md`](TRACKER.md).
+Updated 23:22 IST, Fri 6 Nov. **Only the submission (Sat 09:00 IST) and the presentation (09:30 IST) are fixed** (ADR-0066). Every deliverable's status is in [`TRACKER.md`](TRACKER.md).
 
-**Urgent: the Mac is on battery** (75% at 22:59 IST, about 4 h 20 min left). It would die around 03:20 IST, taking the mirror and every night session with it. **Plug in the charger and keep the lid open.**
+**Urgent: the Mac is on battery** (68% at 23:17 IST, about 3 h 15 min left). It would die around 02:30 IST, taking the mirror and every night session with it. **Plug in the charger and keep the lid open.**
 
 **The night run** ([brief](briefs/2259-night-coordinator.md)): seven streams, each in its own session and worktree, on Opus 5.5 at max. The usage guardrails are off tonight, and no contract is redeployed.
 
@@ -28,8 +28,14 @@ Updated 23:10 IST, Fri 6 Nov. **Only the submission (Sat 09:00 IST) and the pres
 
 The Coordinator times each step. If a merge breaks the live errand, revert first, then fix.
 
-**Live now** (23:01 IST):
-- **The payer is ACTIVE again:** resumed at 23:00 IST ([Sepolia tx](https://sepolia.etherscan.io/tx/0x34cddd47d2230e305b4f0a9546b8dfba51d37b7bee4c0336d54a4f556397f949)). 78 of today's 100 test USDT are spent; the pass resets at 05:30 IST.
+**Landed tonight:**
+- **W5:** the payer's pass is **300 test USDT a day** for tonight, in the policy and the ENS record, and PAYER is back to 125 test USDT ([#152](https://github.com/Zugzwang-world/graphpay/pull/152)).
+- **W4:** the request says "delivered within an hour", and the deadline counts from the request, so errands can buy at any hour ([#153](https://github.com/Zugzwang-world/graphpay/pull/153), live since 23:18 IST). W4 proves it with live errands next.
+
+**In PR:** W7's README ([#154](https://github.com/Zugzwang-world/graphpay/pull/154)) and W3's 0.80 coffee re-order ([#155](https://github.com/Zugzwang-world/graphpay/pull/155)). W1's three new shop names are registering on Sepolia; W2 is writing the new shops' history.
+
+**Live now** (23:17 IST):
+- **The payer is ACTIVE:** resumed at 23:00 IST ([Sepolia tx](https://sepolia.etherscan.io/tx/0x34cddd47d2230e305b4f0a9546b8dfba51d37b7bee4c0336d54a4f556397f949)). 78 of tonight's 300 test USDT are spent; the pass resets at 05:30 IST.
 - **Filter & Fold is open.** A listing lasts 15 minutes, and only an open merchant phone renews it, so all three shops had lapsed to closed.
 - **A bridge loop on this Mac** renews the shop's listing every 9 minutes and resumes a paused payer after about 6 minutes, until W5's self-healing cron is live.
 
@@ -40,7 +46,6 @@ The Coordinator times each step. If a merge breaks the live errand, revert first
 
 **Still open** (from the 22:49 IST sync):
 - The Arkiv access key's quota is used up, so reads go to the keyless endpoint (#148).
-- From about 23:14 IST to midnight no errand can buy, because of the 11:59 pm deadline. W4's relative deadline fixes this.
 - Acceptance: 35 pass, 8 fail (W5).
 
 **Founder now** (OPEN):
