@@ -80,11 +80,15 @@ Started 23:02 IST, Fri 6 Nov (session `local_b65be40a-eb20-4d86-b784-7d2aa1a9352
 Updated 23:25 IST, Fri 6 Nov (W4 Agents, session `local_3404db4e-486c-4f86-8b3a-67ceb53ef025`).
 - **Item 1, the relative deadline ([#153](https://github.com/Zugzwang-world/graphpay/pull/153), merging):** the request now says "delivered within an hour", and code reads the hour from the moment of the request, so errands work at any hour, also after 23:15 and across midnight. The guard checks each shop's ETA against that hour.
 - **Next:** measure every model call of a live errand (tokens, cached, output, seconds), then cut tokens and time without changing the screens, then three live errands in a row that pay.
-- **Blockers:** none. Today's pass has 22 of 100 test USDT left (four payments) until it resets at 05:30 IST.
+- **Blockers:** none.
 
 ## w5-ops
 
-Started 23:02 IST, Fri 6 Nov (session `local_29b84e36-bafe-4ba2-9315-4c2a94a0a19e`). W5 rewrites this section at the end of each step.
+Updated 23:10 IST, Fri 6 Nov (W5 Ops).
+- **The payer is ACTIVE**, with a **300 test USDT** pass for tonight, in the policy and the ENS record (the gate passes it at 300). 78 spent today.
+- **PAYER holds 125 test USDT** (66.8 from FUNDER); the shop's takings (118.81) refill it next.
+- **The shop (Filter & Fold) is open.**
+- **Next:** Pause and Resume per agent, the self-healing cron, the workers after W1's new labels, and acceptance at 0 failures.
 
 ## w6-sdk
 

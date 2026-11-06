@@ -16,4 +16,4 @@
 ## State
 
 - Item 1 in its PR. Next: item 2, per-call measurement in the run log.
-- The payer's pass: 22 of today's 100 test USDT left (four payments) until the contract's day turns at 05:30 IST.
+- The payer's pass is 300 test USDT a day tonight (W5, #152); the contract's day turns at 05:30 IST.
