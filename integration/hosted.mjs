@@ -2,8 +2,8 @@
 // Everything goes through the production domain (config site.url, no redirect followed): the
 // hosted shop writes the quote and delivers, the hosted facilitator relays as FACILITATOR, the
 // hosted recorder writes refusals. Nothing here sends with a relayer key.
-//   no flag    health, C6 and F2 (every spending route answers 401 without and with a wrong
-//              passcode or bearer; nothing is sent), and the plan with its expected spend
+//   no flag    health, C6 and F2 (public access, ADR-0069: every server-to-server route answers
+//              401 without and with a wrong key; the visitor routes are open; nothing is sent)
 //   --yes      also, as the acceptance payer (its story wallet role) on a fresh UTC day:
 //              C2 pay 4.80 (402 → payer-side gate and ENS payee read → sign → 200), C5 the same
 //              request again, C3's re-order of 3 for 1.20, C4(b) 0.40 more (over the 6.00 cap)
@@ -71,7 +71,9 @@ const isRelayer = relayer ? await pub.readContract({ address: checkout, abi: che
 const healthy = out.health.shop === 200 && fh.startup === 'ok' && isRelayer;
 out.health.signerIsRelayer = isRelayer;
 
-// C6 and F2: every route that makes anyone sign, without and with a wrong passcode or bearer.
+// C6 and F2 with public access (ADR-0069): visitors meet no passcode, but every key between our
+// own servers stays. The server-to-server routes (the shop's pay step, the facilitator, the
+// recorder, the cron) answer the app's own 401 without and with a wrong key, and send nothing.
 const quote = async (qs) => {
   const r = await req(`/api/shop/quote?${new URLSearchParams(qs)}`);
   const body = await r.json();
@@ -93,7 +95,8 @@ const routes = [
   { path: '/api/facilitator/settle', gate: 'bearer', signs: 'FACILITATOR' },
   { path: '/api/recorder/attempts', gate: 'bearer', signs: 'W_SYNC' },
   { path: '/api/cron/renew', gate: 'bearer', method: 'GET', signs: 'RENEWER' },
-  ...['customer/pause', 'customer/resume', 'customer/kill-disposable', 'customer/subscribe', 'customer/unsubscribe', 'customer/reorder', 'customer/refund-request', 'merchant/dispatch', 'merchant/refund', 'merchant/open', 'agents/run'].map((p) => ({ path: `/api/${p}`, gate: 'passcode', signs: p === 'merchant/open' ? 'W_DIRECTORY' : 'an owner, merchant or payer key' })),
+  // The visitor routes are public by design (ADR-0069, config site.publicAccess): not probed
+  // here, because a real call would act; see the public check below.
 ];
 const table = [];
 for (const r of routes) {
@@ -104,11 +107,18 @@ for (const r of routes) {
   const wrong = await status(await call(r.gate === 'bearer' ? { authorization: `Bearer ${WRONG}` } : { [PASSCODE_HEADER]: WRONG }));
   table.push({ route: `${r.method ?? 'POST'} ${r.path.replace(/0x[0-9a-f]{64}/i, ':id')}`, gate: r.gate, signs: r.signs, without, wrong });
 }
+// The visitor routes are open while the config says so, and the run route takes a visitor
+// without a passcode: an empty request is refused as a bad request (400), never as 401, and
+// starts nothing. No other visitor route is called (a real call would act).
+const publicAccess = config.site.publicAccess === true;
+const runProbe = await post('/api/agents/run', { request: '' });
+const visitor = { publicAccess, runWithoutPasscode: runProbe.status, runBody: await runProbe.json().catch(() => null) };
 const nonce1 = await nonce();
 const mNonce1 = await merchantNonce();
 const all401 = table.every((t) => t.without === 401 && t.wrong === 401);
 // Nothing sent: the hosted relayer's and the shop's merchant nonces (RENEWER is the cron's own).
-out.rows.F2 = { pass: healthy && all401 && nonce1 === nonce0 && mNonce1 === mNonce0, table, relayerNonce: { before: nonce0, after: nonce1 }, merchantNonce: { role: shop.walletRole, before: mNonce0, after: mNonce1 } };
+out.rows.F2 = { pass: healthy && all401 && publicAccess && runProbe.status === 400 && nonce1 === nonce0 && mNonce1 === mNonce0, mode: 'public access (ADR-0069): visitor routes open; server-to-server keys stay', table, visitor, relayerNonce: { before: nonce0, after: nonce1 }, merchantNonce: { role: shop.walletRole, before: mNonce0, after: mNonce1 } };
+say(`visitor routes: public access ${publicAccess}; /api/agents/run without a passcode and an empty request answered ${runProbe.status}`);
 const c6 = table.filter((t) => /orders\/:id\/pay|facilitator\/(settle|verify)/.test(t.route));
 out.rows.C6 = { pass: healthy && c6.length === 3 && c6.every((t) => t.without === 401 && t.wrong === 401) && nonce1 === nonce0, table: c6, relayerNonce: { before: nonce0, after: nonce1 } };
 for (const t of table) say(`${t.without === 401 && t.wrong === 401 ? 'ok  ' : 'FAIL'} ${t.route} (${t.gate}): ${t.without}, ${t.wrong}`);

@@ -303,8 +303,8 @@ const HOSTED_WHAT = {
   C3: 'partial refund, re-order and renewal work',
   C4: 'revoked-agent and over-cap failures are recorded',
   C5: 'a repeat request returns "already paid"',
-  C6: 'hosted endpoints return 401 without the passcode or token',
-  F2: 'spending endpoints are passcode-gated',
+  C6: 'hosted endpoints return 401 without the passcode or token (the server-to-server keys, public access)',
+  F2: 'spending endpoints: visitors open (ADR-0069), the keys between our servers enforced',
 };
 function latestHosted(root, paidOnly) {
   const dir = join(root, 'docs/sessions/integration/hosted');
@@ -362,8 +362,8 @@ async function hosted(root, id, env = {}) {
   const expected = {
     C2: 'payer WBT identical; PaymentSettled; tx.from = the relayer; gas 312,024 or 234,292–252,082, ±15%; the quote key and the ENS payee read',
     C5: 'HTTP 200 alreadyPaid; relayer nonce and payer balance unchanged',
-    C6: 'every one 401; relayer nonce unchanged',
-    F2: 'every spending route 401 without and with a wrong passcode or bearer; relayer nonce unchanged',
+    C6: "the shop's pay step and the facilitator's verify and settle: every one the app's 401 without and with a wrong key; relayer nonce unchanged",
+    F2: "public access on (config site.publicAccess, ADR-0069): the run route takes a visitor without a passcode (an empty request is a 400, nothing starts); every server-to-server route (shop pay and re-order, facilitator, recorder, cron) the app's 401 without and with a wrong key; relayer and merchant nonces unchanged",
   }[id];
   return { pass: row.pass, what, measured: row, expected, evidence };
 }

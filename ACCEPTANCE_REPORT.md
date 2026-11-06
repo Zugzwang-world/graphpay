@@ -1,8 +1,8 @@
 # Acceptance report
 
-Written by `pnpm acceptance` at 2026-11-06T05:05:07.198Z. Checks and pass criteria: `planning/ACCEPTANCE_TESTS.md` and `docs/plan/ACCEPTANCE_ADDITIONS.md`. Only D7 may be `blocked` (C7 and E3 no longer wait on supply, ADR-0054); a check without a result is `not run`, never `pass`.
+Written by `pnpm acceptance` at 2026-11-06T08:05:32.312Z. Checks and pass criteria: `planning/ACCEPTANCE_TESTS.md` and `docs/plan/ACCEPTANCE_ADDITIONS.md`. Only D7 may be `blocked` (C7 and E3 no longer wait on supply, ADR-0054); a check without a result is `not run`, never `pass`.
 
-**45 pass, 0 fail, 1 blocked, 6 not run** (of 52).
+**45 pass, 0 fail, 1 blocked, 2 not run** (of 48).
 
 | id | check | status | note |
 |---|---|---|---|
@@ -42,10 +42,6 @@ Written by `pnpm acceptance` at 2026-11-06T05:05:07.198Z. Checks and pass criter
 | D8 | The geo query returns only shops inside the box, and only from our writers | pass |  |
 | D9 | A receipt cannot be edited | pass |  |
 | D10 | An expired or missing quote is refused and the agent re-quotes | pass |  |
-| D11 | Heartbeats lapse | not run | the presence half passes; the shop_open half (the Open toggle) is not run here |
-| D12 | Every dot and receipt opens the right explorer page | not run | no runner yet |
-| D13 | Race mode shows reads, not speed (D2) | not run | no runner yet |
-| D14 | Swarm references are safe and open | not run | no runner yet |
 | D15 | The mirror resumes after a sleep or a network drop (ADR-0056) | pass |  |
 | E1 | Vitalik's request | pass |  |
 | E2 | The agents choose Kesar Kingdom, never the trap | pass |  |
@@ -806,12 +802,12 @@ Status: **pass**.
 
 Status: **pass**.
 
-### C6 (2026-11-06T00:14:29.294Z)
+### C6 (2026-11-06T08:05:32.304Z)
 
-- What: hosted endpoints return 401 without the passcode or token
+- What: hosted endpoints return 401 without the passcode or token (the server-to-server keys, public access)
 - Pass: true
-- Expected: every one 401; relayer nonce unchanged
-- Evidence: `{"file":"docs/sessions/integration/hosted/paid-2026-11-06T00-00-52-957Z.json","startedAt":"2026-11-06T00:00:52.957Z","site":"https://graphpay-event.vercel.app"}`
+- Expected: the shop's pay step and the facilitator's verify and settle: every one the app's 401 without and with a wrong key; relayer nonce unchanged
+- Evidence: `{"file":"docs/sessions/integration/hosted/read-2026-11-06T08-05-25-414Z.json","startedAt":"2026-11-06T08:05:25.414Z","site":"https://graphpay-event.vercel.app"}`
 
 ```json
 {
@@ -840,8 +836,8 @@ Status: **pass**.
     }
   ],
   "relayerNonce": {
-    "before": 10,
-    "after": 10
+    "before": 16,
+    "after": 16
   }
 }
 ```
@@ -1346,28 +1342,6 @@ Status: **pass**.
 }
 ```
 
-## D11: Heartbeats lapse
-
-Status: **not run** (the presence half passes; the shop_open half (the Open toggle) is not run here).
-
-### D11 (2026-11-06T05:05:07.190Z)
-
-- What: heartbeats lapse
-- Pass: null
-- Expected: agent_presence within 30 s of the start and gone within 15 min of the stop; both owned by W_DIRECTORY; shop_open present while on and gone within 15 min of off
-- Evidence: `{"file":"docs/sessions/integration/hosted/d11-2026-11-06T04-49-18-756Z.json","parts":{"presence":true,"shopOpen":null}}`
-
-```json
-{
-  "secondsToPresence": 6.7,
-  "minutesToGone": 14.98,
-  "rows": 1,
-  "handoffs": 0,
-  "owner": "0x146002b43a9fb8eb963699e77ed18579dc30a6e4",
-  "errand": "errand: no-purchase, chose null, 1.0 s, $0.0000"
-}
-```
-
 ## D15: The mirror resumes after a sleep or a network drop (ADR-0056)
 
 Status: **pass**.
@@ -1635,16 +1609,17 @@ Status: **pass**.
 
 Status: **pass**.
 
-### F2 (2026-11-06T00:14:29.295Z)
+### F2 (2026-11-06T08:05:32.305Z)
 
-- What: spending endpoints are passcode-gated
+- What: spending endpoints: visitors open (ADR-0069), the keys between our servers enforced
 - Pass: true
-- Expected: every spending route 401 without and with a wrong passcode or bearer; relayer nonce unchanged
-- Evidence: `{"file":"docs/sessions/integration/hosted/paid-2026-11-06T00-00-52-957Z.json","startedAt":"2026-11-06T00:00:52.957Z","site":"https://graphpay-event.vercel.app"}`
+- Expected: public access on (config site.publicAccess, ADR-0069): the run route takes a visitor without a passcode (an empty request is a 400, nothing starts); every server-to-server route (shop pay and re-order, facilitator, recorder, cron) the app's 401 without and with a wrong key; relayer and merchant nonces unchanged
+- Evidence: `{"file":"docs/sessions/integration/hosted/read-2026-11-06T08-05-25-414Z.json","startedAt":"2026-11-06T08:05:25.414Z","site":"https://graphpay-event.vercel.app"}`
 
 ```json
 {
   "pass": true,
+  "mode": "public access (ADR-0069): visitor routes open; server-to-server keys stay",
   "table": [
     {
       "route": "POST /api/shop/orders/:id/pay",
@@ -1687,93 +1662,23 @@ Status: **pass**.
       "signs": "RENEWER",
       "without": 401,
       "wrong": 401
-    },
-    {
-      "route": "POST /api/customer/pause",
-      "gate": "passcode",
-      "signs": "an owner, merchant or payer key",
-      "without": 401,
-      "wrong": 401
-    },
-    {
-      "route": "POST /api/customer/resume",
-      "gate": "passcode",
-      "signs": "an owner, merchant or payer key",
-      "without": 401,
-      "wrong": 401
-    },
-    {
-      "route": "POST /api/customer/kill-disposable",
-      "gate": "passcode",
-      "signs": "an owner, merchant or payer key",
-      "without": 401,
-      "wrong": 401
-    },
-    {
-      "route": "POST /api/customer/subscribe",
-      "gate": "passcode",
-      "signs": "an owner, merchant or payer key",
-      "without": 401,
-      "wrong": 401
-    },
-    {
-      "route": "POST /api/customer/unsubscribe",
-      "gate": "passcode",
-      "signs": "an owner, merchant or payer key",
-      "without": 401,
-      "wrong": 401
-    },
-    {
-      "route": "POST /api/customer/reorder",
-      "gate": "passcode",
-      "signs": "an owner, merchant or payer key",
-      "without": 401,
-      "wrong": 401
-    },
-    {
-      "route": "POST /api/customer/refund-request",
-      "gate": "passcode",
-      "signs": "an owner, merchant or payer key",
-      "without": 401,
-      "wrong": 401
-    },
-    {
-      "route": "POST /api/merchant/dispatch",
-      "gate": "passcode",
-      "signs": "an owner, merchant or payer key",
-      "without": 401,
-      "wrong": 401
-    },
-    {
-      "route": "POST /api/merchant/refund",
-      "gate": "passcode",
-      "signs": "an owner, merchant or payer key",
-      "without": 401,
-      "wrong": 401
-    },
-    {
-      "route": "POST /api/merchant/open",
-      "gate": "passcode",
-      "signs": "W_DIRECTORY",
-      "without": 401,
-      "wrong": 401
-    },
-    {
-      "route": "POST /api/agents/run",
-      "gate": "passcode",
-      "signs": "an owner, merchant or payer key",
-      "without": 401,
-      "wrong": 401
     }
   ],
+  "visitor": {
+    "publicAccess": true,
+    "runWithoutPasscode": 400,
+    "runBody": {
+      "error": "request must be 1 to 400 characters"
+    }
+  },
   "relayerNonce": {
-    "before": 10,
-    "after": 10
+    "before": 16,
+    "after": 16
   },
   "merchantNonce": {
     "role": "SHOP_KESAR",
-    "before": 11,
-    "after": 11
+    "before": 17,
+    "after": 17
   }
 }
 ```

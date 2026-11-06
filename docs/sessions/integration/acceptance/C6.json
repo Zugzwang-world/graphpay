@@ -1,8 +1,8 @@
 {
   "id": "C6",
-  "at": "2026-11-06T00:14:29.294Z",
+  "at": "2026-11-06T08:05:32.304Z",
   "pass": true,
-  "what": "hosted endpoints return 401 without the passcode or token",
+  "what": "hosted endpoints return 401 without the passcode or token (the server-to-server keys, public access)",
   "measured": {
     "pass": true,
     "table": [
@@ -29,14 +29,14 @@
       }
     ],
     "relayerNonce": {
-      "before": 10,
-      "after": 10
+      "before": 16,
+      "after": 16
     }
   },
-  "expected": "every one 401; relayer nonce unchanged",
+  "expected": "the shop's pay step and the facilitator's verify and settle: every one the app's 401 without and with a wrong key; relayer nonce unchanged",
   "evidence": {
-    "file": "docs/sessions/integration/hosted/paid-2026-11-06T00-00-52-957Z.json",
-    "startedAt": "2026-11-06T00:00:52.957Z",
+    "file": "docs/sessions/integration/hosted/read-2026-11-06T08-05-25-414Z.json",
+    "startedAt": "2026-11-06T08:05:25.414Z",
     "site": "https://graphpay-event.vercel.app"
   }
 }
