@@ -288,6 +288,12 @@ export interface ErrandOptions {
   dryRun?: boolean;
   /** Per-call seconds in the run log (default: on for live runs, off for mock runs, so two mock run logs stay byte-identical). */
   timing?: boolean;
+  /** W4: 'code' (default) does the routine steps in code (the scout, payer, storefront and dispatch
+   * entirely; the reads and the delegation of the analyst, risk agent and concierge) and asks each
+   * remaining model once, for its judgment; 'model' is the original flow, where the models make every call. */
+  steps?: 'code' | 'model';
+  /** ms before a failed directory or ranking read is tried once more (default 1000). */
+  retryMs?: number;
   /** Presence renewal period in ms (default PRESENCE_RENEW_MS), and the timer functions (tests). */
   presenceRenewMs?: number;
   setTimer?: (fn: () => void, ms: number) => unknown;
