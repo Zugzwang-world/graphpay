@@ -117,7 +117,7 @@ export function shopHandler(deps) {
   function quoteOf({ shop, product, terms, order }) {
     return {
       shop: shop.ensName,
-      item: product.name,
+      item: product.short ?? product.name,
       sku: product.sku,
       quantity: terms.quantity,
       priceMicro: terms.priceMicro,

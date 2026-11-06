@@ -25,7 +25,8 @@
       "label": "concierge",
       "displayName": "Concierge",
       "walletRole": "VITALIK",
-      "pays": false
+      "pays": false,
+      "avatar": "/phones/grok/agents/concierge"
     },
     {
       "key": "scout",
@@ -33,14 +34,16 @@
       "displayName": "Scout",
       "walletRole": "DEAL_HUNTER",
       "pays": true,
-      "capMicro": 1000000
+      "capMicro": 1000000,
+      "avatar": "/phones/grok/agents/scout"
     },
     {
       "key": "analyst",
       "label": "analyst",
       "displayName": "Analyst",
       "walletRole": "VITALIK",
-      "pays": false
+      "pays": false,
+      "avatar": "/phones/grok/agents/analyst"
     },
     {
       "key": "payer",
@@ -48,7 +51,8 @@
       "displayName": "Payer",
       "walletRole": "PAYER",
       "pays": true,
-      "capMicro": 100000000
+      "capMicro": 100000000,
+      "avatar": "/phones/grok/agents/payer"
     }
   ],
   "workingAgents": [
@@ -79,17 +83,20 @@
     {
       "key": "storefront",
       "label": "storefront",
-      "displayName": "Storefront"
+      "displayName": "Storefront",
+      "avatar": "/phones/grok/agents/storefront"
     },
     {
       "key": "risk",
       "label": "risk",
-      "displayName": "Risk"
+      "displayName": "Risk",
+      "avatar": "/phones/grok/agents/risk"
     },
     {
       "key": "dispatch",
       "label": "dispatch",
-      "displayName": "Dispatch"
+      "displayName": "Dispatch",
+      "avatar": "/phones/grok/agents/dispatch"
     }
   ],
   "shops": [
@@ -105,31 +112,36 @@
       "products": [
         {
           "sku": "filter-and-fold-masala-dosa-combo",
-          "name": "masala dosa",
-          "unit": "plate with filter coffee",
+          "name": "Ghee roast masala dosa + filter coffee",
+          "unit": "plate",
           "quantity": 1,
-          "priceMicro": 4800000
+          "priceMicro": 4800000,
+          "image": "/phones/grok/dishes/filter-and-fold-masala-dosa-combo.jpg",
+          "short": "masala dosa"
         },
         {
           "sku": "filter-and-fold-filter-coffee",
           "name": "Filter coffee",
           "unit": "cup",
           "quantity": 1,
-          "priceMicro": 800000
+          "priceMicro": 800000,
+          "image": "/phones/grok/dishes/filter-and-fold-filter-coffee.jpg"
         },
         {
           "sku": "filter-and-fold-sunday-breakfast",
           "name": "Sunday breakfast box: 2 idlis, 1 medu vada, 1 filter coffee",
           "unit": "box",
           "quantity": 1,
-          "priceMicro": 2400000
+          "priceMicro": 2400000,
+          "image": "/phones/grok/dishes/filter-and-fold-sunday-breakfast.jpg"
         },
         {
           "sku": "filter-and-fold-podi-idli",
           "name": "Ghee podi idli",
           "unit": "plate",
           "quantity": 1,
-          "priceMicro": 1800000
+          "priceMicro": 1800000,
+          "image": "/phones/grok/dishes/filter-and-fold-podi-idli.jpg"
         }
       ],
       "scenario": {
@@ -141,7 +153,8 @@
         "priceFor12Micro": 4800000,
         "etaMinutes": 45,
         "distanceKm": 2.1
-      }
+      },
+      "image": "/phones/grok/shops/filter-and-fold.jpg"
     },
     {
       "key": "jamun-junction",
@@ -155,31 +168,36 @@
       "products": [
         {
           "sku": "tawa-tangle-masala-dosa-combo",
-          "name": "masala dosa",
-          "unit": "plate with filter coffee",
+          "name": "Masala dosa + filter coffee",
+          "unit": "plate",
           "quantity": 1,
-          "priceMicro": 3300000
+          "priceMicro": 3300000,
+          "image": "/phones/grok/dishes/tawa-tangle-masala-dosa-combo.jpg",
+          "short": "masala dosa"
         },
         {
           "sku": "tawa-tangle-onion-uttapam",
           "name": "Onion uttapam",
           "unit": "plate",
           "quantity": 1,
-          "priceMicro": 1900000
+          "priceMicro": 1900000,
+          "image": "/phones/grok/dishes/tawa-tangle-onion-uttapam.jpg"
         },
         {
           "sku": "tawa-tangle-lemon-rice",
           "name": "Lemon rice",
           "unit": "box",
           "quantity": 1,
-          "priceMicro": 1500000
+          "priceMicro": 1500000,
+          "image": "/phones/grok/dishes/tawa-tangle-lemon-rice.jpg"
         },
         {
           "sku": "tawa-tangle-filter-coffee",
           "name": "Filter coffee",
           "unit": "cup",
           "quantity": 1,
-          "priceMicro": 600000
+          "priceMicro": 600000,
+          "image": "/phones/grok/dishes/tawa-tangle-filter-coffee.jpg"
         }
       ],
       "scenario": {
@@ -191,7 +209,8 @@
         "priceFor12Micro": 3300000,
         "etaMinutes": 25,
         "distanceKm": 0.9
-      }
+      },
+      "image": "/phones/grok/shops/tawa-tangle.jpg"
     },
     {
       "key": "syrup-street",
@@ -205,31 +224,36 @@
       "products": [
         {
           "sku": "idli-index-masala-dosa-combo",
-          "name": "masala dosa",
-          "unit": "plate with filter coffee",
+          "name": "Masala dosa + filter coffee",
+          "unit": "plate",
           "quantity": 1,
-          "priceMicro": 4200000
+          "priceMicro": 4200000,
+          "image": "/phones/grok/dishes/idli-index-masala-dosa-combo.jpg",
+          "short": "masala dosa"
         },
         {
           "sku": "idli-index-idli-sambar",
           "name": "Idli sambar",
           "unit": "plate",
           "quantity": 1,
-          "priceMicro": 1400000
+          "priceMicro": 1400000,
+          "image": "/phones/grok/dishes/idli-index-idli-sambar.jpg"
         },
         {
           "sku": "idli-index-medu-vada",
           "name": "Medu vada",
           "unit": "plate",
           "quantity": 1,
-          "priceMicro": 1200000
+          "priceMicro": 1200000,
+          "image": "/phones/grok/dishes/idli-index-medu-vada.jpg"
         },
         {
           "sku": "idli-index-rava-upma",
           "name": "Rava upma",
           "unit": "bowl",
           "quantity": 1,
-          "priceMicro": 1600000
+          "priceMicro": 1600000,
+          "image": "/phones/grok/dishes/idli-index-rava-upma.jpg"
         }
       ],
       "scenario": {
@@ -241,7 +265,8 @@
         "priceFor12Micro": 4200000,
         "etaMinutes": 50,
         "distanceKm": 1.4
-      }
+      },
+      "image": "/phones/grok/shops/idli-index.jpg"
     }
   ],
   "order": {
@@ -266,7 +291,7 @@
     "plan": "sunday-box",
     "item": "Sunday breakfast box",
     "shop": "kesar-kingdom",
-    "priceMicro": 400000,
+    "priceMicro": 2400000,
     "schedule": {
       "period": "weekly",
       "weekday": "Sunday"

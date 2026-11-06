@@ -122,7 +122,8 @@ export async function readMenu(publicClient, swarm, { shopEns, epoch = 0, owner 
 }
 
 // The active story's cast menus: [{ key, shopEns, name, items }] from the story config.
+// The story's `image` is a path on our own site (for the phones); a menu's image is a Swarm reference, so it is left out here.
 export function castMenus(cast = activeCast()) {
   const names = new Map(castEntries(cast).filter((e) => e.kind === 'shop').map((e) => [e.key, e.ensName]));
-  return cast.shops.map((s) => ({ key: s.key, shopEns: names.get(s.key), name: s.displayName, items: s.products, synthetic: true }));
+  return cast.shops.map((s) => ({ key: s.key, shopEns: names.get(s.key), name: s.displayName, items: s.products.map(({ image: _site, ...item }) => item), synthetic: true }));
 }

@@ -13,6 +13,7 @@ export interface StoryAgent {
   pays?: boolean;
   capUsdt?: string;
   does?: string;
+  avatar?: string | null;
 }
 
 export interface StoryShopChoice {
@@ -26,6 +27,7 @@ export interface StoryShopChoice {
   repeatBuyers: number;
   onTimeRate: string;
   open: boolean;
+  image?: string | null;
   rejectedBecause?: string;
 }
 
