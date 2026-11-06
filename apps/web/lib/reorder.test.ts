@@ -17,7 +17,7 @@ function deps(over: Partial<{ status: string; shopNode: string; buyerNode: strin
     quote: async (input) => {
       quoted.push(input);
       const m = model();
-      const terms = { orderId: '0x1', shop: m.merchant.ens, item: m.order.sku, quantity: m.order.reorder.quantity, priceMicro: m.order.reorder.priceMicro, parentOrderId: input.parentOrderId, buyer: input.buyer, payer: m.payer.ens, exp: over.exp ?? 1_800_000_600, ...over.terms };
+      const terms = { orderId: '0x1', shop: m.merchant.ens, item: m.order.reorder.sku, quantity: m.order.reorder.quantity, priceMicro: m.order.reorder.priceMicro, parentOrderId: input.parentOrderId, buyer: input.buyer, payer: m.payer.ens, exp: over.exp ?? 1_800_000_600, ...over.terms };
       return { buyer: input.buyer, terms, payUrl: 'https://example.test/pay', priceMicro: over.price ?? model().order.reorder.priceMicro, quantity: over.quantity ?? model().order.reorder.quantity };
     },
     pay: async (quote) => {
@@ -55,12 +55,12 @@ test('the page cannot name another order; no order at all is refused', async () 
   assert.equal(await code(reorder({}, deps({ last: null }).d)), 'NO_ORDER');
 });
 
-test('another shop, another buyer, and an unpaid or refunded order are refused before any quote', async () => {
+test('another shop, another buyer, and an unpaid or cancelled order are refused before any quote', async () => {
   for (const [over, want] of [
     [{ shopNode: `0x${'00'.repeat(32)}` }, 'NOT_OURS'],
     [{ buyerNode: `0x${'00'.repeat(32)}` }, 'NOT_OURS'],
     [{ status: 'CREATED' }, 'NOT_REORDERABLE'],
-    [{ status: 'REFUNDED' }, 'NOT_REORDERABLE'],
+    [{ status: 'CANCELLED' }, 'NOT_REORDERABLE'],
   ] as const) {
     const { d, quoted, paid } = deps(over);
     assert.equal(await code(reorder({}, d)), want);
@@ -126,8 +126,15 @@ test('a buyer refusal before signing releases the hold; any other error keeps it
   assert.equal(await code(reorder({}, deps().d)), 'TOO_SOON');
 });
 
+test('a refunded order may be ordered again (the coffee that was refunded is the one re-ordered)', async () => {
+  const { d, paid } = deps({ status: 'REFUNDED' });
+  assert.equal((await reorder({}, d)).status, 'paid');
+  assert.equal(paid.length, 1);
+});
+
 test('terms that are not the story\'s shop, item, parent, buyer or payer are never signed', async () => {
-  for (const terms of [{ shop: 'other.eth' }, { item: 'other-sku' }, { parentOrderId: OTHER }, { buyer: 'someone.eth' }, { payer: 'other.eth' }, { priceMicro: '1' }]) {
+  // The order's own item (the combo) is not the re-order's item: a quote for it is never signed either.
+  for (const terms of [{ shop: 'other.eth' }, { item: 'other-sku' }, { item: model().order.sku }, { parentOrderId: OTHER }, { buyer: 'someone.eth' }, { payer: 'other.eth' }, { priceMicro: '1' }]) {
     const { d, paid } = deps({ terms });
     assert.equal(await code(reorder({}, d)), 'PRICE_CHANGED');
     assert.equal(paid.length, 0);

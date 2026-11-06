@@ -111,7 +111,7 @@ test('a quote is free, priced from the catalog only, and its order id has the to
   assert.equal(q.order.payerNode, namehash(PAYER));
   assert.equal(q.order.kind, '0');
   assert.equal(q.asset, TOKEN.address);
-  const reorder = await quoteFor(w, { qty: String(story.order.reorder.quantity) });
+  const reorder = await quoteFor(w, { item: story.order.reorder.sku, qty: String(story.order.reorder.quantity) });
   assert.equal(reorder.priceMicro, String(story.order.reorder.priceMicro));
   assert.equal(String(priceOf(SHOP.products[0], 1)), String(Math.ceil(SHOP.products[0].priceMicro / SHOP.products[0].quantity)));
   assert.equal(w.chain.sends, 0);
@@ -291,7 +291,7 @@ test('a quote for one wallet cannot be paid from another', async () => {
 test('a re-order follows a paid parent of the same buyer at the same shop', async () => {
   const w = world();
   const parent = await quoteFor(w);
-  const rq = await quoteFor(w, { qty: String(story.order.reorder.quantity), parent: parent.orderId });
+  const rq = await quoteFor(w, { item: story.order.reorder.sku, qty: String(story.order.reorder.quantity), parent: parent.orderId });
   assert.equal(rq.payUrl, `${BASE}/orders/${parent.orderId}/reorder`);
   assert.equal(rq.order.kind, '1');
   assert.equal(rq.order.parentOrderId, parent.orderId);

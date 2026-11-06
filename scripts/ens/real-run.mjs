@@ -1,7 +1,9 @@
-// node scripts/ens/real-run.mjs [--fork <loopback url>] [--real] [--disposable <n>] [--out <file>]
+// node scripts/ens/real-run.mjs [--fork <loopback url>] [--real] [--disposable <n>] [--relabel <shop key>=<label>,…] [--out <file>]
 // Provisions the namespace under the root (planning/PROMPTS/05-ens-namespace.md, as amended by
 // docs/plan/amendments/M5-ens.md): the root, every owner and agent of the active story cast,
-// the wildcard and, with --disposable n, disposable-n under the persona.
+// the wildcard and, with --disposable n, disposable-n under the persona. With --relabel, the
+// named shops are planned under new labels (same wallet roles, so no funds move); their old
+// names stay registered as history and stay in the record.
 //   (no flag)   dry run on Ethereum Sepolia: reads only, prints the plan, what exists and the gas check
 //   --fork url  a local anvil fork of Sepolia started with --auto-impersonate: transactions are sent
 //               from the role addresses without any key (fork transactions never reach Sepolia)
@@ -13,8 +15,8 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname } from 'node:path';
 import { createPublicClient, createWalletClient, formatEther, formatGwei, getAddress, http, isAddressEqual } from 'viem';
 import { privateKeyToAccount } from 'viem/accounts';
-import { config } from '../../packages/config/index.mjs';
-import { createProvisioner, createTxRunner, disposableAgent, ENS, ensChain, namespacePlan, permissionedRegistryAbi, registryState, STATUS } from '../../packages/ens/index.mjs';
+import { activeCast, config } from '../../packages/config/index.mjs';
+import { createProvisioner, createTxRunner, disposableAgent, ENS, ensChain, namespacePlan, permissionedRegistryAbi, parseRelabel, registryState, relabelShops, STATUS } from '../../packages/ens/index.mjs';
 import { clientsFor } from '../lib/chains.mjs';
 import { loadEnv } from '../lib/env-loader.mjs';
 import { installErrorBoundary } from '../lib/redact.mjs';
@@ -37,6 +39,9 @@ const has = (name) => process.argv.includes(name);
 const mode = has('--real') ? 'real' : arg('--fork') ? 'fork' : 'dry';
 if (has('--real') && arg('--fork')) throw new Error('use --real or --fork, not both');
 const disposableN = arg('--disposable') ? Number(arg('--disposable')) : undefined;
+// shop key → new label, checked by relabelShops; a bare --relabel is an error, never the old story
+if (process.argv.some((a) => a.startsWith('--relabel='))) throw new Error('use --relabel <shop key>=<label>,…, not --relabel=…');
+const relabel = parseRelabel(has('--relabel') ? (arg('--relabel') ?? '') : undefined);
 const outFile = arg('--out') ?? (mode === 'real' ? 'docs/sessions/identity/namespace.json' : undefined);
 const sepolia = config.networks[config.ens.network];
 
@@ -44,7 +49,11 @@ async function main() {
   const { values } = loadEnv();
   envValues = values;
   const addresses = roleAddresses(values);
-  const plan = namespacePlan();
+  const story = activeCast();
+  // Owner labels already on chain (the record) are taken too: an old name is never a new one.
+  const recorded = existsSync(outFile ?? '') ? JSON.parse(readFileSync(outFile, 'utf8')).owners ?? [] : [];
+  const alsoTaken = recorded.map((o) => o.name.split('.')[0]);
+  const plan = namespacePlan({ cast: relabel.size > 0 ? relabelShops(story, relabel, { alsoTaken }) : story });
   const extra = disposableN ? [disposableAgent(disposableN)] : [];
   const agents = [...plan.agents, ...extra];
   const roles = [...new Set(['OPERATOR', ...plan.owners.map((o) => o.walletRole), ...agents.map((a) => a.walletRole)])];
@@ -143,14 +152,28 @@ async function main() {
   record.updatedAt = new Date().toISOString();
   record.mode = mode;
   record.root = { name: plan.root.name, resolver: result.root.resolver, registry: result.root.registry, expiry: Number(result.root.expiry) };
-  record.owners = result.owners.map((o) => ({ name: o.name, registry: o.registry, resolver: o.resolver, holder: o.holder }));
-  record.agents = result.agents.map((a) => ({ name: a.name, node: a.node, epoch: a.epoch, expiry: Number(a.expiry), resolver: a.resolver, registry: a.registry, holder: a.holder }));
+  // Merged by name: names outside this run's plan (a renamed shop's old name, a killed disposable
+  // agent) stay in the record as history.
+  record.owners = mergeByName(record.owners, result.owners.map((o) => ({ name: o.name, registry: o.registry, resolver: o.resolver, holder: o.holder })));
+  record.agents = mergeByName(record.agents, result.agents.map((a) => ({ name: a.name, node: a.node, epoch: a.epoch, expiry: Number(a.expiry), resolver: a.resolver, registry: a.registry, holder: a.holder })));
   record.wildcard = result.wildcard;
+  for (const [key, label] of relabel) {
+    const shop = story.shops.find((s) => s.key === key);
+    const entry = { shop: key, from: `${shop.label}.${plan.root.name}`, to: `${label}.${plan.root.name}`, walletRole: shop.walletRole };
+    record.renamed = record.renamed ?? [];
+    if (!record.renamed.some((r) => r.from === entry.from && r.to === entry.to)) record.renamed.push({ ...entry, at: new Date().toISOString() });
+  }
   saveRecord(outFile, record);
   const gas = record.txs.reduce((s, t) => s + t.gasUsed, 0);
   console.log(`\ndone: ${record.txs.length} transaction(s) recorded${outFile ? ` in ${outFile}` : ''}, ${gas} gas in all`);
   const leaf = await registryState(client, result.owners[0].registry, agents[0].label);
   console.log(`check: ${agents[0].name} is ${leaf.status === STATUS.REGISTERED ? 'REGISTERED' : 'NOT registered'} (epoch ${leaf.epoch})`);
+}
+
+function mergeByName(existing = [], fresh) {
+  const out = existing.map((e) => fresh.find((f) => f.name === e.name) ?? e);
+  for (const f of fresh) if (!out.some((e) => e.name === f.name)) out.push(f);
+  return out;
 }
 
 function loadRecord(file) {

@@ -98,7 +98,9 @@ export async function reorder(input: { parentOrderId?: unknown }, deps: ReorderD
   // The buyer name the first order used: whichever of the payer agent and its person hashes to the order's buyer.
   const buyer = [model.payer.ens, model.persona.ens].find((ens) => namehash(ens).toLowerCase() === parent.buyerNode.toLowerCase());
   if (!buyer) throw new ReorderRefusal('NOT_OURS');
-  if (parent.status !== 'PAID' && parent.status !== 'DELIVERED') throw new ReorderRefusal('NOT_REORDERABLE');
+  // A refunded order may be ordered again (the checkout and the shop accept it: the coffee that was
+  // refunded is exactly what "another coffee" replaces); an unpaid or cancelled one may not.
+  if (parent.status !== 'PAID' && parent.status !== 'DELIVERED' && parent.status !== 'REFUNDED') throw new ReorderRefusal('NOT_REORDERABLE');
 
   const now = deps.now();
   const agentKey = `agent:${model.payer.ens}`;
@@ -113,7 +115,7 @@ export async function reorder(input: { parentOrderId?: unknown }, deps: ReorderD
     const quote = await deps.quote({ parentOrderId: key, buyer });
     // What the phone shows is what is paid: the shop's price and quantity must be the story's, and the
     // terms the key will sign must be this shop's, this item, this buyer and this parent.
-    const expected = { shop: model.merchant.ens, item: model.order.sku, quantity: model.order.reorder.quantity, priceMicro: model.order.reorder.priceMicro, parentOrderId: key, buyer, payer: model.payer.ens };
+    const expected = { shop: model.merchant.ens, item: model.order.reorder.sku, quantity: model.order.reorder.quantity, priceMicro: model.order.reorder.priceMicro, parentOrderId: key, buyer, payer: model.payer.ens };
     if (quote.priceMicro !== model.order.reorder.priceMicro || quote.quantity !== model.order.reorder.quantity || !termsMatch(quote.terms, expected)) throw new ReorderRefusal('PRICE_CHANGED');
     // From here a signature may exist, and it can settle until its deadline (plus a minute for clock skew):
     // no other re-order starts before then, unless this one is known paid or known unsigned.

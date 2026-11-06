@@ -12,3 +12,7 @@ The Anthropic key has no credit left. Kimi's API reasons on every call, keeps re
 - `AGENT_MODE` is `mock`, `live` or `auto` (`anthropic` stays as the old name of `live`); the provider is the preset's. `auto` goes live only when the keys of the active preset's providers are set.
 - Kimi calls send the whole assistant message back every turn (`reasoning_content`, `tool_calls`, one tool message per call), keep the effort fixed for the whole errand, always set the output-token cap and never send a temperature. ADR-0048's "read only the final text block" applies to what is parsed, not to the history.
 - Supersedes the model names in ADR-0048 (`claude-opus-5-5` for `testing` and `video`, `claude-haiku-5-5` for `live`); the preset mechanism, the calibration table and "nothing changes a preset without the founder" stand.
+
+## Amendment, Fri 6 Nov 23:45 IST (night Coordinator): the routine roles at low
+
+The founder's W4 brief for the night run ("lower Kimi's reasoning effort for the routine agents", `docs/thinking-partner/briefs/2258-w4-agents.md`) is the founder's word this decision asks for. Since #162 (23:40 IST), the concierge and the analyst stay at `high`, and the scout, payer, storefront, risk and dispatch roles run at `low`, in the `testing`, `video` and `live` presets. The models, the preset mechanism and `AGENT_PRESET` are unchanged. The trap veto and every visible message stay; W4 records the before-and-after tokens and seconds in its relay.

@@ -1,12 +1,12 @@
 # NOW
 
-Updated 23:22 IST, Fri 6 Nov (night Coordinator)
+Updated 23:45 IST, Fri 6 Nov (night Coordinator)
 
 ## Summary (Coordinator only)
 
-Updated 23:22 IST, Fri 6 Nov. **Only the submission (Sat 09:00 IST) and the presentation (09:30 IST) are fixed** (ADR-0066). Every deliverable's status is in [`TRACKER.md`](TRACKER.md).
+Updated 23:45 IST, Fri 6 Nov. **Only the submission (Sat 09:00 IST) and the presentation (09:30 IST) are fixed** (ADR-0066). Every deliverable's status is in [`TRACKER.md`](TRACKER.md).
 
-**Urgent: the Mac is on battery** (68% at 23:17 IST, about 3 h 15 min left). It would die around 02:30 IST, taking the mirror and every night session with it. **Plug in the charger and keep the lid open.**
+**The Mac is charging** (68% at 23:39 IST). Keep the charger in and the lid open until the presentation: the mirror and every night session run on it.
 
 **The night run** ([brief](briefs/2259-night-coordinator.md)): seven streams, each in its own session and worktree, on Opus 5.5 at max. The usage guardrails are off tonight, and no contract is redeployed.
 
@@ -30,9 +30,18 @@ The Coordinator times each step. If a merge breaks the live errand, revert first
 
 **Landed tonight:**
 - **W5:** the payer's pass is **300 test USDT a day** for tonight, in the policy and the ENS record, and PAYER is back to 125 test USDT ([#152](https://github.com/Zugzwang-world/graphpay/pull/152)).
-- **W4:** the request says "delivered within an hour", and the deadline counts from the request, so errands can buy at any hour ([#153](https://github.com/Zugzwang-world/graphpay/pull/153), live since 23:18 IST). W4 proves it with live errands next.
+- **W4:** the request says "delivered within an hour", and the deadline counts from the request, so errands can buy at any hour ([#153](https://github.com/Zugzwang-world/graphpay/pull/153), live since 23:18 IST). Every model call now goes into the run log with its tokens and seconds ([#157](https://github.com/Zugzwang-world/graphpay/pull/157)); the live baseline at 23:30 IST paid 4.80 in 91 s, with 19 model calls, 33,287 tokens and $0.15. The routine agents now run at Kimi's low effort, and the models read short tool replies ([#162](https://github.com/Zugzwang-world/graphpay/pull/162), 23:40 IST); W4 proves it live next.
+- **W3:** "Another coffee" pays 0.80 for the filter coffee, live at 23:34 IST ([#155](https://github.com/Zugzwang-world/graphpay/pull/155), [tx](https://explorer.testnet.whitechain.io/tx/0xf1d7cb5654de6cc09ede0a404818a009f7429d9d149e3e564222d4a4d3ae2b4a)).
+- **W7:** the README, with a "verify each claim" table of 24 checked transactions, the persona note, the partner sections and the team; a root MIT license ([#154](https://github.com/Zugzwang-world/graphpay/pull/154)). Then `AI_USAGE.md` and the five Arkiv files ([#159](https://github.com/Zugzwang-world/graphpay/pull/159)), and `WHITECHAIN_FEEDBACK.md` with the ENS partner note ([#161](https://github.com/Zugzwang-world/graphpay/pull/161)).
+- **W1:** the three new shop names are live on ENS (Sepolia), each with its storefront, risk and dispatch agents, on the old shops' wallets, so no funds move (30 transactions; ENS reads 100 pass). The record is [#158](https://github.com/Zugzwang-world/graphpay/pull/158).
 
-**In PR:** W7's README ([#154](https://github.com/Zugzwang-world/graphpay/pull/154)) and W3's 0.80 coffee re-order ([#155](https://github.com/Zugzwang-world/graphpay/pull/155)). W1's three new shop names are registering on Sepolia; W2 is writing the new shops' history.
+**In PR:** W3's refund decline ([#163](https://github.com/Zugzwang-world/graphpay/pull/163)) and W7's form text ([#164](https://github.com/Zugzwang-world/graphpay/pull/164)).
+
+**The mirror is paused, not broken.** This Mac's Arkiv read budget ran out at 23:34 IST: the access key's quota is spent, and the keyless endpoint allows 10,000 requests per window, shared by every process on this Mac. It resets at about 23:59 IST; the mirror then resumes from its checkpoint, and the payments since 23:29 IST (W3's re-order, W4's baseline) reach Arkiv. Payments themselves still settle, and the site reads from Vercel, unaffected. Until a fresh key comes, every stream keeps its Arkiv reads from this Mac small.
+
+**The label flip:** W2 has written the new shops' directory and node rows (category south-indian, at the Grok places) and 175 of 1,258 history events; the rest goes out after the reset. Then W1 flips the labels and the category in one PR, and W5 restarts the workers. Expected after 01:00 IST.
+
+**Decided tonight (Coordinator):** the owner's cap change reaches the spending policy through the watcher on the Mac, never above the story's configured cap, so POLICY_WRITER stays local (ADR-0021); W3 writes the ADR.
 
 **Live now** (23:17 IST):
 - **The payer is ACTIVE:** resumed at 23:00 IST ([Sepolia tx](https://sepolia.etherscan.io/tx/0x34cddd47d2230e305b4f0a9546b8dfba51d37b7bee4c0336d54a4f556397f949)). 78 of tonight's 300 test USDT are spent; the pass resets at 05:30 IST.
@@ -49,8 +58,8 @@ The Coordinator times each step. If a merge breaks the live errand, revert first
 - Acceptance: 35 pass, 8 fail (W5).
 
 **Founder now** (OPEN):
-1. The charger.
-2. The Arkiv key.
+1. Keep the charger in.
+2. **A fresh Arkiv access key** (the most useful thing tonight: the mirror and the big city share the keyless budget).
 3. The Kimi balance, and more test USDT to FUNDER.
 4. npm's web approval when W6 asks.
 5. The video.
@@ -70,7 +79,13 @@ Updated 23:10 IST, Fri 6 Nov (night Coordinator, `local_1caa580c-…`).
 
 ## w1-identity
 
-Started 23:02 IST, Fri 6 Nov (session `local_45f7cf5d-c31e-4dbf-b849-466f3067bdd3`). W1 rewrites this section at the end of each step.
+Updated 23:35 IST, Fri 6 Nov (W1 Identity, session `local_45f7cf5d-c31e-4dbf-b849-466f3067bdd3`).
+- **Done: the new shops are on ENS** (Sepolia), each with storefront, risk and dispatch agents:
+  - `filter-and-fold.graphpay.eth`, `idli-index.graphpay.eth`, `tawa-tangle.graphpay.eth`.
+  - Each pays into its old shop's wallet, so no money moved. The old names stay registered as history.
+  - 30 transactions; all 100 ENS acceptance reads pass for the new names (`docs/sessions/identity/namespace.md`).
+- **Waiting on:** the Coordinator's go for the `story.json` label flip, after W2 writes the new shops' Arkiv rows.
+- **Next:** the kill (a funded spare, the site's Kill route, the watcher's revoke, a refused payment, a fresh spare).
 
 ## w2-city
 
@@ -78,7 +93,10 @@ Started 23:02 IST, Fri 6 Nov (session `local_da212093-3d02-4768-9314-ab7be179eb8
 
 ## w3-payments
 
-Started 23:02 IST, Fri 6 Nov (session `local_b65be40a-eb20-4d86-b784-7d2aa1a93527`). W3 rewrites this section at the end of each step.
+Updated 23:50 IST, Fri 6 Nov (W3 Payments, session `local_b65be40a-eb20-4d86-b784-7d2aa1a93527`).
+- **Re-order (item 1, PR #155):** "Another coffee" re-orders the filter coffee for 0.80 (ADR-0073), from `order.reorder` in the story. One live re-order proves it after the deploy.
+- **Next:** subscribe and cancel (item 2), the refund decline (item 3), then the limits (item 4).
+- Blockers: none.
 
 ## w4-agents
 
@@ -103,10 +121,10 @@ Started 23:02 IST, Fri 6 Nov (session `local_b6205da6-b613-4662-872a-6d4879c66fa
 
 ## w7-submission
 
-Updated 23:25 IST, Fri 6 Nov (W7 Submission, `local_abd77623-de22-4fe2-a0a9-865fdd43dba2`; relay `relays/w7-submission.md`).
-- **Landed:** the README, with a "verify each claim" table (24 transactions checked on their explorers at about 23:10 IST), a runnable Arkiv query with no keys, the fictional-persona sentence, the team; a root MIT `LICENSE`.
-- **Running:** AI_USAGE.md, then the Arkiv files, `WHITECHAIN_FEEDBACK.md`, `docs/submission/ENS.md`, and `docs/submission/ETHGLOBAL.md` (the form text).
-- **Waits on:** W1's new shop names, W2's menus and race at M, W6's SDK 1.0.0; each gets a pass after it lands.
+Updated 23:43 IST, Fri 6 Nov (W7 Submission, `local_abd77623-de22-4fe2-a0a9-865fdd43dba2`; relay `relays/w7-submission.md`).
+- **The brief is done:** the form text is in one file, [`docs/submission/ETHGLOBAL.md`](../submission/ETHGLOBAL.md), and every claim in it links to evidence. Landed: the README and a root `LICENSE` ([#154](https://github.com/Zugzwang-world/graphpay/pull/154)); AI_USAGE.md and the five Arkiv files ([#159](https://github.com/Zugzwang-world/graphpay/pull/159)); the Whitechain and ENS notes ([#161](https://github.com/Zugzwang-world/graphpay/pull/161)); the form text ([#164](https://github.com/Zugzwang-world/graphpay/pull/164)).
+- **In this PR:** the video shot list (`docs/submission/VIDEO.md`) and the submission checklist (`docs/submission/CHECKLIST.md`); two wording fixes; the README links the disclosure.
+- **Running:** keep-current mode, a pass after each night stream lands (W1 names, W2 race at M and menus, W6 SDK 1.0.0, W3 links).
 - **Blockers:** none.
 
 ## before the night (retired day sessions)
