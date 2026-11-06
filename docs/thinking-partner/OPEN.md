@@ -166,12 +166,13 @@ The kickoff rules (the deadline Sat 09:00 IST; AI use documented; spec files in 
 
 ## w7-submission
 
-Updated 23:38 IST, Fri 6 Nov (W7 Submission).
-- **Submit by 08:00 IST** (what: the title, the descriptions, the links and three partner prizes; where: [`docs/submission/ETHGLOBAL.md`](../submission/ETHGLOBAL.md), one block per form field; why: the form closes at 09:00 IST; recommendation: paste from the file after W7's final pass, and tick its "Before you press Submit" list).
-- **The video** (what: 2 to 4 minutes in your own voice, every party shown, from the shot list [`docs/submission/VIDEO.md`](../submission/VIDEO.md); where: its link goes in the form's video field; why: Whitechain's qualification and ETHGlobal's rules; recommendation: record after the night streams land, with the payer active and the shop open).
-- **Review the README and the partner files** (what: the "verify each claim" table, the persona note, the Team section, `arkiv/`, `WHITECHAIN_FEEDBACK.md`, `docs/submission/ENS.md`; why: judges open them first; recommendation: tell W7 any change before 07:00 IST).
+Updated 01:35 IST, Sat 7 Nov (W7 Submission, final).
+- **Submit by 08:00 IST** (what: the title, the descriptions, the links and three partner prizes; where: [`docs/submission/ETHGLOBAL.md`](../submission/ETHGLOBAL.md), one block per form field, final at the close; why: the form closes at 09:00 IST; recommendation: paste the blocks as they are, then tick its "Before you press Submit" list).
+- **The video** (what: 2 to 4 minutes in your own voice, every party shown; where: the shot list [`docs/submission/VIDEO.md`](../submission/VIDEO.md), and the link in the form's video field; why: Whitechain's qualification and ETHGlobal's rules; recommendation: record with the payer active and the shop open; an errand takes about 47 s now).
+- **Review the README and the partner files** (what: the "verify each claim" table, the persona note, the Team section, `arkiv/`, `WHITECHAIN_FEEDBACK.md`, `docs/submission/ENS.md`; why: judges open them first; recommendation: a 10-minute read before submitting).
 - **The team list** (what: the README names `Zugzwang-world` and `ajatshatru01` by GitHub handle; why: no other member is recorded in the repo; recommendation: add names or anyone missing, and confirm each is on the ETHGlobal project).
-- Closed: the README (#154), AI_USAGE.md and the Arkiv files (#159), the Whitechain and ENS notes (#161), the form text (#164); the shot list and the checklist (this PR).
+- **The disclosure** (what: the written pre-event disclosure; where: [`docs/plan/DISCLOSURE_MESSAGE.md`](../plan/DISCLOSURE_MESSAGE.md); recommendation: paste it into the Hacker Dashboard if it was not sent).
+- Closed: the README, AI_USAGE.md, the Arkiv files, the Whitechain and ENS notes, the form text, the shot list and the checklist (#154 to #211, and this final PR).
 
 ## w3-payments
 
