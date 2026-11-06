@@ -83,14 +83,13 @@ Updated 23:10 IST, Fri 6 Nov (night Coordinator, `local_1caa580c-…`).
 
 ## w1-identity
 
-Updated 00:00 IST, Sat 7 Nov (W1 Identity, session `local_45f7cf5d-c31e-4dbf-b849-466f3067bdd3`).
-- **Done:** the new shop names are on ENS, on the old wallets (#158).
-- **Ready:** the `story.json` label flip (branch `claude/w1-flip`, all tests pass). It waits for the Coordinator's go after W2.
-- **In its PR: the kill.**
-  - A funded spare, `disposable-2.vitalik.graphpay.eth`, is live, and spare keys 2 to 9 are in Vercel.
-  - `POST /api/customer/kill-disposable`: the owner unregisters the spare, the watcher revokes its pass, and its next payment is refused and recorded on Arkiv. GET names the spare.
-  - The workers make a fresh spare after each kill (needs W5's restart).
-- **Next:** one kill on production, then a fresh spare.
+Updated 00:26 IST, Sat 7 Nov (W1 Identity, session `local_45f7cf5d-c31e-4dbf-b849-466f3067bdd3`).
+- **Done:** the new shop names on ENS (#158); the kill, live and proven at 00:16 IST (#175, #183).
+- **Now: the story flip** (this PR, on the Coordinator's go after W2's history). The shops go by `filter-and-fold`, `idli-index` and `tawa-tangle`, category south-indian.
+  - W4 holds errands until W5's restart.
+- **Next:**
+  1. W5 restarts the workers on the new names; that also loads the spare keeper and the owner's-cap change.
+  2. One live errand pays Filter & Fold through `filter-and-fold.graphpay.eth`.
 
 ## w2-city
 
