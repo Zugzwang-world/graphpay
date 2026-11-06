@@ -20,6 +20,8 @@ import type { Money } from '@/demo/contract';
 import { CustomerJourneyProvider, useCustomerJourney } from './customer/CustomerJourneyProvider';
 import { CustomerDesk } from './customer/CustomerDesk';
 import { CustomerQuoteSheet } from './customer/CustomerQuoteSheet';
+import { MerchantHome } from './merchant/MerchantHome';
+import { MerchantOrderDetail } from './merchant/MerchantOrderDetail';
 
 const customerPages: AppPage[] = [
   { id: 'desk', label: copy.customer.pages.desk },
@@ -33,17 +35,31 @@ const merchantPages: AppPage[] = [
   { id: 'refunds', label: copy.merchant.pages.refunds },
   { id: 'renewals', label: copy.merchant.pages.renewals },
   { id: 'payouts', label: copy.merchant.pages.payouts },
+  { id: 'order-detail', label: copy.merchant.order.title.replace('{number}', ''), hidden: true },
 ];
 
 /** F3 scaffold: navigation and state previews are real; journey pages follow in F5–F10. */
 export function AppPlaceholder({ app }: { app: 'customer' | 'merchant' }) {
   const { snapshot, generation } = useDemo();
+  const { muted } = useSoundPreference();
+  const [selectedMerchantOrder, setSelectedMerchantOrder] = useState<string | null>(null);
   const pages = app === 'customer' ? customerPages : merchantPages;
   const title = app === 'customer' ? story.customer.name : story.shop.name;
   const cap = snapshot?.agents.find((agent) => agent.pass && agent.ref.role === story.spendingPass.payingRole)?.pass?.cap.amount;
-  const subtitle = app === 'customer' && cap ? fill(copy.customer.desk.subtitle, { cap }) : undefined;
-  const shell = <AppShell app={app} pages={pages} homeTitle={title} subtitle={subtitle} renderPage={(page) => <><PlaceholderPage app={app} page={page} pages={pages} />{app === 'customer' && <LiveQuoteSheet />}</>} />;
+  const subtitle = app === 'customer' ? cap ? fill(copy.customer.desk.subtitle, { cap }) : undefined : snapshot?.shop.open ? muted ? copy.merchant.home.subtitleOpenMuted : copy.merchant.home.subtitleOpen : copy.merchant.home.subtitleClosed;
+  const selectedOrder = snapshot?.orders.find((order) => order.id === selectedMerchantOrder);
+  const shell = <AppShell app={app} pages={pages} homeTitle={title} subtitle={subtitle}
+    getPageTitle={(page) => page === 'order-detail' && selectedOrder ? fill(copy.merchant.order.title, { number: selectedOrder.number }) : undefined}
+    getPageSubtitle={(page) => page === 'order-detail' && selectedOrder ? fill(copy.merchant.order.via, { owner: selectedOrder.owner.name, agent: selectedOrder.buyer.role }) : undefined}
+    renderPage={(page) => app === 'merchant' && (page === 'home' || page === 'order-detail') ? <MerchantRoute page={page} selectedOrder={selectedMerchantOrder} onSelectOrder={setSelectedMerchantOrder} /> : <><PlaceholderPage app={app} page={page} pages={pages} />{app === 'customer' && <LiveQuoteSheet />}</>} />;
   return app === 'customer' ? <CustomerJourneyProvider key={generation}>{shell}</CustomerJourneyProvider> : shell;
+}
+
+function MerchantRoute({ page, selectedOrder, onSelectOrder }: { page: string; selectedOrder: string | null; onSelectOrder: (id: string) => void }) {
+  const { adapter } = useDemo();
+  const navigate = useAppNavigation();
+  if (page === 'order-detail') return <MerchantOrderDetail orderId={selectedOrder} onRefund={() => navigate('refunds')} />;
+  return <MerchantHome onOrderDetails={(id) => { onSelectOrder(id); void adapter.markOrderSeen?.(id); navigate('order-detail'); }} />;
 }
 
 function LiveQuoteSheet() {
@@ -82,7 +98,9 @@ function CustomerOrderHandoff() {
   const navigate = useAppNavigation();
   const order = snapshot?.orders.find((entry) => entry.id === state.selectedOrderId);
   if (!order) return <div className="p-4"><EmptyState title={copy.customer.orders.title} detail={copy.customer.orders.empty[0]} action={copy.customer.orders.askAgents} onAction={() => navigate('desk')} /></div>;
-  return <div className="flex flex-col gap-3 p-4"><ReceiptCard title={fill(copy.customer.orders.detailTitle, { number: order.number })} amount={order.total} status={order.status} rows={[{ label: copy.customer.quote.from, value: order.shop.name }]} links={order.links} /><button type="button" className="min-h-11 rounded-full border border-line px-4 text-body font-bold" onClick={() => navigate('desk')}>{copy.dev.backHome}</button></div>;
+  const steps = ['ordered', 'paid', 'dispatched', 'delivered'] as const;
+  const current = steps.indexOf(order.status);
+  return <div className="flex flex-col gap-3 p-4"><StatusTracker label={copy.customer.orders.detailTitle.replace('{number}', order.number)} steps={steps.map((step, index) => ({ id: step, label: copy.status[step], state: index < current || order.status === 'delivered' ? 'done' as const : index === current ? 'current' as const : 'todo' as const }))} /><ReceiptCard title={fill(copy.customer.orders.detailTitle, { number: order.number })} amount={order.total} status={order.status} rows={[{ label: copy.customer.quote.from, value: order.shop.name }]} links={order.links} /><button type="button" className="min-h-11 rounded-full border border-line px-4 text-body font-bold" onClick={() => navigate('desk')}>{copy.dev.backHome}</button></div>;
 }
 
 const sampleLink = { label: copy.common.viewTx, url: 'mock:preview', mock: true } as const;

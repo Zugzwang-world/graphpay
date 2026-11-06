@@ -24,6 +24,8 @@ F4 components are also in `?state=components`: the keyboard, validated amount en
 
 F5 customer journey: open the shop on the merchant phone, then tap a quick prompt or type on the customer desk. The thread follows the adapter's agent, graph, shop comparison, quote, and payment events. A quote opens its sheet automatically; after settlement, **View order** opens a receipt handoff on Orders. The full Orders list and actions arrive in F7. Reset returns the shop to Closed so the refusal path can be tried too. Quote links remain visibly marked as mock.
 
+F6 merchant journey: Shop Home starts Closed with an empty day. Opening it plays the shared cash register sound; a settled order arrives in today's log with a New marker and chime. Expand the row for the buyer, risk verdict and items, then open Order detail to Dispatch. The adapter marks it Delivered automatically. The customer's order receipt and tracker follow those same updates. Today's totals are calculated from the shared order snapshot.
+
 ## How the mock engine works
 
 - **One store for both phones.** `MockAdapter` (`src/demo/mock-adapter.ts`) holds the in-memory state. Both apps read it through `DemoProvider` and the same snapshot, so an action in one phone appears live in the other.
@@ -132,7 +134,7 @@ All are marked `PROPOSED (mock only)` in `src/demo/contract.ts`.
 - [x] **F3** Shared components 1: header and coin hamburger, page strip, chips, sheets, states, dev state switcher
 - [x] **F4** Shared components 2: iOS keyboard, AmountEntry, StatusTracker, AgentAvatar, sounds, SVG fox
 - [x] **F5** Customer journey 1: desk, shop cards, quote and receipt
-- [ ] **F6** Merchant journey 1: Shop Home, order detail
+- [x] **F6** Merchant journey 1: Shop Home, order detail
 - [ ] **F7** Refund: orders, refund wizard, refund requests
 - [ ] **F8** Renewals: customer and merchant
 - [ ] **F9** Agents and spending pass

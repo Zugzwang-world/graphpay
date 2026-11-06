@@ -6,7 +6,7 @@ import { useDemo, useDemoEvents } from '@/demo/DemoProvider';
 import { copy, fill } from '@/copy';
 import type { DemoEvent } from '@/demo/contract';
 
-export interface AppPage { id: string; label: string }
+export interface AppPage { id: string; label: string; hidden?: boolean }
 type Navigate = (id: string) => void;
 const NavigationContext = createContext<Navigate | null>(null);
 const KeyboardLayoutContext = createContext<{ open: boolean; setKeyboard: (open: boolean, height: number) => void } | null>(null);
@@ -35,7 +35,7 @@ function destination(app: 'customer' | 'merchant', event: DemoEvent): string | n
 }
 
 /** Shared navigation, arrival dot and page transition. Business pages supply only their content. */
-export function AppShell({ app, pages, homeTitle, subtitle, renderPage }: { app: 'customer' | 'merchant'; pages: AppPage[]; homeTitle: string; subtitle?: string; renderPage: (id: string) => ReactNode }) {
+export function AppShell({ app, pages, homeTitle, subtitle, renderPage, getPageTitle, getPageSubtitle }: { app: 'customer' | 'merchant'; pages: AppPage[]; homeTitle: string; subtitle?: string; renderPage: (id: string) => ReactNode; getPageTitle?: (id: string) => string | undefined; getPageSubtitle?: (id: string) => string | undefined }) {
   const { generation } = useDemo();
   const [page, setPage] = useState(pages[0]?.id ?? '');
   const [menuOpen, setMenuOpen] = useState(false);
@@ -76,7 +76,9 @@ export function AppShell({ app, pages, homeTitle, subtitle, renderPage }: { app:
     setKeyboardHeight(0);
     setKeyboardOpen(false);
   };
-  const title = page === pages[0]?.id ? homeTitle : pages.find((item) => item.id === page)?.label ?? homeTitle;
+  const detailPage = pages.find((item) => item.id === page)?.hidden ?? false;
+  const title = page === pages[0]?.id ? homeTitle : getPageTitle?.(page) ?? pages.find((item) => item.id === page)?.label ?? homeTitle;
+  const headerSubtitle = page === pages[0]?.id ? subtitle : getPageSubtitle?.(page);
 
   const setKeyboard = (open: boolean, height: number) => {
     setKeyboardOpen(open);
@@ -85,11 +87,11 @@ export function AppShell({ app, pages, homeTitle, subtitle, renderPage }: { app:
 
   return <NavigationContext.Provider value={navigate}><KeyboardLayoutContext.Provider value={{ open: keyboardOpen, setKeyboard }}>
     <div className="relative flex h-full flex-col pt-[54px]">
-      <AppHeader title={title} subtitle={page === pages[0]?.id ? subtitle : undefined} menuOpen={menuOpen} hasUnread={unread.length > 0} onMenu={() => setMenuOpen((open) => !open)} onHome={() => navigate(pages[0]!.id)} />
+      <AppHeader title={title} subtitle={headerSubtitle} menuOpen={menuOpen} hasUnread={unread.length > 0} onMenu={() => setMenuOpen((open) => !open)} onHome={() => navigate(pages[0]!.id)} showBack={detailPage} onBack={() => navigate(pages[0]!.id)} />
       {menuOpen && <>
         <button type="button" className="absolute inset-0 z-20 cursor-default" aria-label={copy.common.closeMenu} onClick={() => setMenuOpen(false)} />
         <nav aria-label={copy.common.pages} className="absolute inset-x-0 top-[118px] z-30 flex gap-2 overflow-x-auto border-b border-line bg-surface px-4 py-3 shadow-card [scrollbar-width:none]">
-          {pages.map((item) => <button key={item.id} type="button" onClick={() => navigate(item.id)} aria-current={page === item.id ? 'page' : undefined} className={clsx('relative min-h-11 shrink-0 rounded-card border px-4 text-body font-bold whitespace-nowrap', page === item.id ? 'border-brand bg-brand text-white' : 'border-line bg-bg text-ink')}>
+          {pages.filter((item) => !item.hidden).map((item) => <button key={item.id} type="button" onClick={() => navigate(item.id)} aria-current={page === item.id ? 'page' : undefined} className={clsx('relative min-h-11 shrink-0 rounded-card border px-4 text-body font-bold whitespace-nowrap', page === item.id ? 'border-brand bg-brand text-white' : 'border-line bg-bg text-ink')}>
             {item.label}
             {unread.includes(item.id) && <span className="absolute top-1 right-1 h-2 w-2 rounded-full bg-bad" aria-hidden />}
           </button>)}

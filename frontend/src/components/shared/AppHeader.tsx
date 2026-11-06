@@ -1,4 +1,4 @@
-import { Volume2, VolumeX } from 'lucide-react';
+import { ArrowLeft, Volume2, VolumeX } from 'lucide-react';
 import clsx from 'clsx';
 import { MockBadge } from './MockBadge';
 import { useSoundPreference } from './SoundPreference';
@@ -11,10 +11,12 @@ export interface AppHeaderProps {
   hasUnread: boolean;
   onMenu: () => void;
   onHome: () => void;
+  showBack?: boolean;
+  onBack?: () => void;
 }
 
 /** One header for the customer and merchant apps. */
-export function AppHeader({ title, subtitle, menuOpen, hasUnread, onMenu, onHome }: AppHeaderProps) {
+export function AppHeader({ title, subtitle, menuOpen, hasUnread, onMenu, onHome, showBack = false, onBack }: AppHeaderProps) {
   const { muted, toggle } = useSoundPreference();
   return (
     <header className="relative z-30 flex min-h-[64px] shrink-0 items-center gap-1 border-b border-line bg-bg px-2">
@@ -22,6 +24,7 @@ export function AppHeader({ title, subtitle, menuOpen, hasUnread, onMenu, onHome
         <CoinMenuIcon open={menuOpen} />
         {hasUnread && <span className="absolute top-1 right-1 h-2.5 w-2.5 rounded-full border-2 border-bg bg-bad" aria-hidden />}
       </button>
+      {showBack && <button type="button" className="flex h-10 w-8 shrink-0 items-center justify-center rounded-input text-brand" aria-label={copy.common.back} onClick={onBack}><ArrowLeft size={19} aria-hidden /></button>}
       <button type="button" className="min-w-0 flex-1 rounded-input px-1 text-left" onClick={onHome} title={title}>
         <span className="block truncate font-heading text-title font-bold leading-tight">{title}</span>
         {subtitle && <span className="block truncate text-caption text-muted">{subtitle}</span>}

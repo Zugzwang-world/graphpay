@@ -232,9 +232,17 @@
 .quote-sheet-enter { animation: quote-sheet-in 280ms var(--ease-out) both; }
 .payment-coin { left: 0; animation: payment-coin-across 1.4s ease-in-out infinite; }
 
+@keyframes merchant-meme-in { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes merchant-row-in { from { opacity: 0; transform: translateY(-18px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes merchant-row-pulse { 50% { box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-brand) 13%, transparent); } }
+.merchant-meme-enter { animation: merchant-meme-in 220ms var(--ease-out) both; }
+.merchant-new-row { animation: merchant-row-in 330ms var(--ease-out) both, merchant-row-pulse 2s ease-in-out 330ms 2; }
+.merchant-summary-enter { animation: merchant-meme-in 200ms var(--ease-out) both; }
+
 @media (prefers-reduced-motion: reduce) {
   .keyboard-enter { animation-name: none; }
   .tracker-check, .tracker-current, [class*="avatar-"], [class*="fox-"] * { animation-name: none !important; }
   .thread-user-enter, .thread-agent-enter, .quote-sheet-enter { animation: page-fade 120ms ease-out both !important; }
   .thread-dots i, .payment-coin { animation: none !important; }
+  .merchant-meme-enter, .merchant-new-row, .merchant-summary-enter { animation: page-fade 120ms ease-out both !important; }
 }
