@@ -1,6 +1,6 @@
 # NOW
 
-Updated 13:32 IST, Fri 6 Nov (Coordinator)
+Updated 16:10 IST, Fri 6 Nov (Coordinator)
 
 ## Summary (Coordinator only)
 
@@ -16,7 +16,7 @@ Updated 13:32 IST, Fri 6 Nov. **Standing rule (ADR-0066): no target times.** Onl
 - **Public access is live** (#117, ADR-0069): visitors meet no passcode, and the keys between our own servers stay.
 - **Phase 1 is live at `/live`:** the team's phones around the explainer (#111).
   - Production deploys had failed from #111 until #116 fixed the build (Vercel had skipped the phones' build tools). Production now runs `ff12990`.
-- **Next, phase 2's last step:** the Integration session wires the live errand into the phones. Then the founder tests.
+- **Phase 2 is under way** (the founder's go, 16:09 IST): the Integration session wires the live errand into the phones on `/live`. The Coordinator tells the founder the moment it is live, so he can test.
 - **Join next:** C6 and F2 rewritten for public access.
 - **Idle until the founder's run:**
   - the story swap;
@@ -25,7 +25,7 @@ Updated 13:32 IST, Fri 6 Nov. **Standing rule (ADR-0066): no target times.** Onl
   - Kimi tuning;
   - the big city;
   - Submission.
-- **Usage:** 91%. Every session pauses at 97%; the reset is at 21:30 IST.
+- **Usage: 92% at 16:09 IST**, rising about one point an hour while the sessions were idle. Every session pauses at 97%; the weekly reset is at 21:30 IST (in 5 h 20 min).
 
 ## foundation
 
