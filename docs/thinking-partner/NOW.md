@@ -150,10 +150,10 @@ Updated 01:35 IST, Sat 7 Nov (W6 SDK, session `local_b6205da6-b613-4662-872a-6d4
 
 ## w7-submission
 
-Updated 01:35 IST, Sat 7 Nov (W7 Submission, `local_abd77623-de22-4fe2-a0a9-865fdd43dba2`; relay `relays/w7-submission.md`).
+Updated 02:01 IST, Sat 7 Nov (W7 Submission, `local_abd77623-de22-4fe2-a0a9-865fdd43dba2`; relay `relays/w7-submission.md`).
 - **Done:** the form text is in one file, [`docs/submission/ETHGLOBAL.md`](../submission/ETHGLOBAL.md), and every claim in it links to evidence that answered at the close (#154 to #211, then this final PR).
 - **The final pass matches the close** (the founder, about 01:30 IST): race mode at size S only, no M number; both SDKs at 1.0.0 on npm; the flip, the kill, the limits, subscriptions, the re-order, the owner's cap, self-healing, the refund decline and W4's three errands, each with its links.
-- **Running:** nothing. The acceptance report is cited without totals until W5 regenerates it.
+- **Running:** nothing. The README cites the closing acceptance run (#215): 36 pass, 2 stale fails (explained), 1 blocked, 9 not run, of 48.
 - **Founder:** review the README, confirm the team, record the video, submit from `ETHGLOBAL.md` by 08:00 IST (OPEN, `w7-submission`).
 
 ## before the night (retired day sessions)
