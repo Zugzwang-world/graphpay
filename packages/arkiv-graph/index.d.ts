@@ -68,7 +68,7 @@ export interface Writer {
   send(batch: WriteBatch, options?: { split?: boolean; nonce?: number | null; verifyRecovered?: ((createdKeys: Hex[]) => Promise<boolean>) | null }): Promise<{ txs: SentTx[]; createdKeys: Hex[] }>;
   confirmedNonce(): Promise<number>;
 }
-export declare function createWriter(options: { walletClient: WalletArkivClient; publicClient: PublicArkivClient; entityContract: string; splitBytes?: number; recoveryMs?: number; pollMs?: number; maxSends?: number; log?: (entry: Record<string, unknown>) => void }): Writer;
+export declare function createWriter(options: { walletClient: WalletArkivClient; publicClient: PublicArkivClient; entityContract: string; splitBytes?: number; recoveryMs?: number; pollMs?: number; maxSends?: number; sentHashes?: { has(hash: string): boolean } | null; log?: (entry: Record<string, unknown>) => void }): Writer;
 export declare function operationBytes(op: unknown): number;
 export declare class WriteRevertedError extends Error { txHash?: Hex }
 export declare class WriteUncertainError extends Error { nonce?: number }
@@ -79,9 +79,9 @@ export declare function newStats(): TransportStats;
 export declare function parseRateLimit(header: string | null): { limit: number; remaining: number; reset?: number } | null;
 export declare function redactError<E>(error: E, secrets: string[]): E;
 export declare function isRequestTooLarge(error: unknown): boolean;
-export declare function arkivTransport(options: { url: string; fetchFn?: typeof fetch; secrets?: string[]; timeout?: number; stats?: TransportStats; log?: (entry: Record<string, unknown>) => void; lowWater?: number }): Transport & { stats: TransportStats };
+export declare function arkivTransport(options: { url: string; fetchFn?: typeof fetch; secrets?: string[]; timeout?: number; stats?: TransportStats; log?: (entry: Record<string, unknown>) => void; lowWater?: number }): Transport & { stats: TransportStats; sent: Set<string> };
 export declare function arkivChain(options: { id: number; name?: string; symbol?: string }): Chain;
-export declare function arkivClients(options: { transport: Transport; chain: Chain; account?: unknown; pollingInterval?: number }): { publicClient: PublicArkivClient; walletClient: WalletArkivClient | null; chain: Chain; stats: TransportStats };
+export declare function arkivClients(options: { transport: Transport; chain: Chain; account?: unknown; pollingInterval?: number }): { publicClient: PublicArkivClient; walletClient: WalletArkivClient | null; chain: Chain; stats: TransportStats; sentHashes: Set<string> };
 export declare function assertChain(client: PublicArkivClient, expected: number): Promise<number>;
 
 export declare class ArkivSim {

@@ -99,13 +99,22 @@ export function arkivTransport({ url, fetchFn = globalThis.fetch, secrets = [], 
     return response;
   };
   const inner = http(url, { fetchFn: metered, retryCount: 0, timeout });
+  // The hashes of the transactions this transport sent (the node's answer to
+  // eth_sendRawTransaction), newest last, bounded. The writer uses them to tell its own
+  // transaction from a replacement that took its nonce.
+  const sent = new Set();
   const transport = (config) => {
     const t = inner(config);
     return {
       ...t,
       async request(args) {
         try {
-          return await t.request(args);
+          const result = await t.request(args);
+          if (args?.method === 'eth_sendRawTransaction' && typeof result === 'string') {
+            sent.add(result.toLowerCase());
+            if (sent.size > 256) sent.delete(sent.values().next().value);
+          }
+          return result;
         } catch (error) {
           throw redactError(error, [...secrets, url]);
         }
@@ -113,6 +122,7 @@ export function arkivTransport({ url, fetchFn = globalThis.fetch, secrets = [], 
     };
   };
   transport.stats = stats;
+  transport.sent = sent;
   return transport;
 }
 
@@ -127,7 +137,7 @@ export function arkivChain({ id, name = `Arkiv ${id}`, symbol = 'GLM' }) {
 export function arkivClients({ transport, chain, account = null, pollingInterval = 1_000 }) {
   const publicClient = createPublicClient({ chain, transport, pollingInterval });
   const walletClient = account ? createWalletClient({ chain, transport, account, pollingInterval }) : null;
-  return { publicClient, walletClient, chain, stats: transport.stats };
+  return { publicClient, walletClient, chain, stats: transport.stats, sentHashes: transport.sent };
 }
 
 // Refuses a node that answers another chain id (call before anything is signed).

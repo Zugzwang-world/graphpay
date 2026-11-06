@@ -96,6 +96,7 @@ export function createWriter({
   recoveryMs = 60_000,
   pollMs = 2_000,
   maxSends = 3,
+  sentHashes = null,
   log = () => {},
   sleep = (ms) => new Promise((r) => setTimeout(r, ms)),
 } = {}) {
@@ -274,6 +275,23 @@ export function createWriter({
       try {
         const res = await walletClient.executeBatch(sdkBatch(ops), { nonce });
         nextNonce = Math.max(nextNonce, nonce + 1);
+        // viem's waitForTransactionReceipt follows a replacement: if another transaction of
+        // this key took our nonce, the hash that comes back is not the one we sent, and its
+        // entities are not ours. Our transaction can no longer land at this nonce. (If the
+        // replacement fails, the SDK's error carries that other transaction's hash.)
+        if (sentHashes) {
+          if (typeof res.txHash !== 'string') throw new WriteUncertainError('arkiv-graph: the node returned no transaction hash; re-read the state before writing again', { nonce });
+          if (!sentHashes.has(res.txHash.toLowerCase())) {
+            // A send that was resent at its pinned nonce can come back as the first copy's
+            // receipt: the pinned branch finds it by nonce and verifyRecovered judges it.
+            if (pinned) continue;
+            nextNonce = Math.max(nextNonce, nonce + 1);
+            log({ event: 'replaced-by-another', nonce, hash: res.txHash });
+            if (fixedNonce !== null) throw new WriteNonceTakenError(fixedNonce, nonce + 1);
+            if (attempt >= maxSends) throw new WriteUncertainError(`arkiv-graph: nonce ${nonce} was taken by another transaction of this key ${attempt} times`, { nonce });
+            continue;
+          }
+        }
         const tx = await adopt(res.txHash, ops, { recovered: false });
         return [tx];
       } catch (error) {

@@ -54,6 +54,13 @@ Cause: `stats.responseBytes += Buffer.byteLength(await response.clone().text())`
 Fix: read the body first, then add; an ArkivSim test sends five reads at once and expects five bodies counted (the old code counted one). The benchmark was re-run on the fixed commit (arkiv/bench PR).
 Prevention: no `+=` with an `await` on its right side in shared counters; any number from a parallel mode is checked against the same requests sent one at a time before it is reported.
 
+### P-arkiv-3: another instance's transaction at our nonce was returned as ours
+When: 2026-11-06 (found by T1's reviewer, fixed by T3) · Activity: arkiv · Cost: no data lost; W_DIRECTORY quote writes failed with `WriteUncertainError` under contention, and a refund request could have been reported written when it was not
+Symptom: with several Vercel instances writing as one key, one instance's single-create transaction can take another's nonce; the second instance's write came back with the first one's entity key.
+Cause: `sendChunk`'s direct path adopted `res.txHash`, which SDK 1.0.1 takes from `receipt.transactionHash`; viem's `waitForTransactionReceipt` follows a replacement, so the hash was the other transaction's. The create-count check passed (one create each) and `verifyRecovered` was only called on the recovery path.
+Fix: `arkivTransport` records the hash of every `eth_sendRawTransaction` it sends (`sentHashes`); the writer treats a returned hash it did not send as a replacement (next nonce, or `NONCE_TAKEN` with a fixed nonce; a pinned resend defers to the recovery path). ArkivSim tests land a transaction from a second transport at the same nonce and fail without the fix.
+Prevention: any new place that builds a writer passes `sentHashes` (both `connect` helpers do); the replacement tests stay.
+
 ## records
 
 ### P-records-1: the worktree sessions' prompt logs land in the main checkout

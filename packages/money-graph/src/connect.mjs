@@ -59,13 +59,14 @@ export async function connectArkiv({ backend, env = process.env, role = null, pr
 
   const transport = arkivTransport({ url, fetchFn, secrets, log });
   const chain = arkivChain({ id: RABDI.chainId, name: RABDI.name, symbol: RABDI.nativeSymbol });
-  const { publicClient, walletClient, stats } = arkivClients({ transport, chain, account, pollingInterval: which === 'sim' ? 20 : 1_000 });
+  const { publicClient, walletClient, stats, sentHashes } = arkivClients({ transport, chain, account, pollingInterval: which === 'sim' ? 20 : 1_000 });
   await assertChain(publicClient, RABDI.chainId);
   const writer = walletClient
     ? createWriter({
         walletClient,
         publicClient,
         entityContract: ENTITY_CONTRACT,
+        sentHashes,
         log: log ? (e) => log({ ...e, role }) : undefined,
         ...(recoveryMs !== undefined ? { recoveryMs } : {}),
         ...(pollMs !== undefined ? { pollMs } : {}),
