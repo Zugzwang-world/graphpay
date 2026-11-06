@@ -1,6 +1,6 @@
 {
   "id": "A3",
-  "at": "2026-11-06T17:06:03.813Z",
+  "at": "2026-11-06T20:12:32.247Z",
   "pass": null,
   "why": "not found: selfCheck",
   "what": "deny rules block reads of .env",

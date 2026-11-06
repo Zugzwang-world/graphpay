@@ -1,4 +1,4 @@
-// pnpm acceptance [--only C,D2,E] [--dry-run] [--friday] [--report-only]
+// pnpm acceptance [--only C,D2,E] [--dry-run] [--friday] [--report-only] [--mark D4,D8 --why <text>]
 //
 // Runs the acceptance checks in order and writes ACCEPTANCE_REPORT.md. The ids and their
 // wording come from planning/ACCEPTANCE_TESTS.md and docs/plan/ACCEPTANCE_ADDITIONS.md
@@ -6,7 +6,10 @@
 // a runner here is run; its result lands in docs/sessions/integration/acceptance/<id>.json. A check without
 // a runner yet is reported `not run`, never `pass`. Friday checks run only with --friday.
 // --dry-run prints the plan and runs nothing; --report-only rewrites the report from the
-// results already on disk.
+// results already on disk. --mark records the named checks as not run, with --why as the reason,
+// instead of running them (a check left out on purpose, such as one that reads Arkiv in bulk
+// while this machine's budget belongs to the mirror). A read that Arkiv refuses for this
+// machine's budget (HTTP 429) is recorded as not run too, never as a failed check.
 
 import { spawnSync } from 'node:child_process';
 import { existsSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
@@ -19,7 +22,18 @@ import { installErrorBoundary } from '../scripts/lib/redact.mjs';
 import { checks as liveChecks } from './checks.mjs';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
-const { values: args } = parseArgs({ options: { only: { type: 'string' }, 'dry-run': { type: 'boolean' }, friday: { type: 'boolean' }, 'report-only': { type: 'boolean' } } });
+const { values: args } = parseArgs({ options: { only: { type: 'string' }, 'dry-run': { type: 'boolean' }, friday: { type: 'boolean' }, 'report-only': { type: 'boolean' }, mark: { type: 'string' }, why: { type: 'string' } } });
+const marked = new Set((args.mark ?? '').split(',').filter(Boolean));
+if (marked.size > 0 && !args.why) throw new Error('--mark needs --why: the reason each marked check is not run');
+
+// An error from Arkiv's anonymous budget (HTTP 429, anywhere in the cause chain).
+export function arkivRefused(err) {
+  for (let e = err, depth = 0; e && depth < 6; e = e.cause, depth += 1) {
+    if (e.status === 429) return true;
+    if (/ANON_COST_LIMITED|QUOTA_EXCEEDED/.test(`${e.details ?? ''} ${e.message ?? ''} ${e.body ?? ''}`)) return true;
+  }
+  return false;
+}
 
 // The only checks that may be blocked, and why (join.md; ADR-0054).
 export const MAY_BLOCK = { D7: 'waiting for the locked story (the M city is seeded only after the founder locks it)' };
@@ -115,13 +129,22 @@ if (!args['report-only']) {
   for (const c of checks) {
     const r = RUNNERS[c.id];
     if (!r) continue;
+    if (marked.has(c.id)) {
+      const res = { id: c.id, at: new Date().toISOString(), pass: null, why: `not run: ${args.why}`, what: c.what, measured: null, expected: '', evidence: {} };
+      for (const f of r.files ?? [c.id]) writeFileSync(join(root, 'docs', 'sessions', 'integration', 'acceptance', `${f}.json`), `${JSON.stringify({ ...res, id: f }, null, 2)}\n`);
+      process.stdout.write(`${c.id}: not run (marked)\n`);
+      continue;
+    }
     process.stdout.write(`${c.id}: running\n`);
     if (r.fn) {
       let body;
       try {
         body = await r.fn();
       } catch (err) {
-        body = { pass: false, what: c.what, measured: { error: String(err.shortMessage ?? err.message).slice(0, 300) }, expected: 'the check runs', evidence: {} };
+        const error = String(err.shortMessage ?? err.message).slice(0, 300);
+        body = arkivRefused(err)
+          ? { pass: null, why: "not run: Arkiv refused this machine's reads (HTTP 429, the shared anonymous budget; a fresh access key lifts it)", what: c.what, measured: { error }, expected: 'the check runs', evidence: {} }
+          : { pass: false, what: c.what, measured: { error }, expected: 'the check runs', evidence: {} };
       }
       const res = { id: c.id, at: new Date().toISOString(), ...body };
       writeFileSync(join(root, 'docs', 'sessions', 'integration', 'acceptance', `${c.id}.json`), `${JSON.stringify(res, (_, x) => (typeof x === 'bigint' ? x.toString() : x), 2)}\n`);

@@ -126,17 +126,20 @@ Updated 01:20 IST, Sat 7 Nov (W4 Agents, session `local_3404db4e-486c-4f86-8b3a-
 
 ## w5-ops
 
-Updated 01:30 IST, Sat 7 Nov (W5 Ops).
-- **The payer is ACTIVE**, with a 300 test USDT pass for tonight (#152).
-- **The shop (Filter & Fold) is open.** The heal cron reopened it under its new name at 00:32 IST, right after the label flip, and renews its listing.
-- **Pause per agent and self-healing are live** (#172). A paused agent resumes by itself after 2 minutes; a closed shop is back within 5.
-- **The mirror follows the new names** (restarted at 00:51 IST on #189, #191 and #194).
-  - Proven by a live errand: 4.80 to filter-and-fold.graphpay.eth at 01:07 IST ([payment](https://explorer.testnet.whitechain.io/tx/0xcc69b7bb16eb17c9dede32da4765a90ca15a6af18397011efae6a9eb599e5cb5)), written under filter-and-fold and shown on Filter & Fold's phone.
-  - The two pre-flip payments stay under kesar-kingdom.
-  - W1 verified independently; ENS reads: 101 pass.
-- **Arkiv:** this Mac's free query allowance (10,000 per minute) runs out at times. Then the mirror waits, or re-reads and re-scans. The founder's new Arkiv key is the fix. In this PR, the checkpoint no longer waits on the kit's anonymous payment, so a re-scan is short.
-- **Funding:** PAYER is topped up from the shop's takings (this PR's script, reviewed).
-- **Acceptance** (#188): B1, B2, C7 and E3 pass. E1 needs a fresh errand (next). C3 needs a fresh hosted run after 05:30 IST. D4 and D8 need the full run.
+Updated 01:55 IST, Sat 7 Nov (W5 Ops, closed for the night on the founder's word).
+- **Running for the demo and the video:**
+  - the workers (pid 47443) and their watchdog, from `.claude/worktrees/w5-workers` at main a7491f1, with the kit fix (#209);
+  - the self-healing cron on the site.
+- **The payer is ACTIVE** (300 test USDT pass, #152), holding 125 test USDT (refilled from the shop's takings, #209). **Filter & Fold is open**, and the cron renews its listing.
+- **Proven live tonight:**
+  - Pause per agent, and the heal cron's resumes and the shop's reopen and renewals (#172);
+  - the mirror on the new names: a 01:07 IST errand to filter-and-fold, shown on Filter & Fold's phone.
+- **Acceptance:** this PR's report, regenerated at 01:5x IST. A check that could not run is marked with its reason.
+  - D4 and D8 read Arkiv in bulk.
+  - E1 needs a fresh errand of the current request.
+  - C3 needs a fresh hosted run after 05:30 IST.
+  - Any check Arkiv refused with HTTP 429 is marked likewise.
+- **Open:** the founder's fresh Arkiv access key. Without it, this Mac's free allowance runs out and the mirror lags by up to 30 minutes.
 
 ## w6-sdk
 

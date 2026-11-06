@@ -1,6 +1,6 @@
 {
   "id": "B7",
-  "at": "2026-11-06T17:07:58.811Z",
+  "at": "2026-11-06T20:16:25.309Z",
   "pass": null,
   "why": "the fork test exists but has no recorded output (needs an anvil fork of Sepolia, not run here)",
   "what": "the epoch changes on re-registration (fork test)",

@@ -72,6 +72,8 @@ export function checks(root, env) {
       const firstEnd = Math.min(...['scout', 'analyst'].map((role) => idx('agent.end', role)).filter((i) => i >= 0));
       const m = r.run.agents.result.mandate;
       const request = ev.find((e) => e.type === 'message')?.text;
+      // The latest passing run asked an earlier request: the story's request has no run yet.
+      if (request !== story.order.request) return { pass: null, why: `not run: the latest passing real e2e:food run (${r.run.startedAt}) asked an earlier request; the story's current request needs a fresh run`, what: "the human's request", measured: { request, story: story.order.request }, expected: "a passing real e2e:food run of the story's request", evidence: { runFile: r.f.slice(root.length + 1) } };
       // The deadline the words give at the run's time (#153): a clock time is today's, a span
       // ("within an hour") counts from the request, to the minute. So it lies between the one
       // read at the run's start and the one read at its end, and the mandate's hash covers it.

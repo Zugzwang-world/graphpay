@@ -1,21 +1,32 @@
 {
   "id": "C7",
-  "at": "2026-11-06T17:08:15.659Z",
-  "pass": false,
-  "what": "the qualifying payment in test USDT",
+  "at": "2026-11-06T20:11:57.069Z",
+  "pass": true,
   "measured": {
     "status": "success",
     "paymentSettled": true,
-    "usdtTransferMicro": null,
+    "settledMicro": "4800000",
+    "fromAcceptancePayer": true,
+    "usdtTransferMicro": "4800000",
     "txFrom": "0x1ab82871c3e1be64717269d45f08ca9d54c1ebf6",
+    "byRelayer": true,
     "payerSentIt": false,
-    "gasUsed": "244343",
-    "block": 12326954
+    "gasUsed": "309483",
+    "block": 12322239,
+    "payEdge": {
+      "ref": "1874:0x87505ef2457b6e925fa7378a55fd91419e83c37fb8effc06d901884700c72c00:4",
+      "kind": "pay",
+      "fromAcceptancePayer": true,
+      "amountMicro": "4800000"
+    },
+    "payEdges": 1
   },
-  "expected": "PaymentSettled on the USDT checkout; a 4,800,000-unit transfer of the configured test USDT; sent by the relayer (payer gas 0)",
+  "expected": "PaymentSettled on the USDT checkout from the acceptance payer for the recorded 4.80; the same amount of the configured test USDT transferred from the payer; sent by a relayer (payer gas 0); exactly one pay edge on Arkiv for it, from the acceptance payer, for that amount",
   "evidence": {
-    "tx": "https://explorer.testnet.whitechain.io/tx/0xb77851de876e39556a5c690e938e8fda69e5aa69ef5079a20b85aadcdf27e3d2",
+    "tx": "https://explorer.testnet.whitechain.io/tx/0x87505ef2457b6e925fa7378a55fd91419e83c37fb8effc06d901884700c72c00",
+    "record": "docs/sessions/payments/c7.json",
     "payer": "acceptance.vitalik.graphpay.eth",
     "by": "T1's usdt-ready (M3 part B)"
-  }
+  },
+  "what": "the qualifying payment in test USDT"
 }

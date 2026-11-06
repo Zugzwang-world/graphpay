@@ -1,10 +1,10 @@
 {
   "id": "B5",
-  "at": "2026-11-06T17:07:58.810Z",
+  "at": "2026-11-06T20:16:25.305Z",
   "pass": true,
   "what": "a synthetic wildcard name resolves",
   "measured": [
-    "pass B5 acceptance-0fdv87.sim.graphpay.eth graphpay.synthetic=true",
+    "pass B5 acceptance-dvvdqo.sim.graphpay.eth graphpay.synthetic=true",
     "pass B5 wildcard kind agent",
     "pass B5 wildcard status empty",
     "pass B5 the walk says ENS_SYNTHETIC"
@@ -12,6 +12,6 @@
   "expected": "every line of scripts/ens/acceptance.mjs for this id passes",
   "evidence": {
     "script": "scripts/ens/acceptance.mjs",
-    "exit": 1
+    "exit": 0
   }
 }

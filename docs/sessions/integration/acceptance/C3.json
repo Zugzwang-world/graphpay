@@ -1,12 +1,13 @@
 {
   "id": "C3",
-  "at": "2026-11-06T17:08:01.045Z",
-  "pass": false,
+  "at": "2026-11-06T20:21:59.847Z",
+  "pass": null,
+  "why": "not run yet: reorder (the latest paid run re-ordered before the story's current re-order; run e2e:hosted --yes on a fresh UTC day)",
   "what": "partial refund, re-order and renewal work",
   "measured": {
     "refund": true,
-    "reorder": true,
-    "renewal": false,
+    "reorder": null,
+    "renewal": true,
     "refundTx": {
       "tx": "0x0d04220e9a26243f919715e649d85681439dc4f2a492618bb1f1a916df9fe33f",
       "explorer": "https://explorer.testnet.whitechain.io/tx/0x0d04220e9a26243f919715e649d85681439dc4f2a492618bb1f1a916df9fe33f",
@@ -29,13 +30,15 @@
     "renewalTx": {
       "cycle": 2,
       "orderKind": 2,
+      "renewedMicro": "400000",
       "settledMicro": "400000",
+      "storyPriceMicro": "2400000",
       "gasUsed": 222881,
       "from": "0x4dcb3564ede867001179ba695ef298e73005869c",
       "fromIsRelayer": true
     }
   },
-  "expected": "Refunded(800000, full false), payer +0.80, gas 75,344 ±15%; re-order OrderCreated(kind 1, parent) + PaymentSettled 1.20, gas 252,082 ±15%; SubscriptionRenewed(cycle 2) + PaymentSettled of a kind-2 order, gas 201,555 ±15%",
+  "expected": "Refunded(800000, full false), payer +0.80, gas 75,344 ±15%; the story's re-order: OrderCreated(kind 1, parent) + PaymentSettled 0.80, gas 252,082 ±15%; SubscriptionRenewed(cycle 2) + PaymentSettled of a kind-2 order for the subscription's own amount, gas 201,555 ±15%",
   "evidence": {
     "file": "docs/sessions/integration/hosted/paid-2026-11-06T00-00-52-957Z.json",
     "startedAt": "2026-11-06T00:00:52.957Z",
