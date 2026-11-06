@@ -8,7 +8,7 @@ import { EventEmitter } from 'node:events';
 import { randomBytes } from 'node:crypto';
 import { encodeAbiParameters, erc20Abi, getAddress, isAddressEqual, keccak256, recoverTypedDataAddress, stringToHex } from 'viem';
 import { ORDER_STATUS, SUB_STATUS, checkoutAbi } from './vendor/index.mjs';
-import { AgentPayError, assertChain, assertClientChain, explorerTx, whitechainNetwork } from './network.mjs';
+import { AgentPayError, assertClientChain, assertWriteChain, explorerTx, whitechainNetwork } from './network.mjs';
 import { ZERO32, createOrder, nodeOf } from './order.mjs';
 import { formatUsdt, toMicro } from './money.mjs';
 import { FacilitatorUnavailable } from './facilitator.mjs';
@@ -94,6 +94,7 @@ export function createMerchant({
 }) {
   if (!name) throw new Error('createMerchant needs a name');
   assertClientChain(publicClient, network);
+  if (walletClient) assertClientChain(walletClient, network);
   let chunk = BigInt(logChunk);
   if (chunk < LOG_CHUNK_MIN) throw new Error(`createMerchant: logChunk must be at least ${LOG_CHUNK_MIN}`);
   if (!address || !ADDRESS.test(address)) throw new Error('createMerchant needs a payout address');
@@ -289,7 +290,7 @@ export function createMerchant({
   async function sendOwn(functionName, args) {
     if (!walletClient?.account) throw new AgentPayError('NO_MERCHANT_KEY', 'refunds and delivery marks need the merchant wallet client');
     if (!isAddressEqual(walletClient.account.address, merchant.address)) throw new AgentPayError('WRONG_MERCHANT_KEY', 'the wallet client is not the payout wallet');
-    await assertChain(publicClient, network);
+    await assertWriteChain(publicClient, walletClient, network);
     const hash = await walletClient.writeContract({ address: network.checkout, abi: checkoutAbi, functionName, args, chain: walletClient.chain, account: walletClient.account });
     const receipt = await publicClient.waitForTransactionReceipt({ hash, timeout: 60_000 });
     if (receipt.status !== 'success') throw new AgentPayError('TX_REVERTED', `${functionName} reverted`, { transaction: hash });

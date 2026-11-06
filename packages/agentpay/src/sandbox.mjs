@@ -3,7 +3,8 @@
 // checkout deployed on it, a relayer, a policy writer, a merchant and a buyer, all fresh keys
 // made for this run. Nothing here touches the real chain; the fork is thrown away on stop().
 //
-// Needs Foundry's `anvil` on the PATH (https://getfoundry.sh). Only a loopback fork is ever used.
+// Needs Foundry's `anvil` on the PATH (https://getfoundry.sh). Only a loopback fork is ever used,
+// and it forks only the public RPCs in the vendored defaults.
 
 import { spawn } from 'node:child_process';
 import { createPublicClient, createWalletClient, defineChain, encodeFunctionData, erc20Abi, http, parseEther, toHex } from 'viem';
@@ -37,7 +38,12 @@ async function launch(forkUrl, base) {
     for (let i = 0; i < 150 && !failed && !exited; i++) {
       try {
         const res = await fetch(url, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ jsonrpc: '2.0', id: 1, method: 'eth_chainId', params: [] }) });
-        if (res.ok) return { child, url, chainId: Number.parseInt((await res.json()).result, 16) };
+        if (res.ok) {
+          // The answer must come from our own child: if anvil could not bind the port it has exited.
+          await sleep(300);
+          if (exited || failed) break;
+          return { child, url, chainId: Number.parseInt((await res.json()).result, 16) };
+        }
       } catch {
         // still starting
       }
@@ -50,11 +56,24 @@ async function launch(forkUrl, base) {
   throw new AgentPayError('FORK_FAILED', 'could not start an anvil fork of Whitechain Sepolia (is the public RPC reachable?)');
 }
 
-// options: { forkUrl? } defaults to the first public Whitechain Sepolia RPC. The fork must answer
-// chain 1874 or the sandbox refuses to run.
-export async function startSandbox({ forkUrl = defaults.publicRpcs[0], buyerUsdt = 20_000_000n, port = 18_000 } = {}) {
-  const { child, url, chainId } = await launch(forkUrl, port);
+// The fork reads only the public Whitechain Sepolia RPCs (no key, so nothing secret reaches the
+// process list), trying each in turn. The fork must answer chain 1874 or the sandbox refuses to run.
+export async function startSandbox({ buyerUsdt = 20_000_000n, port = 18_000 } = {}) {
+  let launched;
+  let lastError;
+  for (const forkUrl of defaults.publicRpcs) {
+    try {
+      launched = await launch(forkUrl, port);
+      break;
+    } catch (e) {
+      lastError = e;
+      if (e.code === 'NO_ANVIL') throw e;
+    }
+  }
+  if (!launched) throw lastError;
+  const { child, url, chainId } = launched;
   const stop = () => child.kill('SIGTERM');
+  process.once('exit', stop); // a crash of the caller never leaves a fork running
   try {
     if (chainId !== 1874) throw new AgentPayError('WRONG_CHAIN', `the fork answered chain ${chainId}, not 1874`);
     const chain = defineChain({

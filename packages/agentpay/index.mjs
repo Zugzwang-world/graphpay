@@ -2,7 +2,7 @@
 // Buyers pay a 402 with one signature and no gas under an on-chain spending pass; merchants
 // price any route and settle through a facilitator. See README.md.
 
-export { whitechainNetwork, assertChain, assertClientChain, explorerTx, AgentPayError, ALLOWED_CHAIN_IDS } from './src/network.mjs';
+export { whitechainNetwork, assertChain, assertClientChain, assertWriteChain, explorerTx, AgentPayError, ALLOWED_CHAIN_IDS } from './src/network.mjs';
 export { usdt, formatUsdt, toMicro } from './src/money.mjs';
 export { createOrder, orderToWire, orderFromWire, deriveOrderId, detailsHash, nodeOf, canonicalJson, FULFILMENT_TYPES, ORDER_SCHEMA, ZERO32 } from './src/order.mjs';
 export {

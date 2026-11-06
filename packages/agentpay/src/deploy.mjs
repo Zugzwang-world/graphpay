@@ -3,7 +3,7 @@
 // their own and names their own relayer. The deployer becomes the checkout's admin (owner).
 
 import { getAddress, isAddressEqual } from 'viem';
-import { AgentPayError, assertChain, assertClientChain, whitechainNetwork } from './network.mjs';
+import { AgentPayError, assertClientChain, assertWriteChain, whitechainNetwork } from './network.mjs';
 import { checkoutAbi } from './vendor/abi.mjs';
 import { checkoutCreationCode } from './vendor/bytecode.mjs';
 
@@ -20,7 +20,7 @@ export async function deployCheckout({ walletClient, publicClient, relayer, poli
     throw new AgentPayError('BAD_ROLES', 'the admin, the relayer and the policy writer must be three different addresses');
   }
   assertClientChain(publicClient, network);
-  await assertChain(publicClient, network);
+  await assertWriteChain(publicClient, walletClient, network);
   const hash = await walletClient.deployContract({
     abi: checkoutAbi,
     bytecode: checkoutCreationCode,
@@ -34,6 +34,6 @@ export async function deployCheckout({ walletClient, publicClient, relayer, poli
     address,
     transactionHash: hash,
     deployBlock: receipt.blockNumber,
-    network: whitechainNetwork({ checkout: address, deployBlock: receipt.blockNumber }),
+    network: Object.freeze({ ...network, checkout: address, deployBlock: receipt.blockNumber }),
   });
 }

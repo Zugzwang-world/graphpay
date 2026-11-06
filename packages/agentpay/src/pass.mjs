@@ -11,7 +11,7 @@
 // day need a contract change: V2.
 
 import { checkoutAbi } from './vendor/index.mjs';
-import { AgentPayError, assertChain } from './network.mjs';
+import { AgentPayError, assertWriteChain } from './network.mjs';
 import { ZERO32, nodeOf } from './order.mjs';
 import { MAX_U64 } from './money.mjs';
 
@@ -82,7 +82,7 @@ export async function issueSpendingPass({ walletClient, publicClient, network, n
   if (wallet.toLowerCase() === walletClient.account.address.toLowerCase()) throw new AgentPayError('WALLET_MUST_STAY_UNBOUND', 'the policy writer may not bind itself');
   const bound = await publicClient.readContract({ address: network.checkout, abi: checkoutAbi, functionName: 'nodeOfWallet', args: [wallet] });
   if (bound !== ZERO32 && bound.toLowerCase() !== node.toLowerCase()) throw new AgentPayError('WALLET_BOUND_ELSEWHERE', 'this wallet already backs another agent');
-  await assertChain(publicClient, network);
+  await assertWriteChain(publicClient, walletClient, network);
   const writer = walletClient.account.address;
   const allowed = await publicClient.readContract({ address: network.checkout, abi: checkoutAbi, functionName: 'isPolicyWriter', args: [writer] });
   if (!allowed) throw new AgentPayError('NOT_POLICY_WRITER', 'this key may not write spending passes on the checkout');

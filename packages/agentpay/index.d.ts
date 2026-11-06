@@ -23,7 +23,8 @@ export interface AgentPayNetwork {
 export declare const ALLOWED_CHAIN_IDS: readonly number[];
 export declare function whitechainNetwork(overrides?: Partial<AgentPayNetwork>): AgentPayNetwork;
 export declare function assertChain(publicClient: PublicClient, network: AgentPayNetwork): Promise<number>;
-export declare function assertClientChain(publicClient: { chain?: { id: number } }, network: AgentPayNetwork): void;
+export declare function assertClientChain(client: { chain?: { id: number } }, network: AgentPayNetwork): void;
+export declare function assertWriteChain(publicClient: PublicClient, walletClient: WalletClient, network: AgentPayNetwork): Promise<void>;
 export declare function explorerTx(network: AgentPayNetwork, hash: Hex): string;
 export declare class AgentPayError extends Error {
   code: string;

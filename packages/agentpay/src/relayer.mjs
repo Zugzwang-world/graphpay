@@ -11,7 +11,7 @@
 import { decodeAbiParameters, decodeEventLog, erc20Abi, isAddressEqual, parseAbi, recoverAddress, recoverTypedDataAddress } from 'viem';
 import { namehash, normalize } from 'viem/ens';
 import { FAIL_REASON, ORDER_STATUS, RENEWAL_BIT, SUB_STATUS, cancelTypes, checkoutAbi, checkoutDomain, eip2612Types, permit2Domain, permitWitnessTypes, tokenDomain } from './vendor/index.mjs';
-import { assertChain, assertClientChain, whitechainNetwork } from './network.mjs';
+import { assertChain, assertClientChain, assertWriteChain, whitechainNetwork } from './network.mjs';
 import { ZERO32 } from './order.mjs';
 import { permit2Abi } from './sign.mjs';
 import { SCHEME, X402_VERSION, fromWireOrder, paymentPayloadSchema, requirementSchema, sameWireOrder } from './wire.mjs';
@@ -121,6 +121,7 @@ export function createReferenceRelayer({ walletClient, publicClient, network = w
   if (!walletClient?.account?.address) throw new Error('createReferenceRelayer needs a wallet client with an account');
   if (!Array.isArray(allowedMerchants) || allowedMerchants.length === 0) throw new Error('createReferenceRelayer needs a merchant allowlist');
   assertClientChain(publicClient, network);
+  assertClientChain(walletClient, network);
   const L = resolveLimits(limits);
   const relayer = walletClient.account.address;
   const hourly = windowCounter(3_600_000);
@@ -255,7 +256,7 @@ export function createReferenceRelayer({ walletClient, publicClient, network = w
   // as a plain failure: a receipt timeout throws Pending with the hash, so nobody retries it
   // as a new order (the payer would pay twice).
   async function send(functionName, args, maxGas) {
-    await assertChain(publicClient, network);
+    await assertWriteChain(publicClient, walletClient, network);
     const estimate = await publicClient.estimateContractGas({ address: network.checkout, abi: checkoutAbi, functionName, args, account: walletClient.account });
     if (estimate > maxGas) refuse('gas_too_high');
     const floor = functionName === 'settleOrder' ? L.minSendGas : 0n;
@@ -453,8 +454,8 @@ export function createReferenceRelayer({ walletClient, publicClient, network = w
         if (status !== 'ACTIVE' && status !== 'LAPSED') refuse('not_active');
         const signer = await recoverTypedDataAddress({ domain: checkoutDomain(network.chainId, network.checkout), types: cancelTypes, primaryType: 'Cancel', message: { subId, deadline: BigInt(deadline) }, signature }).catch(() => null);
         if (!signer || !isAddressEqual(signer, subscriber)) refuse('bad_signature');
-        const balance = await publicClient.getBalance({ address: relayer });
-        if (balance <= L.minRelayerBalanceWei) refuse('relayer_balance_low');
+        await checkLimits(0n, subscriber);
+        consume(0n, subscriber);
         const sent = await send('cancelWithSig', [subId, BigInt(deadline), signature], L.maxCancelGas);
         const cancelled = sent.events.find((ev) => ev.eventName === 'SubscriptionCancelled');
         return { success: Boolean(cancelled), subId, transaction: sent.hash, network: network.caip2 };

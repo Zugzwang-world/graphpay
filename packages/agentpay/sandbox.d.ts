@@ -1,7 +1,7 @@
 import type { Address, Chain, Hex, LocalAccount, PublicClient, WalletClient } from 'viem';
 import type { AgentPayNetwork } from './index.js';
 
-export declare function startSandbox(options?: { forkUrl?: string; buyerUsdt?: bigint; port?: number }): Promise<{
+export declare function startSandbox(options?: { buyerUsdt?: bigint; port?: number }): Promise<{
   url: string;
   chain: Chain;
   network: AgentPayNetwork;

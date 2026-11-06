@@ -31,6 +31,8 @@ export function whitechainNetwork(overrides = {}, source = defaults) {
     neverUse: Object.freeze(source.neverUse.map((a) => getAddress(a))),
   };
   const merged = { ...base, ...overrides };
+  // An override can add to the never-use list but never remove the baseline entries.
+  merged.neverUse = Object.freeze([...new Set([...base.neverUse, ...(overrides.neverUse ?? []).map((a) => getAddress(a))])]);
   if (!ALLOWED_CHAIN_IDS.includes(merged.chainId)) throw new Error(`agentpay: chain ${merged.chainId} is not an allowed testnet`);
   if (merged.neverUse.some((a) => isAddressEqual(a, merged.token.address))) throw new Error('agentpay: the configured token is on the never-use list');
   if (merged.token.decimals !== 6) throw new Error('agentpay: the token must have 6 decimals (USDT)');
@@ -43,6 +45,16 @@ export function whitechainNetwork(overrides = {}, source = defaults) {
 export function assertClientChain(publicClient, network) {
   const id = publicClient?.chain?.id;
   if (id !== undefined && id !== network.chainId) throw new AgentPayError('WRONG_CHAIN', `the client is on chain ${id}, not ${network.chainId}`);
+}
+
+// Before every write: the public client AND the wallet client must be on Whitechain Sepolia.
+// A wallet client has its own transport, so it is asked directly (eth_chainId) as well.
+export async function assertWriteChain(publicClient, walletClient, network) {
+  assertClientChain(walletClient, network);
+  await assertChain(publicClient, network);
+  if (typeof walletClient?.getChainId !== 'function') throw new AgentPayError('WRONG_CHAIN', 'the wallet client cannot report its chain id');
+  const id = await walletClient.getChainId();
+  if (id !== network.chainId) throw new AgentPayError('WRONG_CHAIN', `the wallet client is on chain ${id}, not ${network.chainId}`);
 }
 
 export function explorerTx(network, hash) {

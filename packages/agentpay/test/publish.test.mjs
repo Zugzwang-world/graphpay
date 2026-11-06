@@ -4,13 +4,16 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
-import { readFileSync, readdirSync, statSync } from 'node:fs';
+import { mkdtempSync, readFileSync, readdirSync, statSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
 import { builtinModules } from 'node:module';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { createPublicClient, createWalletClient, custom } from 'viem';
+import { createPublicClient, createWalletClient, custom, keccak256 } from 'viem';
 import { privateKeyToAccount, generatePrivateKey } from 'viem/accounts';
-import { createBuyerAgent, createMerchant, createReferenceRelayer, deployCheckout, resolveLimits, RELAYER_DEFAULTS, whitechainNetwork, usdt, signRefundRequest } from '../index.mjs';
+import { createBuyerAgent, createMerchant, createReferenceRelayer, deployCheckout, resolveLimits, RELAYER_DEFAULTS, whitechainNetwork, usdt, signRefundRequest, assertWriteChain } from '../index.mjs';
+import { checkoutAbi } from '../src/vendor/abi.mjs';
+import { checkoutCreationCode } from '../src/vendor/bytecode.mjs';
 
 const pkgDir = join(dirname(fileURLToPath(import.meta.url)), '..');
 const pkg = JSON.parse(readFileSync(join(pkgDir, 'package.json'), 'utf8'));
@@ -21,7 +24,14 @@ function files(dir) {
     return statSync(p).isDirectory() ? files(p) : [p];
   });
 }
-const importsOf = (file) => [...readFileSync(file, 'utf8').matchAll(/(?:^|\n)\s*(?:import|export)\s[^'"\n;]*?from\s+['"]([^'"]+)['"]|import\(\s*['"]([^'"]+)['"]\s*\)|(?:^|\n)\s*import\s+['"]([^'"]+)['"]/g)].map((m) => m[1] ?? m[2] ?? m[3]);
+// Every module specifier in a file: `from '…'` (also across lines), `import '…'` and `import('…')`.
+const importsOf = (file) => [...readFileSync(file, 'utf8').matchAll(/\bfrom\s*['"]([^'"]+)['"]|\bimport\s*\(\s*['"]([^'"]+)['"]\s*\)|\bimport\s+['"]([^'"]+)['"]/g)].map((m) => m[1] ?? m[2] ?? m[3]);
+
+test('the import scanner sees multi-line imports', () => {
+  const file = join(mkdtempSync(join(tmpdir(), 'scan-')), 'probe.mjs');
+  writeFileSync(file, "import {\n  a,\n  b,\n} from '@graphpay/arkiv-graph';\nexport {\n  c\n} from './x.mjs';\nconst d = await import('node:fs');\n");
+  assert.deepEqual(importsOf(file), ['@graphpay/arkiv-graph', './x.mjs', 'node:fs']);
+});
 
 const shipped = [...files(join(pkgDir, 'src')), ...files(join(pkgDir, 'examples')), join(pkgDir, 'index.mjs'), join(pkgDir, 'sandbox.mjs')];
 
@@ -112,4 +122,30 @@ test('no hosted facilitator or relayer by default: both are required', () => {
   assert.throws(() => createMerchant({ name: 'm.example', address: account.address, publicClient: clientOnChain(1874) }), /needs a facilitator/);
   assert.throws(() => createReferenceRelayer({ walletClient: walletOn(), publicClient: clientOnChain(1874) }), /merchant allowlist/);
   assert.throws(() => createReferenceRelayer({ walletClient: walletOn(), publicClient: clientOnChain(1874), allowedMerchants: [] }), /merchant allowlist/);
+});
+
+// The wallet client has its own transport: it must be on 1874 too.
+const walletOnChain = (id) => createWalletClient({ account, chain: { id, name: 'x', nativeCurrency: { name: 'x', symbol: 'x', decimals: 18 }, rpcUrls: { default: { http: ['http://127.0.0.1:1'] } } }, transport: custom({ request: async () => null }) });
+const walletTransportOn = (id) => createWalletClient({ account, transport: custom({ request: async ({ method }) => (method === 'eth_chainId' ? `0x${id.toString(16)}` : null) }) });
+
+test('a wallet client on another chain is refused at creation, and its transport is asked before a send', async () => {
+  assert.throws(() => createReferenceRelayer({ walletClient: walletOnChain(1), publicClient: clientOnChain(1874), allowedMerchants: [account.address] }), /WRONG_CHAIN/);
+  assert.throws(() => createMerchant({ name: 'm.example', address: account.address, facilitator: noFacilitator, publicClient: clientOnChain(1874), walletClient: walletOnChain(1) }), /WRONG_CHAIN/);
+  const others = [privateKeyToAccount(generatePrivateKey()).address, privateKeyToAccount(generatePrivateKey()).address];
+  // public client says 1874, but the wallet's own transport answers chain 1: nothing is sent
+  await assert.rejects(deployCheckout({ walletClient: walletTransportOn(1), publicClient: rpcOnChain(1874), relayer: others[0], policyWriter: others[1] }), /WRONG_CHAIN/);
+  await assert.rejects(assertWriteChain(rpcOnChain(1874), walletTransportOn(1), whitechainNetwork()), /WRONG_CHAIN/);
+  await assert.doesNotReject(assertWriteChain(rpcOnChain(1874), walletTransportOn(1874), whitechainNetwork()));
+});
+
+test('network overrides cannot drop the never-use list', () => {
+  const net = whitechainNetwork({ neverUse: [] });
+  assert.ok(net.neverUse.length >= 1);
+});
+
+test('the vendored checkout creation code is the verified one, and deployCheckout passes its constructor arguments in order', () => {
+  // keccak256 of the code taken from the deployment transaction of the checkout in FACTS.md (18,379 bytes).
+  assert.equal(keccak256(checkoutCreationCode), '0x9f009ad51cd39e24c0c0b5c8943099e1e6a38a44bae20d238deefac75e36f216');
+  const ctor = checkoutAbi.find((e) => e.type === 'constructor');
+  assert.deepEqual(ctor.inputs.map((i) => i.name), ['token', 'permit2', 'admin', 'relayer', 'policyWriter']);
 });

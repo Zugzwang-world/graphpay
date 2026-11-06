@@ -252,7 +252,7 @@ interface ReputationProvider {
 ### Deploy and sandbox
 
 - `deployCheckout({ walletClient, publicClient, relayer, policyWriter, network? })` deploys your own checkout (the admin is the wallet client's account) and returns `{ address, transactionHash, deployBlock, network }`.
-- `startSandbox({ forkUrl?, buyerUsdt?, port? })` from `@graphpay_ethglobal/agentpay/sandbox`: a local anvil fork of Whitechain Sepolia with your own checkout and fresh keys; `stop()` ends it. Local only.
+- `startSandbox({ buyerUsdt?, port? })` from `@graphpay_ethglobal/agentpay/sandbox`: a local anvil fork of Whitechain Sepolia with your own checkout and fresh keys; `stop()` ends it. Local only.
 
 ## How GraphPay uses it
 
