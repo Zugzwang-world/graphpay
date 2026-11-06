@@ -64,8 +64,9 @@ if (!execute) {
 const { loadSecrets } = await import('../../money-graph/scripts/lib.mjs');
 const env = loadSecrets();
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
-// The keyless endpoint meters queries (arkiv_query) on their own window, per IP, and the running
-// mirror on this Mac shares it: this script never takes the last 40% of it. The transport's and
+// The keyless endpoint meters queries (arkiv_query) on their own window, which the running mirror
+// on this Mac shares. Its header shows that window only once it is the tighter one (under about
+// 2,000 left); from then on this script pauses until the reset while under 40%. The transport's and
 // the writer's events are logged as names and numbers only, never a URL.
 const queries = { remaining: null, limit: null, resetAt: 0 };
 const arkivLog = (e) => {

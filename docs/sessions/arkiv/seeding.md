@@ -13,9 +13,9 @@ Driver: `packages/city/scripts/seed.mjs`. Generator: `packages/city/src/generate
 | seed graph and plain | same with `--backend rabdi --execute --store graph,plain` | started 01:58 IST; manifests `seed-S-graph.json`, `seed-S-plain.json` |
 | seed the directory | same with `--backend rabdi --execute --store directory` | after the generator's neighbourhoods are in the story |
 
-## Size M (the Coordinator, after the story lock)
+## Size M (W2, Sat 7 Nov, with the final cast; ADR-0077)
 
-1. Lock the story (`"locked": true`, the final cast) and merge it. The city ends at a fixed UTC midnight: use the day before the seeding day, for example `2026-11-06`.
+1. The cast is pinned, not the whole story: `syntheticCity.sizes.M.cast = "final"` and `syntheticCity.places` (Grok's 120 places). The driver refuses M with any other cast. The city ends at a fixed UTC midnight: `2026-11-06`.
 2. Check on ArkivSim, which needs no secrets. Expect about 10,000 events and `countsOk`, `q1ok` and `q2ok` all true. The estimate is in `docs/sessions/arkiv/city/sim-check-M.json`; the lab's M cost 6.3 tGLM before the merged columns.
    ```bash
    fnm exec --using=22.23.4 node packages/city/scripts/seed.mjs --size M --end 2026-11-06 --backend sim
@@ -24,15 +24,20 @@ Driver: `packages/city/scripts/seed.mjs`. Generator: `packages/city/src/generate
    ```bash
    fnm exec --using=22.23.4 node packages/city/scripts/seed.mjs --size M --end 2026-11-06 --backend rabdi
    ```
-4. Seed (about 100–130 minutes; run it in the background with a log, and never edit the script while it runs):
+4. Seed the graph and plain stores (about 2 hours; run it in the background with a log, and never edit the script while it runs). The directory store is held back tonight: the stage's phones poll `/api/map`, whose synthetic-shops query would read the 120 rows on every poll (OPEN, frontend).
    ```bash
-   fnm exec --using=22.23.4 node packages/city/scripts/seed.mjs --size M --end 2026-11-06 --backend rabdi --execute > docs/sessions/arkiv/city/seed-M.log 2>&1
+   fnm exec --using=22.23.4 node packages/city/scripts/seed.mjs --size M --end 2026-11-06 --backend rabdi --execute --store graph,plain > seed-M.log 2>&1
    ```
 5. If the plain store stops, resume it: the same command with `--store plain --resume` (it skips rows already written). If the graph store fails, wipe it and run it again (its tallies are merged per batch, so it is never resumed):
    ```bash
    fnm exec --using=22.23.4 node packages/city/scripts/seed.mjs --size M --backend rabdi --wipe --execute --store graph
    ```
-6. Commit `docs/sessions/arkiv/city/` (truth, manifests; the `.log` files stay local).
+6. Commit `docs/sessions/arkiv/city/` (truth, manifests, the digests in `digests.json`; the `.log` files stay local).
+
+## Progress (size M)
+
+- 00:00 IST, Sat 7 Nov: the graph store started from W_SEED_M_EVENT (8.5 tGLM). Dry run on ArkivSim: 9,996 events, every row count equal to a direct load; estimate about 6.0 tGLM (`sim-check-M.json`).
+- SEED_M_RESULT
 
 ## Progress (size S)
 
