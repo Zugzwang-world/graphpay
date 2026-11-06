@@ -114,12 +114,16 @@ export class Busy extends Error {}
 export const CHANGE_COOLDOWN_MS = 20_000;
 let lastChange = Number.NEGATIVE_INFINITY;
 
-export function changeStatus(paused: boolean, { actionsFor = actions, agent = siteModel().payer.ens, open = publicAccess(), now = Date.now() }: { actionsFor?: () => Promise<OwnerActions>; agent?: string; open?: boolean; now?: number } = {}): Promise<OwnerChange> {
+// onlyIf: a change decided earlier (the self-healing cron's) is checked again once its turn in
+// the queue comes, and sends nothing when it is no longer due.
+export const NO_LONGER_DUE = 'no longer due';
+export function changeStatus(paused: boolean, { actionsFor = actions, agent = siteModel().payer.ens, open = publicAccess(), now = Date.now(), onlyIf }: { actionsFor?: () => Promise<OwnerActions>; agent?: string; open?: boolean; now?: number; onlyIf?: () => Promise<boolean> } = {}): Promise<OwnerChange> {
   if (pending >= MAX_PENDING) return Promise.reject(new Busy('busy'));
   if (open && now - lastChange < CHANGE_COOLDOWN_MS) return Promise.reject(new Busy('too soon'));
   if (open) lastChange = now;
   pending += 1;
   const task = async (): Promise<OwnerChange> => {
+    if (onlyIf && !(await onlyIf())) return { changed: false, sepoliaTx: null, note: NO_LONGER_DUE };
     const owner = await actionsFor();
     const result = await (paused ? owner.pause(agent) : owner.resume(agent));
     return { changed: result.changed, sepoliaTx: result.hash ?? null, note: result.changed ? null : (result.reason ?? 'no change') };

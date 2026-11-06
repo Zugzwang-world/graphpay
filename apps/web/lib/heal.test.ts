@@ -13,8 +13,11 @@ test('a paused agent resumes RESUME_AFTER_S after its pause, and an active one i
   const paused = { value: 'paused', at: T };
   assert.deepEqual(planAgent('paused', paused, T + RESUME_AFTER_S - 1), { status: 'paused', pausedAt: T, resumesAt: T + RESUME_AFTER_S, action: 'wait' });
   assert.equal(planAgent('paused', paused, T + RESUME_AFTER_S).action, 'resume');
-  // Paused with no change inside the lookback: paused longer ago than the window, so at once.
-  assert.deepEqual(planAgent('paused', null, T), { status: 'paused', pausedAt: null, resumesAt: T, action: 'resume' });
+  // Paused with no change inside the lookback: an old pause only when the record already read
+  // paused RESUME_AFTER_S ago; a brand-new pause on a node a block behind never resumes at once.
+  assert.deepEqual(planAgent('paused', null, T, true), { status: 'paused', pausedAt: null, resumesAt: T, action: 'resume' });
+  assert.equal(planAgent('paused', null, T, false).action, 'unsure');
+  assert.equal(planAgent('paused', null, T).action, 'unsure', 'not read: no action');
   // The record says paused but the newest log says active: a lagging log query; never resume on it.
   assert.equal(planAgent('paused', { value: 'active', at: T }, T + 10 * RESUME_AFTER_S).action, 'unsure');
 });
@@ -28,6 +31,9 @@ test('the shop: renewed before it lapses, reopened REOPEN_AFTER_S after a close,
   assert.deepEqual(planShop([], T), { open: false, openUntil: null, closedAt: null, reopensAt: T, action: 'reopen' });
   // A row whose open_until is exactly now is closed (the open-now query reads open_until > now).
   assert.equal(planShop([T], T).open, false);
+  // A value that is not a number never decides (it would keep the shop waiting forever).
+  assert.equal(planShop([Number.NaN, T - REOPEN_AFTER_S], T).action, 'reopen');
+  assert.equal(planShop([Number.NaN], T).action, 'reopen');
 });
 
 test("the event filter matches @graphpay/ens's generated resolver ABI", () => {
@@ -37,7 +43,7 @@ test("the event filter matches @graphpay/ens's generated resolver ABI", () => {
   assert.deepEqual(shape(TEXT_UPDATED.inputs), shape(generated.inputs));
 });
 
-function world({ statuses, listings }: { statuses: Record<string, { status: string; last: { value: string; at: number } | null } | Error>; listings: number[] | Error }) {
+function world({ statuses, listings }: { statuses: Record<string, { status: string; last: { value: string; at: number } | null; pausedEarlier?: boolean } | Error>; listings: number[] | Error }) {
   const calls: string[] = [];
   const sources: HealSources = {
     agentStatus: async (ens) => {
@@ -50,12 +56,15 @@ function world({ statuses, listings }: { statuses: Record<string, { status: stri
       return listings;
     },
   };
+  // As the live actions do: the decision is taken again in the write's turn.
   const actions: HealActions = {
-    resume: async (ens) => {
+    resume: async (ens, stillDue) => {
+      if (!(await stillDue())) return { changed: false, sepoliaTx: null, note: 'no longer due' };
       calls.push(`resume ${ens}`);
       return { changed: true, sepoliaTx: `0x${'cd'.repeat(32)}` };
     },
-    openShop: async (ens) => {
+    openShop: async (ens, stillDue) => {
+      if (!(await stillDue())) return { openUntil: null, skipped: true };
       calls.push(`open ${ens}`);
       return { openUntil: T + 900 };
     },
@@ -71,7 +80,7 @@ test('a run resumes only the agents that are due, reopens a shop closed long eno
   const keys = env([ownerKeyName(payer.ens), ownerKeyName(scout.ens)]);
   const w = world({ statuses: { [payer.ens]: { status: 'paused', last: { value: 'paused', at: T - RESUME_AFTER_S } }, [scout.ens]: { status: 'paused', last: { value: 'paused', at: T - 30 } } }, listings: [T - REOPEN_AFTER_S - 1] });
   const lines: string[] = [];
-  const report = await heal({ sources: w.sources, actions: w.actions, nowS: T, env: keys, log: (l) => lines.push(l) })!;
+  const report = await heal({ sources: w.sources, actions: w.actions, nowS: T, clock: () => T, env: keys, log: (l) => lines.push(l) })!;
   assert.deepEqual(w.calls.sort(), [`open ${siteModel().merchant.ens}`, `resume ${payer.ens}`]);
   const byEns = Object.fromEntries(report.agents.map((a) => [a.ens, a]));
   assert.equal(byEns[payer.ens]!.done, 'resumed');
@@ -93,8 +102,8 @@ test('a failed read or a missing key acts on nothing and is reported as a kind',
   assert.equal(JSON.stringify(report).includes('rpc.example'), false, 'no message reaches the report');
   assert.equal(report.shop?.failed, 'timeout');
   // Due, but this server has no owner key: nothing is sent.
-  const due = world({ statuses: { [payer.ens]: { status: 'paused', last: null } }, listings: [T + 3600] });
-  const keyless = await heal({ sources: due.sources, actions: due.actions, nowS: T, env: {}, log: () => undefined })!;
+  const due = world({ statuses: { [payer.ens]: { status: 'paused', last: null, pausedEarlier: true } }, listings: [T + 3600] });
+  const keyless = await heal({ sources: due.sources, actions: due.actions, nowS: T, clock: () => T, env: {}, log: () => undefined })!;
   assert.deepEqual(due.calls, []);
   assert.equal(keyless.agents.find((a) => a.ens === payer.ens)!.failed, 'key');
   assert.equal(keyless.shop, null, 'no directory key: the shop is not looked at');
@@ -112,9 +121,40 @@ test('one run at a time on a server; inspect only reads', async () => {
   assert.equal(heal({ sources: slow, actions: w.actions, nowS: T, env: keys, log: () => undefined }), null);
   release();
   await first;
-  const due = world({ statuses: { [payer.ens]: { status: 'paused', last: null } }, listings: [] });
+  const due = world({ statuses: { [payer.ens]: { status: 'paused', last: null, pausedEarlier: true } }, listings: [] });
   const plans = await inspect({ sources: due.sources, nowS: T, env: { W_DIRECTORY_PRIVATE_KEY: 'set' } });
   assert.deepEqual(due.calls, [], 'inspect sends nothing');
   assert.equal(plans.agents.find((a) => a.ens === payer.ens)!.action, 'resume');
   assert.equal(plans.shop?.action, 'reopen');
+});
+
+test("a decision is taken again in the write's turn: a visitor's change in between wins", async () => {
+  const payer = siteModel().payer;
+  const { ownerKeyName } = await import('./owner-actions.server.ts');
+  const keys = { W_DIRECTORY_PRIVATE_KEY: 'set', [ownerKeyName(payer.ens)]: `0x${'1'.repeat(64)}` };
+  // Planned: resume the payer and renew the listing. By their turn, a visitor resumed and paused
+  // again (a fresh pause) and closed the shop.
+  let reads = 0;
+  const statuses = [{ status: 'paused', last: { value: 'paused', at: T - RESUME_AFTER_S } }, { status: 'paused', last: { value: 'paused', at: T - 5 } }];
+  const lists = [[T + RENEW_BELOW_S - 30], [T - 2]];
+  let listReads = 0;
+  const sources: HealSources = {
+    agentStatus: async (ens) => (ens === payer.ens ? statuses[Math.min(reads++, 1)]! : { status: 'active', last: null }),
+    listings: async () => lists[Math.min(listReads++, 1)]!,
+  };
+  const w = world({ statuses: {}, listings: [] });
+  const report = await heal({ sources, actions: w.actions, nowS: T, clock: () => T, env: keys, log: () => undefined })!;
+  assert.deepEqual(w.calls, [], 'nothing is sent');
+  assert.equal(report.agents.find((a) => a.ens === payer.ens)!.done, 'no longer due');
+  assert.equal(report.shop?.done, 'no longer due');
+});
+
+test('the pause route refuses a body that is not a JSON object, rather than pausing the payer', async () => {
+  for (const path of ['../app/api/customer/pause/route.ts', '../app/api/customer/resume/route.ts']) {
+    const { POST } = (await import(path)) as { POST: (r: Request) => Promise<Response> };
+    for (const body of ['[1,2]', 'not json', JSON.stringify({ agent: 'x' }).repeat(400)]) {
+      const res = await POST(new Request('https://example.test/api/customer/pause', { method: 'POST', headers: { 'content-type': 'application/json' }, body }));
+      assert.equal(res.status, 400, `${path} ${body.slice(0, 12)}`);
+    }
+  }
 });

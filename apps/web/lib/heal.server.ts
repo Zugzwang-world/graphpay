@@ -10,40 +10,49 @@ import { readAll, type EntityDef } from '@graphpay_ethglobal/arkiv-graph';
 import { ensPublicClient, KEYS, locate, readText, retryingReads } from '@graphpay/ens';
 import { ENTITIES } from '@graphpay/money-graph';
 import { parseAbiItem, type PublicClient } from 'viem';
-import { planAgent, planShop, type AgentPlan, type ShopPlan, type StatusChange } from './heal.ts';
+import { namehash } from 'viem/ens';
+import { RESUME_AFTER_S, planAgent, planShop, type AgentPlan, type ShopPlan, type StatusChange } from './heal.ts';
 import { directoryConfigured, directoryConnection, setShopOpen, shopKeyOf } from './open-toggle.server.ts';
-import { changeStatus, failureKind, ownerConfigured, pausableAgents } from './owner-actions.server.ts';
+import { NO_LONGER_DUE, changeStatus, failureKind, ownerConfigured, pausableAgents } from './owner-actions.server.ts';
 import { siteModel } from './site.server.ts';
 
 // The resolver's text-record event, as in @graphpay/ens's generated ABI (heal.test.ts checks
 // that they match). keyHash is the indexed key, so one record's changes are one topic filter.
 export const TEXT_UPDATED = parseAbiItem('event TextUpdated(uint256 indexed recordId, string indexed keyHash, string key, string value)');
+// The agent's own resolver read directly at a past block (ENSIP-5 text).
+const TEXT = parseAbiItem('function text(bytes32 node, string key) view returns (string)');
 // About three hours of Sepolia blocks (12 s each): a pause older than that resumes at once.
 export const LOOKBACK_BLOCKS = 900n;
+// RESUME_AFTER_S in Sepolia blocks: with no change in the window, the record must already have
+// read paused this far back (every full node still holds that state).
+export const RECENT_BLOCKS = BigInt(Math.ceil(RESUME_AFTER_S / 12));
 const CACHE_MS = 10 * 60_000;
 
 export interface HealSources {
-  // The status record, and its newest change when it reads paused.
-  agentStatus(ens: string): Promise<{ status: string; last: StatusChange | null }>;
+  // The status record; when it reads paused, its newest change and, with none in the window,
+  // whether it read paused RECENT_BLOCKS ago.
+  agentStatus(ens: string): Promise<{ status: string; last: StatusChange | null; pausedEarlier?: boolean | null }>;
   // The open_until of each of the shop's listing rows still on Arkiv (W_DIRECTORY's own).
   listings(shopEns: string): Promise<number[]>;
 }
 
+// stillDue: the decision taken again from fresh reads once the write's turn comes (a visitor's
+// change on another server may have landed in between).
 export interface HealActions {
-  resume(ens: string): Promise<{ changed: boolean; sepoliaTx: string | null }>;
-  openShop(shopEns: string): Promise<{ openUntil: number | null }>;
+  resume(ens: string, stillDue: () => Promise<boolean>): Promise<{ changed: boolean; sepoliaTx: string | null; note?: string | null }>;
+  openShop(shopEns: string, stillDue: () => Promise<boolean>): Promise<{ openUntil: number | null; skipped?: boolean }>;
 }
 
 export interface AgentHealth extends AgentPlan {
   ens: string;
-  done: 'resumed' | 'no change' | null;
+  done: 'resumed' | 'no change' | 'no longer due' | null;
   sepoliaTx: string | null;
   failed: string | null;
 }
 
 export interface ShopHealth extends ShopPlan {
   ens: string;
-  done: 'renewed' | 'reopened' | null;
+  done: 'renewed' | 'reopened' | 'no longer due' | null;
   failed: string | null;
 }
 
@@ -78,8 +87,7 @@ function cached(key: string, load: () => Promise<`0x${string}`>): Promise<`0x${s
   return value;
 }
 
-async function lastStatusChange(client: PublicClient, resolver: `0x${string}`): Promise<StatusChange | null> {
-  const head = await client.getBlockNumber({ cacheTime: 0 });
+async function lastStatusChange(client: PublicClient, resolver: `0x${string}`, head: bigint): Promise<StatusChange | null> {
   const logs = await client.getLogs({ address: resolver, event: TEXT_UPDATED, args: { keyHash: KEYS.status }, fromBlock: head > LOOKBACK_BLOCKS ? head - LOOKBACK_BLOCKS : 0n, toBlock: head });
   const last = logs.at(-1);
   if (!last) return null;
@@ -95,7 +103,13 @@ export const liveSources: HealSources = {
     const status = await readText(client, name, KEYS.status);
     if (status !== 'paused') return { status, last: null };
     const resolver = await cached(`resolver ${name}`, async () => (await locate(client, name)).resolver);
-    return { status, last: await lastStatusChange(client, resolver) };
+    const head = await client.getBlockNumber({ cacheTime: 0 });
+    const last = await lastStatusChange(client, resolver, head);
+    if (last) return { status, last };
+    // No change in the window: the record read RECENT_BLOCKS back tells an old pause from a new
+    // one whose log this node has not served yet. A failed read is a failed run: nothing is sent.
+    const earlier = await client.readContract({ address: resolver, abi: [TEXT], functionName: 'text', args: [namehash(name), KEYS.status], blockNumber: head - RECENT_BLOCKS });
+    return { status, last: null, pausedEarlier: earlier === 'paused' };
   },
   listings: async (shopEns) => {
     const arkiv = await directoryConnection();
@@ -107,12 +121,14 @@ export const liveSources: HealSources = {
 
 export const liveActions: HealActions = {
   // open: false: the cron's resume neither waits on nor starts the visitors' 20 s gap.
-  resume: (agent) => changeStatus(false, { agent, open: false }),
-  openShop: async (shopEns) => {
-    const state = await setShopOpen({ arkiv: await directoryConnection(), shopKey: await shopKey(shopEns), shopEns, on: true });
-    return { openUntil: state.openUntil };
+  resume: (agent, stillDue) => changeStatus(false, { agent, open: false, onlyIf: stillDue }),
+  openShop: async (shopEns, stillDue) => {
+    const state = await setShopOpen({ arkiv: await directoryConnection(), shopKey: await shopKey(shopEns), shopEns, on: true, onlyIf: stillDue });
+    return { openUntil: state.openUntil, skipped: state.skipped === true };
   },
 };
+
+const nowSeconds = () => Math.floor(Date.now() / 1000);
 
 // The plans only: what the next run would do. A read that fails leaves its entry as a failure.
 export async function inspect({ sources = liveSources, nowS = Math.floor(Date.now() / 1000), env = process.env }: { sources?: HealSources; nowS?: number; env?: Record<string, string | undefined> } = {}): Promise<HealReport> {
@@ -120,8 +136,8 @@ export async function inspect({ sources = liveSources, nowS = Math.floor(Date.no
   const agents = await Promise.all(
     pausableAgents().map(async (a): Promise<AgentHealth> => {
       try {
-        const { status, last } = await sources.agentStatus(a.ens);
-        return { ens: a.ens, ...planAgent(status, last, nowS), done: null, sepoliaTx: null, failed: null };
+        const { status, last, pausedEarlier = null } = await sources.agentStatus(a.ens);
+        return { ens: a.ens, ...planAgent(status, last, nowS, pausedEarlier), done: null, sepoliaTx: null, failed: null };
       } catch (error) {
         return { ens: a.ens, status: 'unknown', pausedAt: null, resumesAt: null, action: 'none', done: null, sepoliaTx: null, failed: failureKind(error) };
       }
@@ -142,9 +158,14 @@ export async function inspect({ sources = liveSources, nowS = Math.floor(Date.no
 // makes that call return at once (the chain state, not this flag, decides what is due).
 let running: Promise<HealReport> | null = null;
 
-export function heal(options: { sources?: HealSources; actions?: HealActions; nowS?: number; env?: Record<string, string | undefined>; log?: (line: string) => void } = {}): Promise<HealReport> | null {
+export function heal(options: { sources?: HealSources; actions?: HealActions; nowS?: number; clock?: () => number; env?: Record<string, string | undefined>; log?: (line: string) => void } = {}): Promise<HealReport> | null {
   if (running) return null;
-  const { actions = liveActions, env = process.env, log = console.log } = options;
+  const { sources = liveSources, actions = liveActions, clock = nowSeconds, env = process.env, log = console.log } = options;
+  const agentStillDue = (ens: string) => async () => {
+    const { status, last, pausedEarlier = null } = await sources.agentStatus(ens);
+    return planAgent(status, last, clock(), pausedEarlier).action === 'resume';
+  };
+  const shopStillDue = (ens: string, action: ShopPlan['action']) => async () => planShop(await sources.listings(ens), clock()).action === action;
   const run = (async (): Promise<HealReport> => {
     const report = await inspect(options);
     await Promise.all([
@@ -155,8 +176,8 @@ export function heal(options: { sources?: HealSources; actions?: HealActions; no
           return;
         }
         try {
-          const change = await actions.resume(a.ens);
-          a.done = change.changed ? 'resumed' : 'no change';
+          const change = await actions.resume(a.ens, agentStillDue(a.ens));
+          a.done = change.note === NO_LONGER_DUE ? 'no longer due' : change.changed ? 'resumed' : 'no change';
           a.sepoliaTx = change.sepoliaTx;
           log(`heal: ${a.ens} ${a.done}${a.pausedAt === null ? ' (paused before the lookback)' : ` (paused at ${a.pausedAt})`}${change.sepoliaTx ? `, tx ${change.sepoliaTx}` : ''}`);
         } catch (error) {
@@ -168,7 +189,11 @@ export function heal(options: { sources?: HealSources; actions?: HealActions; no
         const shop = report.shop;
         if (!shop || (shop.action !== 'renew' && shop.action !== 'reopen')) return;
         try {
-          const opened = await actions.openShop(shop.ens);
+          const opened = await actions.openShop(shop.ens, shopStillDue(shop.ens, shop.action));
+          if (opened.skipped) {
+            shop.done = 'no longer due';
+            return;
+          }
           shop.done = shop.action === 'renew' ? 'renewed' : 'reopened';
           if (shop.action === 'reopen') log(`heal: ${shop.ens} reopened${shop.closedAt === null ? ' (no listing left)' : ` (closed at ${shop.closedAt})`}`);
           shop.open = true;

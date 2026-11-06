@@ -2,7 +2,7 @@
 // active on the agent's ENS name (Ethereum Sepolia). The passcode is checked first. The agent
 // is the tapped card's ({ agent: <ENS name> }; none named is the payer), and only one with a
 // spending pass: the others are refused in words.
-import { json, notLive, readJsonObject } from '../../../../lib/http.ts';
+import { badRequest, json, notLive, readJsonObject } from '../../../../lib/http.ts';
 import { requirePasscode } from '../../../../lib/passcode.ts';
 import { Busy, EFFECTIVE_WITHIN_S, OWNER_WAITING_FOR, changeStatus, failureKind, ownerConfigured, pickAgent } from '../../../../lib/owner-actions.server.ts';
 
@@ -13,7 +13,9 @@ export const maxDuration = 300;
 export async function POST(request: Request): Promise<Response> {
   const refused = requirePasscode(request);
   if (refused) return refused;
-  const pick = pickAgent((await readJsonObject(request))?.agent);
+  const body = await readJsonObject(request);
+  if (!body) return badRequest('the body must be a JSON object, { agent } or empty');
+  const pick = pickAgent(body.agent);
   if (!pick.ok) return json({ error: pick.error, reason: pick.reason }, pick.status);
   if (!ownerConfigured(process.env, pick.agent.ens)) return notLive(OWNER_WAITING_FOR);
   try {
