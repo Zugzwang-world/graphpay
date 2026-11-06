@@ -172,6 +172,22 @@ Updated 23:38 IST, Fri 6 Nov (W7 Submission).
 
 - **Acceptance E1 reads the old clock deadline** (owner: the Coordinator, who regenerates acceptance). What: `acceptance/checks.mjs` E1 expects the run's deadline to contain `T23:59:00` (`order.deadlineLocal`); the request now says "delivered within an hour". Why: E1 would fail on every fresh run. Recommendation: expect the deadline one hour after the run's request, to the minute (`result.mandate.deadlineIso`); E1 needs a fresh `e2e:food` run anyway.
 
+## w2-city
+
+- **The flip waits for the restart that follows the history** (owner: the Coordinator, who times it; W5 restarts the workers). What, in order:
+  1. W2's history for the new shops is complete (1,258 of 1,258 events);
+  2. then W5 restarts the workers;
+  3. then W1's flip merges.
+
+  Why: a mirror that read the new shops' tallies part-way would plan their first live payment from stale counts and overwrite their totals (reviewer finding, ADR-0077). Recommendation: keep that order. A mirror started after the history is fine; W5's restart on W2's "done" is that restart.
+- **W1's flip changes the labels and the category together** (owner: W1). What: in `packages/config/story.json`, set `shops[].label` to the final cast's labels by story role and every `shops[].category` to `south-indian`, in one PR:
+  - good → `filter-and-fold`;
+  - runner-up → `idli-index`;
+  - trap → `tawa-tangle`.
+
+  Why: the analyst ranks `nodes(category)`, and the new rows are `south-indian`; a labels-only flip would rank the old shops. A test in `packages/city` fails it. Recommendation: one PR.
+- **After the flip, delist the old shops' directory rows** (owner: W2). What: kesar-kingdom, syrup-street and jamun-junction stay listed under their new display names, so until then the map shows each name twice. Why: the old rows feed acceptance D8 at S until acceptance moves to M. Recommendation: W2 delists them once acceptance checks M.
+
 ## w6-sdk
 
 - **npm's web approval for both SDKs at 1.0.0** (owner: the founder). What: W6 runs `npm login` (the sign-in link), then publishes both packages one after the other (one approval link, which lasts about 5 minutes; last time npm reused it for the second package). Where: the links come in this chat and as a notification; open them in the browser signed in to npm as the owner of `graphpay_ethglobal`. Why: the brief's done-when is both packages on npm at 1.0.0. Recommendation: about 10 minutes at the browser, as soon as both PRs are merged.

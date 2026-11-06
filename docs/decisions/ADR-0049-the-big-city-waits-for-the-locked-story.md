@@ -1,6 +1,6 @@
 # ADR-0049: The big city waits for the locked story
 
-Status: accepted · Date: 2026-11-05 · Decided by: founder (chat, 22:42 IST; brief v2)
+Status: accepted (gate superseded by ADR-0077) · Date: 2026-11-05 · Decided by: founder (chat, 22:42 IST; brief v2)
 
 ## Decision
 

@@ -413,12 +413,14 @@
       "S": {
         "approxEdges": 1000,
         "seed": "tonight, test story",
-        "owner": "W_SEED_EVENT"
+        "owner": "W_SEED_EVENT",
+        "cast": "test"
       },
       "M": {
         "approxEdges": 10000,
         "seed": "only after the final story is locked",
-        "owner": "W_SEED_M_EVENT"
+        "owner": "W_SEED_M_EVENT",
+        "cast": "final"
       }
     },
     "generator": {
@@ -463,6 +465,48 @@
         ]
       ],
       "batchEvents": 25
+    },
+    "casts": {
+      "about": "The cast shops each seeded city and the live graph are written with, by story role (ADR-0077). A seeded city is generated again from its own cast here, never from shops[] or renewal, so its names and truth stay as seeded when those change. test: size S as seeded on 2026-11-05 (the renewal was 0.40 then). final: the founder's dosa story (ADR-0073), with the Grok pack's places (assets/grok/part1/places/cast-shops.json, synthetic); W2 writes these shops on Arkiv at epoch 0, W1 registers them on ENS, and W1's flip gives shops[].label and shops[].category these values in one change.",
+      "test": {
+        "category": "sweets",
+        "renewalPriceMicro": 400000,
+        "shops": {
+          "good": {
+            "label": "kesar-kingdom"
+          },
+          "runner-up": {
+            "label": "syrup-street"
+          },
+          "trap": {
+            "label": "jamun-junction"
+          }
+        }
+      },
+      "final": {
+        "category": "south-indian",
+        "renewalPriceMicro": 2400000,
+        "shops": {
+          "good": {
+            "label": "filter-and-fold",
+            "area": "Bandra Kurla Complex",
+            "lat": 19.0667,
+            "lng": 72.8651
+          },
+          "runner-up": {
+            "label": "idli-index",
+            "area": "Bandra East",
+            "lat": 19.0622,
+            "lng": 72.8503
+          },
+          "trap": {
+            "label": "tawa-tangle",
+            "area": "Kalina",
+            "lat": 19.0794,
+            "lng": 72.8658
+          }
+        }
+      }
     }
   },
   "demoScript": [

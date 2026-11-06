@@ -155,6 +155,10 @@ One line per PR: time (IST) · activity · result · PR link. Append under your 
 - 00:00 IST · w3-payments · in PR: feat(pay): subscribe and cancel the Sunday box on the demo clock; the cron renews within the signed allowance
 - 23:45 IST · w3-payments · in PR: feat(pay): the shop can decline a refund request, recorded on Arkiv (reviewer's two blocking items fixed: a refund the graph has not shown yet stops a decline; the order page words it "Refund declined") · https://github.com/Zugzwang-world/graphpay/pull/163
 
+## w2-city
+
+- 00:15 IST · w2-city · item 1: the dosa shops on Arkiv under their own names at epoch 0 (directory, nodes and the full labelled 90-day history, south-indian; the analyst reads 241, 60 and 110 orders with the story's rates); each seeded city keeps its own cast, which fixes race Q2 at S and D4 (ADR-0077) · https://github.com/Zugzwang-world/graphpay/pull/167
+
 ## w6-sdk
 
 - 23:55 IST · w6-sdk · arkiv-graph 1.0.0: five bugs fixed (paging past rows that do not fit, row lifetimes, atomic split writes, refused batches, the predicate budget), every export documented and typed, the quickstart first, the reference app linked · merged https://github.com/Zugzwang-world/graphpay/pull/174
