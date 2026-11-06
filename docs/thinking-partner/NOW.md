@@ -31,10 +31,10 @@ Updated 09:47 IST, Fri 6 Nov (T1).
 - Next: the demo cast's policies, which start once the story locks. Blockers: none.
 
 ## identity
-Updated 04:25 IST. **M6 is built: the gate is merged (PR #34); the watcher PR is open.** The watcher keeps the payment policy and the Arkiv node standing in step with ENS: a kill revokes the policy, a pause shows on the node, a lapse is caught by a 30 s ticker, and it never creates a policy or copies an ENS cap into one. Join hosts it in the workers process.
-- Checked: 47 unit tests, 11 fork tests (including a `renew` after `unregister` that must not revive a killed agent), a dry run on real Sepolia, B8's MCP call (`initialize` and `tools/list` on the hosted endpoint).
-- Running: nothing. Blockers: none. Real kill timings (B6/B7/E7) wait for Join's workers process.
-- Next: after the merge, B6/B7/E7 with Join, then B9 (a) after T1's first settled payment, then the Friday items.
+Updated 05:00 IST. **M6 is done and merged (gate #34, watcher #40); B7 is covered.** The fork test for epochs on re-registration passes twice: a new registration after an unregister or after a lapse gets e + 1, and an unregistered label already shows a higher epoch while AVAILABLE (0 → 2). Fork tests are now 12, all passing.
+- `disposable-1` was killed on real Sepolia by someone else; the fork tests use `disposable-2` (kill) and `disposable-3` (lapse), provisioned on the fork only.
+- Running: nothing. Blockers: none. B6/B7/E7 real timings wait for Join's workers process to host the watcher.
+- Next: the demo cast's ENS names the moment the story locks (Coordinator will say), B9 (a) after T1's first settled payment.
 
 ## arkiv
 

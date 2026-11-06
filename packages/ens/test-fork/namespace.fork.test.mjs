@@ -62,7 +62,7 @@ async function resolverOf(agentName) {
 }
 
 guard('B1/B2 on the fork: every name of the cast walks ok, is REGISTERED at epoch 0 with its own factory-proxy resolver', async () => {
-  const all = [...plan.owners, ...plan.agents, disposableAgent(1)];
+  const all = [...plan.owners, ...plan.agents, disposableAgent(2)];
   const resolvers = new Set();
   for (const e of all) {
     const w = await resolverOf(e.name);
@@ -72,7 +72,7 @@ guard('B1/B2 on the fork: every name of the cast walks ok, is REGISTERED at epoc
     resolvers.add(w.resolver);
     assert.equal(await readText(client, e.name, KEYS.status), 'active', e.name);
   }
-  for (const a of [...plan.agents, disposableAgent(1)].filter((x) => x.pays)) {
+  for (const a of [...plan.agents, disposableAgent(2)].filter((x) => x.pays)) {
     const bytes = await readAddressBytes(client, a.name, WHITECHAIN_COIN_TYPE);
     assert.equal(getAddress(bytes), getAddress(wallets[a.walletRole]), `${a.name} address is its own wallet`);
     assert.equal(await readText(client, a.name, KEYS.capMicro), a.capMicro.toString());
