@@ -30,8 +30,10 @@ import {
   ownerRecords,
   parseAccepts,
   parseInteropList,
+  parseRelabel,
   permissionedResolverAbi,
   REGISTRY,
+  relabelShops,
   RESOLVER,
   rootRecords,
   saltOf,
@@ -189,6 +191,43 @@ test('plan: one wallet per paying agent; non-paying agents are held by their own
   assert.ok(d.selfHeld && d.pays);
   assert.throws(() => disposableAgent(0));
   assert.ok(walletRolesOf(plan).includes(payers[0].walletRole));
+});
+
+test('plan: a relabelled shop keeps its key and wallet role; the old label leaves the plan, the others stay', () => {
+  const story = activeCast();
+  const [first, ...rest] = story.shops;
+  const label = `${first.label}-next`; // built at run time: no story literal here
+  const relabelled = namespacePlan({ cast: relabelShops(story, { [first.key]: label }) });
+  const owner = relabelled.owners.find((o) => o.key === first.key);
+  assert.equal(owner.name, `${label}.${ROOT}`);
+  assert.equal(owner.walletRole, first.walletRole);
+  assert.ok(!relabelled.owners.some((o) => o.label === first.label));
+  for (const s of rest) assert.ok(relabelled.owners.some((o) => o.name === `${s.label}.${ROOT}`), s.key);
+  const agents = relabelled.agents.filter((a) => a.ownerKey === first.key);
+  assert.equal(agents.length, story.shopAgents.length);
+  for (const a of agents) {
+    assert.ok(a.name.endsWith(`.${label}.${ROOT}`), a.name);
+    assert.equal(a.walletRole, first.walletRole);
+    assert.ok(!a.pays && !a.selfHeld, a.name);
+  }
+  // the persona's agents are unchanged; the original cast is not mutated
+  assert.deepEqual(relabelled.agents.filter((a) => a.owner === relabelled.human.name).map((a) => a.name), plan.agents.filter((a) => a.owner === plan.human.name).map((a) => a.name));
+  assert.equal(story.shops[0].label, first.label);
+  // refused: an unknown shop, a taken label, two shops on one label, a label that is not one normalised label
+  assert.throws(() => relabelShops(story, { [`${first.key}-missing`]: label }), /not a shop/);
+  assert.throws(() => relabelShops(story, { [first.key]: rest[0].label }), /already a label/);
+  assert.throws(() => relabelShops(story, { [first.key]: story.persona.label }), /already a label/);
+  assert.throws(() => relabelShops(story, { [first.key]: config.ens.namespace.wildcardLabel }), /already a label/);
+  assert.throws(() => relabelShops(story, { [first.key]: label, [rest[0].key]: label }), /already a label/);
+  for (const bad of [`${label}.x`, label.toUpperCase(), `-${label}`, `${label}--x`, '', 'a'.repeat(64)]) assert.throws(() => relabelShops(story, { [first.key]: bad }), /normalised label/, bad);
+  // a label already on chain (from the record) is taken too
+  assert.throws(() => relabelShops(story, { [first.key]: label }, { alsoTaken: [label] }), /already a label/);
+});
+
+test('plan: parseRelabel reads <key>=<label> pairs; a flag with no pair or a repeated key is an error, never the old story', () => {
+  assert.deepEqual([...parseRelabel(undefined)], []);
+  assert.deepEqual([...parseRelabel('a=b,c=d')], [['a', 'b'], ['c', 'd']]);
+  for (const bad of ['', ',', 'a', 'a=', '=b', 'a=b=c', 'a=b,a=c', '--real']) assert.throws(() => parseRelabel(bad), /relabel/, bad);
 });
 
 test('records: ENSIP-26 texts point at the hosted MCP and the site; shops publish the payee and accepts', () => {

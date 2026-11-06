@@ -93,8 +93,59 @@ export async function readBuyerStanding(mcp, ens) {
   return { ok: true, standing, explainId: explain ? explain[1] : null };
 }
 
+// An MCP tool's answer as JSON: the hosted server's `{ content: [{ type: 'text', text }] }`, or
+// the mocks' plain object. Null when it is neither.
+export function mcpJson(output) {
+  if (Array.isArray(output?.content)) {
+    const text = output.content.filter((c) => c?.type === 'text').map((c) => c.text).join('\n');
+    try {
+      return JSON.parse(text);
+    } catch {
+      return null;
+    }
+  }
+  return output && typeof output === 'object' ? output : null;
+}
+
+// What the model reads of a graph answer (W4: shorter tool replies). The run log keeps the
+// whole answer for the screens and the explainer (the entity keys behind every read, about
+// 17,000 characters on production); the model needs the data, the errors, and the explain id
+// and read count that `explain` takes.
+function arkivOf(answer) {
+  const a = answer?.extensions?.arkiv ?? {};
+  return { explainId: a.explainId ?? null, calls: a.calls ?? null };
+}
+export const MODEL_VIEW = Object.freeze({
+  graphql: (answer) => ({
+    data: answer.data ?? null,
+    ...(Array.isArray(answer.errors) && answer.errors.length ? { errors: answer.errors.slice(0, 3).map((e) => String(e?.message ?? e).slice(0, 300)) } : {}),
+    extensions: { arkiv: arkivOf(answer) },
+  }),
+  explain: (trace) => ({
+    calls: trace.calls ?? null,
+    reads: Array.isArray(trace.queries) ? trace.queries.length : null,
+    entities: Array.isArray(trace.entityKeys) ? trace.entityKeys.length : null,
+    blockNumber: trace.blockNumber ?? null,
+    note: trace.note ?? null,
+    shown: 'the full trace is on the human’s screen',
+  }),
+});
+
+// The model's view of one MCP answer: the short view when the answer reads as JSON, otherwise the
+// tool's own conversion (text as it came).
+function modelOutputOf(name, t) {
+  const view = MODEL_VIEW[name];
+  if (!view) return t.toModelOutput;
+  return async (arg) => {
+    const answer = mcpJson(arg?.output);
+    if (answer && !arg?.output?.isError) return { type: 'json', value: view(answer) };
+    return t.toModelOutput ? t.toModelOutput(arg) : { type: 'json', value: arg?.output ?? null };
+  };
+}
+
 // The MCP tools the model sees, traced into the run log. `onResult` lets the
-// analyst's phase remember the explain id of its own `graphql` answer.
+// analyst's phase remember the explain id of its own `graphql` answer. The log
+// gets each whole answer; the model reads the short view (MODEL_VIEW).
 export function tracedMcpTools(tools, log, agent, { only, executed, onResult } = {}) {
   const out = {};
   for (const [name, t] of Object.entries(tools ?? {})) {
@@ -102,6 +153,7 @@ export function tracedMcpTools(tools, log, agent, { only, executed, onResult } =
     if (typeof t?.execute !== 'function') continue;
     out[name] = {
       ...t,
+      toModelOutput: modelOutputOf(name, t),
       execute: async (input, options) => {
         executed?.add(options?.toolCallId);
         log.toolCall(agent, name, input);
