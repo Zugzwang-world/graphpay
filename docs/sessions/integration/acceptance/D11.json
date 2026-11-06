@@ -1,0 +1,23 @@
+{
+  "id": "D11",
+  "at": "2026-11-06T05:05:07.190Z",
+  "pass": null,
+  "why": "the presence half passes; the shop_open half (the Open toggle) is not run here",
+  "what": "heartbeats lapse",
+  "measured": {
+    "secondsToPresence": 6.7,
+    "minutesToGone": 14.98,
+    "rows": 1,
+    "handoffs": 0,
+    "owner": "0x146002b43a9fb8eb963699e77ed18579dc30a6e4",
+    "errand": "errand: no-purchase, chose null, 1.0 s, $0.0000"
+  },
+  "expected": "agent_presence within 30 s of the start and gone within 15 min of the stop; both owned by W_DIRECTORY; shop_open present while on and gone within 15 min of off",
+  "evidence": {
+    "file": "docs/sessions/integration/hosted/d11-2026-11-06T04-49-18-756Z.json",
+    "parts": {
+      "presence": true,
+      "shopOpen": null
+    }
+  }
+}

@@ -56,6 +56,9 @@ if (balance < piece) throw new Error(`${agent.walletRole} holds ${balance} micro
 
 let read = null;
 const stack = await startStack({ env, whitechain, sepolia, directory, sync, shopKeyOf: (s) => read.shopKey(s), log: say });
+// The kill is one-shot per label, and its fail edge is read from this process's recorder: the
+// hosted mode would kill the name and then never see the edge.
+if (stack.hosted) throw new Error('e2e:kill needs the local stack (STACK_LOCAL_RELAY=1, with the hosted relayer quiet)');
 read = createReadHooks({ ens: sepolia.publicClient, arkiv, gate: stack.gate, wallets });
 redact = redactor(new Map([...values, ...stack.secrets.map((v, i) => [`KILL_RUN_SECRET_${i}`, v])]));
 const surface = stack.surfaceFor(goodEns);
