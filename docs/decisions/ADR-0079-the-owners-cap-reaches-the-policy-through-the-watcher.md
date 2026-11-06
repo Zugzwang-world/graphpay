@@ -2,7 +2,7 @@
 Status: accepted · Date: 2026-11-07 00:10 IST · Decided by: the night Coordinator, under the founder's authority (W3 brief, item 4b) · Source: the W3 brief `docs/thinking-partner/briefs/2258-w3-payments.md`; NOW, "Decided tonight (Coordinator)", 00:00 IST; the Coordinator's approval to W3 with these bounds. Amends `planning/SPEC/IDENTITY_ENS.md` §8; cites ADR-0021
 
 ## Decision
-When the payer agent's owner changes its daily cap (`POST /api/customer/cap`), the owner's wallet writes the ENS record `graphpay.cap_micro` on Sepolia. The ENS watcher on the Mac then writes the same cap into the agent's spending policy on the checkout, as min(the owner's ENS cap, the payments setup's configured cap, `buyerAgents.<agent>.capMicro`). POLICY_WRITER stays local. The route waits up to 60 s for the policy and records the change on Arkiv (a W_SYNC `request` edge from the owner to the agent, ref `own:`, amount 0).
+When the payer agent's owner changes its daily cap (`POST /api/customer/cap`), the owner's wallet writes the ENS record `graphpay.cap_micro` on Sepolia. The ENS watcher on the Mac then writes the same cap into the agent's spending policy on the checkout, as min(the owner's ENS cap, the payments setup's configured cap, `buyerAgents.<agent>.capMicro`). POLICY_WRITER stays local. The route waits up to 90 s for the policy and records the change on Arkiv (a W_SYNC `request` edge from the owner to the agent, ref `own:`, amount 0).
 
 ## Bounds (the Coordinator's, enforced in code)
 - The policy never goes above the configured cap: the watcher writes min(the owner's ENS cap, `buyerAgents.<agent>.capMicro`).

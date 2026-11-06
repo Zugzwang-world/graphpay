@@ -10,7 +10,7 @@ import { OWNER_CAP_WAITING_FOR, OwnerCapRefusal, setOwnerCap } from '../../../..
 import { requirePasscode } from '../../../../lib/passcode.ts';
 
 export const dynamic = 'force-dynamic';
-// The Sepolia receipt (up to 180 s), the policy writer (up to 60 s) and the Arkiv write.
+// The Sepolia receipt (up to 180 s), the policy writer (up to 90 s, inside a 260 s budget) and the Arkiv write.
 export const maxDuration = 300;
 
 export async function POST(request: Request): Promise<Response> {
