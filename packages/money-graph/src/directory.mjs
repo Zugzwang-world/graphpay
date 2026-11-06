@@ -7,7 +7,7 @@ import { ExpirationTime, bool, i32, key, str } from '@arkiv-network/sdk';
 import { and, asc, between, eq, gt } from '@arkiv-network/sdk/query';
 import { checkedOwner, findOne, fromJsonBytes, jsonBytes, scope, trustedRows } from '@graphpay_ethglobal/arkiv-graph';
 import { identityKey, nodeOf, normalizedName } from './identity.mjs';
-import { ownCreate } from './menu.mjs';
+import { ownCreate, rowHolds } from './menu.mjs';
 import { ENTITIES, LIFETIME, writerAddresses } from './model.mjs';
 
 const I32_MIN = -2147483648;
@@ -40,17 +40,18 @@ export async function writeShop(arkiv, shop, { lifetimeDays = LIFETIME.shopDays 
   if (!arkiv?.writer) throw new Error('money-graph: writeShop needs a W_DIRECTORY connection with a writer');
   const values = shopValues(shop);
   const existing = await findOne(arkiv.publicClient, ENTITIES.shop, { owner: arkiv.owner, where: [eq('shop_key', key(values.shop_key))] });
-  // W_DIRECTORY is shared with the live site: a transaction found by nonce must hold this row.
+  // W_DIRECTORY is shared with the live site: a transaction found by nonce must hold this row. A row
+  // that already holds every value is left alone, so nothing is sent and nothing can be mistaken.
   if (existing) {
     const { shop_key: _k, ...set } = values;
-    const patched = async () => {
-      const row = await findOne(arkiv.publicClient, ENTITIES.shop, { owner: arkiv.owner, where: [eq('shop_key', key(values.shop_key))] });
-      return row?.category === values.category && row?.lat === values.lat && row?.lng === values.lng && row?.status === values.status;
-    };
-    const { txs } = await arkiv.writer.send({ patches: [{ def: ENTITIES.shop, key: existing.$key, values: set }] }, { verifyRecovered: patched });
-    return { entityKey: existing.$key, txHash: txs[0].hash, created: false };
+    const wanted = Object.fromEntries(Object.entries(set).filter(([, v]) => v != null).map(([k, v]) => [k, typeof v === 'boolean' ? String(v) : v]));
+    if (Object.entries(wanted).every(([k, v]) => String(existing[k] ?? '').toLowerCase() === String(v).toLowerCase())) return { entityKey: existing.$key, txHash: null, created: false, unchanged: true };
+    // A found transaction is checked on the values a patch can change (a boolean reads back in its own form).
+    const check = Object.fromEntries(Object.entries(set).filter(([, v]) => v != null && typeof v !== 'boolean'));
+    const { txs } = await arkiv.writer.send({ patches: [{ def: ENTITIES.shop, key: existing.$key, values: set }] }, { verifyRecovered: rowHolds(arkiv, existing.$key, check) });
+    return { entityKey: existing.$key, txHash: txs[0].hash, created: false, unchanged: false };
   }
-  const { txs, createdKeys } = await arkiv.writer.send({ creates: [{ def: ENTITIES.shop, values, expiration: ExpirationTime.fromDays(lifetimeDays) }] }, { verifyRecovered: ownCreate(arkiv, ENTITIES.shop, values.shop_key) });
+  const { txs, createdKeys } = await arkiv.writer.send({ creates: [{ def: ENTITIES.shop, values, expiration: ExpirationTime.fromDays(lifetimeDays) }] }, { verifyRecovered: ownCreate(arkiv, ENTITIES.shop, values.shop_key, { lat: values.lat, lng: values.lng, category: values.category }) });
   return { entityKey: createdKeys[0], txHash: txs[0].hash, created: true };
 }
 

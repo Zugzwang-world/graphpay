@@ -46,7 +46,7 @@ A test fails a flip of the labels alone.
   - `writeMenu` sent without `verifyRecovered`. When a send was uncertain, the writer adopted whatever W_DIRECTORY transaction it found at that nonce (a live `handoff` row, an `agent_presence` row) and reported a menu row it never wrote.
   - Nothing of the site's was changed, and the two menu rows were written again.
   - `ownCreate` now checks the entity's type and shop key for `writeMenu`, `writeShop` and the cast script.
-- **The Arkiv read window (new fact, `docs/technical/FACTS.md`):** the keyless endpoint meters `arkiv_query` on its own window (`limit=10000`), shared by every process on this Mac, the mirror included. Each retry that reloaded all of W_LEDGER's rows (about 2,000) spent it. My scripts now keep 40% free and wait out the mirror's heartbeat gap.
+- **The Arkiv read window (new fact, `docs/technical/FACTS.md`):** the keyless endpoint meters `arkiv_query` on its own window (`limit=10000`), shared by every process on this Mac, the mirror included. Each retry that reloaded all of W_LEDGER's rows (about 2,000) spent it. The header shows that window only once it is nearly spent (under about 2,000 left), so my scripts pause there, space their heavy reads, and send between the mirror's heartbeats.
 - **SDK finding (for W6):** when another writer takes a pinned nonce, `adopt()` throws "created N entities for M creates" before `verifyRecovered` can call the transaction someone else's.
 - **Reviewer:** the blocking items in #167 are fixed:
   - the history writer resumes only the stream its manifest names;
