@@ -21,6 +21,8 @@ declare module '@graphpay/ens' {
   export interface OwnerActions {
     pause(name: string): Promise<OwnerActionResult>;
     resume(name: string): Promise<OwnerActionResult>;
+    // The published cap (micro-USDT), read back before it answers (optional here so fakes need not have it).
+    setCap?(name: string, capMicro: bigint | string): Promise<OwnerActionResult>;
   }
   export function createOwnerActions(context: { client: PublicClient; runner: TxRunner; senderFor(role: string): OwnerSender; log?: (line: string) => void; retryReads?: boolean }): OwnerActions;
   export function ensPublicClient(options?: { env?: Record<string, string | undefined> }): Promise<{ client: PublicClient; rpcLabel: string }>;
