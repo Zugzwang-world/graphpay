@@ -11,20 +11,27 @@ const HEADERS = { 'content-type': 'application/json', 'cache-control': 'no-store
 export const json = (status, body, extra = {}) =>
   new Response(JSON.stringify(body, (_, v) => (typeof v === 'bigint' ? String(v) : v)), { status, headers: { ...HEADERS, ...extra } });
 
-// Constant-time and length-independent: both sides are hashed first.
-// An error for a log line: the class names along its cause chain, with an RPC error code or an
-// HTTP status where one is a plain number (e.g. HttpRequestError 429, RpcRequestError -32005).
-// Never a message: viem's messages quote the RPC URL, and keyed URLs carry the key.
+// An error for a log line: the class names along its cause chain, each with an HTTP status or an
+// RPC code where it is a plain integer, a text code that is a plain constant (ECONNREFUSED), or a
+// contract revert's error name (ContractFunctionRevertedError BadState). Never a message: viem's
+// messages quote the RPC URL, and keyed URLs carry the key.
+const IDENT = /^[A-Za-z][A-Za-z0-9]{0,60}$/;
+const CONST = /^[A-Z][A-Z0-9_]{0,40}$/;
 export function errorNames(e) {
   const parts = [];
-  for (let x = e, i = 0; x && i < 6; x = x.cause, i += 1) {
-    const name = typeof x.name === 'string' && /^[A-Za-z][A-Za-z0-9]{0,60}$/.test(x.name) ? x.name : 'Error';
-    const num = [x.status, x.code].find((v) => Number.isInteger(v));
-    parts.push(num === undefined ? name : `${name} ${num}`);
+  try {
+    for (let x = e, i = 0; x && i < 6; x = x.cause, i += 1) {
+      const name = typeof x.name === 'string' && IDENT.test(x.name) ? x.name : 'Error';
+      const extra = [x.status, x.code].find((v) => Number.isInteger(v)) ?? [x.code].find((v) => typeof v === 'string' && CONST.test(v)) ?? [x.data?.errorName].find((v) => typeof v === 'string' && IDENT.test(v));
+      parts.push(extra === undefined ? name : `${name} ${extra}`);
+    }
+  } catch {
+    parts.push('Error'); // a getter that throws: what was read so far is kept
   }
   return parts.join(' < ') || 'Error';
 }
 
+// Constant-time and length-independent: both sides are hashed first.
 export function bearerOk(request, token) {
   if (typeof token !== 'string' || token.length < 24) return false;
   const header = request.headers.get('authorization') ?? '';

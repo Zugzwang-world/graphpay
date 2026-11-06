@@ -12,7 +12,7 @@ export async function GET(request: Request): Promise<Response> {
   try {
     return jsonNoStore(200, await renewDue());
   } catch (e) {
-    log(`cron renew: ${reason(e)}`); // a start-up check's name, or the error's name: never a message
+    log(`cron renew: ${reason(e)}`); // a start-up check's name, or the error's cause chain: never a message
     return jsonNoStore(503, { error: 'renewals unavailable' });
   }
 }

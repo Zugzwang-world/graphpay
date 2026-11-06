@@ -323,4 +323,9 @@ test('errorNames: the cause chain with plain-number codes, never a message', asy
   assert.equal(errorNames(Object.assign(new Error('x'), { name: 'a name with https://spaces' })), 'Error');
   assert.equal(errorNames(Object.assign(new Error('x'), { name: 'RpcRequestError', code: -32005 })), 'RpcRequestError -32005');
   assert.doesNotMatch(errorNames(top), /secret|https/);
+  assert.equal(errorNames(Object.assign(new Error('x'), { name: 'TypeError', cause: Object.assign(new Error('y'), { code: 'ECONNREFUSED' }) })), 'TypeError < Error ECONNREFUSED');
+  assert.equal(errorNames(Object.assign(new Error('x'), { name: 'ContractFunctionRevertedError', data: { errorName: 'BadState' } })), 'ContractFunctionRevertedError BadState');
+  assert.equal(errorNames(Object.assign(new Error('x'), { name: 'Error', code: 'sk-ant-abc/def' })), 'Error', 'a code that is not a plain constant is dropped');
+  const trap = new Proxy({}, { get() { throw new Error('boom'); } });
+  assert.equal(errorNames(trap), 'Error');
 });
