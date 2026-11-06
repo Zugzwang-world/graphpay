@@ -59,6 +59,7 @@ One line per PR: time (IST) · activity · result · PR link. Append under your 
 - 05:33 IST · integration · opened: M13's hosted run passes C2, C3, C5, C6, F2 and C4(b) on the production domain (4.80 paid, 0.80 refunded, 1.20 re-order, over-cap refused); A3, A4, A9, A10, B3 wired; the report at 41 pass, 0 fail · https://github.com/Zugzwang-world/graphpay/pull/66
 - 05:41 IST · integration · opened: C4(a) passes (the scout agent revoked, refused on-chain AGENT_REVOKED, restored exactly; the mirror's fail edge once after a paused restart); the report at 42 pass, 0 fail; then F1 (no secrets in the tree, the history of every branch or Vercel), 43 pass · https://github.com/Zugzwang-world/graphpay/pull/67
 - 09:47 IST · integration · opened: D10 passes (the hosted shop's quote on Arkiv: owner W_DIRECTORY, 15 minutes, valid_until 10 minutes); the report at 44 pass, 0 fail, 1 blocked, 3 not run (M13 done); then F3 from T1's record, 45 pass · https://github.com/Zugzwang-world/graphpay/pull/79
+- 10:36 IST · integration · opened: the e2e stack on the hosted shop and facilitator; D11's presence half passes (6.7 s to appear, lapsed 14.98 min after the end, owner W_DIRECTORY) · https://github.com/Zugzwang-world/graphpay/pull/85
 
 ## website
 

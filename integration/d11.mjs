@@ -1,0 +1,102 @@
+// ALLOW_REAL_NETWORK=1 node integration/d11.mjs     (D11's presence half, Friday item 3)
+// Runs `pnpm e2e:food` once with a known run id and watches its agents' presence rows on Arkiv:
+// every 5 s until they appear, then every 60 s until they are gone (at most 20 minutes after the
+// errand ends). The errand's start and end are the times of e2e:food's "errand as" and
+// "errand:" lines. Pass: rows within 30 s of the start, gone within 15 minutes of the end, all
+// owned by W_DIRECTORY. Also counts the run's handoff rows. Writes
+// docs/sessions/integration/hosted/d11-<time>.json; e2e:food writes its own run file.
+
+import { spawn } from 'node:child_process';
+import { createHash, randomBytes } from 'node:crypto';
+import { mkdirSync, writeFileSync } from 'node:fs';
+import { dirname, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { agentsOnline, connectArkiv, handoffsFor, writerAddresses } from '@graphpay/money-graph';
+
+const here = dirname(fileURLToPath(import.meta.url));
+const say = (l) => process.stdout.write(`${new Date().toISOString().slice(11, 19)} d11: ${l}\n`);
+const runId = `run-${randomBytes(8).toString('hex')}`;
+const requestId = `0x${createHash('sha256').update(runId).digest('hex')}`;
+const owner = writerAddresses().W_DIRECTORY;
+const arkiv = await connectArkiv({ backend: 'rabdi', env: {} });
+const out = { runId, owner, startedAt: new Date().toISOString(), polls: [] };
+
+const save = () => {
+  out.endedAt = new Date().toISOString();
+  const dir = join(here, '..', 'docs', 'sessions', 'integration', 'hosted');
+  mkdirSync(dir, { recursive: true });
+  writeFileSync(join(dir, `d11-${out.startedAt.replace(/[:.]/g, '-')}.json`), `${JSON.stringify(out, (_, v) => (typeof v === 'bigint' ? v.toString() : v), 2)}\n`);
+};
+process.on('exit', save);
+
+// The errand, as a child process; its output is passed through (it redacts its own).
+const child = spawn(process.execPath, [join(here, 'e2e-food.mjs')], { env: { ...process.env, E2E_RUN_ID: runId }, stdio: ['ignore', 'pipe', 'inherit'] });
+let buf = '';
+child.stdout.on('data', (d) => {
+  process.stdout.write(d);
+  buf += d;
+  const lines = buf.split('\n');
+  buf = lines.pop();
+  for (const l of lines) {
+    if (!out.errandStartMs && / errand as /.test(l)) out.errandStartMs = Date.now();
+    if (!out.errandEndMs && / errand: /.test(l)) {
+      out.errandEndMs = Date.now();
+      out.errandLine = l.slice(9, 200);
+    }
+  }
+});
+const exited = new Promise((ok) => child.on('exit', (code) => ok(code)));
+
+// This run's rows, owned by W_DIRECTORY: agentsOnline reads only that owner and re-checks each
+// row's owner (arkiv-graph's trustedRows), so a row from anyone else is never counted.
+async function poll() {
+  const rows = await agentsOnline(arkiv.publicClient, { session: runId });
+  const p = { at: Date.now(), rows: rows.length, agents: rows.map((r) => r.agentEns) };
+  for (const r of rows) if (!out.lastExpiresAt || BigInt(r.expiresAt) > BigInt(out.lastExpiresAt)) out.lastExpiresAt = String(r.expiresAt);
+  out.polls.push(p);
+  return rows;
+}
+
+const t0 = Date.now();
+let seen = null;
+let childDone = false;
+exited.then(() => {
+  childDone = true;
+});
+while (!seen && !childDone && Date.now() - t0 < 30 * 60_000) {
+  const rows = await poll().catch(() => []);
+  if (rows.length) {
+    seen = Date.now();
+    out.firstSeenMs = seen;
+    // Each row's own owner, read from the entity (evidence; agentsOnline already filters by it).
+    out.firstRows = await Promise.all(rows.map(async (r) => ({ key: r.key, agentEns: r.agentEns, role: r.role, expiresAt: r.expiresAt, owner: (await arkiv.publicClient.getEntity(r.key).catch(() => null))?.$owner ?? null })));
+    say(`presence: ${rows.length} rows (${rows.map((r) => r.role).join(', ')})`);
+  } else await new Promise((ok) => setTimeout(ok, 5_000));
+}
+out.exitCode = await exited;
+say(`e2e:food exited ${out.exitCode}`);
+out.handoffs = (await handoffsFor(arkiv.publicClient, requestId).catch(() => [])).length;
+
+// Every 60 s, then every 10 s from minute 13 (the rows live exactly 15 minutes).
+while (seen && out.errandEndMs && Date.now() - out.errandEndMs < 20 * 60_000) {
+  await new Promise((ok) => setTimeout(ok, Date.now() - out.errandEndMs > 13 * 60_000 ? 10_000 : 60_000));
+  const rows = await poll().catch(() => null);
+  if (rows && rows.length === 0) {
+    out.goneMs = Date.now();
+    break;
+  }
+}
+const s = (ms) => (ms ? Math.round(ms / 100) / 10 : null);
+// When the rows really lapsed: the timestamp of their last expiry block on Arkiv (polling only
+// brackets it), against the errand's end.
+if (out.goneMs && out.lastExpiresAt) {
+  const b = await arkiv.publicClient.getBlock({ blockNumber: BigInt(out.lastExpiresAt) }).catch(() => null);
+  if (b) out.expiredAtMs = Number(b.timestamp) * 1000;
+}
+out.secondsToPresence = out.firstSeenMs && out.errandStartMs ? s(out.firstSeenMs - out.errandStartMs) : null;
+out.minutesToGoneObserved = out.goneMs && out.errandEndMs ? Math.round((out.goneMs - out.errandEndMs) / 600) / 100 : null;
+out.minutesToGone = out.expiredAtMs && out.errandEndMs ? Math.round((out.expiredAtMs - out.errandEndMs) / 600) / 100 : null;
+out.ownersOk = (out.firstRows ?? []).length > 0 && out.firstRows.every((r) => String(r.owner).toLowerCase() === owner.toLowerCase());
+out.pass = out.secondsToPresence !== null && out.secondsToPresence <= 30 && out.minutesToGone !== null && out.minutesToGone <= 15 && out.ownersOk;
+say(`presence ${out.secondsToPresence} s after the start, expired ${out.minutesToGone} min after the end (seen gone ${out.minutesToGoneObserved}), handoffs ${out.handoffs}: ${out.pass ? 'pass' : 'FAIL'}`);
+process.exitCode = out.pass ? 0 : 1;

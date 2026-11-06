@@ -3,6 +3,12 @@
   "version": "0.0.0",
   "private": true,
   "type": "module",
+  "exports": {
+    "./live-runner": {
+      "types": "./src/live-runner.d.ts",
+      "default": "./src/live-runner.mjs"
+    }
+  },
   "description": "The live clients behind the agents' interfaces (MCP to Graph Arkiv, ENS, directory, quotes, x402 signing, the shop gateway) and pnpm e2e:food (M12).",
   "scripts": {
     "test": "node --test \"test/*.test.mjs\""
