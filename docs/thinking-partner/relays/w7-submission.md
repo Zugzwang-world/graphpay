@@ -1,6 +1,6 @@
 # Relay: w7-submission (the night Submission stream), final
 
-Updated 01:35 IST, Sat 7 Nov, by W7 Submission (`local_abd77623-de22-4fe2-a0a9-865fdd43dba2`). Brief: [`briefs/2258-w7-submission.md`](../briefs/2258-w7-submission.md).
+Updated 02:01 IST, Sat 7 Nov, by W7 Submission (`local_abd77623-de22-4fe2-a0a9-865fdd43dba2`). Brief: [`briefs/2258-w7-submission.md`](../briefs/2258-w7-submission.md).
 
 ## Plain language
 
@@ -24,7 +24,7 @@ Updated 01:35 IST, Sat 7 Nov, by W7 Submission (`local_abd77623-de22-4fe2-a0a9-8
 **The final pass matches the close** (the founder's word through the Coordinator, about 01:30 IST):
 - race mode stays at size S, and no number at size M is claimed;
 - both SDKs are 1.0.0 on npm (arkiv-graph at 00:34 IST, agentpay at 01:30 IST);
-- the acceptance report is cited without totals until W5 regenerates it.
+- the README cites the closing acceptance run (#215): 36 pass, 2 fail, 1 blocked, 9 not run, of 48; both fails are stale readings, and the README says why.
 
 **Live with their links:**
 - the label flip, and the first errand under the new name;
@@ -46,7 +46,7 @@ Updated 01:35 IST, Sat 7 Nov, by W7 Submission (`local_abd77623-de22-4fe2-a0a9-8
 
 ## Technical
 
-- **PRs:** #154, #159, #161, #164, #166, #170, #178, #180, #187, #193, #195, #196, #198, #199, #205, #208, #211, and this final one. Each was small, docs only and auto-merged.
+- **PRs:** #154, #159, #161, #164, #166, #170, #178, #180, #187, #193, #195, #196, #198, #199, #205, #208, #211, #212, and this acceptance one. Each was small, docs only and auto-merged.
 - **How claims were checked:**
   - **Transactions:** about 45, each read back before it was cited. Whitechain through the Blockscout API (status, method, token transfers); Sepolia and Rabdi through public RPCs, with the chain id checked first.
   - **Arkiv entities:** read with a keyless `arkiv_query` until the keyless budget refused this Mac (`ANON_COST_LIMITED`, friction row 10). After that, no direct Rabdi reads, to keep the mirror's budget.
@@ -66,4 +66,3 @@ Updated 01:35 IST, Sat 7 Nov, by W7 Submission (`local_abd77623-de22-4fe2-a0a9-8
 - **Left open:**
   - the founder's items above;
   - the video's Swarm timestamp (`arkiv/swarm.md` item 6);
-  - the regenerated acceptance report, if W5 lands it before 08:00 IST.
