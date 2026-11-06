@@ -145,7 +145,7 @@ One line per PR: time (IST) · activity · result · PR link. Append under your 
 
 - 23:10 IST · w5-ops · the payer's pass is 300 a day for tonight (policy and ENS, ADR-0071 amendment); PAYER back to 125 test USDT from FUNDER · https://github.com/Zugzwang-world/graphpay/pull/152
 - 23:40 IST · w5-ops · Pause and Resume per agent (payer and scout; the others say why); the self-healing cron: a paused agent resumes after 2 min, a closed shop reopens after 5 · https://github.com/Zugzwang-world/graphpay/pull/172
-- 00:35 IST · w5-ops · the workers under a watchdog (a 30-minute fuse, longer than Arkiv's rate-limit reset; a hold file for maintenance windows), the ENS watcher's poll interval as a setting, P-w5-ops-1 · PR_LINK
+- 00:35 IST · w5-ops · the workers under a watchdog (a 30-minute fuse, longer than Arkiv's rate-limit reset; a hold file for maintenance windows), the ENS watcher's poll interval as a setting, P-w5-ops-1 · https://github.com/Zugzwang-world/graphpay/pull/194
 
 ## w3-payments
 
