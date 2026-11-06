@@ -363,7 +363,20 @@ h1,h2,h3,h4,h5{font-family:"Baloo 2","Mukta",system-ui,sans-serif;}
 .embed .pgrid,.embed .pt-grid,.embed .wide-grid,.embed .pillars,.embed .hand{grid-template-columns:1fr !important; height:auto !important; gap:22px !important; margin-top:20px !important;}
 .embed .pillars{margin-top:60px !important;}
 .embed #hud{left:50%; right:auto; transform:translateX(-50%); opacity:1; padding:8px; background:var(--bg); border-radius:999px;}
-.embed #hud button{padding:6px 18px; font-size:15px;}
+.embed #hud{white-space:nowrap; width:max-content; flex-wrap:nowrap; bottom:4px;}
+.embed #hud button{padding:5px 14px; font-size:13px; white-space:nowrap;}
+#hud [data-act=replay]{display:none;} .embed #hud [data-act=replay]{display:inline-block !important;}
+#livestrip{position:fixed; left:8px; right:8px; bottom:48px; z-index:4; padding:8px 12px; border-radius:14px; background:var(--panel); box-shadow:inset 0 0 0 2px var(--line); font:600 14px "Mukta",system-ui,sans-serif; color:var(--ink); max-height:128px; overflow:auto;}
+#livestrip[hidden]{display:none;}
+#livestrip .pills{display:flex; gap:4px; align-items:center; margin-bottom:4px;}
+#livestrip .pills i{flex:1; height:6px; border-radius:3px; background:var(--line);}
+#livestrip .pills i.on{background:var(--kesar-fill);}
+#livestrip .pills i.now{background:var(--kesar-fill); box-shadow:0 0 0 2px var(--kesar-soft);}
+#livestrip .st{display:flex; justify-content:space-between; gap:8px;}
+#livestrip .st b{font-size:15px;} #livestrip .st span{color:var(--muted); font-weight:600;}
+#livestrip a{display:inline-block; margin:4px 6px 0 0; padding:3px 11px; border-radius:999px; background:var(--sky-soft); color:var(--sky); text-decoration:none; font-size:13px;}
+#livestrip a.ok{background:var(--teal-soft); color:var(--teal);}
+.embed.has-strip #viewport{height:calc(100% - 150px);}
 .embed .title-s{padding:60px 40px;} .embed .brand{font-size:130px;} .embed .title-s .thread{left:40px; width:880px; bottom:120px; height:150px;}
 .embed .head{font-size:48px;} .embed .head2{font-size:40px;} .embed .coda2{left:40px; right:40px; font-size:20px;}
 @media (prefers-reduced-motion: reduce){
@@ -379,6 +392,7 @@ h1,h2,h3,h4,h5{font-family:"Baloo 2","Mukta",system-ui,sans-serif;}
 <div id="hud" aria-label="Deck controls">
   <button type="button" data-act="prev">Back</button>
   <button type="button" data-act="next">Next</button>
+  <button type="button" data-act="replay">Replay the last run</button>
   <button type="button" data-act="notes">Notes</button>
   <button type="button" data-act="config">Config</button>
   <button type="button" data-act="full">Full screen</button>
@@ -525,7 +539,7 @@ function buyerSvg() {
 }
 
 /* x402 sequence */
-const LANES6 = [['Vitalik’s payer', 'agent'], ['Kesar Kingdom', 'shop server'], ['GraphPay', 'facilitator'], ['ENS', 'Sepolia'], ['Whitechain', 'chain 1874'], ['Arkiv', 'Rabdi']];
+const LANES6 = [['Vitalik’s payer', 'agent'], ['Filter & Fold', 'shop server'], ['GraphPay', 'facilitator'], ['ENS', 'Sepolia'], ['Whitechain', 'chain 1874'], ['Arkiv', 'Rabdi']];
 const STEPS = [
   [0, 1, 'GET /order: 1 masala dosa', 'The payer asks the shop for the order.'],
   [1, 0, '402 + PAYMENT-REQUIRED: 4.80 USDT', 'The shop answers with a bill: 402 Payment Required.'],
@@ -1161,7 +1175,7 @@ viewport.addEventListener('click', e => {
 document.getElementById('hud').addEventListener('click', e => {
   const b = e.target.closest('button');
   if (!b) return;
-  const act = { prev, next: () => next(), notes: toggleNotes, config: toggleConfig, full: toggleFull }[b.dataset.act];
+  const act = { prev, next: () => next(), notes: toggleNotes, config: toggleConfig, full: toggleFull, replay: () => parent.postMessage({ type: 'graphpay.deck-replay' }, location.origin) }[b.dataset.act];
   if (act) act();
 });
 addEventListener('resize', fit);
@@ -1170,6 +1184,26 @@ setInterval(() => {
   const el = notesEl.querySelector('.n-clock');
   el.textContent = t0 ? `Elapsed ${fmt(Date.now() - t0)}. This slide ${fmt(Date.now() - slideT0)}.` : 'The clock starts when you first advance.';
 }, 500);
+if (EMBED) {
+  const strip = document.createElement('div');
+  strip.id = 'livestrip'; strip.hidden = true;
+  document.body.appendChild(strip);
+  const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  addEventListener('message', ev => {
+    const m = ev.data;
+    if (ev.origin !== location.origin || !m || m.type !== 'graphpay.deck') return;
+    const i = Math.max(1, Math.min(slides.length, Number(m.slide) || 1)) - 1;
+    stopAuto();
+    show(i, m.step == null ? (slides[i].steps || 0) : m.step);
+    const st = m.stage || {};
+    const pills = Array.from({ length: st.of || 0 }, (_, n) => `<i class="${n + 1 < st.index ? 'on' : n + 1 === st.index ? 'now' : ''}"></i>`).join('');
+    const chips = (m.chips || []).filter(c => typeof c.href === 'string' && /^(https:\/\/|\/)/.test(c.href)).map(c => `<a class="${c.tone === 'ok' ? 'ok' : ''}" href="${esc(c.href)}" target="_blank" rel="noopener">${esc(c.label)} ↗</a>`).join('');
+    strip.innerHTML = `<div class="pills">${pills}</div><div class="st"><b>${esc(st.title || '')}</b><span>${m.live ? 'live, step ' : 'step '}${st.index} of ${st.of}</span></div>${chips}`;
+    strip.hidden = false;
+    document.documentElement.classList.add('has-strip');
+    fit();
+  });
+}
 fit();
 show(fromHash(), 0);
 })();

@@ -1077,20 +1077,8 @@ pre.query {
 /* The booth stage: the deck or the live run in the middle, no page scroll on laptops and projectors */
 .middle-switch {
   display: grid;
-  grid-template-rows: auto minmax(0, 1fr);
-  gap: 8px;
+  grid-template-rows: minmax(0, 1fr);
   min-height: 0;
-}
-
-.middle-tabs {
-  display: flex;
-  gap: 8px;
-}
-
-.middle-tabs .btn[data-on='true'] {
-  background: var(--surface);
-  border-color: var(--kesar);
-  color: var(--kesar);
 }
 
 .middle-deck {
@@ -1102,15 +1090,6 @@ pre.query {
   background: var(--surface);
 }
 
-.middle-deck[hidden],
-.middle-live[hidden] {
-  display: none;
-}
-
-.middle-live {
-  min-height: 0;
-  overflow: auto;
-}
 
 @media (min-width: 1200px) and (min-height: 560px) {
   html:has(.stage),
