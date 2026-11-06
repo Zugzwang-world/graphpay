@@ -1,45 +1,44 @@
-# Relay: records (the Coordinator), 11:46 IST, Fri 6 Nov: the integration audit, npm 0.1.1, the first production purchase
+# Relay: records (the Coordinator), 12:47 IST, Fri 6 Nov: supporting the integration proof of concept
 
 ## In plain words
 
-**The integration audit is done** (`docs/plan/integration-audit.md`). It is read-only: three sub-agents read the team's fork, our code and the production site, and nothing was changed.
+The founder started the integration proof of concept. A new Integration session builds one website: the team's two phones beside T5's explainer, on the live back end. The Coordinator's job is the essentials it needs and the decisions on record, while every other session stays idle so the usage goes to the integration.
 
-- **The team's two phones:** they build cleanly and their 40 tests pass. They run on mock data only: there is no live connection and no passcode step yet. PR #70 is still open, not merged.
-- **Our back end:**
-  - live and working: customer state, the merchant feed, shops, the agents' errand and the renewal job;
-  - wired but never run on production: refund, re-order, pause, the Open toggle;
-  - not built: subscriptions and the kill.
-- **Recommendation:** serve the team's phones as static pages on our domain, inside T5's stage, with the explainer in the middle. Their folder stays theirs. Our own adapter connects the phones to the live back end, and the story still comes from our single story file.
+**Done:**
+- **The team's code is in.** PR #70 is squash-merged, credited to the team member who wrote it.
+- **Funding:** the founder's 150 test USDT reached our funding wallet. 100 of it went on to Vitalik's payer, which now holds 125, and Vitalik's wallet got gas for many pauses and resumes.
+- **The founder's decisions, recorded:**
+  - **ADR-0069:** visitors use the site with no passcode and no rate limits; the keys between our own servers stay.
+  - **ADR-0070:** option A from the audit.
+  - **ADR-0071:** Mr. Vitalik stays the persona, the payer can spend 100 a day, and the new story comes after the founder's run.
+  - **ADR-0062, amended:** payments and merges are allowed up to 97% for this work.
+- **Kimi:** the project instructions and the README now say the agents run on Kimi.
 
-**The first real purchase through the production site** came at 11:11 IST: the live runner on Kimi paid 4.80 to Kesar Kingdom.
-
-**Both SDKs are now 0.1.1 on npm.** Each was installed from the registry and checked.
-
-**What the founder does next:**
-1. Choose the hosting option. I record it as an ADR.
-2. Lock the story, including the paying agents' daily caps. The stage payer's cap is spent until Sat 05:30 IST.
-3. Check the Kimi balance. A production errand costs $0.71 to $3.55.
-4. OK the CLAUDE.md model line.
+**In progress:**
+- **The payer's 100-a-day pass:** T1 writes it on-chain and T2 in ENS.
+- **A reliable errand:** Join leads, with T4.
+- **T3:** one image on Swarm.
+- **T5:** reviews.
 
 ## Technical
 
-- **The audit's sources:**
-  - the fork at `bef8862`;
-  - `main` at `29daec5`;
-  - GET-only probes of production;
-  - the 18 Vercel Production variable names;
-  - the read-only balances.
-- **The sub-agents** ran on Sonnet and used about 1.0M tokens together.
-- **The bugs found** go to T5:
-  - the merchant feed keeps 50 incoming edges and holds 46 (`lib/merchant-feed.server.ts:17`);
-  - `export.csv`'s 100-row cap keeps only the synthetic history.
-- **npm:**
-  - arkiv-graph 0.1.1: published 06:04:22 UTC, shasum `28232f41…`. The quickstart and the leaderboard ran from the registry.
-  - agentpay 0.1.1: published 06:05:55 UTC, shasum `a03f4295…`. The sweet shop paid 4.80 and the cab 3.20 on a local fork, and the manifest's only devDependency is `@x402/core`.
-  - Both are recorded in FACTS, the README and the Arkiv file.
-- **Re-order's real proof needs a person.** T5 can't send a payment or enter the passcode, and neither can I. On `/customer`: unlock, then tap "Re-order 3" (1.20).
-- **The Arkiv clash:** no write has failed since #96, #97 and #93. The separate-wallet fallback stays unused.
+- **#70:** merged with `--match-head-commit bef8862`.
+  - GitHub made UTSAV OJHA the commit's author, with GitHub as committer.
+  - The body lists the 10 commits, with Co-authored-by trailers.
+  - `gh pr merge --author-email` with the author's noreply address was refused ("Invalid email address"): it must be one of the merger's own emails.
+- **Funding:**
+  - The founder's transfer: `0x7aeb681a…42e10535`, block 12,349,311, at 11:44:39 IST.
+  - `--plan usdt`: PAYER 99.8, ACCEPTANCE_PAYER 5.2, VITALIK 5.2 and REHEARSAL_PAYER 1.2.
+  - `--plan m0` on Sepolia: VITALIK 0.018 ETH.
+  - FUNDER keeps 54.14 test USDT and 0.2569 Sepolia ETH. All of it is in `WALLETS.md` §2b.
+  - The payer's bounded Permit2 approval (50) renews itself whenever the allowance falls below the amount due, so a cap of 100 is not blocked.
+- **Builds:**
+  - `apps/web/vercel.json` now has an `ignoreCommand`, verified in Vercel's schema and docs, which say it overrides the project setting.
+  - It adds `integration/`, `frontend/` and `apps/phones/`. `integration/` was missing, so runner-only commits did not deploy.
+- **PRs:**
+  - #105: the config and funding records.
+  - This PR (`coord/decisions-1240`): the ADRs, CLAUDE.md, the README and the thinking-partner records.
 
 ## Problems
 
-- None new. The feed and export bugs are T5's to fix, before any integration.
+- A Sepolia balance read from the public node lagged behind the receipt for a few seconds. Lesson: confirm a transfer by its receipt, and read balances again later.
