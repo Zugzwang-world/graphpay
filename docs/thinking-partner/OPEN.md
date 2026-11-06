@@ -4,45 +4,47 @@ The founder's to-dos and open questions. Each item says what, where, why and wha
 
 ## Founder now (Coordinator only)
 
-Updated 11:15 IST, Fri 6 Nov, by the new Coordinator, which took over at 11:00 IST. **Standing rule (ADR-0066): no target times.** Every task starts the moment it's given and is reported when it's done. Only the submission (Sat 09:00 IST) and the presentation (Sat 09:30 IST) are fixed.
+Updated 11:55 IST, Fri 6 Nov (Coordinator). **Standing rule (ADR-0066): no target times.** Every task starts the moment it's given and is reported when it's done. Only the submission (Sat 09:00 IST) and the presentation (Sat 09:30 IST) are fixed.
 
 1. **Lock the story.**
-   - **What:** send the final story.
-   - **Why:** the moment it locks, the demo cast is set up (T2 names, T1 policies, Join's bootstrap, T3's `shop` rows) and the large city starts seeding (100–130 minutes). Rehearsal 1 runs once the demo cast is in.
-2. **npm: approve arkiv-graph 0.1.1.**
-   - **What:** the writer fix (#97, #98) is merged. The package is checked: 21 files, no secrets, public URLs only, no workspace dependencies.
-   - **How:** say when you're at the browser. The Coordinator then runs the publish in a Terminal tab and sends you npm's approval link, which expires in about 5 minutes.
-   - **Next:** agentpay 0.1.1 (T6) goes the same way when it's ready. The versions freeze from submission.
-3. **The team's site, PR #70** (ADR-0068).
-   - **What:** T5's review says do not merge yet. The team must:
-     - (a) move it into `apps/demo-ui` as a pnpm workspace app, with no npm lockfile;
-     - (b) read the story and the explorer links from `@graphpay/config`;
-     - (c) remove the middle dots and the uppercase labels;
-     - (d) add the passcode to the adapter contract;
-     - (e) add a CI step for `demo-ui`.
-   - **Also:** confirm every committer is on the ETHGlobal team.
-   - **Next:** T5 re-reviews as soon as the team pushes.
-4. **Start the Submission session** (its gate, CP4, is met).
-   - **What:** start it from `docs/plan/sessions/README.md` (Sonnet 5.5, high).
-   - **Why:** it writes the sponsor files and the submission text.
-   - **Recommendation:** start it once the story work no longer needs the remaining plan usage, or at the latest after the 21:30 reset.
-5. **Plan usage: 87%** (11:02 IST). The new lines (ADR-0062, amended 11:00):
+   - **Why:** the demo cast (T2 names, T1 policies, Join's bootstrap, T3's `shop` rows) and the large city's seeding (100–130 minutes) start the moment it locks.
+   - **Also decide the paying agents' daily caps.** At 4.80 an errand, the payer's 6.00 allows one errand and one re-order a day.
+2. **The stage payer's cap is spent until Sat 05:30 IST.**
+   - **What:** PAYER spent 4.80 of its 6.00 daily cap on the first production purchase (11:11 IST). T5's real Re-order takes the last 1.20. Nothing more pays as PAYER until the UTC day turns.
+   - **Why it matters:** your test run of the integrated site needs something that can pay. There are two options:
+     - a higher daily cap, which is a story value that T1 then writes on-chain;
+     - the hosted runner paying as the rehearsal agent (cap 30.00, 38.8 test USDT). Its key is not on Vercel.
+   - **Recommendation:** set the caps in the story lock.
+3. **npm: approve both 0.1.1 publishes** (arkiv-graph, with the writer fix, and agentpay, without the workspace devDependencies).
+   - Both are merged and checked: no secrets, public URLs only.
+   - Say when you're at the browser. Each approval link expires in about 5 minutes.
+4. **Kimi balance.**
+   - **What:** the first paid production errand used 177,690 tokens. At the config's highspeed prices that is $0.71 to $3.55, so $10 covers roughly 3 to 14 production errands. The exact figure is in the Vercel log.
+   - **Recommendation:** check the balance on the Kimi platform, and top up enough for the rehearsals, the video and the pitch.
+5. **The team's site, PR #70** (still open, not merged; ADR-0068).
+   - **What happened since:** the team added the F6–F8 flows (dispatch, orders and refunds, renewals) but not the fix list. T5's re-check found:
+     - (a) the app is still in `frontend/`, with its own npm lockfile;
+     - (b) it still has its own copy of the story;
+     - (c) the middle dots have spread to about 10 places;
+     - (d) the adapter contract still has no passcode step. Add it now, before the live adapter, or the refund and dispatch calls change twice;
+     - (e) there is no CI yet. I approved the fork's CI run.
+   - **The audit** (`docs/plan/integration-audit.md`) recommends option A: their phones as static pages on our domain, inside T5's stage, with their folder untouched. Option A would replace fixes (a), (b), (d) and (e). Tell me your choice and I record it as an ADR.
+6. **CLAUDE.md's agent-model line is stale.**
+   - **What:** it still names claude-opus-5-5 and claude-haiku-5-5 as the presets. ADR-0067 moved them to Kimi.
+   - **Recommendation:** let the Coordinator change that line to point at `story.json`'s `agentModels` and ADR-0067. I don't edit CLAUDE.md without your OK.
+7. **Start the Submission session** (its gate, CP4, is met). Start it once the story work no longer needs the remaining usage, or at the latest after the 21:30 reset.
+8. **Plan usage: 88%** (11:24 IST). The lines (ADR-0062 amended):
    - at 95%, no new real payment, merge or publish, and every session writes its resume;
    - at 97%, every session pauses.
    - The weekly window resets at 21:30 IST.
-6. **This session's effort.**
-   - **What:** the new Coordinator runs at max effort, as it was started. The plan says high (`docs/plan/sessions/coordinator.md`).
-   - **Why:** high uses less of the plan.
-   - **Recommendation:** switch it to high in this session's model menu. Only you can.
-7. **Top up Kimi, if you haven't.** $10 reaches Tier 1. The prepaid balance is also the live runner's spending cap.
-8. **The written pre-event disclosure:** send it to ETHGlobal if you haven't yet (`docs/plan/DISCLOSURE_MESSAGE.md`).
-9. **Keep the charger in and the lid open** until the presentation.
+9. **This session's effort:** it runs at max; the plan says high. Switch it in this session's model menu. Only you can.
+10. **The written pre-event disclosure,** if not sent (`docs/plan/DISCLOSURE_MESSAGE.md`).
+11. **Keep the charger in and the lid open** until the presentation.
 
-**Closed 11:07:**
-- On Kimi the agents now pay the good shop in mock runs on every preset (#92).
-- The 10:47 production run reached the payment step, then failed on the Arkiv quote write (the W_DIRECTORY clash). The fixes #96, #97 and #93 are merged and live.
-
-**Closed 10:47:** both SDKs are on npm as 0.1.0, and both quickstarts pass from the registry.
+**Closed 11:11:**
+- The first purchase through the production site's live runner: Kimi live, 4.80 to Kesar Kingdom, 171 s ([explorer](https://explorer.testnet.whitechain.io/tx/0x8617754857a8eb1fb1483b4f18fb6fa6a4f1607241d3f08c7ccd062de1b8863a)).
+- The run before it was refused at the settle send (an RPC error; nothing was sent). #100 now logs the cause.
+- No Arkiv write has failed since the fixes, so separate writer wallets aren't needed so far.
 
 ## Funding (the Coordinator)
 

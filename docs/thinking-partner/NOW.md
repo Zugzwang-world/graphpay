@@ -1,41 +1,35 @@
 # NOW
 
-Updated 11:15 IST, Fri 6 Nov (Coordinator)
+Updated 11:55 IST, Fri 6 Nov (Coordinator)
 
 ## Summary (Coordinator only)
 
-Updated 11:15 IST, Fri 6 Nov. **A fresh Coordinator took over at 11:00 IST** (the session "GraphPay Coordinator takeover"), and the first one has retired. Every session now reports to the new one. Its resume is `docs/sessions/records/resume.md`.
+Updated 11:55 IST, Fri 6 Nov. **Standing rule (ADR-0066): no target times.** Only the submission (Sat 09:00 IST) and the presentation (Sat 09:30 IST) are fixed.
 
-**Standing rule (ADR-0066): no target times.** Every task starts the moment it's given and is reported when it's done. Two deadlines are fixed: the submission, Sat 09:00 IST, and the presentation, Sat 09:30 IST.
-
-- **New usage rule** (the founder, 11:00 IST; ADR-0062 amended):
-  - At 95% of the weekly plan, no session starts a new real payment, merge or publish, and every session writes its resume.
-  - At 97%, every session pauses at a clean checkpoint.
-  - Usage is 87%. The weekly window resets at 21:30 IST. Every session has been told.
-- **The core works on the real testnets.** Acceptance: 45 pass, 0 fail, 1 blocked (D7, the large city), 2 not run (09:51 run). B7 and B9 have merged since (#83, #84).
-- **The Arkiv writer clash:**
-  - Three writers share the directory wallet W_DIRECTORY from separate server instances: the shop's quotes, the agents' presence and hand-off rows, and the Open toggle.
-  - A live errand's quote write failed at 10:49 IST (the 10:47 run), so that run paid nothing.
-  - Three fixes are merged and live on production:
-    - the shop retries an uncertain quote write (#96);
-    - the writer never takes another instance's transaction for its own (#97);
-    - the runner holds its writes around the quote step (#93).
-  - **If one more quote, presence or Open write fails in a live errand,** each writer gets its own Arkiv wallet at once (the founder approved).
-- **The agents on Kimi** (ADR-0067):
-  - After T4's fix (#92), every preset pays the good shop in mock runs. Per errand: testing 127–155 s, video 56–70 s, live 58–65 s, at $0.06–0.14.
-  - No production purchase yet. Join re-runs the live runner now that the fixes are deployed.
-- **npm:** both SDKs are on npm as 0.1.0.
-  - arkiv-graph 0.1.1 (the writer fix) is merged and checked, and needs only the founder's approval link.
-  - agentpay 0.1.1 (T6) drops three test-only dependencies.
-  - Versions freeze from submission until judging ends.
-- **The website** (ADR-0068): T5 builds no new screens. It reviews the team's site (#70) the moment the team pushes fixes (a)–(e).
-- **On the story lock:** the demo cast is set up and the large city starts seeding.
+- **The integration audit is done:** `docs/plan/integration-audit.md` (read-only; three sub-agents).
+  - **The team's phones:** they build, and their 40 tests pass. PR #70 is still open, not merged. They run on mock data only: there is no live adapter and no passcode step yet.
+  - **Our back end:**
+    - live: customer state, the merchant feed, shops, the errand and the renewal cron;
+    - wired but never run on production: refund, re-order, pause, the Open toggle;
+    - not live: subscribe and cancel, and the kill.
+  - **Recommended:** serve their phones as static pages on our domain, inside T5's stage. Their folder stays untouched, and our live adapter and a build-time story projection connect them.
+  - **Top risks:**
+    - usage: the 95% line is 7 points away, against 4 to 8 points of estimated integration work;
+    - the payer's cap is spent until Sat 05:30 IST;
+    - the merchant feed stops showing new orders after four more;
+    - the Kimi balance.
+- **The first production purchase** (11:11 IST): the site's live runner on Kimi paid 4.80 to Kesar Kingdom in 171 s. No Arkiv write has failed since the clash fixes.
+- **Both SDKs are 0.1.1 on npm** (11:34 and 11:35 IST). Both were checked from the registry: arkiv-graph has the writer fix, and agentpay has a clean manifest.
+- **Usage:** 88%.
+  - At 95%: no new real payment, merge or publish.
+  - At 97%: every session pauses.
+  - The weekly reset is at 21:30 IST.
 - **Open founder items** (`OPEN.md`):
-  - lock the story;
-  - the npm approval for 0.1.1;
-  - the team's fixes on #70;
+  - lock the story, with the paying agents' daily caps;
+  - the Kimi balance;
+  - the team's fixes;
+  - the CLAUDE.md model line;
   - the Submission session;
-  - the disclosure, if not sent;
   - this session's effort.
 
 ## foundation
@@ -105,15 +99,15 @@ Updated 11:09 IST, Fri 6 Nov (T6 AgentPay, Sonnet 5.5). **0.1.0 merged (PR 80); 
 
 ## records
 
-Updated 11:15 IST, Fri 6 Nov (the new Coordinator).
-- **Took over at 11:00 IST:** the 10-minute tick and the keep-awake hold are on. Every session has been told that it reports here and that the 95%/97% usage rule applies.
-- **Merged since:**
-  - #93's conflict (OPEN.md only) is resolved, and #93 merged at 11:07.
-  - T3's writer fix (#97) and the 0.1.1 bump (#98) are merged.
-  - ADR-0062 is amended with the new usage rule.
-- **Watching:** the W_DIRECTORY clash. One more failed live write and the three writers get their own wallets.
+Updated 11:55 IST, Fri 6 Nov (Coordinator).
+- **Done this step:**
+  - the integration audit, with three read-only sub-agents (`docs/plan/integration-audit.md`);
+  - both SDKs published as 0.1.1 and checked from the registry;
+  - "Founder now" refreshed.
+- **Running:** the 10-minute tick and keep-awake.
 - **Next:**
-  - publish arkiv-graph 0.1.1, then agentpay 0.1.1, each with the founder's approval link;
+  - the founder's choice of hosting option (then its ADR);
+  - the integration brief;
   - the story lock.
 
 ## submission

@@ -82,5 +82,6 @@ One line per PR: time (IST) · activity · result · PR link. Append under your 
 - 10:25 IST · records · Kimi secret: KIMI_API_KEY server-only, a Kimi rule in the secret scan, JSON-escaped keys caught, a non-Kimi value refused; reviewer: ship · https://github.com/Zugzwang-world/graphpay/pull/89
 - 10:50 IST · records · handover: arkiv-graph 0.1.0 and agentpay 0.1.0 on npm (registry quickstarts pass; FACTS, README, Arkiv file); Kimi key stored and on Vercel; ADR-0068 (the team's site, the server-side runner); the Coordinator's resume file · coord/handover
 - 11:15 IST · records · the new Coordinator took over (tick, keep-awake, every session told); ADR-0062 amended (95%: no new real payment, merge or publish, resumes written; 97%: pause); #93 conflict resolved and merged; arkiv-graph 0.1.1 checked for publish; LOG rolled up before 04:00 · https://github.com/Zugzwang-world/graphpay/pull/101
+- 11:55 IST · records · integration audit (`docs/plan/integration-audit.md`, three read-only sub-agents; option A recommended); both SDKs 0.1.1 published and checked from the registry (FACTS, README, Arkiv file); Founder now: the payer's cap, the Kimi cost, the CLAUDE.md line · coord/integration-audit
 
 ## submission
