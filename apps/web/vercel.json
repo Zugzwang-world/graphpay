@@ -1,4 +1,10 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "crons": [{ "path": "/api/cron/renew", "schedule": "* * * * *" }]
+  "ignoreCommand": "git diff --quiet HEAD^ HEAD -- . ../../packages ../../integration ../../frontend ../../apps/phones ../../package.json ../../pnpm-workspace.yaml ../../pnpm-lock.yaml ../../.node-version ../../tsconfig.base.json ../../.vercelignore",
+  "crons": [
+    {
+      "path": "/api/cron/renew",
+      "schedule": "* * * * *"
+    }
+  ]
 }

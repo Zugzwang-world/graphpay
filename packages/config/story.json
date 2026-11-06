@@ -48,7 +48,7 @@
       "displayName": "Payer",
       "walletRole": "PAYER",
       "pays": true,
-      "capMicro": 6000000
+      "capMicro": 100000000
     }
   ],
   "workingAgents": [

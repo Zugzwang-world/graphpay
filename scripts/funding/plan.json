@@ -17,7 +17,7 @@
       "DISPOSABLE_1": "0.005"
     },
     "sepolia": {
-      "VITALIK": "0.002",
+      "VITALIK": "0.02",
       "SHOP_KESAR": "0.002",
       "SHOP_JAMUN": "0.002",
       "SHOP_SYRUP": "0.002",
@@ -41,7 +41,7 @@
     "about": "Test USDT on Whitechain (planning/WALLETS.md §3, the 80 plan, extended for the 150 that arrived: REHEARSAL_PAYER and DEAL_HUNTER as in the stand-in mint table; ADR-0045). FUNDER keeps the rest for disposable agents and top-ups.",
     "whitechain": {
       "ACCEPTANCE_PAYER": "20",
-      "PAYER": "30",
+      "PAYER": "125",
       "SHOP_KESAR": "20",
       "VITALIK": "10",
       "REHEARSAL_PAYER": "40",
