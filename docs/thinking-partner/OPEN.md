@@ -65,6 +65,7 @@ Agents (T4) and Join add one row per full errand run, so the presets can be cali
 | 04:32 | Join e2e:food real, rehearsal (live hooks, real shop) | testing | `claude-opus-5-5`, xhigh | 56.5 | $0.2289 | refused by kesar's risk check: the MCP's buyer_risk table bug (fixed, PR 48) and rehearsal's real 1/6 cancel rate (correct by policy) |
 | 04:40 | Join e2e:food real, payer | testing | `claude-opus-5-5`, xhigh | 88.8 | $0.2623 | approved by the shop; the signer answered a headers object, so nothing was signed (fixed) |
 | 04:43 | Join e2e:food real, payer (the counting run) | testing | `claude-opus-5-5`, xhigh | 122.1 | $0.2986 | **paid** 4.80 on Whitechain, delivered, refunded 0.80; A–E pass |
+| 10:41–10:42 | Join live runner on the production site (`/api/agents/run`), three runs, payer | live | `kimi-k3.1-pro-highspeed`, high | 11.9, 9.4, 7.6 | ≤ $0.025 each (1,225 and 1,187 tokens; the server's `apiCostUsd` line is in the Vercel log, not read here) | no-purchase: the concierge answered ("I'll find the best gulab jamun options…") and stopped without delegating to the scout and analyst; nothing signed |
 
 ## Kickoff rules and booth questions (closed; rolled up 06:55 IST)
 

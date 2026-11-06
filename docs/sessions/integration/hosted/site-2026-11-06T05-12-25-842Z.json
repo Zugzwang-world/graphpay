@@ -1,0 +1,38 @@
+{
+  "site": "https://graphpay-event.vercel.app",
+  "startedAt": "2026-11-06T05:12:25.842Z",
+  "request": "Just landed in Mumbai. Get me the best gulab jamun near me under 6 USDT by 8 pm.",
+  "events": {
+    "message": 1,
+    "guard": 1,
+    "agent.start": 1,
+    "agent.end": 1
+  },
+  "frames": 6,
+  "status": 200,
+  "runId": "5e2fa042-2d2e-443f-a148-7bb5818acc32",
+  "agentEnds": [
+    {
+      "agent": "concierge.vitalik.graphpay.eth",
+      "role": "concierge",
+      "model": "kimi-k3.1-pro-highspeed",
+      "usageTokens": 1187,
+      "error": null,
+      "output": {
+        "summary": "I'll find the best gulab jamun options in Mumbai and check shop trust rankings.",
+        "chosenShop": null
+      }
+    }
+  ],
+  "result": {
+    "status": "no-purchase",
+    "chosenShop": null,
+    "priceUsdt": null,
+    "orderId": null,
+    "receipt": null,
+    "refusals": [],
+    "error": null
+  },
+  "seconds": 7.6,
+  "endedAt": "2026-11-06T05:12:33.396Z"
+}
