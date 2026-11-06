@@ -11,7 +11,8 @@ The first Coordinator is handing over to a fresh Coordinator session, at the fou
 - **The website plan changed** (ADR-0068):
   - The founder's team has its own site (#70). T5 stopped building screens and now reviews and integrates the team's site.
   - The review asks for five fixes before merge.
-  - The live errand runner (Join, #88) runs on the server only, uses the live preset only, keeps every guardrail and holds its keys only on Vercel. Join is merging `main` into it and moving it to Kimi.
+  - The live errand runner (Join, #88) runs on the server only, uses the live preset only, keeps every guardrail and holds its keys only on Vercel. It is merged and live on production on Kimi.
+  - On Kimi the agents don't complete a purchase yet: the concierge stops at a plan. T4 is fixing this.
 
 **What the founder does next** (`OPEN.md`, "Founder now"):
 1. Lock the story. The demo cast and the large city's seeding start at once.

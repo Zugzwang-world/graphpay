@@ -17,7 +17,8 @@ Updated 10:40 IST, Fri 6 Nov. **A fresh Coordinator is taking over.** Its handov
   - T4 is calibrating: three errands per preset, with seconds and cost per errand.
 - **The website** (ADR-0068):
   - The founder's team's site (#70) needs fixes (a)–(e) before it merges. T5 reviews them and then integrates the site.
-  - Join's live errand runner (#88) runs on the server with every guardrail. Join is merging `main` into it and moving it to Kimi.
+  - Join's live errand runner (#88) is merged and live on production. It runs on the server, with every guardrail, on Kimi.
+  - **On Kimi the agents don't complete a purchase yet:** the concierge stops at a plan, so nothing is signed or paid. T4 is fixing this with Join's repro.
 - **Next on the story lock:** the moment the story locks, the demo cast is set up and the large city starts seeding.
 - **Plan usage:** 86%. Every session pauses at 92% (ADR-0062); the weekly window resets at 21:30 IST.
 - **Open founder items** (`OPEN.md`): lock the story; top up Kimi; the team's fixes on #70; start the Submission session; the disclosure, if not sent.

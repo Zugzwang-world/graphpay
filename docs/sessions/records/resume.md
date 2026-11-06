@@ -41,8 +41,14 @@ Written by the outgoing Coordinator, Fri 6 Nov, about 10:40 IST. It replaces the
 - **Keys live only on Vercel:** never in browser code, never `NEXT_PUBLIC_`, and a missing key is logged by name only.
 - **Both sites need it:** `graphpay-event` (`apps/web`) and the team's site once #70 merges, connected through the adapter contract.
 - **Status:**
-  - Join built it in **#88**, on top of **#85** (option A, D11's presence watcher). The reviewer found no blockers.
-  - Both PRs were DIRTY after #87. Join was told (10:3x) to merge `origin/main`, adapt to Kimi and turn auto-merge on.
+  - **#85 and #88 are merged and deployed** (Join, 10:5x). The reviewer found no blockers.
+  - Three production errands ran through `/api/agents/run` on the live preset: 11.9, 9.4 and 7.6 s, each at most $0.025. The rows are in `OPEN.md`'s calibration table, and the evidence is in Join's PR #91.
+  - **There is no purchase yet.** On Kimi the concierge answers with a plan and stops without delegating to the scout or analyst (`chosenShop` null), so nothing is signed or paid.
+    - This is the agents' behaviour on Kimi (#87), not the runner's. T4 has Join's repro.
+    - The testing preset may have the same problem, which would affect every errand and the video run.
+    - Join re-runs the production smoke test after T4's fix.
+  - D11's presence half passes (6.7 s to appear, lapsed after 14.98 minutes). D11's `shop_open` half has no runner.
+  - Left over from #88's review (Join): a 429 for the rate limit, a unit test for the runner, and the `server-only` guard.
   - The provider is now **Kimi** (ADR-0067): the live preset is `kimi-k3.1-pro-highspeed` at high. It needs `KIMI_API_KEY` on Vercel.
   - Kimi is prepaid, so its balance is the spend cap across all instances.
 
@@ -120,9 +126,9 @@ All are idle unless noted. Message them with `local_` ids.
 | T1 Payments | `local_16ccf7cf-ca9a-497a-bfce-d8bb3415cd92` | M4 and F3 done; next, the demo cast's policies when the story locks |
 | T2 Identity | `local_8ec48e25-b5c3-442f-b70d-a258266170ba` | M6 done, B7 (#83) and B9(a) (#84) done; next, the demo cast's ENS names when the story locks |
 | T3 Arkiv | `local_949a2091-02b7-4f63-9c71-efebf8fe215a` | arkiv-graph published; Swarm menus (#82, #86); next, the `shop` rows and the **size-M seeding the moment the story locks** |
-| T4 Agents | `local_0a83861b-1aaa-424f-abb4-cd36290807d2` | Kimi presets merged (#87); next, calibration once the key is set |
+| T4 Agents | `local_0a83861b-1aaa-424f-abb4-cd36290807d2` | working: fixing the concierge so it delegates on Kimi (Join's repro), then calibration (3 errands per preset) |
 | T5 Web | `local_e34793ca-bfc1-4489-8340-07a90fc9b703` | screens stopped; Re-order merged (#81); waits for the team's fixes on #70 |
-| Join | `local_e67c2aa7-36f4-43ff-bee9-578ad5a1d519` | working: merging main into #85 and #88 and adapting the runner to Kimi |
+| Join | `local_e67c2aa7-36f4-43ff-bee9-578ad5a1d519` | #85 and #88 merged and live; evidence in PR #91; re-runs the production smoke test after T4's fix |
 | T6 AgentPay | `local_be1a1d1c-53bd-4570-b242-09a41617ce01` | 0.1.0 ready (#80); venue feedback, then 0.1.1 |
 | Submission | not started | its gate (CP4) is met; starting it is the founder's call (usage) |
 
