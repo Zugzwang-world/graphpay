@@ -271,14 +271,14 @@
   ],
   "order": {
     "synthetic": true,
-    "request": "Just landed in Mumbai. Get me the best masala dosa near BKC under 6 USDT by 8 pm.",
+    "request": "Just landed in Mumbai. Get me the best masala dosa near BKC under 6 USDT by 11:59 pm.",
     "shop": "kesar-kingdom",
     "sku": "filter-and-fold-masala-dosa-combo",
     "item": "masala dosa",
     "quantity": 1,
     "priceMicro": 4800000,
     "budgetMicro": 6000000,
-    "deadlineLocal": "20:00",
+    "deadlineLocal": "23:59",
     "refundMicro": 800000,
     "refundReason": "coffee arrived cold",
     "reorder": {

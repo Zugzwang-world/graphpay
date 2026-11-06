@@ -37,7 +37,7 @@ test('no readable budget or deadline: fail closed, with the reason', () => {
 });
 
 test('a deadline that has passed today refuses instead of rolling to tomorrow', () => {
-  const late = Date.parse('2026-11-06T15:00:00.000Z'); // 20:30 IST
+  const late = Date.parse('2026-11-06T18:29:30.000Z'); // 23:59:30 IST, after the story's 23:59 deadline
   assert.equal(parseMandate(cast.order.request, { ...opts, now: late }).reason, 'MANDATE_DEADLINE_PASSED');
 });
 
