@@ -2,7 +2,7 @@
 // one-errand-at-a-time rule (the start-up is replaced through buildParts).
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { createLiveRunner, LIVE_RUNNER_NEEDS, liveRunnerMissing, payWithRetry, VERIFY_UNAVAILABLE } from '../src/live-runner.mjs';
+import { createLiveRunner, FACILITATOR_BUSY, LIVE_RUNNER_NEEDS, liveRunnerMissing, payWithRetry, VERIFY_UNAVAILABLE } from '../src/live-runner.mjs';
 
 const full = Object.fromEntries(LIVE_RUNNER_NEEDS.map((n) => [n, n === 'ALLOW_REAL_NETWORK' ? '1' : `value-of-${n.toLowerCase()}`]));
 const input = { runId: 'run-test', request: 'test', onEvent: () => {}, signal: new AbortController().signal };
@@ -47,6 +47,10 @@ test('a signed payment is sent again only when the shop says its verify failed o
   assert.equal((await payWithRetry(a.pay, { signature: 's' }, { sleep })).status, 200);
   assert.equal(a.calls.length, 3);
   assert.ok(a.calls.every((c) => c.signature === 's'));
+  // The facilitator busy (before any send) is retried too.
+  a = answers([{ status: 502, body: { error: FACILITATOR_BUSY, reason: 'busy' } }, paid]);
+  assert.equal((await payWithRetry(a.pay, { signature: 's' }, { sleep })).status, 200);
+  assert.equal(a.calls.length, 2);
   // Never more than the waits allow.
   a = answers([unavailable, unavailable, unavailable, paid]);
   assert.equal((await payWithRetry(a.pay, { signature: 's' }, { sleep })).status, 502);

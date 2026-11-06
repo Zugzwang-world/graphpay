@@ -36,7 +36,9 @@ const FLUSH_WAIT_MS = 10_000;
 // "refused" (G16 keeps it unsettled and counted). The order id makes a retry idempotent anyway.
 export const PAY_RETRY_WAITS_MS = [3_000, 8_000];
 export const VERIFY_UNAVAILABLE = 'facilitator verify unavailable; retry is safe';
-const retrySafe = (r) => (r.status === 502 && r.body?.error === VERIFY_UNAVAILABLE) || (r.status === 503 && r.body?.error === 'starting');
+// The facilitator was busy or rate limited: refused before any send (T1, pay/settle-safety).
+export const FACILITATOR_BUSY = 'facilitator busy; retry is safe';
+const retrySafe = (r) => (r.status === 502 && (r.body?.error === VERIFY_UNAVAILABLE || r.body?.error === FACILITATOR_BUSY)) || (r.status === 503 && r.body?.error === 'starting');
 
 // pay(args) once, then again after each wait while the answer is retry-safe and the run goes on.
 export async function payWithRetry(pay, args, { waits = PAY_RETRY_WAITS_MS, signal = null, log = () => {}, sleep = (ms) => new Promise((ok) => setTimeout(ok, ms)) } = {}) {
