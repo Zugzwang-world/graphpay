@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import type { OwnerActions } from '@graphpay/ens';
-import { Busy, MAX_PENDING, changeStatus, failureKind, ownerConfigured, ownerKeyName } from './owner-actions.server.ts';
+import { Busy, MAX_PENDING, changeStatus, failureKind, ownerConfigured, ownerKeyName, pausableAgents, pickAgent } from './owner-actions.server.ts';
 import { siteModel } from './site.server.ts';
 
 // These tests check the gated mode; the public-access guards are tested on their own.
@@ -91,4 +91,40 @@ test('public access: changes are at most one per cooldown, and the gated mode is
   await changeStatus(false, { actionsFor: async () => fake(calls), open: true, now: t0 + CHANGE_COOLDOWN_MS });
   await changeStatus(true, { actionsFor: async () => fake(calls), open: false, now: t0 + CHANGE_COOLDOWN_MS + 1 });
   assert.equal(calls.length, 3);
+});
+
+test('pause per agent: the tapped card names the agent; only buyer agents with a spending pass are pausable', () => {
+  const model = siteModel();
+  const pausable = pausableAgents(model);
+  assert.deepEqual(
+    pausable.map((a) => a.key),
+    model.buyerAgents.filter((a) => a.pays && a.capMicro !== null).map((a) => a.key),
+  );
+  assert.ok(pausable.some((a) => a.key === 'payer') && pausable.some((a) => a.key === 'scout'), 'the payer and the scout hold passes');
+  // None named: the payer, as the phones' first build sends {}.
+  for (const none of [undefined, null, '']) assert.deepEqual(pickAgent(none, model), { ok: true, agent: model.payer });
+  const scout = pausable.find((a) => a.key === 'scout')!;
+  assert.deepEqual(pickAgent(scout.ens, model), { ok: true, agent: scout });
+  assert.deepEqual(pickAgent(` ${scout.ens.toUpperCase()} `, model), { ok: true, agent: scout }, 'a name in any case');
+  assert.deepEqual(pickAgent('scout', model), { ok: true, agent: scout }, 'or the story key');
+  for (const other of model.buyerAgents.filter((a) => !pausable.includes(a))) {
+    const refused = pickAgent(other.ens, model);
+    assert.equal(refused.ok, false);
+    if (refused.ok) continue;
+    assert.equal(refused.status, 409);
+    assert.equal(refused.reason, 'NO_PASS');
+    assert.ok(refused.error.startsWith(`${other.displayName} has no spending pass`), refused.error);
+    for (const a of pausable) assert.ok(refused.error.includes(a.displayName), `the refusal names ${a.displayName}`);
+  }
+  // Never a name outside the buyer team, a working agent's or a shop's included.
+  for (const bad of ['someone.else.eth', model.merchant.ens, model.merchant.agents[0]!.ens]) assert.deepEqual(pickAgent(bad, model), { ok: false, status: 400, error: 'not an agent of this story', reason: 'NOT_AN_AGENT' });
+  assert.equal(pickAgent(42, model).ok, false);
+});
+
+test('a change acts on the agent it is given, and the owner key is the one for that agent', async () => {
+  const calls: string[] = [];
+  const scout = pausableAgents().find((a) => a.key === 'scout')!;
+  await changeStatus(true, { actionsFor: async () => fake(calls), agent: scout.ens });
+  assert.deepEqual(calls, [`pause ${scout.ens}`]);
+  assert.equal(ownerConfigured({ [ownerKeyName(scout.ens)]: `0x${'1'.repeat(64)}` }, scout.ens), true);
 });
