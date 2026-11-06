@@ -68,6 +68,7 @@ Short records, one file each (skill `adr`). Lab decisions are adopted from `plan
 | [ADR-0063](ADR-0063-both-sdks-on-npm-as-graphpay-ethglobal-by-13-00.md) | Both SDKs on npm under @graphpay_ethglobal by 13:00 Friday | accepted |
 | [ADR-0064](ADR-0064-one-sdk-per-partner-lane-and-the-same-kit-moment.md) | One SDK per partner lane, and the "same kit, different business" moment | accepted |
 | [ADR-0065](ADR-0065-the-founders-team-builds-apps-demo-ui-in-parallel.md) | The founder's team builds its own UI in apps/demo-ui, in parallel | accepted |
+| [ADR-0066](ADR-0066-no-target-times-only-events-and-external-deadlines.md) | No target times; only events and the deadlines we don't control | accepted |
 
 ## Proposed in the pack, recorded by the owning session when taken
 
