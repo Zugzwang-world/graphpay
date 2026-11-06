@@ -2,9 +2,11 @@
 // read from the two config files (ADR-0030, ADR-0047) and passed to client
 // components as plain data. Nothing story-specific is written in code.
 
+import { generateCity } from '@graphpay/city';
 import { activeCast, castEntries, config, network, story } from '@graphpay/config';
 import type { ExplorerBases } from './explorer.ts';
 import { publicAccess } from './passcode.ts';
+import { SEEDED_END } from './race.server.ts';
 
 export interface ModelAgent {
   key: string;
@@ -90,6 +92,43 @@ export interface SiteModel {
     // The labelled demo clock; maxCharges bounds what a demo subscription can ever pull.
     demoPeriod: { id: string; seconds: number; label: string; maxCharges: number };
   };
+  // Scene 0's table and graph: payments of the seeded synthetic city (labelled synthetic), between its
+  // synthetic agents and its busiest synthetic shops, in time order.
+  film: { rows: FilmRow[] };
+}
+
+export interface FilmRow {
+  user: string;
+  merchant: string;
+  amountMicro: string;
+}
+
+const FILM_ROWS = 12;
+const FILM_USERS = 6;
+const FILM_SHOPS = 4;
+
+function filmRows(): FilmRow[] {
+  try {
+    const city = generateCity({ story, size: 'S', end: SEEDED_END }) as { simRoot: string; events: { kind: string; from: { ens: string }; to: { ens: string }; amountMicro: bigint; ts: number }[] };
+    const sim = `.${city.simRoot}`;
+    const pays = city.events.filter((e) => e.kind === 'pay' && e.from.ens.endsWith(sim) && e.to.ens.endsWith(sim)).sort((a, b) => a.ts - b.ts);
+    const counts = new Map<string, number>();
+    for (const e of pays) counts.set(e.to.ens, (counts.get(e.to.ens) ?? 0) + 1);
+    const busiest = new Set([...counts.entries()].sort((a, b) => b[1] - a[1]).slice(0, FILM_SHOPS).map(([ens]) => ens));
+    const users = new Set<string>();
+    const rows: FilmRow[] = [];
+    for (const e of pays) {
+      if (!busiest.has(e.to.ens) || (!users.has(e.from.ens) && users.size >= FILM_USERS)) continue;
+      users.add(e.from.ens);
+      rows.push({ user: e.from.ens, merchant: e.to.ens, amountMicro: String(e.amountMicro) });
+      if (rows.length === FILM_ROWS) break;
+    }
+    return rows;
+  } catch (error) {
+    // The film then shows the pile without its rows; the error's kind only.
+    console.error('film rows:', error instanceof Error ? error.name : 'unknown');
+    return [];
+  }
 }
 
 type Loose = Record<string, unknown>;
@@ -171,6 +210,7 @@ export function siteModel(): SiteModel {
     storyName: story.name,
     storyLocked: story.locked,
     synthetic: story.synthetic,
+    film: { rows: filmRows() },
     city: cast.city,
     explorers: { whitechain: network('whitechain').explorer, sepolia: network('sepolia').explorer, rabdi: network('rabdi').explorer },
     networks: { whitechain: net('whitechain'), sepolia: net('sepolia'), rabdi: net('rabdi') },

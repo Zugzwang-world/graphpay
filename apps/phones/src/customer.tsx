@@ -8,7 +8,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import clsx from 'clsx';
 import { story } from '@/data/story';
 import { foldAll } from '../../web/lib/stage/errand.ts';
-import { customerErrandLines, endSentence, pauseLines, refundLines, type Line as LineData } from '../../web/lib/stage/lines.ts';
+import { customerErrandLines, dispatchLines, endSentence, pauseLines, refundLines, type Line as LineData } from '../../web/lib/stage/lines.ts';
 import { advance, caughtUp, restPace, type Pace } from '../../web/lib/stage/pace.ts';
 import { ERRAND_STEPS, stepIndex, type BeatKey } from '../../web/lib/stage/scenes.ts';
 import { clock, microUsdt, orderNumber, percent, usdt } from '../../web/lib/stage/format.ts';
@@ -16,7 +16,7 @@ import { getJson, postJson, Refusal, type CustomerState, type HealState } from '
 import { cast, links, menuOf, networks, order, payer, productOf, renewal, shopOf, timeZone } from './cast';
 import { readFrames } from './errand';
 import { embedded, postEvent, postFrame, useNow, useStage, type Frame } from './stage-link';
-import { ActivityRow, ArkivPending, Card, Figure, Line, ProofLink, SwarmPhoto, TeamStrip, useAutoScroll, type ActivityState, type TeamMember } from './ui';
+import { ActivityRow, ArkivPending, Card, Figure, Line, Pending, ProofLink, SwarmPhoto, TeamStrip, useAutoScroll, type ActivityState, type TeamMember } from './ui';
 import { AgentsView, ProofList, ScoreboardView, type ProofItem } from './views';
 
 const REQUEST = story.quickPrompts[0]?.text ?? '';
@@ -182,11 +182,20 @@ export function CustomerPhone() {
     }
   }, [stage.events, refund]);
 
+  // The shop marks the paid order dispatched on chain right after the payment (relayed from its
+  // phone through the stage). On the stage, the refund unlocks only once that is confirmed.
+  const dispatchEvent = model.paid ? stage.events.find((e) => e.key === 'dispatched' && typeof e.data?.orderId === 'string' && e.data.orderId.toLowerCase() === model.paid?.orderId.toLowerCase()) : undefined;
+  const dispatched = dispatchEvent ? { tx: typeof dispatchEvent.data?.transaction === 'string' ? dispatchEvent.data.transaction : null, at: dispatchEvent.at } : null;
+
   // Scene 5: Refund, then one tap to attach the photo: it goes to Swarm from this browser, then the
-  // request is recorded on Arkiv for the shop to accept or decline.
+  // request is recorded on Arkiv, and the shop accepts it by itself.
   const paidOrder = model.paid?.orderId ?? (state?.lastOrder && /PAID|DELIVERED/.test(state.lastOrder.status) ? state.lastOrder.orderId : null);
+  // A phone on its own has no shop beside it to dispatch, so its refund stays as it was. One refund
+  // request per order: after a reload, the stage's replay shows one was already made.
+  const asked = model.paid ? stage.events.some((e) => (e.key === 'refund-request' || e.key === 'refund') && typeof e.data?.orderId === 'string' && e.data.orderId.toLowerCase() === model.paid?.orderId.toLowerCase()) : false;
+  const refundable = embedded ? dispatched !== null && !asked : paidOrder !== null;
   const openRefund = () => {
-    if (!paidOrder || refund) return;
+    if (!paidOrder || refund || !refundable) return;
     setRefund({ phase: 'card', orderId: paidOrder, swarm: null, arkiv: null, refund: null, error: null });
     postEvent('refund-start', [], { orderId: paidOrder });
   };
@@ -299,7 +308,7 @@ export function CustomerPhone() {
   const errandLines = useMemo(() => customerErrandLines(model, cast).filter((l) => stepIndex(l.step) <= shownIndex), [model, shownIndex]);
   const atEnd = model.end !== null && (embedded ? shownIndex >= lastArrived(model.arrived) : caughtUp(pace, model.arrived));
   const failure = atEnd ? endSentence(model) : null;
-  const scrollKey = `${errandLines.length}|${failure}|${refund?.phase}|${pause?.phase}|${beat}`;
+  const scrollKey = `${errandLines.length}|${dispatched?.at}|${failure}|${refund?.phase}|${pause?.phase}|${beat}`;
   const scroller = useAutoScroll(scrollKey);
 
   const payerStatus = statusOf(state?.agent.status);
@@ -328,7 +337,10 @@ export function CustomerPhone() {
     <div className="flex h-full flex-col bg-bg pt-[54px]">
       <header className="flex items-center gap-3 border-b border-line bg-surface px-4 pt-1 pb-3">
         <div className="min-w-0 flex-1">
-          <h1 className="font-heading text-title leading-tight font-bold text-ink">{story.customer.name}</h1>
+          <div className="flex min-w-0 items-center gap-2">
+            <h1 className="truncate font-heading text-title leading-tight font-bold text-ink">{story.customer.name}</h1>
+            <span className="stage-role">User</span>
+          </div>
           <p className="truncate text-caption text-muted">{pass}</p>
         </div>
         {header ? <span className={clsx('stage-status rounded-full px-3 py-1 text-caption font-bold', payerStatus === 'paused' || scoutStatus === 'paused' ? 'bg-warn/10 text-warn' : payerStatus === 'revoked' ? 'bg-bad/10 text-bad' : 'bg-ok/10 text-ok')}>{header}</span> : null}
@@ -348,9 +360,9 @@ export function CustomerPhone() {
           ) : view === 'agents' ? (
             <AgentsView side="customer" state={state} heal={heal} />
           ) : view === 'history' ? (
-            <ProofList title="Payments" items={historyItems(model, refund, pause, state, false)} now={now} empty="No payment on this phone yet." />
+            <ProofList title="Payments" items={historyItems(model, dispatched, refund, pause, state, false)} now={now} empty="No payment on this phone yet." />
           ) : (
-            <ProofList title="This run" items={historyItems(model, refund, pause, state, true)} now={now} replay empty="No run on this phone yet." />
+            <ProofList title="This run" items={historyItems(model, dispatched, refund, pause, state, true)} now={now} replay empty="No run on this phone yet." />
           )
         ) : atRest ? (
           <RestingDesk notice={notice} onSend={() => void start()} />
@@ -358,9 +370,10 @@ export function CustomerPhone() {
           <div className="flex flex-col gap-4">
             {errandLines.map((l) => (
               <Line key={l.key} role={l.role} text={l.text} tone={l.tone} mine={l.role === 'persona'}>
-                {l.card ? <ErrandCard line={l} model={model} shownIndex={shownIndex} now={now} state={state} onRefund={openRefund} refundOpen={refund !== null} /> : null}
+                {l.card ? <ErrandCard line={l} model={model} shownIndex={shownIndex} now={now} state={state} dispatched={dispatched} embedded={embedded} refundable={refundable} onRefund={openRefund} refundOpen={refund !== null} /> : null}
               </Line>
             ))}
+            {dispatched && shownIndex >= stepIndex('paid') ? <Line role="payer" text={dispatchLines.customerDone(cast)} tone="ok" /> : null}
             {running && errandLines.length === 0 ? <Line role="persona" text={REQUEST} mine /> : null}
             {failure ? <Line role="concierge" text={failure} tone="bad" /> : null}
             {refund ? <RefundThread flow={refund} now={now} onAttach={() => void attachPhoto()} /> : null}
@@ -382,11 +395,12 @@ export function CustomerPhone() {
 }
 
 // This run's steps as a plain list: the history (scene 9) or the fast replay (scene 10).
-function historyItems(model: ReturnType<typeof foldAll>, refund: RefundFlow | null, pause: PauseFlow | null, state: CustomerState | null, replay: boolean): ProofItem[] {
+function historyItems(model: ReturnType<typeof foldAll>, dispatched: { tx: string | null; at: number } | null, refund: RefundFlow | null, pause: PauseFlow | null, state: CustomerState | null, replay: boolean): ProofItem[] {
   const items: ProofItem[] = [];
   if (replay && model.request) items.push({ key: 'order', label: `Asked for ${cast.order.item} near ${cast.order.area}`, href: null, network: '', at: null });
   if (replay && model.quote) items.push({ key: 'bill', label: `Bill ${orderNumber(model.quote.orderId)} from ${shopOf(model.quote.shop)?.name ?? ''}`, amount: usdt(model.quote.priceUsdt), href: null, network: '', at: null });
   if (model.paid) items.push({ key: 'paid', label: `Paid ${shopOf(model.quote?.shop ?? model.best)?.name ?? ''}`, amount: usdt(model.paid.amountUsdt), href: links.whitechainTx(model.paid.tx), network: networks.whitechain, at: model.arrived.settled ?? null, tone: 'ok' });
+  if (dispatched?.tx) items.push({ key: 'dispatched', label: 'Dispatched', href: links.whitechainTx(dispatched.tx), network: networks.whitechain, at: dispatched.at });
   if (refund?.refund) items.push({ key: 'refund', label: 'Refunded', amount: microUsdt(refund.refund.amountMicro), href: refund.refund.tx ? links.whitechainTx(refund.refund.tx) : null, network: networks.whitechain, at: refund.refund.at, tone: 'ok' });
   else if (refund?.arkiv) items.push({ key: 'refund', label: 'Refund asked', amount: microUsdt(order.refundMicro), href: refund.arkiv.tx ? links.arkivTx(refund.arkiv.tx) : null, network: networks.arkiv, at: refund.arkiv.at });
   const renewed = state?.subscription?.renewals?.[state.subscription.renewals.length - 1];
@@ -437,7 +451,7 @@ function AgentCard({ role, status, heal, busy, note, onSwitch }: { role: string;
   );
 }
 
-function ErrandCard({ line, model, shownIndex, now, state, onRefund, refundOpen }: { line: LineData; model: ReturnType<typeof foldAll>; shownIndex: number; now: number; state: CustomerState | null; onRefund: () => void; refundOpen: boolean }) {
+function ErrandCard({ line, model, shownIndex, now, state, dispatched, embedded: onStage, refundable, onRefund, refundOpen }: { line: LineData; model: ReturnType<typeof foldAll>; shownIndex: number; now: number; state: CustomerState | null; dispatched: { tx: string | null; at: number } | null; embedded: boolean; refundable: boolean; onRefund: () => void; refundOpen: boolean }) {
   if (line.card === 'shops' || line.card === 'ranking') {
     const ranked = line.card === 'ranking' || shownIndex >= stepIndex('best');
     const scored = shownIndex >= stepIndex('graphql');
@@ -534,8 +548,9 @@ function ErrandCard({ line, model, shownIndex, now, state, onRefund, refundOpen 
         <p className="text-caption text-muted">Order {orderNumber(model.paid.orderId)} to {shopOf(model.quote?.shop ?? model.best)?.name ?? ''}</p>
         <p className="mt-1 text-caption font-bold text-ink">Gas paid by GraphPay, you paid 0.</p>
         <div className="mt-2 flex flex-wrap items-center gap-2">
-          <ProofLink href={links.whitechainTx(model.paid.tx)} network={networks.whitechain} at={model.end?.at ?? model.arrived.settled} now={now} />
-          {!refundOpen && state ? (
+          <ProofLink href={links.whitechainTx(model.paid.tx)} network={networks.whitechain} label="Paid" at={model.end?.at ?? model.arrived.settled} now={now} />
+          {dispatched?.tx ? <ProofLink href={links.whitechainTx(dispatched.tx)} network={networks.whitechain} label="Dispatched" at={dispatched.at} now={now} /> : onStage ? <Pending>Dispatching</Pending> : null}
+          {!refundOpen && state && refundable ? (
             <button type="button" onClick={onRefund} className="stage-refund-button min-h-8 rounded-full border border-bad/40 px-3 text-caption font-bold text-bad">
               Refund
             </button>
