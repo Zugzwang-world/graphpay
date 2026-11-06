@@ -56,6 +56,7 @@ export async function validateValue(name, value, { fetchImpl = globalThis.fetch 
     }
   }
   if (name === 'ANTHROPIC_API_KEY' && !value.startsWith('sk-ant-')) throw new EnvError('ANTHROPIC_API_KEY: refused (not an Anthropic key)');
+  if (name === 'KIMI_API_KEY' && (!value.startsWith('sk-') || value.startsWith('sk-ant-'))) throw new EnvError('KIMI_API_KEY: refused (not a Kimi key)');
   if (GENERATED.includes(name) && value.length < 24) throw new EnvError(`${name}: refused (at least 24 characters)`);
 }
 
