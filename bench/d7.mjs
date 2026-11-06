@@ -9,7 +9,7 @@
 
 import { execFileSync } from 'node:child_process';
 import { mkdirSync, writeFileSync } from 'node:fs';
-import { story } from '../packages/config/index.mjs';
+import { network, story } from '../packages/config/index.mjs';
 import { RACE_QUESTIONS, ask, connectArkiv, createGraphEngine, plainPayRows, score } from '../packages/money-graph/index.mjs';
 import { benchParams, benchTruth, generateCity, truthOf } from '../packages/city/index.mjs';
 import { loadEnv } from '../scripts/lib/env-loader.mjs';
@@ -25,7 +25,9 @@ if (!story.syntheticCity.sizes[size]?.cast) throw new Error(`d7: size ${size} ha
 let secrets = new Map();
 installErrorBoundary(() => secrets);
 ({ values: secrets } = loadEnv());
-const env = Object.fromEntries(secrets);
+// Keyless (docs/problems/PROBLEM_LOG.md, P-arkiv-4): a benchmark run never spends the access key's
+// quota, and every counted call goes to one endpoint.
+const env = Object.fromEntries([...secrets].filter(([k]) => k !== network('rabdi').accessKeyEnv));
 
 const root = new URL('..', import.meta.url);
 const git = (...a) => execFileSync('git', a, { cwd: root, encoding: 'utf8' }).trim();

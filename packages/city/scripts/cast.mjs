@@ -5,6 +5,9 @@
 // days at the same 5% scale, through the mirror's own history code). Nothing here pays.
 //   node packages/city/scripts/cast.mjs                                    dry run: names, keys, counts
 //   node packages/city/scripts/cast.mjs --execute [--store directory,nodes,history]
+//   node packages/city/scripts/cast.mjs --execute --store delist-test
+//       after W1's flip: the test cast's directory rows (the old labels) are delisted, so the map and
+//       discovery list each shop once; their graph rows stay as history
 // W_LEDGER is the running mirror's wallet: every write goes through the mirror's ledger port at
 // a nonce read first, and a nonce the mirror takes meanwhile is retried, never sent twice. A
 // stopped history resumes from its checkpoint. Prints names, keys, hashes and counts only.
@@ -146,6 +149,26 @@ if (stores.includes('directory')) {
     manifest.written.directory = { creates: creates.length, patches: patches.length, txs: r.txs.map((t) => t.hash) };
     log(`directory: ${creates.length} created, ${patches.length} patched in ${r.txs.map((t) => t.hash).join(' ')}`);
   } else log('directory: all three rows already listed');
+  save();
+}
+
+if (stores.includes('delist-test')) {
+  const live = story.shops.map((s) => s.label);
+  const test = pinnedCast(story, 'test').shops.map((s) => s.label);
+  if (test.some((l) => live.includes(l))) throw new Error('cast: the live story still uses the test labels; delist them only after the flip');
+  const dir = await connectArkiv({ backend: 'rabdi', env, role: 'W_DIRECTORY', log: arkivLog });
+  for (const label of test) {
+    const shopKey = identityKey(nodeOf(`${label}.${root}`), 0);
+    const row = await findOne(dir.publicClient, ENTITIES.shop, { owner: dir.owner, where: [eq('shop_key', key(shopKey))] });
+    if (!row || row.status === 'delisted') {
+      log(`delist: ${label} ${row ? 'already delisted' : 'has no directory row'}`);
+      continue;
+    }
+    const delisted = async () => (await findOne(dir.publicClient, ENTITIES.shop, { owner: dir.owner, where: [eq('shop_key', key(shopKey))] }))?.status === 'delisted';
+    const { txs } = await dir.writer.send({ patches: [{ def: ENTITIES.shop, key: row.$key, values: { status: 'delisted' } }] }, { verifyRecovered: delisted });
+    manifest.written.delisted = [...(manifest.written.delisted ?? []), { label, entityKey: row.$key, tx: txs[0].hash }];
+    log(`delist: ${label} ${txs[0].hash}`);
+  }
   save();
 }
 
