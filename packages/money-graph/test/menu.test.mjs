@@ -4,7 +4,7 @@ import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
 import { test } from 'node:test';
 import { generatePrivateKey } from 'viem/accounts';
-import { ENTITIES, QUERIES, ZERO_BATCH, SwarmError, castMenus, connectArkiv, menuBytes, menuDocument, menuValues, newSim, readMenu, sha256Hex, swarmClient, writeMenu, writerAddresses } from '../index.mjs';
+import { ENTITIES, QUERIES, ZERO_BATCH, SwarmError, castMenus, connectArkiv, menuBytes, menuDocument, menuImageLink, menuValues, uploadMenuImage, newSim, readMenu, sha256Hex, swarmClient, writeMenu, writerAddresses } from '../index.mjs';
 
 const SHOP = 'alpha-sweets.sim.example.eth';
 const ITEMS = [{ sku: 'box-12', name: 'jamun', unit: 'box of 12', quantity: 12, priceMicro: 4_800_000 }];
@@ -135,4 +135,39 @@ test('the cast menus come from the story config and carry no wallet or personal 
     assert.doesNotMatch(JSON.stringify(doc), /0x[0-9a-fA-F]{40}/);
     assert.equal(doc.synthetic, true);
   }
+});
+
+test('an item may carry an image on Swarm; a menu without one reads and verifies as before', async () => {
+  const t = await setup();
+  const plain = await writeMenu(t.directory, t.swarm, { shopEns: SHOP, document: t.document });
+  assert.equal((await readMenu(t.reader.publicClient, t.swarm, { shopEns: SHOP, owner: t.owner })).verified, true);
+  assert.equal(JSON.stringify(t.document).includes('image'), false);
+  const bytes = new TextEncoder().encode('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1 1"><rect width="1" height="1"/></svg>');
+  const image = await uploadMenuImage(t.swarm, { bytes, name: 'pic.svg', contentType: 'image/svg+xml' });
+  assert.match(image.ref, /^[0-9a-f]{64}$/);
+  assert.equal(image.sha256, sha256Hex(bytes));
+  assert.deepEqual(await t.swarm.read(image.ref, 'pic.svg'), bytes);
+  const withImage = menuDocument({ shopEns: SHOP, name: 'Alpha Sweets', items: [{ ...ITEMS[0], image }], version: 1 });
+  const w = await writeMenu(t.directory, t.swarm, { shopEns: SHOP, document: withImage });
+  assert.equal(w.entityKey, plain.entityKey);
+  assert.equal(w.version, 2);
+  const got = await readMenu(t.reader.publicClient, t.swarm, { shopEns: SHOP, owner: t.owner });
+  assert.equal(got.verified, true);
+  assert.deepEqual(got.document.items[0].image, image);
+  assert.equal(menuImageLink(t.swarm, got.document.items[0].image), t.swarm.link(image.ref, 'pic.svg'));
+});
+
+test('menu images are small, typed and referenced by a 64-hex reference; nothing inline', async () => {
+  const t = await setup();
+  const ok = new Uint8Array([1, 2, 3]);
+  await assert.rejects(uploadMenuImage(t.swarm, { bytes: ok, name: 'x.gif', contentType: 'image/gif' }), /one of/);
+  await assert.rejects(uploadMenuImage(t.swarm, { bytes: new Uint8Array(), name: 'x.png', contentType: 'image/png' }), /1 to/);
+  await assert.rejects(uploadMenuImage(t.swarm, { bytes: new Uint8Array(70_000), name: 'x.png', contentType: 'image/png' }), /1 to/);
+  const base = { ref: 'ab'.repeat(32), name: 'x.png', contentType: 'image/png', sha256: 'cd'.repeat(32), bytes: 3 };
+  const doc = (image) => menuDocument({ shopEns: SHOP, name: 'A', items: [{ ...ITEMS[0], image }], version: 1 });
+  assert.equal(doc(base).items[0].image.ref, base.ref);
+  assert.throws(() => doc({ ...base, ref: 'a'.repeat(128) }), /64 hex/);
+  assert.throws(() => doc({ ...base, name: '../x.png' }), /file name/);
+  assert.throws(() => doc({ ...base, contentType: 'text/html' }), /one of/);
+  assert.throws(() => doc({ ...base, sha256: 'zz' }), /sha-256/);
 });
