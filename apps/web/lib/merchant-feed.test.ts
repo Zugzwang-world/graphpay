@@ -4,7 +4,7 @@ import { generatePrivateKey } from 'viem/accounts';
 import { config } from '@graphpay/config';
 import { connectArkiv, createGraphEngine, createLedger, newSim, runGraphql, writerAddresses } from '@graphpay/money-graph';
 import type { ExplorerBases } from './explorer.ts';
-import { CSV_COLUMNS, buildCsv, edgeKey, fetchShopEdges, freshEdges, localTime, settlementTxOf, toEvent, type EdgeRow, type GraphqlRunner } from './merchant-feed.ts';
+import { CSV_COLUMNS, buildCsv, edgeKey, fetchShopEdges, fetchShopEdgesFitting, LIST_CAP, freshEdges, localTime, settlementTxOf, toEvent, type EdgeRow, type GraphqlRunner } from './merchant-feed.ts';
 
 // Test names only: the web code never holds story names.
 const SHOP = 'alpha-sweets.sim.example.eth';
@@ -109,4 +109,54 @@ test('the local time column uses the story time zone, not the server zone', () =
   assert.equal(localTime(1_760_000_000, 'Asia/Kolkata'), '2025-10-09 14:23:20');
   assert.equal(localTime(1_760_000_000, 'UTC'), '2025-10-09 08:53:20');
   assert.ok(PERSON);
+});
+
+// The engine returns a node's oldest edges first and cuts the rest at the list cap without a flag
+// (what hid every payment after 24 Oct from the live merchant feed). This double does the same.
+function cutting(total: number, perDay = 20): GraphqlRunner {
+  return async (_query, variables) => {
+    const since = Number(variables.sinceDay);
+    const limit = Number(variables.limit);
+    const today = 20_000;
+    const rows: EdgeRow[] = [];
+    for (let n = 0; n < total; n++) {
+      const day = today - Math.floor((total - 1 - n) / perDay);
+      if (day < since) continue;
+      rows.push({ kind: 'pay', from: { ens: AGENT, owner: null }, to: { ens: SHOP, owner: null }, amountMicro: '1', day, ts: String(day * 86400 + n), ref: ref(n), orderId: null });
+    }
+    return { data: { node: { in: rows.slice(0, limit), out: [] }, today } };
+  };
+}
+
+test('the list cap is the engine\'s row cap, so a window of 208 rows is returned whole and not flagged', async () => {
+  assert.equal(LIST_CAP, 500);
+  const { edges, truncated } = await fetchShopEdges(cutting(208), SHOP, { daysBack: 31, nowS: 20_000 * 86400 });
+  assert.equal(edges.length, 208);
+  assert.equal(truncated, false);
+  assert.equal(edges.at(-1)?.ref, ref(207));
+});
+
+test('a window the cap cuts is flagged truncated, never silently short', async () => {
+  const { edges, truncated } = await fetchShopEdges(cutting(900), SHOP, { daysBack: 31, nowS: 20_000 * 86400 });
+  assert.equal(edges.length, LIST_CAP);
+  assert.equal(truncated, true);
+});
+
+test('the fitting fetch shrinks the window until the answer is whole, and says how far back it reaches', async () => {
+  // 900 rows, 20 a day: 31 days is 620 (cut), 15 days is 300 (whole).
+  const out = await fetchShopEdgesFitting(cutting(900), SHOP, { daysBack: 31, nowS: 20_000 * 86400 });
+  assert.equal(out.truncated, false);
+  assert.equal(out.daysBack, 15);
+  assert.equal(out.edges.length, 320);
+  // The newest edge is always in it.
+  assert.equal(out.edges.at(-1)?.ref, ref(899));
+});
+
+test('a whole window is taken at once; a day too full for any window comes back flagged', async () => {
+  const whole = await fetchShopEdgesFitting(cutting(100), SHOP, { daysBack: 1, nowS: 20_000 * 86400 });
+  assert.equal(whole.daysBack, 1);
+  assert.equal(whole.truncated, false);
+  const full = await fetchShopEdgesFitting(cutting(2000, 2000), SHOP, { daysBack: 31, nowS: 20_000 * 86400 });
+  assert.equal(full.truncated, true);
+  assert.equal(full.daysBack, 0);
 });

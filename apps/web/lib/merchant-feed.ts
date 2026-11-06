@@ -9,6 +9,7 @@ import { txUrl, type ExplorerBases } from './explorer.ts';
 export interface GraphqlAnswer {
   data?: unknown;
   errors?: { message: string }[];
+  extensions?: { arkiv?: { truncated?: boolean } };
 }
 export type GraphqlRunner = (query: string, variables: Record<string, unknown>) => Promise<GraphqlAnswer>;
 
@@ -48,10 +49,19 @@ const DAY_S = 86_400;
 export interface ShopEdges {
   edges: EdgeRow[];
   today: number;
+  // Rows may be missing: a list reached its cap, or the engine stopped at its own row cap. Never silent.
+  truncated: boolean;
+  // How many days back the edges reach (0 is today only).
+  daysBack: number;
 }
 
+// The most edges one list returns. The graph returns each node's OLDEST edges first and cuts the rest
+// without a flag, so a cap below the window's size hides the newest payments: the engine's own row cap
+// is 500 and a list of that size is the largest honest answer (runGraphql gets the same listCap).
+export const LIST_CAP = 500;
+
 // `daysBack` of 1 reads today and yesterday (the day boundary must not hide an edge).
-export async function fetchShopEdges(run: GraphqlRunner, shopEns: string, { daysBack = 1, limit = 100, nowS = Date.now() / 1000 }: { daysBack?: number; limit?: number; nowS?: number } = {}): Promise<ShopEdges> {
+export async function fetchShopEdges(run: GraphqlRunner, shopEns: string, { daysBack = 1, limit = LIST_CAP, nowS = Date.now() / 1000 }: { daysBack?: number; limit?: number; nowS?: number } = {}): Promise<ShopEdges> {
   const sinceDay = Math.floor(nowS / DAY_S) - daysBack;
   const answer = await run(SHOP_EDGES_QUERY, { ens: shopEns, sinceDay, limit });
   if (answer.errors?.length || answer.data === undefined) throw new Error(`the graph did not answer: ${answer.errors?.[0]?.message ?? 'no data'}`);
@@ -59,7 +69,22 @@ export async function fetchShopEdges(run: GraphqlRunner, shopEns: string, { days
   // A shop that has no node on Arkiv yet has no edges; that is an empty feed, not an error.
   const edges = data.node ? [...data.node.in, ...data.node.out] : [];
   edges.sort((a, b) => (BigInt(a.ts) < BigInt(b.ts) ? -1 : BigInt(a.ts) > BigInt(b.ts) ? 1 : a.ref < b.ref ? -1 : 1));
-  return { edges, today: data.today };
+  const full = data.node ? data.node.in.length >= limit || data.node.out.length >= limit : false;
+  return { edges, today: data.today, truncated: full || answer.extensions?.arkiv?.truncated === true, daysBack };
+}
+
+// The longest window, up to `daysBack` days, whose answer is complete: it tries the whole window, then
+// half of it, down to today only. If even today only is cut, that answer comes back flagged truncated.
+export async function fetchShopEdgesFitting(run: GraphqlRunner, shopEns: string, { daysBack = 1, limit = LIST_CAP, nowS = Date.now() / 1000 }: { daysBack?: number; limit?: number; nowS?: number } = {}): Promise<ShopEdges> {
+  const windows: number[] = [];
+  for (let d = daysBack; d > 0; d = Math.floor(d / 2)) windows.push(d);
+  windows.push(0);
+  let last: ShopEdges | null = null;
+  for (const days of windows) {
+    last = await fetchShopEdges(run, shopEns, { daysBack: days, limit, nowS });
+    if (!last.truncated) return last;
+  }
+  return last as ShopEdges;
 }
 
 // `<chain id>:<tx hash>:<log index>` is a chain event's ref (the mirror's event id).

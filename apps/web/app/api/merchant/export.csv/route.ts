@@ -13,9 +13,13 @@ export async function GET(request: Request): Promise<Response> {
   const model = siteModel();
   try {
     // The graph keeps rows for 30 days (docs/technical/FACTS.md), so 31 days back is all there is.
-    const { edges } = await sharedShopEdges(model.merchant.ens, 31);
+    const { edges, truncated, daysBack } = await sharedShopEdges(model.merchant.ens, 31);
     const csv = buildCsv(edges, { shopEns: model.merchant.ens, timeZone: model.city.timeZone, tokenSymbol: model.token.symbol, explorers: model.explorers });
-    return new Response(csv, { headers: { 'content-type': 'text/csv; charset=utf-8', 'cache-control': 'no-store', 'content-disposition': `attachment; filename="${model.merchant.key}-orders.csv"` } });
+    // The window shrinks when the graph holds more rows than one answer can carry: the file name says how far
+    // back it reaches, and the headers say so too, never a silently short file.
+    const from = new Date((Math.floor(Date.now() / 86_400_000) - daysBack) * 86_400_000).toISOString().slice(0, 10);
+    const headers = { 'content-type': 'text/csv; charset=utf-8', 'cache-control': 'no-store', 'content-disposition': `attachment; filename="${model.merchant.key}-orders-from-${from}.csv"`, 'x-export-days': String(daysBack + 1), 'x-export-truncated': String(truncated) };
+    return new Response(csv, { headers });
   } catch {
     return json({ error: 'the graph did not answer; try again' }, 502);
   }
