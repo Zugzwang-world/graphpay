@@ -155,4 +155,5 @@ One line per PR: time (IST) · activity · result · PR link. Append under your 
 
 ## w6-sdk
 
-- 23:55 IST · w6-sdk · arkiv-graph 1.0.0: five bugs fixed (paging past rows that do not fit, row lifetimes, atomic split writes, refused batches, the predicate budget), every export documented and typed, the quickstart first, the reference app linked · https://github.com/Zugzwang-world/graphpay/pull/174
+- 23:55 IST · w6-sdk · arkiv-graph 1.0.0: five bugs fixed (paging past rows that do not fit, row lifetimes, atomic split writes, refused batches, the predicate budget), every export documented and typed, the quickstart first, the reference app linked · merged https://github.com/Zugzwang-world/graphpay/pull/174
+- 00:12 IST · w6-sdk · agentpay 1.0.0: seven bugs fixed (subscribe skipped guards, the refund limit could be split or raced, accept ignored reputation, a settled payment stayed counted, a bad request could stop a node:http merchant, renewals twice, the MCP version), every export documented, the quickstart first, the reference app linked with claims that match the code · sdk/agentpay-1.0.0
