@@ -6,8 +6,9 @@
 // agent-facing URL.
 
 import { z } from 'zod';
-import { runAgent } from './agents.mjs';
-import { readBuyerStanding, tracedMcpTools } from './graph.mjs';
+import { askModel, callTool, endAgent, runAgent, runCodeAgent } from './agents.mjs';
+import { parseBuyerRisk, readBuyerStanding, tracedMcpTools } from './graph.mjs';
+import { promptFor } from './prompts.mjs';
 import { displayUsdt, microFrom, toMicro } from './money.mjs';
 import { buyerRiskReasons } from './scoring.mjs';
 import { errorText } from './scrub.mjs';
@@ -33,6 +34,12 @@ const SurfaceQuote = z
   })
   .passthrough();
 
+// The `ask` tool's TSV answer: the hosted MCP server's text content, or the mocks' { text }.
+function askText(out) {
+  if (Array.isArray(out?.content)) return out.content.filter((c) => c?.type === 'text').map((c) => c.text).join('\n');
+  return typeof out?.text === 'string' ? out.text : null;
+}
+
 export function createShopGateway(ctx) {
   const { shopEns, surface, mcp, hooks, models, meter, log, sdl, storefront, names, signal } = ctx;
   const codec = ctx.codec ?? base64JsonCodec;
@@ -40,6 +47,20 @@ export function createShopGateway(ctx) {
   const base = storefront.replace(/\/$/, '');
   const orders = new Map(); // orderId → the quote it was made from (shop-scoped)
   const common = { models, log, meter, signal };
+  // W4: the shop's routine steps run in code (the same events); `steps: 'model'` is the original
+  // flow, where the models make every call.
+  const byModel = ctx.steps === 'model';
+  // A read that throws (a dropped connection, a rate limit) is tried once more a moment later;
+  // a read that answers is never retried, and a second failure still refuses (fail closed).
+  const retryMs = ctx.retryMs ?? 1000;
+  const once = async (fn) => {
+    try {
+      return await fn();
+    } catch {
+      if (retryMs > 0) await new Promise((ok) => setTimeout(ok, retryMs));
+      return fn();
+    }
+  };
 
   // The risk check in code: ENS and Arkiv must both say active, then the policy.
   // An ENS read error is a refusal, never "active" (G8).
@@ -47,24 +68,60 @@ export function createShopGateway(ctx) {
     const reasons = [];
     let ens = null;
     try {
-      ens = await hooks.ensCheck(payerEns);
+      ens = await once(() => hooks.ensCheck(payerEns));
     } catch (error) {
       reasons.push(`ENS read failed (${errorText(error)}): refused`);
     }
     if (ens && ens.status !== 'ACTIVE') reasons.push(`ENS says ${ens.status}`);
-    const read = await readBuyerStanding(mcp, payerEns);
+    let read = await readBuyerStanding(mcp, payerEns);
+    if (!read.ok && read.thrown) {
+      if (retryMs > 0) await new Promise((ok) => setTimeout(ok, retryMs));
+      read = await readBuyerStanding(mcp, payerEns);
+    }
     if (!read.ok) reasons.push(`no readable standing on Arkiv: ${read.detail}`);
     else reasons.push(...buyerRiskReasons(read.standing, amountMicro));
     return reasons;
   }
 
+  // W4: the risk agent's reads are routine. Code reads the buyer agent's ENS state and its
+  // standing through the risk agent's own traced tools (once: code's check uses the same
+  // answers), then the model judges from them in one call.
+  async function vetByCode(req, amountMicro, task, tools) {
+    log.agentStart(names.risk, 'risk', task);
+    const startedAt = meter?.timing ? meter.now() : null;
+    const code = [];
+    let ens = null;
+    try {
+      ens = await once(() => callTool(tools.ens_check, { name: req.payer }, signal));
+    } catch (error) {
+      code.push(`ENS read failed (${errorText(error)}): refused`);
+    }
+    if (ens && ens.status !== 'ACTIVE') code.push(`ENS says ${ens.status}`);
+    let standing = null;
+    try {
+      standing = parseBuyerRisk(askText(await once(() => callTool(tools.ask, { intent: 'buyer_risk', ens: [req.payer], window: 'D90', verify: false }, signal))), req.payer);
+    } catch {
+      standing = null;
+    }
+    if (!standing) code.push(`no readable standing on Arkiv: no readable standing for ${req.payer}`);
+    else code.push(...buyerRiskReasons(standing, amountMicro));
+    const view = {
+      ens: ens ? { status: ens.status, registryState: ens.registryState ?? null } : { error: 'the ENS read failed' },
+      standing: standing
+        ? { status: standing.status, orders: standing.orders, cancellations: standing.cancellations, disputes: standing.disputes, dailyCapUsdt: displayUsdt(standing.dailyCapMicro), spendTodayUsdt: displayUsdt(standing.spendTodayMicro) }
+        : { error: 'no readable standing' },
+    };
+    const asked = await askModel({ role: 'risk', ens: names.risk, task: { ...task, ...view }, models, log, meter, signal, prompt: promptFor('risk-data') });
+    endAgent({ ens: names.risk, role: 'risk', log, meter, startedAt, ...asked });
+    return { code, run: asked };
+  }
+
   // G9: stricter wins. The decision is code's reasons ∪ the risk agent's.
   async function vet(req, amountMicro) {
     log.message(names.storefront, names.risk, `vet ${req.payer}`, STEPS.checkBack);
-    const code = await codeRisk(req.payer, amountMicro);
     const executed = new Set();
     const tools = {
-      ...tracedMcpTools(await mcp.tools(), log, names.risk, { only: MCP_TOOLS, executed }),
+      ...tracedMcpTools(await mcp.tools(), log, names.risk, { only: byModel ? MCP_TOOLS : ['ask'], executed }),
       ens_check: tracedTool(log, names.risk, 'ens_check', {
         description: "Read an agent's ENS registry state, status and records (Sepolia, ENSv2).",
         inputSchema: z.object({ name: z.string().max(255) }),
@@ -73,7 +130,14 @@ export function createShopGateway(ctx) {
       }),
     };
     const task = { buyerAgent: req.payer, buyer: req.buyer, orderUsdt: displayUsdt(amountMicro), shop: shopEns };
-    const run = await runAgent({ role: 'risk', ens: names.risk, task, tools, executed, sdl, ...common });
+    let code;
+    let run;
+    if (byModel) {
+      code = await codeRisk(req.payer, amountMicro);
+      run = await runAgent({ role: 'risk', ens: names.risk, task, tools, executed, sdl, ...common });
+    } else {
+      ({ code, run } = await vetByCode(req, amountMicro, task, tools));
+    }
     const model = run.output?.decision === 'decline' ? run.output.reasons.map((r) => `risk agent: ${r}`) : [];
     if (run.output?.decision === 'decline' && model.length === 0) model.push('risk agent: declined');
     const reasons = [...code, ...model];
@@ -111,7 +175,20 @@ export function createShopGateway(ctx) {
         },
       }),
     };
-    const run = await runAgent({ role: 'storefront', ens: names.storefront, task: { item: req.item, quantity: req.quantity, buyerAgent: req.payer }, tools, executed, ...common });
+    const storeTask = { item: req.item, quantity: req.quantity, buyerAgent: req.payer };
+    const run = byModel
+      ? await runAgent({ role: 'storefront', ens: names.storefront, task: storeTask, tools, executed, ...common })
+      : await runCodeAgent({
+          role: 'storefront',
+          ens: names.storefront,
+          task: storeTask,
+          log,
+          meter,
+          run: async () => {
+            const q = await callTool(tools.catalog_quote, { item: req.item, quantity: req.quantity }, signal);
+            return q?.ok ? { quoteUsdt: q.priceUsdt, etaMinutes: q.etaMinutes, message: 'Quoted from the catalog (SYNTHETIC).' } : { quoteUsdt: null, etaMinutes: null, message: 'We do not sell that.' };
+          },
+        });
     if (!toolQuote) return { ok: false, refused: 'NO_QUOTE', reasons: [run.error ?? 'the storefront did not quote'] };
     if (run.output?.quoteUsdt && toMicro(run.output.quoteUsdt) !== amount) {
       log.guard('G13', true, `the storefront said ${run.output.quoteUsdt}; the catalog quote is ${displayUsdt(amount)}: code keeps the catalog`);
@@ -177,7 +254,20 @@ export function createShopGateway(ctx) {
       }),
     };
     const task = { item: bound.item, quantity: bound.quantity, deadlineIso: req.deadlineIso, orderId: bound.orderId };
-    await runAgent({ role: 'dispatch', ens: names.dispatch, task, tools, executed, ...common });
+    if (byModel) await runAgent({ role: 'dispatch', ens: names.dispatch, task, tools, executed, ...common });
+    else {
+      await runCodeAgent({
+        role: 'dispatch',
+        ens: names.dispatch,
+        task,
+        log,
+        meter,
+        run: async () => {
+          const c = await callTool(tools.dispatch_confirm, task, signal);
+          return { confirmed: c?.confirmed === true, orderId: String(c?.orderId ?? bound.orderId), etaIso: String(c?.etaIso ?? ''), message: c?.confirmed ? 'Delivery confirmed (SYNTHETIC courier).' : 'Not confirmed: the shop API has no payment for this order.' };
+        },
+      });
+    }
     if (confirmation) log.message(names.dispatch, req.payer, `dispatched ${bound.orderId}, arrives ${confirmation.etaIso}`, STEPS.pay);
     return { ...res, body: { ...(res.body && typeof res.body === 'object' ? res.body : {}), dispatch: confirmation } };
   }

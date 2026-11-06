@@ -31,13 +31,13 @@ The watcher (`packages/ens`) follows ENS changes and keeps the on-chain payment 
 
 1. Vitalik's agents pay a shop: the gate reads each paying agent's name (status, registry state, expiry, cap) and the shop's payout address from ENS, then the payment settles on Whitechain.
 2. **Pause my agent:** one ENS record, and the next errand is refused before anything is signed; Resume brings it back.
-3. **The agent cannot raise its own cap** (proven by the acceptance checks; no phone button yet): the acceptance agent updated its own `agent-context`; its attempt to raise its own cap reverts in simulation.
-4. **The kill** (proven by the acceptance checks; no phone button yet): the owner unregistered a disposable agent, and the gate refused it.
+3. **The agent cannot raise its own cap:** the acceptance agent updated its own `agent-context`; its attempt to raise its own cap reverts in simulation (acceptance B3). Since [#169](https://github.com/Zugzwang-world/graphpay/pull/169) a route lets the payer agent try it live: the resolver refuses, nothing is sent, and the attempt is recorded on Arkiv. No phone button yet.
+4. **The kill:** the owner unregisters a disposable agent, the watcher revokes its pass, and the gate refuses its next payment, recorded on Arkiv. Proven by the acceptance checks (B6, E7), and a button on the `/customer` page since [#175](https://github.com/Zugzwang-world/graphpay/pull/175), shown when a spare agent is ready.
 5. **The name is the centre of the graph:** a shop's tallies on Arkiv hang off its name and epoch.
 
 ## Not built
 
-ERC-8004 and ENSIP-25 linking, aliasing (`linkToNode`), reverse names and CCIP-Read. The kill and the cap change are proven by the acceptance checks; the phones show Pause and Resume, not yet a kill button.
+ERC-8004 and ENSIP-25 linking, aliasing (`linkToNode`), reverse names and CCIP-Read. The refused cap change is proven by the acceptance checks and a route (#169), without a button yet; the stage's phones show Pause and Resume, and the kill is on the `/customer` page (#175).
 
 ## Check it yourself
 

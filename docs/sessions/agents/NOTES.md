@@ -24,6 +24,16 @@ Two optional members of `LiveHooks`, no-ops when absent (hooks absent or recordi
 - Cost: `moonshotUsage` maps cached tokens to the cached price and everything else in the prompt (cache-write tokens included, assumption: no write price is published) to the input price; output includes reasoning tokens.
 - Join: `integration/e2e-food.mjs` calls `runErrand({ mode: 'anthropic' })` (accepted, means live) and needs `KIMI_API_KEY` in the env it passes, now that the active preset is Kimi.
 
+## Routine steps in code (W4 Agents, Fri 6 Nov night)
+
+`runErrand({ steps })`: `'code'` (the default) or `'model'` (the original flow; the bad-play tests use it).
+- In code mode the scout, payer, storefront and dispatch make no model call: code calls their own traced tools (`callTool`), so the run log has the same `agent.start`, `tool.call`, `tool.result`, `message` and `agent.end` events (`model: 'code'`, no calls). The payer still only calls `get_quote` then `pay_order`; every pre-sign check is unchanged.
+- The analyst's reads are code's: its fixed `RANKING_QUERY` through the analyst's traced `graphql` tool (the one ranking read, in the graph's lower-case city), then `explain`; the model judges the data in one call (`analyst-data` prompt), advisory as before.
+- The risk agent's reads (`ens_check`, `ask` buyer_risk) are code's, through its traced tools; code's reasons come from those answers; the model judges in one call (`risk-data`) and can only add declines (G9).
+- The concierge: code asks the scout and the analyst at once with code's need, the model chooses in one call (`concierge-choose`) on the offers and code's ranking (the analyst model's opinion stays out), and code pays through `pay_shop`. A choice that names no shop of the ranking (or no answer) falls to `bestFit` (the best-ranked eligible offer within the budget left and the deadline; a G2 line says so); a ranked shop the guard refuses (the trap) ends the errand, as before.
+- A directory or ranking read that throws is tried once more after `retryMs` (1 s).
+- Presets: the concierge at high; every other role at low (only the analyst and the risk agent still call a model in code mode).
+
 ## Deviations from the pack
 
 - Models come from the story presets (`agentPreset(role)`, ADR-0048), not `AGENT_MODEL`; `AGENT_PRESET` overrides. Providers: anthropic and moonshot (Kimi, ADR-0067). Grok (`AGENT_PROVIDER`) is not built (optional); a preset naming another provider fails closed.

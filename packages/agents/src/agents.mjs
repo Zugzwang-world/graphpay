@@ -2,6 +2,9 @@
 // stopWhen isStepCount(8) (the SDK default is 20), traced as agent.start and
 // agent.end. A missing, empty, cut-off (max_tokens) or invalid answer is
 // recorded as `agent.end { error }` and treated as no answer (planning/SPEC/AGENTS.md §2).
+// W4: `askModel` is the model part alone (an agent whose routine steps are code asks it
+// once, for its judgment); `runCodeAgent` is an agent whose steps are all code, with the
+// same agent.start and agent.end events (`model: 'code'`, no calls).
 
 import { isStepCount, NoObjectGeneratedError, NoOutputGeneratedError, Output, ToolLoopAgent } from 'ai';
 import { OUTPUTS, WIRE_OUTPUTS } from './contracts.mjs';
@@ -34,19 +37,71 @@ function noAnswerReason(error, steps) {
 }
 
 // Runs `role` as `ens` on `task` with `tools`. Returns { output, error, usageTokens }.
-export async function runAgent({ role, ens, task, tools, models, log, meter, sdl, executed = new Set(), signal }) {
-  const { model, settings, callSettings } = models(role);
+export async function runAgent({ role, ens, task, tools, models, log, meter, sdl, executed = new Set(), signal, prompt }) {
   log.agentStart(ens, role, task);
-  const prompted = PROMPTED_JSON.has(settings.provider);
   const startedAt = meter?.timing ? meter.now() : null;
+  const asked = await askModel({ role, ens, task, tools, models, log, meter, sdl, executed, signal, prompt });
+  endAgent({ ens, role, log, meter, startedAt, ...asked });
+  return { output: asked.output, error: asked.error, usageTokens: asked.usageTokens };
+}
+
+// agent.end for one agent: its output (or its error) and every model call it made. `modelError`
+// records a model that gave no answer while code carried the step (the screens show an `error`
+// as a refusal, so a step code completed has none).
+export function endAgent({ ens, role, log, meter, startedAt, output, error, usageTokens = 0, settings = null, calls = [], modelError = null }) {
+  const extra = { usageTokens, model: settings ? settings.model : 'code', effort: settings ? settings.effort : null, calls };
+  if (modelError) extra.modelError = log.scrub(modelError);
+  if (startedAt !== null && startedAt !== undefined) extra.seconds = Number(((meter.now() - startedAt) / 1000).toFixed(2));
+  if (error) log.agentEnd(ens, role, null, { ...extra, error: log.scrub(error) });
+  else log.agentEnd(ens, role, output, extra);
+}
+
+// An agent whose steps are all code (W4: routine steps in code): `run()` does them, through the
+// agent's own traced tools, and returns the output, which is checked against OUTPUTS[role].
+export async function runCodeAgent({ role, ens, task, log, meter, run }) {
+  log.agentStart(ens, role, task);
+  const startedAt = meter?.timing ? meter.now() : null;
+  let output = null;
+  let error = null;
+  try {
+    const parsed = OUTPUTS[role].safeParse(await run());
+    if (parsed.success) output = parsed.data;
+    else error = `no answer: code's report does not match the output schema (${parsed.error.issues.slice(0, 4).map((i) => `${i.path.join('.') || 'reply'}: ${i.code}`).join('; ')})`;
+  } catch (e) {
+    error = `agent error: ${errorText(e)}`;
+  }
+  endAgent({ ens, role, log, meter, startedAt, output, error });
+  return { output, error, usageTokens: 0 };
+}
+
+let codeCalls = 0;
+// Code calls one of an agent's traced tools itself: the same tool.call and tool.result events as
+// when the model calls it. `signal` reaches the tool as the SDK's abortSignal would.
+export function callTool(tool, input, signal) {
+  codeCalls += 1;
+  return tool.execute(input, { toolCallId: `code-${codeCalls}`, messages: [], ...(signal ? { abortSignal: signal } : {}) });
+}
+
+// The model part of an agent: the loop, the parsed and checked answer, and its calls. No
+// agent.start or agent.end (the caller writes them). `prompt` overrides the role's prompt.
+export async function askModel({ role, ens, task, tools = {}, models, log, meter, sdl, executed = new Set(), signal, prompt }) {
+  let chosen;
+  try {
+    chosen = models(role);
+  } catch (e) {
+    return { output: null, error: `agent error: ${errorText(e)}`, usageTokens: 0, settings: null, calls: [] };
+  }
+  const { model, settings, callSettings } = chosen;
+  const prompted = PROMPTED_JSON.has(settings.provider);
+  const instructions = prompt ?? promptFor(role, { sdl });
   const calls = []; // one record per model call (models.mjs createMeter)
   let steps = 0;
   let usageTokens = 0;
   const agent = new ToolLoopAgent({
     model,
     instructions: prompted
-      ? `${promptFor(role, { sdl })}\nYour final reply is exactly one JSON object that matches this JSON Schema, with no other text:\n${JSON.stringify(z.toJSONSchema(WIRE_OUTPUTS[role]))}`
-      : promptFor(role, { sdl }),
+      ? `${instructions}\nYour final reply is exactly one JSON object that matches this JSON Schema, with no other text:\n${JSON.stringify(z.toJSONSchema(WIRE_OUTPUTS[role]))}`
+      : instructions,
     tools,
     ...(prompted ? {} : { output: Output.object({ schema: WIRE_OUTPUTS[role] }) }),
     stopWhen: isStepCount(MAX_STEPS),
@@ -99,9 +154,5 @@ export async function runAgent({ role, ens, task, tools, models, log, meter, sdl
   } catch (e) {
     error = noAnswerReason(e, steps);
   }
-  const extra = { usageTokens, model: settings.model, effort: settings.effort, calls };
-  if (startedAt !== null) extra.seconds = Number(((meter.now() - startedAt) / 1000).toFixed(2));
-  if (error) log.agentEnd(ens, role, null, { ...extra, error: log.scrub(error) });
-  else log.agentEnd(ens, role, output, extra);
-  return { output, error, usageTokens };
+  return { output, error, usageTokens, settings, calls };
 }

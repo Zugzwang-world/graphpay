@@ -1,4 +1,5 @@
-// The seeding driver (planning/PROMPTS/08). Only size S runs tonight (ADR-0049).
+// The seeding driver (planning/PROMPTS/08): size S with the test cast, size M with the final
+// cast (ADR-0077).
 //   node packages/city/scripts/seed.mjs --size S --end <YYYY-MM-DD> --backend sim
 //       the whole run on an in-process ArkivSim: counts against a direct load, tallies
 //       against the generator's truth, and the estimated live cost (no secrets needed)
@@ -31,7 +32,11 @@ const log = (line) => console.log(`${new Date().toISOString().slice(11, 19)}Z ${
 const json = (v) => JSON.stringify(v, (_, x) => (typeof x === 'bigint' ? String(x) : x), 2);
 
 if (size !== 'S' && size !== 'M') throw new Error('seed: --size S or M');
-if (size === 'M' && !story.locked) throw new Error('seed: size M waits until the founder locks the final story (ADR-0049)');
+// A city is seeded only with a cast pinned for its size, and M never with the test cast
+// (ADR-0049, ADR-0077): the pin is what lets it be generated again as seeded.
+const sizeCast = story.syntheticCity.sizes[size]?.cast;
+if (!story.syntheticCity.casts?.[sizeCast]) throw new Error(`seed: size ${size} has no cast pinned in syntheticCity.casts (ADR-0077)`);
+if (size === 'M' && sizeCast !== 'final') throw new Error('seed: size M is seeded only with the final cast (ADR-0049, ADR-0077)');
 if (!flag('wipe') && !end) throw new Error('seed: --end YYYY-MM-DD (the UTC midnight the city ends at)');
 
 // Generated files carry names and addresses, so they live with the session's records.
@@ -82,7 +87,9 @@ if (city) {
 }
 
 if (backend === 'sim') {
-  const sim = newSim();
+  // No emulated quota for the dry run: ArkivSim's request counter never resets, so past 90% of
+  // its default 5,000 every call would wait out a 10 s reset (size M makes far more calls).
+  const sim = newSim({ rateLimit: 1_000_000_000 });
   const seedConn = await connectArkiv({ backend: 'sim', sim, role: 'W_SEED_EVENT', privateKey: generatePrivateKey() });
   const dirConn = await connectArkiv({ backend: 'sim', sim, role: 'W_DIRECTORY', privateKey: generatePrivateKey() });
   const base = { size, owner: seedConn.owner, dataset: city.dataset, backend: 'sim' };
