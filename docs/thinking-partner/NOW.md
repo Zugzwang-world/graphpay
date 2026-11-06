@@ -55,13 +55,14 @@ Updated 02:40 IST. **M10 is merged; the presence and handoff hooks are built** (
 - Blockers: none. Next: merge, then wait for Join's M12 counting run; re-run the live errand if time allows.
 ## integration
 
-Updated 05:33 IST, Fri 6 Nov. **M13's hosted run passed on the production domain. The acceptance report: 41 pass, 0 fail, 1 blocked (the big city), 6 not run.**
+Updated 05:41 IST, Fri 6 Nov. **M13's hosted run passed on the production domain. The acceptance report: 42 pass, 0 fail, 1 blocked (the big city), 5 not run.**
 - As the acceptance agent, through the hosted shop and our hosted facilitator: paid 4.80 with no gas of its own, and the shop delivered. The same request again answered "already paid" and sent nothing. The shop refunded 0.80, and the agent re-ordered 3 for 1.20. One more 0.40 was refused for being over its 6.00 daily cap: nothing was sent, and the refusal is recorded on Arkiv.
+- A revoked agent is stopped on-chain: the policy writer revoked the scout agent's spending policy, the scout's next payment was refused and recorded by the contract (AGENT_REVOKED), the policy was restored exactly, and the mirror wrote the refusal to Arkiv once after a clean restart.
 - All 17 spending routes refuse a caller without the passcode or token (401), and nothing is sent.
 - Also wired: five other tracks' checks from their recorded evidence (A3, A4, A9, A10, B3).
 - Running: `pnpm workers` with T2's watcher. Local scripts no longer relay; every payment goes through the hosted facilitator.
-- Not run yet: C4(a) (a policy revoke by the policy writer, whose key the workers hold), B7 (T2's fork test does not cover re-registration), D10's quote-expiry part, F1 (history scan), F3 (a preview deployment with the relayer floor raised; T1's).
-- Next: F1, D10(c), then C4(a) with the Coordinator's go for the policy-writer key.
+- Not run yet: B7 (T2's fork test does not cover re-registration), D10's quote-expiry part, F1 (history scan), F3 (a preview deployment with the relayer floor raised; T1's).
+- Next: F1 (history scan), then D10(c).
 
 ## website
 
