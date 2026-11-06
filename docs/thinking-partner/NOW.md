@@ -1,28 +1,26 @@
 # NOW
 
-Updated 05:15 IST, Fri 6 Nov (Coordinator)
+Updated 06:55 IST, Fri 6 Nov (Coordinator)
 
 ## Summary (Coordinator only)
 
-Updated 05:15 IST, Fri 6 Nov. **CP4 is met: the core is done on the real networks.**
-- **The acceptance report: 31 pass, 0 fail, 1 blocked (D7, the benchmark at size M, waiting for the locked story), 16 not yet run** (mostly the hosted endpoints, which wait for M4).
-- Done: M1–M3, M5–M12. Real payments, refunds, a subscription and the live kill switch, all on Whitechain and Sepolia.
-- The mirror has written every event exactly once through crashes and replays.
-- In progress: M4 (hosting, T1), the website and the demo store (T5), Friday items (T3).
+Updated 06:55 IST, Fri 6 Nov. **The core is complete on the real networks, and acceptance is at 42 pass, 0 fail, 1 blocked (D7), 5 not run.**
+- Done: M1–M13, except D7 (the benchmark at size M, waiting for the locked story) and five checks that wait on other tracks (B7, F1, F3, D10, B9).
+- M4 is live on the production domain: the hosted facilitator, shop, recorder and renewal cron.
+- M16 is proved with one real payment from the checkout kit.
+- The mirror has run under caffeinate since 05:38, and every event is written exactly once.
+- Merged Friday items: 1 (the open, online and handoff rows), 2 (the agent hooks), 3 (the live hooks), 8 (race mode), 9 (the Open toggle), 10 (the map), 13 (the explainer lanes), plus the phones' Pause/Resume and merchant actions.
 
-**Plan usage:** 81% at 05:12. Every session pauses gracefully at 92% (ADR-0062). Join is paused until M4 is hosted. The Mac is on power with the lid open.
+**Plan usage:** 82% and holding since 05:31; most sessions are idle. Every session pauses gracefully at 92% (ADR-0062).
 
-Next:
-1. M4 hosted (T1), then M13's C and F rows (Join, after 05:30 IST).
-2. The founder's story brief by 08:30 for rehearsal 1; the large city starts seeding by 14:00.
+**The founder at 08:30:**
+1. Send the story brief (the demo cast, then the large city's seeding by 14:00).
+2. Decide which Friday items get the remaining budget (see `relays/records.md`).
+3. Type anything in the Coordinator session, so it can wake the idle sessions (the app caps its messages until the founder types).
 
 ## foundation
 
-Updated 23:55 IST. **M0 done; handed over to the Coordinator** (`docs/plan/sessions/coordinator.md`).
-- Merged: #1 web placeholder, #2 Vercel install fix, #3 secret helpers and config (three reviewer passes), #4 funding script (two passes), #5 records, #6 story config and presets (one pass and fixes); this handover is #7.
-- A1–A6 pass. CI green on `main`; Vercel builds only for code changes.
-- FUNDER at 23:53: 2.6427 WBT, 0.2749 Sepolia ETH, 15.7583 tGLM, 31.75 test USDT. No shortfall.
-- Open follow-ups (none blocking) are listed in the coordinator file's handover state.
+M0 is done and handed over (PRs #1–#7); see `relays/foundation.md`.
 
 ## payments
 
@@ -82,10 +80,10 @@ Updated 05:30 IST, Fri 6 Nov (T6 AgentPay). **Fixed: the merchant's order export
 
 ## records
 
-Updated 05:15 IST. **CP4's relay is written.**
-- Done since 04:45: DISPOSABLE_1 funded for the kill check (#59, reviewer: ship); top-ups to plan targets; T1's facilitator wallet released after Join's run; Join paused until M4.
-- One passing GitHub fault: pushes of new commits were rejected for about 4 minutes (04:52–04:56).
-- Next: Join's start line when M4 is hosted; records again about 06:45.
+Updated 06:55 IST. **The 06:45 relay is written.** LOG.md is rolled up, and the closed M0 tables in OPEN.md are condensed: the folder was at 24,459 words, over the 20,000 guideline.
+- Since 05:15: M4 done (#58, #62); M13's hosted run and C4(a) (#66, #67: 42 pass); M16 proved (#63); DISPOSABLE_1 funded and the kill check passed (#59); T5's kit payment.
+- Waiting: T5 is idle and can't be woken until the founder types (the app's message cap). Join is idle after F1. The others wait for the story.
+- Next: the 08:30 morning relay; the story brief; the graphpay-store Vercel project.
 
 ## submission
 

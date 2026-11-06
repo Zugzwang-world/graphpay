@@ -12,16 +12,9 @@ The founder's to-dos and open questions. Each item says what, where, why and wha
 
 **Closed tonight:** the six track sessions and the Coordinator started (00:44–00:46 IST); the Ankr session's worktree and branch (removed at 23:09), the Vercel GitHub link (connected 22:42 IST; checks in `NOW.md`), the personal Ankr URL (stored, verified 22:51 IST: chain 1874, HTTPS), test USDT (150 arrived 21:54 IST; distributed, ADR-0045) and tGLM (FUNDER held 12.86; every planned wallet funded).
 
-## Funding check (main, 22:43 IST; nothing new since the M0 funding)
+## Funding (the Coordinator)
 
-FUNDER holds **2.6427 WBT, 0.2749 Sepolia ETH, 15.7583 tGLM** (after the founder's 15 tGLM at about 23:05) and **31.75 test USDT**. Every role in the plan is at its target (`docs/technical/WALLETS.md`).
-
-| asset | shortfall | detail |
-|---|---|---|
-| **Sepolia ETH** | **none at today's gas** | base fee about 21 wei plus a 3 wei tip. OPERATOR's 0.095 ETH covers the namespace (about 80M gas) up to about 1.1 gwei; the owners' 0.002 each and ACCEPTANCE_PAYER's 0.001 cover their few transactions many times over. If gas goes above 0.5 gwei, main sends 0.1 ETH from FUNDER (which holds 0.27) to OPERATOR, so no faucet trip is needed |
-| WBT | none | FACILITATOR 0.8 (about 300 payments before the 0.3 floor); FUNDER keeps 2.64 for top-ups and disposable agents (0.005 each) |
-| tGLM | none | S city 0.9, mirror 2.0, recorder 0.2, directory 0.5; the M city's 8.5 waits in W_SEED_M_EVENT; FUNDER's 15.76 covers a second M seeding or a larger final city |
-| test USDT | none | payers hold 102, the good shop's refund float 20, FUNDER 31.75 (disposable agents take 1 each) |
+Current balances and every transfer are in `docs/technical/WALLETS.md` (§2 for M0, §2b for the event top-ups). FUNDER after the 05:1x runs: about 2.59 WBT, 0.275 Sepolia ETH, 15.08 tGLM, 15.54 test USDT. Every role is at its plan target. W_SEED_M_EVENT holds 8.5 tGLM for the large city.
 
 ## Preset calibration (seconds and API cost per full errand; every test run adds a row)
 
@@ -41,41 +34,9 @@ Agents (T4) and Join add one row per full errand run, so the presets can be cali
 | 04:40 | Join e2e:food real, payer | testing | `claude-opus-5-5`, xhigh | 88.8 | $0.2623 | approved by the shop; the signer answered a headers object, so nothing was signed (fixed) |
 | 04:43 | Join e2e:food real, payer (the counting run) | testing | `claude-opus-5-5`, xhigh | 122.1 | $0.2986 | **paid** 4.80 on Whitechain, delivered, refunded 0.80; A–E pass |
 
-## Kickoff findings (main, read 21:44 IST, Thu 5 Nov)
+## Kickoff rules and booth questions (closed; rolled up 06:55 IST)
 
-| rule | what it says | source |
-|---|---|---|
-| deadline | "All projects must be submitted by Saturday, November 7th 2026 at 09:00 am IST." "Late submissions won't be accepted." Submit on the Hacker Dashboard (title, description, repo link); up to 3 partner prizes; a partner's several tracks count as one | https://ethglobal.com/events/mumbai/info/start, https://ethglobal.com/events/mumbai/info/details |
-| AI use | "generally permitted"; "clearly document in your submission where and how AI tools were used"; AI should "assist your development process, not to create the entire project"; submissions relying entirely on AI "without meaningful contributions from team members" may lose partner and finalist eligibility | https://ethglobal.com/events/mumbai/info/details |
-| spec-driven work | permitted; "all spec files, prompts, and planning artifacts" must be in the repo | same page |
-| pre-event work | Classic track: work begins at kickoff; prior project-specific code, designs or assets are not allowed unless public libraries or starter kits; disclose pre-existing work "in writing to the ETHGlobal team"; "clearly distinguish between what's new and what's reused"; large single commits or missing histories may be disqualified | https://ethglobal.com/rules, details page |
-| video | no text-to-speech or AI voiceover | details page |
-
-**Organiser's answer on AI (founder, in chat, about 21:40 IST): "go all out, use AI the best you can".** Closed: we keep full AI disclosure (`AI_USAGE.md`, the README line, the submission text) and describe the founder's own part honestly, which also answers the "meaningful contributions" sentence above. ADR-0028.
-
-**Open questions with defaults (no answer needed to proceed):**
-
-| question | default | where it shows |
-|---|---|---|
-| Organiser questions 1, 3, 4 (pre-event specs and design; reused wallets, key and name; the docs-only first commit) | go on with full written disclosure | founder to-do 4 |
-| Booth layout: the start page says partners judge at booths; the details page says a booth visit is optional | plan for both: a short booth demo per partner | M17 (Friday) |
-| How many Whitechain prizes a project can win (no limit on the public pages) | enter Operate (ADR-0032); the product stays general | submission |
-
-## Closed tonight (founder's defaults, about 21:42 IST; no booth answers are coming)
-
-| question | decision | ADR |
-|---|---|---|
-| Arkiv: how the explorer tags a schema | our own naming convention: `project`, `type`, `schema_v` on every entity | ADR-0040 |
-| Arkiv: stored vs indexed attributes | index only queried fields (the SDK supports it per column) | ADR-0041 |
-| Arkiv: key quota, create-if-absent, `HandleInvalid` | no answer: watch the `ratelimit` header, rely on the write anchors, note the rest as friction | ADR-0044 |
-| race mode | shows reads needed, not speed | ADR-0042 |
-| Swarm: shared batch, public gateway | public gateway first; never a mainnet postage batch | ADR-0039 |
-| ENS: ENSIP-31 key format | skip ENSIP-31; the Whitechain address record plus the text record `x-graphpay-accepts` | ADR-0038 |
-| Whitechain: one prize or two | Operate, with a short code snippet as the drop-in; the product stays a general payments solution | ADR-0032 |
-| Whitechain: is the Blockscout "verified" badge enough | treat it as enough; Standard JSON verification only if asked | ADR-0044 |
-| ENS workshop items (Sepolia stability, `sim` wildcard, ERC-8004) | assume stable; the wildcard counts; ERC-8004 only if Friday has time | ADR-0044 |
-| synthetic city | seeded straight into Arkiv, labelled synthetic, no real payments; its shops listed by the directory writer | ADR-0043 |
-| Whitechain faucet amount (docs say 0.5 WBT a day) | the founder's 2 WBT a day is confirmed on-chain (FUNDER rose by 2 WBT at 22:12) | FACTS |
+The kickoff rules (the deadline Sat 09:00 IST; AI use documented; spec files in the repo; pre-event work disclosed in writing; the video in the founder's own voice) are in `planning/` and ADR-0028. The organiser said "go all out, use AI the best you can", and we keep full AI disclosure (ADR-0028). Every booth question is closed with the founder's defaults (ADR-0038 to ADR-0044). Prize tracks: ADR-0051; Swarm: ADR-0039 and ADR-0061.
 
 ## foundation
 
