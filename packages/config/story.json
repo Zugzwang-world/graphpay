@@ -422,9 +422,10 @@
       },
       "M": {
         "approxEdges": 10000,
-        "seed": "only after the final story is locked",
+        "seed": "with the final cast (ADR-0077)",
         "owner": "W_SEED_M_EVENT",
-        "cast": "final"
+        "cast": "final",
+        "places": true
       }
     },
     "generator": {
@@ -511,6 +512,851 @@
           }
         }
       }
+    },
+    "places": {
+      "about": "The background shops of size M: the Grok pack's 120 invented South Indian places (assets/grok/part1/places/city-places.json, labelled synthetic there; areas from its neighbourhoods.json), listed as <label>.sim.<root> and labelled synthetic (ADR-0043, ADR-0077). The cast shops keep ranks 1 to 3; the places take ranks 4 on, in an order the city's seed shuffles. Size S keeps its generated shops.",
+      "list": [
+        {
+          "label": "podi-pebble-kitchen",
+          "name": "Podi Pebble Kitchen",
+          "area": "Bandra Kurla Complex",
+          "lat": 19.066628,
+          "lng": 72.863573
+        },
+        {
+          "label": "podi-pebble-tiffins",
+          "name": "Podi Pebble Tiffins",
+          "area": "Bandra Kurla Complex",
+          "lat": 19.066532,
+          "lng": 72.865102
+        },
+        {
+          "label": "podi-pebble-canteen",
+          "name": "Podi Pebble Canteen",
+          "area": "Bandra Kurla Complex",
+          "lat": 19.065378,
+          "lng": 72.86332
+        },
+        {
+          "label": "podi-pebble-counter",
+          "name": "Podi Pebble Counter",
+          "area": "Bandra Kurla Complex",
+          "lat": 19.067025,
+          "lng": 72.867113
+        },
+        {
+          "label": "podi-pebble-courtyard",
+          "name": "Podi Pebble Courtyard",
+          "area": "Bandra Kurla Complex",
+          "lat": 19.066051,
+          "lng": 72.867475
+        },
+        {
+          "label": "podi-pebble-pantry",
+          "name": "Podi Pebble Pantry",
+          "area": "Bandra Kurla Complex",
+          "lat": 19.06944,
+          "lng": 72.863484
+        },
+        {
+          "label": "podi-pebble-room",
+          "name": "Podi Pebble Room",
+          "area": "Bandra Kurla Complex",
+          "lat": 19.065752,
+          "lng": 72.866913
+        },
+        {
+          "label": "podi-pebble-corner",
+          "name": "Podi Pebble Corner",
+          "area": "Bandra Kurla Complex",
+          "lat": 19.068553,
+          "lng": 72.866994
+        },
+        {
+          "label": "podi-pebble-table",
+          "name": "Podi Pebble Table",
+          "area": "Bandra Kurla Complex",
+          "lat": 19.069442,
+          "lng": 72.866156
+        },
+        {
+          "label": "podi-pebble-stop",
+          "name": "Podi Pebble Stop",
+          "area": "Bandra Kurla Complex",
+          "lat": 19.067898,
+          "lng": 72.867319
+        },
+        {
+          "label": "dosa-dapple-kitchen",
+          "name": "Dosa Dapple Kitchen",
+          "area": "Bandra Kurla Complex",
+          "lat": 19.069272,
+          "lng": 72.864217
+        },
+        {
+          "label": "dosa-dapple-tiffins",
+          "name": "Dosa Dapple Tiffins",
+          "area": "Bandra Kurla Complex",
+          "lat": 19.065417,
+          "lng": 72.863588
+        },
+        {
+          "label": "dosa-dapple-canteen",
+          "name": "Dosa Dapple Canteen",
+          "area": "Bandra Kurla Complex",
+          "lat": 19.065616,
+          "lng": 72.86808
+        },
+        {
+          "label": "dosa-dapple-counter",
+          "name": "Dosa Dapple Counter",
+          "area": "Bandra Kurla Complex",
+          "lat": 19.065682,
+          "lng": 72.86439
+        },
+        {
+          "label": "dosa-dapple-courtyard",
+          "name": "Dosa Dapple Courtyard",
+          "area": "Bandra Kurla Complex",
+          "lat": 19.065968,
+          "lng": 72.867445
+        },
+        {
+          "label": "dosa-dapple-pantry",
+          "name": "Dosa Dapple Pantry",
+          "area": "Bandra Kurla Complex",
+          "lat": 19.06684,
+          "lng": 72.866543
+        },
+        {
+          "label": "dosa-dapple-room",
+          "name": "Dosa Dapple Room",
+          "area": "Bandra Kurla Complex",
+          "lat": 19.069542,
+          "lng": 72.865918
+        },
+        {
+          "label": "dosa-dapple-corner",
+          "name": "Dosa Dapple Corner",
+          "area": "Bandra Kurla Complex",
+          "lat": 19.066556,
+          "lng": 72.864593
+        },
+        {
+          "label": "dosa-dapple-table",
+          "name": "Dosa Dapple Table",
+          "area": "Bandra Kurla Complex",
+          "lat": 19.06687,
+          "lng": 72.866047
+        },
+        {
+          "label": "dosa-dapple-stop",
+          "name": "Dosa Dapple Stop",
+          "area": "Bandra Kurla Complex",
+          "lat": 19.064664,
+          "lng": 72.8653
+        },
+        {
+          "label": "idli-inkwell-kitchen",
+          "name": "Idli Inkwell Kitchen",
+          "area": "Bandra Kurla Complex",
+          "lat": 19.06788,
+          "lng": 72.864621
+        },
+        {
+          "label": "idli-inkwell-tiffins",
+          "name": "Idli Inkwell Tiffins",
+          "area": "Bandra Kurla Complex",
+          "lat": 19.068091,
+          "lng": 72.866286
+        },
+        {
+          "label": "idli-inkwell-canteen",
+          "name": "Idli Inkwell Canteen",
+          "area": "Bandra Kurla Complex",
+          "lat": 19.067395,
+          "lng": 72.863807
+        },
+        {
+          "label": "idli-inkwell-counter",
+          "name": "Idli Inkwell Counter",
+          "area": "Bandra Kurla Complex",
+          "lat": 19.067527,
+          "lng": 72.86506
+        },
+        {
+          "label": "idli-inkwell-courtyard",
+          "name": "Idli Inkwell Courtyard",
+          "area": "Bandra East",
+          "lat": 19.060373,
+          "lng": 72.851051
+        },
+        {
+          "label": "idli-inkwell-pantry",
+          "name": "Idli Inkwell Pantry",
+          "area": "Bandra East",
+          "lat": 19.060368,
+          "lng": 72.848525
+        },
+        {
+          "label": "idli-inkwell-room",
+          "name": "Idli Inkwell Room",
+          "area": "Bandra East",
+          "lat": 19.062663,
+          "lng": 72.850361
+        },
+        {
+          "label": "idli-inkwell-corner",
+          "name": "Idli Inkwell Corner",
+          "area": "Bandra East",
+          "lat": 19.062209,
+          "lng": 72.85151
+        },
+        {
+          "label": "idli-inkwell-table",
+          "name": "Idli Inkwell Table",
+          "area": "Bandra East",
+          "lat": 19.061676,
+          "lng": 72.849665
+        },
+        {
+          "label": "idli-inkwell-stop",
+          "name": "Idli Inkwell Stop",
+          "area": "Bandra East",
+          "lat": 19.063601,
+          "lng": 72.847531
+        },
+        {
+          "label": "kaapi-kite-kitchen",
+          "name": "Kaapi Kite Kitchen",
+          "area": "Bandra East",
+          "lat": 19.062966,
+          "lng": 72.848799
+        },
+        {
+          "label": "kaapi-kite-tiffins",
+          "name": "Kaapi Kite Tiffins",
+          "area": "Bandra East",
+          "lat": 19.06309,
+          "lng": 72.851985
+        },
+        {
+          "label": "kaapi-kite-canteen",
+          "name": "Kaapi Kite Canteen",
+          "area": "Kalina",
+          "lat": 19.081529,
+          "lng": 72.859806
+        },
+        {
+          "label": "kaapi-kite-counter",
+          "name": "Kaapi Kite Counter",
+          "area": "Kalina",
+          "lat": 19.077439,
+          "lng": 72.862715
+        },
+        {
+          "label": "kaapi-kite-courtyard",
+          "name": "Kaapi Kite Courtyard",
+          "area": "Kalina",
+          "lat": 19.077664,
+          "lng": 72.86158
+        },
+        {
+          "label": "kaapi-kite-pantry",
+          "name": "Kaapi Kite Pantry",
+          "area": "Kalina",
+          "lat": 19.079968,
+          "lng": 72.86244
+        },
+        {
+          "label": "kaapi-kite-room",
+          "name": "Kaapi Kite Room",
+          "area": "Kalina",
+          "lat": 19.080222,
+          "lng": 72.86272
+        },
+        {
+          "label": "kaapi-kite-corner",
+          "name": "Kaapi Kite Corner",
+          "area": "Kalina",
+          "lat": 19.08053,
+          "lng": 72.863636
+        },
+        {
+          "label": "kaapi-kite-table",
+          "name": "Kaapi Kite Table",
+          "area": "Kalina",
+          "lat": 19.080974,
+          "lng": 72.861795
+        },
+        {
+          "label": "kaapi-kite-stop",
+          "name": "Kaapi Kite Stop",
+          "area": "Kalina",
+          "lat": 19.077693,
+          "lng": 72.859018
+        },
+        {
+          "label": "sambar-spindle-kitchen",
+          "name": "Sambar Spindle Kitchen",
+          "area": "Kurla West",
+          "lat": 19.069767,
+          "lng": 72.877998
+        },
+        {
+          "label": "sambar-spindle-tiffins",
+          "name": "Sambar Spindle Tiffins",
+          "area": "Kurla West",
+          "lat": 19.070082,
+          "lng": 72.874378
+        },
+        {
+          "label": "sambar-spindle-canteen",
+          "name": "Sambar Spindle Canteen",
+          "area": "Kurla West",
+          "lat": 19.069518,
+          "lng": 72.878502
+        },
+        {
+          "label": "sambar-spindle-counter",
+          "name": "Sambar Spindle Counter",
+          "area": "Kurla West",
+          "lat": 19.070565,
+          "lng": 72.876364
+        },
+        {
+          "label": "sambar-spindle-courtyard",
+          "name": "Sambar Spindle Courtyard",
+          "area": "Kurla West",
+          "lat": 19.069039,
+          "lng": 72.878712
+        },
+        {
+          "label": "sambar-spindle-pantry",
+          "name": "Sambar Spindle Pantry",
+          "area": "Kurla West",
+          "lat": 19.068049,
+          "lng": 72.87469
+        },
+        {
+          "label": "sambar-spindle-room",
+          "name": "Sambar Spindle Room",
+          "area": "Kurla West",
+          "lat": 19.070889,
+          "lng": 72.878276
+        },
+        {
+          "label": "sambar-spindle-corner",
+          "name": "Sambar Spindle Corner",
+          "area": "Kurla West",
+          "lat": 19.068185,
+          "lng": 72.874274
+        },
+        {
+          "label": "sambar-spindle-table",
+          "name": "Sambar Spindle Table",
+          "area": "Kalanagar",
+          "lat": 19.05449,
+          "lng": 72.85033
+        },
+        {
+          "label": "sambar-spindle-stop",
+          "name": "Sambar Spindle Stop",
+          "area": "Sion",
+          "lat": 19.040123,
+          "lng": 72.858806
+        },
+        {
+          "label": "rasam-ribbon-kitchen",
+          "name": "Rasam Ribbon Kitchen",
+          "area": "Matunga",
+          "lat": 19.017208,
+          "lng": 72.845581
+        },
+        {
+          "label": "rasam-ribbon-tiffins",
+          "name": "Rasam Ribbon Tiffins",
+          "area": "Dadar",
+          "lat": 19.019834,
+          "lng": 72.842838
+        },
+        {
+          "label": "rasam-ribbon-canteen",
+          "name": "Rasam Ribbon Canteen",
+          "area": "Mahim",
+          "lat": 19.033487,
+          "lng": 72.838428
+        },
+        {
+          "label": "rasam-ribbon-counter",
+          "name": "Rasam Ribbon Counter",
+          "area": "Dharavi",
+          "lat": 19.039121,
+          "lng": 72.855096
+        },
+        {
+          "label": "rasam-ribbon-courtyard",
+          "name": "Rasam Ribbon Courtyard",
+          "area": "Chunabhatti",
+          "lat": 19.049279,
+          "lng": 72.868774
+        },
+        {
+          "label": "rasam-ribbon-pantry",
+          "name": "Rasam Ribbon Pantry",
+          "area": "Santacruz East",
+          "lat": 19.082149,
+          "lng": 72.85295
+        },
+        {
+          "label": "rasam-ribbon-room",
+          "name": "Rasam Ribbon Room",
+          "area": "Kalanagar",
+          "lat": 19.056385,
+          "lng": 72.84902
+        },
+        {
+          "label": "rasam-ribbon-corner",
+          "name": "Rasam Ribbon Corner",
+          "area": "Sion",
+          "lat": 19.038706,
+          "lng": 72.857588
+        },
+        {
+          "label": "rasam-ribbon-table",
+          "name": "Rasam Ribbon Table",
+          "area": "Matunga",
+          "lat": 19.017168,
+          "lng": 72.843251
+        },
+        {
+          "label": "rasam-ribbon-stop",
+          "name": "Rasam Ribbon Stop",
+          "area": "Dadar",
+          "lat": 19.020768,
+          "lng": 72.842486
+        },
+        {
+          "label": "tiffin-thimble-kitchen",
+          "name": "Tiffin Thimble Kitchen",
+          "area": "Mahim",
+          "lat": 19.036118,
+          "lng": 72.839642
+        },
+        {
+          "label": "tiffin-thimble-tiffins",
+          "name": "Tiffin Thimble Tiffins",
+          "area": "Dharavi",
+          "lat": 19.040205,
+          "lng": 72.855253
+        },
+        {
+          "label": "tiffin-thimble-canteen",
+          "name": "Tiffin Thimble Canteen",
+          "area": "Chunabhatti",
+          "lat": 19.049217,
+          "lng": 72.868934
+        },
+        {
+          "label": "tiffin-thimble-counter",
+          "name": "Tiffin Thimble Counter",
+          "area": "Santacruz East",
+          "lat": 19.081671,
+          "lng": 72.853291
+        },
+        {
+          "label": "tiffin-thimble-courtyard",
+          "name": "Tiffin Thimble Courtyard",
+          "area": "Kalanagar",
+          "lat": 19.055758,
+          "lng": 72.848643
+        },
+        {
+          "label": "tiffin-thimble-pantry",
+          "name": "Tiffin Thimble Pantry",
+          "area": "Sion",
+          "lat": 19.039227,
+          "lng": 72.858562
+        },
+        {
+          "label": "tiffin-thimble-room",
+          "name": "Tiffin Thimble Room",
+          "area": "Matunga",
+          "lat": 19.016525,
+          "lng": 72.847214
+        },
+        {
+          "label": "tiffin-thimble-corner",
+          "name": "Tiffin Thimble Corner",
+          "area": "Dadar",
+          "lat": 19.022184,
+          "lng": 72.842458
+        },
+        {
+          "label": "tiffin-thimble-table",
+          "name": "Tiffin Thimble Table",
+          "area": "Mahim",
+          "lat": 19.034513,
+          "lng": 72.839537
+        },
+        {
+          "label": "tiffin-thimble-stop",
+          "name": "Tiffin Thimble Stop",
+          "area": "Dharavi",
+          "lat": 19.038614,
+          "lng": 72.855836
+        },
+        {
+          "label": "uttapam-orbit-kitchen",
+          "name": "Uttapam Orbit Kitchen",
+          "area": "Chunabhatti",
+          "lat": 19.049376,
+          "lng": 72.870443
+        },
+        {
+          "label": "uttapam-orbit-tiffins",
+          "name": "Uttapam Orbit Tiffins",
+          "area": "Santacruz East",
+          "lat": 19.081309,
+          "lng": 72.851555
+        },
+        {
+          "label": "uttapam-orbit-canteen",
+          "name": "Uttapam Orbit Canteen",
+          "area": "Kalanagar",
+          "lat": 19.055159,
+          "lng": 72.848188
+        },
+        {
+          "label": "uttapam-orbit-counter",
+          "name": "Uttapam Orbit Counter",
+          "area": "Sion",
+          "lat": 19.039728,
+          "lng": 72.862189
+        },
+        {
+          "label": "uttapam-orbit-courtyard",
+          "name": "Uttapam Orbit Courtyard",
+          "area": "Matunga",
+          "lat": 19.0163,
+          "lng": 72.84623
+        },
+        {
+          "label": "uttapam-orbit-pantry",
+          "name": "Uttapam Orbit Pantry",
+          "area": "Dadar",
+          "lat": 19.023462,
+          "lng": 72.843082
+        },
+        {
+          "label": "uttapam-orbit-room",
+          "name": "Uttapam Orbit Room",
+          "area": "Mahim",
+          "lat": 19.036712,
+          "lng": 72.841424
+        },
+        {
+          "label": "uttapam-orbit-corner",
+          "name": "Uttapam Orbit Corner",
+          "area": "Dharavi",
+          "lat": 19.037931,
+          "lng": 72.851399
+        },
+        {
+          "label": "uttapam-orbit-table",
+          "name": "Uttapam Orbit Table",
+          "area": "Chunabhatti",
+          "lat": 19.049184,
+          "lng": 72.870001
+        },
+        {
+          "label": "uttapam-orbit-stop",
+          "name": "Uttapam Orbit Stop",
+          "area": "Santacruz East",
+          "lat": 19.082699,
+          "lng": 72.853207
+        },
+        {
+          "label": "vada-velvet-kitchen",
+          "name": "Vada Velvet Kitchen",
+          "area": "Kalanagar",
+          "lat": 19.052724,
+          "lng": 72.848446
+        },
+        {
+          "label": "vada-velvet-tiffins",
+          "name": "Vada Velvet Tiffins",
+          "area": "Sion",
+          "lat": 19.042319,
+          "lng": 72.861711
+        },
+        {
+          "label": "vada-velvet-canteen",
+          "name": "Vada Velvet Canteen",
+          "area": "Matunga",
+          "lat": 19.017099,
+          "lng": 72.842439
+        },
+        {
+          "label": "vada-velvet-counter",
+          "name": "Vada Velvet Counter",
+          "area": "Dadar",
+          "lat": 19.021094,
+          "lng": 72.839323
+        },
+        {
+          "label": "vada-velvet-courtyard",
+          "name": "Vada Velvet Courtyard",
+          "area": "Mahim",
+          "lat": 19.034571,
+          "lng": 72.837517
+        },
+        {
+          "label": "vada-velvet-pantry",
+          "name": "Vada Velvet Pantry",
+          "area": "Dharavi",
+          "lat": 19.036534,
+          "lng": 72.855287
+        },
+        {
+          "label": "vada-velvet-room",
+          "name": "Vada Velvet Room",
+          "area": "Chunabhatti",
+          "lat": 19.049211,
+          "lng": 72.871377
+        },
+        {
+          "label": "vada-velvet-corner",
+          "name": "Vada Velvet Corner",
+          "area": "Santacruz East",
+          "lat": 19.082406,
+          "lng": 72.854144
+        },
+        {
+          "label": "vada-velvet-table",
+          "name": "Vada Velvet Table",
+          "area": "Kalanagar",
+          "lat": 19.055731,
+          "lng": 72.849946
+        },
+        {
+          "label": "vada-velvet-stop",
+          "name": "Vada Velvet Stop",
+          "area": "Sion",
+          "lat": 19.037847,
+          "lng": 72.861921
+        },
+        {
+          "label": "appam-acorn-kitchen",
+          "name": "Appam Acorn Kitchen",
+          "area": "Matunga",
+          "lat": 19.015503,
+          "lng": 72.843908
+        },
+        {
+          "label": "appam-acorn-tiffins",
+          "name": "Appam Acorn Tiffins",
+          "area": "Dadar",
+          "lat": 19.02019,
+          "lng": 72.839959
+        },
+        {
+          "label": "appam-acorn-canteen",
+          "name": "Appam Acorn Canteen",
+          "area": "Mahim",
+          "lat": 19.034896,
+          "lng": 72.839156
+        },
+        {
+          "label": "appam-acorn-counter",
+          "name": "Appam Acorn Counter",
+          "area": "Dharavi",
+          "lat": 19.040107,
+          "lng": 72.853
+        },
+        {
+          "label": "appam-acorn-courtyard",
+          "name": "Appam Acorn Courtyard",
+          "area": "Chunabhatti",
+          "lat": 19.049498,
+          "lng": 72.871294
+        },
+        {
+          "label": "appam-acorn-pantry",
+          "name": "Appam Acorn Pantry",
+          "area": "Santacruz East",
+          "lat": 19.08246,
+          "lng": 72.853674
+        },
+        {
+          "label": "appam-acorn-room",
+          "name": "Appam Acorn Room",
+          "area": "Kalanagar",
+          "lat": 19.055992,
+          "lng": 72.84606
+        },
+        {
+          "label": "appam-acorn-corner",
+          "name": "Appam Acorn Corner",
+          "area": "Sion",
+          "lat": 19.039959,
+          "lng": 72.861655
+        },
+        {
+          "label": "appam-acorn-table",
+          "name": "Appam Acorn Table",
+          "area": "Matunga",
+          "lat": 19.016894,
+          "lng": 72.846163
+        },
+        {
+          "label": "appam-acorn-stop",
+          "name": "Appam Acorn Stop",
+          "area": "Dadar",
+          "lat": 19.022943,
+          "lng": 72.838939
+        },
+        {
+          "label": "neer-nooklet-kitchen",
+          "name": "Neer Nooklet Kitchen",
+          "area": "Mahim",
+          "lat": 19.034319,
+          "lng": 72.840024
+        },
+        {
+          "label": "neer-nooklet-tiffins",
+          "name": "Neer Nooklet Tiffins",
+          "area": "Dharavi",
+          "lat": 19.035702,
+          "lng": 72.854712
+        },
+        {
+          "label": "neer-nooklet-canteen",
+          "name": "Neer Nooklet Canteen",
+          "area": "Chunabhatti",
+          "lat": 19.049371,
+          "lng": 72.871376
+        },
+        {
+          "label": "neer-nooklet-counter",
+          "name": "Neer Nooklet Counter",
+          "area": "Santacruz East",
+          "lat": 19.08016,
+          "lng": 72.85148
+        },
+        {
+          "label": "neer-nooklet-courtyard",
+          "name": "Neer Nooklet Courtyard",
+          "area": "Kalanagar",
+          "lat": 19.052538,
+          "lng": 72.850902
+        },
+        {
+          "label": "neer-nooklet-pantry",
+          "name": "Neer Nooklet Pantry",
+          "area": "Sion",
+          "lat": 19.038307,
+          "lng": 72.861589
+        },
+        {
+          "label": "neer-nooklet-room",
+          "name": "Neer Nooklet Room",
+          "area": "Matunga",
+          "lat": 19.017293,
+          "lng": 72.84305
+        },
+        {
+          "label": "neer-nooklet-corner",
+          "name": "Neer Nooklet Corner",
+          "area": "Dadar",
+          "lat": 19.018733,
+          "lng": 72.840953
+        },
+        {
+          "label": "neer-nooklet-table",
+          "name": "Neer Nooklet Table",
+          "area": "Mahim",
+          "lat": 19.036759,
+          "lng": 72.841592
+        },
+        {
+          "label": "neer-nooklet-stop",
+          "name": "Neer Nooklet Stop",
+          "area": "Dharavi",
+          "lat": 19.039282,
+          "lng": 72.853368
+        },
+        {
+          "label": "millet-mariglow-kitchen",
+          "name": "Millet Mariglow Kitchen",
+          "area": "Chunabhatti",
+          "lat": 19.049192,
+          "lng": 72.867559
+        },
+        {
+          "label": "millet-mariglow-tiffins",
+          "name": "Millet Mariglow Tiffins",
+          "area": "Santacruz East",
+          "lat": 19.083302,
+          "lng": 72.853095
+        },
+        {
+          "label": "millet-mariglow-canteen",
+          "name": "Millet Mariglow Canteen",
+          "area": "Kalanagar",
+          "lat": 19.056701,
+          "lng": 72.849041
+        },
+        {
+          "label": "millet-mariglow-counter",
+          "name": "Millet Mariglow Counter",
+          "area": "Sion",
+          "lat": 19.038682,
+          "lng": 72.859781
+        },
+        {
+          "label": "millet-mariglow-courtyard",
+          "name": "Millet Mariglow Courtyard",
+          "area": "Matunga",
+          "lat": 19.018725,
+          "lng": 72.845716
+        },
+        {
+          "label": "millet-mariglow-pantry",
+          "name": "Millet Mariglow Pantry",
+          "area": "Dadar",
+          "lat": 19.020964,
+          "lng": 72.838819
+        },
+        {
+          "label": "millet-mariglow-room",
+          "name": "Millet Mariglow Room",
+          "area": "Mahim",
+          "lat": 19.036735,
+          "lng": 72.841081
+        },
+        {
+          "label": "millet-mariglow-corner",
+          "name": "Millet Mariglow Corner",
+          "area": "Dharavi",
+          "lat": 19.037278,
+          "lng": 72.85184
+        },
+        {
+          "label": "millet-mariglow-table",
+          "name": "Millet Mariglow Table",
+          "area": "Chunabhatti",
+          "lat": 19.049184,
+          "lng": 72.870906
+        },
+        {
+          "label": "millet-mariglow-stop",
+          "name": "Millet Mariglow Stop",
+          "area": "Santacruz East",
+          "lat": 19.082321,
+          "lng": 72.853576
+        }
+      ]
     }
   },
   "demoScript": [
