@@ -25,7 +25,7 @@ One line per PR: time (IST) · activity · result · PR link. Append under your 
 - 02:00 IST · identity · M5: the ens package, ABIs from Sourcify, run script and checkers; namespace provisioned on real Sepolia (60 tx, 72.7M gas); B1/B4/B5/B8/B9a reads pass · [PR #18](https://github.com/Zugzwang-world/graphpay/pull/18)
 - 03:50 IST · identity · M6 part 1: `ensGate`, `ens_check`, owner actions (pause, resume, kill), `scripts/ens/owner.mjs`; 33 unit + 10 fork tests, real-Sepolia read-only gate pass · [PR #34](https://github.com/Zugzwang-world/graphpay/pull/34)
 - 04:25 IST · identity · M6 done: the ENS watcher library and policy sink (reviewed twice), B8's MCP call in the acceptance script · [PR #40](https://github.com/Zugzwang-world/graphpay/pull/40)
-- 05:00 IST · identity · B7: fork test for the epoch on re-registration (after a lapse and after an unregister: e + 1); fork tests moved to disposable-2/3 · PR link in the next line
+- 05:00 IST · identity · B7: fork test for the epoch on re-registration (after a lapse and after an unregister: e + 1); fork tests moved to disposable-2/3 · [PR #83](https://github.com/Zugzwang-world/graphpay/pull/83)
 
 ## arkiv
 
