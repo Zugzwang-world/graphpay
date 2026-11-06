@@ -33,11 +33,21 @@ export interface OrderSummary {
 export interface SubscriptionSummary {
   subId: string;
   plan: string;
+  // The period's label (the story's demo clock, e.g. "2-minute demo period"); periodSeconds is the chain's.
   period: string;
   priceMicro: Micro;
+  // null once it is no longer active.
   nextChargeAt: string | null;
+  // Charges, newest first, each with its Whitechain transaction (the first charge is in the subscribe transaction).
   renewals: { at: string; transaction: string }[];
   active: boolean;
+  // The checkout's own state, the charges so far, and how many more the demo allowance still covers.
+  status: 'ACTIVE' | 'LAPSED' | 'CANCELLED';
+  cycle: number;
+  periodSeconds: number;
+  chargesLeft: number;
+  item: string;
+  shopEns: string;
 }
 
 // GET /api/state/customer
