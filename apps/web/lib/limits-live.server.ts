@@ -10,7 +10,7 @@ import { checkoutAbi } from '@graphpay/contracts';
 import { KEYS, createEnsGate, createEnsReader, dnsEncode, ensPublicClient, permissionedResolverAbi, walkName } from '@graphpay/ens';
 import { decodePaymentRequiredHeader, errorNames, graphPayOrderClient, x402Client } from '@graphpay/facilitator';
 import { recordEdge, runGraphql } from '@graphpay/money-graph';
-import { BaseError, ContractFunctionRevertedError, isAddressEqual, keccak256, namehash, toHex, type Hex } from 'viem';
+import { BaseError, ContractFunctionRevertedError, isAddressEqual, keccak256, namehash, toHex, type Abi, type Hex } from 'viem';
 import { privateKeyToAccount } from 'viem/accounts';
 import { arkivEngine } from '../app/api/graphql/arkiv.server.ts';
 import { sharedCustomerState } from './customer-state.server.ts';
@@ -216,7 +216,7 @@ export function liveRaiseCapDeps(): RaiseCapDeps {
       if (!walked.ok) throw new Error('the agent name does not resolve');
       const block = String(await client.getBlockNumber());
       try {
-        await client.simulateContract({ account: payerAccount().address, address: walked.resolver, abi: permissionedResolverAbi, functionName: 'setText', args: [dnsEncode(walked.name), KEYS.capMicro, String(capMicro)], blockNumber: BigInt(block) });
+        await client.simulateContract({ account: payerAccount().address, address: walked.resolver, abi: permissionedResolverAbi as unknown as Abi, functionName: 'setText', args: [dnsEncode(walked.name), KEYS.capMicro, String(capMicro)], blockNumber: BigInt(block) });
         return { reverted: false, resolver: walked.resolver, block };
       } catch (error) {
         const revert = revertName(error);

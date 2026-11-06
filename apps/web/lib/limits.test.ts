@@ -1,7 +1,9 @@
 import assert from 'node:assert/strict';
 import { beforeEach, test } from 'node:test';
-import { ContractFunctionRevertedError, encodeErrorResult } from 'viem';
-import { permissionedResolverAbi } from '@graphpay/ens';
+import { ContractFunctionRevertedError, encodeErrorResult, type Abi } from 'viem';
+import { permissionedResolverAbi as resolverAbi } from '@graphpay/ens';
+
+const permissionedResolverAbi = resolverAbi as unknown as Abi;
 import { siteModel } from './site.server.ts';
 import { revertName } from './limits-live.server.ts';
 import { EXPECTED_REVERT, LIMIT_COOLDOWN_MS, LimitRefusal, forgetLimits, overPass, overPassPlan, raiseOwnCap, type AttemptOutcome, type OverPassDeps, type Pass, type RaiseCapDeps } from './limits.server.ts';
