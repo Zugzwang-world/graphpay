@@ -6,7 +6,8 @@
 // partial refunds, weekly subscriptions; the persona's agents buy only in the last
 // week and never from the trap shop; one generated shop re-registers late in the city.
 
-import { castEntries, activeCast, config } from '@graphpay/config';
+import { castEntries, config } from '@graphpay/config';
+import { castOfSize } from './cast.mjs';
 import { draws, zipf } from './rng.mjs';
 
 const DAY = 86_400;
@@ -43,7 +44,8 @@ export function generateCity({ story, size, end, root = config.root.ens }) {
   const simRoot = `${gen.simLabel}.${root}`;
   const cityName = story.city.name.toLowerCase();
   const dataset = `${sc.dataset}-${size}`;
-  const cast = activeCast(story);
+  // The size's own cast (syntheticCity.casts): the names it was seeded with (ADR-0077).
+  const cast = castOfSize(story, size);
   const entries = castEntries(cast, root);
 
   const actors = new Map();
@@ -67,7 +69,9 @@ export function generateCity({ story, size, end, root = config.root.ens }) {
   const shopAgent = cast.shopAgents.find((a) => a.key === gen.shopAgentKey);
   const shops = [];
   for (const s of castShops) {
-    const loc = offset(point, s.scenario.distanceKm, rnd.next() * 360);
+    // A placed shop keeps its place; the bearing is drawn either way, so the draws that follow stay the same.
+    const bearing = rnd.next() * 360;
+    const loc = s.location ?? offset(point, s.scenario.distanceKm, bearing);
     const shop = add({ ens: `${s.label}.${root}`, kind: 'shop', cast: true, category: s.category, city: cityName, refundRate: s.scenario.refundRate90d, priceMicro: s.products[0].priceMicro, storyRole: s.storyRole, lat: loc.lat, lng: loc.lng, area: s.area, displayName: s.displayName });
     shops.push(shop);
   }
@@ -155,7 +159,7 @@ export function generateCity({ story, size, end, root = config.root.ens }) {
     }
   }
   for (const { buyer, shop, start } of plan) {
-    const price = story.renewal.priceMicro;
+    const price = cast.renewal.priceMicro;
     push('subscribe', buyer.ens, shop.ens, price, start);
     push('pay', buyer.ens, shop.ens, price, start + 30);
     for (let t = start + 7 * DAY; t < endTs; t += 7 * DAY) {

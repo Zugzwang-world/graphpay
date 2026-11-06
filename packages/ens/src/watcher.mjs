@@ -14,6 +14,8 @@
 //   updatePolicy({ node, epoch, revoked?, expiry? })   no wallet, no cap: the sink adds them
 //                                                      from its configured list; a no-op without a policy
 //   patchNode(node, { status?, expiry?, epoch?, ensCapMicro? })
+// onRevoked({ name, node, epoch, why }) runs after a revocation was applied (the host provisions
+// a fresh spare after a disposable agent's kill); it is never awaited and its failure is only logged.
 
 import { getAddress, isAddressEqual, zeroAddress } from 'viem';
 import { permissionedRegistryAbi, permissionedResolverAbi } from './abi.generated.mjs';
@@ -49,6 +51,7 @@ export function createEnsWatcher({
   checkpoint = memoryCheckpoint(),
   now = async () => (await client.getBlock({ blockTag: 'latest' })).timestamp,
   log = () => {},
+  onRevoked = () => {},
 }) {
   const tracked = new Map(); // name → { name, node, label, registry, resolver, epoch, expiry, revoked, expired, textStatus }
   const untracked = new Set();
@@ -103,6 +106,9 @@ export function createEnsWatcher({
     t.revoked = true; // marks only after the sinks succeeded
     gate?.invalidate(t.name);
     log(`watcher: ${t.name} ${why}: policy revoked at epoch ${t.epoch}, node revoked`);
+    Promise.resolve()
+      .then(() => onRevoked({ name: t.name, node: t.node, epoch: t.epoch, why }))
+      .catch((e) => log(`watcher: after ${t.name} was revoked: ${e?.message ?? e}`));
   }
 
   async function onUnregistered(t) {

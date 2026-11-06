@@ -1,46 +1,47 @@
-# Relay: w1-identity (W1 Identity), 23:35 IST, Fri 6 Nov
+# Relay: w1-identity (W1 Identity), 00:00 IST, Sat 7 Nov
 
 ## In plain words
 
 - W1 gives the dosa story's shops their own names on ENS, flips the story to them, and makes the kill work live.
-- **Done: the three new shops have their names on ENS** (Ethereum Sepolia): `filter-and-fold.graphpay.eth`, `idli-index.graphpay.eth` and `tawa-tangle.graphpay.eth`, each with its storefront, risk and dispatch agents.
-- They are built exactly like the old shops: their own registry and resolvers and the same records.
-- Each new name pays into the wallet its old shop used, so no money moved:
-  - Kesar Kingdom's wallet → Filter & Fold;
-  - Syrup Street's → Idli Index;
-  - Jamun Junction's → Tawa Tangle.
-- The old names stay registered as history; nothing was changed for them.
-- **Not yet:** the site still uses the old names. The story flips to the new names in one small PR, after W2 has written the new shops' rows and history on Arkiv. The Coordinator times it; then W5 restarts the workers.
-- **Next: the kill.** One spare disposable agent with money, its key on the site; a button unregisters it; the watcher revokes its spending pass; its next payment is refused and recorded on Arkiv; a fresh spare is made for the next kill.
+- **Done: the new shop names are on ENS** (#158): `filter-and-fold.graphpay.eth`, `idli-index.graphpay.eth` and `tawa-tangle.graphpay.eth`, each with its three agents.
+  - Each pays into the wallet its old shop used, so no money moved.
+  - The old names stay registered as history.
+- **Ready, not pushed: the story flip.** Three label lines in `story.json`, plus one phones test that replays a Nov 5 errand under the new names. It waits for the Coordinator's go, after W2 has written the new shops' Arkiv rows. Then W5 restarts the workers.
+- **The kill: built, in its PR.**
+  - **A spare is ready:** `disposable-2.vitalik.graphpay.eth` has its name, a spending pass of 1.00 a day and 1 test USDT.
+  - The site holds the keys of the spares `disposable-2` to `disposable-9` (in Vercel, never printed). They take effect from the next deploy.
+  - **The Kill button's route** makes the owner unregister the spare's name. The watcher then revokes its pass, and the spare's next payment is refused and recorded on Arkiv.
+  - **After each kill,** the workers make a fresh spare: a name, a pass and 1 test USDT. That needs a workers restart once the PR is in.
+- **Still to prove:** one kill on the production site, followed by a refused payment and a fresh spare.
 
 ## Technical
 
-- **Registered:** 30 Sepolia transactions, 23:10 to 23:18 IST, about 39M gas at 16 wei.
-  - For each shop: the owner registry, the owner resolver, the registration under `graphpay.eth` and `setParent`.
-  - Then two transactions for each of the nine agents: its resolver, then its registration with role bitmap 0.
-  - Every hash is in [`docs/sessions/identity/namespace.md`](../../sessions/identity/namespace.md), under the new "Renamed shops" table and in the transactions table.
-- **How:** `node scripts/ens/real-run.mjs --real --relabel kesar-kingdom=filter-and-fold,syrup-street=idli-index,jamun-junction=tawa-tangle`.
-  - The shops keep their story keys and wallet roles; only their labels are new.
-  - The provisioner skips everything that already exists.
-  - It was rehearsed on an anvil fork of Sepolia first.
-- **Checked:** `node scripts/ens/acceptance.mjs --relabel …` on real Sepolia: 100 checks pass.
-  - Each new name is REGISTERED at epoch 0, with its own resolver.
-  - Its kind and status are right, and its coin type 2147485522 address is the old shop's wallet.
-  - `x-graphpay-accepts` is test USDT, and every agent has `agent-context` and `agent-endpoint[mcp]`.
-  - B9 (a), the payee of the last settled order, waits for the first payment under a new name.
-- **Nodes, for W2's Arkiv rows** (every new name is epoch 0):
-  - `filter-and-fold.graphpay.eth` `0xc82a07d8a94558e9c674da7dcff543682d8b80d29787bda4616890ed93dc07d6`
-  - `idli-index.graphpay.eth` `0x85dbc5b3f68825d4f3e39f9680127f6394b5cdd460c91e5cdb359ead885e04b4`
-  - `tawa-tangle.graphpay.eth` `0xe7445394024c4044d77327c3cc9eed02725501773a6cf6f9e60408c85cf5aaf3`
-  - The agents' nodes are in the hand-off table of `namespace.md`.
-- **Code:**
-  - `relabelShops` and `parseRelabel` in `packages/ens/src/plan.mjs`, with a unit test.
-  - `--relabel` in `real-run.mjs` and `acceptance.mjs`.
-  - The namespace record is merged by name, so the old names stay in it as history.
-- **Seen in passing:** `payer.vitalik.graphpay.eth` reports DRIFT on `graphpay.cap_micro`. That is expected: W5 raised the payer's pass to 300 for tonight (#152), and the provisioner never rewrites a record.
+- **The spare keeper** is `scripts/ens/spare.mjs`: a dry run by default, `--yes` to send, and one run at a time (a lock file). It works in three steps:
+  1. It takes the lowest live `disposable-<n>` among the keys in `.env`. If none is live, it provisions the next label that was never registered, never a killed one. OPERATOR deploys the resolver and registers the label; the owner, VITALIK, signs the two setter grants.
+  2. POLICY_WRITER calls `setPolicy`, from the payments setup's plan (`scripts/whitechain/plan.mjs`). It never lifts a revocation, and stops if the wallet is bound to another node.
+  3. FUNDER tops the wallet up to the story's disposable cap. It keeps 10 test USDT in reserve, and the receipt must show exactly that transfer.
+  - For `disposable-2`: Sepolia [0xeea8…16b9](https://sepolia.etherscan.io/tx/0xeea817653bc0f30628c840fb9e265810e1786c4580a75853c9fc7585137216b9), [0x4d82…ab43](https://sepolia.etherscan.io/tx/0x4d82116c0a356789652cf33ed5c5f55f7ec5e342a293d5280fef546deca1ab43), [0xace7…67e5](https://sepolia.etherscan.io/tx/0xace7d1b80334a76c1d0ead5c0fefe070f995c2f3e9a8131680e0552688f767e5).
+  - Its policy: [0xbe08…604c](https://explorer.testnet.whitechain.io/tx/0xbe08647b142b7c49523c6d8f5376c345c491fd90de6c79a062238a34a112604c). Its 1 test USDT: [0x1fd6…35e5](https://explorer.testnet.whitechain.io/tx/0x1fd6f43462497fa5409c296fb6752fdf1c68faaf9d7433fb34c720aedeab35e5).
+  - `scripts/ens/gate-pass.mjs` shows its full gate ok.
+- **The route** is `POST /api/customer/kill-disposable` (`apps/web/lib/kill-disposable.server.ts`).
+  - **The spare it takes:** chosen from chain state, never from the request. It must be live, held by its own key, and have a live pass at its epoch. A spare whose pass isn't set yet is never offered, because the watcher would then find nothing to revoke (the reviewer's one blocking finding, fixed).
+  - **The kill:** the owner unregisters the name, in the owner's queue that Pause and Resume use.
+  - **The revoke:** it waits up to 75 s for the watcher's `AgentPolicySet` with `revoked`.
+  - **The payment:** at least 21 s after the kill, past the gate's 20 s cache, the spare signs one payment for the cheapest item within its cap (none fits: no kill). Re-order's rules read the answer: refused, paid, unknown or not sent.
+  - **The record:** a 402 refusal's `fail` edge is read back from GraphQL `order(id)` by its ref.
+  - **Partial results:** a step that fails after the kill is named in `incomplete`, and the kill hash stays in the answer.
+  - `GET` names the ready spare and the site's key pool. The route is listed in OPEN under "frontend".
+- **The keeper's guards:**
+  - It re-reads the name before setting the pass, and again before the top-up.
+  - If the name was killed while its pass was being set, it revokes that pass itself.
+  - It provisions only a label whose key the site holds.
+  - A failed run is retried after 2 minutes; exit 2, a missing key, waits for a person.
+  - A lock whose process has died is taken over.
+- **The workers:** `packages/mirror/src/ens.mjs` runs the keeper as a child process. It runs once at the watcher's start, and again after each `onRevoked` of a disposable name (a new watcher hook in `packages/ens`). `SPARE_KEEPER=0` turns it off.
+- **The flip** is ready on branch `claude/w1-flip`. With it, the whole suite passes: 214 web and phones tests, and every package.
 
 ## State
 
 - **Running:** this session, `local_45f7cf5d-c31e-4dbf-b849-466f3067bdd3` (brief `briefs/2302-w1-identity.md`).
 - **Blockers:** none.
-- **Waiting on:** the Coordinator's go for the label flip, after W2 confirms the Arkiv rows.
+- **Waiting on:** the Coordinator's go for the flip, and W5's workers restart after the kill PR.

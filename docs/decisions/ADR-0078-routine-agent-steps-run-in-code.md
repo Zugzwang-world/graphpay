@@ -1,4 +1,4 @@
-# ADR-0077: Routine agent steps run in code; each model keeps one judgment call
+# ADR-0078: Routine agent steps run in code; each model keeps one judgment call
 Status: accepted · Date: 2026-11-07 00:10 IST · Decided by: W4 Agents under the founder's authority · Source: the founder's W4 brief (`docs/thinking-partner/briefs/2258-w4-agents.md`, item 3: "do routine steps in code"; keep the trap veto and every visible message)
 
 ## Decision
