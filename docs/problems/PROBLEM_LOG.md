@@ -99,3 +99,10 @@ Symptom: `/api/status` reported `checkout: null` and noted "waiting for M2 deplo
 Cause: `checkoutAddress()` (written in the shell, before M2) looked for a string value under `whitechain.contracts`; the deployment record is `whitechain.contracts.checkout.address`. Its unit tests used a stand-in shape, so nothing failed until a route used the real config.
 Fix: read `contracts.checkout.address`, with a test against the real config.
 Prevention: a helper that reads a config section is tested against the real config file at least once, not only against the shape its author expected; a first live read of every new route is part of its step.
+
+### P-website-2: conflict markers committed in a CSS file after a merge
+When: 2026-11-06 06:45 IST · Activity: website · Cost: about 25 minutes of CI and a red PR
+Symptom: PR 55's `ci` and Vercel builds failed with "Parsing CSS source code failed" at `site.css`; the file held `<<<<<<< HEAD` and `>>>>>>> origin/main` lines.
+Cause: after `git merge origin/main` I resolved the conflicted docs files only (the ones I expected) and ran `git add -A`, which committed a second conflicted file (`apps/web/app/site.css`, both PRs appended CSS at its end). The checks I ran before the merge were green, and `pnpm check` does not look for conflict markers.
+Fix: kept both sides, rebuilt, pushed.
+Prevention: after every merge, list the conflicts from `git status` (or `git diff --name-only --diff-filter=U`) before committing, and run `git ls-files | xargs grep -ln '^<<<<<<< '` plus `pnpm build` before pushing; a merge commit is not green until the build is.

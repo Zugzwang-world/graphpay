@@ -65,17 +65,16 @@ Updated 05:33 IST, Fri 6 Nov. **M13's hosted run passed on the production domain
 
 ## website
 
-Updated 07:55 IST, Fri 6 Nov (T5 Web). **On `main`:** everything through M16 (the checkout kit and the demo store, #51). **In a PR:** the Mumbai map (Friday item 10), our own drawing of the neighbourhoods with no tiles: every shop in the directory as a dot (the small city labelled synthetic), open shops and agents at work glowing while their heartbeat is live and fading when it lapses, every dot opening its Arkiv record. Read live this session: 13 shops (3 cast, 10 synthetic), 18 agents at work, 0 open (nobody has tapped Open shop yet).
-- Running: nothing long. The store is not deployed (needs the Vercel project and env, see OPEN).
-- Blockers: none for the map. The Open toggle and Pause/Resume are live in production once the next deploy runs and someone with the passcode tries them.
-- Next: item 13 (the explainer lanes from the handoff and quote records); the store's Sunday box if time. Fresh start file: `docs/sessions/website/resume.md`.
+Updated 05:40 IST, Fri 6 Nov (T5 Web; the Mac's clock, Coordinator's time). **On `main`:** everything through M16, the Mumbai map and the explainer's agent lanes. **M16's done-when is met on the chain:** one real 4.80 USDT payment from the persona wallet (a human payer, no gas) went through the kit's client and the hosted facilitator to kesar-kingdom and settled (order 0x0864e72a…, block 12326025, `settleOrder` success; the order reads PAID, 4.80, payer the persona wallet).
+- Running: nothing. The store is not deployed (the Coordinator creates the Vercel project in the morning; env names in OPEN).
+- Blockers: the store's CSV export waits for T6's `LOG_CHUNK` fix (the public RPCs cap `eth_getLogs` at 10,000 blocks).
+- Next: the store's Sunday box if time; the explainer lanes and map fill as Join wires the runner. Fresh start file: `docs/sessions/website/resume.md`.
 
 ## agentpay
 
-Updated 04:20 IST, Fri 6 Nov (T6 AgentPay). **A4 done: the SDK's merchant now settles through GraphPay's own facilitator (T1, PR 42), not only through its reference relayer.** On an anvil fork, a gasless buyer agent paid the SDK merchant twice through T1's real pipeline: once in process, once over T1's HTTP handler with a bearer token. Both orders are PAID on-chain, sent by T1's relayer.
-- Also proven there: a wrong bearer token is refused by T1 and nothing is sent; an agent T1's ENS gate refuses is stopped before any send, and T1 records the refusal. Reviewer: nothing blocking.
-- V1 (PR 38) and the first real test payment (PR 41, 0.01 test USDT, https://explorer.testnet.whitechain.io/tx/0xfbd7d307b1b0c08f3af015b4bdb03aaeed12d0c2d18c2553432cb4679ff14c7e) are merged. 17 fork tests, 36 offline tests in CI.
-- Fixed on the way: the merchant's CSV could miss a refund from the last few seconds (a cached block number); its fork test is now reliable.
+Updated 05:30 IST, Fri 6 Nov (T6 AgentPay). **Fixed: the merchant's order export failed on the real Whitechain Sepolia** (T5 found it; its checkout kit's store export and refund views depend on it). The public RPCs refuse a log search over too many blocks (Whitechain's own over 10,000, the public Ankr endpoint over about 1,000), and the export asked for 50,000 at a time. It now asks for 10,000 and drops to 1,000 when an RPC refuses. Checked on the real chain: both public RPCs export the same 15 orders from the deploy block.
+- Also fixed: the fork tests no longer depend on FUNDER's real test USDT, which is down to 15.54. They write the test balance on the fork only.
+- A4 merged (PR 47): the SDK merchant settles through T1's facilitator, in process and over HTTP. 17 fork tests, 41 offline tests in CI.
 - Running: nothing. Blockers: none. The ride stays on the fork (OPEN).
 - Next: a resume file by 08:00 (A5); npm publish waits for the founder's login.
 

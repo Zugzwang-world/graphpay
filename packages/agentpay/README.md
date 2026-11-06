@@ -153,7 +153,7 @@ Spending pass: `issueSpendingPass`, `revokeSpendingPass`, `readSpendingPass`, `s
 | `refundRequests()` | POST endpoint for signed refund requests; checks the signer paid the order; emits `refund.requested` |
 | `subscriptions(plan)`, `cancellations()` | the plan offer (GET) and signed subscription (POST); signed cancels |
 | `chargeDueRenewals()`, `watchRenewals()` | renew what is due through the facilitator; watch the chain for renewals charged by any relayer |
-| `exportCsv({ fromBlock?, toBlock? })` | every order of this merchant from the chain logs: status, amount, refunds, payer, transactions, explorer links (no spreadsheet formulas) |
+| `exportCsv({ fromBlock?, toBlock? })` | every order of this merchant from the chain logs: status, amount, refunds, payer, transactions, explorer links (no spreadsheet formulas). Logs are read `logChunk` blocks at a time (a `createMerchant` option, default 10,000), and the span drops to a tenth when an RPC refuses the range |
 | `on(event, fn)` | `paid`, `payment.failed`, `refund.requested`, `refunded`, `accepted`, `delivered`, `subscribed`, `renewal.charged`, `cancelled` |
 
 `riskCheck(ctx)` → `{ allow, reason? }` runs before settlement and in `accept`. The default allows, unless the `ReputationProvider` rates the payer high risk.
