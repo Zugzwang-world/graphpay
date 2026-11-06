@@ -1,6 +1,6 @@
 # Integration audit: the team's phones and our back end
 
-Fri 6 Nov, 11:50 IST, by the Coordinator. This is a read-only audit for the integration brief (`docs/thinking-partner/briefs/1115-integration-audit.md`).
+Fri 6 Nov, 11:45 IST, by the Coordinator. This is a read-only audit for the integration brief (`docs/thinking-partner/briefs/1115-integration-audit.md`).
 
 Three read-only sub-agents read the team's fork at `bef8862`, our `main` at `29daec5`, and production by GET requests only. I added the Vercel variable names and the wallet balances. Nothing was changed, merged, deployed or sent.
 

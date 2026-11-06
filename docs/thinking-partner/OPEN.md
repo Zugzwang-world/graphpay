@@ -4,7 +4,7 @@ The founder's to-dos and open questions. Each item says what, where, why and wha
 
 ## Founder now (Coordinator only)
 
-Updated 11:55 IST, Fri 6 Nov (Coordinator). **Standing rule (ADR-0066): no target times.** Every task starts the moment it's given and is reported when it's done. Only the submission (Sat 09:00 IST) and the presentation (Sat 09:30 IST) are fixed.
+Updated 11:46 IST, Fri 6 Nov (Coordinator). **Standing rule (ADR-0066): no target times.** Every task starts the moment it's given and is reported when it's done. Only the submission (Sat 09:00 IST) and the presentation (Sat 09:30 IST) are fixed.
 
 1. **Lock the story.**
    - **Why:** the demo cast (T2 names, T1 policies, Join's bootstrap, T3's `shop` rows) and the large city's seeding (100–130 minutes) start the moment it locks.

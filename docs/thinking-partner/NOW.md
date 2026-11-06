@@ -1,10 +1,10 @@
 # NOW
 
-Updated 11:55 IST, Fri 6 Nov (Coordinator)
+Updated 11:46 IST, Fri 6 Nov (Coordinator)
 
 ## Summary (Coordinator only)
 
-Updated 11:55 IST, Fri 6 Nov. **Standing rule (ADR-0066): no target times.** Only the submission (Sat 09:00 IST) and the presentation (Sat 09:30 IST) are fixed.
+Updated 11:46 IST, Fri 6 Nov. **Standing rule (ADR-0066): no target times.** Only the submission (Sat 09:00 IST) and the presentation (Sat 09:30 IST) are fixed.
 
 - **The integration audit is done:** `docs/plan/integration-audit.md` (read-only; three sub-agents).
   - **The team's phones:** they build, and their 40 tests pass. PR #70 is still open, not merged. They run on mock data only: there is no live adapter and no passcode step yet.
@@ -99,7 +99,7 @@ Updated 11:09 IST, Fri 6 Nov (T6 AgentPay, Sonnet 5.5). **0.1.0 merged (PR 80); 
 
 ## records
 
-Updated 11:55 IST, Fri 6 Nov (Coordinator).
+Updated 11:46 IST, Fri 6 Nov (Coordinator).
 - **Done this step:**
   - the integration audit, with three read-only sub-agents (`docs/plan/integration-audit.md`);
   - both SDKs published as 0.1.1 and checked from the registry;
