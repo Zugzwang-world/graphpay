@@ -1,13 +1,14 @@
-// The live side of the limits (lib/limits.server.ts holds the decisions). Over the pass: the payer
-// agent's x402 attempt through the hosted shop and our facilitator, signed under its pass, which the
-// facilitator refuses before any send; the refusal record is read back from Arkiv. The agent's own cap
-// raise: an eth_call of the resolver's setText as the agent's key on Ethereum Sepolia, never sent, and
-// its record written with the recorder's key. Keys are read by role name, never leave this file and
-// are never logged; errors are logged by name only.
+// The live side of the limits (lib/limits.server.ts holds the decisions). Over the pass: the hosted
+// shop's 402 for the payer agent's attempt, one signature under its pass, and that payment sent to our
+// facilitator's verify step only (server to server, with its bearer token): verify never sends, and it
+// writes its refusal to Arkiv, which is read back here. The agent's own cap raise: an eth_call of the
+// resolver's setText from the agent's address on Ethereum Sepolia, never sent, and its record written
+// with the recorder's key. Keys and tokens are read by name, never leave this file and are never
+// logged; errors are logged by name only.
 import { config } from '@graphpay/config';
 import { checkoutAbi } from '@graphpay/contracts';
 import { KEYS, createEnsGate, createEnsReader, dnsEncode, ensPublicClient, permissionedResolverAbi, walkName } from '@graphpay/ens';
-import { decodePaymentRequiredHeader, errorNames, graphPayOrderClient, x402Client, x402HTTPClient } from '@graphpay/facilitator';
+import { decodePaymentRequiredHeader, errorNames, graphPayOrderClient, x402Client } from '@graphpay/facilitator';
 import { recordEdge, runGraphql } from '@graphpay/money-graph';
 import { BaseError, ContractFunctionRevertedError, isAddressEqual, keccak256, namehash, toHex, type Hex } from 'viem';
 import { privateKeyToAccount } from 'viem/accounts';
@@ -24,6 +25,9 @@ const KEY_SHAPE = /^0x[0-9a-fA-F]{64}$/;
 const ZERO32 = `0x${'0'.repeat(64)}`;
 const SITE = String(config.site.url).replace(/\/+$/, '');
 const SHOP = `${SITE}/api/shop`;
+const FACILITATOR = `${SITE}/api/facilitator`;
+// The facilitator's own rule for its bearer token (packages/facilitator settings).
+const MIN_TOKEN = 24;
 // A reason the shop or the facilitator gives (CAP_EXCEEDED, insufficient_balance): a short word, never text.
 const SAFE_REASON = /^[A-Za-z][A-Za-z0-9_]{1,39}$/;
 // The recorder writes after the facilitator answers; it is looked for this long.
@@ -31,7 +35,7 @@ const RECORD_WAIT_MS = 20_000;
 
 export function limitsKeysConfigured(env: Record<string, string | undefined> = process.env): boolean {
   try {
-    return KEY_SHAPE.test(env[payerKeyName()] ?? '') && recorderKeyConfigured(env);
+    return KEY_SHAPE.test(env[payerKeyName()] ?? '') && recorderKeyConfigured(env) && (env.FACILITATOR_AUTH_TOKEN ?? '').length >= MIN_TOKEN;
   } catch {
     return false;
   }
@@ -73,6 +77,8 @@ export function liveOverPassDeps(): OverPassDeps {
   const node = namehash(model.payer.ens);
   return {
     pass: async (): Promise<Pass> => {
+      // A fresh ENS read: the gate's 20 s cache must not hide a cap the owner just changed.
+      (await ensGate()).invalidate(model.payer.ens);
       const w = await whitechain();
       const checkout = checkoutAddress() as Hex;
       const [policy, spent, ensCapMicro] = await Promise.all([
@@ -105,24 +111,24 @@ export function liveOverPassDeps(): OverPassDeps {
       const network = `eip155:${w.chain.id}`;
       const headers = { 'content-type': 'application/json', [PASSCODE_HEADER]: process.env.DEMO_PASSCODE ?? '' };
       const body = JSON.stringify(quote.terms);
-      const post = (extra: Record<string, string>) => fetch(quote.payUrl, { method: 'POST', headers: { ...headers, ...extra }, body, redirect: 'error', cache: 'no-store', signal: AbortSignal.timeout(60_000) });
+      const post = () => fetch(quote.payUrl, { method: 'POST', headers, body, redirect: 'error', cache: 'no-store', signal: AbortSignal.timeout(20_000) });
       // 1. The shop's 402 for these terms (nothing is signed yet).
       let first: Response;
       try {
-        first = await post({});
+        first = await post();
       } catch {
-        return { status: 'failed', reason: 'SHOP_UNREACHABLE' };
+        return { status: 'unknown', reason: 'SHOP_UNREACHABLE' };
       }
-      if (first.status !== 402) return { status: 'failed', reason: 'SHOP_REFUSED' };
+      if (first.status !== 402) return { status: 'unknown', reason: 'SHOP_REFUSED' };
       let required: ReturnType<typeof decodePaymentRequiredHeader>;
       let accepted: { payTo: string; amount: string; extra?: { order?: Record<string, unknown> } };
       try {
         required = decodePaymentRequiredHeader(first.headers.get('payment-required') ?? '');
-        if (required.accepts?.length !== 1) return { status: 'failed', reason: 'BAD_402' };
+        if (required.accepts?.length !== 1) return { status: 'unknown', reason: 'BAD_402' };
         accepted = required.accepts[0] as typeof accepted;
       } catch (error) {
         console.error('over-pass 402:', errorNames(error));
-        return { status: 'failed', reason: 'BAD_402' };
+        return { status: 'unknown', reason: 'BAD_402' };
       }
       // 2. The payee is the shop's ENS address, and the 402's order is the quoted one-off order.
       try {
@@ -130,39 +136,44 @@ export function liveOverPassDeps(): OverPassDeps {
           createEnsReader({ client: (await ensPublicClient({ env: process.env })).client }).resolvePayee(model.merchant.ens),
           new Promise<never>((_, reject) => setTimeout(() => reject(new Error('ENS read timed out')), 12_000)),
         ]);
-        if (!payee.ok || !isAddressEqual(payee.payee as Hex, accepted.payTo as Hex)) return { status: 'failed', reason: 'PAYEE_MISMATCH' };
+        if (!payee.ok || !isAddressEqual(payee.payee as Hex, accepted.payTo as Hex)) return { status: 'unknown', reason: 'PAYEE_MISMATCH' };
       } catch (error) {
         console.error('over-pass payee:', errorNames(error));
-        return { status: 'failed', reason: 'PAYEE_MISMATCH' };
+        return { status: 'unknown', reason: 'PAYEE_MISMATCH' };
       }
       const wire = accepted.extra?.order;
       if (!wire || String(wire.orderId).toLowerCase() !== quote.orderId.toLowerCase() || String(wire.parentOrderId) !== ZERO32 || BigInt(String(wire.amountMicro ?? accepted.amount)) !== price || BigInt(String(wire.deadline)) > BigInt(String(quote.terms.exp))) {
-        return { status: 'failed', reason: 'NOT_THE_QUOTE' };
+        return { status: 'unknown', reason: 'NOT_THE_QUOTE' };
       }
       // 3. One signature under the pass, capped at the quoted amount.
-      let signature: Record<string, string>;
+      let paymentPayload: unknown;
       try {
         const scheme = graphPayOrderClient({ account, publicClient: w.publicClient, chainId: w.chain.id, token, permit2: config.whitechain.system.permit2, checkout, payerName: model.payer.ens, mandateHash: keccak256(toHex(`graphpay over-pass ${quote.orderId}`)) });
         const client = new x402Client().register(network, scheme).setSpendControls({ allowedAssets: [{ network, asset: token.address, maxAmountPerPayment: String(price) }] });
-        signature = new x402HTTPClient(client).encodePaymentSignatureHeader(await client.createPaymentPayload(required));
+        paymentPayload = await client.createPaymentPayload(required);
       } catch (error) {
         console.error('over-pass sign:', errorNames(error));
-        return { status: 'failed', reason: 'NOT_SIGNED' };
+        return { status: 'unknown', reason: 'NOT_SIGNED' };
       }
-      // 4. The signed attempt: our facilitator decides.
-      let paid: Response;
+      // 4. The signed attempt goes to our facilitator's verify step only: it decides, records a refusal,
+      // and never sends. The shop's pay route, which would settle, is never called with the signature.
+      let answer: { isValid?: unknown; invalidReason?: unknown } | null;
       try {
-        paid = await post(signature);
+        const verified = await fetch(`${FACILITATOR}/verify`, {
+          method: 'POST',
+          headers: { 'content-type': 'application/json', authorization: `Bearer ${process.env.FACILITATOR_AUTH_TOKEN ?? ''}` },
+          body: JSON.stringify({ x402Version: (paymentPayload as { x402Version?: unknown }).x402Version, paymentPayload, paymentRequirements: accepted }),
+          redirect: 'error',
+          cache: 'no-store',
+          signal: AbortSignal.timeout(30_000),
+        });
+        answer = verified.ok ? ((await verified.json().catch(() => null)) as typeof answer) : null;
       } catch {
-        return { status: 'unknown', reason: 'SHOP_UNREACHABLE' };
+        answer = null;
       }
-      const answer = (await paid.json().catch(() => null)) as { status?: unknown; reason?: unknown; transaction?: unknown } | null;
-      const transaction = typeof answer?.transaction === 'string' && /^0x[0-9a-fA-F]{64}$/.test(answer.transaction) ? answer.transaction : undefined;
-      const reason = typeof answer?.reason === 'string' && SAFE_REASON.test(answer.reason) ? answer.reason : undefined;
-      if (paid.status === 402 && answer?.status === 'refused' && !transaction) return { status: 'refused', reason };
-      if (paid.status === 200 && answer?.status === 'paid') return { status: 'paid', transaction };
-      if (paid.status === 402 && transaction) return { status: 'failed', reason, transaction };
-      return { status: 'unknown', reason, transaction };
+      if (!answer || typeof answer.isValid !== 'boolean') return { status: 'unknown', reason: 'FACILITATOR_UNREACHABLE' };
+      if (answer.isValid) return { status: 'valid' };
+      return { status: 'refused', reason: typeof answer.invalidReason === 'string' && SAFE_REASON.test(answer.invalidReason) ? answer.invalidReason : undefined };
     },
     // The facilitator's recorder writes the refusal as a `fail` edge with the order id (ref att:…).
     record: async (orderId) => {
@@ -203,16 +214,17 @@ export function liveRaiseCapDeps(): RaiseCapDeps {
       if ((await client.getChainId()) !== config.networks.sepolia.chainId) throw new Error('the RPC is not on Ethereum Sepolia');
       const walked = await walkName(client, model.payer.ens);
       if (!walked.ok) throw new Error('the agent name does not resolve');
+      const block = String(await client.getBlockNumber());
       try {
-        await client.simulateContract({ account: payerAccount().address, address: walked.resolver, abi: permissionedResolverAbi, functionName: 'setText', args: [dnsEncode(walked.name), KEYS.capMicro, String(capMicro)] });
-        return { reverted: false, resolver: walked.resolver };
+        await client.simulateContract({ account: payerAccount().address, address: walked.resolver, abi: permissionedResolverAbi, functionName: 'setText', args: [dnsEncode(walked.name), KEYS.capMicro, String(capMicro)], blockNumber: BigInt(block) });
+        return { reverted: false, resolver: walked.resolver, block };
       } catch (error) {
         const revert = revertName(error);
         if (!revert) throw error;
-        return { reverted: true, revert, resolver: walked.resolver };
+        return { reverted: true, revert, resolver: walked.resolver, block };
       }
     },
-    record: async ({ attemptedMicro, currentMicro, revert, resolver, ts }) => {
+    record: async ({ attemptedMicro, currentMicro, revert, resolver, block, ts }) => {
       const epoch = (await sharedCustomerState()).agent.epoch;
       const node = namehash(model.payer.ens);
       return recordEdge(await syncConnection(), {
@@ -221,9 +233,11 @@ export function liveRaiseCapDeps(): RaiseCapDeps {
         kind: 'request',
         from: { ens: model.payer.ens, epoch },
         to: { ens: model.persona.ens, epoch: 0 },
-        amountMicro: attemptedMicro,
+        // No money moves and nothing is asked of anyone: the figure is in the payload, never the amount.
+        amountMicro: 0n,
         ts,
-        payload: toHex(JSON.stringify({ action: 'raise-own-cap', key: KEYS.capMicro, attemptedMicro: String(attemptedMicro), currentMicro: String(currentMicro), outcome: 'refused', revert, sent: false, resolver })),
+        // A simulation this site ran from the agent's address: anyone can repeat the same eth_call at this block.
+        payload: toHex(JSON.stringify({ action: 'raise-own-cap', key: KEYS.capMicro, attemptedMicro: String(attemptedMicro), currentMicro: String(currentMicro), outcome: 'refused', revert, sent: false, simulated: true, triggeredBy: 'site', chainId: config.networks.sepolia.chainId, block, resolver })),
       });
     },
     now: () => Date.now(),
