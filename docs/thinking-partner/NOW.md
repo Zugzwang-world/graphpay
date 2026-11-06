@@ -1,12 +1,12 @@
 # NOW
 
-Updated 23:52 IST, Fri 6 Nov (night Coordinator)
+Updated 00:12 IST, Sat 7 Nov (night Coordinator)
 
 ## Summary (Coordinator only)
 
-Updated 23:52 IST, Fri 6 Nov. **Only the submission (Sat 09:00 IST) and the presentation (09:30 IST) are fixed** (ADR-0066). Every deliverable's status is in [`TRACKER.md`](TRACKER.md).
+Updated 00:12 IST, Sat 7 Nov. **Only the submission (Sat 09:00 IST) and the presentation (09:30 IST) are fixed** (ADR-0066). Every deliverable's status is in [`TRACKER.md`](TRACKER.md).
 
-**The Mac is charging** (72% at 23:47 IST). Keep the charger in and the lid open until the presentation: the mirror and every night session run on it.
+**The Mac is charging** (81% at 00:07 IST). Keep the charger in and the lid open until the presentation: the mirror and every night session run on it.
 
 **The night run** ([brief](briefs/2259-night-coordinator.md)): seven streams, each in its own session and worktree, on Opus 5.5 at max. The usage guardrails are off tonight, and no contract is redeployed.
 
@@ -31,24 +31,26 @@ The Coordinator times each step. If a merge breaks the live errand, revert first
 **Landed tonight:**
 - **W5:** the payer's pass is **300 test USDT a day** for tonight, in the policy and the ENS record, and PAYER is back to 125 test USDT ([#152](https://github.com/Zugzwang-world/graphpay/pull/152)).
 - **W4:** the request says "delivered within an hour", and the deadline counts from the request, so errands can buy at any hour ([#153](https://github.com/Zugzwang-world/graphpay/pull/153), live since 23:18 IST). Every model call now goes into the run log with its tokens and seconds ([#157](https://github.com/Zugzwang-world/graphpay/pull/157)); the live baseline at 23:30 IST paid 4.80 in 91 s, with 19 model calls, 33,287 tokens and $0.15. The routine agents now run at Kimi's low effort, and the models read short tool replies ([#162](https://github.com/Zugzwang-world/graphpay/pull/162), 23:40 IST); W4 proves it live next.
-- **W3:** "Another coffee" pays 0.80 for the filter coffee, live at 23:34 IST ([#155](https://github.com/Zugzwang-world/graphpay/pull/155), [tx](https://explorer.testnet.whitechain.io/tx/0xf1d7cb5654de6cc09ede0a404818a009f7429d9d149e3e564222d4a4d3ae2b4a)).
+- **W3:** "Another coffee" pays 0.80 for the filter coffee, live at 23:34 IST ([#155](https://github.com/Zugzwang-world/graphpay/pull/155), [tx](https://explorer.testnet.whitechain.io/tx/0xf1d7cb5654de6cc09ede0a404818a009f7429d9d149e3e564222d4a4d3ae2b4a)). Subscribe, renew and cancel work live: the Sunday breakfast at 2.40 on the labelled 2-minute demo clock, at most 3 charges per subscription ([#173](https://github.com/Zugzwang-world/graphpay/pull/173); [subscribe](https://explorer.testnet.whitechain.io/tx/0xf3f7586090fb37cf4b04963216dabc7b89915f02afb19f71fb81ca138e53c393), [the cron's renewal](https://explorer.testnet.whitechain.io/tx/0x8d40d556382f40313dafaf712d3c174d7cc8365176c8813f04e849f93338de83), [cancel](https://explorer.testnet.whitechain.io/tx/0x70ed2b3ffa63b81fa426631c70cb39591f8b80c077455930d05e63de04077b42)).
+- **W5:** pause and resume per agent (only the payer and the scout can be paused), and self-healing ([#172](https://github.com/Zugzwang-world/graphpay/pull/172), live 00:05 IST).
+- **W6:** arkiv-graph 1.0.0 is merged ([#174](https://github.com/Zugzwang-world/graphpay/pull/174)); agentpay 1.0.0 follows, then the publish, with the founder's npm approval.
 - **W7:** the README, with a "verify each claim" table of 24 checked transactions, the persona note, the partner sections and the team; a root MIT license ([#154](https://github.com/Zugzwang-world/graphpay/pull/154)). Then `AI_USAGE.md` and the five Arkiv files ([#159](https://github.com/Zugzwang-world/graphpay/pull/159)), and `WHITECHAIN_FEEDBACK.md` with the ENS partner note ([#161](https://github.com/Zugzwang-world/graphpay/pull/161)).
 - **W1:** the three new shop names are live on ENS (Sepolia), each with its storefront, risk and dispatch agents, on the old shops' wallets, so no funds move (30 transactions; ENS reads 100 pass). The record is [#158](https://github.com/Zugzwang-world/graphpay/pull/158).
 
 - **W7 is done with its brief:** the form text, ready to paste, is in `docs/submission/ETHGLOBAL.md` ([#164](https://github.com/Zugzwang-world/graphpay/pull/164)), with every claim linked to evidence; also a video shot list and the sponsor checklist ([#166](https://github.com/Zugzwang-world/graphpay/pull/166)). W7 keeps them current as the other streams land.
 
-**In PR:** W2's new shops on Arkiv ([#167](https://github.com/Zugzwang-world/graphpay/pull/167), ADR-0077) and the big city M ([#168](https://github.com/Zugzwang-world/graphpay/pull/168)); W3's refund decline ([#163](https://github.com/Zugzwang-world/graphpay/pull/163)) and the limits ([#169](https://github.com/Zugzwang-world/graphpay/pull/169)).
+**In PR:** W2's new shops on Arkiv ([#167](https://github.com/Zugzwang-world/graphpay/pull/167), ADR-0077) and the big city M ([#168](https://github.com/Zugzwang-world/graphpay/pull/168)); W3's refund decline ([#163](https://github.com/Zugzwang-world/graphpay/pull/163)) and the limits ([#169](https://github.com/Zugzwang-world/graphpay/pull/169): the over-the-pass demo must post to the facilitator's verify, so it can never send); W1's kill ([#175](https://github.com/Zugzwang-world/graphpay/pull/175)).
 
-**The mirror is back.** It stalled at 23:29 IST, when this Mac's Arkiv read budget ran out (the access key's quota is spent; the keyless endpoint allows 10,000 requests per window, shared by every process on this Mac). W5 restarted it at 23:43 IST from its own worktree (`w5-workers`); it caught up and wrote the six missed events, W3's 0.80 re-order among them. Until a fresh key comes, every stream keeps its Arkiv reads from this Mac small. Join is archived (23:49 IST).
+**Arkiv from this Mac:** the access key's quota is spent, and the keyless endpoint's budget is shared by every process on this Mac, so the mirror stalled at 23:29 and 23:51 IST. W5 runs the workers from its own checkout (`w5-workers`) under a watchdog. Until a fresh key comes, every stream keeps its Arkiv reads from this Mac small. The site reads from Vercel, unaffected. Join is archived (23:49 IST).
 
 **The label flip:** W2 has written the new shops' directory and node rows (category south-indian, at the Grok places) and 175 of 1,258 history events; the rest goes out after the reset. Then W1 flips the labels and the category in one PR, and W5 restarts the workers. Expected after 01:00 IST.
 
 **Decided tonight (Coordinator):** the owner's cap change reaches the spending policy through the watcher on the Mac, never above the story's configured cap, so POLICY_WRITER stays local (ADR-0021); W3 writes the ADR.
 
-**Live now** (23:17 IST):
-- **The payer is ACTIVE:** resumed at 23:00 IST ([Sepolia tx](https://sepolia.etherscan.io/tx/0x34cddd47d2230e305b4f0a9546b8dfba51d37b7bee4c0336d54a4f556397f949)). 78 of tonight's 300 test USDT are spent; the pass resets at 05:30 IST.
-- **Filter & Fold is open.** A listing lasts 15 minutes, and only an open merchant phone renews it, so all three shops had lapsed to closed.
-- **A bridge loop on this Mac** renews the shop's listing every 9 minutes and resumes a paused payer after about 6 minutes, until W5's self-healing cron is live.
+**Live now** (00:07 IST):
+- **The payer is ACTIVE,** with 107.6 of tonight's 300 test USDT spent; the pass resets at 05:30 IST.
+- **Filter & Fold is open.** Since 00:05 IST W5's self-healing cron (every minute) resumes a paused agent after 2 minutes and reopens a closed shop after 5; the Coordinator's bridge loop stopped at 00:09 IST.
+- **The mirror is stopped on purpose** (a hold since 00:01 IST) while W2 writes the new shops' history without colliding with the mirror's heartbeat. W5's watchdog restarts it when the hold is lifted; it resumes from its checkpoint, so nothing is lost.
 
 **Retired at 23:05 IST:**
 - T1 to T6, Booth (with its two side sessions), Booth Sync and Integration are archived. Their last prompt logs are committed here.
