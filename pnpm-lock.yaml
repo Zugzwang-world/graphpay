@@ -109,24 +109,24 @@ importers:
 
   examples/agentpay-ride:
     dependencies:
-      '@graphpay/agentpay':
-        specifier: workspace:*
-        version: link:../../packages/agentpay
       '@graphpay/config':
         specifier: workspace:*
         version: link:../../packages/config
+      '@graphpay_ethglobal/agentpay':
+        specifier: workspace:*
+        version: link:../../packages/agentpay
 
   examples/agentpay-sweets:
     dependencies:
-      '@graphpay/agentpay':
-        specifier: workspace:*
-        version: link:../../packages/agentpay
       '@graphpay/config':
         specifier: workspace:*
         version: link:../../packages/config
       '@graphpay/contracts':
         specifier: workspace:*
         version: link:../../packages/contracts
+      '@graphpay_ethglobal/agentpay':
+        specifier: workspace:*
+        version: link:../../packages/agentpay
       viem:
         specifier: 2.57.16
         version: 2.57.16(typescript@5.9.3)(zod@4.6.7)
@@ -181,12 +181,6 @@ importers:
 
   packages/agentpay:
     dependencies:
-      '@graphpay/config':
-        specifier: workspace:*
-        version: link:../config
-      '@graphpay/contracts':
-        specifier: workspace:*
-        version: link:../contracts
       '@modelcontextprotocol/sdk':
         specifier: 1.32.2
         version: 1.32.2(zod@4.6.7)
@@ -200,6 +194,12 @@ importers:
         specifier: 4.6.7
         version: 4.6.7
     devDependencies:
+      '@graphpay/config':
+        specifier: workspace:*
+        version: link:../config
+      '@graphpay/contracts':
+        specifier: workspace:*
+        version: link:../contracts
       '@graphpay/facilitator':
         specifier: workspace:*
         version: link:../facilitator
@@ -236,12 +236,12 @@ importers:
 
   packages/checkout-kit:
     dependencies:
-      '@graphpay/agentpay':
-        specifier: workspace:*
-        version: link:../agentpay
       '@graphpay/contracts':
         specifier: workspace:*
         version: link:../contracts
+      '@graphpay_ethglobal/agentpay':
+        specifier: workspace:*
+        version: link:../agentpay
       react:
         specifier: '>=19'
         version: 19.3.1

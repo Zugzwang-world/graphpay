@@ -1,4 +1,4 @@
-// The browser-safe signer is a copy of what @graphpay/contracts and @graphpay/agentpay define;
+// The browser-safe signer is a copy of what @graphpay/contracts and @graphpay_ethglobal/agentpay define;
 // these tests hold it equal, so it can never drift from what the contract verifies.
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
@@ -6,7 +6,7 @@ import { generatePrivateKey, privateKeyToAccount } from 'viem/accounts';
 import { recoverTypedDataAddress } from 'viem';
 import { config } from '@graphpay/config';
 import { eip2612Types, permit2Domain, permitWitnessTypes, tokenDomain } from '@graphpay/contracts';
-import { buildRequirement, createOrder, nodeOf, signOrderPayment as agentpaySign, whitechainNetwork } from '@graphpay/agentpay';
+import { buildRequirement, createOrder, nodeOf, signOrderPayment as agentpaySign, whitechainNetwork } from '@graphpay_ethglobal/agentpay';
 import { fakeChain } from './fakes.mjs';
 import * as kit from '../src/sign.mjs';
 

@@ -1,36 +1,64 @@
 {
-  "name": "@graphpay/agentpay",
+  "name": "@graphpay_ethglobal/agentpay",
   "version": "0.1.0",
-  "private": true,
   "type": "module",
-  "description": "AgentPay: a two-sided SDK for agentic stablecoin payments on Whitechain. Customer agents pay a 402 with one signature and no gas under an on-chain spending pass; merchants price any route, settle through a facilitator and get paid in USDT. Identity and reputation plug in through interfaces.",
+  "description": "AgentPay: a two-sided SDK for agentic USDT payments on Whitechain Sepolia. An AI agent pays an HTTP 402 with one signature and no gas under an on-chain spending pass; a merchant prices any route, settles through a facilitator and gets paid.",
   "license": "MIT",
+  "author": "GraphPay",
+  "homepage": "https://github.com/Zugzwang-world/graphpay/tree/main/packages/agentpay#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Zugzwang-world/graphpay.git",
+    "directory": "packages/agentpay"
+  },
+  "bugs": {
+    "url": "https://github.com/Zugzwang-world/graphpay/issues?q=label%3Aagentpay"
+  },
+  "keywords": ["x402", "http-402", "agent-payments", "ai-agents", "usdt", "stablecoin", "whitechain", "mcp", "permit2", "eip-712"],
+  "engines": {
+    "node": ">=22"
+  },
   "exports": {
     ".": {
       "types": "./index.d.ts",
       "default": "./index.mjs"
-    }
+    },
+    "./sandbox": {
+      "types": "./sandbox.d.ts",
+      "default": "./sandbox.mjs"
+    },
+    "./package.json": "./package.json"
   },
   "types": "./index.d.ts",
   "files": [
     "index.mjs",
     "index.d.ts",
+    "sandbox.mjs",
+    "sandbox.d.ts",
     "src",
-    "README.md"
+    "examples",
+    "README.md",
+    "CHANGELOG.md",
+    "FEEDBACK.md",
+    "LICENSE"
   ],
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "test": "node --test \"test/*.test.mjs\"",
-    "test:fork": "node --test --test-concurrency=1 \"test-fork/*.test.mjs\""
+    "test:fork": "node --test --test-concurrency=1 \"test-fork/*.test.mjs\"",
+    "vendor": "node scripts/vendor.mjs"
   },
   "dependencies": {
-    "@graphpay/config": "workspace:*",
-    "@graphpay/contracts": "workspace:*",
     "@modelcontextprotocol/sdk": "1.32.2",
     "ai": "7.0.162",
     "viem": "2.57.16",
     "zod": "4.6.7"
   },
   "devDependencies": {
+    "@graphpay/config": "workspace:*",
+    "@graphpay/contracts": "workspace:*",
     "@graphpay/facilitator": "workspace:*",
     "@x402/core": "2.30.0"
   }
