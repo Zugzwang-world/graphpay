@@ -171,13 +171,14 @@ Updated 23:38 IST, Fri 6 Nov (W7 Submission).
 
 ## w3-payments
 
-- **The owner's cap change goes live with W1's watcher** (owner: W3, with W1 and W5). What: `POST /api/customer/cap` (#179) writes the owner's ENS cap. The policy follows through the watcher on the Mac, never above the configured cap (ADR-0078). Why: until W1's watcher change is merged and W5 has restarted the workers, the route answers `policy.applied: false`. Recommendation: merge W1's PR, restart the workers, and W3 proves it once, 300 → 250 → 300.
-- **The "everyone" quantity** (owner: founder; default taken). What: `order.overPass.quantity` is 100, a synthetic story value; the brief gives no headcount. Why: any figure above the pass is refused the same way. Recommendation: keep 100, or set the real headcount in `story.json`.
+- **The "everyone" quantity** (owner: founder; default taken). What: `order.overPass.quantity` is 100, a synthetic story value labelled as such; the brief gives no headcount. Why: any figure above the pass is refused the same way. Recommendation: keep 100, or set the real headcount in `story.json`.
+- **A reconcile at the watcher's start** (owner: W1; not needed tonight). What: a cap the owner sets while the workers are down reaches the policy only with the owner's next change (ADR-0079, known gap). Recommendation: after the event, read each paying agent's ENS cap at start and apply min(ENS cap, configured cap).
 - Closed tonight:
   - the 0.80 re-order (#155);
   - subscribe, renew and cancel (#173);
   - the refund decline (#163);
-  - over the pass and the refused cap raise (#169);
+  - over the pass and the refused cap raise (#169, #190);
+  - the owner's cap change in both records (#179, #191, ADR-0079), proven live 300 → 250 → 300;
   - acceptance C3 on the re-order's own item (W5).
 
 ## w4-agents

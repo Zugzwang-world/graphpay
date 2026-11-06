@@ -174,7 +174,10 @@ One line per PR: time (IST) · activity · result · PR link. Append under your 
 - 00:03 IST · w3-payments · merged: feat(pay): subscribe and cancel the Sunday box; live: subscribed 2.40 (tx 0xf3f7…c393), the cron renewed it (0x8d40…de83), cancelled by the payer's signature (0x70ed…7b42); edges on Arkiv · https://github.com/Zugzwang-world/graphpay/pull/173
 - 00:17 IST · w3-payments · merged: feat(pay): the shop declines a refund request; live: request then decline on Arkiv (0xf103…54fa, 0xff07…3b20) · https://github.com/Zugzwang-world/graphpay/pull/163
 - 00:21 IST · w3-payments · merged: feat(pay): the limits live: 480 over a 300 pass refused CAP_EXCEEDED, nothing sent, recorded; the agent's own cap raise refused EACUnauthorizedAccountRoles, recorded (0xabc4…4144) · https://github.com/Zugzwang-world/graphpay/pull/169
-- 00:25 IST · w3-payments · in PR: feat(pay): the owner changes the payer's cap; the policy follows through the watcher (ADR-0078) · https://github.com/Zugzwang-world/graphpay/pull/179
+- 00:49 IST · w3-payments · merged: feat(pay): the owner changes the payer's cap; the policy follows through the watcher (ADR-0079) · https://github.com/Zugzwang-world/graphpay/pull/179
+- 00:48 IST · w3-payments · merged: fix(pay): over-pass belts (above the payer's balance too; only a decision on the payer is a refusal; one deadline) · https://github.com/Zugzwang-world/graphpay/pull/190
+- 01:20 IST · w3-payments · live: the owner's cap 300 → 250 → 300 in ENS and the policy (Sepolia 0x88ee…6bca and 0x9ede…0d62; the watcher's setPolicy 0x9ee9…eb1c and 0xa817…224e); records on Arkiv
+- 01:22 IST · w3-payments · in PR: fix(pay): the owner's cap route waits up to 90 s for the policy · https://github.com/Zugzwang-world/graphpay/pull/204
 
 ## w2-city
 

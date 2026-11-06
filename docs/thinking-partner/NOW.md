@@ -98,18 +98,21 @@ Updated 01:15 IST, Sat 7 Nov (W2 City, session `local_da212093-3d02-4768-9314-ab
 
 ## w3-payments
 
-Updated 00:25 IST, Sat 7 Nov (W3 Payments, session `local_b65be40a-eb20-4d86-b784-7d2aa1a93527`). Every money action of the brief works live, with its explorer link and Arkiv record, except the owner's cap change, which waits for W1's watcher.
-- **Re-order, done (#155):** "Another coffee" paid 0.80 at 23:34 IST ([tx](https://explorer.testnet.whitechain.io/tx/0xf1d7cb5654de6cc09ede0a404818a009f7429d9d149e3e564222d4a4d3ae2b4a), [Arkiv](https://graphpay-event.vercel.app/api/explain/8391bb5c1b6b)).
-- **Subscriptions, done (#173):**
-  - subscribed at 2.40, stored on chain, first box charged at once ([tx](https://explorer.testnet.whitechain.io/tx/0xf3f7586090fb37cf4b04963216dabc7b89915f02afb19f71fb81ca138e53c393));
+Updated 01:25 IST, Sat 7 Nov (W3 Payments, session `local_b65be40a-eb20-4d86-b784-7d2aa1a93527`). **Every money action of the brief works live, each with its explorer link and its Arkiv record.**
+- **Re-order (#155):** "Another coffee" paid 0.80 ([tx](https://explorer.testnet.whitechain.io/tx/0xf1d7cb5654de6cc09ede0a404818a009f7429d9d149e3e564222d4a4d3ae2b4a), [Arkiv](https://graphpay-event.vercel.app/api/explain/8391bb5c1b6b)).
+- **Subscriptions (#173):**
+  - subscribed at 2.40 ([tx](https://explorer.testnet.whitechain.io/tx/0xf3f7586090fb37cf4b04963216dabc7b89915f02afb19f71fb81ca138e53c393));
   - the cron renewed it ([tx](https://explorer.testnet.whitechain.io/tx/0x8d40d556382f40313dafaf712d3c174d7cc8365176c8813f04e849f93338de83));
-  - cancelled with the payer's own signature ([tx](https://explorer.testnet.whitechain.io/tx/0x70ed2b3ffa63b81fa426631c70cb39591f8b80c077455930d05e63de04077b42));
+  - cancelled by the payer's own signature ([tx](https://explorer.testnet.whitechain.io/tx/0x70ed2b3ffa63b81fa426631c70cb39591f8b80c077455930d05e63de04077b42));
   - [Arkiv](https://graphpay-event.vercel.app/api/explain/23281094e730).
-- **Refund decline, done (#163):** request, then the shop's decline, both on Arkiv ([explain](https://graphpay-event.vercel.app/api/explain/033a073bd39e)).
-- **Limits (#169):**
-  - over the pass: 480 against 300, refused `CAP_EXCEEDED`, nothing sent ([Arkiv](https://rabdi.explorer.arkiv.network/entity/0x49163142476bc996134f3a4b0cac473f9698fa0781f39895206b138cfab1dc19));
-  - the agent's own cap raise: refused `EACUnauthorizedAccountRoles`, simulated, nothing sent ([Arkiv](https://rabdi.explorer.arkiv.network/tx/0xabc41f475312767e363e073ec872c3ff4b3556883901201dca53f1dafd444144)).
-- **Next:** the owner's cap change (#179, ADR-0078), live once W1's watcher PR merges and W5 restarts the workers.
+- **Refund decline (#163):** request, then the shop's decline, on Arkiv ([explain](https://graphpay-event.vercel.app/api/explain/033a073bd39e)).
+- **Over the pass (#169, #190):** 480 against 300, refused `CAP_EXCEEDED`, verify only, nothing sent ([Arkiv](https://rabdi.explorer.arkiv.network/entity/0x49163142476bc996134f3a4b0cac473f9698fa0781f39895206b138cfab1dc19)).
+- **The agent's own cap raise (#169):** refused `EACUnauthorizedAccountRoles`, simulated, nothing sent ([Arkiv](https://rabdi.explorer.arkiv.network/tx/0xabc41f475312767e363e073ec872c3ff4b3556883901201dca53f1dafd444144)).
+- **The owner's cap change (#179 with W1's #191, ADR-0079):** 300 → 250 → 300.
+  - ENS: [Sepolia](https://sepolia.etherscan.io/tx/0x88eee4073dd89ca143cb1a155f4443f9810435cbd0522e3dde87102077b06bca) and [back](https://sepolia.etherscan.io/tx/0x9ede86e263e96dab93b13686c290ced72041da5c2b8b7b0ae76a8774040b0d62).
+  - The policy, written by the watcher: [setPolicy](https://explorer.testnet.whitechain.io/tx/0x9ee983c5b03c6fa183fc5d6ebbcda5e87c1955b04d474ddfc6f40f7a16caeb1c) and [back](https://explorer.testnet.whitechain.io/tx/0xa8171e53f95808df50d7fcad4820d071b0aa23b83ffcc09b8bb8173bcae6224e).
+  - Arkiv: [record](https://rabdi.explorer.arkiv.network/tx/0x0156c13f9a2eefc977e83cd1fac6fec0f4cd06c86f8ef887850f6a6393407a1a), and the node reads 300.
+- **In PR:** #204, the cap route waits 90 s for the policy (the first setPolicy landed 61 s after the ENS write).
 - Blockers: none.
 
 ## w4-agents
