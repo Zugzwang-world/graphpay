@@ -17,6 +17,7 @@
     "@graphpay/contracts": "workspace:*",
     "@graphpay/ens": "workspace:*",
     "@graphpay/facilitator": "workspace:*",
+    "@graphpay_ethglobal/agentpay": "workspace:*",
     "@graphpay/money-graph": "workspace:*",
     "@graphpay/shop": "workspace:*",
     "next": "16.4.5",

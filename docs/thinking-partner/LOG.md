@@ -76,6 +76,7 @@ One line per PR: time (IST) · activity · result · PR link. Append under your 
 - 05:40 IST · website · opened: M16 proof, one real 4.80 USDT kit payment on the hosted facilitator (tx 0xf1e76a91…), the store's facilitator env name, the export's RPC range cap logged · https://github.com/Zugzwang-world/graphpay/pull/63
 - 06:10 IST · website · opened: the merchant phone's Mark dispatched and Refund (Friday item 12), signed with the shop's key behind the passcode, reviewer pass · https://github.com/Zugzwang-world/graphpay/pull/65
 - 09:50 IST · website · opened: the customer phone's Request refund (Friday item 11): a request edge on Arkiv from the recorder's key behind the passcode, reviewer pass; the website relay trimmed to about 700 words · https://github.com/Zugzwang-world/graphpay/pull/73
+- 10:50 IST · website · opened: the customer phone's Re-order (Friday item 11): the payer agent's one signed payment through the hosted shop behind the passcode, reviewer pass (three double-payment findings fixed) · https://github.com/Zugzwang-world/graphpay/pull/81
 
 ## agentpay
 - 04:05 IST · agentpay · opened: `@graphpay/agentpay` V1, the two-sided SDK (buyer pass and guards, merchant middleware, facilitator interface and reference relayer, AI SDK and MCP tools, the sweet shop and ride examples), 36 offline and 13 fork tests, reviewer's 2 blocking fixed · https://github.com/Zugzwang-world/graphpay/pull/38
