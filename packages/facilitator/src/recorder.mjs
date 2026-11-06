@@ -6,7 +6,7 @@
 
 import { z } from 'zod';
 import { keccak256, namehash, toHex } from 'viem';
-import { bearerOk, json, readJson } from './http.mjs';
+import { bearerOk, errorNames, json, readJson } from './http.mjs';
 import { RateLimiter } from './limits.mjs';
 
 const hex32 = z.string().regex(/^0x[0-9a-fA-F]{64}$/);
@@ -95,7 +95,7 @@ export function recorderHandler({ token, write, log = console.error, clock = () 
       const written = await write(attemptEdge(parsed.data));
       return json(201, { entityKey: written.entityKey, txHash: written.txHash, recovered: written.recovered });
     } catch (e) {
-      log(`recorder: ${e?.name ?? 'Error'}`);
+      log(`recorder: ${errorNames(e)}`);
       return json(500, { error: 'internal error' });
     }
   };

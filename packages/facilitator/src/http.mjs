@@ -12,6 +12,19 @@ export const json = (status, body, extra = {}) =>
   new Response(JSON.stringify(body, (_, v) => (typeof v === 'bigint' ? String(v) : v)), { status, headers: { ...HEADERS, ...extra } });
 
 // Constant-time and length-independent: both sides are hashed first.
+// An error for a log line: the class names along its cause chain, with an RPC error code or an
+// HTTP status where one is a plain number (e.g. HttpRequestError 429, RpcRequestError -32005).
+// Never a message: viem's messages quote the RPC URL, and keyed URLs carry the key.
+export function errorNames(e) {
+  const parts = [];
+  for (let x = e, i = 0; x && i < 6; x = x.cause, i += 1) {
+    const name = typeof x.name === 'string' && /^[A-Za-z][A-Za-z0-9]{0,60}$/.test(x.name) ? x.name : 'Error';
+    const num = [x.status, x.code].find((v) => Number.isInteger(v));
+    parts.push(num === undefined ? name : `${name} ${num}`);
+  }
+  return parts.join(' < ') || 'Error';
+}
+
 export function bearerOk(request, token) {
   if (typeof token !== 'string' || token.length < 24) return false;
   const header = request.headers.get('authorization') ?? '';
@@ -88,7 +101,7 @@ export function facilitatorHandler({ facilitator, scheme, authToken, ready, heal
       if (!result.success && result.errorReason === 'busy') return json(503, result);
       return json(200, result);
     } catch (e) {
-      log(`facilitator: ${e?.name ?? 'Error'}`); // never the message: viem's quotes the RPC URL
+      log(`facilitator: ${errorNames(e)}`); // never the message: viem's quotes the RPC URL
       return json(500, { error: 'internal error' });
     }
   };

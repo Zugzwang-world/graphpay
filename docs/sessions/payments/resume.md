@@ -13,6 +13,7 @@ Read `docs/plan/sessions/T1-payments.md` first; this note says where the work st
 3. Real payments go through the hosted facilitator only; no local FACILITATOR or RENEWER sends during the demo.
 
 ## Open threads
+- Live finding (11:12 IST): a hosted settle (Join's Kimi errand, order 0x31065e2f…, 05:39:47 UTC) failed in the relayer's send with ContractFunctionExecutionError. Nothing was broadcast: nonce 13, latest = pending. The log showed only the class name, so the error-chain PR now logs the cause names and codes. If it happens again, read the chain in `vercel logs` (project id in the config, `-e production`, the time window).
 - Live finding (10:49 IST): W_DIRECTORY has three writers on different instances (the shop's quote, Join's presence and hand-off rows, T5's Open toggle). A quote write failed with WriteUncertainError. Fixed by the bounded retry (`retryUncertain`) and Join's hold during the 402 (#93). T3 was told that arkiv-graph's writer can adopt a replacement transaction on the direct path (it doesn't call verifyRecovered there).
 - OPEN.md: CI required check; config role addresses.
 - C4(b) as the acceptance agent is M13's (over-cap off-chain after C2 + C3).
