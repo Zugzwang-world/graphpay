@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { Explainer } from '@/components/explainer';
+import { LiveRunBridge } from '@/components/live-run-bridge';
 import { QrCode } from '@/components/qr-code';
 import { siteModel } from '@/lib/site.server';
 
@@ -15,6 +16,7 @@ export default function LiveStagePage() {
   const merchantLabel = `${model.merchant.displayName}’s phone`;
   return (
     <>
+      <LiveRunBridge />
       <div className="stage">
         <div className="stage-customer">
           <p className="stage-label">

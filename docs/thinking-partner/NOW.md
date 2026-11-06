@@ -83,11 +83,11 @@ Updated 13:33 IST, Fri 6 Nov. **The live errand pays reliably on the production 
 
 ## phones
 
-Updated 13:50 IST, Fri 6 Nov (Integration).
-- **Phase 1 is merged (#111):** the team's two phones on our site at `/live`, on live read-only data. It broke production deploys (Vercel skipped the team's dev tools); the one-flag fix is #116. Production goes live with it.
-- **Phase 2, step 1, in review: public access (ADR-0069).** One config switch (`site.publicAccess`) opens the site's own routes; the site stops asking for the passcode. Keys between our own servers stay.
-  - Guards kept or added: visitors can refund and dispatch only Vitalik's orders, once per order every 30 s, and pause or resume at most once every 20 s. The one-errand-at-a-time and re-order guards are unchanged.
-- Next: Vitalik's ask runs the real errand on the phones (once Join says it pays).
+Updated 14:20 IST, Fri 6 Nov (Integration).
+- **Phase 1 is live** at `/live` (#111, deploy fix #116). **Public access is live** (#117; Join's C6 and F2, #120).
+- **Phase 2 in review: the errand on the phones.** Vitalik's ask on his phone runs the real errand. The agents' steps, the shop comparison (the trap rejected with its refund rate), the quote and the paid receipt with its real explorer link fill his phone. The explainer on `/live` follows the same run, and the shop's phone gets the order from the merchant stream.
+  - Tested against a recorded real paid errand; one live paid errand follows the merge.
+- Next: phase 3, the money buttons that exist.
 
 ## website
 
