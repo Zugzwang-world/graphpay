@@ -33,7 +33,8 @@
     "acceptance": "node acceptance/run.mjs",
     "e2e:food": "node integration/e2e-food.mjs",
     "e2e:kill": "node integration/kill.mjs",
-    "e2e:hosted": "node integration/hosted.mjs"
+    "e2e:hosted": "node integration/hosted.mjs",
+    "e2e:d11": "node integration/d11.mjs"
   },
   "devDependencies": {
     "viem": "2.57.16",

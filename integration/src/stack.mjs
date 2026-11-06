@@ -1,5 +1,7 @@
-// M12's payment stack, in process on loopback (before M4 hosts the routes): T1's facilitator
-// and shop API (packages/facilitator, packages/shop) against the real deployed checkout, with
+// M12's payment stack. By default (since M4) the agents use the production domain's hosted shop
+// and facilitator, and only the merchant's refund is sent here (it waits until the shop's key has
+// no pending transaction: the hosted shop delivers with it). With STACK_LOCAL_RELAY=1 it runs
+// T1's facilitator and shop API (packages/facilitator, packages/shop) on loopback instead, with
 //   the ENS gate    T2's createEnsGate with the checkout's policy and spend (gate.mjs)
 //   the payee       T2's resolvePayee, read at pay time
 //   quotes          the shop writes the errand's quote as W_DIRECTORY (M7 amendment §5)
@@ -7,8 +9,8 @@
 //   delivery        markDelivered as the shop's merchant key
 // and the agents' side of it: a ShopSurface over HTTP, the x402 codec of @x402/core and the
 // signer (graphPayOrderClient through x402Client with spend controls). Keys come from the env
-// loader and stay in this process. FACILITATOR is the relayer: never run this while another
-// process (T1's scripts, the hosted facilitator) relays with the same key (pitfall 16).
+// loader and stay in this process. The local mode's FACILITATOR is the hosted relayer too: never
+// run it while another process relays with the same key (pitfall 16).
 
 import { createServer } from 'node:http';
 import { randomBytes } from 'node:crypto';
@@ -61,9 +63,9 @@ function serve(handler) {
 // Arkiv connections as W_DIRECTORY and W_SYNC. shopKeyOf(shopEns): the directory's shop key.
 export async function startStack({ env, whitechain, sepolia, directory, sync, shopKeyOf, log = () => {} }) {
   if (env.ALLOW_REAL_NETWORK !== '1') throw new Error('stack: the real network needs ALLOW_REAL_NETWORK=1');
-  // Since M4 the hosted facilitator relays as FACILITATOR (integration/hosted.mjs goes through
-  // it); this local relayer would race its nonces, so it runs only on an explicit opt-in.
-  if (env.STACK_LOCAL_RELAY !== '1') throw new Error('stack: relays locally as FACILITATOR; since M4 use the hosted routes (pnpm e2e:hosted), or set STACK_LOCAL_RELAY=1 once the hosted relayer is quiet');
+  // Since M4 the hosted shop and facilitator are the default: the hosted facilitator relays as
+  // FACILITATOR, and a local relayer would race its nonces, so it runs only on an explicit opt-in.
+  const hosted = env.STACK_LOCAL_RELAY !== '1';
   const chainId = whitechain.chain.id;
   const NETWORK = `eip155:${chainId}`;
   const checkout = config.whitechain.contracts.checkout.address;
@@ -82,80 +84,124 @@ export async function startStack({ env, whitechain, sepolia, directory, sync, sh
   const shops = storyShops();
   const merchants = Object.fromEntries(shops.map((s) => [s.key, key(s.walletRole).address]));
   const walletClients = Object.fromEntries(shops.map((s) => [s.key, whitechain.walletClient(key(s.walletRole))]));
-  const merchant = merchantActions({ publicClient: pub, walletClients, checkout, chain: whitechain.chain });
-  const relayer = key('FACILITATOR');
+  const local = merchantActions({ publicClient: pub, walletClients, checkout, chain: whitechain.chain });
+  // Hosted, the shop delivers with the same merchant key: a refund here waits for it to be quiet.
+  const merchant = !hosted
+    ? local
+    : {
+        ...local,
+        async refund(shopKey, orderId, amountMicro, reason) {
+          const address = merchants[shopKey];
+          for (let i = 0; i < 20; i += 1) {
+            const [latest, pending] = await Promise.all(['latest', 'pending'].map((blockTag) => pub.getTransactionCount({ address, blockTag })));
+            if (latest === pending) return local.refund(shopKey, orderId, amountMicro, reason);
+            await new Promise((ok) => setTimeout(ok, 3_000));
+          }
+          throw new Error('stack: the merchant key has a pending transaction; no refund');
+        },
+      };
   // The payer's pre-sign gate, and the facilitator's own (T1's policy semantics, as in
   // scripts/whitechain/local-pay.mjs: a revoked policy keeps its cap, so the contract records
   // AGENT_REVOKED itself; the spend is the policy epoch's on the contract's UTC day).
   const gate = createPayerGate({ ens: sepolia.publicClient, whitechain: pub });
-  const policy = (node) => pub.readContract({ address: checkout, abi: checkoutAbi, functionName: 'policies', args: [node] });
-  const bound = (p) => p && p.wallet.toLowerCase() !== `0x${'0'.repeat(40)}`;
-  const facilitatorGate = createEnsGate({
-    client: sepolia.publicClient,
-    expectedEpoch: async (node) => {
-      const p = await policy(node);
-      return bound(p) ? Number(p.epoch) : null;
-    },
-    policyCapMicro: async (node, epoch) => {
-      const p = await policy(node);
-      return bound(p) && Number(p.epoch) === epoch ? BigInt(p.dailyCapMicro) : null;
-    },
-    spentToday: async (node, epoch) => {
-      const block = await pub.getBlock();
-      return BigInt(await pub.readContract({ address: checkout, abi: checkoutAbi, functionName: 'spentMicro', args: [node, epoch, block.timestamp / 86_400n] }));
-    },
-  });
-  const ensReader = createEnsReader({ client: sepolia.publicClient });
-  const refusals = [];
+  const run = hosted ? await hostedRoutes() : await localRoutes();
+  const { base, passcode, refusals } = run;
 
-  const scheme = createGraphPayFacilitator({
-    chainId,
-    token,
-    permit2,
-    checkout,
-    allowedMerchants: Object.values(merchants),
-    chain: viemChain({ publicClient: pub, walletClient: whitechain.walletClient(relayer), account: relayer, checkout, token, permit2, chain: whitechain.chain }),
-    ensGate: facilitatorGate.ensGate,
-    recorder: {
-      refused: async (r) => {
-        const edge = attemptEdge(r);
-        try {
-          const w = await recordEdge(sync, edge);
-          refusals.push({ ref: edge.ref, reason: r.reason, entityKey: w.entityKey, txHash: w.txHash, at: Date.now() });
-          log(`recorder: fail edge ${edge.ref.split(':').at(-1)} written`);
-        } catch (e) {
-          refusals.push({ ref: edge.ref, reason: r.reason, error: e.name, at: Date.now() });
-          log(`recorder: write failed (${e.name})`);
-        }
+  // The production domain's shop and facilitator (config site.url; the passcode from .env).
+  async function hostedRoutes() {
+    const site = String(config.site.url).replace(/\/+$/, '');
+    if (!env.DEMO_PASSCODE) throw new Error('stack: DEMO_PASSCODE is not in .env');
+    const health = await (await fetch(`${site}/api/facilitator/health`, { redirect: 'error', cache: 'no-store' })).json().catch(() => ({}));
+    if (health.startup !== 'ok' || !(await pub.readContract({ address: checkout, abi: checkoutAbi, functionName: 'isRelayer', args: [health.signer] }))) throw new Error('stack: the hosted facilitator is not ready');
+    log(`stack: the hosted shop and facilitator (${site}), relayer ${health.signer}`);
+    // Refusals are written by the hosted recorder; read them on Arkiv (W_SYNC).
+    return { base: `${site}/api/shop`, passcode: env.DEMO_PASSCODE, refusals: [], relayer: health.signer, secrets: [], close() {} };
+  }
+
+  // The local facilitator and shop on loopback (STACK_LOCAL_RELAY=1 only).
+  async function localRoutes() {
+    const relayer = key('FACILITATOR');
+    const policy = (node) => pub.readContract({ address: checkout, abi: checkoutAbi, functionName: 'policies', args: [node] });
+    const bound = (p) => p && p.wallet.toLowerCase() !== `0x${'0'.repeat(40)}`;
+    const facilitatorGate = createEnsGate({
+      client: sepolia.publicClient,
+      expectedEpoch: async (node) => {
+        const p = await policy(node);
+        return bound(p) ? Number(p.epoch) : null;
       },
-    },
-  });
-  const authToken = randomBytes(24).toString('hex'); // this run only, never printed
-  const auth = { Authorization: `Bearer ${authToken}` };
-  const fServer = await serve(facilitatorHandler({ facilitator: new x402Facilitator().register(NETWORK, scheme), scheme, authToken, ready: checks, health: async () => ({ signer: relayer.address }) }));
-  const passcode = randomBytes(16).toString('hex');
-  let handle;
-  const sServer = await serve((req) => handle(req));
-  const base = `${sServer.url}/api/shop`;
-  handle = shopHandler({
-    shops,
-    merchants,
-    chainId,
-    token,
-    checkout,
-    baseUrl: base,
-    passcode,
-    facilitator: new HTTPFacilitatorClient({ url: `${fServer.url}/api/facilitator`, createAuthHeaders: async () => ({ verify: auth, settle: auth, supported: auth }) }),
-    orders: viemOrders({ publicClient: pub, checkout }),
-    resolvePayee: ensReader.resolvePayee,
-    createQuote: async ({ requestId, shopName, agentEns, priceMicro, validUntil }) => {
-      const q = await createQuote(directory, { requestId, shopKey: await shopKeyOf(shopName), agentEns, price: BigInt(priceMicro), validUntil: BigInt(validUntil) });
-      return { entityKey: q.key ?? q.entityKey };
-    },
-    deliver: (shopKey, orderId) => merchant.deliver(shopKey, orderId),
-    ready: checks,
-    log,
-  });
+      policyCapMicro: async (node, epoch) => {
+        const p = await policy(node);
+        return bound(p) && Number(p.epoch) === epoch ? BigInt(p.dailyCapMicro) : null;
+      },
+      spentToday: async (node, epoch) => {
+        const block = await pub.getBlock();
+        return BigInt(await pub.readContract({ address: checkout, abi: checkoutAbi, functionName: 'spentMicro', args: [node, epoch, block.timestamp / 86_400n] }));
+      },
+    });
+    const ensReader = createEnsReader({ client: sepolia.publicClient });
+    const refusals = [];
+
+    const scheme = createGraphPayFacilitator({
+      chainId,
+      token,
+      permit2,
+      checkout,
+      allowedMerchants: Object.values(merchants),
+      chain: viemChain({ publicClient: pub, walletClient: whitechain.walletClient(relayer), account: relayer, checkout, token, permit2, chain: whitechain.chain }),
+      ensGate: facilitatorGate.ensGate,
+      recorder: {
+        refused: async (r) => {
+          const edge = attemptEdge(r);
+          try {
+            const w = await recordEdge(sync, edge);
+            refusals.push({ ref: edge.ref, reason: r.reason, entityKey: w.entityKey, txHash: w.txHash, at: Date.now() });
+            log(`recorder: fail edge ${edge.ref.split(':').at(-1)} written`);
+          } catch (e) {
+            refusals.push({ ref: edge.ref, reason: r.reason, error: e.name, at: Date.now() });
+            log(`recorder: write failed (${e.name})`);
+          }
+        },
+      },
+    });
+    const authToken = randomBytes(24).toString('hex'); // this run only, never printed
+    const auth = { Authorization: `Bearer ${authToken}` };
+    const fServer = await serve(facilitatorHandler({ facilitator: new x402Facilitator().register(NETWORK, scheme), scheme, authToken, ready: checks, health: async () => ({ signer: relayer.address }) }));
+    const passcode = randomBytes(16).toString('hex');
+    let handle;
+    const sServer = await serve((req) => handle(req));
+    const base = `${sServer.url}/api/shop`;
+    handle = shopHandler({
+      shops,
+      merchants,
+      chainId,
+      token,
+      checkout,
+      baseUrl: base,
+      passcode,
+      facilitator: new HTTPFacilitatorClient({ url: `${fServer.url}/api/facilitator`, createAuthHeaders: async () => ({ verify: auth, settle: auth, supported: auth }) }),
+      orders: viemOrders({ publicClient: pub, checkout }),
+      resolvePayee: ensReader.resolvePayee,
+      createQuote: async ({ requestId, shopName, agentEns, priceMicro, validUntil }) => {
+        const q = await createQuote(directory, { requestId, shopKey: await shopKeyOf(shopName), agentEns, price: BigInt(priceMicro), validUntil: BigInt(validUntil) });
+        return { entityKey: q.key ?? q.entityKey };
+      },
+      deliver: (shopKey, orderId) => merchant.deliver(shopKey, orderId),
+      ready: checks,
+      log,
+    });
+    return {
+      base,
+      passcode,
+      refusals,
+      relayer: relayer.address,
+      // This run's own secrets, for the caller's redactor.
+      secrets: [passcode, authToken],
+      close() {
+        fServer.server.close();
+        sServer.server.close();
+      },
+    };
+  }
 
   const orderStatus = async (orderId) => ({ status: STATUS[Number((await pub.readContract({ address: checkout, abi: checkoutAbi, functionName: 'orders', args: [orderId] })).status)] });
 
@@ -206,12 +252,9 @@ export async function startStack({ env, whitechain, sepolia, directory, sync, sh
     merchant,
     refusals,
     orderStatus,
-    relayer: relayer.address,
-    // This run's own secrets, for the caller's redactor.
-    secrets: [passcode, authToken],
-    close() {
-      fServer.server.close();
-      sServer.server.close();
-    },
+    relayer: run.relayer,
+    hosted,
+    secrets: run.secrets,
+    close: run.close,
   };
 }

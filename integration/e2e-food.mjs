@@ -6,8 +6,8 @@
 // (rehearsal by default; payer only for the counting run), AGENT_PRESET, E2E_KILL (skip),
 // ALLOW_REAL_NETWORK=1, and the role keys through the env loader. Writes the run file and
 // the transcript to docs/sessions/integration/runs/<run id>/ and prints the calibration row (ADR-0048).
-// Never run it while another process relays with FACILITATOR, or while the website demo is
-// live.
+// It pays through the hosted shop and facilitator (stack.mjs); never run it while the website
+// demo is live.
 
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
@@ -92,7 +92,8 @@ say(`before: ${good.ensName} all-time orders ${before.graph.good.all?.orders}, p
 
 // 5. The errand (the story's request, the active preset, live hooks).
 say(`errand as ${buyer.ensName} on preset ${env.AGENT_PRESET ?? story.agentModels?.active ?? 'active'}`);
-const { runLog, metrics } = await runErrand({ mode: 'anthropic', env, buyer: buyerKey, hooks, mcp, label: `${cast.key ?? 'story'} errand, real networks (SYNTHETIC story)` });
+// E2E_RUN_ID: a caller's run id (the presence rows' session; integration/d11.mjs watches it).
+const { runLog, metrics } = await runErrand({ mode: 'anthropic', env, buyer: buyerKey, hooks, mcp, ...(env.E2E_RUN_ID ? { runId: env.E2E_RUN_ID } : {}), label: `${cast.key ?? 'story'} errand, real networks (SYNTHETIC story)` });
 await activity.flush();
 const r = runLog.result;
 say(`errand: ${r.status}, chose ${r.chosenShop}, ${metrics.seconds.toFixed(1)} s, $${metrics.apiCostUsd.toFixed(4)}${r.refusals.length ? `, refusals ${r.refusals.map((x) => x.reason).join(', ')}` : ''}`);
