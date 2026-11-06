@@ -1,32 +1,31 @@
 # NOW
 
-Updated 12:59 IST, Fri 6 Nov (Coordinator)
+Updated 13:32 IST, Fri 6 Nov (Coordinator)
 
 ## Summary (Coordinator only)
 
-Updated 12:59 IST, Fri 6 Nov. **Standing rule (ADR-0066): no target times.** Only the submission (Sat 09:00 IST) and the presentation (Sat 09:30 IST) are fixed.
+Updated 13:32 IST, Fri 6 Nov. **Standing rule (ADR-0066): no target times.** Only the submission (Sat 09:00 IST) and the presentation (Sat 09:30 IST) are fixed.
 
 **Now: the integration proof of concept** (the 1240 briefs).
 
-- **Landed:**
-  - **Phase 1:** the team's two phones are on our site at `/live`, around the explainer, with live read-only data (#111). T5 reviewed it: no blockers.
-  - **The payer's pass is 100 test USDT a day,** on-chain (T1's policy transaction, #107) and in ENS (T2's record). PAYER holds 125 test USDT.
-  - **The reliable errand, first part:** the signed payment is retried when the shop says "retry is safe", the hourly cap is gone, and one errand runs at a time (#108, #112).
-  - **The read limits** are raised tenfold for shared venue Wi-Fi (#113).
-  - **One image on Swarm:** the team's fox, on Kesar Kingdom's gulab jamun (#109).
-  - **#70 is merged** (the team's front end), and **the decisions are recorded:** ADR-0069 to ADR-0071 and ADR-0062 amendment 2 (#110).
-- **In progress:**
-  - **Settle safety:** T1's #114 (reviewer: ship).
-  - **Join's live proof:** at most two live errands, then C6 and F2 rewritten for public access.
-  - **Phase 2:** the passcode switch (Integration, then a reviewer pass and T5's review), then the live errand on the new stage. The founder tests after that.
+- **The errand pays reliably on production** (Join, 13:32 IST).
+  - Two live errands through the site's runner each paid 4.80 to Kesar Kingdom, with no retry needed: 129 s ([tx](https://explorer.testnet.whitechain.io/tx/0x9749a7f766282021a4e0e255276b938e53c608f55985a68b4b59b08d852a1e1a)) and 115 s ([tx](https://explorer.testnet.whitechain.io/tx/0x11588a5e47611c1e9095219ab95b8907d8b0f59a602f56d8b12d11a16cfa0a13)).
+  - With the 11:14 run, that is three paid in a row. All seven agents ran each time, and no Arkiv write or settle failed.
+  - The fixes: #92, #93, #96, #97, #108, #112 and #114.
+- **The payer's pass is 100 test USDT a day,** on-chain and in ENS. 14.40 is spent today, and PAYER held 125 before these runs.
+- **Public access is live** (#117, ADR-0069): visitors meet no passcode, and the keys between our own servers stay.
+- **Phase 1 is live at `/live`:** the team's phones around the explainer (#111).
+  - Production deploys had failed from #111 until #116 fixed the build (Vercel had skipped the phones' build tools). Production now runs `ff12990`.
+- **Next, phase 2's last step:** the Integration session wires the live errand into the phones. Then the founder tests.
+- **Join next:** C6 and F2 rewritten for public access.
 - **Idle until the founder's run:**
-  - the story swap and Grok's assets;
+  - the story swap;
   - the kill;
   - subscribe, cancel, caps and decline;
   - Kimi tuning;
   - the big city;
   - Submission.
-- **Usage:** 90%. Every session pauses at 97%, likely around 15:30 to 16:30 IST at today's pace, until the 21:30 reset.
+- **Usage:** 91%. Every session pauses at 97%; the reset is at 21:30 IST.
 
 ## foundation
 
