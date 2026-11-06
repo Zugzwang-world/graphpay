@@ -35,6 +35,8 @@ As `planning/BUILD_SEQUENCE.md` §5, plus: **T3 also owns `apps/web/app/api/{gra
 
 **Waves.** Wave 1 (T1–T5) starts together as soon as M0 has merged. Wave 2 (Join) starts when M7a has merged. **Seeding (M8) starts as soon as M7a has merged, with size S only** (the test story, for acceptance). Size M waits until the founder locks the final story (ADR-0049).
 
+> **Standing rule (ADR-0066):** the times in §3–§4 below are history, not targets. Every task starts the moment it is given and is reported when done. Only the submission (Sat 09:00 IST) and the presentation (Sat 09:30 IST) are fixed, and dependencies are events: the large city seeds the moment the story locks.
+
 ## 3. Checkpoints (moved to tonight's real start)
 
 M0 began at 21:40 IST and closed about an hour later, so the pack's central times move by about 50 minutes. Core done (CP4) is now expected around **Fri 05:30 IST** (range 04:25–06:35), still well before the Friday programme.

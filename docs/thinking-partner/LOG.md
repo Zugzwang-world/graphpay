@@ -18,7 +18,8 @@ One line per PR: time (IST) · activity · result · PR link. Append under your 
 - 04:40 IST · payments · M4 dependencies: apps/web depends on the facilitator and shop packages · https://github.com/Zugzwang-world/graphpay/pull/53
 - 05:05 IST · payments · M4 hosted routes: shop, facilitator, recorder, renewal cron; vercel-env (14 Sensitive values set) and pay:public; two reviews fixed · https://github.com/Zugzwang-world/graphpay/pull/58
 - 05:05 IST · payments · merged: M4 part 1, the hosted routes · https://github.com/Zugzwang-world/graphpay/pull/58
-- 05:11 IST · payments · M4 live: pay:public settled 0.40 through the public URL, C6 401s, recorder edge, cron renewal (M4 done) · pay/hosted-done
+- 05:11 IST · payments · M4 live: pay:public settled 0.40 through the public URL, C6 401s, recorder edge, cron renewal (M4 done) · https://github.com/Zugzwang-world/graphpay/pull/62
+- 09:47 IST · payments · F3: relayer floor enforced on the production build (refused as relayer_floor, nothing sent) · pay/f3
 
 ## identity
 - 02:00 IST · identity · M5: the ens package, ABIs from Sourcify, run script and checkers; namespace provisioned on real Sepolia (60 tx, 72.7M gas); B1/B4/B5/B8/B9a reads pass · [PR #18](https://github.com/Zugzwang-world/graphpay/pull/18)
@@ -34,6 +35,7 @@ One line per PR: time (IST) · activity · result · PR link. Append under your 
 - 03:42 IST · arkiv · M9 at S: live benchmark, D6 passes (Q2: Graph Arkiv 2 reads, plain 5, 6 in parallel; every answer right), race function for /api/race, batched out()/in(), byte meter fix · https://github.com/Zugzwang-world/graphpay/pull/31 (merged 03:45)
 - 03:50 IST · arkiv · Friday item 1: `shop_open`, `agent_presence`, `handoff` rows (W_DIRECTORY, lapse by themselves, renewals never past now + lifetime), GraphQL `shops(openNow)`, `agentsOnline`, `handoffs`, the agents' hooks · https://github.com/Zugzwang-world/graphpay/pull/35
 - 09:50 IST · arkiv · SDK publish prep: renamed to @graphpay_ethglobal/arkiv-graph, 0.1.0, connect/createStore, README quickstart, leaderboard, CHANGELOG, FEEDBACK, MIT; pack, install and run pass · PR link below
+- 10:40 IST · arkiv · Friday item 15: drafts of `arkiv/friction.md`, `how-you-use-arkiv.md`, `swarm.md` (pending) · PR link below
 
 ## agents
 
@@ -93,5 +95,6 @@ One line per PR: time (IST) · activity · result · PR link. Append under your 
 - 06:55 IST · records · 06:45 relay: M4 and M16 done, acceptance at 42 pass, 0 fail; LOG rolled up; OPEN's closed M0 tables condensed · https://github.com/Zugzwang-world/graphpay/pull/68
 - 08:30 IST · records · morning relay: 42 pass, 0 fail; usage 82%; the story brief, a message to wake the sessions, and the budget call are the founder's · https://github.com/Zugzwang-world/graphpay/pull/69
 - 09:35 IST · records · the 09:35 brief filed; ADR-0063 (both SDKs as @graphpay_ethglobal by 13:00), ADR-0064 (one SDK per lane, the cab-ride moment), ADR-0065 (apps/demo-ui); labels and issue templates; the names renamed in the records; NOW and Founder now for the handoff · https://github.com/Zugzwang-world/graphpay/pull/72
+- 09:46 IST · records · the standing rule "no target times" (ADR-0066) in the coordinator file, NOW, OPEN and the master plan; every session told · https://github.com/Zugzwang-world/graphpay/pull/76
 
 ## submission
