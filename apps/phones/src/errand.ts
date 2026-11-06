@@ -257,10 +257,17 @@ export async function readFrames(body: ReadableStream<Uint8Array>, onFrame: (eve
           if (field === 'event') event = value;
           else if (field === 'data') data.push(value);
         }
-        if (data.length) onFrame(event, data.join('\n'));
+        if (!data.length) continue;
+        // One frame that fails to apply never stops the stream: the result still arrives.
+        try {
+          onFrame(event, data.join('\n'));
+        } catch (error) {
+          console.error(`errand frame "${event}" was skipped:`, error);
+        }
       }
     }
-  } catch {
+  } catch (error) {
     // The connection dropped; the caller's end() reports a run with no result.
+    console.error('errand stream dropped:', error);
   }
 }

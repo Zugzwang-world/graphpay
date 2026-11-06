@@ -129,6 +129,8 @@ Updated 13:05 IST, Fri 6 Nov (Integration).
 - **For the founder's story lock: the re-order prompt's text.** What: their desk has a second quick prompt ("Re-order my usual"); our story has no text for it, so the phones show only the ask. Where: `packages/config/story.json` (`order.reorder`). Recommendation: add a `prompt` field with the final story.
 - **For Join (acceptance C6 and F2, ADR-0069): the route table's labels.** What: `apps/web/lib/routes.ts` still labels the site's routes `gate: 'passcode'`, and its header and the how page's table say so. Why: under public access they are open to visitors; the server-to-server checks are the shop's pay route, the facilitator's and recorder's tokens and the cron secret. Recommendation: relabel them in your F2 rewrite; the unit tests already cover both modes (`apps/web/lib/routes.test.ts`).
 - **Watch (founder): the Open switch has no cooldown.** What: each toggle is one W_DIRECTORY write on Arkiv. Why: a visitor can toggle it repeatedly; W_DIRECTORY holds 0.48 tGLM. Recommendation: accept for the demo and watch the balance; a cooldown is a one-line change if needed.
+- **For the team: optional repeat buyers on the shop card.** What: `ShopChoice.repeatBuyers` is required, but the graph has no repeat-buyer count, so the live card shows a dash. Where: `frontend/src/apps/customer/CustomerDesk.tsx` (`shopFacts`). Recommendation: make it optional and leave it out of the line when unknown.
+- **For the team: a pause and resume button (F9).** What: the live adapter's `pauseAgent` and `resumeAgent` work, but no screen calls them yet. Recommendation: the agents page's switch calls them for the paying agent.
 
 ## website
 

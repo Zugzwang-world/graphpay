@@ -83,11 +83,15 @@ Updated 13:33 IST, Fri 6 Nov. **The live errand pays reliably on the production 
 
 ## phones
 
-Updated 14:20 IST, Fri 6 Nov (Integration).
-- **Phase 1 is live** at `/live` (#111, deploy fix #116). **Public access is live** (#117; Join's C6 and F2, #120).
-- **Phase 2 in review: the errand on the phones.** Vitalik's ask on his phone runs the real errand. The agents' steps, the shop comparison (the trap rejected with its refund rate), the quote and the paid receipt with its real explorer link fill his phone. The explainer on `/live` follows the same run, and the shop's phone gets the order from the merchant stream.
-  - Tested against a recorded real paid errand; one live paid errand follows the merge.
-- Next: phase 3, the money buttons that exist.
+Updated 16:35 IST, Fri 6 Nov (Integration).
+- **Phase 2 is live** (#122). The first errand from `/live`:
+  - Vitalik's phone showed the agents' steps and the three shops; the trap was rejected with its refund rate and on-time rate.
+  - The explainer's lanes filled up to the signature.
+  - It was refused because the payer agent is **paused on ENS** (not by this session; asked the Coordinator).
+  - The phone then said the stream ended early. The fix: one frame that fails no longer stops the stream.
+- **Phase 3 in review:** refund request, merchant refund, re-order, dispatch, pause and resume, and the Open switch now call our routes.
+  - Pause and resume have no button in the team's app yet (their agents page is still to come), so I test them through T5's customer screen.
+- Next: one paid errand once the payer is active again; then each button once, live.
 
 ## website
 

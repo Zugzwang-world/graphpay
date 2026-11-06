@@ -61,3 +61,21 @@ test('frames are read across chunk boundaries, comments skipped', async () => {
   await readFrames(body, (e, d) => seen.push(`${e}:${d}`));
   assert.deepEqual(seen, ['started:{"runId":"a"}', 'trace:{"seq":1}']);
 });
+
+test('a frame whose handler throws is skipped and the stream goes on to its result', async () => {
+  const enc = new TextEncoder();
+  const text = 'event: trace\ndata: {"seq":1}\n\nevent: result\ndata: {"status":"paid"}\n\n';
+  const body = new ReadableStream<Uint8Array>({ start(c) { c.enqueue(enc.encode(text)); c.close(); } });
+  const seen: string[] = [];
+  const quiet = console.error;
+  console.error = () => {};
+  try {
+    await readFrames(body, (e) => {
+      if (e === 'trace') throw new Error('boom');
+      seen.push(e);
+    });
+  } finally {
+    console.error = quiet;
+  }
+  assert.deepEqual(seen, ['result']);
+});

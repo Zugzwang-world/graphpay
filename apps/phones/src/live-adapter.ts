@@ -4,9 +4,10 @@
 // `/api/merchant/events` stream). Spending actions arrive in the next phases; until then
 // they answer with an error event and change nothing.
 
-import type { AgentRef, AgentState, DemoAdapter, DemoEvent, DemoSnapshot, Money, Order } from '@/demo/contract';
+import type { AgentRef, AgentState, DemoAdapter, DemoEvent, DemoSnapshot, Link, Money, Order } from '@/demo/contract';
 import { payingAgent, story } from '@/data/story';
-import { foldOrders, microToAmount, rowFromEdge, rowKey, rowsFromCsv, type FoldContext, type LedgerRow } from './orders';
+import { copy, fill } from '@/copy';
+import { amountToMicro, foldOrders, microToAmount, rowFromEdge, rowKey, rowsFromCsv, type FoldContext, type LedgerRow } from './orders';
 import { ErrandMapper, readFrames } from './errand';
 import { txLink } from './links';
 
@@ -31,6 +32,26 @@ const MAP_POLL_MS = 30_000;
 const RECONNECT_MS = 1_500;
 const RECONNECT_MAX_MS = 30_000;
 const DAY_MS = 86_400_000;
+// The Open listing lasts 15 minutes on Arkiv; the server's own renewal period (RENEW_EVERY_S).
+const RENEW_OPEN_MS = 300_000;
+
+// The routes' refusal codes in words (the code itself when it is not listed).
+const REFUSALS: Record<string, string> = {
+  NOT_THIS_ORDER: 'Only the latest order can be refunded from here.',
+  NOT_THE_STORY_BUYER: 'Only orders from the story’s buyer can be changed here.',
+  TOO_SOON: 'That order was just changed. Wait half a minute.',
+  OVER_REFUNDABLE: 'That is more than is left to refund.',
+  NOT_REFUNDABLE: 'This order cannot be refunded.',
+  NOT_DELIVERABLE: 'This order is not waiting for dispatch.',
+  FLOAT_LOW: 'The shop’s refund float is too low.',
+  STILL_PENDING: 'The last transaction for this order is still on its way.',
+  NO_ORDER: 'There is no order to re-order yet.',
+};
+const refusalText = (code: string): string => REFUSALS[code] ?? code;
+
+function sepoliaLink(tx: string): Link {
+  return { label: fill(copy.common.viewOnEns, { chain: story.explorers.ensLabel }), url: `${story.explorers.ens.replace(/\/+$/, '')}/tx/${tx}` };
+}
 
 const usdt = (micro: string | bigint): Money => ({ amount: microToAmount(BigInt(micro)), currency: 'USDT' });
 
@@ -87,6 +108,7 @@ export class LiveAdapter implements DemoAdapter {
   private source: EventSource | null = null;
   private reconnect: ReturnType<typeof setTimeout> | null = null;
   private failures = 0;
+  private renewOpen: ReturnType<typeof setInterval> | null = null;
   private readonly payer = payingAgent();
   private readonly payerRef: AgentRef = { ens: this.payer.ens, role: this.payer.role, owner: story.customer.ens };
   private readonly ctx: FoldContext = {
@@ -146,16 +168,34 @@ export class LiveAdapter implements DemoAdapter {
     const mapper = new ErrandMapper(story, txLink);
     void readFrames(res.body, (event, data) => {
       postToStage(event, data);
-      for (const e of mapper.map(event, data)) this.emit(e);
+      for (const e of mapper.map(event, data)) {
+        try {
+          this.emit(e);
+        } catch (error) {
+          console.error(`the phones could not apply "${e.type}":`, error);
+        }
+      }
     }).then(() => {
       for (const e of mapper.end()) this.emit(e);
     });
   }
-  reorder(): Promise<void> {
-    return this.notYet();
+  // The server re-derives the parent order (the payer's last) and pays the story's re-order.
+  async reorder(orderId: string): Promise<void> {
+    try {
+      const { body, status } = await this.post<{ status?: string; orderId?: string | null; amountMicro?: string; transaction?: string }>('/api/customer/reorder', { parentOrderId: orderId });
+      if (status === 200 && body.orderId && body.transaction && body.amountMicro) {
+        this.emit({ type: 'payment.settled', orderId: body.orderId, total: usdt(body.amountMicro), links: [txLink(body.transaction)] });
+      } else {
+        this.emit({ type: 'error', message: 'The re-order was sent; its receipt is still on its way.', recoverable: false });
+      }
+    } catch (error) {
+      this.emit({ type: 'error', message: error instanceof Error ? error.message : String(error), recoverable: true });
+    }
   }
-  requestRefund(): Promise<void> {
-    return this.notYet();
+  // Recorded on Arkiv for the payer's last order; the photo stays on the phone for now.
+  async requestRefund(orderId: string, input: { amount: Money; reason: string }): Promise<void> {
+    await this.post('/api/customer/refund-request', { orderId, amountMicro: String(amountToMicro(input.amount.amount)), reason: input.reason });
+    this.emit({ type: 'refund.requested', orderId, amount: input.amount, reason: input.reason });
   }
   startRenewal(): Promise<void> {
     return this.notYet();
@@ -163,11 +203,12 @@ export class LiveAdapter implements DemoAdapter {
   cancelRenewal(): Promise<void> {
     return this.notYet();
   }
+  // The owner sets the payer's ENS status on Sepolia; the server acts on the story's payer only.
   pauseAgent(): Promise<void> {
-    return this.notYet();
+    return this.permission(true);
   }
   resumeAgent(): Promise<void> {
-    return this.notYet();
+    return this.permission(false);
   }
   revokeAgent(): Promise<void> {
     return this.notYet();
@@ -176,14 +217,20 @@ export class LiveAdapter implements DemoAdapter {
     return this.notYet();
   }
   // merchant
-  setShopOpen(): Promise<void> {
-    return this.notYet();
+  // Lists the shop as open on Arkiv; the listing is renewed every RENEW_OPEN_MS while this page is open.
+  async setShopOpen(open: boolean): Promise<void> {
+    await this.post('/api/merchant/open', { on: open });
+    if (this.renewOpen) clearInterval(this.renewOpen);
+    this.renewOpen = open ? setInterval(() => void this.post('/api/merchant/open', { on: true }).catch(() => undefined), RENEW_OPEN_MS) : null;
+    this.last.open = open;
+    this.emit({ type: 'shop.status', open });
   }
-  dispatch(): Promise<void> {
-    return this.notYet();
+  // The merchant marks the order delivered on Whitechain; the stream brings the new state.
+  async dispatch(orderId: string): Promise<void> {
+    await this.post('/api/merchant/dispatch', { orderId });
   }
-  approveRefund(): Promise<void> {
-    return this.notYet();
+  async approveRefund(orderId: string, amount: Money): Promise<void> {
+    await this.post('/api/merchant/refund', { orderId, amountMicro: String(amountToMicro(amount.amount)) });
   }
   declineRefund(): Promise<void> {
     return this.notYet();
@@ -202,8 +249,28 @@ export class LiveAdapter implements DemoAdapter {
   async runNextRenewal(): Promise<void> {}
   async resetDemo(): Promise<void> {}
 
+  private async permission(paused: boolean): Promise<void> {
+    const { body } = await this.post<{ changed?: boolean; sepoliaTx?: string | null }>(paused ? '/api/customer/pause' : '/api/customer/resume', {});
+    const links = body.sepoliaTx ? [sepoliaLink(body.sepoliaTx)] : [];
+    this.last.status = paused ? 'paused' : 'active';
+    this.emit({ type: 'agent.permission', agent: this.payerRef, change: paused ? 'paused' : 'resumed', links });
+  }
+
+  // A POST to our own routes; a refusal is thrown with the route's own words, as the phones show it.
+  private async post<T = unknown>(path: string, body: unknown): Promise<{ status: number; body: T }> {
+    let res: Response;
+    try {
+      res = await fetch(path, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body), cache: 'no-store' });
+    } catch {
+      throw new Error('The site did not answer. Try again.');
+    }
+    const parsed = (await res.json().catch(() => ({}))) as T & { error?: unknown };
+    if (!res.ok) throw new Error(typeof parsed.error === 'string' ? refusalText(parsed.error) : `HTTP ${res.status}`);
+    return { status: res.status, body: parsed };
+  }
+
   private notYet(): Promise<void> {
-    this.emit({ type: 'error', message: 'This button is connected in the next step.', recoverable: false });
+    this.emit({ type: 'error', message: 'This action is not available yet.', recoverable: false });
     return Promise.resolve();
   }
 
@@ -247,6 +314,8 @@ export class LiveAdapter implements DemoAdapter {
   private stop(): void {
     for (const t of this.timers) clearInterval(t);
     this.timers = [];
+    if (this.renewOpen) clearInterval(this.renewOpen);
+    this.renewOpen = null;
     if (this.reconnect) clearTimeout(this.reconnect);
     this.reconnect = null;
     this.source?.close();
