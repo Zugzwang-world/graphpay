@@ -1,5 +1,7 @@
 # Coordinator handover: for a fresh Coordinator session
 
+> **Superseded at 23:04 IST, Fri 6 Nov.** The night Coordinator (`local_1caa580c-782f-4658-a828-66758afb211a`) took over from this file. The day sessions in §5 are retired (archived at 23:05 IST; Join stays idle until W5 moves the mirror). Tonight's roster, the seven night streams W1 to W7 with their session ids, is in `docs/thinking-partner/NOW.md`.
+
 Written Fri 6 Nov, 22:49 IST, by the outgoing Coordinator (`local_3b893898-fa05-4265-93ee-e9090aeee49f`, "GraphPay Coordinator takeover", Opus 5.5). Its context is nearly full. Read this file first.
 
 ## 1. Your role
