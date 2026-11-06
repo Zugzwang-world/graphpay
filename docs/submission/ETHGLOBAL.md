@@ -27,7 +27,7 @@ Live demo, open to everyone with no passcode: https://graphpay-event.vercel.app
 
 The story: Vitalik types one sentence on his phone: "Just landed in Mumbai. Get me the best masala dosa near BKC under 6 USDT, delivered within an hour." His agents find the shops near him on Arkiv, ask the money graph for each shop's orders, refunds and on-time rate, refuse the trap shop with its reasons, and pay the good shop 4.80 USDT with one signature and no gas. A live payment from the site: https://explorer.testnet.whitechain.io/tx/0xbc052d7f11bd61ab0fcee69a78da0b7fbe5bcbf9821741d1150345a0fe29cd43
 
-The shop's phone rings with the buyer agent's ENS name and its reputation. The shop dispatches, refunds part of an order (https://explorer.testnet.whitechain.io/tx/0xcd442a5e6675e0eae8a66bc17ee3913af1b673e39a54a28d4a14a0fab58bc425) and exports a CSV for its accountant, with the shop's labelled synthetic history beside the real rows (https://graphpay-event.vercel.app/api/merchant/export.csv); a subscription renews on its own (https://explorer.testnet.whitechain.io/tx/0x48b14aa45f56d487dee743721416a359fed96296b3ad0ababf546838f55e480f).
+The shop's phone rings with the buyer agent's ENS name and its reputation. The shop dispatches, refunds part of an order (https://explorer.testnet.whitechain.io/tx/0xcd442a5e6675e0eae8a66bc17ee3913af1b673e39a54a28d4a14a0fab58bc425) and exports a CSV for its accountant, with the shop's labelled synthetic history beside the real rows (https://graphpay-event.vercel.app/api/merchant/export.csv); a weekly subscription renews on its own (https://explorer.testnet.whitechain.io/tx/0x8d40d556382f40313dafaf712d3c174d7cc8365176c8813f04e849f93338de83) and is cancelled with the subscriber's signature (https://explorer.testnet.whitechain.io/tx/0x70ed2b3ffa63b81fa426631c70cb39591f8b80c077455930d05e63de04077b42).
 
 The human stays in charge. Pausing an agent is one ENS record. The owner can kill an agent by unregistering its name, and the gate then refuses it (https://sepolia.etherscan.io/tx/0x785a13f119ab77f67c1ed8dfa6f1213708fde4f43158122a357e72c018acf29f). An agent cannot raise its own cap, because its ENS resolver refuses the write. The payee is read from the shop's ENS name at pay time, never hard-coded.
 
@@ -97,7 +97,8 @@ GraphPay gets a business paid in USDT on Whitechain, past the first payment. Cus
 Verified contract: https://explorer.testnet.whitechain.io/address/0x75233b7341B9e86407e4b31599f07b8936716FcA?tab=contract
 The qualifying payment in test USDT: https://explorer.testnet.whitechain.io/tx/0x87505ef2457b6e925fa7378a55fd91419e83c37fb8effc06d901884700c72c00
 Refund: https://explorer.testnet.whitechain.io/tx/0xcd442a5e6675e0eae8a66bc17ee3913af1b673e39a54a28d4a14a0fab58bc425
-Renewal: https://explorer.testnet.whitechain.io/tx/0x48b14aa45f56d487dee743721416a359fed96296b3ad0ababf546838f55e480f
+Re-order: https://explorer.testnet.whitechain.io/tx/0xf1d7cb5654de6cc09ede0a404818a009f7429d9d149e3e564222d4a4d3ae2b4a
+Subscription, on a labelled 2-minute demo clock: subscribe https://explorer.testnet.whitechain.io/tx/0xf3f7586090fb37cf4b04963216dabc7b89915f02afb19f71fb81ca138e53c393 · renewal https://explorer.testnet.whitechain.io/tx/0x8d40d556382f40313dafaf712d3c174d7cc8365176c8813f04e849f93338de83 · cancel https://explorer.testnet.whitechain.io/tx/0x70ed2b3ffa63b81fa426631c70cb39591f8b80c077455930d05e63de04077b42
 Accountant export (it lists the shop's labelled synthetic history beside the real rows): https://graphpay-event.vercel.app/api/merchant/export.csv
 Drop-in store (12 lines): https://github.com/Zugzwang-world/graphpay/tree/main/apps/store
 Feedback: https://github.com/Zugzwang-world/graphpay/blob/main/WHITECHAIN_FEEDBACK.md
