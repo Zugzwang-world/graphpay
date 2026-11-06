@@ -81,7 +81,7 @@ One line per PR: time (IST) · activity · result · PR link. Append under your 
 - 07:55 IST · website · opened: the Mumbai map (Friday item 10): our own SVG of the neighbourhoods, directory dots, open shops and agents glowing, explorer links · https://github.com/Zugzwang-world/graphpay/pull/54
 - 08:20 IST · website · opened: the explainer's agent lanes (Friday item 13) from the handoff rows, and the run id passed to the errand runner · https://github.com/Zugzwang-world/graphpay/pull/55
 - 05:40 IST · website · opened: M16 proof, one real 4.80 USDT kit payment on the hosted facilitator (tx 0xf1e76a91…), the store's facilitator env name, the export's RPC range cap logged · https://github.com/Zugzwang-world/graphpay/pull/63
-- 06:10 IST · website · opened: the merchant phone's Mark dispatched and Refund (Friday item 12), signed with the shop's key behind the passcode, reviewer pass · PR link in the next line
+- 06:10 IST · website · opened: the merchant phone's Mark dispatched and Refund (Friday item 12), signed with the shop's key behind the passcode, reviewer pass · https://github.com/Zugzwang-world/graphpay/pull/65
 
 
 ## agentpay
