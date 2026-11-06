@@ -63,12 +63,13 @@ const inFlight = new Set<string>();
 export const MAX_WRITES_PER_MINUTE = MAX_SYNC_WRITES_PER_MINUTE;
 
 // Plain printable text only: the reason is written to a public graph. No contact details or links
-// either (no personal data, ADR-0003): no @, / or :, and no run of six digits or more.
+// either (no personal data, ADR-0003): no @, / or :, and no seven digits or more in a row, counting
+// across spaces, dots, dashes and brackets (a phone number written with separators).
 export function cleanReason(value: unknown): string {
   if (typeof value !== 'string') throw new RefundRefusal('BAD_REASON', 400);
   const text = value.replace(/\s+/g, ' ').trim();
   if (text.length === 0 || text.length > REASON_MAX || /[^\p{L}\p{M}\p{N}\p{P}\p{Zs}\p{Sc}]/u.test(text)) throw new RefundRefusal('BAD_REASON', 400);
-  if (/[@/:]/.test(text) || /\p{N}{6,}/u.test(text)) throw new RefundRefusal('BAD_REASON', 400);
+  if (/[@/:]/.test(text) || /(?:\p{N}[\s.()-]*){7,}/u.test(text)) throw new RefundRefusal('BAD_REASON', 400);
   return text;
 }
 

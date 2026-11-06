@@ -51,8 +51,14 @@ test('a decline is a request edge from the shop to the payer agent, for the amou
 test('a decline already on the record is answered as done (a retry after a write that did land), and written once', async () => {
   const req = request(1_799_999_900);
   const { d, written } = deps({ trail: [req, declineOf(req, 1_799_999_950)] });
-  const out = await declineRefund({ orderId: ORDER }, d);
-  assert.deepEqual([out.decision, out.arkivTx, written.length], ['declined', null, 0]);
+  const out = await declineRefund({ orderId: ORDER, note: 'a different note' }, d);
+  assert.deepEqual([out.decision, out.arkivTx, out.note, written.length], ['declined', null, null, 0]);
+});
+
+test('declined, then refunded: a repeat is answered as decided, never as declined again', async () => {
+  const req = request(1_799_999_900);
+  const refund = { ...request(1_799_999_970), kind: 'refund', ref: '1874:0xtx:1' };
+  assert.equal(await code(declineRefund({ orderId: ORDER }, deps({ trail: [req, declineOf(req, 1_799_999_950), refund], refunded: 800_000n }).d)), 'ALREADY_DECIDED');
 });
 
 test('no request on the record, or one already answered by a refund, is never declined', async () => {

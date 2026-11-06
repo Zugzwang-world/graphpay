@@ -103,6 +103,6 @@ test('the reason is short plain text', () => {
   assert.equal(cleanReason('दो कुचले'), 'दो कुचले');
   for (const bad of ['', '   ', 'a'.repeat(141), 'bell\u0007', 5, undefined]) assert.throws(() => cleanReason(bad), (e: unknown) => e instanceof RefundRefusal && e.code === 'BAD_REASON');
   // No contact details or links on a public graph.
-  for (const bad of ['mail me at a@b.example', 'see https://example.test', 'call 9820012345', 'ref: 12']) assert.throws(() => cleanReason(bad), (e: unknown) => e instanceof RefundRefusal && e.code === 'BAD_REASON');
+  for (const bad of ['mail me at a@b.example', 'see https://example.test', 'call 9820012345', 'ref: 12', 'ring 98200 12345', 'ring 982-001-2345']) assert.throws(() => cleanReason(bad), (e: unknown) => e instanceof RefundRefusal && e.code === 'BAD_REASON');
   assert.equal(cleanReason('2 squashed, 1 cold'), '2 squashed, 1 cold');
 });

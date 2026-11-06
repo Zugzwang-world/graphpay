@@ -130,13 +130,17 @@ async function decide(orderId: string, note: string | null, model: ReturnType<ty
   const ref = `dec:${orderId}:${/^\d{1,12}$/.test(minute ?? '') ? minute : Math.floor(Number(BigInt(request.ts)) / 60)}`;
   const amount = BigInt(request.amountMicro);
   const done = { orderId, decision: 'declined' as const, amountMicro: String(amount), requestRef: request.ref, ref, note };
-  if (trail.some((e) => e.kind === 'request' && e.ref === ref && same(e.from.ens, model.merchant.ens))) return { ...done, arkivTx: null, entityKey: null };
-  // Answered already: declined, or refunded, since the request.
-  const answered = trail.find((e) => BigInt(e.ts) >= BigInt(request.ts) && ((e.kind === 'request' && e.ref.startsWith('dec:') && same(e.from.ens, model.merchant.ens)) || e.kind === 'refund'));
-  if (answered) throw new DeclineRefusal('ALREADY_DECIDED');
+  // Refunded since the request: it is answered, and never "declined", even if a decline came first.
+  if (trail.some((e) => e.kind === 'refund' && BigInt(e.ts) >= BigInt(request.ts))) throw new DeclineRefusal('ALREADY_DECIDED');
+  // This very decline is on the record already (a retry after a write that did land): done, with the
+  // note on record unknown here, so none is echoed.
+  if (trail.some((e) => e.kind === 'request' && e.ref === ref && same(e.from.ens, model.merchant.ens))) return { ...done, note: null, arkivTx: null, entityKey: null };
+  // Answered already by another decline since the request.
+  if (trail.some((e) => BigInt(e.ts) >= BigInt(request.ts) && e.kind === 'request' && e.ref.startsWith('dec:') && same(e.from.ens, model.merchant.ens))) throw new DeclineRefusal('ALREADY_DECIDED');
   // W_SYNC's nonce is shared with the facilitator's refusal recorder and the refund requests: one cap.
   if (!takeSyncWrite(now)) throw new DeclineRefusal('TOO_SOON', 429);
-  const ts = Math.floor(now / 1000);
+  // Never before the request it answers (the clock was read before the lookups).
+  const ts = Math.max(Math.floor(deps.now() / 1000), Number(BigInt(request.ts)));
   const written = await deps.record({
     ref,
     kind: 'request',
