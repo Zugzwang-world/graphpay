@@ -37,7 +37,9 @@ export async function GET(request: Request): Promise<Response> {
       try {
         while (!stopped && Date.now() < end) {
           try {
-            const { edges } = await sharedShopEdges(shop);
+            const { edges, truncated } = await sharedShopEdges(shop);
+            // A full window is said, never silent: the stream keeps going with what the graph returned.
+            if (truncated) controller.enqueue(encoder.encode(': the graph window is full, newest edges may be missing\n\n'));
             for (const row of freshEdges(edges, cursor, sent)) {
               const event = toEvent(row);
               sent.add(edgeKey(row));

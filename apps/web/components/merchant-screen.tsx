@@ -171,6 +171,10 @@ export function MerchantScreen() {
     a.download = `${shop.key}-orders.csv`;
     a.click();
     URL.revokeObjectURL(url);
+    // The server shortens the window when the graph holds more rows than one answer carries: say so.
+    const days = Number(res.headers.get('x-export-days'));
+    if (res.headers.get('x-export-truncated') === 'true') setExportNote(`The file may be missing rows: the graph holds more than one answer can carry. It covers the last ${days} day${days === 1 ? '' : 's'}.`);
+    else if (Number.isFinite(days) && days > 0 && days < 32 && days < 31) setExportNote(`The file covers the last ${days} day${days === 1 ? '' : 's'}, as far back as the graph could answer in full.`);
   };
 
   if (!open) {
