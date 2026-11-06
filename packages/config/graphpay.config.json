@@ -157,6 +157,7 @@
   },
   "site": {
     "url": "https://graphpay-event.vercel.app",
+    "publicAccess": true,
     "mcpPath": "/api/mcp",
     "graphqlPath": "/api/graphql",
     "vercel": {

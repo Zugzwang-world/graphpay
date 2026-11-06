@@ -8,6 +8,7 @@ import { createOwnerActions, createTxRunner, ensChain, ownerRoleOf, type OwnerAc
 import { createPublicClient, createWalletClient, http } from 'viem';
 import { privateKeyToAccount } from 'viem/accounts';
 import { siteModel } from './site.server.ts';
+import { publicAccess } from './passcode.ts';
 
 export const OWNER_WAITING_FOR = "the owner's key on this server (the Coordinator sets it in Vercel)";
 export const EFFECTIVE_WITHIN_S = 20;
@@ -81,8 +82,15 @@ let tail: Promise<unknown> = Promise.resolve();
 let pending = 0;
 export class Busy extends Error {}
 
-export function changeStatus(paused: boolean, { actionsFor = actions, agent = siteModel().payer.ens }: { actionsFor?: () => Promise<OwnerActions>; agent?: string } = {}): Promise<OwnerChange> {
+// Public access (ADR-0069): one change at most every CHANGE_COOLDOWN_MS on this instance, so a
+// visitor alternating pause and resume cannot drain the owner's Sepolia gas.
+export const CHANGE_COOLDOWN_MS = 20_000;
+let lastChange = Number.NEGATIVE_INFINITY;
+
+export function changeStatus(paused: boolean, { actionsFor = actions, agent = siteModel().payer.ens, open = publicAccess(), now = Date.now() }: { actionsFor?: () => Promise<OwnerActions>; agent?: string; open?: boolean; now?: number } = {}): Promise<OwnerChange> {
   if (pending >= MAX_PENDING) return Promise.reject(new Busy('busy'));
+  if (open && now - lastChange < CHANGE_COOLDOWN_MS) return Promise.reject(new Busy('too soon'));
+  if (open) lastChange = now;
   pending += 1;
   const task = async (): Promise<OwnerChange> => {
     const owner = await actionsFor();

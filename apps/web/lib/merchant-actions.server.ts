@@ -4,10 +4,11 @@
 // refund can never exceed what is left. The shop is always the story's merchant shop, never a
 // name from the request; the key is read from the env by role name and never leaves here.
 import { ORDER_STATUS, checkoutAbi } from '@graphpay/contracts';
-import { activeCast, config } from '@graphpay/config';
-import { createWalletClient, erc20Abi, getAddress, isAddressEqual, type Hex, type PublicClient, type WalletClient } from 'viem';
+import { activeCast, castEntries, config } from '@graphpay/config';
+import { createWalletClient, erc20Abi, getAddress, isAddressEqual, namehash, type Hex, type PublicClient, type WalletClient } from 'viem';
 import { privateKeyToAccount } from 'viem/accounts';
 import { checkoutAddress } from './site.server.ts';
+import { publicAccess } from './passcode.ts';
 import { whitechain } from './payments.server.ts';
 
 export const SHOP_KEY_WAITING_FOR = "the shop's key on this server (the Coordinator sets it in Vercel)";
@@ -18,7 +19,7 @@ const HEX32 = /^0x[0-9a-fA-F]{64}$/;
 export const MERCHANT_REFUND_REASON = 1;
 
 // A refusal the merchant can act on (shown as its code); anything else is a failure of the chain.
-export type RefusalCode = 'NO_SUCH_ORDER' | 'NOT_OURS' | 'NOT_DELIVERABLE' | 'NOT_REFUNDABLE' | 'BAD_AMOUNT' | 'OVER_REFUNDABLE' | 'FLOAT_LOW' | 'STILL_PENDING';
+export type RefusalCode = 'NO_SUCH_ORDER' | 'NOT_OURS' | 'NOT_THE_STORY_BUYER' | 'TOO_SOON' | 'NOT_DELIVERABLE' | 'NOT_REFUNDABLE' | 'BAD_AMOUNT' | 'OVER_REFUNDABLE' | 'FLOAT_LOW' | 'STILL_PENDING';
 export class Refusal extends Error {
   code: RefusalCode;
   status: number;
@@ -138,6 +139,22 @@ function ours(chain: Chain, order: OrderState): void {
   if (!isAddressEqual(getAddress(order.merchant), chain.walletClient.account.address)) throw new Refusal('NOT_OURS');
 }
 
+// Public access (ADR-0069): a visitor acts for the shop only on the story persona's own orders
+// (the contract's buyerNode is the buyer owner's ENS node), never on an outside buyer's, and
+// one action per order at most every ORDER_COOLDOWN_MS on this instance, so a loop of tiny
+// refunds cannot drain the shop's gas or float.
+export const ORDER_COOLDOWN_MS = 30_000;
+const lastAction = new Map<string, number>();
+const personaNode = (): string => namehash(castEntries().find((e) => e.kind === 'persona')!.ensName).toLowerCase();
+
+export function visitorGuard(order: OrderState, orderId: string, { open = publicAccess(), now = Date.now(), persona = personaNode() }: { open?: boolean; now?: number; persona?: string } = {}): void {
+  if (!open) return;
+  if (order.buyerNode.toLowerCase() !== persona) throw new Refusal('NOT_THE_STORY_BUYER', 403);
+  const last = lastAction.get(orderId);
+  if (last !== undefined && now - last < ORDER_COOLDOWN_MS) throw new Refusal('TOO_SOON', 429);
+  lastAction.set(orderId, now);
+}
+
 export function markDispatched(orderId: string, chain?: Promise<Chain>): Promise<Sent> {
   return serially(async () => {
     const c = await (chain ?? liveChain());
@@ -145,6 +162,7 @@ export function markDispatched(orderId: string, chain?: Promise<Chain>): Promise
     ours(c, order);
     await settled(c, orderId);
     if (order.status !== 'PAID') throw new Refusal('NOT_DELIVERABLE');
+    visitorGuard(order, orderId);
     return send(c, orderId, 'markDelivered', [orderId]);
   });
 }
@@ -168,6 +186,7 @@ export function refundOrder(orderId: string, amountMicro: bigint | null, chain?:
       c.publicClient.readContract({ address: c.token, abi: erc20Abi, functionName: 'allowance', args: [c.walletClient.account.address, c.checkout] }),
     ]);
     if (balance < amount || allowance < amount) throw new Refusal('FLOAT_LOW');
+    visitorGuard(order, orderId);
     const sent = await send(c, orderId, 'refund', [orderId, amount, MERCHANT_REFUND_REASON]);
     return { ...sent, amountMicro: String(amount), full: amount === left };
   });

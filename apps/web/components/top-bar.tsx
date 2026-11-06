@@ -77,7 +77,8 @@ export function TopBar() {
         ) : null}
       </nav>
       <div className="topbar-actions">
-        <button
+        {/* No lock for visitors under public access (ADR-0069). */}
+        {model.publicAccess ? null : <button
           type="button"
           className="chip lock"
           data-tone={passcode ? 'pista' : undefined}
@@ -89,7 +90,7 @@ export function TopBar() {
             <path d={passcode ? 'M5.2 7V5.2a2.8 2.8 0 0 1 5.5-.8' : 'M5.2 7V5.2a2.8 2.8 0 0 1 5.6 0V7'} fill="none" stroke="currentColor" strokeWidth="1.5" />
           </svg>
           {passcode ? 'Unlocked' : 'Locked'}
-        </button>
+        </button>}
         <button type="button" className="chip" aria-pressed={soundOn} onClick={() => setSoundOn(!soundOn)} title="Sounds are synthesised in the browser; captions show either way">
           {soundOn ? 'Sound on' : 'Sound off'}
         </button>

@@ -4,6 +4,9 @@ import type { OwnerActions } from '@graphpay/ens';
 import { Busy, MAX_PENDING, changeStatus, failureKind, ownerConfigured, ownerKeyName } from './owner-actions.server.ts';
 import { siteModel } from './site.server.ts';
 
+// These tests check the gated mode; the public-access guards are tested on their own.
+process.env.GRAPHPAY_PUBLIC_ACCESS = '0';
+
 const hash = `0x${'ab'.repeat(32)}` as const;
 const fake = (calls: string[], overrides: Partial<OwnerActions> = {}): OwnerActions => ({
   pause: async (name) => {
@@ -77,4 +80,15 @@ test('a failure is logged as a kind, never as its message (which can carry an RP
   assert.equal(failureKind(new Error('execution reverted: EACUnauthorizedAccountRoles')), 'revert');
   assert.equal(failureKind(new Error('pause receipt: not visible on chain after 60 s')), 'timeout');
   assert.equal(failureKind('weird'), 'error');
+});
+
+test('public access: changes are at most one per cooldown, and the gated mode is unchanged', async () => {
+  const { CHANGE_COOLDOWN_MS } = await import('./owner-actions.server.ts');
+  const calls: string[] = [];
+  const t0 = 10_000_000;
+  await changeStatus(true, { actionsFor: async () => fake(calls), open: true, now: t0 });
+  await assert.rejects(changeStatus(false, { actionsFor: async () => fake(calls), open: true, now: t0 + CHANGE_COOLDOWN_MS - 1 }), Busy);
+  await changeStatus(false, { actionsFor: async () => fake(calls), open: true, now: t0 + CHANGE_COOLDOWN_MS });
+  await changeStatus(true, { actionsFor: async () => fake(calls), open: false, now: t0 + CHANGE_COOLDOWN_MS + 1 });
+  assert.equal(calls.length, 3);
 });

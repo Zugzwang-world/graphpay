@@ -9,6 +9,9 @@ import type { RunResult } from './contracts.ts';
 import { POST } from '../app/api/agents/run/route.ts';
 import { GET } from '../app/api/agents/run/[id]/events/route.ts';
 
+// These tests check the gated mode; public access (ADR-0069) is tested on its own.
+process.env.GRAPHPAY_PUBLIC_ACCESS = '0';
+
 const passcode = 'r'.repeat(MIN_PASSCODE_LENGTH + 2);
 const call = (body: unknown, code: string | null = passcode) =>
   POST(new Request('https://example.test/api/agents/run', { method: 'POST', headers: code ? { [PASSCODE_HEADER]: code } : {}, body: JSON.stringify(body) }));

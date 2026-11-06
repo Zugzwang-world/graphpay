@@ -4,6 +4,9 @@ import { generatePrivateKey } from 'viem/accounts';
 import { connectArkiv, identityKey, newSim, nodeOf, openShopKeys } from '@graphpay/money-graph';
 import { directoryConfigured, setShopOpen } from './open-toggle.server.ts';
 
+// These tests check the gated mode; public access (ADR-0069) is tested on its own.
+process.env.GRAPHPAY_PUBLIC_ACCESS = '0';
+
 // Test names only (sim.*): the web code never holds story names.
 const SHOP = 'alpha-sweets.sim.example.eth';
 const shopKey = identityKey(nodeOf(SHOP), 0);

@@ -56,6 +56,7 @@ One line per PR: time (IST) · activity · result · PR link. Append under your 
 
 - 13:05 IST · phones · phase 1: the team's two phones on our site at `/live`, built from `frontend/` (#70, `8abe39a`) with their Vite, on live read-only data (agents, pass, Open flag, real orders with explorer links, the merchant stream) · https://github.com/Zugzwang-world/graphpay/pull/111
 - 13:30 IST · phones · fix: production deploys failed since #111 (Vercel's NODE_ENV=production made npm skip the team's toolchain); the phones build now installs frontend/'s dev dependencies · PR link follows
+- 13:50 IST · phones · public access (ADR-0069): the passcode check is a no-op behind the config's `site.publicAccess`; visitor guards on merchant refund and dispatch (the persona's orders only, 30 s per order) and pause and resume (20 s); reviewer: no blocking · PR link follows
 
 ## website
 

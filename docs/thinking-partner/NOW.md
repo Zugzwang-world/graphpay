@@ -83,13 +83,11 @@ Updated 10:36 IST, Fri 6 Nov. **M13 is done on the real networks. The acceptance
 
 ## phones
 
-Updated 13:05 IST, Fri 6 Nov (Integration). **Phase 1 of the integration brief: the team's two phones run on our site, on live data, at `/live`.**
-- `apps/phones/` builds the team's customer and merchant apps from `frontend/` (unchanged, pinned at their #70, `8abe39a`) with their own Vite, wrapped in our live adapter, into `/phones/customer.html` and `/phones/merchant.html`.
-- `/live` is a copy of T5's stage: the two phones in frames, the explainer in the middle. The home page is unchanged.
-- Read-only for now: Vitalik's agents and the payer's pass, the shop's Open flag, and every real order (paid, delivered, refunded) with real explorer links. New orders arrive live from the merchant stream.
-- One story: their story file is replaced at build time by a projection of `packages/config/story.json`; images and avatars pass through when the story gets them.
-- Buttons answer "connected in the next step" until phases 2 and 3.
-- Next: phase 2, Vitalik's ask runs the real errand.
+Updated 13:50 IST, Fri 6 Nov (Integration).
+- **Phase 1 is merged (#111):** the team's two phones on our site at `/live`, on live read-only data. It broke production deploys (Vercel skipped the team's dev tools); the one-flag fix is #116. Production goes live with it.
+- **Phase 2, step 1, in review: public access (ADR-0069).** One config switch (`site.publicAccess`) opens the site's own routes; the site stops asking for the passcode. Keys between our own servers stay.
+  - Guards kept or added: visitors can refund and dispatch only Vitalik's orders, once per order every 30 s, and pause or resume at most once every 20 s. The one-errand-at-a-time and re-order guards are unchanged.
+- Next: Vitalik's ask runs the real errand on the phones (once Join says it pays).
 
 ## website
 
