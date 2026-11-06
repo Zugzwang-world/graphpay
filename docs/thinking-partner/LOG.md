@@ -103,7 +103,10 @@ One line per PR: time (IST) · activity · result · PR link. Append under your 
 - 12:47 IST · records · merged: feat(config): the payer's daily cap is 100; funding targets; the Vercel build step in git · https://github.com/Zugzwang-world/graphpay/pull/105
 - 21:49 IST · records · merged: docs(records): the Coordinator's resume at 21:45 IST · https://github.com/Zugzwang-world/graphpay/pull/147
 - 22:49 IST · records · full sync: TRACKER (new, 55 rows), NOW, OPEN by owner, LOG catch-up and roll-up, every relay (+ phones, booth, sync), ADR-0072 to ADR-0076, the acceptance report (read-only: 35/8/1/4), the fresh-Coordinator handover; completed briefs archived · https://github.com/Zugzwang-world/graphpay/pull/150
-- 23:10 IST · records · night Coordinator takeover: payer resumed (Sepolia 0x34cddd47…f949), Filter & Fold open, the day sessions retired, the night roster (W1 to W7) in NOW, TRACKER owners moved to the streams, retired relays and finished briefs archived · coord/night-takeover
+- 23:10 IST · records · night Coordinator takeover: payer resumed (Sepolia 0x34cddd47…f949), Filter & Fold open, the day sessions retired, the night roster (W1 to W7) in NOW, TRACKER owners moved to the streams, retired relays and finished briefs archived · https://github.com/Zugzwang-world/graphpay/pull/151
+- 23:22 IST · records · NOW and TRACKER after W5's pass at 300 (#152) and W4's relative deadline (#153); the outgoing Coordinator's last prompt log · https://github.com/Zugzwang-world/graphpay/pull/156
+- 23:33 IST · records · NOW and TRACKER: the Mac charging, W7's README (#154), W1's new names on ENS (#158), W4's run-log metrics (#157) · https://github.com/Zugzwang-world/graphpay/pull/160
+- 23:45 IST · records · NOW and TRACKER after W3's coffee re-order, W4's low effort and W7's submission files; the mirror's pause explained; ADR-0067 amended and CLAUDE.md's model line to match #162 · coord/night-records-3
 
 ## booth
 
@@ -119,11 +122,23 @@ One line per PR: time (IST) · activity · result · PR link. Append under your 
 
 ## w7-submission
 
-- 23:25 IST · w7-submission · the README rewritten with a verify-each-claim table (24 transactions checked on the explorers), a keyless Arkiv query, the persona sentence, the team; a root MIT LICENSE · this PR
+- 23:25 IST · w7-submission · the README rewritten with a verify-each-claim table (24 transactions checked on the explorers), a keyless Arkiv query, the persona sentence, the team; a root MIT LICENSE · https://github.com/Zugzwang-world/graphpay/pull/154
+- 23:30 IST · w7-submission · AI_USAGE.md (every session and model, Kimi at runtime, the Grok desk, all images AI-generated, the team's Copilot co-author) and the five Arkiv files finished (friction +2 rows, reach and why-arkiv new, how-you-use, swarm) · https://github.com/Zugzwang-world/graphpay/pull/159
+- 23:32 IST · w7-submission · WHITECHAIN_FEEDBACK.md (gas measured on the event build, friction ranked by cost) and docs/submission/ENS.md (what ENS decides, with evidence); two README claims made exact · https://github.com/Zugzwang-world/graphpay/pull/161
+- 23:38 IST · w7-submission · docs/submission/ETHGLOBAL.md: the form text ready to paste, every claim linked, every URL checked · https://github.com/Zugzwang-world/graphpay/pull/164
+- 23:43 IST · w7-submission · the video shot list and the submission checklist (docs/submission/VIDEO.md, CHECKLIST.md); wording fixes; the README links the disclosure · https://github.com/Zugzwang-world/graphpay/pull/166
+- 23:46 IST · w7-submission · keep current: AI_USAGE.md records W4's effort split (#162); the README notes W1's new shop names on Sepolia (#158) · this PR
+
+## w1-identity
+
+- 23:35 IST · w1-identity · the new shop names filter-and-fold, idli-index and tawa-tangle on Sepolia, each with its three agents, on the old shops' wallets (30 txs; ENS acceptance reads 100 pass) · https://github.com/Zugzwang-world/graphpay/pull/158
 
 ## w4-agents
 
-- 23:25 IST · w4-agents · item 1: the request says "delivered within an hour"; code reads the span from the request, so errands work at any hour (mocks: paid at 23:50, 23:59 and 03:00 IST) · https://github.com/Zugzwang-world/graphpay/pull/153
+- 23:18 IST · w4-agents · item 1 (merged): the request says "delivered within an hour"; code reads the span from the request, so errands work at any hour (mocks: paid at 23:50, 23:59 and 03:00 IST) · https://github.com/Zugzwang-world/graphpay/pull/153
+- 23:21 IST · w4-agents · item 2: each agent's end event carries its model calls (tokens in, cached, out, reasoning, cost, tools; seconds on live runs); a script runs one live site errand and prints the table · https://github.com/Zugzwang-world/graphpay/pull/157
+- 23:30 IST · w4-agents · the live baseline on the site: paid 4.80 in 91.4 s, 19 model calls, 33,287 tokens, $0.1455 (tx 0xeac3…abe6) · no PR (a live run)
+- 23:35 IST · w4-agents · item 3, first cut: routine agents at low effort, short tool replies for the model, the concierge gets code's limits · https://github.com/Zugzwang-world/graphpay/pull/162
 
 ## w5-ops
 

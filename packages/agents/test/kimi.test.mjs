@@ -13,10 +13,13 @@ const KEY = ['kimi', 'test', 'Q'.repeat(24)].join('-');
 const env = { KIMI_API_KEY: KEY };
 const roles = Object.keys(story.agentModels.presets.testing.roles);
 
-test('the testing, video and live presets are Kimi at high; Anthropic stays as named fallbacks', () => {
+// W4: the concierge and the analyst decide, so they stay at high; the routine roles run at low.
+const HIGH = new Set(['concierge', 'analyst']);
+
+test('the testing, video and live presets are Kimi, high for the concierge and the analyst and low for the routine roles; Anthropic stays as named fallbacks', () => {
   const presets = story.agentModels.presets;
   for (const [name, model] of [['testing', 'kimi-k3.1-pro'], ['video', 'kimi-k3.1-pro-highspeed'], ['live', 'kimi-k3.1-pro-highspeed']]) {
-    for (const role of roles) assert.deepEqual({ ...presets[name].roles[role] }, { provider: 'moonshot', model, effort: 'high', maxTokens: 32000 }, `${name}/${role}`);
+    for (const role of roles) assert.deepEqual({ ...presets[name].roles[role] }, { provider: 'moonshot', model, effort: HIGH.has(role) ? 'high' : 'low', maxTokens: 32000 }, `${name}/${role}`);
   }
   assert.equal(story.agentModels.active, 'testing');
   for (const name of ['anthropic-testing', 'anthropic-video', 'anthropic-live']) {
@@ -76,7 +79,8 @@ test('requests carry the key only to the configured host, the preset effort and 
     assert.equal(r.url, `${config.models.moonshot.apiBaseUrl}/chat/completions`);
     assert.equal(r.headers.authorization, `Bearer ${KEY}`);
     assert.equal(r.body.model, settings.model);
-    assert.equal(r.body.reasoning_effort, 'high', 'the effort is fixed for the whole errand');
+    assert.equal(r.body.reasoning_effort, settings.effort, 'the effort is fixed for the whole errand');
+    assert.equal(r.body.reasoning_effort, 'low', 'the scout is a routine role');
     assert.equal(r.body.max_tokens ?? r.body.max_completion_tokens, 32000, 'max output tokens are always set');
     assert.equal('temperature' in r.body, false, 'temperature is fixed by the model and never sent');
   }
@@ -120,4 +124,38 @@ test('Kimi gets the output schema in its instructions, not as a response_format,
   assert.match(system, /chosenShop/);
   assert.match((await go()).error, /not the JSON/);
   assert.match((await go()).error, /empty reply/);
+});
+
+test('each model call is recorded on agent.end: tokens in and cached, out and reasoning, its cost, its tools and, when timed, its seconds', async () => {
+  const { runAgent } = await import('../src/agents.mjs');
+  const { createRunLog } = await import('../src/runlog.mjs');
+  const answers = [
+    completion({ role: 'assistant', content: null, reasoning_content: 'look first', tool_calls: [{ id: 'call_1', type: 'function', function: { name: 'lookup', arguments: '{}' } }] }, 'tool_calls'),
+    completion({ role: 'assistant', content: '{"summary":"done","chosenShop":null}', reasoning_content: 'ok' }),
+  ];
+  let n = 0;
+  const fetch = async () => new Response(JSON.stringify(answers[n++]), { status: 200, headers: { 'content-type': 'application/json' } });
+  const models = createModelFactory({ mode: 'live', env, fetch });
+  const log = createRunLog();
+  const tools = { lookup: tool({ description: 'look up', inputSchema: z.object({}), execute: async () => ({ ok: true }) }) };
+  await runAgent({ role: 'concierge', ens: 'concierge.x.graphpay.eth', task: { a: 1 }, tools, models, log, meter: createMeter({ timing: true }) });
+  const end = log.events.find((e) => e.type === 'agent.end');
+  assert.equal(end.effort, 'high');
+  assert.equal(end.calls.length, 2);
+  const price = config.models.pricingUsdPerMTok[models('concierge').settings.model];
+  for (const call of end.calls) {
+    assert.deepEqual([call.input, call.cached, call.output, call.reasoning], [100, 40, 50, 30]);
+    assert.ok(Math.abs(call.usd - (60 * price.input + 40 * price.cacheRead + 50 * price.output) / 1e6) < 1e-9);
+    assert.ok(Number.isFinite(call.seconds) && call.seconds >= 0);
+    assert.ok(Number.isFinite(call.toolSeconds) && call.toolSeconds >= 0);
+  }
+  assert.deepEqual(end.calls.map((c) => c.tools), [['lookup'], []]);
+  assert.ok(Number.isFinite(end.seconds));
+  // Untimed (mock runs): the same record without seconds.
+  n = 0;
+  const quiet = createRunLog();
+  await runAgent({ role: 'concierge', ens: 'concierge.x.graphpay.eth', task: { a: 1 }, tools, models, log: quiet, meter: createMeter() });
+  const untimed = quiet.events.find((e) => e.type === 'agent.end');
+  assert.equal('seconds' in untimed, false);
+  assert.equal('seconds' in untimed.calls[0], false);
 });

@@ -3,7 +3,7 @@
 // their story role, never by label (ADR-0047).
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { promptFor, runErrand, TAIL, teamCast } from '../index.mjs';
+import { promptFor, runErrand, TAIL, teamCast, usageOf, usageTable } from '../index.mjs';
 import { base64JsonCodec } from '../index.mjs';
 import { createMockWorld, MOCK_SDL, mockAddress, runMockErrand } from '../mocks/index.mjs';
 
@@ -305,4 +305,22 @@ test('get_quote cannot swap the order while pay_order is signing it', async () =
   assert.equal(world.hooks.signed.length, 1);
   assert.equal(world.hooks.signed[0].orderId, runLog.result.orderId);
   assert.equal(world.hooks.quotes.entries.length, 1, 'no second quote was made');
+});
+
+test('the run log carries every model call per agent; usageOf adds them up to the meter, and mock runs stay untimed', async () => {
+  const { runLog, metrics } = await run();
+  const ends = events(runLog, 'agent.end');
+  assert.ok(ends.length >= 7);
+  for (const e of ends) {
+    assert.ok(Array.isArray(e.calls) && e.calls.length > 0, e.role);
+    assert.equal('seconds' in e, false, 'no timing in a mock run log');
+  }
+  const usage = usageOf(runLog.events);
+  assert.equal(usage.total.calls, metrics.calls);
+  assert.equal(usage.total.input + usage.total.output, metrics.tokens);
+  assert.deepEqual(metrics.usage, usage);
+  assert.deepEqual(events(runLog, 'agent.end').find((e) => e.role === 'scout').calls.map((c) => c.tools), [['directory_list'], ['catalog_read', 'catalog_read', 'catalog_read'], []]);
+  assert.match(usageTable(usage), /\| \*\*errand\*\* \| \d+ calls/);
+  const timed = await run({ timing: true });
+  assert.ok(events(timed.runLog, 'agent.end').every((e) => Number.isFinite(e.seconds) && e.calls.every((c) => Number.isFinite(c.seconds))));
 });

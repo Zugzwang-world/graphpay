@@ -1,31 +1,55 @@
 # Relay: w7-submission (the night Submission stream)
 
-Updated 23:25 IST, Fri 6 Nov, by W7 Submission (`local_abd77623-de22-4fe2-a0a9-865fdd43dba2`). Brief: [`briefs/2258-w7-submission.md`](../briefs/2258-w7-submission.md).
+Updated 23:43 IST, Fri 6 Nov, by W7 Submission (`local_abd77623-de22-4fe2-a0a9-865fdd43dba2`). Brief: [`briefs/2258-w7-submission.md`](../briefs/2258-w7-submission.md).
 
 ## Plain language
 
-W7 writes what a judge reads, so the founder can paste the ETHGlobal submission from one file and every claim in it links to evidence.
+W7 writes what a judge reads, so the founder can paste the ETHGlobal submission from one file, and every claim in it links to evidence. All four items of the brief now exist; what remains is keeping them true as the other night streams land.
 
-**Landed in this step:** the README. It now says what GraphPay is, gives the live link, and has a "verify each claim" table: every payment, refund, renewal, ENS action and Arkiv receipt it mentions opens on a public explorer. Each of those 24 transactions was checked on its explorer at about 23:10 IST. It also has the fictional-persona sentence from the brief, the SDKs, the Whitechain, ENS and Arkiv sections the prize rules ask for, a runnable Arkiv query with no keys, the limitations, and the team. A root MIT `LICENSE` is added (the packages were MIT already; the repo root had none).
+**Landed:**
+- **The README** ([#154](https://github.com/Zugzwang-world/graphpay/pull/154)): what GraphPay is, the live link, the fictional-persona sentence, and a "verify each claim" table where every payment, refund, renewal, ENS action and Arkiv receipt opens on a public explorer. It also has a keyless Arkiv query, a viem check of the ENS records, the partner sections, the limitations and the team. A root MIT `LICENSE` came with it.
+- **AI_USAGE.md and the five Arkiv files** ([#159](https://github.com/Zugzwang-world/graphpay/pull/159)).
+  - AI_USAGE.md: Claude Code wrote the code; Claude helped plan; Kimi runs the agents; the Grok desk made the assets; all images are AI-generated; every session is listed with its model.
+  - The Arkiv files: friction, reach, why Arkiv, how we use it, Swarm.
+- **The Whitechain and ENS notes** ([#161](https://github.com/Zugzwang-world/graphpay/pull/161)): `WHITECHAIN_FEEDBACK.md` at the root, and `docs/submission/ENS.md`.
 
-**Next, in order:** AI_USAGE.md; the Arkiv files (`friction.md`, `reach.md`, `why-arkiv.md`, `how-you-use-arkiv.md`, `swarm.md`); `WHITECHAIN_FEEDBACK.md` and `docs/submission/ENS.md`; then `docs/submission/ETHGLOBAL.md`, the form text. Then a pass after each night stream lands (W1's new shop names, W2's menus and the race at M, W6's 1.0.0 SDKs).
+- **The form text** ([#164](https://github.com/Zugzwang-world/graphpay/pull/164)): [`docs/submission/ETHGLOBAL.md`](../../submission/ETHGLOBAL.md), with name, one-liner (90 characters), description, how it's made, links, one block for each of the three partner prizes, and a "before you press Submit" list. The brief's done-when is met.
 
-**The founder must:** review the README; record the video (2 to 4 minutes, own voice) and paste its link into the form; submit by 08:00 IST from `docs/submission/ETHGLOBAL.md`; confirm the team list and that every member is registered.
+**In this step's PR:** the video shot list ([`VIDEO.md`](../../submission/VIDEO.md), prompts for the founder's own words, not a script) and the submission checklist ([`CHECKLIST.md`](../../submission/CHECKLIST.md), `planning/SPONSOR_CHECKLIST.md` §6 row by row), both from the M17 plan; two wording fixes; the README links the disclosure.
+
+**The founder must:**
+- review the README and the partner files;
+- confirm the team list;
+- record the video and paste its link;
+- submit from `ETHGLOBAL.md` by 08:00 IST.
 
 ## Technical
 
-- **Branch and PRs:** `submit/readme` (this step). Small PRs, one per item, auto-merge.
-- **How links were checked:** a read-only script queried the Whitechain explorer's API (status, method, token transfers), and public Sepolia and Rabdi RPCs (receipt status, chain id first). All 24 succeeded. Highlights:
-  - the first real test-USDT payment, 4.80, 04:13 IST, sent by our relayer: [0x8750…2c00](https://explorer.testnet.whitechain.io/tx/0x87505ef2457b6e925fa7378a55fd91419e83c37fb8effc06d901884700c72c00);
-  - the latest live errand, 4.80, 20:36 IST: [0xbc05…cd43](https://explorer.testnet.whitechain.io/tx/0xbc052d7f11bd61ab0fcee69a78da0b7fbe5bcbf9821741d1150345a0fe29cd43);
-  - refund 0.80, re-order 1.20, the cron renewal, a subscription created, renewed and cancelled (by script), a revoked agent's on-chain `PaymentFailed`;
-  - on Sepolia: the agent's own `agent-context` write (B3), the disposable agent's kill, the payer's cap record.
-- **Arkiv receipts link to their payment:** a keyless `arkiv_query` for the payer's `pay` edges (owner W_LEDGER) returns rows whose `ref` is `1874:<Whitechain tx>:<log>`; for example entity `0xc64b…7204` points at the errand `0x8617…863a`. The README carries the query as a curl command and as an explorer "run this query" link.
-- **ENS read with stock viem** on Sepolia's public RPC: the shop's coin-type 2147485522 address is the payee of every payment; the payer's `graphpay.status` and `graphpay.cap_micro`; `graphpay.eth`'s `agent-endpoint[mcp]`; a wildcard `sim-0042` name answers "synthetic agent, unverified".
-- **The drop-in:** the store's integration is 12 lines in four files, counted by the store's own rule (`apps/store/lib/integration.ts`); the old "about 20" stays the limit its test holds.
+- **Evidence method:**
+  - A read-only script read 24 transactions back: Whitechain's Blockscout API for status, method and token transfers; public Sepolia and Rabdi RPCs, chain id first. All succeeded.
+  - A link checker runs over every owned file: relative links and their anchors must exist; external links must answer. npm's pages refuse scripts (403), so the packages are checked through the registry API.
+  - Every URL in the form text answered 200 at 23:38 IST.
+- **Live facts gathered tonight** (all cited in the files):
+  - Arkiv receipts carry `ref = 1874:<Whitechain tx>:<log>`.
+  - `ask` with `verify: true` answers `RAW_VERIFIED` in 8 Arkiv calls.
+  - The map lists 16 shops, 10 labelled synthetic.
+  - The accountant CSV: 346 rows over 31 days, 105 of them chain rows with explorer links, the rest labelled synthetic history.
+  - The Swarm menu and the dish photo match their recorded hashes.
+  - On chain 1874, `eth_getCode` finds Permit2, Multicall3, EntryPoint v0.7, x402's Permit2 proxy and the deterministic deployer.
+  - The checkout enforces the daily cap itself (`SPEND_CAP` in `_checkPolicy`).
+- **Corrections along the way:**
+  - Explain ids live per server instance (the last 200), so no fixed explain link is published.
+  - URLs percent-encode their parentheses.
+  - B7 and B9 are cited as what they are: a fork test, and the payee read recorded in C2.
+  - The agent's scoped keys are named exactly: `agent-context` and its Whitechain address.
 - **Deviations:**
-  - The tallies of the good shop include labelled synthetic history (`history-buyer-N.sim…`, `synthetic: true`). The README says so rather than quoting the shop's order count.
-  - The payer's daily cap is not quoted as a number: it reads 300 test USDT in ENS since about 23:10 IST (W5's #152), after the 100 of ADR-0071. The README links the live state instead.
-  - The store is not deployed (graphpay-store.vercel.app answers 404), so the README says how to run it locally.
-  - The brief's `why.md` is written as `arkiv/why-arkiv.md`, the name the pack, the master plan and the M17 plan use.
-- **Open risks:** the ENS labels change with W1, the race numbers with W2 at M, the SDK versions with W6; each is a find-and-replace in the README and the form text, done after it lands.
+  - The brief's `why.md` is written as `arkiv/why-arkiv.md`, the name the pack and the plans use.
+  - The payer's cap is linked live, never quoted: it is 300 tonight (W5's #152).
+  - The store is not deployed, so the README says how to run it locally.
+  - My LOG and OPEN heading is now `## w7-submission`, like the other night streams.
+- **The final pass:** the form text's last section lists what can still change.
+  - W1: the shops' ENS names (today `kesar-kingdom` and the others).
+  - W2: the race at size M, and the menus.
+  - W6: the SDKs at 1.0.0.
+  - W3: newer refund, re-order or renewal links.
+  Each is an edit to the README, the Arkiv and ENS files and the form text after it lands.

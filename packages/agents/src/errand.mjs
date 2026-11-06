@@ -12,6 +12,7 @@ import { fromMicro } from './money.mjs';
 import { createRunLog, RUN_SCHEMA } from './runlog.mjs';
 import { createScrubber, errorText } from './scrub.mjs';
 import { createRunState } from './state.mjs';
+import { usageOf } from './usage.mjs';
 
 const sha256 = (text) => createHash('sha256').update(text).digest('hex');
 
@@ -95,7 +96,8 @@ export async function runErrand(options = {}) {
   let activity = null; // presence and handoff hooks: no-ops unless the hooks define them
   const log = createRunLog({ scrub, onEvent: options.onEvent, observe: (entry, meta) => activity?.observe(entry, meta) });
   activity = createActivity({ hooks: options.hooks, cast, log, runId, renewMs: options.presenceRenewMs, setTimer: options.setTimer, clearTimer: options.clearTimer });
-  const meter = createMeter();
+  // Per-call seconds only on live runs, so two mock runs still give byte-identical run logs.
+  const meter = createMeter({ timing: options.timing ?? mode !== 'mock' });
   const started = performance.now();
   const label = options.label ?? `${cast.key} story errand (SYNTHETIC)`;
   let state = null;
@@ -159,6 +161,6 @@ export async function runErrand(options = {}) {
     usageTokens: meter.tokens,
     apiCostUsd: Number(meter.costUsd.toFixed(6)),
   };
-  const metrics = { seconds: (performance.now() - started) / 1000, calls: meter.calls, tokens: meter.tokens, apiCostUsd: meter.costUsd, byRole: meter.byRole };
+  const metrics = { seconds: (performance.now() - started) / 1000, calls: meter.calls, tokens: meter.tokens, apiCostUsd: meter.costUsd, byRole: meter.byRole, usage: usageOf(log.events) };
   return { runLog, metrics, state };
 }

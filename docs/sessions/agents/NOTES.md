@@ -29,6 +29,7 @@ Two optional members of `LiveHooks`, no-ops when absent (hooks absent or recordi
 - Models come from the story presets (`agentPreset(role)`, ADR-0048), not `AGENT_MODEL`; `AGENT_PRESET` overrides. Providers: anthropic and moonshot (Kimi, ADR-0067). Grok (`AGENT_PROVIDER`) is not built (optional); a preset naming another provider fails closed.
 - The model-facing output schemas (`WIRE_OUTPUTS`) are bare types; code validates the reply against the strict `OUTPUTS` after the call, because native structured output drops bounds and patterns.
 - The need and limits are adopted from the request by code (G1); `directory_list` searches for the adopted need whatever the model types.
+- The concierge's task carries `limits` (code's budget and deadline) and its prompt's step 1 says to copy them (W4); the routine roles think at Kimi's low effort; the models read short tool replies (`MODEL_VIEW` in `src/graph.mjs`, `modelView` on `tracedTool`) while the run log keeps the whole answers.
 - The deadline may be a span from the request ("within an hour", W4 Agents, Fri 6 Nov): the request instant plus the span, floored to the minute, so errands work at any hour; a clock time and a different span together are ambiguous and refused.
 - `pay_shop` guard also needs the scout's offer for the chosen shop to fit budget and deadline, and a refusal ends the errand (one payment slot).
 - A 402 is checked for contract, order id, merchant, nodes and amount, and `408` after signing counts as unclear, not final.
