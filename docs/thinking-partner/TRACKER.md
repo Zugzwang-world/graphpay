@@ -1,4 +1,4 @@
-# Tracker at 23:22 IST, Fri 6 Nov (night Coordinator): the 22:45 sync, with tonight's owners (W1 to W7, the frontend pass, the founder, the Coordinator)
+# Tracker at 23:33 IST, Fri 6 Nov (night Coordinator): the 22:45 sync, with tonight's owners (W1 to W7, the frontend pass, the founder, the Coordinator)
 
 | deliverable | track | status | evidence link | owner | next step |
 |---|---|---|---|---|---|
@@ -27,7 +27,7 @@
 | Stream recovery | Website | done | [#138](https://github.com/Zugzwang-world/graphpay/pull/138) | frontend pass | None. No drop has been recorded since the fix. |
 | Deck's other slides | Website | not started | [Booth resume](https://github.com/Zugzwang-world/graphpay/blob/main/docs/sessions/booth/resume.md) | frontend pass | Check title, problem, solution, partners and close; the sample sweets pictures are still in. |
 | On screen | Story | done | [#135](https://github.com/Zugzwang-world/graphpay/pull/135) | founder | Ask the team to replace the sweets jokes ("The syrup is warm") in their `copy.ts`. |
-| On chain: ENS names for Filter & Fold, Idli Index, Tawa Tangle and their agents | Story | not started | [story.json](https://github.com/Zugzwang-world/graphpay/blob/main/packages/config/story.json) | W1 | W1 registers filter-and-fold, idli-index and tawa-tangle with their agents, on the old shops' wallets; flips the labels after W2. |
+| On chain: ENS names for Filter & Fold, Idli Index, Tawa Tangle and their agents | Story | partial | [#158](https://github.com/Zugzwang-world/graphpay/pull/158) | W1 | The three names are live on ENS (Sepolia) with their agents, on the old shops' wallets; ENS reads 100 pass. W1 flips the story labels after W2's rows. |
 | Moving their history | Story | not started | [ADR-0073](https://github.com/Zugzwang-world/graphpay/blob/main/docs/decisions/ADR-0073-the-story-masala-dosa-near-bkc.md) | W2 | W2 writes the new shops' rows and labelled history under the new names (epoch 0); then W1 flips the labels. |
 | Arkiv category, still "sweets" | Story | not started | [category: sweets](https://graphpay-event.vercel.app/api/graphql?query=%7Bnode(ens%3A%22kesar-kingdom.graphpay.eth%22)%7Bcategory%20tally%7Borders%20refunds%7D%7D%7D) | W2 | W2 writes the new shops with the category South Indian. |
 | Used: figurines, photos | Grok | done | [#140](https://github.com/Zugzwang-world/graphpay/pull/140) | founder | None. |
@@ -44,7 +44,7 @@
 | Drop-in store | Whitechain | partial | [#63: one real kit payment](https://github.com/Zugzwang-world/graphpay/pull/63) | Coordinator | graphpay-store.vercel.app answers 404: create the project and its env, or show the store locally. |
 | Checkout kit | Whitechain | done | [kit payment 4.80](https://explorer.testnet.whitechain.io/tx/0xf1e76a91d855af352e7b38122f94c337be2a74e25ce087eb396b7945be343f89) | W3 | None: a shop in 17 lines (#51). The mirror parks this payment as an unknown actor. |
 | AgentPay | Whitechain | done | [0.01 test payment](https://explorer.testnet.whitechain.io/tx/0xfbd7d307b1b0c08f3af015b4bdb03aaeed12d0c2d18c2553432cb4679ff14c7e) | W7 | W7 writes `WHITECHAIN_FEEDBACK.md` (not started) and the README's Operate section. |
-| README, with the fictional-persona note | Submission | partial | [README](https://github.com/Zugzwang-world/graphpay/blob/main/README.md) | W7 | Still to do: the "being built live" line, the video link, the addresses. |
+| README, with the fictional-persona note | Submission | done | [#154](https://github.com/Zugzwang-world/graphpay/pull/154) | W7 | Merged 23:24 IST: live link, persona note, a "verify each claim" table (24 transactions), partner sections, team. W7 re-passes it after the flip, race at M and the 1.0.0 SDKs. |
 | AI_USAGE.md naming Kimi and the Grok desk | Submission | partial | [AI_USAGE.md](https://github.com/Zugzwang-world/graphpay/blob/main/AI_USAGE.md) | W7 | Claude Code wrote the code, Kimi runs the agents, the Grok desk made the assets, all images AI-generated. |
 | ETHGlobal disclosure | Submission | partial | [paste-ready text](https://github.com/Zugzwang-world/graphpay/blob/main/docs/plan/DISCLOSURE_MESSAGE.md) | founder | Confirm it was sent; if not, paste it into the Hacker Dashboard. |
 | Team members registered | Submission | ask the founder | none | founder | Confirm every member is on the ETHGlobal project. |
@@ -55,5 +55,5 @@
 | Wallets and funding | Operations | done | [WALLETS.md](https://github.com/Zugzwang-world/graphpay/blob/main/docs/technical/WALLETS.md) | Coordinator | PAYER 125 test USDT (23:12 IST, #152), FACILITATOR 0.774 WBT (floor 0.3), W_SYNC 0.198 tGLM. FUNDER: 132.34 test USDT, 2.59 WBT, 0.41 Sepolia ETH, 15.08 tGLM. |
 | Kimi balance | Operations | ask the founder | [Founder now](https://github.com/Zugzwang-world/graphpay/blob/main/docs/thinking-partner/OPEN.md) | founder | Top up for the video and pitch: up to $3.55 an errand, and anyone can run one. |
 | Vercel keys | Operations | done | [env.example](https://github.com/Zugzwang-world/graphpay/blob/main/env.example) | Coordinator | 18 Production names cover the live runner; none for POLICY_WRITER or disposables. New Arkiv key: `secrets:set`, `secrets:vercel`, redeploy. |
-| Mac awake for the workers | Operations | partial | [ADR-0056](https://github.com/Zugzwang-world/graphpay/blob/main/docs/decisions/ADR-0056-the-mirror-keeps-the-mac-awake-and-resumes.md) | founder | On battery: 68%, about 3 h 15 min left at 23:17 IST. Plug in; lid open. |
+| Mac awake for the workers | Operations | partial | [ADR-0056](https://github.com/Zugzwang-world/graphpay/blob/main/docs/decisions/ADR-0056-the-mirror-keeps-the-mac-awake-and-resumes.md) | founder | Charging again (65% at 23:27 IST). Keep the lid open. |
 | Session roster | Operations | done | [handover §5](https://github.com/Zugzwang-world/graphpay/blob/main/docs/sessions/coordinator/handover.md) | Coordinator | Night streams W1 to W7 running since 23:02 IST; the day sessions retired at 23:05 IST (ids in NOW). |
