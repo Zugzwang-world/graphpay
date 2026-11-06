@@ -4,6 +4,42 @@ Written by the outgoing Coordinator, Fri 6 Nov, about 10:40 IST. It replaces the
 
 **Taken over Fri 11:00 IST** by the new Coordinator (`local_3b893898-fa05-4265-93ee-e9090aeee49f`, "GraphPay Coordinator takeover"), which has kept it current since. The first Coordinator (`local_d1ca442e-…`) has retired, and every session has been told to report to the new one.
 
+## State at 21:45 IST, Fri 6 Nov (read this first; the sections below are older)
+
+- **Usage:** the weekly window reset at 21:30 IST (0%). The next reset is Fri 13 Nov. ADR-0062 as amended twice: warn at 90%; at 95% every session writes its resume; at 97% every session pauses. Merges and payments for the integration and the founder's run were allowed up to 97%.
+- **Tick:** `4,14,24,34,44,54 * * * *` (session-only cron, recreated at 21:36 IST). Cross-session messages are capped at 10 until the founder types in this session; a message he sends while a turn is running does not reset the count.
+- **Decisions since 11:00:**
+  - ADR-0069: public access. No passcode and no rate limits for visitors; the keys between our own servers stay.
+  - ADR-0070: option A. The team's phones in `frontend/` are built by `apps/phones/` into the stage.
+  - ADR-0071: Vitalik stays the persona; the payer's pass is 100 test USDT a day (on-chain policy and ENS record).
+  - ADR-0062 amendment 2.
+  - CLAUDE.md names Kimi.
+- **The live site** (https://graphpay-event.vercel.app):
+  - The home page is the stage: the team's phones around the deck.
+  - The Booth sessions put the Grok dosa story on screen (#135 to #145). The ENS labels are unchanged, and the Arkiv category is still "sweets".
+  - Everything has worked live: the errand, the Open switch, the refund request, the merchant refund (#129), the re-order (#131), and pause and resume.
+  - A visitor can pause the payer, because Pause is public: that happened at 15:45 IST, and it was resumed at 16:33.
+- **Broken since about 21:36 IST: the Arkiv access key's quota is exhausted.**
+  - Keyed `arkiv_query` calls answer 429 `QUOTA_EXCEEDED`, so `/api/map` and `/api/state/customer` answer 502.
+  - T3 (`local_949a2091-02b7-4f63-9c71-efebf8fe215a`) is shipping a transport fallback to the keyless endpoint.
+  - **Do not remove `ARKIV_ACCESS_KEY` from Vercel:** `LIVE_RUNNER_NEEDS` (`integration/src/live-runner.mjs:29`) requires it, and the errands would stop.
+  - The founder was asked to get a quota reset or a new key from the Arkiv team.
+  - Check that the mirror (`pnpm workers`) has not stalled.
+- **Merged on the founder's word:**
+  - #70 (8abe39a) and #132, both credited to ajatshatru01. A new team PR goes to T5 for review; then the Coordinator squash-merges it.
+  - `gh pr merge --author-email` with another person's address is refused: GitHub credits the PR author anyway.
+- **Sessions:** the Integration session is `local_7268b4b1-7f52-4fe6-9652-329b9a9c97de`; the Booth sessions are `local_ffc009c6-…` and `local_f5b061ec-…`. Every session was idle at 21:45 apart from T3.
+- **Open founder items** (OPEN "Founder now"):
+  - start the Submission session;
+  - the Arkiv key;
+  - what else goes into the demo (real ENS names for the dosa shops, the big city, caps, the kill, subscriptions);
+  - the video;
+  - the Kimi balance;
+  - this session's effort (max; the plan says high);
+  - the disclosure;
+  - the charger and lid.
+- **Wallets:** PAYER held 125 test USDT at 12:4x, and its spend resets at 05:30 IST. FUNDER holds 54.14 test USDT, about 2.59 WBT and 0.2569 Sepolia ETH. DISPOSABLE_2 and DISPOSABLE_3 are still unfunded.
+
 ## Start
 
 1. Ask the app to keep the Mac awake (`request_keep_awake`, until `session_idle`).
