@@ -5,7 +5,7 @@
 // way, Q2's plain side one page at a time and every page at once, and a pause whenever the window
 // is under 40%. Writes bench/results/{questions,q2-parallel,http}-<size>.csv and
 // bench/BENCHMARK-LIVE-<size>.md. Prints counts only: no answers, names, URLs or keys.
-//   node bench/d7.mjs --size M --end 2026-11-06
+//   node bench/d7.mjs --size M --end 2026-11-06 [--gap 750]
 
 import { execFileSync } from 'node:child_process';
 import { mkdirSync, writeFileSync } from 'node:fs';
@@ -84,9 +84,24 @@ async function one(question, mode, inFlight = 1) {
   }
 }
 
+// The header shows the query window only once it is the tighter one (under about 2,000 left), so
+// the heavy plain reads (every payment row, or a payment neighbourhood) are also spaced --gap
+// seconds apart, leaving the mirror its share of each window. The graph side and the counts go first.
+const gapMs = Number(opt('gap', 750)) * 1000;
 const results = new Map();
-for (const q of RACE_QUESTIONS) for (const mode of ['graph', 'plain']) results.set(`${q}|${mode}`, await one(q, mode));
-const parallel = await one('Q2', 'plain', 'all');
+for (const q of RACE_QUESTIONS) results.set(`${q}|graph`, await one(q, 'graph'));
+results.set('Q1|plain', await one('Q1', 'plain'));
+const heavy = [['Q2', 'plain', 1], ['Q5', 'plain', 1], ['Q2', 'plain', 'all']];
+let parallel = null;
+for (const [i, [q, mode, inFlight]] of heavy.entries()) {
+  if (i > 0) {
+    log(`waiting ${gapMs / 1000} s before the next plain read`);
+    await sleep(gapMs);
+  }
+  const r = await one(q, mode, inFlight);
+  if (inFlight === 'all') parallel = r;
+  else results.set(`${q}|${mode}`, r);
+}
 const blockTo = await arkiv.publicClient.getBlockNumber();
 
 // ---- CSVs (the same columns as bench/run.mjs) ------------------------------------------
