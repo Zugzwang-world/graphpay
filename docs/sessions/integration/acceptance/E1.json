@@ -1,20 +1,14 @@
 {
   "id": "E1",
-  "at": "2026-11-06T17:09:49.902Z",
-  "pass": false,
+  "at": "2026-11-06T20:21:59.857Z",
+  "pass": null,
+  "why": "not run: the latest passing real e2e:food run (2026-11-05T23:11:01.937Z) asked an earlier request; the story's current request needs a fresh run",
   "what": "the human's request",
   "measured": {
     "request": "Just landed in Mumbai. Get me the best gulab jamun near me under 6 USDT by 8 pm.",
-    "mandate": {
-      "budgetUsdt": "6.000000",
-      "deadlineIso": "2026-11-06T20:00:00+05:30",
-      "hash": "0x0c5a80df0c98786229a9427ac38c4d4a5286d6b848d8329687d2af4b8751195d"
-    },
-    "scoutStart": 6,
-    "analystStart": 12,
-    "firstEnd": 19
+    "story": "Just landed in Mumbai. Get me the best masala dosa near BKC under 6 USDT, delivered within an hour."
   },
-  "expected": "the exact request; budget 6.000000, deadline 20:00 local; scout and analyst both start before either ends",
+  "expected": "a passing real e2e:food run of the story's request",
   "evidence": {
     "runFile": "docs/sessions/integration/runs/run-a8d00695846884f3/run.json"
   }

@@ -1,10 +1,10 @@
 {
   "id": "A2",
-  "at": "2026-11-06T17:06:03.813Z",
+  "at": "2026-11-06T20:12:32.245Z",
   "pass": true,
   "what": "the secret scan is clean (pnpm check)",
   "measured": [
-    "check: clean (1143 files)"
+    "check: clean (1245 files)"
   ],
   "expected": "check: clean",
   "evidence": {

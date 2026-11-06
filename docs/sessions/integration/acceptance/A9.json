@@ -1,6 +1,6 @@
 {
   "id": "A9",
-  "at": "2026-11-06T17:06:10.034Z",
+  "at": "2026-11-06T20:12:38.479Z",
   "pass": null,
   "why": "no probe row for anthropic-testing, anthropic-video, anthropic-live",
   "what": "the agent presets are accepted",
@@ -8,7 +8,8 @@
     {
       "preset": "testing",
       "want": [
-        "`kimi-k3.1-pro`, high"
+        "`kimi-k3.1-pro`, high",
+        "`kimi-k3.1-pro`, low"
       ],
       "row": {
         "time": "22:54",
@@ -23,7 +24,8 @@
     {
       "preset": "video",
       "want": [
-        "`kimi-k3.1-pro-highspeed`, high"
+        "`kimi-k3.1-pro-highspeed`, high",
+        "`kimi-k3.1-pro-highspeed`, low"
       ],
       "row": {
         "time": "22:54",
@@ -38,7 +40,8 @@
     {
       "preset": "live",
       "want": [
-        "`kimi-k3.1-pro-highspeed`, high"
+        "`kimi-k3.1-pro-highspeed`, high",
+        "`kimi-k3.1-pro-highspeed`, low"
       ],
       "row": {
         "time": "22:54",

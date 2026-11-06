@@ -1,17 +1,17 @@
 {
   "id": "B4",
-  "at": "2026-11-06T17:07:58.810Z",
+  "at": "2026-11-06T20:16:25.305Z",
   "pass": true,
   "what": "the payment preference parses",
   "measured": [
-    "pass B4 kesar-kingdom.graphpay.eth accepts 0x0001000002075214cedfb56113143d55b2358b8cfbb0deb5ad2f55a7",
-    "pass B4 jamun-junction.graphpay.eth accepts 0x0001000002075214cedfb56113143d55b2358b8cfbb0deb5ad2f55a7",
-    "pass B4 syrup-street.graphpay.eth accepts 0x0001000002075214cedfb56113143d55b2358b8cfbb0deb5ad2f55a7",
+    "pass B4 filter-and-fold.graphpay.eth accepts 0x0001000002075214cedfb56113143d55b2358b8cfbb0deb5ad2f55a7",
+    "pass B4 tawa-tangle.graphpay.eth accepts 0x0001000002075214cedfb56113143d55b2358b8cfbb0deb5ad2f55a7",
+    "pass B4 idli-index.graphpay.eth accepts 0x0001000002075214cedfb56113143d55b2358b8cfbb0deb5ad2f55a7",
     "pass B4 a malformed copy is ignored whole"
   ],
   "expected": "every line of scripts/ens/acceptance.mjs for this id passes",
   "evidence": {
     "script": "scripts/ens/acceptance.mjs",
-    "exit": 1
+    "exit": 0
   }
 }

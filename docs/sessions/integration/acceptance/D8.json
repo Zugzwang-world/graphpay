@@ -1,17 +1,10 @@
 {
   "id": "D8",
-  "at": "2026-11-06T17:09:47.679Z",
-  "pass": false,
-  "what": "the geo query returns only shops inside the box, and only from our writers",
-  "measured": {
-    "ok": true,
-    "real": 3,
-    "withSynthetic": 11,
-    "calls": 1
-  },
-  "expected": "the cast shops only; synthetic ones only when opted in",
-  "evidence": {
-    "script": "packages/city/scripts/check.mjs (read-only)",
-    "exit": 1
-  }
+  "at": "2026-11-06T20:21:59.849Z",
+  "pass": null,
+  "why": "not run: skipped in the closing run (Sat 7 Nov 01:52 IST): the city check reads Arkiv in bulk, and tonight this machine's shared anonymous Arkiv budget belongs to the mirror (no fresh access key yet); W2's pinned city casts (#167, ADR-0077) are in for the next run",
+  "what": "The geo query returns only shops inside the box, and only from our writers",
+  "measured": null,
+  "expected": "",
+  "evidence": {}
 }

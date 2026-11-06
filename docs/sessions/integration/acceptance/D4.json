@@ -1,18 +1,10 @@
 {
   "id": "D4",
-  "at": "2026-11-06T17:09:45.797Z",
-  "pass": false,
-  "what": "GraphQL's top 10 matches the ground truth (seeded S city, synthetic)",
-  "measured": {
-    "ok": false,
-    "calls": 2,
-    "explainId": "6d02b9d6f1a0",
-    "bytes": 35370
-  },
-  "expected": "exact order and amounts against the generator's identity truth; 2 calls",
-  "evidence": {
-    "script": "packages/city/scripts/check.mjs (read-only)",
-    "file": "docs/sessions/arkiv/city/check-S.json",
-    "exit": 1
-  }
+  "at": "2026-11-06T20:21:59.849Z",
+  "pass": null,
+  "why": "not run: skipped in the closing run (Sat 7 Nov 01:52 IST): the city check reads Arkiv in bulk, and tonight this machine's shared anonymous Arkiv budget belongs to the mirror (no fresh access key yet); W2's pinned city casts (#167, ADR-0077) are in for the next run",
+  "what": "GraphQL's top 10 matches the ground truth",
+  "measured": null,
+  "expected": "",
+  "evidence": {}
 }

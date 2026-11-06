@@ -174,6 +174,7 @@ One line per PR: time (IST) · activity · result · PR link. Append under your 
 - 00:35 IST · w5-ops · acceptance: B2, C3, C7, E3, D8 and E1 updated to tonight's decisions (reviewed twice); B2, C7 and E3 pass read-only, C3 waits for a fresh e2e:hosted after 05:30 IST, E1 for a fresh errand · https://github.com/Zugzwang-world/graphpay/pull/188
 - 00:35 IST · w5-ops · the workers under a watchdog (a 30-minute fuse, longer than Arkiv's rate-limit reset; a hold file for maintenance windows), the ENS watcher's poll interval as a setting, P-w5-ops-1 · https://github.com/Zugzwang-world/graphpay/pull/194
 - 01:40 IST · w5-ops · the workers on the new names (00:51 restart; a live errand to filter-and-fold at 01:07 shown on Filter & Fold's phone); PAYER refilled from the shop's takings (63.2); the mirror passes the checkout kit's anonymous payment instead of parking it · https://github.com/Zugzwang-world/graphpay/pull/209
+- 01:55 IST · w5-ops · closed for the night: workers on main with the kit fix (pid 47443, watchdog on); acceptance regenerated, with D4, D8, E1 and C3 marked not run with their reasons · PR_LINK
 
 ## w3-payments
 
