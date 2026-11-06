@@ -1,6 +1,6 @@
 # Relay: w2-city (W2 City)
 
-Updated 01:15 IST, Sat 7 Nov (W2 City, session `local_da212093-3d02-4768-9314-ab7be179eb86`). Brief: [`briefs/2300-w2-city.md`](../briefs/2300-w2-city.md).
+Updated 01:25 IST, Sat 7 Nov (W2 City, session `local_da212093-3d02-4768-9314-ab7be179eb86`). Brief: [`briefs/2300-w2-city.md`](../briefs/2300-w2-city.md).
 
 ## In plain words
 
@@ -19,9 +19,9 @@ Updated 01:15 IST, Sat 7 Nov (W2 City, session `local_da212093-3d02-4768-9314-ab
 - It cost 1.65 tGLM. Rabdi refused part of batch 127; that part was undone, so the store is exactly batches 0 to 126.
 - The plain store (what plain Arkiv code reads) and the directory rows were not written.
 
-**4. Race mode stays at S.**
+**4. Race mode stays at S, by the founder's decision (01:24 IST).**
 - Measured at S: the top 10 takes Graph Arkiv 2 reads against 5 for plain code.
-- The race at M needs M's plain store, which is the founder's call (OPEN). With it, the generator's count for Q2 is 2 against 14.
+- M has no plain store, so it is not raced, and acceptance D7 stays blocked.
 - The "48 reads" is the lab's 10,000-event city, and stays labelled "lab".
 
 ## Technical
@@ -45,5 +45,5 @@ Updated 01:15 IST, Sat 7 Nov (W2 City, session `local_da212093-3d02-4768-9314-ab
 ## Next
 
 - Merge #186 after its review. Race mode stays at S.
-- If the founder asks for M's plain store: write it, run `bench/d7.mjs --size M`, publish `bench/results/questions-M.csv`, and set `raceSize: "M"`.
+- If M is ever raced, the path is ready: write M's plain store, run `bench/d7.mjs --size M`, publish `bench/results/questions-M.csv`, and set `raceSize: "M"`.
 - Delist the old shops' directory rows once acceptance's D8 moves off S.

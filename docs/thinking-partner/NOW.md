@@ -86,14 +86,14 @@ Updated 01:16 IST, Sat 7 Nov (W1 Identity, session `local_45f7cf5d-c31e-4dbf-b84
 
 ## w2-city
 
-Updated 01:15 IST, Sat 7 Nov (W2 City, session `local_da212093-3d02-4768-9314-ab7be179eb86`).
+Updated 01:25 IST, Sat 7 Nov (W2 City, session `local_da212093-3d02-4768-9314-ab7be179eb86`).
 - **Steps 1 and 2 are done and live:**
   - the dosa shops on Arkiv under their own names, with their history (#167);
   - the three menus on Swarm, every item with its dish photo (#181), and now each with its storefront photo (this PR).
 
   Every file was checked by its hash on read-back.
 - **The big city M was trimmed by the founder to what was seeded** (ADR-0080): 3,175 events, 123 shops (the final cast and 120 synthetic places), 1,387 payment rows, graph store only. The seeding has stopped.
-- **Race mode stays at S** (Q2: 2 reads against 5, measured). Its plain side needs M's plain store, which was never written. That is the founder's call (OPEN).
+- **Race mode stays at S, by the founder's decision** (Q2: 2 reads against 5, measured). M has no plain store, so it is not raced.
 - **In review:** #186, race mode for any seeded size, the seeder's recovery, M as seeded.
 
 ## w3-payments

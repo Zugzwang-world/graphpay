@@ -4,7 +4,7 @@ Status: accepted · Date: 2026-11-07 01:05 IST · Decided by: founder (relayed b
 ## Decision
 - **The founder trimmed the big city M to what was already seeded.** The graph store holds the first 3,175 of its 9,996 events in time order: 127 batches of 25, from 9 Jul to 14 Aug. That is all 606 actors and 123 shops (the final cast and the Grok pack's 120 places), and 1,387 payment and renewal rows.
 - **The story records it as `syntheticCity.sizes.M.seededEvents: 3175`.** The generator cuts M there, so its truth and digest are those of the seeded city.
-- **No more M seeding writes.** The plain store, which race mode's plain side reads, was never written for M. Race mode stays at S unless the founder asks for the plain store.
+- **No more M seeding writes.** The plain store, which race mode's plain side reads, was never written for M. The founder decided at 01:24 IST that race mode stays at S.
 
 ## Why
 - One M seeding takes about two hours and most of W_SEED_M_EVENT's 8.5 tGLM (ADR-0049).
