@@ -120,4 +120,4 @@ One line per PR: time (IST) · activity · result · PR link. Append under your 
 
 ## w5-ops
 
-- 23:10 IST · w5-ops · the payer's pass is 300 a day for tonight (policy and ENS, ADR-0071 amendment); PAYER back to 125 test USDT from FUNDER · PR_LINK
+- 23:10 IST · w5-ops · the payer's pass is 300 a day for tonight (policy and ENS, ADR-0071 amendment); PAYER back to 125 test USDT from FUNDER · https://github.com/Zugzwang-world/graphpay/pull/152
