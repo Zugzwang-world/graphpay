@@ -165,3 +165,43 @@
 @media (prefers-reduced-motion: reduce) {
   .page-enter-forward, .page-enter-backward { animation-name: page-fade; animation-duration: 120ms !important; }
 }
+
+@keyframes keyboard-in { from { transform: translateY(100%); } to { transform: translateY(0); } }
+.keyboard-enter { animation: keyboard-in 220ms var(--ease-out) both; }
+
+@keyframes tracker-draw { from { stroke-dashoffset: 22; } to { stroke-dashoffset: 0; } }
+.tracker-check { animation: tracker-draw 350ms var(--ease-out) both; }
+@keyframes tracker-pulse { 50% { transform: scale(1.08); } }
+.tracker-current { animation: tracker-pulse 1.8s ease-in-out infinite; }
+
+@keyframes avatar-think { 50% { transform: translateY(-3px); } }
+@keyframes avatar-pop { 50% { transform: scale(1.1); } }
+@keyframes avatar-drop { 50% { transform: translateY(3px) rotate(-6deg); } }
+@keyframes avatar-nod { 50% { transform: rotate(9deg); } }
+.avatar-thinking, .avatar-checking { animation: avatar-think 1.4s ease-in-out infinite; }
+.avatar-paid, .avatar-success, .avatar-welcoming { animation: avatar-pop 350ms var(--ease-out) both; }
+.avatar-refused, .avatar-rejected, .avatar-declining { animation: avatar-drop 650ms var(--ease-out) both; }
+.avatar-approving { animation: avatar-nod 350ms var(--ease-out) both; }
+.avatar-disappointed { transform: rotate(-4deg); }
+
+@keyframes fox-ear { 50% { transform: rotate(4deg); } }
+@keyframes fox-breathe { 50% { transform: translateY(-2px); } }
+@keyframes fox-wave { 50% { transform: rotate(-22deg); } }
+@keyframes fox-bounce { 50% { transform: translateY(-6px); } }
+@keyframes fox-blink { 0%, 43%, 47%, 100% { transform: scaleY(1); } 45% { transform: scaleY(.08); } }
+.fox-ear-left { transform-origin: 60px 85px; animation: fox-ear 6s ease-in-out infinite; }
+.fox-ear-right { transform-origin: 140px 85px; animation: fox-ear 5.5s ease-in-out infinite reverse; }
+.fox-body { animation: fox-breathe 6s ease-in-out infinite; }
+.fox-eyes-open { transform-origin: 100px 110px; animation: fox-blink 4.5s ease-in-out infinite; }
+.fox-eyes-smile, .fox-eyes-squint, .fox-mouth-smile { display: none; }
+.fox-smile .fox-eyes-open, .fox-squint .fox-eyes-open, .fox-smile .fox-mouth-normal { display: none; }
+.fox-smile .fox-eyes-smile, .fox-smile .fox-mouth-smile, .fox-squint .fox-eyes-squint { display: block; }
+.fox-wave .fox-paw { transform-origin: 155px 205px; animation: fox-wave 420ms ease-in-out 4; }
+.fox-smile svg { animation: fox-bounce 500ms var(--ease-out) 2; }
+.fox-squint svg { transform: rotate(-4deg); transform-origin: center; }
+.fox-paused *, .fox-paused svg { animation-play-state: paused !important; }
+
+@media (prefers-reduced-motion: reduce) {
+  .keyboard-enter { animation-name: none; }
+  .tracker-check, .tracker-current, [class*="avatar-"], [class*="fox-"] * { animation-name: none !important; }
+}

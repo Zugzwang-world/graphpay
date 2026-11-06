@@ -9,10 +9,17 @@ import type { DemoEvent } from '@/demo/contract';
 export interface AppPage { id: string; label: string }
 type Navigate = (id: string) => void;
 const NavigationContext = createContext<Navigate | null>(null);
+const KeyboardLayoutContext = createContext<{ open: boolean; setKeyboard: (open: boolean, height: number) => void } | null>(null);
 export function useAppNavigation(): Navigate {
   const navigate = useContext(NavigationContext);
   if (!navigate) throw new Error('useAppNavigation must be used inside AppShell');
   return navigate;
+}
+
+export function useKeyboardLayout() {
+  const value = useContext(KeyboardLayoutContext);
+  if (!value) throw new Error('useKeyboardLayout must be used inside AppShell');
+  return value;
 }
 
 function destination(app: 'customer' | 'merchant', event: DemoEvent): string | null {
@@ -35,11 +42,15 @@ export function AppShell({ app, pages, homeTitle, subtitle, renderPage }: { app:
   const [direction, setDirection] = useState<'forward' | 'backward'>('forward');
   const [unread, setUnread] = useState<string[]>([]);
   const [toast, setToast] = useState<string | null>(null);
+  const [keyboardHeight, setKeyboardHeight] = useState(0);
+  const [keyboardOpen, setKeyboardOpen] = useState(false);
   useEffect(() => {
     setPage(pages[0]?.id ?? '');
     setUnread([]);
     setToast(null);
     setMenuOpen(false);
+    setKeyboardHeight(0);
+    setKeyboardOpen(false);
   }, [generation, pages]);
 
   useEffect(() => {
@@ -62,10 +73,17 @@ export function AppShell({ app, pages, homeTitle, subtitle, renderPage }: { app:
     setUnread((current) => current.filter((item) => item !== id));
     setToast(null);
     setMenuOpen(false);
+    setKeyboardHeight(0);
+    setKeyboardOpen(false);
   };
   const title = page === pages[0]?.id ? homeTitle : pages.find((item) => item.id === page)?.label ?? homeTitle;
 
-  return <NavigationContext.Provider value={navigate}>
+  const setKeyboard = (open: boolean, height: number) => {
+    setKeyboardOpen(open);
+    setKeyboardHeight(open ? height : 0);
+  };
+
+  return <NavigationContext.Provider value={navigate}><KeyboardLayoutContext.Provider value={{ open: keyboardOpen, setKeyboard }}>
     <div className="relative flex h-full flex-col pt-[54px]">
       <AppHeader title={title} subtitle={page === pages[0]?.id ? subtitle : undefined} menuOpen={menuOpen} hasUnread={unread.length > 0} onMenu={() => setMenuOpen((open) => !open)} onHome={() => navigate(pages[0]!.id)} />
       {menuOpen && <>
@@ -77,10 +95,10 @@ export function AppShell({ app, pages, homeTitle, subtitle, renderPage }: { app:
           </button>)}
         </nav>
       </>}
-      <main key={page} className={clsx('min-h-0 flex-1 overflow-y-auto pb-6', direction === 'forward' ? 'page-enter-forward' : 'page-enter-backward')}>
+      <main key={page} className={clsx('min-h-0 flex-1 overflow-y-auto pb-6', direction === 'forward' ? 'page-enter-forward' : 'page-enter-backward')} style={{ marginBottom: keyboardHeight }}>
         {renderPage(page)}
       </main>
       {toast && <Toast message={toast} onClose={() => setToast(null)} />}
     </div>
-  </NavigationContext.Provider>;
+  </KeyboardLayoutContext.Provider></NavigationContext.Provider>;
 }

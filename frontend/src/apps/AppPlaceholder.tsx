@@ -10,6 +10,13 @@ import { copy, fill } from '@/copy';
 import { formatMoney, usdt } from '@/lib/money';
 import { orderChip } from '@/demo/rules';
 import { usePreviewState, setPreviewState } from '@/dev/StateSwitcher';
+import { IosTextInput } from '@/components/shared/IosKeyboard';
+import { AmountEntry } from '@/components/shared/AmountEntry';
+import { AgentAvatar } from '@/components/shared/AgentAvatar';
+import { Mascot, type FoxPose } from '@/components/shared/Mascot';
+import { StatusTracker } from '@/components/shared/StatusTracker';
+import { useSoundPreference } from '@/components/shared/SoundPreference';
+import type { Money } from '@/demo/contract';
 
 const customerPages: AppPage[] = [
   { id: 'desk', label: copy.customer.pages.desk },
@@ -37,6 +44,7 @@ export function AppPlaceholder({ app }: { app: 'customer' | 'merchant' }) {
 
 function PlaceholderPage({ app, page, pages }: { app: 'customer' | 'merchant'; page: string; pages: AppPage[] }) {
   const { snapshot, adapter } = useDemo();
+  const { playWee } = useSoundPreference();
   const navigate = useAppNavigation();
   const preview = usePreviewState();
   const orders = snapshot?.orders.filter((order) => app === 'customer' ? order.owner.ens === story.customer.ens : order.status !== 'ordered') ?? [];
@@ -53,7 +61,7 @@ function PlaceholderPage({ app, page, pages }: { app: 'customer' | 'merchant'; p
   return <div className="flex flex-col gap-3 px-4 pt-4 pb-8">
     <p className="rounded-card border border-line bg-surface p-4 text-body text-muted shadow-card">{copy.placeholder[app]}</p>
     {home && app === 'merchant' && snapshot && <button type="button" className="min-h-11 rounded-full bg-brand px-4 text-body font-bold text-white" onClick={() => void adapter.setShopOpen(!snapshot.shop.open)}>{snapshot.shop.open ? copy.merchant.home.toggleOpen : copy.merchant.home.toggleClosed}</button>}
-    {home && app === 'customer' && snapshot && <button type="button" className="min-h-11 rounded-full bg-brand px-4 text-body font-bold text-white disabled:opacity-50" disabled={snapshot.errandRunning} onClick={() => void adapter.sendPrompt(story.quickPrompts[0]!.text)}>{story.quickPrompts[0]!.text}</button>}
+    {home && app === 'customer' && snapshot && <button type="button" className="min-h-11 rounded-full bg-brand px-4 text-body font-bold text-white disabled:opacity-50" disabled={snapshot.errandRunning} onClick={() => { playWee(); void adapter.sendPrompt(story.quickPrompts[0]!.text); }}>{story.quickPrompts[0]!.text}</button>}
     {home && <ul className="flex flex-col gap-2">{[...orders].reverse().map((order) => <li key={order.id} className="flex items-center justify-between gap-2 rounded-card border border-line bg-surface px-4 py-3 shadow-card"><span className="text-body">#{order.number} {order.items[0]?.name}</span><span className="tabular text-caption text-muted">{formatMoney(order.total)} · {orderChip(order)}</span></li>)}</ul>}
     {!home && <EmptyState title={pageLabel} detail={copy.dev.emptyDetail} action={copy.dev.backHome} onAction={() => navigate(pages[0]!.id)} />}
   </div>;
@@ -63,6 +71,8 @@ const sampleLink = { label: copy.common.viewTx, url: 'mock:preview', mock: true 
 
 /** A reachable dev gallery for verifying each F3 piece before journey pages exist. */
 function ComponentGallery() {
+  const { snapshot } = useDemo();
+  const sound = useSoundPreference();
   const [sheet, setSheet] = useState(false);
   const [actions, setActions] = useState(false);
   const [picker, setPicker] = useState<'daily' | 'weekly'>('daily');
@@ -70,6 +80,11 @@ function ComponentGallery() {
   const [checked, setChecked] = useState(true);
   const [toast, setToast] = useState(false);
   const [deadline] = useState(() => Date.now() + 90_000);
+  const [text, setText] = useState('');
+  const [amount, setAmount] = useState<Money | null>(null);
+  const [progress, setProgress] = useState(1);
+  const [foxPose, setFoxPose] = useState<FoxPose>('idle');
+  const agent = snapshot?.agents[0];
   return <div className="flex flex-col gap-4 p-4 pb-12">
     <h2 className="font-heading text-section font-bold">{copy.dev.componentTitle}</h2>
     <div className="flex flex-wrap gap-2">{(['thinking', 'checked', 'quoted', 'paid', 'refused', 'idle', 'active', 'paused', 'revoked', 'usedUp', 'expired'] as const).map((status) => <StatusChip key={status} status={status} />)}</div>
@@ -79,6 +94,13 @@ function ComponentGallery() {
     <IosPicker label={copy.dev.pickerLabel} value={picker} options={[{ value: 'daily', label: copy.customer.renewals.frequencies.daily }, { value: 'weekly', label: copy.customer.renewals.frequencies.weekly }]} onChange={setPicker} />
     <SegmentedControl label={copy.dev.segmentLabel} options={[{ value: 'full', label: copy.dev.segmentOne }, { value: 'partial', label: copy.dev.segmentTwo }]} value={segment} onChange={setSegment} />
     <div className="flex items-center justify-between text-body"><span>{copy.dev.switchLabel}</span><Switch label={copy.dev.switchLabel} checked={checked} onChange={setChecked} /></div>
+    <StatusTracker label={copy.dev.trackerLabel} steps={[copy.status.ordered, copy.status.paid, copy.status.dispatched, copy.status.delivered].map((label, index) => ({ id: label, label, state: index < progress ? 'done' as const : index === progress ? 'current' as const : 'todo' as const }))} />
+    <button type="button" className="min-h-11 rounded-full border border-line px-4 text-body font-bold" onClick={() => setProgress((value) => (value + 1) % 5)}>{copy.dev.advanceTracker}</button>
+    <IosTextInput label={copy.dev.textLabel} value={text} onChange={setText} onDone={() => setToast(true)} canDone={text.trim().length > 0} placeholder={copy.customer.desk.composerPlaceholder} returnLabel={copy.customer.desk.send} />
+    <AmountEntry label={copy.customer.refund.amountLabel} max={usdt('4.00')} value={amount} onConfirm={setAmount} agent={agent?.ref} agentLabel={agent?.label} />
+    {agent && <div className="flex items-center gap-3"><AgentAvatar agent={agent.ref} label={agent.label} status={agent.status} activity="thinking" /><span className="text-body">{agent.label}</span></div>}
+    <div className="flex flex-col items-center gap-2"><Mascot size={160} previewPose={foxPose} /><SegmentedControl label={copy.dev.foxLabel} options={[{ value: 'idle', label: copy.dev.foxIdle }, { value: 'wave', label: copy.dev.foxWave }, { value: 'smile', label: copy.dev.foxSmile }, { value: 'squint', label: copy.dev.foxSquint }]} value={foxPose} onChange={setFoxPose} /></div>
+    <div className="flex flex-wrap gap-2"><button type="button" className="min-h-11 rounded-full border border-line px-4 text-body font-bold" onClick={sound.playWee}>{copy.dev.playWee}</button><button type="button" className="min-h-11 rounded-full border border-line px-4 text-body font-bold" onClick={sound.playCashRegister}>{copy.dev.playCashRegister}</button><button type="button" className="min-h-11 rounded-full border border-line px-4 text-body font-bold" onClick={sound.playChime}>{copy.dev.playChime}</button></div>
     <div className="flex flex-wrap gap-2"><button className="min-h-11 rounded-full bg-brand px-4 text-body font-bold text-white" onClick={() => setSheet(true)}>{copy.dev.showSheet}</button><button className="min-h-11 rounded-full border border-line px-4 text-body font-bold" onClick={() => setActions(true)}>{copy.dev.showActions}</button><button className="min-h-11 rounded-full border border-line px-4 text-body font-bold" onClick={() => setToast(true)}>{copy.dev.showToast}</button></div>
     <Skeleton className="h-12 w-full" /><LoadingState /><EmptyState title={copy.dev.emptyTitle} /><ErrorState onRetry={() => setToast(true)} />
     <BottomSheet open={sheet} title={copy.dev.sheetTitle} onClose={() => setSheet(false)} actions={<button className="min-h-11 rounded-full bg-brand px-4 text-body font-bold text-white" onClick={() => setSheet(false)}>{copy.common.confirm}</button>}>{copy.dev.sheetBody}</BottomSheet>
