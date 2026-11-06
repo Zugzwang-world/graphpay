@@ -52,6 +52,10 @@ One line per PR: time (IST) · activity · result · PR link. Append under your 
 - 09:47 IST · integration · opened: D10 passes (the hosted shop's quote on Arkiv: owner W_DIRECTORY, 15 minutes, valid_until 10 minutes); the report at 44 pass, 0 fail, 1 blocked, 3 not run (M13 done); then F3 from T1's record, 45 pass · https://github.com/Zugzwang-world/graphpay/pull/79
 - 10:36 IST · integration · opened: the e2e stack on the hosted shop and facilitator; D11's presence half passes (6.7 s to appear, lapsed 14.98 min after the end, owner W_DIRECTORY) · https://github.com/Zugzwang-world/graphpay/pull/85
 
+## phones
+
+- 13:05 IST · phones · phase 1: the team's two phones on our site at `/live`, built from `frontend/` (#70, `8abe39a`) with their Vite, on live read-only data (agents, pass, Open flag, real orders with explorer links, the merchant stream) · https://github.com/Zugzwang-world/graphpay/pull/111
+
 ## website
 
 - 04:20 IST · website · opened: race mode live (Friday item 8): `/api/race` runs one side on Rabdi with per-read ticks and truth badges, the committed benchmark table under it · https://github.com/Zugzwang-world/graphpay/pull/36 (merged)

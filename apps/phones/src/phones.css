@@ -1,0 +1,4 @@
+/* The team's styles, unchanged; Tailwind scans their sources and ours from here. */
+@import '../../../frontend/src/styles/index.css';
+@source '../../../frontend/src';
+@source '.';

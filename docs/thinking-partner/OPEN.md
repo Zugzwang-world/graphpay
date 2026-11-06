@@ -119,6 +119,13 @@ Updated 09:47 IST, Fri 6 Nov. Nothing for the founder now. M13 is done; the two 
 - **B9 (a): the payee comparison (T2): done 2026-11-06 05:15 IST for the shop with a settled payment.** `scripts/ens/acceptance.mjs` now compares the merchant of each cast shop's last settled order with the shop's `addr(2147485522)`: Kesar Kingdom passes (order paid the ENS address; settlement transaction in the script output). The other two shops have no settled payment yet and are skipped, not failed; re-run `node scripts/ens/acceptance.mjs` after more payments.
 - **Ask of T3: the reputation's synthetic label (open since 03:29 IST).** What: `Reputation.synthetic` in `packages/money-graph/src/graphql.mjs` comes from the node row only, so scores built from the labelled history say `synthetic: false`. Recommendation: true when the node or any tally row read is synthetic.
 
+## phones
+
+Updated 13:05 IST, Fri 6 Nov (Integration).
+- **For the team (`frontend/` is theirs): a way to hide unbuilt actions.** What: in live mode the phones must hide subscribe and cancel, the kill, the cap actions, decline and reset until T1 and T2 build them. Where: `frontend/src/demo/contract.ts` and the buttons that call those methods. Why: the adapter cannot hide a button. Recommendation: an optional `supports?: Partial<Record<keyof DemoAdapter, boolean>>` on the adapter (their "PROPOSED" pattern); a button whose method is `false` is not rendered. Our adapter fills it.
+- **For the team: label sample orders.** What: `Order.synthetic` is never shown. Why: the shop's seeded history is synthetic and must be labelled, so the live adapter leaves it out for now. Recommendation: a small "Sample data" chip (their `copy.common.synthetic`) when `synthetic` is true.
+- **For the founder's story lock: the re-order prompt's text.** What: their desk has a second quick prompt ("Re-order my usual"); our story has no text for it, so the phones show only the ask. Where: `packages/config/story.json` (`order.reorder`). Recommendation: add a `prompt` field with the final story.
+
 ## website
 
 - **Open (default taken):** the kill button (`/api/customer/kill-disposable`) still says "not live yet": it needs T2's `provisionDisposable` plus a funded disposable wallet, which are not wired yet.

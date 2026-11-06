@@ -85,6 +85,16 @@ Updated 10:36 IST, Fri 6 Nov. **M13 is done on the real networks. The acceptance
 - Not run yet, both T2's: B7 and B9.
 - Next: the item-6 bootstrap of the demo cast, when the story locks.
 
+## phones
+
+Updated 13:05 IST, Fri 6 Nov (Integration). **Phase 1 of the integration brief: the team's two phones run on our site, on live data, at `/live`.**
+- `apps/phones/` builds the team's customer and merchant apps from `frontend/` (unchanged, pinned at their #70, `8abe39a`) with their own Vite, wrapped in our live adapter, into `/phones/customer.html` and `/phones/merchant.html`.
+- `/live` is a copy of T5's stage: the two phones in frames, the explainer in the middle. The home page is unchanged.
+- Read-only for now: Vitalik's agents and the payer's pass, the shop's Open flag, and every real order (paid, delivered, refunded) with real explorer links. New orders arrive live from the merchant stream.
+- One story: their story file is replaced at build time by a projection of `packages/config/story.json`; images and avatars pass through when the story gets them.
+- Buttons answer "connected in the next step" until phases 2 and 3.
+- Next: phase 2, Vitalik's ask runs the real errand.
+
 ## website
 
 Updated 10:45 IST, Fri 6 Nov (T5 Web). **On `main`:** everything through Request refund (#73), the merchant phone's buttons, the map, the lanes, race, M16. **In a PR (`web/reorder-live`):** the customer phone's **Re-order**: the payer agent signs one payment for the story's re-order of its newest order through the hosted shop; the order, price and shop come from the chain and the story; a second tap is held off until a signature can no longer settle. Reviewer pass done (three double-payment findings fixed; two taps on two servers at once is a known limit, in OPEN).
