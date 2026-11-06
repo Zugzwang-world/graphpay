@@ -17,4 +17,4 @@ export { SDL, graphqlSchema, runGraphql, createContext, createGraphEngine, check
 export { MCP_TOOLS, askDocument, askTable, createMcpServer, handleMcpRequest } from './src/mcp.mjs';
 export { QUESTIONS, RACE_QUESTIONS, ask, score, plainPayRows, graphDocument, graphAnswer, callTap, raceQuestion } from './src/bench.mjs';
 export { ZERO_BATCH, swarmClient, sha256Hex, SwarmError } from './src/swarm.mjs';
-export { menuDocument, uploadMenuImage, menuImageLink, menuBytes, menuValues, writeMenu, readMenu, castMenus } from './src/menu.mjs';
+export { menuDocument, uploadMenuImage, menuImageLink, menuBytes, menuValues, writeMenu, readMenu, castMenus, ownCreate } from './src/menu.mjs';

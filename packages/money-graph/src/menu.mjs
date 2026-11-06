@@ -68,6 +68,18 @@ async function currentRow(arkiv, shopKey, owner) {
   return findOne(arkiv.publicClient, ENTITIES.menu, { owner, where: [eq('shop_key', key(shopKey))] });
 }
 
+// W_DIRECTORY is shared with the live site's quotes and activity rows, so a transaction the writer
+// finds by nonce is this write only if it holds this shop's row: a create of this type with this
+// shop_key, or the patched row now carrying the hash we sent.
+export function ownCreate(arkiv, def, shopKey) {
+  return async (createdKeys) => {
+    if (!createdKeys?.[0]) return false;
+    const e = await arkiv.publicClient.getEntity(createdKeys[0]);
+    const a = e?.$attributes ?? e?.attributes;
+    return a?.type?.value === def.type && String(a?.shop_key?.value ?? '').toLowerCase() === String(shopKey).toLowerCase();
+  };
+}
+
 // Uploads the menu, reads it back and checks the hash, then creates or patches the `menu`
 // row. The same bytes as the row already holds change nothing on Arkiv. Scripts only, like
 // writeShop (ADR-0033). Returns { entityKey, txHash|null, reference, link, version, created, unchanged }.
@@ -89,10 +101,11 @@ export async function writeMenu(arkiv, swarm, { shopEns, epoch = 0, document, li
   if (existing) {
     if (existing.swarm_ref === reference && existing.content_hash === values.content_hash) return { entityKey: existing.$key, txHash: null, reference, link, version: doc.version, created: false, unchanged: true };
     const { shop_key: _k, ...set } = values;
-    const { txs } = await arkiv.writer.send({ patches: [{ def: ENTITIES.menu, key: existing.$key, values: set }] });
+    const patched = async () => (await currentRow(arkiv, shopKey, arkiv.owner))?.content_hash === values.content_hash;
+    const { txs } = await arkiv.writer.send({ patches: [{ def: ENTITIES.menu, key: existing.$key, values: set }] }, { verifyRecovered: patched });
     return { entityKey: existing.$key, txHash: txs[0].hash, reference, link, version: doc.version, created: false, unchanged: false };
   }
-  const { txs, createdKeys } = await arkiv.writer.send({ creates: [{ def: ENTITIES.menu, values, expiration: ExpirationTime.fromDays(lifetimeDays) }] });
+  const { txs, createdKeys } = await arkiv.writer.send({ creates: [{ def: ENTITIES.menu, values, expiration: ExpirationTime.fromDays(lifetimeDays) }] }, { verifyRecovered: ownCreate(arkiv, ENTITIES.menu, shopKey) });
   return { entityKey: createdKeys[0], txHash: txs[0].hash, reference, link, version: doc.version, created: true, unchanged: false };
 }
 
