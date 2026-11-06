@@ -1,0 +1,25 @@
+{
+  "id": "A3",
+  "at": "2026-11-05T23:52:17.334Z",
+  "pass": true,
+  "what": "deny rules block reads of .env",
+  "measured": {
+    "listed": 30,
+    "deny": 34,
+    "missing": [],
+    "extra": [
+      "Bash(vercel project ls*)",
+      "Bash(vercel project list*)",
+      "Bash(vercel projects ls*)",
+      "Bash(vercel projects list*)"
+    ],
+    "selfCheck": "**A3 self-check.** An empty `.env` was created by a script (a direct write is refused once the deny rules load). The `Read` of `.env` was refused with: `File is in a directory that is denied by your permission settings.` The shell `cat .env` was refused with: `Permission to use Bash with command cat"
+  },
+  "expected": "every rule of SPEC/SECURITY_AND_OPS.md §2 present; the self-check shows the Read of .env refused (P-foundation-3: the wording changed, the block holds)",
+  "evidence": {
+    "settings": ".claude/settings.json",
+    "spec": "planning/SPEC/SECURITY_AND_OPS.md §2",
+    "selfCheck": "docs/thinking-partner/relays/foundation.md",
+    "wording": "docs/problems/PROBLEM_LOG.md P-foundation-3"
+  }
+}

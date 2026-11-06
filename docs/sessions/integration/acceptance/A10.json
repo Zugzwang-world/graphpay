@@ -1,0 +1,30 @@
+{
+  "id": "A10",
+  "at": "2026-11-05T23:52:20.056Z",
+  "pass": true,
+  "what": "the Whitechain RPC rules hold",
+  "measured": {
+    "tests": {
+      "exit": 0,
+      "pass": 13,
+      "fail": 0
+    },
+    "live": {
+      "label": "WHITECHAIN_RPC_URL (secret)",
+      "secret": true,
+      "chainId": 1874,
+      "refused": []
+    },
+    "secretFirst": "measured now",
+    "proof": {
+      "hookMasks": true,
+      "scanRefuses": true
+    }
+  },
+  "expected": "config tests pass (wrong chain and plain http refused, no URL in errors); the secret URL chosen first at 1874; the hook masks a keyed Ankr URL and the scan refuses it",
+  "evidence": {
+    "cmd": "node --test packages/config/test/config.test.mjs; resolveRpc(whitechain) label-only (eth_chainId reads); buildLine + scanText in process on scripts/test/samples.mjs",
+    "fact": "docs/technical/FACTS.md \"Founder's Ankr RPC\"",
+    "hookAndScanM0": "docs/thinking-partner/COVERAGE.md (23:10 proof)"
+  }
+}

@@ -1,0 +1,277 @@
+{
+  "site": "https://graphpay-event.vercel.app",
+  "startedAt": "2026-11-06T00:00:52.957Z",
+  "payer": "acceptance.vitalik.graphpay.eth",
+  "shop": "kesar-kingdom.graphpay.eth",
+  "mode": "pay+refund",
+  "rows": {
+    "F2": {
+      "pass": true,
+      "table": [
+        {
+          "route": "POST /api/shop/orders/:id/pay",
+          "gate": "passcode",
+          "signs": "FACILITATOR (and W_DIRECTORY writes the quote on the 402 step)",
+          "without": 401,
+          "wrong": 401
+        },
+        {
+          "route": "POST /api/shop/orders/:id/reorder",
+          "gate": "passcode",
+          "signs": "FACILITATOR",
+          "without": 401,
+          "wrong": 401
+        },
+        {
+          "route": "POST /api/facilitator/verify",
+          "gate": "bearer",
+          "signs": "FACILITATOR (verify reads only)",
+          "without": 401,
+          "wrong": 401
+        },
+        {
+          "route": "POST /api/facilitator/settle",
+          "gate": "bearer",
+          "signs": "FACILITATOR",
+          "without": 401,
+          "wrong": 401
+        },
+        {
+          "route": "POST /api/recorder/attempts",
+          "gate": "bearer",
+          "signs": "W_SYNC",
+          "without": 401,
+          "wrong": 401
+        },
+        {
+          "route": "GET /api/cron/renew",
+          "gate": "bearer",
+          "signs": "RENEWER",
+          "without": 401,
+          "wrong": 401
+        },
+        {
+          "route": "POST /api/customer/pause",
+          "gate": "passcode",
+          "signs": "an owner, merchant or payer key",
+          "without": 401,
+          "wrong": 401
+        },
+        {
+          "route": "POST /api/customer/resume",
+          "gate": "passcode",
+          "signs": "an owner, merchant or payer key",
+          "without": 401,
+          "wrong": 401
+        },
+        {
+          "route": "POST /api/customer/kill-disposable",
+          "gate": "passcode",
+          "signs": "an owner, merchant or payer key",
+          "without": 401,
+          "wrong": 401
+        },
+        {
+          "route": "POST /api/customer/subscribe",
+          "gate": "passcode",
+          "signs": "an owner, merchant or payer key",
+          "without": 401,
+          "wrong": 401
+        },
+        {
+          "route": "POST /api/customer/unsubscribe",
+          "gate": "passcode",
+          "signs": "an owner, merchant or payer key",
+          "without": 401,
+          "wrong": 401
+        },
+        {
+          "route": "POST /api/customer/reorder",
+          "gate": "passcode",
+          "signs": "an owner, merchant or payer key",
+          "without": 401,
+          "wrong": 401
+        },
+        {
+          "route": "POST /api/customer/refund-request",
+          "gate": "passcode",
+          "signs": "an owner, merchant or payer key",
+          "without": 401,
+          "wrong": 401
+        },
+        {
+          "route": "POST /api/merchant/dispatch",
+          "gate": "passcode",
+          "signs": "an owner, merchant or payer key",
+          "without": 401,
+          "wrong": 401
+        },
+        {
+          "route": "POST /api/merchant/refund",
+          "gate": "passcode",
+          "signs": "an owner, merchant or payer key",
+          "without": 401,
+          "wrong": 401
+        },
+        {
+          "route": "POST /api/merchant/open",
+          "gate": "passcode",
+          "signs": "W_DIRECTORY",
+          "without": 401,
+          "wrong": 401
+        },
+        {
+          "route": "POST /api/agents/run",
+          "gate": "passcode",
+          "signs": "an owner, merchant or payer key",
+          "without": 401,
+          "wrong": 401
+        }
+      ],
+      "relayerNonce": {
+        "before": 10,
+        "after": 10
+      },
+      "merchantNonce": {
+        "role": "SHOP_KESAR",
+        "before": 11,
+        "after": 11
+      }
+    },
+    "C6": {
+      "pass": true,
+      "table": [
+        {
+          "route": "POST /api/shop/orders/:id/pay",
+          "gate": "passcode",
+          "signs": "FACILITATOR (and W_DIRECTORY writes the quote on the 402 step)",
+          "without": 401,
+          "wrong": 401
+        },
+        {
+          "route": "POST /api/facilitator/verify",
+          "gate": "bearer",
+          "signs": "FACILITATOR (verify reads only)",
+          "without": 401,
+          "wrong": 401
+        },
+        {
+          "route": "POST /api/facilitator/settle",
+          "gate": "bearer",
+          "signs": "FACILITATOR",
+          "without": 401,
+          "wrong": 401
+        }
+      ],
+      "relayerNonce": {
+        "before": 10,
+        "after": 10
+      }
+    },
+    "C2": {
+      "pass": true,
+      "tx": "0x7c6b60e23cd92cc4efb4e0557df9d455aa093ea89ed35dc4f2f7429d64afa0c8",
+      "explorer": "https://explorer.testnet.whitechain.io/tx/0x7c6b60e23cd92cc4efb4e0557df9d455aa093ea89ed35dc4f2f7429d64afa0c8",
+      "gasUsed": 254294,
+      "wbt": {
+        "before": "5000000000000000",
+        "after": "5000000000000000"
+      },
+      "from": "0x1ab82871c3e1be64717269d45f08ca9d54c1ebf6",
+      "relayer": "0x1AB82871c3E1Be64717269D45F08cA9d54C1EBf6",
+      "settled": {
+        "amountMicro": "4800000",
+        "orderId": "0x2c3b4236932c802cdd548d8ce3ea877d343a99e2a135b2f10460870778fb6844"
+      },
+      "delivery": "delivered",
+      "quoteKey": "0x79848ec90f9b711352dd29789cc74549bcae6859eefab10627e411a2e85bd8cf",
+      "payeeRead": {
+        "payee": "0x26940565cb470e25B06F5a39cB4E3B98b3e0d03E",
+        "node": "0xb70f38151e07566a895abd7d378d9a50fe295893cb665172c1162bedacd25a9c",
+        "epoch": 0
+      },
+      "payerGate": {
+        "ok": true
+      }
+    },
+    "C5": {
+      "pass": true,
+      "status": 200,
+      "body": {
+        "status": "paid",
+        "alreadyPaid": true,
+        "orderId": "0x2c3b4236932c802cdd548d8ce3ea877d343a99e2a135b2f10460870778fb6844",
+        "chainStatus": "DELIVERED"
+      },
+      "relayerNonce": {
+        "before": 11,
+        "after": 11
+      },
+      "payerUsdt": {
+        "before": "15200000",
+        "after": "15200000"
+      }
+    },
+    "C3": {
+      "refund": {
+        "tx": "0x0d04220e9a26243f919715e649d85681439dc4f2a492618bb1f1a916df9fe33f",
+        "explorer": "https://explorer.testnet.whitechain.io/tx/0x0d04220e9a26243f919715e649d85681439dc4f2a492618bb1f1a916df9fe33f",
+        "gasUsed": 75323,
+        "amountMicro": "800000",
+        "full": false,
+        "payerDelta": "800000",
+        "pass": true
+      },
+      "reorder": {
+        "tx": "0xb77851de876e39556a5c690e938e8fda69e5aa69ef5079a20b85aadcdf27e3d2",
+        "explorer": "https://explorer.testnet.whitechain.io/tx/0xb77851de876e39556a5c690e938e8fda69e5aa69ef5079a20b85aadcdf27e3d2",
+        "gasUsed": 244343,
+        "kind": 1,
+        "parent": "0x2c3b4236932c802cdd548d8ce3ea877d343a99e2a135b2f10460870778fb6844",
+        "amountMicro": "1200000",
+        "quoteKey": "0x0b0e824396410493214b17f5aaf78f5a3076777b8d56ad504b8949d545b5b118",
+        "pass": true
+      }
+    },
+    "C4": {
+      "b": {
+        "pass": true,
+        "status": 402,
+        "reason": "CAP_EXCEEDED",
+        "relayerNonce": {
+          "before": 12,
+          "after": 12
+        },
+        "failEdge": {
+          "entityKey": "0x1bd8324c4e695b5add4941ed96c90f933f639d0e0e3b2fdffd120bed963b54b7",
+          "kind": "fail",
+          "ref": "att:0x2d43695c83fd381d83edba571049cf18e6749f431a3681a5d66774e9b7a9c712:0x1a2a5a6c6fd1a8cff8632814ef8fa395726b837f:d354975b",
+          "reason": null
+        }
+      },
+      "a": {
+        "pass": null,
+        "why": "needs a POLICY_WRITER revoke of the scout agent while the workers hold that key"
+      }
+    }
+  },
+  "health": {
+    "facilitator": {
+      "startup": "ok",
+      "signer": "0x1AB82871c3E1Be64717269D45F08cA9d54C1EBf6"
+    },
+    "shop": 200,
+    "signerIsRelayer": true
+  },
+  "plan": {
+    "spentTodayMicro": "0",
+    "spends": {
+      "C2": 4800000,
+      "C3": 1200000,
+      "C4b": "refused, sends nothing",
+      "refund": "800000 from SHOP_KESAR"
+    },
+    "gas": "none from the payer; the hosted relayer pays"
+  },
+  "endedAt": "2026-11-06T00:02:59.616Z"
+}

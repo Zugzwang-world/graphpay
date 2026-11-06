@@ -1,0 +1,24 @@
+{
+  "id": "B3",
+  "at": "2026-11-05T23:52:24.075Z",
+  "pass": true,
+  "what": "a scoped role stops an agent raising its own cap",
+  "measured": {
+    "tx": {
+      "status": "success",
+      "fn": "setText",
+      "key": "agent-context",
+      "fromIsHolder": true,
+      "toIsResolver": true,
+      "gasUsed": 59046
+    },
+    "refusedRecorded": true
+  },
+  "expected": "agent-context setText lands as the agent's own key; setAddress 2147485522 simulates ok; cap_micro, status, x-graphpay-accepts, agent-endpoint[mcp] setText and setAddress(60) revert EACUnauthorizedAccountRoles in simulation, none sent",
+  "evidence": {
+    "tx": "https://sepolia.etherscan.io/tx/0x12f009dfe98a8a5a7b4cab317774cb4d79fc40c64a16bff8cb9093052c7e456e",
+    "name": "acceptance.vitalik.graphpay.eth",
+    "file": "docs/technical/FACTS.md \"Setter scope\" (T2, b3-real.mjs --send, 02:25 IST; not re-run)",
+    "receipt": "read again now (Sepolia, read-only)"
+  }
+}

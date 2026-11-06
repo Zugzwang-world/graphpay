@@ -112,12 +112,13 @@ Agents (T4) and Join add one row per full errand run, so the presets can be cali
 
 ## integration
 
-Updated 03:36 IST, Fri 6 Nov. Nothing for the founder now: the live mirror needs no login or funding. W_LEDGER holds 1.51 test GLM after the history (0.49 spent); one mirrored payment costs about 0.002 (the lab figure, `planning/SPEC/INTEGRATION_AND_MIRROR.md` §6).
+Updated 05:33 IST, Fri 6 Nov. Nothing for the founder now.
 
-- **Keep the lid open (watch).** What: the workers process runs on this Mac under `caffeinate -ims`. Where: this Mac. Why: caffeinate stops idle sleep but not a closed lid (it slept 02:14–03:01 IST). A closed lid stops the mirror; it resumes from Arkiv on wake by design (D15), but the website's scores lag until then. Recommendation: keep the lid open and the charger in until Saturday's submission.
-- **Ask of T3: the reputation's synthetic label (open, sent to the Coordinator 03:29 IST).** What: `Reputation.synthetic` in `packages/money-graph/src/graphql.mjs` (line 323) comes from the node row only. The cast nodes are real, so the scores built from the labelled history say `synthetic: false`, although the stored tally rows say `true`. Why: synthetic data must always be labelled, on the site and in the agents' answers. Recommendation: `synthetic` is true when the node or any tally row the answer read is synthetic.
-- **Network drops (watch).** What: this Mac's DNS stopped answering at 00:50 and 01:15 IST. Why: the mirror must keep up during the live runs. Recommendation: if it recurs, switch to a phone hotspot; the mirror catches up from its Arkiv checkpoint (2-minute freeze tested: 127 blocks caught up in under 5 s).
-- **Closed 03:13 IST:** the checkout's address and deploy block (M2, PR 15) and the cast on ENS (M5, PR 18) arrived. Every name is epoch 0 and the 16 hand-off nodes match the cast (`docs/sessions/identity/namespace.md`).
+- **Keep the lid open (watch).** What: the workers process runs on this Mac under `caffeinate -ims`. Where: this Mac. Why: caffeinate does not stop a closed lid from sleeping the Mac; the mirror then resumes from Arkiv on wake (D15), but the site's scores lag until then. Recommendation: keep the lid open and the charger in until Saturday's submission.
+- **C4(a): a revoke by the policy writer (Coordinator).** What: C4(a) needs POLICY_WRITER to revoke the scout agent's spending policy, then a 0.40 payment that the contract records as AGENT_REVOKED. Where: Whitechain, POLICY_WRITER. Why: the workers process also holds that key for T2's watcher, so two senders could clash on a nonce. Recommendation: run it from inside the workers' own process, or pause the watcher for the minute it takes, once the Coordinator agrees.
+- **B7: the re-registration fork test (T2).** What: no fork test covers a new registration after a lapse, or after an unregister (only "renew keeps the epoch" exists). Where: `packages/ens/test-fork/`. Why: B7 cannot pass without it. Recommendation: T2 adds the two cases; the check reads them through `acceptance/tracks.mjs`.
+- **F3: the relayer floor on a preview deployment (T1).** What: set `MIN_RELAYER_BALANCE_WBT` above the relayer's balance on a preview, request a payment, read the health route. Why: it needs a preview deployment's env, which is T1's. Recommendation: T1 runs it and records the result; Join reads it.
+- **Ask of T3: the reputation's synthetic label (open since 03:29 IST).** What: `Reputation.synthetic` in `packages/money-graph/src/graphql.mjs` comes from the node row only, so scores built from the labelled history say `synthetic: false`. Recommendation: true when the node or any tally row read is synthetic.
 
 ## website
 

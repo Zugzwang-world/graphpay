@@ -1,6 +1,6 @@
 # Join: resume after a fresh start
 
-Updated 05:12 IST, Fri 6 Nov. Read this first, then `docs/plan/sessions/join.md`.
+Updated 05:33 IST, Fri 6 Nov. Read this first, then `docs/plan/sessions/join.md`.
 
 ## Running now
 
@@ -8,16 +8,18 @@ Updated 05:12 IST, Fri 6 Nov. Read this first, then `docs/plan/sessions/join.md`
 
 ## Done
 
-- **M11 done** (PR 60): D1, D2a–c, D3, D15 and the 30-minute lag pass on the real networks (`docs/sessions/integration/mirror.md`).
+- PR 57 closed as superseded (its lines landed in PR 60).
+- **M11 done** (PR 60, merged): D1, D2a–c, D3, D15 and the 30-minute lag pass on the real networks (`docs/sessions/integration/mirror.md`).
 - **M12 done** (PRs 48, 52, 56): `pnpm e2e:food` passed A–E as payer.vitalik (04:43 IST) and `pnpm e2e:kill` passed F on disposable-1 (killed once; DISPOSABLE_2 is kept for the video).
 - **Acceptance** (`pnpm acceptance`, `ACCEPTANCE_REPORT.md`): 31 pass, 0 fail, 1 blocked (D7), 16 not run. Results in `docs/sessions/integration/acceptance/`, run files in `docs/sessions/integration/runs/`.
 - Friday item 3 (batched presence and hand-offs, `integration/src/activity.mjs`).
 
 ## Next (M13)
 
-1. After 05:30 IST (acceptance.vitalik's fresh UTC day) and once T1's M4 hosts the facilitator and shop: C2–C6, F2, F3 through the hosted routes (`pnpm acceptance --dry-run` first; no run while the website demo is live).
-2. Wire the other tracks' checks into `acceptance/checks.mjs`: B3 (`scripts/ens/b3-real.mjs`), B7 (T2's fork test), B9, A3, A4, A9 (the probe rows in OPEN.md), A10, D10 (T4's presignCheck), F1 (history scan + Vercel env names).
-3. The website errand runner: `runId: input.runId` and `batchedActivity` + `flush()` (T5's note).
+1. **Done 05:33 IST (PR on `join/m13-hosted`): the paid hosted run passed C2, C3, C5, C4(b)** (`docs/sessions/integration/hosted/paid-2026-11-06T00-00-52-957Z.json`); the report at 41 pass, 0 fail, 1 blocked, 6 not run. The acceptance payer's 6.00 is spent for this UTC day. `pnpm e2e:hosted` (`integration/hosted.mjs`) runs C2, C3 (re-order; refund with `--refund`, the one local send as SHOP_KESAR, after telling T1), C4(b), C5, C6 and F2 through the production domain; results in `docs/sessions/integration/hosted/`, read by `acceptance/checks.mjs` (`hosted()`). Read-only pass done 05:15 IST: C6 and F2 pass (17 routes, nonce unchanged). The paying run (`ALLOW_REAL_NETWORK=1 pnpm e2e:hosted --yes [--refund]`) only after 05:30 IST, when the acceptance payer's `spentToday` is 0; it refuses otherwise. C3's renewal is read from T1's hosted-cron receipt (`m4-hosted.md`, the `| cron |` row): it passes.
+2. Not covered yet: C4(a) (a POLICY_WRITER revoke of the scout agent while the workers hold that key) and F3 (a preview deployment with the floor raised; T1's). `integration/src/stack.mjs` (e2e:food, e2e:kill) now refuses unless `STACK_LOCAL_RELAY=1`.
+3. Done: `acceptance/tracks.mjs` (A3, A4, A9, A10, B3 pass; B7 waits on T2's fork test; D10(c) needs a recorded quote's expiry). Next: F1 (history scan + Vercel env names), D10(c).
+4. The website errand runner: `runId: input.runId` and `batchedActivity` + `flush()` (T5's note).
 
 ## Relay key rule
 

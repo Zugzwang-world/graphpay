@@ -1,0 +1,42 @@
+{
+  "id": "C6",
+  "at": "2026-11-06T00:03:12.278Z",
+  "pass": true,
+  "what": "hosted endpoints return 401 without the passcode or token",
+  "measured": {
+    "pass": true,
+    "table": [
+      {
+        "route": "POST /api/shop/orders/:id/pay",
+        "gate": "passcode",
+        "signs": "FACILITATOR (and W_DIRECTORY writes the quote on the 402 step)",
+        "without": 401,
+        "wrong": 401
+      },
+      {
+        "route": "POST /api/facilitator/verify",
+        "gate": "bearer",
+        "signs": "FACILITATOR (verify reads only)",
+        "without": 401,
+        "wrong": 401
+      },
+      {
+        "route": "POST /api/facilitator/settle",
+        "gate": "bearer",
+        "signs": "FACILITATOR",
+        "without": 401,
+        "wrong": 401
+      }
+    ],
+    "relayerNonce": {
+      "before": 10,
+      "after": 10
+    }
+  },
+  "expected": "every one 401; relayer nonce unchanged",
+  "evidence": {
+    "file": "docs/sessions/integration/hosted/paid-2026-11-06T00-00-52-957Z.json",
+    "startedAt": "2026-11-06T00:00:52.957Z",
+    "site": "https://graphpay-event.vercel.app"
+  }
+}

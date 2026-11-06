@@ -1,0 +1,58 @@
+{
+  "id": "A9",
+  "at": "2026-11-05T23:52:19.409Z",
+  "pass": true,
+  "what": "the agent presets are accepted",
+  "measured": [
+    {
+      "preset": "testing",
+      "want": [
+        "`claude-opus-5-5`, xhigh"
+      ],
+      "row": {
+        "time": "22:54",
+        "run": "M0 probe (one-word reply, not an errand)",
+        "model": "`claude-opus-5-5`, xhigh",
+        "seconds": "2.2",
+        "cost": "$0.0005",
+        "notes": "accepted"
+      },
+      "ok": true
+    },
+    {
+      "preset": "video",
+      "want": [
+        "`claude-opus-5-5`, xhigh"
+      ],
+      "row": {
+        "time": "22:54",
+        "run": "M0 probe (one-word reply, not an errand)",
+        "model": "`claude-opus-5-5`, xhigh",
+        "seconds": "1.6",
+        "cost": "$0.0006",
+        "notes": "accepted"
+      },
+      "ok": true
+    },
+    {
+      "preset": "live",
+      "want": [
+        "`claude-haiku-5-5`, xhigh"
+      ],
+      "row": {
+        "time": "22:54",
+        "run": "M0 probe (one word, then three short turns)",
+        "model": "`claude-haiku-5-5`, xhigh",
+        "seconds": "0.9; turns 0.9 / 0.9 / 1.9",
+        "cost": "under $0.0002 in all",
+        "notes": "accepted; no empty reply, no `max_tokens`; once the same answer in two text blocks (read the final block)"
+      },
+      "ok": true
+    }
+  ],
+  "expected": "every preset of story.json's agentModels has a probe row with its model and effort, accepted, seconds and cost recorded; the live preset over three turns",
+  "evidence": {
+    "file": "docs/thinking-partner/OPEN.md (preset calibration)",
+    "cmd": "pnpm agents:probe (recorded, not re-run)"
+  }
+}

@@ -1,36 +1,36 @@
 # Acceptance report
 
-Written by `pnpm acceptance` at 2026-11-05T23:35:12.697Z. Checks and pass criteria: `planning/ACCEPTANCE_TESTS.md` and `docs/plan/ACCEPTANCE_ADDITIONS.md`. Only D7 may be `blocked` (C7 and E3 no longer wait on supply, ADR-0054); a check without a result is `not run`, never `pass`.
+Written by `pnpm acceptance` at 2026-11-06T00:03:12.292Z. Checks and pass criteria: `planning/ACCEPTANCE_TESTS.md` and `docs/plan/ACCEPTANCE_ADDITIONS.md`. Only D7 may be `blocked` (C7 and E3 no longer wait on supply, ADR-0054); a check without a result is `not run`, never `pass`.
 
-**31 pass, 0 fail, 1 blocked, 16 not run** (of 48).
+**41 pass, 0 fail, 1 blocked, 6 not run** (of 48).
 
 | id | check | status | note |
 |---|---|---|---|
 | A1 | CI is green (at M0 the `contracts` job runs a placeholder Foundry project) | pass |  |
 | A2 | The secret scan is clean | pass |  |
-| A3 | Deny rules block reads of `.env` | not run | no runner yet |
-| A4 | Auto-merge works | not run | no runner yet |
+| A3 | Deny rules block reads of `.env` | pass |  |
+| A4 | Auto-merge works | pass |  |
 | A5 | The event wallets are fresh, except FUNDER and OPERATOR | pass |  |
 | A6 | `planning/` and the thinking-partner folder are in place | pass |  |
 | A7 | No known address literal in code outside the config file (D6) | pass |  |
 | A8 | No story name or value in code outside the story file (ADR-0047) | pass |  |
-| A9 | The agent presets are accepted (ADR-0048) | not run | no runner yet |
-| A10 | The Whitechain RPC rules hold (ADR-0031) | not run | no runner yet |
+| A9 | The agent presets are accepted (ADR-0048) | pass |  |
+| A10 | The Whitechain RPC rules hold (ADR-0031) | pass |  |
 | B1 | The `graphpay.eth` namespace resolves; all owners and agents exist | pass |  |
 | B2 | The gate passes active agents | pass |  |
-| B3 | A scoped role stops an agent raising its own cap | not run | no runner yet |
+| B3 | A scoped role stops an agent raising its own cap | pass |  |
 | B4 | The payment preference parses | pass |  |
 | B5 | A synthetic wildcard name resolves | pass |  |
 | B6 | Killing a disposable agent makes the gate deny it | pass |  |
-| B7 | The epoch changes on re-registration (fork test) | not run | no runner yet |
+| B7 | The epoch changes on re-registration (fork test) | not run | no fork test for a new registration after a lapse or an unregister (only renew keeping the epoch); needs an anvil fork of Sepolia |
 | B8 | ENSIP-26 records exist and the MCP endpoint answers | pass |  |
 | B9 | The payee is the shop's ENS address | not run |  |
 | C1 | Contracts are verified on the explorer | pass |  |
-| C2 | A payment through the facilitator costs the payer no gas | not run | no runner yet |
-| C3 | Partial refund, re-order and renewal work | not run | no runner yet |
-| C4 | Revoked-agent and over-cap failures are recorded | not run | no runner yet |
-| C5 | A repeat request returns "already paid" | not run | no runner yet |
-| C6 | Hosted endpoints return 401 without the passcode or token | not run | no runner yet |
+| C2 | A payment through the facilitator costs the payer no gas | pass |  |
+| C3 | Partial refund, re-order and renewal work | pass |  |
+| C4 | Revoked-agent and over-cap failures are recorded | not run | (a) needs a POLICY_WRITER revoke of the scout agent while the workers hold that key; (b) passes |
+| C5 | A repeat request returns "already paid" | pass |  |
+| C6 | Hosted endpoints return 401 without the passcode or token | pass |  |
 | C7 | **The qualifying payment in test USDT `0xcedfB56113143d55b2358b8CFbB0dEB5Ad2f55a7`** | pass |  |
 | D1 | One payment event writes its edge and tallies in one atomic batch | pass |  |
 | D2 | A retry with the same nonce creates no duplicate | pass |  |
@@ -41,7 +41,7 @@ Written by `pnpm acceptance` at 2026-11-05T23:35:12.697Z. Checks and pass criter
 | D7 | Benchmark at size M, if seeded | blocked | waiting for the locked story (the M city is seeded only after the founder locks it) |
 | D8 | The geo query returns only shops inside the box, and only from our writers | pass |  |
 | D9 | A receipt cannot be edited | pass |  |
-| D10 | An expired or missing quote is refused and the agent re-quotes | not run | no runner yet |
+| D10 | An expired or missing quote is refused and the agent re-quotes | not run | not run: (c) the quote entity's expiry on Arkiv needs a live 402 with requestId (passcode; W_DIRECTORY writes a quote) |
 | D15 | The mirror resumes after a sleep or a network drop (ADR-0056) | pass |  |
 | E1 | Vitalik's request | pass |  |
 | E2 | The agents choose Kesar Kingdom, never the trap | pass |  |
@@ -52,7 +52,7 @@ Written by `pnpm acceptance` at 2026-11-05T23:35:12.697Z. Checks and pass criter
 | E7 | A killed agent is refused | pass |  |
 | E8 | Every counting errand records its time and cost (ADR-0048) | pass |  |
 | F1 | No secrets are in the repo | not run | no runner yet |
-| F2 | Spending endpoints are passcode-gated | not run | no runner yet |
+| F2 | Spending endpoints are passcode-gated | pass |  |
 | F3 | The relayer's safety floor is enforced | not run | no runner yet |
 
 ## A1: CI is green (at M0 the `contracts` job runs a placeholder Foundry project)
@@ -89,6 +89,77 @@ Status: **pass**.
 [
   "check: clean (590 files)"
 ]
+```
+
+## A3: Deny rules block reads of `.env`
+
+Status: **pass**.
+
+### A3 (2026-11-05T23:52:17.334Z)
+
+- What: deny rules block reads of .env
+- Pass: true
+- Expected: every rule of SPEC/SECURITY_AND_OPS.md §2 present; the self-check shows the Read of .env refused (P-foundation-3: the wording changed, the block holds)
+- Evidence: `{"settings":".claude/settings.json","spec":"planning/SPEC/SECURITY_AND_OPS.md §2","selfCheck":"docs/thinking-partner/relays/foundation.md","wording":"docs/problems/PROBLEM_LOG.md P-foundation-3"}`
+
+```json
+{
+  "listed": 30,
+  "deny": 34,
+  "missing": [],
+  "extra": [
+    "Bash(vercel project ls*)",
+    "Bash(vercel project list*)",
+    "Bash(vercel projects ls*)",
+    "Bash(vercel projects list*)"
+  ],
+  "selfCheck": "**A3 self-check.** An empty `.env` was created by a script (a direct write is refused once the deny rules load). The `Read` of `.env` was refused with: `File is in a directory that is denied by your permission settings.` The shell `cat .env` was refused with: `Permission to use Bash with command cat"
+}
+```
+
+## A4: Auto-merge works
+
+Status: **pass**.
+
+### A4 (2026-11-05T23:52:19.406Z)
+
+- What: auto-merge works
+- Pass: true
+- Expected: auto-merge on, squash only, delete-on-merge on; required check ci, admins enforced, linear history, no force-push; a docs PR merged by auto-merge after ci passed
+- Evidence: `{"cmd":"gh api repos/{owner}/{repo}; gh api repos/{owner}/{repo}/branches/main/protection; gh pr list --state merged (read-only)","pr":"https://github.com/Zugzwang-world/graphpay/pull/62"}`
+
+```json
+{
+  "repo": {
+    "allow_auto_merge": true,
+    "allow_merge_commit": false,
+    "allow_rebase_merge": false,
+    "allow_squash_merge": true,
+    "delete_branch_on_merge": true,
+    "full_name": "Zugzwang-world/graphpay"
+  },
+  "protection": {
+    "admins": true,
+    "checks": [
+      "ci"
+    ],
+    "forcePush": false,
+    "linear": true
+  },
+  "pr": {
+    "number": 62,
+    "url": "https://github.com/Zugzwang-world/graphpay/pull/62",
+    "autoMergeRequest": {
+      "mergeMethod": "SQUASH",
+      "enabledAt": "2026-11-05T23:41:27Z"
+    },
+    "mergedAt": "2026-11-05T23:43:25Z",
+    "ci": {
+      "conclusion": "SUCCESS",
+      "completedAt": "2026-11-05T23:43:16Z"
+    }
+  }
+}
 ```
 
 ## A5: The event wallets are fresh, except FUNDER and OPERATOR
@@ -162,6 +233,99 @@ Status: **pass**.
 [
   "check: clean (593 files)"
 ]
+```
+
+## A9: The agent presets are accepted (ADR-0048)
+
+Status: **pass**.
+
+### A9 (2026-11-05T23:52:19.409Z)
+
+- What: the agent presets are accepted
+- Pass: true
+- Expected: every preset of story.json's agentModels has a probe row with its model and effort, accepted, seconds and cost recorded; the live preset over three turns
+- Evidence: `{"file":"docs/thinking-partner/OPEN.md (preset calibration)","cmd":"pnpm agents:probe (recorded, not re-run)"}`
+
+```json
+[
+  {
+    "preset": "testing",
+    "want": [
+      "`claude-opus-5-5`, xhigh"
+    ],
+    "row": {
+      "time": "22:54",
+      "run": "M0 probe (one-word reply, not an errand)",
+      "model": "`claude-opus-5-5`, xhigh",
+      "seconds": "2.2",
+      "cost": "$0.0005",
+      "notes": "accepted"
+    },
+    "ok": true
+  },
+  {
+    "preset": "video",
+    "want": [
+      "`claude-opus-5-5`, xhigh"
+    ],
+    "row": {
+      "time": "22:54",
+      "run": "M0 probe (one-word reply, not an errand)",
+      "model": "`claude-opus-5-5`, xhigh",
+      "seconds": "1.6",
+      "cost": "$0.0006",
+      "notes": "accepted"
+    },
+    "ok": true
+  },
+  {
+    "preset": "live",
+    "want": [
+      "`claude-haiku-5-5`, xhigh"
+    ],
+    "row": {
+      "time": "22:54",
+      "run": "M0 probe (one word, then three short turns)",
+      "model": "`claude-haiku-5-5`, xhigh",
+      "seconds": "0.9; turns 0.9 / 0.9 / 1.9",
+      "cost": "under $0.0002 in all",
+      "notes": "accepted; no empty reply, no `max_tokens`; once the same answer in two text blocks (read the final block)"
+    },
+    "ok": true
+  }
+]
+```
+
+## A10: The Whitechain RPC rules hold (ADR-0031)
+
+Status: **pass**.
+
+### A10 (2026-11-05T23:52:20.056Z)
+
+- What: the Whitechain RPC rules hold
+- Pass: true
+- Expected: config tests pass (wrong chain and plain http refused, no URL in errors); the secret URL chosen first at 1874; the hook masks a keyed Ankr URL and the scan refuses it
+- Evidence: `{"cmd":"node --test packages/config/test/config.test.mjs; resolveRpc(whitechain) label-only (eth_chainId reads); buildLine + scanText in process on scripts/test/samples.mjs","fact":"docs/technical/FACTS.md \"Founder's Ankr RPC\"","hookAndScanM0":"docs/thinking-partner/COVERAGE.md (23:10 proof)"}`
+
+```json
+{
+  "tests": {
+    "exit": 0,
+    "pass": 13,
+    "fail": 0
+  },
+  "live": {
+    "label": "WHITECHAIN_RPC_URL (secret)",
+    "secret": true,
+    "chainId": 1874,
+    "refused": []
+  },
+  "secretFirst": "measured now",
+  "proof": {
+    "hookMasks": true,
+    "scanRefuses": true
+  }
+}
 ```
 
 ## B1: The `graphpay.eth` namespace resolves; all owners and agents exist
@@ -285,6 +449,31 @@ Status: **pass**.
 ]
 ```
 
+## B3: A scoped role stops an agent raising its own cap
+
+Status: **pass**.
+
+### B3 (2026-11-05T23:52:24.075Z)
+
+- What: a scoped role stops an agent raising its own cap
+- Pass: true
+- Expected: agent-context setText lands as the agent's own key; setAddress 2147485522 simulates ok; cap_micro, status, x-graphpay-accepts, agent-endpoint[mcp] setText and setAddress(60) revert EACUnauthorizedAccountRoles in simulation, none sent
+- Evidence: `{"tx":"https://sepolia.etherscan.io/tx/0x12f009dfe98a8a5a7b4cab317774cb4d79fc40c64a16bff8cb9093052c7e456e","name":"acceptance.vitalik.graphpay.eth","file":"docs/technical/FACTS.md \"Setter scope\" (T2, b3-real.mjs --send, 02:25 IST; not re-run)","receipt":"read again now (Sepolia, read-only)"}`
+
+```json
+{
+  "tx": {
+    "status": "success",
+    "fn": "setText",
+    "key": "agent-context",
+    "fromIsHolder": true,
+    "toIsResolver": true,
+    "gasUsed": 59046
+  },
+  "refusedRecorded": true
+}
+```
+
 ## B4: The payment preference parses
 
 Status: **pass**.
@@ -340,6 +529,26 @@ Status: **pass**.
 {
   "reason": "ENS_EXPIRED_OR_REVOKED",
   "secondsAfterKill": 9.3
+}
+```
+
+## B7: The epoch changes on re-registration (fork test)
+
+Status: **not run** (no fork test for a new registration after a lapse or an unregister (only renew keeping the epoch); needs an anvil fork of Sepolia).
+
+### B7 (2026-11-05T23:52:24.077Z)
+
+- What: the epoch changes on re-registration (fork test)
+- Pass: null
+- Expected: renew keeps e; a new registration after a lapse gets e + 1; after unregister +1 (AVAILABLE view +2)
+- Evidence: `{"dir":"packages/ens/test-fork","cmd":"pnpm --filter @graphpay/ens test:fork (not run: needs FORK_URL)"}`
+
+```json
+{
+  "epochTests": [
+    "gate.fork.test.mjs: a lapse then renew revives the same epoch; a never-registered label is the next free disposable",
+    "namespace.fork.test.mjs: B1/B2 on the fork: every name of the cast walks ok, is REGISTERED at epoch 0 with its own factory-proxy resolver"
+  ]
 }
 ```
 
@@ -409,6 +618,203 @@ Status: **pass**.
   "is_verified": true,
   "is_fully_verified": false,
   "name": "GraphPayCheckout"
+}
+```
+
+## C2: A payment through the facilitator costs the payer no gas
+
+Status: **pass**.
+
+### C2 (2026-11-06T00:03:11.096Z)
+
+- What: a payment through the facilitator costs the payer no gas
+- Pass: true
+- Expected: payer WBT identical; PaymentSettled; tx.from = the relayer; gas 312,024 or 234,292–252,082, ±15%; the quote key and the ENS payee read
+- Evidence: `{"file":"docs/sessions/integration/hosted/paid-2026-11-06T00-00-52-957Z.json","startedAt":"2026-11-06T00:00:52.957Z","site":"https://graphpay-event.vercel.app"}`
+
+```json
+{
+  "pass": true,
+  "tx": "0x7c6b60e23cd92cc4efb4e0557df9d455aa093ea89ed35dc4f2f7429d64afa0c8",
+  "explorer": "https://explorer.testnet.whitechain.io/tx/0x7c6b60e23cd92cc4efb4e0557df9d455aa093ea89ed35dc4f2f7429d64afa0c8",
+  "gasUsed": 254294,
+  "wbt": {
+    "before": "5000000000000000",
+    "after": "5000000000000000"
+  },
+  "from": "0x1ab82871c3e1be64717269d45f08ca9d54c1ebf6",
+  "relayer": "0x1AB82871c3E1Be64717269D45F08cA9d54C1EBf6",
+  "settled": {
+    "amountMicro": "4800000",
+    "orderId": "0x2c3b4236932c802cdd548d8ce3ea877d343a99e2a135b2f10460870778fb6844"
+  },
+  "delivery": "delivered",
+  "quoteKey": "0x79848ec90f9b711352dd29789cc74549bcae6859eefab10627e411a2e85bd8cf",
+  "payeeRead": {
+    "payee": "0x26940565cb470e25B06F5a39cB4E3B98b3e0d03E",
+    "node": "0xb70f38151e07566a895abd7d378d9a50fe295893cb665172c1162bedacd25a9c",
+    "epoch": 0
+  },
+  "payerGate": {
+    "ok": true
+  }
+}
+```
+
+## C3: Partial refund, re-order and renewal work
+
+Status: **pass**.
+
+### C3 (2026-11-06T00:03:12.274Z)
+
+- What: partial refund, re-order and renewal work
+- Pass: true
+- Expected: Refunded(800000, full false), payer +0.80, gas 75,344 ±15%; re-order OrderCreated(kind 1, parent) + PaymentSettled 1.20, gas 252,082 ±15%; SubscriptionRenewed(cycle 2) + PaymentSettled of a kind-2 order, gas 201,555 ±15%
+- Evidence: `{"file":"docs/sessions/integration/hosted/paid-2026-11-06T00-00-52-957Z.json","startedAt":"2026-11-06T00:00:52.957Z","site":"https://graphpay-event.vercel.app","renewal":{"tx":"https://explorer.testnet.whitechain.io/tx/0x48b14aa45f56d487dee743721416a359fed96296b3ad0ababf546838f55e480f","by":"the hosted cron as RENEWER (T1's M4)","subscription":"the rehearsal agent's 120 s demo subscription (C3 asks only for cycle 2 and a kind-2 PaymentSettled)"}}`
+
+```json
+{
+  "refund": true,
+  "reorder": true,
+  "renewal": true,
+  "refundTx": {
+    "tx": "0x0d04220e9a26243f919715e649d85681439dc4f2a492618bb1f1a916df9fe33f",
+    "explorer": "https://explorer.testnet.whitechain.io/tx/0x0d04220e9a26243f919715e649d85681439dc4f2a492618bb1f1a916df9fe33f",
+    "gasUsed": 75323,
+    "amountMicro": "800000",
+    "full": false,
+    "payerDelta": "800000",
+    "pass": true
+  },
+  "reorderTx": {
+    "tx": "0xb77851de876e39556a5c690e938e8fda69e5aa69ef5079a20b85aadcdf27e3d2",
+    "explorer": "https://explorer.testnet.whitechain.io/tx/0xb77851de876e39556a5c690e938e8fda69e5aa69ef5079a20b85aadcdf27e3d2",
+    "gasUsed": 244343,
+    "kind": 1,
+    "parent": "0x2c3b4236932c802cdd548d8ce3ea877d343a99e2a135b2f10460870778fb6844",
+    "amountMicro": "1200000",
+    "quoteKey": "0x0b0e824396410493214b17f5aaf78f5a3076777b8d56ad504b8949d545b5b118",
+    "pass": true
+  },
+  "renewalTx": {
+    "cycle": 2,
+    "orderKind": 2,
+    "settledMicro": "400000",
+    "gasUsed": 222881,
+    "from": "0x4dcb3564ede867001179ba695ef298e73005869c",
+    "fromIsRelayer": true
+  }
+}
+```
+
+## C4: Revoked-agent and over-cap failures are recorded
+
+Status: **not run** ((a) needs a POLICY_WRITER revoke of the scout agent while the workers hold that key; (b) passes).
+
+### C4 (2026-11-06T00:03:12.276Z)
+
+- What: revoked-agent and over-cap failures are recorded
+- Pass: null
+- Expected: (a) PaymentFailed(AGENT_REVOKED), gas 160,525 ±15%, an on-chain fail edge; (b) 402 CAP_EXCEEDED, no transaction, an off-chain fail edge
+- Evidence: `{"file":"docs/sessions/integration/hosted/paid-2026-11-06T00-00-52-957Z.json","startedAt":"2026-11-06T00:00:52.957Z","site":"https://graphpay-event.vercel.app"}`
+
+```json
+{
+  "b": {
+    "pass": true,
+    "status": 402,
+    "reason": "CAP_EXCEEDED",
+    "relayerNonce": {
+      "before": 12,
+      "after": 12
+    },
+    "failEdge": {
+      "entityKey": "0x1bd8324c4e695b5add4941ed96c90f933f639d0e0e3b2fdffd120bed963b54b7",
+      "kind": "fail",
+      "ref": "att:0x2d43695c83fd381d83edba571049cf18e6749f431a3681a5d66774e9b7a9c712:0x1a2a5a6c6fd1a8cff8632814ef8fa395726b837f:d354975b",
+      "reason": null
+    }
+  },
+  "a": {
+    "pass": null,
+    "why": "needs a POLICY_WRITER revoke of the scout agent while the workers hold that key"
+  }
+}
+```
+
+## C5: A repeat request returns "already paid"
+
+Status: **pass**.
+
+### C5 (2026-11-06T00:03:12.276Z)
+
+- What: a repeat request returns "already paid"
+- Pass: true
+- Expected: HTTP 200 alreadyPaid; relayer nonce and payer balance unchanged
+- Evidence: `{"file":"docs/sessions/integration/hosted/paid-2026-11-06T00-00-52-957Z.json","startedAt":"2026-11-06T00:00:52.957Z","site":"https://graphpay-event.vercel.app"}`
+
+```json
+{
+  "pass": true,
+  "status": 200,
+  "body": {
+    "status": "paid",
+    "alreadyPaid": true,
+    "orderId": "0x2c3b4236932c802cdd548d8ce3ea877d343a99e2a135b2f10460870778fb6844",
+    "chainStatus": "DELIVERED"
+  },
+  "relayerNonce": {
+    "before": 11,
+    "after": 11
+  },
+  "payerUsdt": {
+    "before": "15200000",
+    "after": "15200000"
+  }
+}
+```
+
+## C6: Hosted endpoints return 401 without the passcode or token
+
+Status: **pass**.
+
+### C6 (2026-11-06T00:03:12.278Z)
+
+- What: hosted endpoints return 401 without the passcode or token
+- Pass: true
+- Expected: every one 401; relayer nonce unchanged
+- Evidence: `{"file":"docs/sessions/integration/hosted/paid-2026-11-06T00-00-52-957Z.json","startedAt":"2026-11-06T00:00:52.957Z","site":"https://graphpay-event.vercel.app"}`
+
+```json
+{
+  "pass": true,
+  "table": [
+    {
+      "route": "POST /api/shop/orders/:id/pay",
+      "gate": "passcode",
+      "signs": "FACILITATOR (and W_DIRECTORY writes the quote on the 402 step)",
+      "without": 401,
+      "wrong": 401
+    },
+    {
+      "route": "POST /api/facilitator/verify",
+      "gate": "bearer",
+      "signs": "FACILITATOR (verify reads only)",
+      "without": 401,
+      "wrong": 401
+    },
+    {
+      "route": "POST /api/facilitator/settle",
+      "gate": "bearer",
+      "signs": "FACILITATOR",
+      "without": 401,
+      "wrong": 401
+    }
+  ],
+  "relayerNonce": {
+    "before": 10,
+    "after": 10
+  }
 }
 ```
 
@@ -867,6 +1273,43 @@ Status: **pass**.
 }
 ```
 
+## D10: An expired or missing quote is refused and the agent re-quotes
+
+Status: **not run** (not run: (c) the quote entity's expiry on Arkiv needs a live 402 with requestId (passcode; W_DIRECTORY writes a quote)).
+
+### D10 (2026-11-05T23:52:24.196Z)
+
+- What: an expired or missing quote is refused and the agent re-quotes
+- Pass: null
+- Expected: (a) QUOTE_MISSING, one re-quote that passes; (b) QUOTE_EXPIRED, one re-quote with a new entity key that passes; no signature before the passing check; (c) owner W_DIRECTORY, expiry 15 min after creation (±2 blocks), valid_until 10 min after
+- Evidence: `{"how":"in process on the mock world (packages/agents/mocks): createPayer → presignCheck with fake 402s, quote entities and signer; no network, no model, no real signature; the one mock signature follows the passing re-quote","tests":"packages/agents/test/errand.test.mjs (D10 a, D10 b)"}`
+
+```json
+{
+  "a": {
+    "refused": true,
+    "requotes": 1,
+    "status": "paid",
+    "signed": 1,
+    "quoteKeys": 1,
+    "guards": [
+      "QUOTE_MISSING: re-quoting once (new quote, new 402)"
+    ]
+  },
+  "b": {
+    "refused": true,
+    "requotes": 1,
+    "status": "paid",
+    "signed": 1,
+    "quoteKeys": 2,
+    "guards": [
+      "QUOTE_EXPIRED: re-quoting once (new quote, new 402)"
+    ]
+  },
+  "c": null
+}
+```
+
 ## D15: The mirror resumes after a sleep or a network drop (ADR-0056)
 
 Status: **pass**.
@@ -1098,6 +1541,153 @@ Status: **pass**.
     "apiCostUsd": 0.2986,
     "seconds": 122.1,
     "tokens": 52693
+  }
+}
+```
+
+## F2: Spending endpoints are passcode-gated
+
+Status: **pass**.
+
+### F2 (2026-11-06T00:03:12.278Z)
+
+- What: spending endpoints are passcode-gated
+- Pass: true
+- Expected: every spending route 401 without and with a wrong passcode or bearer; relayer nonce unchanged
+- Evidence: `{"file":"docs/sessions/integration/hosted/paid-2026-11-06T00-00-52-957Z.json","startedAt":"2026-11-06T00:00:52.957Z","site":"https://graphpay-event.vercel.app"}`
+
+```json
+{
+  "pass": true,
+  "table": [
+    {
+      "route": "POST /api/shop/orders/:id/pay",
+      "gate": "passcode",
+      "signs": "FACILITATOR (and W_DIRECTORY writes the quote on the 402 step)",
+      "without": 401,
+      "wrong": 401
+    },
+    {
+      "route": "POST /api/shop/orders/:id/reorder",
+      "gate": "passcode",
+      "signs": "FACILITATOR",
+      "without": 401,
+      "wrong": 401
+    },
+    {
+      "route": "POST /api/facilitator/verify",
+      "gate": "bearer",
+      "signs": "FACILITATOR (verify reads only)",
+      "without": 401,
+      "wrong": 401
+    },
+    {
+      "route": "POST /api/facilitator/settle",
+      "gate": "bearer",
+      "signs": "FACILITATOR",
+      "without": 401,
+      "wrong": 401
+    },
+    {
+      "route": "POST /api/recorder/attempts",
+      "gate": "bearer",
+      "signs": "W_SYNC",
+      "without": 401,
+      "wrong": 401
+    },
+    {
+      "route": "GET /api/cron/renew",
+      "gate": "bearer",
+      "signs": "RENEWER",
+      "without": 401,
+      "wrong": 401
+    },
+    {
+      "route": "POST /api/customer/pause",
+      "gate": "passcode",
+      "signs": "an owner, merchant or payer key",
+      "without": 401,
+      "wrong": 401
+    },
+    {
+      "route": "POST /api/customer/resume",
+      "gate": "passcode",
+      "signs": "an owner, merchant or payer key",
+      "without": 401,
+      "wrong": 401
+    },
+    {
+      "route": "POST /api/customer/kill-disposable",
+      "gate": "passcode",
+      "signs": "an owner, merchant or payer key",
+      "without": 401,
+      "wrong": 401
+    },
+    {
+      "route": "POST /api/customer/subscribe",
+      "gate": "passcode",
+      "signs": "an owner, merchant or payer key",
+      "without": 401,
+      "wrong": 401
+    },
+    {
+      "route": "POST /api/customer/unsubscribe",
+      "gate": "passcode",
+      "signs": "an owner, merchant or payer key",
+      "without": 401,
+      "wrong": 401
+    },
+    {
+      "route": "POST /api/customer/reorder",
+      "gate": "passcode",
+      "signs": "an owner, merchant or payer key",
+      "without": 401,
+      "wrong": 401
+    },
+    {
+      "route": "POST /api/customer/refund-request",
+      "gate": "passcode",
+      "signs": "an owner, merchant or payer key",
+      "without": 401,
+      "wrong": 401
+    },
+    {
+      "route": "POST /api/merchant/dispatch",
+      "gate": "passcode",
+      "signs": "an owner, merchant or payer key",
+      "without": 401,
+      "wrong": 401
+    },
+    {
+      "route": "POST /api/merchant/refund",
+      "gate": "passcode",
+      "signs": "an owner, merchant or payer key",
+      "without": 401,
+      "wrong": 401
+    },
+    {
+      "route": "POST /api/merchant/open",
+      "gate": "passcode",
+      "signs": "W_DIRECTORY",
+      "without": 401,
+      "wrong": 401
+    },
+    {
+      "route": "POST /api/agents/run",
+      "gate": "passcode",
+      "signs": "an owner, merchant or payer key",
+      "without": 401,
+      "wrong": 401
+    }
+  ],
+  "relayerNonce": {
+    "before": 10,
+    "after": 10
+  },
+  "merchantNonce": {
+    "role": "SHOP_KESAR",
+    "before": 11,
+    "after": 11
   }
 }
 ```
