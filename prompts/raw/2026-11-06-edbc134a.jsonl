@@ -1,1 +1,2 @@
 {"ts":"2026-11-06T13:18:24.224Z","session":"edbc134a","prompt":"@\"~/Downloads/booth-run-part2.md\"\nPart 2 is attached. Do every step in order, unattended, without asking me between steps. Stop only at 98% usage or when all of it is done, then end gracefully and tell me it’s ready to demo."}
+{"ts":"2026-11-06T13:33:36.006Z","session":"edbc134a","prompt":"PR #140 has already merged, so stop waiting on its CI. Confirm the deploy is live, run the live errand check from a normal browser, then write the notes, end gracefully and tell me it’s ready to demo."}
