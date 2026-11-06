@@ -1,56 +1,63 @@
-# Relay: records (the Coordinator), 08:30 IST, Fri 6 Nov: the morning relay
+# Relay: records (the Coordinator), 10:40 IST, Fri 6 Nov: the handover to a fresh Coordinator
 
-## Where we are
+## In plain words
 
-**The core is complete on the real networks.** `ACCEPTANCE_REPORT.md` has **42 pass, 0 fail, 1 blocked, 5 not run** (of 48):
-- D7, the benchmark at size M, is blocked: it waits for the locked story.
-- The 5 not run wait on other tracks: B7 (T2's re-registration fork test), F3 (T1's preview with the relayer floor raised), F1, D10 and B9.
+The first Coordinator is handing over to a fresh Coordinator session, at the founder's request. Everything the new session needs is in `docs/sessions/records/resume.md`: the work in flight, each session's state, the open decisions and every standing rule.
 
-| milestone | status | PRs |
-|---|---|---|
-| M4 | live on https://graphpay-event.vercel.app: the hosted facilitator, shop, recorder and renewal cron | #58, #62 |
-| M11–M13 | done: the mirror, the real errand, the hosted acceptance run | — |
-| C4(a) | passed: the scout's policy revoked, the refusal recorded, the policy restored and read back | #67 |
-| M16 | the checkout kit and demo store, proved with one real kit payment | #51, #63 |
+**What is true now:**
+- The core works on the real testnets. Acceptance stands at 45 pass, 0 fail, 1 blocked (D7, the large city, which waits for the story) and 2 not run. B7 and B9 have merged since and go into the next run.
+- **One SDK is on npm:** `@graphpay_ethglobal/arkiv-graph` 0.1.0. **`@graphpay_ethglobal/agentpay` 0.1.0 is packed and waits only for the founder's npm approval.** Approval links expire after about 5 minutes and two have lapsed, so the founder should have npm open in the browser before the next attempt.
+- **The agents now run on Kimi** (ADR-0067). The founder stored the key through the hidden prompt, and the secret scan recognised it. The key is also on Vercel Production as a Sensitive value. T4 is running the calibration: three errands per preset, with seconds and cost.
+- **The website plan changed** (ADR-0068):
+  - The founder's team has its own site (#70). T5 stopped building screens and now reviews and integrates the team's site.
+  - The review asks for five fixes before merge.
+  - The live errand runner (Join, #88) runs on the server only, uses the live preset only, keeps every guardrail and holds its keys only on Vercel. Join is merging `main` into it and moving it to Kimi.
 
-Merged Friday items:
-- 1: the open, online and handoff rows;
-- 2 and 3: the agent hooks and the live hooks;
-- 8: race mode;
-- 9: the Open toggle;
-- 10: the Mumbai map;
-- 13: the explainer lanes;
-- the phones' Pause/Resume and merchant actions.
+**What the founder does next** (`OPEN.md`, "Founder now"):
+1. Approve the agentpay publish the moment the link arrives.
+2. Lock the story. The demo cast and the large city's seeding start at once.
+3. Top up Kimi ($10 recommended).
+4. Pass T5's five fixes to the team.
+5. Start the Submission session when usage allows.
+6. Send the disclosure if not sent.
 
-Plan usage has held at **82%** since 05:31: the sessions have been idle overnight, waiting for the founder. Nothing has changed since 06:55 apart from the time.
+## Technical
 
-## What the founder needs to do at 08:30
+**PRs this step:**
+- #89 is merged: the `KIMI_API_KEY` name, the Kimi secret rule and the validator.
+- The handover docs PR (`coord/handover`): this relay, the resume, ADR-0068, NOW, OPEN, LOG and AI_USAGE.
 
-| what | where | why |
-|---|---|---|
-| Send the story brief | the Coordinator | Rehearsal 1 with the demo cast; the large city must start seeding by 14:00 |
-| Type anything in the Coordinator session | this app | The app caps the Coordinator's messages until you type, so idle sessions (T5 first) can't be woken |
-| Choose where the remaining budget goes | the Coordinator | 82% now; everything pauses at 92% (ADR-0062); the reset is at 21:30 |
-| Read the stage passcode from `.env` | your Mac | It unlocks the spending buttons |
+**The secret scan (#89):**
+- `kimi-api-key` matches `sk-` and then 32 or more key characters (letters, digits, `_` and `-`). It never matches `sk-ant-`, which keeps the Anthropic label.
+- JSON text, as in prompt logs and git diffs, stores a key that starts a line or follows a tab as `\n<key>`. That escape now counts as a boundary in the xai, Kimi, JWT and GitHub rules, so `pnpm check`, the pre-commit hook and F1's history scan all catch such a key. Before #89 they missed it.
+- `secrets:set` refuses a Kimi value that isn't Kimi-shaped and reports whether the scan recognises a stored API key.
+- Checks: 100/100 script tests; `pnpm check` clean over 794 files; 0 findings over the history of every branch (404 commits).
+- The main checkout pulled #89 at once, because the prompt-log hook runs from there.
 
-## A plan for the remaining budget (the Coordinator's recommendation)
+**npm:**
+- arkiv-graph 0.1.0 has 21 files, 42.7 kB packed.
+- agentpay 0.1.0 has 32 files, 75.5 kB packed, from `main` at #80.
+- The main checkout needed `pnpm install` before pnpm could rewrite agentpay's three workspace devDependencies. Those are test-only and never installed by users. A 0.1.1 should drop them from the published manifest (T6), because they name a scope we don't own.
+- After publishing:
+  - install each package from the registry in an empty folder and run its quickstart;
+  - record the versions and links in `docs/technical/FACTS.md`, the README and the sponsor files;
+  - freeze the versions from submission until judging ends.
 
-There are about 10 points until the 92% pause. With two or three sessions working, that's roughly 3–4 hours. In order:
-1. **The story swap and the demo cast** (item 6): T2 names, T1 policies, the mirror's bootstrap, T3's `shop` rows. Then the size-M seeding by 14:00, which is a script and costs little plan budget.
-2. **Both phone views** (items 11–12, never cut): T5 after a fresh start.
-3. **Rehearsal 1** at 12:00 with the founder.
-4. **The `arkiv/` files** (item 15) and **the sponsor files** (M17 from 13:00, Submission session).
-5. After the 21:30 reset: the video, rehearsal 2, the npm publish (item 18) and any polish.
+**Wallets** (`pnpm -s funding --balances`, 10:3x IST):
+- FUNDER: 2.5948 WBT, 0.2749 Sepolia ETH, 15.08 tGLM and about 15.54 test USDT.
+- W_SEED_M_EVENT: 8.5 tGLM for the large city.
+- The two disposable wallets for the video and the pitch, DISPOSABLE_2 and DISPOSABLE_3, have keys but no funds. They also need adding to `wallets.fresh` and to the funding plan (0.005 WBT and 1 test USDT each) before a real funding run.
 
-Cut first if short: Swarm, the map heartbeats, then the npm publish.
+**Sessions:**
+- Working: T4 (calibration) and Join (runner merge).
+- Idle and waiting for the story lock: T1, T2 and T3.
+- Waiting for the team's fixes: T5.
+- Waiting for venue feedback: T6.
+- Plan usage is 86%, with the pause at 92% and the reset at 21:30 IST.
+
+**Stopped at handover:** the first Coordinator's tick and its background tasks, so only one Coordinator runs.
 
 ## Problems
 
-- Session clocks drift: messages said 08:50 and 06:15 at 05:15 and 04:23. The records use `date`.
-- The app's message cap: after 10 automatic cross-session messages the Coordinator is paused until the founder types. Replies on a peer's own channel still work.
-- A GitHub push fault (04:52–04:56) cleared by itself.
-- The thinking-partner folder: now about 22,200 words after the roll-up. T5's `relays/website.md` (3,000 words against the 800 guideline) is the rest, and T5 trims it at its next relay.
-
-## Next
-
-The 08:30 morning relay, the story brief, and the graphpay-store Vercel project for the demo store.
+- **npm's web approval expires after about 5 minutes.** Two agentpay links lapsed while the founder was storing the Kimi key. Lesson: start the publish only when the founder is at the browser.
+- **The prompt-log hook only masks Kimi keys once the main checkout has the rule.** The founder's first `secrets:set` was refused ("not a name in env.example") until the main checkout pulled #89. The order now is merge, then pull, then store.

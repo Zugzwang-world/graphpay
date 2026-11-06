@@ -1,22 +1,28 @@
 # NOW
 
-Updated 09:46 IST, Fri 6 Nov (Coordinator)
+Updated 10:40 IST, Fri 6 Nov (Coordinator)
 
 ## Summary (Coordinator only)
 
-Updated 09:46 IST, Fri 6 Nov.
+Updated 10:40 IST, Fri 6 Nov. **A fresh Coordinator is taking over.** Its handover is `docs/sessions/records/resume.md`.
 
-**Standing rule (the founder, ADR-0066): no target times.** Every task starts the moment it's given, runs as fast as it can, and is reported when done. Fixed: the submission, Sat 09:00 IST, and the presentation, Sat 09:30 IST. Everything else is an event.
+**Standing rule (ADR-0066): no target times.** Every task starts the moment it's given, runs as fast as it can, and is reported when it's done. Two deadlines are fixed: the submission, Sat 09:00 IST, and the presentation, Sat 09:30 IST. Everything else is an event.
 
-- **The core is done on the real testnets.** Acceptance: 42 pass, 0 fail, 1 blocked (D7: the large city), 5 not run (other tracks' items).
-- **The SDKs (ADR-0063):**
-  - `@graphpay_ethglobal/arkiv-graph` 0.1.0 is ready (#74: pack, install and quickstart pass);
-  - `@graphpay_ethglobal/agentpay` is being finished by T6 now;
-  - the founder's npm login comes the moment both are ready, and then the publish.
-- **The story lock** starts the demo cast and the large city's seeding the moment it happens.
-- **Running:** T6 (agentpay), T3 (the `arkiv/` write-ups), T5 (both phone views). The others wait for the story lock or for unblocked items.
-- **Plan usage:** 83%; every session pauses at 92% (ADR-0062).
-- **Open founder items** (`OPEN.md`): the story lock; npm login when both SDKs are ready; PR #70 belongs in `apps/demo-ui`; who writes `FRONTEND_HANDOVER.md`; the disclosure, if not sent.
+- **The core works on the real testnets.** Acceptance: 45 pass, 0 fail, 1 blocked, 2 not run (09:51 run). D7, the large city, is the blocked one; B7 and B9 have merged since (#83, #84) and go into the next run.
+- **Both SDKs are on npm** (ADR-0063):
+  - `@graphpay_ethglobal/arkiv-graph` 0.1.0 is published;
+  - `@graphpay_ethglobal/agentpay` 0.1.0 is waiting for the founder's npm approval (see `OPEN.md`).
+  - Developers at the venue can try them; their feedback goes to GitHub issues labelled `arkiv-graph` or `agentpay` plus `feedback`.
+  - Versions freeze from submission until judging ends.
+- **The agents run on Kimi** (ADR-0067):
+  - `KIMI_API_KEY` is stored, on the Mac and on Vercel Production, and the secret scan recognises Kimi keys (#89).
+  - T4 is calibrating: three errands per preset, with seconds and cost per errand.
+- **The website** (ADR-0068):
+  - The founder's team's site (#70) needs fixes (a)–(e) before it merges. T5 reviews them and then integrates the site.
+  - Join's live errand runner (#88) runs on the server with every guardrail. Join is merging `main` into it and moving it to Kimi.
+- **Next on the story lock:** the moment the story locks, the demo cast is set up and the large city starts seeding.
+- **Plan usage:** 86%. Every session pauses at 92% (ADR-0062); the weekly window resets at 21:30 IST.
+- **Open founder items** (`OPEN.md`): approve the agentpay publish; lock the story; top up Kimi; the team's fixes on #70; start the Submission session; the disclosure, if not sent.
 
 ## foundation
 

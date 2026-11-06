@@ -14,13 +14,16 @@ GraphPay was built with **Claude Code** (Anthropic), running mostly unattended i
 | track sessions T1 Payments, T2 Identity, T3 Arkiv, T4 Agents, T5 Web and Join, from Fri 00:44 IST | started on Opus 5.5 at max effort; at 01:22 IST the Coordinator switched them to the plan (`docs/plan/sessions/README.md`), each from its next turn: Sonnet 5.5 at high for identity, agents and the website, Opus 5.5 at xhigh for payments, Arkiv and integration (to protect the weekly plan limit; FACTS records rows); at 03:37 IST one more step for the Opus sessions, payments, Arkiv and integration, to high; from about 04:20 IST every track session at high, on the founder's instruction (ADR-0062 for the 92% pause) |
 | Coordinator (records, merges, story lock, top-ups), from Fri 00:46 IST | Opus 5.5 at max effort as started (the plan: high; only the founder can change a session's own setting, in its model menu) |
 | T6 AgentPay SDK (`packages/agentpay`), from Fri 03:25 IST | Opus 5.5 at xhigh, as the founder started it; high from about 04:20 IST (the founder's instruction) |
+| Coordinator, a fresh session from the Fri 10:4x IST handover | Opus 5.5 at high (the plan); the first Coordinator's handover is `docs/sessions/records/resume.md` |
 | Submission (M17), from Fri 13:00 IST | planned: Sonnet 5.5 at high |
 | subagents | a **reviewer** (reads each branch's diff, blocking issues first) and a **verifier** (checks versions, addresses, chain ids and API names against primary sources), defined in `.claude/agents/` |
-| the product at runtime | the buyer and shop agents run on `claude-haiku-5-5` through the Anthropic API with the Vercel AI SDK (ADR-0011, ADR-0019); Grok only if a session switches to it, and then it is recorded here |
+| the product at runtime | from Fri 10:30 IST the buyer and shop agents run on **Kimi (Moonshot AI)**: `kimi-k3.1-pro-highspeed` for the live and video presets, `kimi-k3.1-pro` for testing, at effort high, through Kimi's OpenAI-compatible API with the Vercel AI SDK (ADR-0067; the founder's decision when the Anthropic API credit ran out). Before that, the test errands ran on `claude-opus-5-5` through the Anthropic API (ADR-0011, ADR-0019, ADR-0048); the Anthropic presets stay in the story config as fallbacks |
 
 ## 3. What AI wrote
 
 All code, tests, contracts, scripts and docs in this repository were written by Claude Code **during the hackathon**, from the specs in `planning/` and the founder's instructions. Nothing was copied from the private pre-event lab (ADR-0002, ADR-0015). Humans reviewed the decisions and the demo; the reviewer subagent reviewed the code.
+
+The founder's team is building its own UI in `apps/demo-ui` (PR #70 by ajatshatru01; ADR-0065, ADR-0068). Its authorship, and any AI use in it, will be recorded here when it merges.
 
 ## 4. What the product's AI does at runtime
 
