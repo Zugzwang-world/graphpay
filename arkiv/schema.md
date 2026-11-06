@@ -26,6 +26,7 @@ Every entity GraphPay writes to Arkiv Rabdi (chain 7794095), defined in `package
 | `shop_open` | W_DIRECTORY | `shop_key`* key, `shop_ens` str, `open_until` u64 (unix s) | `shops(openNow: true)`: the live rows of the listed shops whose `open_until` is ahead (one extra read) | no: `open_until` patched and the row extended while the Open toggle is on; set to now when it goes off | 15 minutes, renewed; a renewal reads `$expiresAt` and never goes past now + 15 min |
 | `agent_presence` | W_DIRECTORY | `agent_ens`* str, `owner_ens`* str, `role` str, `session`* str (the run id) | `agentsOnline(owner, session)` | **yes** (extended, never patched) | 15 minutes, extended every 5 minutes while the agent runs |
 | `handoff` | W_DIRECTORY | `request_id`* str (the run id), `from_agent` str, `to_agent` str, `step` str (the explainer's lane) | `handoffs(requestId)`, oldest first by `$createdAt` | **yes** | 30 minutes |
+| `menu` | W_DIRECTORY | `shop_key`* key, `shop_ens` str, `version` u64, `swarm_ref` str (64 hex, never a 128-hex encrypted reference), `content_hash` str (sha-256 of the menu bytes), `size` u64 | `readMenu`: the shop's row by `shop_key`, then the bytes from the Swarm gateway, checked against `content_hash` | no: a new menu version patches it | 14 days |
 | `record` | the seed wallets (plain store) | `from_name`* str, `to_name`* str, `kind`* str, `amount_micro` u64, `day`* u64, `ts` u64, `ref` str, `synthetic` bool, `dataset` str, `payload` bytes? | the benchmark's plain baseline | yes | 14 days |
 | `profile` | the seed wallets (plain store) | `name`* str, `kind`* str, `owner_name`* str?, `synthetic` bool, `dataset` str | the plain baseline | no | 14 days |
 
@@ -35,4 +36,4 @@ The synthetic cities' graph rows (`node`, `edge`, `tally`, `link`) are written b
 
 One serialised writer per wallet, the confirmed nonce, the event's rows and the checkpoint in one atomic batch, find-by-nonce after an uncertain send (ADR-0023). Measured on Rabdi: a steady money event (edge, four tally patches, link and checkpoint patches) costs 377,893 gas; the first event between two actors (seven creates) 1,301,681 (`docs/technical/FACTS.md`, T3 rows).
 
-Friday additions (`shop_open`, `agent_presence`, `handoff`, `menu`, `refund_evidence`) get their rows here when they ship.
+Friday additions: `shop_open`, `agent_presence`, `handoff` and `menu` are above; `refund_evidence` gets its row here when it ships.
