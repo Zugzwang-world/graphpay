@@ -4,25 +4,25 @@ The founder's to-dos and open questions. Each item says what, where, why and wha
 
 ## Founder now (Coordinator only)
 
-Updated 22:49 IST, Fri 6 Nov (Coordinator, full sync). **Only the submission (Sat 09:00 IST) and the presentation (09:30 IST) are fixed** (ADR-0066). The full status is in `TRACKER.md`.
+Updated 23:10 IST, Fri 6 Nov (night Coordinator). **Only the submission (Sat 09:00 IST) and the presentation (09:30 IST) are fixed** (ADR-0066). The full status is in `TRACKER.md`; tonight's seven streams are in NOW.
 
-0. **Plug in the charger now.** The Mac is on battery (78% at 22:49 IST, about 5 h 20 min left), and it runs the mirror and every session. Keep the lid open until the presentation.
-1. **Start the Submission session now.** `docs/plan/sessions/submission.md`, Opus 5.5 at max tonight (ADR-0062, amendment 3). It writes the sponsor files, the README and the form text.
-2. **The payer has been paused since 21:24 IST,** after someone pressed the public Pause. While it stays paused, every errand is refused.
-   - **Decide:** resume it now, and make Pause/Resume presenter-only (behind the passcode, an exception to ADR-0069).
-   - **Recommendation:** yes to both.
-3. **The Arkiv key's quota is used up.** Reads fall back to the keyless endpoint (#148), which is slower.
+0. **Plug in the charger now.** The Mac is on battery (75% at 22:59 IST, about 4 h 20 min left). It runs the mirror and all eight night sessions. Keep the lid open until the presentation.
+1. **The Arkiv key's quota is used up.** Reads fall back to the keyless endpoint (#148), which is slower.
    - Ask the Arkiv team to reset the quota or give us a new key.
-   - With a new key, run `pnpm -s secrets:set ARKIV_ACCESS_KEY` in the main checkout. The Coordinator pushes it to Vercel, and Join restarts the mirror.
-4. **Demo scope:** decide whether to move the dosa shops on chain tonight (new ENS names, their history, the Arkiv category; T2 and T3). Also decide on the big city (T3), and on caps, the kill and subscriptions (T1 and T2).
-   - **Recommendation:** only what the video and the pitch show.
-5. **The video,** in your own voice (the event's rule).
-6. **The Kimi balance:** check it on the Kimi platform. With public access, anyone can run errands, at $0.71 to $3.55 each.
-7. **ETHGlobal:**
+   - With a new key, run `pnpm -s secrets:set ARKIV_ACCESS_KEY` in the main checkout. The Coordinator pushes it to Vercel, and W5 restarts the mirror.
+2. **Funding:** the test USDT you are sending to FUNDER, and the Kimi top-up (anyone can run an errand, at up to $3.55 each). The Coordinator tells you early if WBT, Sepolia ETH or tGLM run low.
+3. **npm's web approval** when W6 asks for it (it lasts about 5 minutes), to publish both SDKs at 1.0.0.
+4. **The video,** in your own voice (the event's rule), once tonight's streams have landed.
+5. **ETHGlobal:**
    - send the written pre-event disclosure, if you haven't (`docs/plan/DISCLOSURE_MESSAGE.md`);
    - confirm that every team member is registered.
-8. **This session's effort:** a fresh Coordinator can take over from `docs/sessions/coordinator/handover.md`, because this one's context is nearly full.
-9. **Keep the charger in and the lid open** until the presentation. The mirror runs on this Mac.
+6. **Submit by 08:00 IST** from W7's `docs/submission/ETHGLOBAL.md`; the form closes at 09:00.
+
+**Closed tonight:**
+- the payer resumed at 23:00 IST, and Filter & Fold open again;
+- the demo scope: the night brief decides it (the new shops on chain, the big city, caps, the kill, subscriptions);
+- the Submission session: W7 replaces it;
+- a fresh Coordinator took over at 22:59 IST.
 
 **Closed today:**
 - both SDKs at 0.1.1;
