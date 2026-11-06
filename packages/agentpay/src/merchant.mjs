@@ -32,7 +32,21 @@ const HEX32 = /^0x[0-9a-fA-F]{64}$/;
 const ADDRESS = /^0x[0-9a-fA-F]{40}$/;
 const NO_STORE = { 'cache-control': 'no-store' };
 const bigintSafe = (_, v) => (typeof v === 'bigint' ? v.toString() : v);
-const LOG_CHUNK = 50_000n;
+// eth_getLogs spans (blocks per call, inclusive). Public RPCs cap the range: Whitechain's own at
+// 10,000 blocks, the public Ankr endpoint at about 1,000 (measured 2026-11-06). A merchant starts
+// at `logChunk` and, on a range refusal, drops to a tenth (not below LOG_CHUNK_MIN) for good.
+export const LOG_CHUNK = 10_000n;
+const LOG_CHUNK_MIN = 100n;
+const RANGE_CODES = new Set([-32062, -32602, -32005]);
+const RANGE_TEXT = /block range|range is too large|range too (?:large|wide)|max(?:imum)? block|too many blocks/i;
+
+// A getLogs refusal because of the span (viem wraps the RPC error; walk its causes).
+export function isRangeError(e) {
+  for (let c = e; c; c = c.cause) {
+    if (RANGE_TEXT.test(String(c.details ?? '')) || RANGE_TEXT.test(String(c.shortMessage ?? '')) || (RANGE_CODES.has(c.code) && RANGE_TEXT.test(String(c.message ?? '')))) return true;
+  }
+  return false;
+}
 // Facilitator answers that do not say whether the payment reached the chain (ours and T1's).
 const UNCERTAIN = new Set(['pending', 'in_flight', 'receipt_timeout', 'send_failed', 'busy', 'rate_limited', 'error']);
 
@@ -74,10 +88,13 @@ export function createMerchant({
   quoteTtlSeconds = 300,
   maxRefundMicro,
   resourceBase,
+  logChunk = LOG_CHUNK,
   clock = () => Date.now(),
   log = () => {},
 }) {
   if (!name) throw new Error('createMerchant needs a name');
+  let chunk = BigInt(logChunk);
+  if (chunk < LOG_CHUNK_MIN) throw new Error(`createMerchant: logChunk must be at least ${LOG_CHUNK_MIN}`);
   if (!address || !ADDRESS.test(address)) throw new Error('createMerchant needs a payout address');
   if (!facilitator?.verify || !facilitator?.settle) throw new Error('createMerchant needs a facilitator with verify and settle');
   const merchant = Object.freeze({ name, node: nodeOf(name), address: getAddress(address) });
@@ -435,11 +452,22 @@ export function createMerchant({
   }
 
   async function logsOf(eventName, args, fromBlock, toBlock) {
+    const event = checkoutAbi.find((e) => e.type === 'event' && e.name === eventName);
     const out = [];
-    for (let start = fromBlock; start <= toBlock; start += LOG_CHUNK) {
-      const end = start + LOG_CHUNK - 1n > toBlock ? toBlock : start + LOG_CHUNK - 1n;
-      const event = checkoutAbi.find((e) => e.type === 'event' && e.name === eventName);
-      out.push(...(await publicClient.getLogs({ address: network.checkout, event, args, fromBlock: start, toBlock: end })));
+    for (let start = fromBlock; start <= toBlock; ) {
+      const used = chunk;
+      const end = start + used - 1n > toBlock ? toBlock : start + used - 1n;
+      try {
+        out.push(...(await publicClient.getLogs({ address: network.checkout, event, args, fromBlock: start, toBlock: end })));
+      } catch (e) {
+        if (!isRangeError(e) || used <= LOG_CHUNK_MIN) throw e;
+        // This RPC's cap is lower: retry the same start smaller. Reads run side by side, so a
+        // refusal shrinks from the span it used, never twice for one cap.
+        const smaller = used / 10n > LOG_CHUNK_MIN ? used / 10n : LOG_CHUNK_MIN;
+        if (smaller < chunk) chunk = smaller;
+        continue;
+      }
+      start = end + 1n;
     }
     return out;
   }

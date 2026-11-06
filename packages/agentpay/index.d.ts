@@ -363,6 +363,8 @@ export declare function createMerchant(options: {
   reputation?: ReputationProvider;
   quoteTtlSeconds?: number;
   maxRefundMicro?: Micro;
+  /** eth_getLogs span in blocks (default 10,000); drops to a tenth, for good, when the RPC refuses the range. */
+  logChunk?: bigint | number;
   resourceBase?: string;
   clock?: () => number;
   log?: (line: string) => void;

@@ -1,10 +1,10 @@
 // An anvil fork of Whitechain Sepolia for AgentPay's end-to-end tests. Keys are generated per
-// run (never stored); roles and test USDT are arranged on the fork by impersonation, which
-// changes nothing on the real chain.
+// run (never stored); roles are arranged on the fork by impersonation and test USDT by writing the
+// token's balance slot on the fork, which changes nothing on the real chain.
 
 import { spawn } from 'node:child_process';
 import { createServer } from 'node:http';
-import { createPublicClient, createWalletClient, defineChain, erc20Abi, http, parseEther } from 'viem';
+import { createPublicClient, createWalletClient, defineChain, encodeFunctionData, erc20Abi, http, parseEther, toHex } from 'viem';
 import { generatePrivateKey, privateKeyToAccount } from 'viem/accounts';
 import { config, resolveRpc } from '@graphpay/config';
 import { checkoutAbi } from '@graphpay/contracts';
@@ -70,9 +70,18 @@ export async function startFork() {
       if (receipt.status !== 'success') throw new Error(`${args.functionName} reverted on the fork`);
       return receipt;
     },
-    // Test USDT from the FUNDER wallet, by impersonation on the fork.
+    // Test USDT on the fork only, without depending on a real wallet's balance: find the storage
+    // key balanceOf(to) reads (eth_createAccessList) and add to it there, as Foundry's `deal` does.
+    // Falls back to a FUNDER transfer by impersonation.
     async giveUsdt(to, micro) {
-      await fork.impersonate(config.wallets.carried.FUNDER, (w) => fork.send(w, { address: network.token.address, abi: erc20Abi, functionName: 'transfer', args: [to, micro] }));
+      const before = await fork.usdtBalance(to);
+      const key = await balanceKey(fork, to, before);
+      if (!key) {
+        await fork.impersonate(config.wallets.carried.FUNDER, (w) => fork.send(w, { address: network.token.address, abi: erc20Abi, functionName: 'transfer', args: [to, micro] }));
+        return;
+      }
+      await rpcCall('anvil_setStorageAt', [network.token.address, key, toHex(before + BigInt(micro), { size: 32 })]);
+      if ((await fork.usdtBalance(to)) !== before + BigInt(micro)) throw new Error('giveUsdt: the balance write did not take on the fork');
     },
     async usdtBalance(address) {
       return publicClient.readContract({ address: network.token.address, abi: erc20Abi, functionName: 'balanceOf', args: [address] });
@@ -94,6 +103,36 @@ export async function startFork() {
     },
   };
   return fork;
+}
+
+// The token storage key that holds balanceOf(holder): of the keys the call reads (behind a proxy
+// too), the one whose write moves the balance. null if none does.
+// A proxy's implementation, admin and beacon slots: never probed.
+const EIP1967_SLOTS = new Set([
+  '0x360894a13ba1a3210667c828492db98dca3e2076cc3735a920a3ca505d382bbc',
+  '0xb53127684a568b3173ae13b9f8a6016e243e63b6e8ee1178d6a717850b5d6103',
+  '0xa3f0ad74e5423aebfd80d3ef4346578335a9a72aeaee59ff6cb3582b35133d50',
+]);
+
+async function balanceKey(fork, holder, current) {
+  const data = encodeFunctionData({ abi: erc20Abi, functionName: 'balanceOf', args: [holder] });
+  const { accessList } = await fork.rpc('eth_createAccessList', [{ to: network.token.address, data }, 'latest']);
+  const keys = accessList.filter((e) => e.address.toLowerCase() === network.token.address.toLowerCase()).flatMap((e) => e.storageKeys);
+  const marker = current + 123_456_789n;
+  for (const key of keys.filter((k) => !EIP1967_SLOTS.has(k.toLowerCase()))) {
+    const old = await fork.rpc('eth_getStorageAt', [network.token.address, key, 'latest']);
+    let hit = false;
+    try {
+      await fork.rpc('anvil_setStorageAt', [network.token.address, key, toHex(marker, { size: 32 })]);
+      hit = (await fork.usdtBalance(holder)) === marker;
+    } catch {
+      // not the balance (the write broke the call)
+    } finally {
+      await fork.rpc('anvil_setStorageAt', [network.token.address, key, old]);
+    }
+    if (hit) return key;
+  }
+  return null;
 }
 
 // A clock that follows the fork's block time (so warps move the SDK's "now" too).
