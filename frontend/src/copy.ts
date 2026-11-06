@@ -306,6 +306,7 @@ export const copy = {
     },
     agents: {
       title: 'Your agents',
+      empty: 'No agents yet',
       cannotSpend: 'Cannot spend',
       passUsed: '{used} of {cap} USDT used today',
       perDay: 'per day',
@@ -323,6 +324,9 @@ export const copy = {
       capRefusedTitle: 'Cap change refused',
       capRefusedBody: 'The agent tried to raise its cap to {amount}. Only {customer} can change this cap',
       refusedAttempt: 'Refused attempt',
+      remaining: '{amount} remaining',
+      working: 'Recording this change…',
+      capUnavailable: 'Cap changes are unavailable in this adapter',
       mainAgent: 'Main agent',
       manages: 'Managed by {main}',
     },
@@ -461,6 +465,7 @@ export const copy = {
       above_max: 'The most you can enter is {max}',
     },
     allowedMax: 'Allowed: up to {max}',
+    allowedPositive: 'Enter an amount greater than 0.00 USDT',
     confirmedLine: '{label} {amount}',
   },
 

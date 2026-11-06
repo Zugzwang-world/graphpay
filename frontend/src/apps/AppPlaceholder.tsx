@@ -23,6 +23,7 @@ import { CustomerQuoteSheet } from './customer/CustomerQuoteSheet';
 import { CustomerOrders } from './customer/CustomerOrders';
 import { RefundWizard } from './customer/RefundWizard';
 import { CustomerRenewals } from './customer/CustomerRenewals';
+import { CustomerAgents } from './customer/CustomerAgents';
 import { MerchantHome } from './merchant/MerchantHome';
 import { MerchantOrderDetail } from './merchant/MerchantOrderDetail';
 import { MerchantRefunds } from './merchant/MerchantRefunds';
@@ -99,6 +100,7 @@ function PlaceholderPage({ app, page, pages }: { app: 'customer' | 'merchant'; p
   if (app === 'customer' && page === 'orders') return <CustomerOrders />;
   if (app === 'customer' && page === 'refund') return <RefundWizard />;
   if (app === 'customer' && page === 'renewals') return <CustomerRenewals />;
+  if (app === 'customer' && page === 'agents') return <CustomerAgents />;
 
   return <div className="flex flex-col gap-3 px-4 pt-4 pb-8">
     <p className="rounded-card border border-line bg-surface p-4 text-body text-muted shadow-card">{copy.placeholder[app]}</p>
