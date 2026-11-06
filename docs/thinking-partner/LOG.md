@@ -132,7 +132,8 @@ One line per PR: time (IST) · activity · result · PR link. Append under your 
 - 23:43 IST · w7-submission · the video shot list and the submission checklist (docs/submission/VIDEO.md, CHECKLIST.md); wording fixes; the README links the disclosure · https://github.com/Zugzwang-world/graphpay/pull/166
 - 23:46 IST · w7-submission · keep current: AI_USAGE.md records W4's effort split (#162); the README notes W1's new shop names on Sepolia (#158) · https://github.com/Zugzwang-world/graphpay/pull/170
 - 00:13 IST · w7-submission · an independent audit's 17 findings fixed across the submission files (exact claims: the kit payment by script, the first facilitator payment, receipts lapse at 30 days, the Swarm photo stored not shown); #172 and #173 folded in · https://github.com/Zugzwang-world/graphpay/pull/178
-- 00:18 IST · w7-submission · keep current: the live 0.80 coffee re-order and the live Sunday-box subscription (subscribe, cron renewal, cancel) in the README and the form text; the kill on /customer (#175); the refund Decline route (#163) · this PR
+- 00:18 IST · w7-submission · keep current: the live 0.80 coffee re-order and the live Sunday-box subscription (subscribe, cron renewal, cancel) in the README and the form text; the kill on /customer (#175); the refund Decline route (#163) · https://github.com/Zugzwang-world/graphpay/pull/180
+- 00:25 IST · w7-submission · keep current: W4's routine steps in code (3 model calls, 55 s; #182, ADR-0078) in AI_USAGE and the form text; W3's live limits (#169) in the README and ENS.md · this PR
 
 ## w1-identity
 
