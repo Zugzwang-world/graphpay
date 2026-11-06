@@ -8,7 +8,7 @@ import { customerJourneyReducer, initialCustomerJourney, type CustomerJourneySta
 interface CustomerJourneyContextValue {
   state: CustomerJourneyState;
   send: (text: string) => Promise<void>;
-  reorder: (orderId: string) => Promise<void>;
+  reorder: (orderId: string) => Promise<boolean>;
   retry: () => Promise<void>;
   setSheetOpen: (open: boolean) => void;
   selectOrder: (orderId: string | null) => void;
@@ -43,11 +43,11 @@ export function CustomerJourneyProvider({ children }: { children: ReactNode }) {
     catch (error) { pending.current = false; dispatch({ kind: 'localError', message: error instanceof Error ? error.message : copy.common.errorGeneric }); }
   };
   const reorder = async (orderId: string) => {
-    if (state.running || pending.current) return;
+    if (state.running || pending.current) return false;
     pending.current = true;
     dispatch({ kind: 'send', text: copy.customer.orders.reorder, at: Date.now() });
-    try { await adapter.reorder(orderId); }
-    catch (error) { pending.current = false; dispatch({ kind: 'localError', message: error instanceof Error ? error.message : copy.common.errorGeneric }); }
+    try { await adapter.reorder(orderId); return true; }
+    catch (error) { pending.current = false; dispatch({ kind: 'localError', message: error instanceof Error ? error.message : copy.common.errorGeneric }); throw error; }
   };
   return <CustomerJourneyContext.Provider value={{ state, send, reorder, retry, setSheetOpen: (open) => dispatch({ kind: 'sheet', open }), selectOrder: (orderId) => dispatch({ kind: 'selectOrder', orderId }) }}>{children}</CustomerJourneyContext.Provider>;
 }

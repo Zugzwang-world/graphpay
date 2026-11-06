@@ -248,6 +248,7 @@ export const copy = {
       refundPending: 'A refund request is already in progress',
       declinedNote: 'The shop said: “{note}”',
       reordering: 'Asking for a new quote…',
+      reorderBusy: 'Your agents are finishing another request. Try again in a moment.',
     },
     refund: {
       title: 'Request a refund',
@@ -430,6 +431,10 @@ export const copy = {
     },
     payouts: {
       title: 'Payouts',
+      periodLabel: 'Period',
+      summary: 'Payout summary',
+      log: 'Transaction log',
+      invalidRange: 'Choose a From date on or before the To date.',
       periods: { today: 'Today', week: 'This week', month: 'This month', custom: 'Custom range' },
       received: 'Received',
       refunded: 'Refunded',

@@ -29,7 +29,12 @@ export function CustomerOrders() {
   const startReorder = async (order: Order) => {
     if (reordering) return;
     setReordering(true); setError(null);
-    try { await reorder(order.id); navigate('desk'); }
+    try {
+      const started = await reorder(order.id);
+      setReordering(false);
+      if (started) navigate('desk');
+      else setError(copy.customer.orders.reorderBusy);
+    }
     catch (cause) { setError(cause instanceof Error ? cause.message : copy.common.errorGeneric); setReordering(false); }
   };
   if (selected) return <OrderDetail order={selected} onBack={() => selectOrder(null)} onRefund={() => navigate('refund')} onRenewal={() => navigate('renewals')} onReorder={() => void startReorder(selected)} reordering={reordering} error={error} />;

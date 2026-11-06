@@ -32,6 +32,8 @@ F8 renewals: from a customer order, **Make this order a renewal** opens the freq
 
 F9 agents: **Your agents** lists the roster from the shared snapshot, with the main agent first. Pause and Resume change permission after adapter events; a paused payer's order attempt is recorded as refused. Revoke asks for final confirmation and removes further controls. Spending agents show the daily pass, and **Change cap** uses validated amount entry plus owner confirmation. **Let the agent try to raise its own cap** records a refused attempt with a mock explorer link. Refused payment attempts remain on the relevant agent card. Journey 4 can be tried by pausing the payer, sending an order prompt, then resuming; journey 5 uses the two cap controls on the payer card.
 
+F10 payouts and reorder: the merchant **Payouts** page filters settled payments and refunds by Today, This week, This month, or a custom date range. Its Received, Refunded, Net, and transaction log come from one snapshot-derived ledger. **Export CSV** calls the mock adapter and downloads a real file for the same period, with a ready confirmation; empty periods show zero totals and a friendly message. From a customer order, **Reorder** returns to the agent desk for a fresh quote. A closed shop produces the existing refusal note without a quote. All list pages now have an empty state.
+
 ## How the mock engine works
 
 - **One store for both phones.** `MockAdapter` (`src/demo/mock-adapter.ts`) holds the in-memory state. Both apps read it through `DemoProvider` and the same snapshot, so an action in one phone appears live in the other.
@@ -145,5 +147,5 @@ All are marked `PROPOSED (mock only)` in `src/demo/contract.ts`.
 - [x] **F7** Refund: orders, refund wizard, refund requests
 - [x] **F8** Renewals: customer and merchant
 - [x] **F9** Agents and spending pass
-- [ ] **F10** Payouts and export, reorder, empty states
+- [x] **F10** Payouts and export, reorder, empty states
 - [ ] **F11** Polish and QA

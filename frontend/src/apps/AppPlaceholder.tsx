@@ -28,6 +28,7 @@ import { MerchantHome } from './merchant/MerchantHome';
 import { MerchantOrderDetail } from './merchant/MerchantOrderDetail';
 import { MerchantRefunds } from './merchant/MerchantRefunds';
 import { MerchantRenewals } from './merchant/MerchantRenewals';
+import { MerchantPayouts } from './merchant/MerchantPayouts';
 
 const customerPages: AppPage[] = [
   { id: 'desk', label: copy.customer.pages.desk },
@@ -44,7 +45,7 @@ const merchantPages: AppPage[] = [
   { id: 'order-detail', label: copy.merchant.order.title.replace('{number}', ''), hidden: true },
 ];
 
-/** F3 scaffold: navigation and state previews are real; journey pages follow in F5–F10. */
+/** Shared navigation and state previews for both phone apps. */
 export function AppPlaceholder({ app }: { app: 'customer' | 'merchant' }) {
   const { snapshot, generation } = useDemo();
   const { muted } = useSoundPreference();
@@ -56,9 +57,9 @@ export function AppPlaceholder({ app }: { app: 'customer' | 'merchant' }) {
   const selectedOrder = snapshot?.orders.find((order) => order.id === selectedMerchantOrder);
   return <AppShell app="merchant" pages={merchantPages} homeTitle={story.shop.name} subtitle={subtitle}
     onMenuNavigate={(page) => { if (page === 'refunds') setMerchantRefundFocus(null); }}
-    getPageTitle={(page) => page === 'order-detail' && selectedOrder ? fill(copy.merchant.order.title, { number: selectedOrder.number }) : page === 'renewals' ? copy.merchant.renewals.title : undefined}
+    getPageTitle={(page) => page === 'order-detail' && selectedOrder ? fill(copy.merchant.order.title, { number: selectedOrder.number }) : page === 'renewals' ? copy.merchant.renewals.title : page === 'payouts' ? copy.merchant.payouts.title : undefined}
     getPageSubtitle={(page) => page === 'order-detail' && selectedOrder ? fill(copy.merchant.order.via, { owner: selectedOrder.owner.name, agent: selectedOrder.buyer.role }) : undefined}
-    renderPage={(page) => page === 'home' || page === 'order-detail' || page === 'refunds' || page === 'renewals' ? <MerchantRoute page={page} selectedOrder={selectedMerchantOrder} refundFocus={merchantRefundFocus} onSelectOrder={setSelectedMerchantOrder} onRefundFocus={setMerchantRefundFocus} /> : <PlaceholderPage app="merchant" page={page} pages={merchantPages} />} />;
+    renderPage={(page) => page === 'home' || page === 'order-detail' || page === 'refunds' || page === 'renewals' || page === 'payouts' ? <MerchantRoute page={page} selectedOrder={selectedMerchantOrder} refundFocus={merchantRefundFocus} onSelectOrder={setSelectedMerchantOrder} onRefundFocus={setMerchantRefundFocus} /> : <PlaceholderPage app="merchant" page={page} pages={merchantPages} />} />;
 }
 
 function CustomerShell({ subtitle }: { subtitle?: string }) {
@@ -74,7 +75,9 @@ function MerchantRoute({ page, selectedOrder, refundFocus, onSelectOrder, onRefu
   if (page === 'order-detail') return <MerchantOrderDetail orderId={selectedOrder} onRefund={() => { onRefundFocus(selectedOrder); navigate('refunds'); }} />;
   if (page === 'refunds') return <MerchantRefunds focusedOrderId={refundFocus} onHome={() => navigate('home')} />;
   if (page === 'renewals') return <MerchantRenewals />;
-  return <MerchantHome onOrderDetails={(id) => { onSelectOrder(id); void adapter.markOrderSeen?.(id); navigate('order-detail'); }} />;
+  const openOrder = (id: string) => { onSelectOrder(id); void adapter.markOrderSeen?.(id); navigate('order-detail'); };
+  if (page === 'payouts') return <MerchantPayouts onOrderDetails={openOrder} />;
+  return <MerchantHome onOrderDetails={openOrder} />;
 }
 
 function LiveQuoteSheet() {
