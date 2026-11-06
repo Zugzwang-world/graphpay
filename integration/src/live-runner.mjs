@@ -29,12 +29,14 @@ const modelKeys = () => [...new Set(Object.values(story.agentModels?.presets?.li
 export const LIVE_RUNNER_NEEDS = [...modelKeys(), `${payerEntry()?.walletRole ?? 'PAYER'}_PRIVATE_KEY`, 'W_DIRECTORY_PRIVATE_KEY', 'ARKIV_ACCESS_KEY', 'DEMO_PASSCODE', 'ALLOW_REAL_NETWORK'];
 // The Arkiv flush of presence and handoffs may not hold the result back longer than this.
 const FLUSH_WAIT_MS = 10_000;
-// A signed payment the shop answers with "retry is safe" (nothing was sent: the facilitator was
-// unavailable, or the instance was starting) is sent again, the same signature for the same
-// order, after these waits. The order id makes it idempotent: a payment that did settle answers
-// "already paid" from the chain. Any other answer goes to the payer agent as it came (G16).
+// A signed payment is sent again, the same signature for the same order, only when the shop says
+// nothing can have been sent: its facilitator's verify step failed (a read; the shop names it), or
+// the instance was still starting. A settle failure is never retried: it can come after the
+// relayer's broadcast, and a retry would turn an honest "unsettled" into a false "failed" or
+// "refused" (G16 keeps it unsettled and counted). The order id makes a retry idempotent anyway.
 export const PAY_RETRY_WAITS_MS = [3_000, 8_000];
-const retrySafe = (r) => (r.status === 502 && /retry is safe/.test(String(r.body?.error))) || (r.status === 503 && r.body?.error === 'starting');
+export const VERIFY_UNAVAILABLE = 'facilitator verify unavailable; retry is safe';
+const retrySafe = (r) => (r.status === 502 && r.body?.error === VERIFY_UNAVAILABLE) || (r.status === 503 && r.body?.error === 'starting');
 
 // pay(args) once, then again after each wait while the answer is retry-safe and the run goes on.
 export async function payWithRetry(pay, args, { waits = PAY_RETRY_WAITS_MS, signal = null, log = () => {}, sleep = (ms) => new Promise((ok) => setTimeout(ok, ms)) } = {}) {
@@ -43,6 +45,7 @@ export async function payWithRetry(pay, args, { waits = PAY_RETRY_WAITS_MS, sign
     if (!retrySafe(r) || signal?.aborted) break;
     log(`live runner: the shop answered ${r.status} (retry is safe); the same signed payment again in ${wait / 1000} s`);
     await sleep(wait);
+    if (signal?.aborted) break; // stopped during the wait: nothing more is sent
     r = await pay(args);
   }
   return r;
