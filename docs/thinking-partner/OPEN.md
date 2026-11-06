@@ -4,17 +4,45 @@ The founder's to-dos and open questions. Each item says what, where, why and wha
 
 ## Founder now (Coordinator only)
 
-**Standing rule (ADR-0066): no target times.** Every task starts the moment it's given and is reported when done. Only the submission (Sat 09:00 IST) and the presentation (Sat 09:30 IST) are fixed.
+Updated 10:40 IST, Fri 6 Nov, at the Coordinator handover (`docs/sessions/records/resume.md`). **Standing rule (ADR-0066): no target times.** Every task starts the moment it's given and is reported when it's done. Only the submission (Sat 09:00 IST) and the presentation (Sat 09:30 IST) are fixed.
 
-1. **Lock the story.** The moment it locks, the demo cast is provisioned (T2 names, T1 policies, Join's bootstrap, T3's `shop` rows) and the large city starts seeding. Rehearsal 1 runs once the demo cast is in.
-2. **npm login, the moment both SDKs are ready** (ADR-0063). `@graphpay_ethglobal/arkiv-graph` is ready (#74). The Coordinator pings you the moment T6's `@graphpay_ethglobal/agentpay` passes too. You then run `npm login` in a Terminal tab and approve the prompts, and the Coordinator publishes both with `pnpm publish --access public`.
-3. **Plan usage:** 83%. Every session pauses gracefully at 92% (ADR-0062), and the weekly reset comes after that. Extra usage with a cap is still the way to rule out a stop.
-4. **The front-end team (ADR-0065).** PR #70 (ajatshatru01) belongs in `apps/demo-ui`, not a root `frontend/` folder with its own npm lockfile. Confirm every committer is on the ETHGlobal team. `FRONTEND_HANDOVER.md` doesn't exist yet. Recommendation: T5 writes it; say "yes".
-5. **Test USDT at FUNDER: 15.54.** The two disposables still to come (the video and the pitch, 1 each) are covered. A new set of paying wallets, needed only if the story renames the paying agents, would need a top-up.
-6. **Send ETHGlobal the written pre-event disclosure, if not sent yet** (`docs/plan/DISCLOSURE_MESSAGE.md`).
-7. **Keep the charger in and the lid open** until the presentation.
+1. **Lock the story.**
+   - **What:** send the final story.
+   - **Why:** the moment it locks, the demo cast is set up (T2 names, T1 policies, Join's bootstrap, T3's `shop` rows) and the large city starts seeding (100–130 minutes). Rehearsal 1 runs once the demo cast is in.
+2. **Kimi errands don't buy anything yet.**
+   - **What:** on Kimi the concierge answers with a plan and doesn't hand off to the scout and analyst, so nothing is paid. The runner itself works: three production errands took 7.6–11.9 s and cost at most $0.025 each.
+   - **Why it matters:** the testing preset may behave the same way, which would affect the video run.
+   - **Recommendation:** let T4 fix the prompts and tools for Kimi first. Anthropic credit would only be a fallback.
+3. **Top up Kimi.**
+   - **What:** add credit on the Kimi platform. $1 or more unlocks K3.1 Pro; $10 reaches Tier 1 (15 concurrent requests, 100 a minute).
+   - **Why:** the agents run on Kimi (ADR-0067). The prepaid balance is also the spending cap for the live runner.
+   - **Recommendation:** $10.
+4. **The team's site, PR #70** (ADR-0068).
+   - **What:** T5's review says do not merge yet. The team must:
+     - (a) move it into `apps/demo-ui` as a pnpm workspace app, with no npm lockfile;
+     - (b) read the story and the explorer links from `@graphpay/config`;
+     - (c) remove the middle dots and the uppercase labels;
+     - (d) add the passcode to the adapter contract;
+     - (e) add a CI step for `demo-ui`.
+   - **Also:** confirm every committer is on the ETHGlobal team.
+   - **Next:** T5 re-reviews as soon as the team pushes.
+5. **Start the Submission session** (its gate, CP4, is met).
+   - **What:** start it from `docs/plan/sessions/README.md` (Sonnet 5.5, high).
+   - **Why:** the sponsor files and the submission text.
+   - **Recommendation:** start it once the story work no longer needs the remaining plan usage, or at the latest after the 21:30 reset.
+6. **Plan usage: 86%.** Every session pauses gracefully at 92% (ADR-0062). The weekly window resets at 21:30 IST.
+7. **The written pre-event disclosure:** send it to ETHGlobal if you haven't yet (`docs/plan/DISCLOSURE_MESSAGE.md`).
+8. **Keep the charger in and the lid open** until the presentation.
 
-**Closed 09:30:** "ADR-0059 appears twice" was a wrong reference: the npm line in the records section said ADR-0059 instead of ADR-0057, and there is only one ADR-0059 (T2's zero cap). Fixed; the npm publish is now ADR-0063. **Closed tonight:** the six track sessions and the Coordinator started (00:44–00:46 IST); the Ankr session's worktree and branch (removed at 23:09), the Vercel GitHub link (connected 22:42 IST; checks in `NOW.md`), the personal Ankr URL (stored, verified 22:51 IST: chain 1874, HTTPS), test USDT (150 arrived 21:54 IST; distributed, ADR-0045) and tGLM (FUNDER held 12.86; every planned wallet funded).
+**Closed 10:47:** both SDKs are on npm: `@graphpay_ethglobal/agentpay` 0.1.0 (published 10:40) and `@graphpay_ethglobal/arkiv-graph` 0.1.0. Both quickstarts pass from the registry.
+
+**Closed 10:31:**
+- The Kimi key: stored with the hidden prompt (the scan recognises it) and on Vercel Production as Sensitive (#89).
+- Anthropic credit is no longer needed (ADR-0067).
+
+**Closed 10:1x:** the npm login, and `@graphpay_ethglobal/arkiv-graph` 0.1.0 published.
+
+**Closed 09:30:** "ADR-0059 appears twice" was a wrong reference (the npm publish is ADR-0063).
 
 ## Funding (the Coordinator)
 

@@ -104,6 +104,10 @@ Opus 5.5 at **high**: judgement on merges, records and the story lock, with litt
 
 ## Handover state
 
+**Current: `docs/sessions/records/resume.md`** (Fri 6 Nov, from the outgoing Coordinator). It covers the work in flight, every session's state and id, the open decisions and every standing rule: no target times, the 92% pause, the live runner's conditions, the website plan with the team's PR #70, the two disposable wallets, the npm versions and the freeze after submission, and Kimi. Read it first.
+
+History, the M0 handover (Thu 23:55 IST). Its follow-ups still apply:
+
 - Open PRs: none. M0 merged as PRs #1–#6 (the last, #6 story config, at 23:53 IST); this handover is PR #7.
 - Worktrees and branches: the main checkout `~/graphpay` is on `main` (clean once PR #7 merges); `~/graphpay-deploy` is a detached checkout of `origin/main` linked to `graphpay-event` for CLI deploys (`git fetch && git checkout --detach origin/main` before use); main's M0 worktrees are removed; GitHub holds only `main`.
 - Balances (23:53 IST): FUNDER 2.6427 WBT, 0.2749 Sepolia ETH, 15.7583 tGLM, 31.75 test USDT; every role at its plan target (`docs/technical/WALLETS.md`); W_SEED_M_EVENT holds 8.5 tGLM for the big city. The founder's `WHITECHAIN_RPC_URL` is in `.env` and in Vercel (Sensitive, production and preview).

@@ -2,7 +2,7 @@
 
 **DRAFT (T3, Fri 6 Nov 2026; Submission finishes it).** Each row is an Arkiv feature, something a person sees because of it, and where it is in the code. "Shipped" means it runs against Arkiv Rabdi (chain 7794095) in this repo; "built" means the code and tests exist and a screen still has to call it. The synthetic city is labelled synthetic wherever it appears. The entities are in [`schema.md`](schema.md).
 
-The generic part is a package anyone can install: [`@graphpay_ethglobal/arkiv-graph`](https://www.npmjs.com/package/@graphpay_ethglobal/arkiv-graph) (source in [`packages/arkiv-graph`](../packages/arkiv-graph), MIT; its README has a five-minute quickstart that runs in memory and a leaderboard example with no payments in it). GraphPay's own model sits on top of it in `packages/money-graph` and uses the package only through its public exports.
+The generic part is a package anyone can install: [`@graphpay_ethglobal/arkiv-graph`](https://www.npmjs.com/package/@graphpay_ethglobal/arkiv-graph), version 0.1.0, published Fri 6 Nov (source in [`packages/arkiv-graph`](../packages/arkiv-graph), MIT; its README has a five-minute quickstart that runs in memory and a leaderboard example with no payments in it). GraphPay's own model sits on top of it in `packages/money-graph` and uses the package only through its public exports.
 
 | Arkiv feature | what a person sees | how we use it | where | state |
 |---|---|---|---|---|
