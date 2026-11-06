@@ -1,12 +1,12 @@
 # NOW
 
-Updated 00:44 IST, Sat 7 Nov (night Coordinator)
+Updated 01:00 IST, Sat 7 Nov (night Coordinator)
 
 ## Summary (Coordinator only)
 
-Updated 00:44 IST, Sat 7 Nov. **Only the submission (Sat 09:00 IST) and the presentation (09:30 IST) are fixed** (ADR-0066). Every deliverable's status is in [`TRACKER.md`](TRACKER.md).
+Updated 01:00 IST, Sat 7 Nov. **Only the submission (Sat 09:00 IST) and the presentation (09:30 IST) are fixed** (ADR-0066). Every deliverable's status is in [`TRACKER.md`](TRACKER.md).
 
-**The Mac is charging** (94% at 00:38 IST). Keep the charger in and the lid open until the presentation: the mirror and every night session run on it.
+**The Mac is charging** (99% at 00:57 IST). Keep the charger in and the lid open until the presentation: the mirror and every night session run on it.
 
 **The night run** ([brief](briefs/2259-night-coordinator.md)): seven streams, each in its own session and worktree, on Opus 5.5 at max. The usage guardrails are off tonight, and no contract is redeployed.
 
@@ -30,17 +30,19 @@ The Coordinator times each step. If a merge breaks the live errand, revert first
 
 **Landed tonight** (each stream's own section below has the details):
 - **W1 Identity:** the three new shop names on ENS with their agents (#158). The kill, live: the owner unregistered spare disposable-2, the watcher revoked its pass at 00:16 IST, and a fresh spare (disposable-3) is ready (#175). **The label flip is live:** the story's shops are filter-and-fold, idli-index and tawa-tangle, category south-indian ([#189](https://github.com/Zugzwang-world/graphpay/pull/189), deployed 00:31 IST); the heal cron lists filter-and-fold open. Next: W5's one post-flip workers restart (after W1's owner-cap PR #191 and the mirror's catch-up, about 00:50 IST), then W1's proof errand through the new name, then W4's three in a row.
-- **W2 City:** Filter & Fold, Idli Index and Tawa Tangle on Arkiv under their new names (south-indian, at the Grok places), with all 1,258 history events; the live ranking picks Filter & Fold (0.916) and excludes Tawa Tangle (#167, ADR-0077). In PR: the menus with dish images (#181) and the big city M (#168, seeding).
+- **W2 City:** Filter & Fold, Idli Index and Tawa Tangle on Arkiv under their new names (south-indian, at the Grok places), with all 1,258 history events; the live ranking picks Filter & Fold (0.916) and excludes Tawa Tangle (#167, ADR-0077). The menus on Swarm with their dish images (#181). **The founder trimmed the big city at 00:52 IST:** seeding stopped at 00:58 IST, and W2 finishes race mode on what is seeded, with measured reads only (#186).
 - **W3 Payments:** the 0.80 coffee re-order (#155); subscribe, renew and cancel (#173); the refund decline (#163); over the pass refused, nothing sent, and the agent's own cap raise refused, both recorded on Arkiv (#169). In PR: the owner's cap change (#179).
 - **W4 Agents:** "delivered within an hour" (#153), per-call metrics (#157), low effort (#162). In PR: the routine steps in code (#182), proven at 55 s, 3 model calls and $0.025 per errand, against a baseline of 91 s, 19 calls and $0.15.
 - **W5 Ops:** the 300 pass (#152); pause per agent and self-healing, proven by the cron's own resumes and renewals (#172); the failing acceptance checks updated to tonight's decisions (#188); a watchdog with a 30-minute fuse keeps the workers running.
 - **W6 SDK:** arkiv-graph 1.0.0 (#174) and agentpay 1.0.0 (#177) merged. **The publish waits for the founder's npm sign-in in W6's chat.**
 - **W7 Submission:** done: the README, AI_USAGE, the Arkiv files, the Whitechain and ENS notes, the form text, the video shot list and the checklist (#154 to #178). It keeps them current.
 
-**Live now** (00:38 IST):
+**Live now** (00:57 IST):
 - **The payer is ACTIVE,** with 122 of tonight's 300 test USDT spent; the pass resets at 05:30 IST.
 - **Filter & Fold is open** under its new name, kept so by W5's heal cron.
-- **The mirror is stalled again** (last good poll 00:23 IST, 822 blocks behind): this Mac's keyless Arkiv budget is shared, the access key's quota is spent, and W2's two-hour seed of the big city draws on it too. Payments still settle on Whitechain; they reach Arkiv when the mirror catches up, so the merchant feed and the receipts lag. **A fresh Arkiv access key** fixes it.
+- **The mirror is down** until this Mac's keyless Arkiv window refills (about 01:20 IST, now that the seeding has stopped): its last good poll was 00:23 IST, and since 00:54 IST each watchdog start fails on its first Arkiv read. Payments still settle on Whitechain and reach Arkiv when it catches up.
+
+**Next, in the founder's order (00:52 IST):** the mirror catches up (the last old-name payments, 00:23 to 00:34 IST, under the old shop); W5's one post-flip restart; W1's proof errand through filter-and-fold.graphpay.eth; W4's three errands in a row; the full acceptance run and the report.
 
 **Retired at 23:05 IST:**
 - T1 to T6, Booth (with its two side sessions), Booth Sync and Integration are archived. Their last prompt logs are committed here.
@@ -139,7 +141,7 @@ Updated 00:12 IST, Sat 7 Nov (W6 SDK, session `local_b6205da6-b613-4662-872a-6d4
 
 ## w7-submission
 
-Updated 00:48 IST, Sat 7 Nov (W7 Submission, `local_abd77623-de22-4fe2-a0a9-865fdd43dba2`; relay `relays/w7-submission.md`).
+Updated 00:58 IST, Sat 7 Nov (W7 Submission, `local_abd77623-de22-4fe2-a0a9-865fdd43dba2`; relay `relays/w7-submission.md`).
 - **The brief is done:** the form text is in one file, [`docs/submission/ETHGLOBAL.md`](../submission/ETHGLOBAL.md), and every claim in it links to evidence. Landed: the README and a root `LICENSE` ([#154](https://github.com/Zugzwang-world/graphpay/pull/154)); AI_USAGE.md and the five Arkiv files ([#159](https://github.com/Zugzwang-world/graphpay/pull/159)); the Whitechain and ENS notes ([#161](https://github.com/Zugzwang-world/graphpay/pull/161)); the form text ([#164](https://github.com/Zugzwang-world/graphpay/pull/164)).
 - **Also landed:** the video shot list and the submission checklist ([#166](https://github.com/Zugzwang-world/graphpay/pull/166)).
 - **Also landed:** AI_USAGE's effort split and W1's names in the README ([#170](https://github.com/Zugzwang-world/graphpay/pull/170)).
@@ -149,8 +151,9 @@ Updated 00:48 IST, Sat 7 Nov (W7 Submission, `local_abd77623-de22-4fe2-a0a9-865f
 - **Also landed:** the production kill as evidence ([#193](https://github.com/Zugzwang-world/graphpay/pull/193)).
 - **Also landed:** the label flip across the docs, W4's production errand ([#195](https://github.com/Zugzwang-world/graphpay/pull/195)).
 - **Also landed:** arkiv-graph 1.0.0 in the README and `reach.md` ([#196](https://github.com/Zugzwang-world/graphpay/pull/196)).
-- **In this PR:** the owner's cap route (#179, ADR-0079) and the workers' watchdog (#194).
-- **Running:** keep-current mode, a pass after each night stream lands (W2's race at M and menus under the new names, agentpay 1.0.0 on npm, the regenerated acceptance report).
+- **Also landed:** the owner's cap route and the watchdog ([#198](https://github.com/Zugzwang-world/graphpay/pull/198)).
+- **In this PR:** the dosa menus on Swarm under the new names, with their dish photos (#181), in `swarm.md`, the README and the form text.
+- **Running:** keep-current mode, a pass after each night stream lands (W2's race at M, agentpay 1.0.0 on npm, the regenerated acceptance report, the first errand under the new names).
 - **Blockers:** none.
 
 ## before the night (retired day sessions)

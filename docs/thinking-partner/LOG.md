@@ -110,7 +110,8 @@ One line per PR: time (IST) · activity · result · PR link. Append under your 
 - 23:52 IST · records · NOW and TRACKER: the mirror back (W5's restart, 23:43 IST), Join archived with its last prompt log and run record, W7's brief done, W2's and W3's PRs in flight · https://github.com/Zugzwang-world/graphpay/pull/171
 - 00:12 IST · records · NOW and TRACKER: W5's per-agent pause and self-healing (#172) replace the bridge loop; W3's subscriptions (#173); W6's arkiv-graph 1.0.0 (#174); the mirror held for W2's history · https://github.com/Zugzwang-world/graphpay/pull/176
 - 00:24 IST · records · NOW rewritten by stream (W1 kill live and flip cleared, W2 step 1 done, W3 limits live, W4 routine in code, W5 self-healing proven, W6 1.0.0 merged, W7 done); TRACKER to match · https://github.com/Zugzwang-world/graphpay/pull/184
-- 00:44 IST · records · NOW and TRACKER: the label flip live (#189), the workers restart and proof errand next, the mirror stalled on the shared Arkiv budget, W4's code mode live (#182), W5's acceptance updates (#188) · coord/night-records-7
+- 00:44 IST · records · NOW and TRACKER: the label flip live (#189), the workers restart and proof errand next, the mirror stalled on the shared Arkiv budget, W4's code mode live (#182), W5's acceptance updates (#188) · https://github.com/Zugzwang-world/graphpay/pull/197
+- 01:00 IST · records · the founder's 00:52 IST word: the big city trimmed, seeding stopped (00:58 IST), the mirror first, then the restart, W1's proof errand, W4's three, acceptance; the menus (#181) · coord/night-records-8
 
 ## booth
 
@@ -138,7 +139,8 @@ One line per PR: time (IST) · activity · result · PR link. Append under your 
 - 00:29 IST · w7-submission · keep current: the production kill (#183; unregister, revoke, refusal on Arkiv, each checked on its chain) is the evidence in the README, the form text, ENS.md and the checklist · https://github.com/Zugzwang-world/graphpay/pull/193
 - 00:33 IST · w7-submission · the label flip (#189): every live link and the ENS snippet use filter-and-fold.graphpay.eth, history keeps the old names, category south-indian; W4's production errand (55.5 s, 3 calls, #192) in AI_USAGE, the README and the shot list · https://github.com/Zugzwang-world/graphpay/pull/195
 - 00:37 IST · w7-submission · arkiv-graph 1.0.0 on npm (00:34 IST) in the README and reach.md; agentpay still 0.1.1 · https://github.com/Zugzwang-world/graphpay/pull/196
-- 00:48 IST · w7-submission · keep current: the owner's cap route (#179, ADR-0079) in the README and ENS.md; the workers' watchdog (#194) · this PR
+- 00:48 IST · w7-submission · keep current: the owner's cap route (#179, ADR-0079) in the README and ENS.md; the workers' watchdog (#194) · https://github.com/Zugzwang-world/graphpay/pull/198
+- 00:58 IST · w7-submission · the dosa menus on Swarm (#181) under the new names, with their dish photos, in swarm.md, the README and the form text (menu and photo hashes checked on the gateway) · this PR
 
 ## w1-identity
 

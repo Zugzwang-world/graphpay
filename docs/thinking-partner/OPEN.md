@@ -19,6 +19,7 @@ Updated 23:10 IST, Fri 6 Nov (night Coordinator). **Only the submission (Sat 09:
 6. **Submit by 08:00 IST** from W7's `docs/submission/ETHGLOBAL.md`; the form closes at 09:00.
 
 **Closed tonight:**
+- the big city: trimmed by the founder at 00:52 IST to what is seeded; W2 finishes race mode on it;
 - the payer resumed at 23:00 IST, and Filter & Fold open again;
 - the demo scope: the night brief decides it (the new shops on chain, the big city, caps, the kill, subscriptions);
 - the Submission session: W7 replaces it;
