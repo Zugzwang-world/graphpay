@@ -112,6 +112,7 @@ One line per PR: time (IST) · activity · result · PR link. Append under your 
 
 - 18:45 IST · booth · the team's pause and resume (#132), the Grok swap on screen (#135), the deck in the middle with one screen (#136); two live errands paid 4.80 to Filter & Fold · https://github.com/Zugzwang-world/graphpay/pull/136
 - 19:20 IST · booth · part 2: no double payment on a dropped stream (#138), the deck follows the live run (#139), Grok's figurines and photos, renewal 2.40, the Ghee roast combo (#140); one live errand in Chrome paid 4.80 · https://github.com/Zugzwang-world/graphpay/pull/140
-- 19:55 IST · booth · sync step 0: the three "no purchase" errands (19:31 to 19:35) were the clock, not a bug: the good shop needs 45 min and the request said "by 8 pm"; the story deadline is now 11:59 pm
+- 19:55 IST · booth · sync step 0: the three "no purchase" errands (19:31 to 19:35) were the clock, not a bug: the good shop needs 45 min and the request said "by 8 pm"; the story deadline is now 11:59 pm · https://github.com/Zugzwang-world/graphpay/pull/142
+- 20:25 IST · booth · sync: the phones drive the deck (#143), a lagging status poll no longer undoes Stopped (#144), figurines without circles, no QR strip; one live errand paid 4.80, a 0.80 refund, pause and resume checked in Chrome · https://github.com/Zugzwang-world/graphpay/pull/143
 
 ## submission
