@@ -101,6 +101,6 @@ One line per PR: time (IST) · activity · result · PR link. Append under your 
 - 13:32 IST · records · the errand pays reliably on production (two live errands paid 4.80 each, no retry; three in a row), public access live (#117), production deploys fixed (#116) · https://github.com/Zugzwang-world/graphpay/pull/118
 - 16:10 IST · records · NOW: usage 92% at 16:09 IST; phase 2 under way (the founder's go) · https://github.com/Zugzwang-world/graphpay/pull/121
 - 16:20 IST · records · NOW: phase 2 live (#122, fd10734): Vitalik's ask on /live runs the real errand; the founder tests · https://github.com/Zugzwang-world/graphpay/pull/123
-- 16:40 IST · records · NOW: phase 2 paid from /live (4.80, 107 s), phase 3 live (#124); the payer resumed after a visitor's pause · coord/now-1640
+- 16:40 IST · records · NOW: phase 2 paid from /live (4.80, 107 s), phase 3 live (#124); the payer resumed after a visitor's pause · https://github.com/Zugzwang-world/graphpay/pull/126
 
 ## submission
