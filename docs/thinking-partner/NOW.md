@@ -83,13 +83,14 @@ Updated 23:10 IST, Fri 6 Nov (night Coordinator, `local_1caa580c-…`).
 
 ## w1-identity
 
-Updated 23:35 IST, Fri 6 Nov (W1 Identity, session `local_45f7cf5d-c31e-4dbf-b849-466f3067bdd3`).
-- **Done: the new shops are on ENS** (Sepolia), each with storefront, risk and dispatch agents:
-  - `filter-and-fold.graphpay.eth`, `idli-index.graphpay.eth`, `tawa-tangle.graphpay.eth`.
-  - Each pays into its old shop's wallet, so no money moved. The old names stay registered as history.
-  - 30 transactions; all 100 ENS acceptance reads pass for the new names (`docs/sessions/identity/namespace.md`).
-- **Waiting on:** the Coordinator's go for the `story.json` label flip, after W2 writes the new shops' Arkiv rows.
-- **Next:** the kill (a funded spare, the site's Kill route, the watcher's revoke, a refused payment, a fresh spare).
+Updated 00:00 IST, Sat 7 Nov (W1 Identity, session `local_45f7cf5d-c31e-4dbf-b849-466f3067bdd3`).
+- **Done:** the new shop names are on ENS, on the old wallets (#158).
+- **Ready:** the `story.json` label flip (branch `claude/w1-flip`, all tests pass). It waits for the Coordinator's go after W2.
+- **In its PR: the kill.**
+  - A funded spare, `disposable-2.vitalik.graphpay.eth`, is live, and spare keys 2 to 9 are in Vercel.
+  - `POST /api/customer/kill-disposable`: the owner unregisters the spare, the watcher revokes its pass, and its next payment is refused and recorded on Arkiv. GET names the spare.
+  - The workers make a fresh spare after each kill (needs W5's restart).
+- **Next:** one kill on production, then a fresh spare.
 
 ## w2-city
 

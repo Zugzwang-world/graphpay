@@ -8,7 +8,7 @@
 import { encodeFunctionData, getAddress, isAddressEqual, zeroAddress } from 'viem';
 import { permissionedRegistryAbi, permissionedResolverAbi } from './abi.generated.mjs';
 import { ENS } from './contracts.mjs';
-import { dnsEncode, exactName, isUnder, labelId, labelsOf, STATUS, STATUS_NAME } from './names.mjs';
+import { dnsEncode, exactName, isUnder, labelId, labelsOf, namehash, STATUS, STATUS_NAME } from './names.mjs';
 import { disposableAgent, namespacePlan } from './plan.mjs';
 import { eventually, retryingReads } from './tx.mjs';
 import { registryState, readText } from './reads.mjs';
@@ -91,6 +91,23 @@ export function createOwnerActions(ctx) {
     setCap,
     kill,
   };
+}
+
+// The live spare: the lowest `disposable-<n>` among `numbers` (the disposable agents whose key
+// the caller holds) whose label is REGISTERED now. Returns { n, name, node, epoch, expiry,
+// holder, registry, resolver } or null. A killed or lapsed label is never a spare.
+export async function liveDisposable(client, numbers, { parentRegistry } = {}) {
+  const sorted = [...new Set(numbers)].filter((n) => Number.isSafeInteger(n) && n >= 1).sort((a, b) => a - b);
+  if (sorted.length === 0) return null;
+  const registry = parentRegistry ?? (await locate(client, disposableAgent(sorted[0]).name)).registry;
+  for (const n of sorted) {
+    const agent = disposableAgent(n);
+    const s = await registryState(client, registry, agent.label);
+    if (s.status !== STATUS.REGISTERED) continue;
+    const resolver = await client.readContract({ address: registry, abi: permissionedRegistryAbi, functionName: 'getResolver', args: [agent.label] });
+    return { n, name: agent.name, node: namehash(agent.name), epoch: s.epoch, expiry: s.expiry, holder: getAddress(s.latestOwner), registry: getAddress(registry), resolver: getAddress(resolver) };
+  }
+  return null;
 }
 
 // The next free `disposable-<n>`: the first n whose label has never been registered

@@ -134,6 +134,7 @@ One line per PR: time (IST) · activity · result · PR link. Append under your 
 ## w1-identity
 
 - 23:35 IST · w1-identity · the new shop names filter-and-fold, idli-index and tawa-tangle on Sepolia, each with its three agents, on the old shops' wallets (30 txs; ENS acceptance reads 100 pass) · https://github.com/Zugzwang-world/graphpay/pull/158
+- 00:00 IST · w1-identity · the kill: POST /api/customer/kill-disposable (owner unregisters a ready spare, the watcher revokes, the next payment refused and recorded), the spare keeper and its workers hook; spare disposable-2 live and funded; spare keys 2–9 in Vercel · https://github.com/Zugzwang-world/graphpay/pull/175
 
 ## w4-agents
 
