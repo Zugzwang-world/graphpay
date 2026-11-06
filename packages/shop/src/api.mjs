@@ -12,7 +12,7 @@
 import { createHash, timingSafeEqual } from 'node:crypto';
 import { isAddress, isAddressEqual } from 'viem';
 import { decodePaymentSignatureHeader, encodePaymentRequiredHeader, encodePaymentResponseHeader } from '@x402/core/http';
-import { json, readJson, MAX_TIMEOUT_SECONDS, RateLimiter, SCHEME, X402_VERSION, toWireOrder, termsHashOf } from '@graphpay/facilitator';
+import { errorNames, json, readJson, MAX_TIMEOUT_SECONDS, RateLimiter, SCHEME, X402_VERSION, toWireOrder, termsHashOf } from '@graphpay/facilitator';
 import { catalogOf } from './catalog.mjs';
 import { TermsError, ZERO32, ZERO_ADDRESS, buildOrder, rebuildOrder } from './orders.mjs';
 
@@ -194,7 +194,7 @@ export function shopHandler(deps) {
           const written = await deps.createQuote({ requestId, shopName: shop.ensName, agentEns: terms.payer, priceMicro: order.amountMicro, validUntil: terms.exp });
           quoteKey = written.entityKey;
         } catch (e) {
-          log(`shop: quote write failed (${e?.name ?? 'Error'})`);
+          log(`shop: quote write failed (${errorNames(e)})`);
           return json(503, { error: 'quote write failed' });
         }
       }
@@ -227,7 +227,7 @@ export function shopHandler(deps) {
     try {
       verdict = await facilitator.verify(paymentPayload, requirement);
     } catch (e) {
-      log(`shop: facilitator verify unavailable (${e?.name ?? 'Error'})`);
+      log(`shop: facilitator verify unavailable (${errorNames(e)})`);
       return json(502, { error: 'facilitator unavailable; retry is safe' });
     }
     if (!verdict.isValid) {
@@ -238,14 +238,14 @@ export function shopHandler(deps) {
     try {
       settled = await facilitator.settle(paymentPayload, requirement);
     } catch (e) {
-      log(`shop: facilitator settle unavailable (${e?.name ?? 'Error'})`);
+      log(`shop: facilitator settle unavailable (${errorNames(e)})`);
       return json(502, { error: 'facilitator unavailable; retry is safe' });
     }
     if (settled.success) {
       let delivery = 'not_configured';
       if (deps.deliver) {
         delivery = await deps.deliver(shop.key, order.orderId).catch((e) => {
-          log(`shop: markDelivered failed (${e?.name ?? 'Error'})`);
+          log(`shop: markDelivered failed (${errorNames(e)})`);
           return 'pending';
         });
       }
@@ -272,7 +272,7 @@ export function shopHandler(deps) {
       return json(404, { error: 'not found' });
     } catch (e) {
       if (e instanceof TermsError) return json(e.status, { error: e.reason });
-      log(`shop: ${e?.name ?? 'Error'}`); // never the message: viem's quotes the RPC URL
+      log(`shop: ${errorNames(e)}`); // never the message: viem's quotes the RPC URL
       return json(500, { error: 'internal error' });
     }
   };

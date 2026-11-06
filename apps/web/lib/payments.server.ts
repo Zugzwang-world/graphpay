@@ -15,6 +15,7 @@ import {
   HTTPFacilitatorClient,
   StartupError,
   checkoutPolicyReads,
+  errorNames,
   createGraphPayFacilitator,
   facilitatorHandler,
   facilitatorSettings,
@@ -38,7 +39,7 @@ const HOSTED_RECEIPT_MS = 30_000; // the hosted receipt wait, inside the facilit
 const SITE = String(config.site.url).replace(/\/+$/, '');
 
 export const log = (line: string) => console.error(line);
-export const reason = (e: unknown) => (e instanceof StartupError ? e.message : ((e as Error)?.name ?? 'Error'));
+export const reason = (e: unknown) => (e instanceof StartupError ? e.message : errorNames(e));
 export const jsonNoStore = (status: number, body: unknown) => Response.json(body, { status, headers: NO_STORE });
 
 const keyAddress = (env: Env, role: string): `0x${string}` | null => {
@@ -138,7 +139,7 @@ export function route(name: string, get: () => Promise<Handler>): Handler {
       headers.set('cache-control', 'no-store');
       return new Response(res.body, { status: res.status, headers });
     } catch (e) {
-      log(`${name}: ${(e as Error)?.name ?? 'Error'}`);
+      log(`${name}: ${errorNames(e)}`);
       return jsonNoStore(500, { error: 'internal error' });
     }
   };

@@ -313,3 +313,19 @@ test('the client refuses a requirement for another token or network', async () =
   assert.throws(() => graphPayOrderClient({ account, publicClient: {}, chainId: CHAIN_ID, token: TOKEN, permit2: PERMIT2, payerName: '', mandateHash: keccak256(toHex('m')) }), /checkout/);
   assert.equal(namehash(AGENT_NAME), AGENT_NODE);
 });
+
+test('errorNames: the cause chain with plain-number codes, never a message', async () => {
+  const { errorNames } = await import('../src/http.mjs');
+  const http = Object.assign(new Error('HTTP request failed. URL: https://rpc.example/secret-key'), { name: 'HttpRequestError', status: 429 });
+  const tx = Object.assign(new Error('https://rpc.example/secret-key'), { name: 'TransactionExecutionError', cause: http });
+  const top = Object.assign(new Error('https://rpc.example/secret-key'), { name: 'ContractFunctionExecutionError', cause: tx });
+  assert.equal(errorNames(top), 'ContractFunctionExecutionError < TransactionExecutionError < HttpRequestError 429');
+  assert.equal(errorNames(Object.assign(new Error('x'), { name: 'a name with https://spaces' })), 'Error');
+  assert.equal(errorNames(Object.assign(new Error('x'), { name: 'RpcRequestError', code: -32005 })), 'RpcRequestError -32005');
+  assert.doesNotMatch(errorNames(top), /secret|https/);
+  assert.equal(errorNames(Object.assign(new Error('x'), { name: 'TypeError', cause: Object.assign(new Error('y'), { code: 'ECONNREFUSED' }) })), 'TypeError < Error ECONNREFUSED');
+  assert.equal(errorNames(Object.assign(new Error('x'), { name: 'ContractFunctionRevertedError', data: { errorName: 'BadState' } })), 'ContractFunctionRevertedError BadState');
+  assert.equal(errorNames(Object.assign(new Error('x'), { name: 'Error', code: 'sk-ant-abc/def' })), 'Error', 'a code that is not a plain constant is dropped');
+  const trap = new Proxy({}, { get() { throw new Error('boom'); } });
+  assert.equal(errorNames(trap), 'Error');
+});

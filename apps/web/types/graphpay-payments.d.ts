@@ -17,6 +17,7 @@ declare module '@graphpay/facilitator' {
   export function recorderClient(options: { url: string; token: string }): { refused(entry: Any): Promise<void> };
   export function recorderHandler(options: { token: string; write: ((edge: Any) => Promise<Any>) | null; log?: (line: string) => void }): Handler;
   export function bearerOk(request: Request, token: string): boolean;
+  export function errorNames(error: unknown): string;
   export class x402Facilitator {
     register(network: string, scheme: Any): x402Facilitator;
   }
