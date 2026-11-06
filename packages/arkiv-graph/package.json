@@ -1,6 +1,6 @@
 {
   "name": "@graphpay_ethglobal/arkiv-graph",
-  "version": "0.1.1",
+  "version": "1.0.0",
   "description": "A graph layer over Arkiv: define nodes, edges and totals, write them atomically with a safe writer, read them back scoped to a wallet you trust, and explain every read. Includes ArkivSim, an in-memory Arkiv node for tests.",
   "type": "module",
   "license": "MIT",
