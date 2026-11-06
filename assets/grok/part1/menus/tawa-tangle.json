@@ -1,0 +1,47 @@
+{
+  "schema": "graphpay.menu.v1",
+  "synthetic": true,
+  "version": 1,
+  "shop": {
+    "ens": "tawa-tangle.graphpay.eth",
+    "name": "Tawa Tangle"
+  },
+  "items": [
+    {
+      "sku": "tawa-tangle-masala-dosa-combo",
+      "name": "Masala dosa + filter coffee",
+      "unit": "plate",
+      "quantity": 1,
+      "priceMicro": 3300000,
+      "description": "Golden dosa with spiced potato, chutneys, sambar and filter coffee.",
+      "image": "images/dishes/tawa-tangle-masala-dosa-combo.jpg"
+    },
+    {
+      "sku": "tawa-tangle-onion-uttapam",
+      "name": "Onion uttapam",
+      "unit": "plate",
+      "quantity": 1,
+      "priceMicro": 1900000,
+      "description": "A thick rice pancake topped with onion, green chilli and coriander.",
+      "image": "images/dishes/tawa-tangle-onion-uttapam.jpg"
+    },
+    {
+      "sku": "tawa-tangle-lemon-rice",
+      "name": "Lemon rice",
+      "unit": "box",
+      "quantity": 1,
+      "priceMicro": 1500000,
+      "description": "Bright lemon rice with crunchy peanuts, curry leaves and mustard seeds.",
+      "image": "images/dishes/tawa-tangle-lemon-rice.jpg"
+    },
+    {
+      "sku": "tawa-tangle-filter-coffee",
+      "name": "Filter coffee",
+      "unit": "cup",
+      "quantity": 1,
+      "priceMicro": 600000,
+      "description": "Hot, strong filter coffee with milk and a frothy finish.",
+      "image": "images/dishes/tawa-tangle-filter-coffee.jpg"
+    }
+  ]
+}

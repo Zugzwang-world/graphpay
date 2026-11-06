@@ -15,7 +15,8 @@
     "test": "node --test \"test/*.test.mjs\"",
     "smoke": "node scripts/smoke.mjs",
     "probe": "node scripts/live-probe.mjs",
-    "menus": "node scripts/menus.mjs"
+    "menus": "node scripts/menus.mjs",
+    "directory-names": "node scripts/directory-names.mjs"
   },
   "dependencies": {
     "@arkiv-network/sdk": "1.0.1",

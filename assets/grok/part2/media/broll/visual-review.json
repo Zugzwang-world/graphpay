@@ -1,0 +1,31 @@
+{
+  "schema": "graphpay.grok.broll-review.v1",
+  "synthetic": true,
+  "generator": "Grok Imagine",
+  "review": {
+    "mumbai-dusk.mp4": {
+      "status": "pass",
+      "notes": "Dusk skyline and moving clouds/lights; no faces logos text."
+    },
+    "dosa-tawa.mp4": {
+      "status": "pass",
+      "notes": "Replacement visibly spreads wet batter; credible motion; no faces logos text."
+    },
+    "delivery-dusk.mp4": {
+      "status": "pass",
+      "notes": "Replacement natural walking, arm and bag swing; no faces logos text."
+    },
+    "ghee-pour.mp4": {
+      "status": "pass",
+      "notes": "Third generation individually full-file visually reviewed: finite pour, natural wrist and finger movement, spoon withdraws, no faces logos text."
+    },
+    "filter-coffee-pour.mp4": {
+      "status": "pass",
+      "notes": "Third generation individually reviewed full-file: high pour, natural hand motion, stream stops, no faces logos text."
+    },
+    "dosa-fold.mp4": {
+      "status": "missing",
+      "notes": "Fourth generation folds directly on serving plate but full-file visual review failed severe geometric edge and texture morphing. All failed attempts remain outside release. Five of six requested clips accepted."
+    }
+  }
+}

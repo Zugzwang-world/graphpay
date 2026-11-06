@@ -1,0 +1,47 @@
+{
+  "schema": "graphpay.menu.v1",
+  "synthetic": true,
+  "version": 1,
+  "shop": {
+    "ens": "idli-index.graphpay.eth",
+    "name": "Idli Index"
+  },
+  "items": [
+    {
+      "sku": "idli-index-masala-dosa-combo",
+      "name": "Masala dosa + filter coffee",
+      "unit": "plate",
+      "quantity": 1,
+      "priceMicro": 4200000,
+      "description": "Golden dosa with spiced potato, chutneys, sambar and filter coffee.",
+      "image": "images/dishes/idli-index-masala-dosa-combo.jpg"
+    },
+    {
+      "sku": "idli-index-idli-sambar",
+      "name": "Idli sambar",
+      "unit": "plate",
+      "quantity": 1,
+      "priceMicro": 1400000,
+      "description": "Two soft rice cakes with warm lentil sambar and coconut chutney.",
+      "image": "images/dishes/idli-index-idli-sambar.jpg"
+    },
+    {
+      "sku": "idli-index-medu-vada",
+      "name": "Medu vada",
+      "unit": "plate",
+      "quantity": 1,
+      "priceMicro": 1200000,
+      "description": "Two crisp lentil rings with soft centres and fresh chutney.",
+      "image": "images/dishes/idli-index-medu-vada.jpg"
+    },
+    {
+      "sku": "idli-index-rava-upma",
+      "name": "Rava upma",
+      "unit": "bowl",
+      "quantity": 1,
+      "priceMicro": 1600000,
+      "description": "Roasted semolina with curry leaves, mustard seeds and toasted cashews.",
+      "image": "images/dishes/idli-index-rava-upma.jpg"
+    }
+  ]
+}

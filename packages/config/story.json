@@ -96,7 +96,7 @@
     {
       "key": "kesar-kingdom",
       "label": "kesar-kingdom",
-      "displayName": "Kesar Kingdom",
+      "displayName": "Filter & Fold",
       "storyRole": "good",
       "walletRole": "SHOP_KESAR",
       "category": "sweets",
@@ -104,11 +104,32 @@
       "location": null,
       "products": [
         {
-          "sku": "gulab-jamun-12",
-          "name": "gulab jamun",
-          "unit": "box of 12",
-          "quantity": 12,
+          "sku": "filter-and-fold-masala-dosa-combo",
+          "name": "masala dosa",
+          "unit": "plate with filter coffee",
+          "quantity": 1,
           "priceMicro": 4800000
+        },
+        {
+          "sku": "filter-and-fold-filter-coffee",
+          "name": "Filter coffee",
+          "unit": "cup",
+          "quantity": 1,
+          "priceMicro": 800000
+        },
+        {
+          "sku": "filter-and-fold-sunday-breakfast",
+          "name": "Sunday breakfast box: 2 idlis, 1 medu vada, 1 filter coffee",
+          "unit": "box",
+          "quantity": 1,
+          "priceMicro": 2400000
+        },
+        {
+          "sku": "filter-and-fold-podi-idli",
+          "name": "Ghee podi idli",
+          "unit": "plate",
+          "quantity": 1,
+          "priceMicro": 1800000
         }
       ],
       "scenario": {
@@ -125,7 +146,7 @@
     {
       "key": "jamun-junction",
       "label": "jamun-junction",
-      "displayName": "Jamun Junction",
+      "displayName": "Tawa Tangle",
       "storyRole": "trap",
       "walletRole": "SHOP_JAMUN",
       "category": "sweets",
@@ -133,11 +154,32 @@
       "location": null,
       "products": [
         {
-          "sku": "gulab-jamun-12",
-          "name": "gulab jamun",
-          "unit": "box of 12",
-          "quantity": 12,
+          "sku": "tawa-tangle-masala-dosa-combo",
+          "name": "masala dosa",
+          "unit": "plate with filter coffee",
+          "quantity": 1,
           "priceMicro": 3300000
+        },
+        {
+          "sku": "tawa-tangle-onion-uttapam",
+          "name": "Onion uttapam",
+          "unit": "plate",
+          "quantity": 1,
+          "priceMicro": 1900000
+        },
+        {
+          "sku": "tawa-tangle-lemon-rice",
+          "name": "Lemon rice",
+          "unit": "box",
+          "quantity": 1,
+          "priceMicro": 1500000
+        },
+        {
+          "sku": "tawa-tangle-filter-coffee",
+          "name": "Filter coffee",
+          "unit": "cup",
+          "quantity": 1,
+          "priceMicro": 600000
         }
       ],
       "scenario": {
@@ -154,7 +196,7 @@
     {
       "key": "syrup-street",
       "label": "syrup-street",
-      "displayName": "Syrup Street",
+      "displayName": "Idli Index",
       "storyRole": "runner-up",
       "walletRole": "SHOP_SYRUP",
       "category": "sweets",
@@ -162,11 +204,32 @@
       "location": null,
       "products": [
         {
-          "sku": "gulab-jamun-12",
-          "name": "gulab jamun",
-          "unit": "box of 12",
-          "quantity": 12,
+          "sku": "idli-index-masala-dosa-combo",
+          "name": "masala dosa",
+          "unit": "plate with filter coffee",
+          "quantity": 1,
           "priceMicro": 4200000
+        },
+        {
+          "sku": "idli-index-idli-sambar",
+          "name": "Idli sambar",
+          "unit": "plate",
+          "quantity": 1,
+          "priceMicro": 1400000
+        },
+        {
+          "sku": "idli-index-medu-vada",
+          "name": "Medu vada",
+          "unit": "plate",
+          "quantity": 1,
+          "priceMicro": 1200000
+        },
+        {
+          "sku": "idli-index-rava-upma",
+          "name": "Rava upma",
+          "unit": "bowl",
+          "quantity": 1,
+          "priceMicro": 1600000
         }
       ],
       "scenario": {
@@ -183,25 +246,25 @@
   ],
   "order": {
     "synthetic": true,
-    "request": "Just landed in Mumbai. Get me the best gulab jamun near me under 6 USDT by 8 pm.",
+    "request": "Just landed in Mumbai. Get me the best masala dosa near BKC under 6 USDT by 8 pm.",
     "shop": "kesar-kingdom",
-    "sku": "gulab-jamun-12",
-    "item": "gulab jamun",
-    "quantity": 12,
+    "sku": "filter-and-fold-masala-dosa-combo",
+    "item": "masala dosa",
+    "quantity": 1,
     "priceMicro": 4800000,
     "budgetMicro": 6000000,
     "deadlineLocal": "20:00",
     "refundMicro": 800000,
-    "refundReason": "two squashed jamuns",
+    "refundReason": "coffee arrived cold",
     "reorder": {
-      "quantity": 3,
-      "priceMicro": 1200000
+      "quantity": 1,
+      "priceMicro": 4800000
     }
   },
   "renewal": {
     "synthetic": true,
     "plan": "sunday-box",
-    "item": "Sunday sweets box",
+    "item": "Sunday breakfast box",
     "shop": "kesar-kingdom",
     "priceMicro": 400000,
     "schedule": {

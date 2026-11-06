@@ -1,0 +1,48 @@
+{
+  "schema": "graphpay.grok.cast.v1",
+  "synthetic": true,
+  "shops": [
+    {
+      "role": "good",
+      "label": "filter-and-fold",
+      "displayName": "Filter & Fold",
+      "neighbourhood": "bkc",
+      "lat": 19.066700,
+      "lon": 72.865100,
+      "tagline": "Crisp folds. Careful cups.",
+      "look": "Spotless premium counter; golden roast dosa, banana leaf, brass and steel.",
+      "comboPriceMicro": 4800000,
+      "refundRatePct": 1.2,
+      "onTimePct": 97,
+      "orders": 4812
+    },
+    {
+      "role": "runner-up",
+      "label": "idli-index",
+      "displayName": "Idli Index",
+      "neighbourhood": "bandra-east",
+      "lat": 19.062200,
+      "lon": 72.850300,
+      "tagline": "A dependable daily tiffin.",
+      "look": "Homely compact dining room; steel thali and generous honest portions.",
+      "comboPriceMicro": 4200000,
+      "refundRatePct": 3.1,
+      "onTimePct": 93,
+      "orders": 1204
+    },
+    {
+      "role": "trap",
+      "label": "tawa-tangle",
+      "displayName": "Tawa Tangle",
+      "neighbourhood": "kalina",
+      "lat": 19.079400,
+      "lon": 72.865800,
+      "tagline": "Hot plates. Hasty exits.",
+      "look": "Rushed roadside counter; foil or paper plates, slightly overdone but edible dosa.",
+      "comboPriceMicro": 3300000,
+      "refundRatePct": 18.4,
+      "onTimePct": 71,
+      "orders": 2190
+    }
+  ]
+}

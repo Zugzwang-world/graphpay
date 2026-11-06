@@ -1,0 +1,96 @@
+{
+  "schema": "graphpay.grok.broll-attempts.v1",
+  "generator": "Grok Imagine",
+  "synthetic": true,
+  "attempts": {
+    "dosa-tawa": [
+      {
+        "attempt": 1,
+        "result": "fail",
+        "reason": "Static batter, ladle traces preformed ridges."
+      },
+      {
+        "attempt": 2,
+        "result": "pass",
+        "reason": "Wet batter visibly spreads."
+      }
+    ],
+    "ghee-pour": [
+      {
+        "attempt": 1,
+        "result": "fail",
+        "reason": "Frozen hand, endless stream."
+      },
+      {
+        "attempt": 2,
+        "result": "fail",
+        "reason": "Frozen hand, endless stream."
+      },
+      {
+        "attempt": 3,
+        "result": "pass",
+        "reason": "Individual full-clip review: finite pour, natural wrist motion, spoon withdraws."
+      }
+    ],
+    "filter-coffee-pour": [
+      {
+        "attempt": 1,
+        "result": "fail",
+        "reason": "Low rigid pour, frozen hand."
+      },
+      {
+        "attempt": 2,
+        "result": "fail",
+        "reason": "Frozen hands and tumblers."
+      },
+      {
+        "attempt": 3,
+        "result": "pass",
+        "reason": "Individual full-clip review: high pour ends naturally, stable anatomy."
+      }
+    ],
+    "delivery-dusk": [
+      {
+        "attempt": 1,
+        "result": "fail",
+        "reason": "Frozen bag and hand against moving background."
+      },
+      {
+        "attempt": 2,
+        "result": "pass",
+        "reason": "Natural walking arm and bag swing."
+      }
+    ],
+    "mumbai-dusk": [
+      {
+        "attempt": 1,
+        "result": "pass",
+        "reason": "Moving clouds and changing lights, no visible artifacts."
+      }
+    ],
+    "dosa-fold": [
+      {
+        "attempt": 1,
+        "result": "aborted",
+        "reason": "Generation returned Aborted; no file delivered."
+      },
+      {
+        "attempt": 2,
+        "result": "fail",
+        "reason": "Dosa already folded; spatula glides over crust."
+      },
+      {
+        "attempt": 3,
+        "result": "fail",
+        "reason": "Individual full-file review: fold occurs but transfer teleports; hand and spatula morph."
+      },
+      {
+        "attempt": 4,
+        "result": "fail",
+        "reason": "Fold directly on serving plate: unnatural straight disappearing edge, detached section and texture morphing."
+      }
+    ]
+  },
+  "review-note": "A multi-attachment review of third attempts initially reported a composite preview. That result was not used for final acceptance. Each third attempt was subsequently reviewed alone; only ghee and coffee passed. Fourth fold reviewed alone and failed.",
+  "rejected_assets": "Stored outside release under /workspace/food-photographer/rejected-video, video-review-pending and video-third; native Imagine assets persist separately."
+}

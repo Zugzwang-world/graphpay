@@ -1,0 +1,124 @@
+{
+  "schema": "graphpay.grok.agents.v1",
+  "agents": [
+    {
+      "id": "concierge",
+      "team": "customer",
+      "displayName": "Mr. Vitalik's agent",
+      "ensName": "concierge.vitalik.graphpay.eth",
+      "job": "plans the errand and runs the team",
+      "colour": "#388A45",
+      "accent": "#FFDA46",
+      "personality": "Calm and decisive.",
+      "motion": {
+        "idle": "Bobs 4 px every 2 seconds; blinks every 4 seconds.",
+        "thinking": "Sways horizontally by 3 px over 2 seconds; the spark moves with the character and does not pulse.",
+        "talking": "Looks forward; a speech dot pulses every 0.6 seconds.",
+        "success": "Happy arc eyes; bobs vertically by 4 px over 2 seconds.",
+        "refused": "Eyes flatten; a small cross appears on the prop."
+      }
+    },
+    {
+      "id": "scout",
+      "team": "customer",
+      "displayName": "Scout",
+      "ensName": "scout.vitalik.graphpay.eth",
+      "job": "finds nearby shops",
+      "colour": "#20B9AC",
+      "accent": "#EFF7F7",
+      "personality": "Curious and observant.",
+      "motion": {
+        "idle": "Bobs 4 px every 2 seconds; blinks every 4 seconds.",
+        "thinking": "Sways horizontally by 3 px over 2 seconds; the spark moves with the character and does not pulse.",
+        "talking": "Looks forward; a speech dot pulses every 0.6 seconds.",
+        "success": "Happy arc eyes; bobs vertically by 4 px over 2 seconds.",
+        "refused": "Eyes flatten; a small cross appears on the prop."
+      }
+    },
+    {
+      "id": "analyst",
+      "team": "customer",
+      "displayName": "Analyst",
+      "ensName": "analyst.vitalik.graphpay.eth",
+      "job": "compares refund and payment history",
+      "colour": "#9565D6",
+      "accent": "#EFF7F7",
+      "personality": "Careful and evidence-led.",
+      "motion": {
+        "idle": "Bobs 4 px every 2 seconds; blinks every 4 seconds.",
+        "thinking": "Sways horizontally by 3 px over 2 seconds; the spark moves with the character and does not pulse.",
+        "talking": "Looks forward; a speech dot pulses every 0.6 seconds.",
+        "success": "Happy arc eyes; bobs vertically by 4 px over 2 seconds.",
+        "refused": "Eyes flatten; a small cross appears on the prop."
+      }
+    },
+    {
+      "id": "payer",
+      "team": "customer",
+      "displayName": "Payer",
+      "ensName": "payer.vitalik.graphpay.eth",
+      "job": "checks limits and pays",
+      "colour": "#F2B526",
+      "accent": "#EFF7F7",
+      "personality": "Precise and cautious.",
+      "motion": {
+        "idle": "Bobs 4 px every 2 seconds; blinks every 4 seconds.",
+        "thinking": "Sways horizontally by 3 px over 2 seconds; the spark moves with the character and does not pulse.",
+        "talking": "Looks forward; a speech dot pulses every 0.6 seconds.",
+        "success": "Happy arc eyes; bobs vertically by 4 px over 2 seconds.",
+        "refused": "Eyes flatten; a small cross appears on the prop."
+      }
+    },
+    {
+      "id": "storefront",
+      "team": "shop",
+      "displayName": "Storefront",
+      "ensName": "storefront.filter-and-fold.graphpay.eth",
+      "job": "presents menus and confirms orders",
+      "colour": "#368DD1",
+      "accent": "#EFF7F7",
+      "personality": "Welcoming and clear.",
+      "motion": {
+        "idle": "Bobs 4 px every 2 seconds; blinks every 4 seconds.",
+        "thinking": "Sways horizontally by 3 px over 2 seconds; the spark moves with the character and does not pulse.",
+        "talking": "Looks forward; a speech dot pulses every 0.6 seconds.",
+        "success": "Happy arc eyes; bobs vertically by 4 px over 2 seconds.",
+        "refused": "Eyes flatten; a small cross appears on the prop."
+      }
+    },
+    {
+      "id": "risk",
+      "team": "shop",
+      "displayName": "Risk",
+      "ensName": "risk.filter-and-fold.graphpay.eth",
+      "job": "checks payment and refund risk",
+      "colour": "#E34651",
+      "accent": "#EFF7F7",
+      "personality": "Watchful and fair.",
+      "motion": {
+        "idle": "Bobs 4 px every 2 seconds; blinks every 4 seconds.",
+        "thinking": "Sways horizontally by 3 px over 2 seconds; the spark moves with the character and does not pulse.",
+        "talking": "Looks forward; a speech dot pulses every 0.6 seconds.",
+        "success": "Happy arc eyes; bobs vertically by 4 px over 2 seconds.",
+        "refused": "Eyes flatten; a small cross appears on the prop."
+      }
+    },
+    {
+      "id": "dispatch",
+      "team": "shop",
+      "displayName": "Dispatch",
+      "ensName": "dispatch.filter-and-fold.graphpay.eth",
+      "job": "packs and delivers orders",
+      "colour": "#F78D27",
+      "accent": "#EFF7F7",
+      "personality": "Practical and prompt.",
+      "motion": {
+        "idle": "Bobs 4 px every 2 seconds; blinks every 4 seconds.",
+        "thinking": "Sways horizontally by 3 px over 2 seconds; the spark moves with the character and does not pulse.",
+        "talking": "Looks forward; a speech dot pulses every 0.6 seconds.",
+        "success": "Happy arc eyes; bobs vertically by 4 px over 2 seconds.",
+        "refused": "Eyes flatten; a small cross appears on the prop."
+      }
+    }
+  ]
+}

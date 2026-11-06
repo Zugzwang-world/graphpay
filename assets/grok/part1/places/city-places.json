@@ -1,0 +1,1206 @@
+{
+  "schema": "graphpay.grok.city.v1",
+  "synthetic": true,
+  "places": [
+    {
+      "label": "podi-pebble-kitchen",
+      "displayName": "Podi Pebble Kitchen",
+      "neighbourhood": "bkc",
+      "lat": 19.066628,
+      "lon": 72.863573,
+      "kind": "darshini",
+      "priceLevel": 1,
+      "signature": "podi idli"
+    },
+    {
+      "label": "podi-pebble-tiffins",
+      "displayName": "Podi Pebble Tiffins",
+      "neighbourhood": "bkc",
+      "lat": 19.066532,
+      "lon": 72.865102,
+      "kind": "udupi",
+      "priceLevel": 2,
+      "signature": "podi idli"
+    },
+    {
+      "label": "podi-pebble-canteen",
+      "displayName": "Podi Pebble Canteen",
+      "neighbourhood": "bkc",
+      "lat": 19.065378,
+      "lon": 72.863320,
+      "kind": "tiffin-room",
+      "priceLevel": 3,
+      "signature": "podi idli"
+    },
+    {
+      "label": "podi-pebble-counter",
+      "displayName": "Podi Pebble Counter",
+      "neighbourhood": "bkc",
+      "lat": 19.067025,
+      "lon": 72.867113,
+      "kind": "dosa-cart",
+      "priceLevel": 1,
+      "signature": "podi idli"
+    },
+    {
+      "label": "podi-pebble-courtyard",
+      "displayName": "Podi Pebble Courtyard",
+      "neighbourhood": "bkc",
+      "lat": 19.066051,
+      "lon": 72.867475,
+      "kind": "mess",
+      "priceLevel": 2,
+      "signature": "podi idli"
+    },
+    {
+      "label": "podi-pebble-pantry",
+      "displayName": "Podi Pebble Pantry",
+      "neighbourhood": "bkc",
+      "lat": 19.069440,
+      "lon": 72.863484,
+      "kind": "filter-coffee-bar",
+      "priceLevel": 3,
+      "signature": "filter coffee"
+    },
+    {
+      "label": "podi-pebble-room",
+      "displayName": "Podi Pebble Room",
+      "neighbourhood": "bkc",
+      "lat": 19.065752,
+      "lon": 72.866913,
+      "kind": "cafe",
+      "priceLevel": 1,
+      "signature": "podi idli"
+    },
+    {
+      "label": "podi-pebble-corner",
+      "displayName": "Podi Pebble Corner",
+      "neighbourhood": "bkc",
+      "lat": 19.068553,
+      "lon": 72.866994,
+      "kind": "darshini",
+      "priceLevel": 2,
+      "signature": "podi idli"
+    },
+    {
+      "label": "podi-pebble-table",
+      "displayName": "Podi Pebble Table",
+      "neighbourhood": "bkc",
+      "lat": 19.069442,
+      "lon": 72.866156,
+      "kind": "udupi",
+      "priceLevel": 3,
+      "signature": "podi idli"
+    },
+    {
+      "label": "podi-pebble-stop",
+      "displayName": "Podi Pebble Stop",
+      "neighbourhood": "bkc",
+      "lat": 19.067898,
+      "lon": 72.867319,
+      "kind": "tiffin-room",
+      "priceLevel": 1,
+      "signature": "podi idli"
+    },
+    {
+      "label": "dosa-dapple-kitchen",
+      "displayName": "Dosa Dapple Kitchen",
+      "neighbourhood": "bkc",
+      "lat": 19.069272,
+      "lon": 72.864217,
+      "kind": "dosa-cart",
+      "priceLevel": 2,
+      "signature": "ghee roast dosa"
+    },
+    {
+      "label": "dosa-dapple-tiffins",
+      "displayName": "Dosa Dapple Tiffins",
+      "neighbourhood": "bkc",
+      "lat": 19.065417,
+      "lon": 72.863588,
+      "kind": "mess",
+      "priceLevel": 3,
+      "signature": "ghee roast dosa"
+    },
+    {
+      "label": "dosa-dapple-canteen",
+      "displayName": "Dosa Dapple Canteen",
+      "neighbourhood": "bkc",
+      "lat": 19.065616,
+      "lon": 72.868080,
+      "kind": "filter-coffee-bar",
+      "priceLevel": 1,
+      "signature": "filter coffee"
+    },
+    {
+      "label": "dosa-dapple-counter",
+      "displayName": "Dosa Dapple Counter",
+      "neighbourhood": "bkc",
+      "lat": 19.065682,
+      "lon": 72.864390,
+      "kind": "cafe",
+      "priceLevel": 2,
+      "signature": "ghee roast dosa"
+    },
+    {
+      "label": "dosa-dapple-courtyard",
+      "displayName": "Dosa Dapple Courtyard",
+      "neighbourhood": "bkc",
+      "lat": 19.065968,
+      "lon": 72.867445,
+      "kind": "darshini",
+      "priceLevel": 3,
+      "signature": "ghee roast dosa"
+    },
+    {
+      "label": "dosa-dapple-pantry",
+      "displayName": "Dosa Dapple Pantry",
+      "neighbourhood": "bkc",
+      "lat": 19.066840,
+      "lon": 72.866543,
+      "kind": "udupi",
+      "priceLevel": 1,
+      "signature": "ghee roast dosa"
+    },
+    {
+      "label": "dosa-dapple-room",
+      "displayName": "Dosa Dapple Room",
+      "neighbourhood": "bkc",
+      "lat": 19.069542,
+      "lon": 72.865918,
+      "kind": "tiffin-room",
+      "priceLevel": 2,
+      "signature": "ghee roast dosa"
+    },
+    {
+      "label": "dosa-dapple-corner",
+      "displayName": "Dosa Dapple Corner",
+      "neighbourhood": "bkc",
+      "lat": 19.066556,
+      "lon": 72.864593,
+      "kind": "dosa-cart",
+      "priceLevel": 3,
+      "signature": "ghee roast dosa"
+    },
+    {
+      "label": "dosa-dapple-table",
+      "displayName": "Dosa Dapple Table",
+      "neighbourhood": "bkc",
+      "lat": 19.066870,
+      "lon": 72.866047,
+      "kind": "mess",
+      "priceLevel": 1,
+      "signature": "ghee roast dosa"
+    },
+    {
+      "label": "dosa-dapple-stop",
+      "displayName": "Dosa Dapple Stop",
+      "neighbourhood": "bkc",
+      "lat": 19.064664,
+      "lon": 72.865300,
+      "kind": "filter-coffee-bar",
+      "priceLevel": 2,
+      "signature": "filter coffee"
+    },
+    {
+      "label": "idli-inkwell-kitchen",
+      "displayName": "Idli Inkwell Kitchen",
+      "neighbourhood": "bkc",
+      "lat": 19.067880,
+      "lon": 72.864621,
+      "kind": "cafe",
+      "priceLevel": 3,
+      "signature": "medu vada"
+    },
+    {
+      "label": "idli-inkwell-tiffins",
+      "displayName": "Idli Inkwell Tiffins",
+      "neighbourhood": "bkc",
+      "lat": 19.068091,
+      "lon": 72.866286,
+      "kind": "darshini",
+      "priceLevel": 1,
+      "signature": "medu vada"
+    },
+    {
+      "label": "idli-inkwell-canteen",
+      "displayName": "Idli Inkwell Canteen",
+      "neighbourhood": "bkc",
+      "lat": 19.067395,
+      "lon": 72.863807,
+      "kind": "udupi",
+      "priceLevel": 2,
+      "signature": "medu vada"
+    },
+    {
+      "label": "idli-inkwell-counter",
+      "displayName": "Idli Inkwell Counter",
+      "neighbourhood": "bkc",
+      "lat": 19.067527,
+      "lon": 72.865060,
+      "kind": "tiffin-room",
+      "priceLevel": 3,
+      "signature": "medu vada"
+    },
+    {
+      "label": "idli-inkwell-courtyard",
+      "displayName": "Idli Inkwell Courtyard",
+      "neighbourhood": "bandra-east",
+      "lat": 19.060373,
+      "lon": 72.851051,
+      "kind": "dosa-cart",
+      "priceLevel": 1,
+      "signature": "medu vada"
+    },
+    {
+      "label": "idli-inkwell-pantry",
+      "displayName": "Idli Inkwell Pantry",
+      "neighbourhood": "bandra-east",
+      "lat": 19.060368,
+      "lon": 72.848525,
+      "kind": "mess",
+      "priceLevel": 2,
+      "signature": "medu vada"
+    },
+    {
+      "label": "idli-inkwell-room",
+      "displayName": "Idli Inkwell Room",
+      "neighbourhood": "bandra-east",
+      "lat": 19.062663,
+      "lon": 72.850361,
+      "kind": "filter-coffee-bar",
+      "priceLevel": 3,
+      "signature": "filter coffee"
+    },
+    {
+      "label": "idli-inkwell-corner",
+      "displayName": "Idli Inkwell Corner",
+      "neighbourhood": "bandra-east",
+      "lat": 19.062209,
+      "lon": 72.851510,
+      "kind": "cafe",
+      "priceLevel": 1,
+      "signature": "medu vada"
+    },
+    {
+      "label": "idli-inkwell-table",
+      "displayName": "Idli Inkwell Table",
+      "neighbourhood": "bandra-east",
+      "lat": 19.061676,
+      "lon": 72.849665,
+      "kind": "darshini",
+      "priceLevel": 2,
+      "signature": "medu vada"
+    },
+    {
+      "label": "idli-inkwell-stop",
+      "displayName": "Idli Inkwell Stop",
+      "neighbourhood": "bandra-east",
+      "lat": 19.063601,
+      "lon": 72.847531,
+      "kind": "udupi",
+      "priceLevel": 3,
+      "signature": "medu vada"
+    },
+    {
+      "label": "kaapi-kite-kitchen",
+      "displayName": "Kaapi Kite Kitchen",
+      "neighbourhood": "bandra-east",
+      "lat": 19.062966,
+      "lon": 72.848799,
+      "kind": "tiffin-room",
+      "priceLevel": 1,
+      "signature": "filter coffee"
+    },
+    {
+      "label": "kaapi-kite-tiffins",
+      "displayName": "Kaapi Kite Tiffins",
+      "neighbourhood": "bandra-east",
+      "lat": 19.063090,
+      "lon": 72.851985,
+      "kind": "dosa-cart",
+      "priceLevel": 2,
+      "signature": "filter coffee"
+    },
+    {
+      "label": "kaapi-kite-canteen",
+      "displayName": "Kaapi Kite Canteen",
+      "neighbourhood": "kalina",
+      "lat": 19.081529,
+      "lon": 72.859806,
+      "kind": "mess",
+      "priceLevel": 3,
+      "signature": "filter coffee"
+    },
+    {
+      "label": "kaapi-kite-counter",
+      "displayName": "Kaapi Kite Counter",
+      "neighbourhood": "kalina",
+      "lat": 19.077439,
+      "lon": 72.862715,
+      "kind": "filter-coffee-bar",
+      "priceLevel": 1,
+      "signature": "filter coffee"
+    },
+    {
+      "label": "kaapi-kite-courtyard",
+      "displayName": "Kaapi Kite Courtyard",
+      "neighbourhood": "kalina",
+      "lat": 19.077664,
+      "lon": 72.861580,
+      "kind": "cafe",
+      "priceLevel": 2,
+      "signature": "filter coffee"
+    },
+    {
+      "label": "kaapi-kite-pantry",
+      "displayName": "Kaapi Kite Pantry",
+      "neighbourhood": "kalina",
+      "lat": 19.079968,
+      "lon": 72.862440,
+      "kind": "darshini",
+      "priceLevel": 3,
+      "signature": "filter coffee"
+    },
+    {
+      "label": "kaapi-kite-room",
+      "displayName": "Kaapi Kite Room",
+      "neighbourhood": "kalina",
+      "lat": 19.080222,
+      "lon": 72.862720,
+      "kind": "udupi",
+      "priceLevel": 1,
+      "signature": "filter coffee"
+    },
+    {
+      "label": "kaapi-kite-corner",
+      "displayName": "Kaapi Kite Corner",
+      "neighbourhood": "kalina",
+      "lat": 19.080530,
+      "lon": 72.863636,
+      "kind": "tiffin-room",
+      "priceLevel": 2,
+      "signature": "filter coffee"
+    },
+    {
+      "label": "kaapi-kite-table",
+      "displayName": "Kaapi Kite Table",
+      "neighbourhood": "kalina",
+      "lat": 19.080974,
+      "lon": 72.861795,
+      "kind": "dosa-cart",
+      "priceLevel": 3,
+      "signature": "filter coffee"
+    },
+    {
+      "label": "kaapi-kite-stop",
+      "displayName": "Kaapi Kite Stop",
+      "neighbourhood": "kalina",
+      "lat": 19.077693,
+      "lon": 72.859018,
+      "kind": "mess",
+      "priceLevel": 1,
+      "signature": "filter coffee"
+    },
+    {
+      "label": "sambar-spindle-kitchen",
+      "displayName": "Sambar Spindle Kitchen",
+      "neighbourhood": "kurla-west",
+      "lat": 19.069767,
+      "lon": 72.877998,
+      "kind": "filter-coffee-bar",
+      "priceLevel": 2,
+      "signature": "filter coffee"
+    },
+    {
+      "label": "sambar-spindle-tiffins",
+      "displayName": "Sambar Spindle Tiffins",
+      "neighbourhood": "kurla-west",
+      "lat": 19.070082,
+      "lon": 72.874378,
+      "kind": "cafe",
+      "priceLevel": 3,
+      "signature": "sambar rice"
+    },
+    {
+      "label": "sambar-spindle-canteen",
+      "displayName": "Sambar Spindle Canteen",
+      "neighbourhood": "kurla-west",
+      "lat": 19.069518,
+      "lon": 72.878502,
+      "kind": "darshini",
+      "priceLevel": 1,
+      "signature": "sambar rice"
+    },
+    {
+      "label": "sambar-spindle-counter",
+      "displayName": "Sambar Spindle Counter",
+      "neighbourhood": "kurla-west",
+      "lat": 19.070565,
+      "lon": 72.876364,
+      "kind": "udupi",
+      "priceLevel": 2,
+      "signature": "sambar rice"
+    },
+    {
+      "label": "sambar-spindle-courtyard",
+      "displayName": "Sambar Spindle Courtyard",
+      "neighbourhood": "kurla-west",
+      "lat": 19.069039,
+      "lon": 72.878712,
+      "kind": "tiffin-room",
+      "priceLevel": 3,
+      "signature": "sambar rice"
+    },
+    {
+      "label": "sambar-spindle-pantry",
+      "displayName": "Sambar Spindle Pantry",
+      "neighbourhood": "kurla-west",
+      "lat": 19.068049,
+      "lon": 72.874690,
+      "kind": "dosa-cart",
+      "priceLevel": 1,
+      "signature": "sambar rice"
+    },
+    {
+      "label": "sambar-spindle-room",
+      "displayName": "Sambar Spindle Room",
+      "neighbourhood": "kurla-west",
+      "lat": 19.070889,
+      "lon": 72.878276,
+      "kind": "mess",
+      "priceLevel": 2,
+      "signature": "sambar rice"
+    },
+    {
+      "label": "sambar-spindle-corner",
+      "displayName": "Sambar Spindle Corner",
+      "neighbourhood": "kurla-west",
+      "lat": 19.068185,
+      "lon": 72.874274,
+      "kind": "filter-coffee-bar",
+      "priceLevel": 3,
+      "signature": "filter coffee"
+    },
+    {
+      "label": "sambar-spindle-table",
+      "displayName": "Sambar Spindle Table",
+      "neighbourhood": "kalanagar",
+      "lat": 19.054490,
+      "lon": 72.850330,
+      "kind": "cafe",
+      "priceLevel": 1,
+      "signature": "sambar rice"
+    },
+    {
+      "label": "sambar-spindle-stop",
+      "displayName": "Sambar Spindle Stop",
+      "neighbourhood": "sion",
+      "lat": 19.040123,
+      "lon": 72.858806,
+      "kind": "darshini",
+      "priceLevel": 2,
+      "signature": "sambar rice"
+    },
+    {
+      "label": "rasam-ribbon-kitchen",
+      "displayName": "Rasam Ribbon Kitchen",
+      "neighbourhood": "matunga",
+      "lat": 19.017208,
+      "lon": 72.845581,
+      "kind": "udupi",
+      "priceLevel": 3,
+      "signature": "rasam rice"
+    },
+    {
+      "label": "rasam-ribbon-tiffins",
+      "displayName": "Rasam Ribbon Tiffins",
+      "neighbourhood": "dadar",
+      "lat": 19.019834,
+      "lon": 72.842838,
+      "kind": "tiffin-room",
+      "priceLevel": 1,
+      "signature": "rasam rice"
+    },
+    {
+      "label": "rasam-ribbon-canteen",
+      "displayName": "Rasam Ribbon Canteen",
+      "neighbourhood": "mahim",
+      "lat": 19.033487,
+      "lon": 72.838428,
+      "kind": "dosa-cart",
+      "priceLevel": 2,
+      "signature": "rasam rice"
+    },
+    {
+      "label": "rasam-ribbon-counter",
+      "displayName": "Rasam Ribbon Counter",
+      "neighbourhood": "dharavi",
+      "lat": 19.039121,
+      "lon": 72.855096,
+      "kind": "mess",
+      "priceLevel": 3,
+      "signature": "rasam rice"
+    },
+    {
+      "label": "rasam-ribbon-courtyard",
+      "displayName": "Rasam Ribbon Courtyard",
+      "neighbourhood": "chunabhatti",
+      "lat": 19.049279,
+      "lon": 72.868774,
+      "kind": "filter-coffee-bar",
+      "priceLevel": 1,
+      "signature": "filter coffee"
+    },
+    {
+      "label": "rasam-ribbon-pantry",
+      "displayName": "Rasam Ribbon Pantry",
+      "neighbourhood": "santacruz-east",
+      "lat": 19.082149,
+      "lon": 72.852950,
+      "kind": "cafe",
+      "priceLevel": 2,
+      "signature": "rasam rice"
+    },
+    {
+      "label": "rasam-ribbon-room",
+      "displayName": "Rasam Ribbon Room",
+      "neighbourhood": "kalanagar",
+      "lat": 19.056385,
+      "lon": 72.849020,
+      "kind": "darshini",
+      "priceLevel": 3,
+      "signature": "rasam rice"
+    },
+    {
+      "label": "rasam-ribbon-corner",
+      "displayName": "Rasam Ribbon Corner",
+      "neighbourhood": "sion",
+      "lat": 19.038706,
+      "lon": 72.857588,
+      "kind": "udupi",
+      "priceLevel": 1,
+      "signature": "rasam rice"
+    },
+    {
+      "label": "rasam-ribbon-table",
+      "displayName": "Rasam Ribbon Table",
+      "neighbourhood": "matunga",
+      "lat": 19.017168,
+      "lon": 72.843251,
+      "kind": "tiffin-room",
+      "priceLevel": 2,
+      "signature": "rasam rice"
+    },
+    {
+      "label": "rasam-ribbon-stop",
+      "displayName": "Rasam Ribbon Stop",
+      "neighbourhood": "dadar",
+      "lat": 19.020768,
+      "lon": 72.842486,
+      "kind": "dosa-cart",
+      "priceLevel": 3,
+      "signature": "rasam rice"
+    },
+    {
+      "label": "tiffin-thimble-kitchen",
+      "displayName": "Tiffin Thimble Kitchen",
+      "neighbourhood": "mahim",
+      "lat": 19.036118,
+      "lon": 72.839642,
+      "kind": "mess",
+      "priceLevel": 1,
+      "signature": "rava upma"
+    },
+    {
+      "label": "tiffin-thimble-tiffins",
+      "displayName": "Tiffin Thimble Tiffins",
+      "neighbourhood": "dharavi",
+      "lat": 19.040205,
+      "lon": 72.855253,
+      "kind": "filter-coffee-bar",
+      "priceLevel": 2,
+      "signature": "filter coffee"
+    },
+    {
+      "label": "tiffin-thimble-canteen",
+      "displayName": "Tiffin Thimble Canteen",
+      "neighbourhood": "chunabhatti",
+      "lat": 19.049217,
+      "lon": 72.868934,
+      "kind": "cafe",
+      "priceLevel": 3,
+      "signature": "rava upma"
+    },
+    {
+      "label": "tiffin-thimble-counter",
+      "displayName": "Tiffin Thimble Counter",
+      "neighbourhood": "santacruz-east",
+      "lat": 19.081671,
+      "lon": 72.853291,
+      "kind": "darshini",
+      "priceLevel": 1,
+      "signature": "rava upma"
+    },
+    {
+      "label": "tiffin-thimble-courtyard",
+      "displayName": "Tiffin Thimble Courtyard",
+      "neighbourhood": "kalanagar",
+      "lat": 19.055758,
+      "lon": 72.848643,
+      "kind": "udupi",
+      "priceLevel": 2,
+      "signature": "rava upma"
+    },
+    {
+      "label": "tiffin-thimble-pantry",
+      "displayName": "Tiffin Thimble Pantry",
+      "neighbourhood": "sion",
+      "lat": 19.039227,
+      "lon": 72.858562,
+      "kind": "tiffin-room",
+      "priceLevel": 3,
+      "signature": "rava upma"
+    },
+    {
+      "label": "tiffin-thimble-room",
+      "displayName": "Tiffin Thimble Room",
+      "neighbourhood": "matunga",
+      "lat": 19.016525,
+      "lon": 72.847214,
+      "kind": "dosa-cart",
+      "priceLevel": 1,
+      "signature": "rava upma"
+    },
+    {
+      "label": "tiffin-thimble-corner",
+      "displayName": "Tiffin Thimble Corner",
+      "neighbourhood": "dadar",
+      "lat": 19.022184,
+      "lon": 72.842458,
+      "kind": "mess",
+      "priceLevel": 2,
+      "signature": "rava upma"
+    },
+    {
+      "label": "tiffin-thimble-table",
+      "displayName": "Tiffin Thimble Table",
+      "neighbourhood": "mahim",
+      "lat": 19.034513,
+      "lon": 72.839537,
+      "kind": "filter-coffee-bar",
+      "priceLevel": 3,
+      "signature": "filter coffee"
+    },
+    {
+      "label": "tiffin-thimble-stop",
+      "displayName": "Tiffin Thimble Stop",
+      "neighbourhood": "dharavi",
+      "lat": 19.038614,
+      "lon": 72.855836,
+      "kind": "cafe",
+      "priceLevel": 1,
+      "signature": "rava upma"
+    },
+    {
+      "label": "uttapam-orbit-kitchen",
+      "displayName": "Uttapam Orbit Kitchen",
+      "neighbourhood": "chunabhatti",
+      "lat": 19.049376,
+      "lon": 72.870443,
+      "kind": "darshini",
+      "priceLevel": 2,
+      "signature": "onion uttapam"
+    },
+    {
+      "label": "uttapam-orbit-tiffins",
+      "displayName": "Uttapam Orbit Tiffins",
+      "neighbourhood": "santacruz-east",
+      "lat": 19.081309,
+      "lon": 72.851555,
+      "kind": "udupi",
+      "priceLevel": 3,
+      "signature": "onion uttapam"
+    },
+    {
+      "label": "uttapam-orbit-canteen",
+      "displayName": "Uttapam Orbit Canteen",
+      "neighbourhood": "kalanagar",
+      "lat": 19.055159,
+      "lon": 72.848188,
+      "kind": "tiffin-room",
+      "priceLevel": 1,
+      "signature": "onion uttapam"
+    },
+    {
+      "label": "uttapam-orbit-counter",
+      "displayName": "Uttapam Orbit Counter",
+      "neighbourhood": "sion",
+      "lat": 19.039728,
+      "lon": 72.862189,
+      "kind": "dosa-cart",
+      "priceLevel": 2,
+      "signature": "onion uttapam"
+    },
+    {
+      "label": "uttapam-orbit-courtyard",
+      "displayName": "Uttapam Orbit Courtyard",
+      "neighbourhood": "matunga",
+      "lat": 19.016300,
+      "lon": 72.846230,
+      "kind": "mess",
+      "priceLevel": 3,
+      "signature": "onion uttapam"
+    },
+    {
+      "label": "uttapam-orbit-pantry",
+      "displayName": "Uttapam Orbit Pantry",
+      "neighbourhood": "dadar",
+      "lat": 19.023462,
+      "lon": 72.843082,
+      "kind": "filter-coffee-bar",
+      "priceLevel": 1,
+      "signature": "filter coffee"
+    },
+    {
+      "label": "uttapam-orbit-room",
+      "displayName": "Uttapam Orbit Room",
+      "neighbourhood": "mahim",
+      "lat": 19.036712,
+      "lon": 72.841424,
+      "kind": "cafe",
+      "priceLevel": 2,
+      "signature": "onion uttapam"
+    },
+    {
+      "label": "uttapam-orbit-corner",
+      "displayName": "Uttapam Orbit Corner",
+      "neighbourhood": "dharavi",
+      "lat": 19.037931,
+      "lon": 72.851399,
+      "kind": "darshini",
+      "priceLevel": 3,
+      "signature": "onion uttapam"
+    },
+    {
+      "label": "uttapam-orbit-table",
+      "displayName": "Uttapam Orbit Table",
+      "neighbourhood": "chunabhatti",
+      "lat": 19.049184,
+      "lon": 72.870001,
+      "kind": "udupi",
+      "priceLevel": 1,
+      "signature": "onion uttapam"
+    },
+    {
+      "label": "uttapam-orbit-stop",
+      "displayName": "Uttapam Orbit Stop",
+      "neighbourhood": "santacruz-east",
+      "lat": 19.082699,
+      "lon": 72.853207,
+      "kind": "tiffin-room",
+      "priceLevel": 2,
+      "signature": "onion uttapam"
+    },
+    {
+      "label": "vada-velvet-kitchen",
+      "displayName": "Vada Velvet Kitchen",
+      "neighbourhood": "kalanagar",
+      "lat": 19.052724,
+      "lon": 72.848446,
+      "kind": "dosa-cart",
+      "priceLevel": 3,
+      "signature": "neer dosa"
+    },
+    {
+      "label": "vada-velvet-tiffins",
+      "displayName": "Vada Velvet Tiffins",
+      "neighbourhood": "sion",
+      "lat": 19.042319,
+      "lon": 72.861711,
+      "kind": "mess",
+      "priceLevel": 1,
+      "signature": "neer dosa"
+    },
+    {
+      "label": "vada-velvet-canteen",
+      "displayName": "Vada Velvet Canteen",
+      "neighbourhood": "matunga",
+      "lat": 19.017099,
+      "lon": 72.842439,
+      "kind": "filter-coffee-bar",
+      "priceLevel": 2,
+      "signature": "filter coffee"
+    },
+    {
+      "label": "vada-velvet-counter",
+      "displayName": "Vada Velvet Counter",
+      "neighbourhood": "dadar",
+      "lat": 19.021094,
+      "lon": 72.839323,
+      "kind": "cafe",
+      "priceLevel": 3,
+      "signature": "neer dosa"
+    },
+    {
+      "label": "vada-velvet-courtyard",
+      "displayName": "Vada Velvet Courtyard",
+      "neighbourhood": "mahim",
+      "lat": 19.034571,
+      "lon": 72.837517,
+      "kind": "darshini",
+      "priceLevel": 1,
+      "signature": "neer dosa"
+    },
+    {
+      "label": "vada-velvet-pantry",
+      "displayName": "Vada Velvet Pantry",
+      "neighbourhood": "dharavi",
+      "lat": 19.036534,
+      "lon": 72.855287,
+      "kind": "udupi",
+      "priceLevel": 2,
+      "signature": "neer dosa"
+    },
+    {
+      "label": "vada-velvet-room",
+      "displayName": "Vada Velvet Room",
+      "neighbourhood": "chunabhatti",
+      "lat": 19.049211,
+      "lon": 72.871377,
+      "kind": "tiffin-room",
+      "priceLevel": 3,
+      "signature": "neer dosa"
+    },
+    {
+      "label": "vada-velvet-corner",
+      "displayName": "Vada Velvet Corner",
+      "neighbourhood": "santacruz-east",
+      "lat": 19.082406,
+      "lon": 72.854144,
+      "kind": "dosa-cart",
+      "priceLevel": 1,
+      "signature": "neer dosa"
+    },
+    {
+      "label": "vada-velvet-table",
+      "displayName": "Vada Velvet Table",
+      "neighbourhood": "kalanagar",
+      "lat": 19.055731,
+      "lon": 72.849946,
+      "kind": "mess",
+      "priceLevel": 2,
+      "signature": "neer dosa"
+    },
+    {
+      "label": "vada-velvet-stop",
+      "displayName": "Vada Velvet Stop",
+      "neighbourhood": "sion",
+      "lat": 19.037847,
+      "lon": 72.861921,
+      "kind": "filter-coffee-bar",
+      "priceLevel": 3,
+      "signature": "filter coffee"
+    },
+    {
+      "label": "appam-acorn-kitchen",
+      "displayName": "Appam Acorn Kitchen",
+      "neighbourhood": "matunga",
+      "lat": 19.015503,
+      "lon": 72.843908,
+      "kind": "cafe",
+      "priceLevel": 1,
+      "signature": "appam with vegetable stew"
+    },
+    {
+      "label": "appam-acorn-tiffins",
+      "displayName": "Appam Acorn Tiffins",
+      "neighbourhood": "dadar",
+      "lat": 19.020190,
+      "lon": 72.839959,
+      "kind": "darshini",
+      "priceLevel": 2,
+      "signature": "appam with vegetable stew"
+    },
+    {
+      "label": "appam-acorn-canteen",
+      "displayName": "Appam Acorn Canteen",
+      "neighbourhood": "mahim",
+      "lat": 19.034896,
+      "lon": 72.839156,
+      "kind": "udupi",
+      "priceLevel": 3,
+      "signature": "appam with vegetable stew"
+    },
+    {
+      "label": "appam-acorn-counter",
+      "displayName": "Appam Acorn Counter",
+      "neighbourhood": "dharavi",
+      "lat": 19.040107,
+      "lon": 72.853000,
+      "kind": "tiffin-room",
+      "priceLevel": 1,
+      "signature": "appam with vegetable stew"
+    },
+    {
+      "label": "appam-acorn-courtyard",
+      "displayName": "Appam Acorn Courtyard",
+      "neighbourhood": "chunabhatti",
+      "lat": 19.049498,
+      "lon": 72.871294,
+      "kind": "dosa-cart",
+      "priceLevel": 2,
+      "signature": "appam with vegetable stew"
+    },
+    {
+      "label": "appam-acorn-pantry",
+      "displayName": "Appam Acorn Pantry",
+      "neighbourhood": "santacruz-east",
+      "lat": 19.082460,
+      "lon": 72.853674,
+      "kind": "mess",
+      "priceLevel": 3,
+      "signature": "appam with vegetable stew"
+    },
+    {
+      "label": "appam-acorn-room",
+      "displayName": "Appam Acorn Room",
+      "neighbourhood": "kalanagar",
+      "lat": 19.055992,
+      "lon": 72.846060,
+      "kind": "filter-coffee-bar",
+      "priceLevel": 1,
+      "signature": "filter coffee"
+    },
+    {
+      "label": "appam-acorn-corner",
+      "displayName": "Appam Acorn Corner",
+      "neighbourhood": "sion",
+      "lat": 19.039959,
+      "lon": 72.861655,
+      "kind": "cafe",
+      "priceLevel": 2,
+      "signature": "appam with vegetable stew"
+    },
+    {
+      "label": "appam-acorn-table",
+      "displayName": "Appam Acorn Table",
+      "neighbourhood": "matunga",
+      "lat": 19.016894,
+      "lon": 72.846163,
+      "kind": "darshini",
+      "priceLevel": 3,
+      "signature": "appam with vegetable stew"
+    },
+    {
+      "label": "appam-acorn-stop",
+      "displayName": "Appam Acorn Stop",
+      "neighbourhood": "dadar",
+      "lat": 19.022943,
+      "lon": 72.838939,
+      "kind": "udupi",
+      "priceLevel": 1,
+      "signature": "appam with vegetable stew"
+    },
+    {
+      "label": "neer-nooklet-kitchen",
+      "displayName": "Neer Nooklet Kitchen",
+      "neighbourhood": "mahim",
+      "lat": 19.034319,
+      "lon": 72.840024,
+      "kind": "tiffin-room",
+      "priceLevel": 2,
+      "signature": "ragi dosa"
+    },
+    {
+      "label": "neer-nooklet-tiffins",
+      "displayName": "Neer Nooklet Tiffins",
+      "neighbourhood": "dharavi",
+      "lat": 19.035702,
+      "lon": 72.854712,
+      "kind": "dosa-cart",
+      "priceLevel": 3,
+      "signature": "ragi dosa"
+    },
+    {
+      "label": "neer-nooklet-canteen",
+      "displayName": "Neer Nooklet Canteen",
+      "neighbourhood": "chunabhatti",
+      "lat": 19.049371,
+      "lon": 72.871376,
+      "kind": "mess",
+      "priceLevel": 1,
+      "signature": "ragi dosa"
+    },
+    {
+      "label": "neer-nooklet-counter",
+      "displayName": "Neer Nooklet Counter",
+      "neighbourhood": "santacruz-east",
+      "lat": 19.080160,
+      "lon": 72.851480,
+      "kind": "filter-coffee-bar",
+      "priceLevel": 2,
+      "signature": "filter coffee"
+    },
+    {
+      "label": "neer-nooklet-courtyard",
+      "displayName": "Neer Nooklet Courtyard",
+      "neighbourhood": "kalanagar",
+      "lat": 19.052538,
+      "lon": 72.850902,
+      "kind": "cafe",
+      "priceLevel": 3,
+      "signature": "ragi dosa"
+    },
+    {
+      "label": "neer-nooklet-pantry",
+      "displayName": "Neer Nooklet Pantry",
+      "neighbourhood": "sion",
+      "lat": 19.038307,
+      "lon": 72.861589,
+      "kind": "darshini",
+      "priceLevel": 1,
+      "signature": "ragi dosa"
+    },
+    {
+      "label": "neer-nooklet-room",
+      "displayName": "Neer Nooklet Room",
+      "neighbourhood": "matunga",
+      "lat": 19.017293,
+      "lon": 72.843050,
+      "kind": "udupi",
+      "priceLevel": 2,
+      "signature": "ragi dosa"
+    },
+    {
+      "label": "neer-nooklet-corner",
+      "displayName": "Neer Nooklet Corner",
+      "neighbourhood": "dadar",
+      "lat": 19.018733,
+      "lon": 72.840953,
+      "kind": "tiffin-room",
+      "priceLevel": 3,
+      "signature": "ragi dosa"
+    },
+    {
+      "label": "neer-nooklet-table",
+      "displayName": "Neer Nooklet Table",
+      "neighbourhood": "mahim",
+      "lat": 19.036759,
+      "lon": 72.841592,
+      "kind": "dosa-cart",
+      "priceLevel": 1,
+      "signature": "ragi dosa"
+    },
+    {
+      "label": "neer-nooklet-stop",
+      "displayName": "Neer Nooklet Stop",
+      "neighbourhood": "dharavi",
+      "lat": 19.039282,
+      "lon": 72.853368,
+      "kind": "mess",
+      "priceLevel": 2,
+      "signature": "ragi dosa"
+    },
+    {
+      "label": "millet-mariglow-kitchen",
+      "displayName": "Millet Mariglow Kitchen",
+      "neighbourhood": "chunabhatti",
+      "lat": 19.049192,
+      "lon": 72.867559,
+      "kind": "filter-coffee-bar",
+      "priceLevel": 3,
+      "signature": "filter coffee"
+    },
+    {
+      "label": "millet-mariglow-tiffins",
+      "displayName": "Millet Mariglow Tiffins",
+      "neighbourhood": "santacruz-east",
+      "lat": 19.083302,
+      "lon": 72.853095,
+      "kind": "cafe",
+      "priceLevel": 1,
+      "signature": "pongal"
+    },
+    {
+      "label": "millet-mariglow-canteen",
+      "displayName": "Millet Mariglow Canteen",
+      "neighbourhood": "kalanagar",
+      "lat": 19.056701,
+      "lon": 72.849041,
+      "kind": "darshini",
+      "priceLevel": 2,
+      "signature": "pongal"
+    },
+    {
+      "label": "millet-mariglow-counter",
+      "displayName": "Millet Mariglow Counter",
+      "neighbourhood": "sion",
+      "lat": 19.038682,
+      "lon": 72.859781,
+      "kind": "udupi",
+      "priceLevel": 3,
+      "signature": "pongal"
+    },
+    {
+      "label": "millet-mariglow-courtyard",
+      "displayName": "Millet Mariglow Courtyard",
+      "neighbourhood": "matunga",
+      "lat": 19.018725,
+      "lon": 72.845716,
+      "kind": "tiffin-room",
+      "priceLevel": 1,
+      "signature": "pongal"
+    },
+    {
+      "label": "millet-mariglow-pantry",
+      "displayName": "Millet Mariglow Pantry",
+      "neighbourhood": "dadar",
+      "lat": 19.020964,
+      "lon": 72.838819,
+      "kind": "dosa-cart",
+      "priceLevel": 2,
+      "signature": "pongal"
+    },
+    {
+      "label": "millet-mariglow-room",
+      "displayName": "Millet Mariglow Room",
+      "neighbourhood": "mahim",
+      "lat": 19.036735,
+      "lon": 72.841081,
+      "kind": "mess",
+      "priceLevel": 3,
+      "signature": "pongal"
+    },
+    {
+      "label": "millet-mariglow-corner",
+      "displayName": "Millet Mariglow Corner",
+      "neighbourhood": "dharavi",
+      "lat": 19.037278,
+      "lon": 72.851840,
+      "kind": "filter-coffee-bar",
+      "priceLevel": 1,
+      "signature": "filter coffee"
+    },
+    {
+      "label": "millet-mariglow-table",
+      "displayName": "Millet Mariglow Table",
+      "neighbourhood": "chunabhatti",
+      "lat": 19.049184,
+      "lon": 72.870906,
+      "kind": "cafe",
+      "priceLevel": 2,
+      "signature": "pongal"
+    },
+    {
+      "label": "millet-mariglow-stop",
+      "displayName": "Millet Mariglow Stop",
+      "neighbourhood": "santacruz-east",
+      "lat": 19.082321,
+      "lon": 72.853576,
+      "kind": "darshini",
+      "priceLevel": 3,
+      "signature": "pongal"
+    }
+  ]
+}
