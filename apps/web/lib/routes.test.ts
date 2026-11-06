@@ -63,8 +63,8 @@ test('every other method a website route exports is a read (GET) or listed', () 
   }
 });
 
-test('every POST route of the website is passcode-gated', () => {
-  for (const route of SITE_ROUTES.filter((r) => r.method === 'POST')) assert.equal(route.gate, 'passcode', route.path);
+test('every POST route of the website is a visitor route (passcode-gated when public access is closed)', () => {
+  for (const route of SITE_ROUTES.filter((r) => r.method === 'POST')) assert.equal(route.gate, 'visitor', route.path);
 });
 
 for (const route of PASSCODE_ROUTES) {

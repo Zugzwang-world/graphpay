@@ -1,0 +1,122 @@
+{
+  "site": "https://graphpay-event.vercel.app",
+  "startedAt": "2026-11-06T08:05:25.414Z",
+  "payer": "acceptance.vitalik.graphpay.eth",
+  "shop": "kesar-kingdom.graphpay.eth",
+  "mode": "read-only",
+  "rows": {
+    "F2": {
+      "pass": true,
+      "mode": "public access (ADR-0069): visitor routes open; server-to-server keys stay",
+      "table": [
+        {
+          "route": "POST /api/shop/orders/:id/pay",
+          "gate": "passcode",
+          "signs": "FACILITATOR (and W_DIRECTORY writes the quote on the 402 step)",
+          "without": 401,
+          "wrong": 401
+        },
+        {
+          "route": "POST /api/shop/orders/:id/reorder",
+          "gate": "passcode",
+          "signs": "FACILITATOR",
+          "without": 401,
+          "wrong": 401
+        },
+        {
+          "route": "POST /api/facilitator/verify",
+          "gate": "bearer",
+          "signs": "FACILITATOR (verify reads only)",
+          "without": 401,
+          "wrong": 401
+        },
+        {
+          "route": "POST /api/facilitator/settle",
+          "gate": "bearer",
+          "signs": "FACILITATOR",
+          "without": 401,
+          "wrong": 401
+        },
+        {
+          "route": "POST /api/recorder/attempts",
+          "gate": "bearer",
+          "signs": "W_SYNC",
+          "without": 401,
+          "wrong": 401
+        },
+        {
+          "route": "GET /api/cron/renew",
+          "gate": "bearer",
+          "signs": "RENEWER",
+          "without": 401,
+          "wrong": 401
+        }
+      ],
+      "visitor": {
+        "publicAccess": true,
+        "runWithoutPasscode": 400,
+        "runBody": {
+          "error": "request must be 1 to 400 characters"
+        }
+      },
+      "relayerNonce": {
+        "before": 16,
+        "after": 16
+      },
+      "merchantNonce": {
+        "role": "SHOP_KESAR",
+        "before": 17,
+        "after": 17
+      }
+    },
+    "C6": {
+      "pass": true,
+      "table": [
+        {
+          "route": "POST /api/shop/orders/:id/pay",
+          "gate": "passcode",
+          "signs": "FACILITATOR (and W_DIRECTORY writes the quote on the 402 step)",
+          "without": 401,
+          "wrong": 401
+        },
+        {
+          "route": "POST /api/facilitator/verify",
+          "gate": "bearer",
+          "signs": "FACILITATOR (verify reads only)",
+          "without": 401,
+          "wrong": 401
+        },
+        {
+          "route": "POST /api/facilitator/settle",
+          "gate": "bearer",
+          "signs": "FACILITATOR",
+          "without": 401,
+          "wrong": 401
+        }
+      ],
+      "relayerNonce": {
+        "before": 16,
+        "after": 16
+      }
+    }
+  },
+  "health": {
+    "facilitator": {
+      "startup": "ok",
+      "signer": "0x1AB82871c3E1Be64717269D45F08cA9d54C1EBf6"
+    },
+    "shop": 200,
+    "signerIsRelayer": true
+  },
+  "plan": {
+    "spentTodayMicro": "6000000",
+    "spends": {
+      "C2": 4800000,
+      "C3": 1200000,
+      "C4b": "refused, sends nothing",
+      "refund": "not in this run"
+    },
+    "gas": "none from the payer; the hosted relayer pays"
+  },
+  "endedAt": "2026-11-06T08:05:31.896Z"
+}

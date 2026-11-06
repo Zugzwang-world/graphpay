@@ -1,10 +1,11 @@
 {
   "id": "F2",
-  "at": "2026-11-06T00:14:29.295Z",
+  "at": "2026-11-06T08:05:32.305Z",
   "pass": true,
-  "what": "spending endpoints are passcode-gated",
+  "what": "spending endpoints: visitors open (ADR-0069), the keys between our servers enforced",
   "measured": {
     "pass": true,
+    "mode": "public access (ADR-0069): visitor routes open; server-to-server keys stay",
     "table": [
       {
         "route": "POST /api/shop/orders/:id/pay",
@@ -47,99 +48,29 @@
         "signs": "RENEWER",
         "without": 401,
         "wrong": 401
-      },
-      {
-        "route": "POST /api/customer/pause",
-        "gate": "passcode",
-        "signs": "an owner, merchant or payer key",
-        "without": 401,
-        "wrong": 401
-      },
-      {
-        "route": "POST /api/customer/resume",
-        "gate": "passcode",
-        "signs": "an owner, merchant or payer key",
-        "without": 401,
-        "wrong": 401
-      },
-      {
-        "route": "POST /api/customer/kill-disposable",
-        "gate": "passcode",
-        "signs": "an owner, merchant or payer key",
-        "without": 401,
-        "wrong": 401
-      },
-      {
-        "route": "POST /api/customer/subscribe",
-        "gate": "passcode",
-        "signs": "an owner, merchant or payer key",
-        "without": 401,
-        "wrong": 401
-      },
-      {
-        "route": "POST /api/customer/unsubscribe",
-        "gate": "passcode",
-        "signs": "an owner, merchant or payer key",
-        "without": 401,
-        "wrong": 401
-      },
-      {
-        "route": "POST /api/customer/reorder",
-        "gate": "passcode",
-        "signs": "an owner, merchant or payer key",
-        "without": 401,
-        "wrong": 401
-      },
-      {
-        "route": "POST /api/customer/refund-request",
-        "gate": "passcode",
-        "signs": "an owner, merchant or payer key",
-        "without": 401,
-        "wrong": 401
-      },
-      {
-        "route": "POST /api/merchant/dispatch",
-        "gate": "passcode",
-        "signs": "an owner, merchant or payer key",
-        "without": 401,
-        "wrong": 401
-      },
-      {
-        "route": "POST /api/merchant/refund",
-        "gate": "passcode",
-        "signs": "an owner, merchant or payer key",
-        "without": 401,
-        "wrong": 401
-      },
-      {
-        "route": "POST /api/merchant/open",
-        "gate": "passcode",
-        "signs": "W_DIRECTORY",
-        "without": 401,
-        "wrong": 401
-      },
-      {
-        "route": "POST /api/agents/run",
-        "gate": "passcode",
-        "signs": "an owner, merchant or payer key",
-        "without": 401,
-        "wrong": 401
       }
     ],
+    "visitor": {
+      "publicAccess": true,
+      "runWithoutPasscode": 400,
+      "runBody": {
+        "error": "request must be 1 to 400 characters"
+      }
+    },
     "relayerNonce": {
-      "before": 10,
-      "after": 10
+      "before": 16,
+      "after": 16
     },
     "merchantNonce": {
       "role": "SHOP_KESAR",
-      "before": 11,
-      "after": 11
+      "before": 17,
+      "after": 17
     }
   },
-  "expected": "every spending route 401 without and with a wrong passcode or bearer; relayer nonce unchanged",
+  "expected": "public access on (config site.publicAccess, ADR-0069): the run route takes a visitor without a passcode (an empty request is a 400, nothing starts); every server-to-server route (shop pay and re-order, facilitator, recorder, cron) the app's 401 without and with a wrong key; relayer and merchant nonces unchanged",
   "evidence": {
-    "file": "docs/sessions/integration/hosted/paid-2026-11-06T00-00-52-957Z.json",
-    "startedAt": "2026-11-06T00:00:52.957Z",
+    "file": "docs/sessions/integration/hosted/read-2026-11-06T08-05-25-414Z.json",
+    "startedAt": "2026-11-06T08:05:25.414Z",
     "site": "https://graphpay-event.vercel.app"
   }
 }
