@@ -37,6 +37,17 @@ Agents (T4) and Join add one row per full errand run, so the presets can be cali
 | 04:32 | Join e2e:food real, rehearsal (live hooks, real shop) | testing | `claude-opus-5-5`, xhigh | 56.5 | $0.2289 | refused by kesar's risk check: the MCP's buyer_risk table bug (fixed, PR 48) and rehearsal's real 1/6 cancel rate (correct by policy) |
 | 04:40 | Join e2e:food real, payer | testing | `claude-opus-5-5`, xhigh | 88.8 | $0.2623 | approved by the shop; the signer answered a headers object, so nothing was signed (fixed) |
 | 04:43 | Join e2e:food real, payer (the counting run) | testing | `claude-opus-5-5`, xhigh | 122.1 | $0.2986 | **paid** 4.80 on Whitechain, delivered, refunded 0.80; A–E pass |
+| 10:31 | T4 Kimi run 0 (mock services, before the fix) | testing | `kimi-k3.1-pro`, high | 6.4 | $0.0042 | **no purchase**: with a `response_format` Kimi answered the JSON at once and called no tool (1 call); fixed in PR 92 by putting the schema in the instructions |
+| 10:32 | T4 Kimi run 1 (mock services, after the fix) | testing | `kimi-k3.1-pro`, high | 123.4 | $0.0687 | paid the good shop; 18 calls, 26,452 tokens |
+| 10:34 | T4 Kimi calibration 1 (mock services) | testing | `kimi-k3.1-pro`, high | 149.7 | $0.0661 | paid the good shop; 19 calls, 28,764 tokens |
+| 10:37 | T4 Kimi calibration 2 | testing | `kimi-k3.1-pro`, high | 126.7 | $0.0586 | paid the good shop; 19 calls, 27,804 tokens |
+| 10:39 | T4 Kimi calibration 3 | testing | `kimi-k3.1-pro`, high | 155.4 | $0.0664 | paid the good shop; 19 calls, 28,697 tokens |
+| 10:41 | T4 Kimi calibration 1 (mock services) | video | `kimi-k3.1-pro-highspeed`, high | 70.0 | $0.1423 | paid the good shop; 19 calls, 28,706 tokens |
+| 10:42 | T4 Kimi calibration 2 | video | `kimi-k3.1-pro-highspeed`, high | 56.0 | $0.1091 | paid the good shop; 19 calls, 27,189 tokens |
+| 10:43 | T4 Kimi calibration 3 | video | `kimi-k3.1-pro-highspeed`, high | 57.2 | $0.1145 | paid the good shop; 19 calls, 27,850 tokens |
+| 10:44 | T4 Kimi calibration 1 (mock services) | live | `kimi-k3.1-pro-highspeed`, high | 58.3 | $0.1139 | paid the good shop; 19 calls, 27,448 tokens |
+| 10:45 | T4 Kimi calibration 2 | live | `kimi-k3.1-pro-highspeed`, high | 60.3 | $0.1210 | paid the good shop; 19 calls, 28,304 tokens |
+| 10:46 | T4 Kimi calibration 3 | live | `kimi-k3.1-pro-highspeed`, high | 64.5 | $0.1249 | paid the good shop; 19 calls, 28,281 tokens; highspeed is about 2.2 times faster than pro and about 1.9 times the cost; Opus 5.5 xhigh was 73 to 321 s at about $0.30 |
 
 ## Kickoff rules and booth questions (closed; rolled up 06:55 IST)
 

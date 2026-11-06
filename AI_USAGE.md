@@ -16,7 +16,7 @@ GraphPay was built with **Claude Code** (Anthropic), running mostly unattended i
 | T6 AgentPay SDK (`packages/agentpay`), from Fri 03:25 IST | Opus 5.5 at xhigh, as the founder started it; high from about 04:20 IST (the founder's instruction) |
 | Submission (M17), from Fri 13:00 IST | planned: Sonnet 5.5 at high |
 | subagents | a **reviewer** (reads each branch's diff, blocking issues first) and a **verifier** (checks versions, addresses, chain ids and API names against primary sources), defined in `.claude/agents/` |
-| the product at runtime | the buyer and shop agents run on `claude-haiku-5-5` through the Anthropic API with the Vercel AI SDK (ADR-0011, ADR-0019); Grok only if a session switches to it, and then it is recorded here |
+| the product at runtime | from Fri 6 Nov the buyer and shop agents run on Kimi (Moonshot AI) through the Vercel AI SDK: `kimi-k3.1-pro` (testing) and `kimi-k3.1-pro-highspeed` (video and live) at reasoning effort high (ADR-0067, ADR-0019), because the Anthropic key ran out of credit. The Anthropic presets (`claude-opus-5-5`, `claude-haiku-5-5`) stay in the config as fallbacks. Before that, the M10 test runs used `claude-opus-5-5` at xhigh. Seconds and API cost per run for both are in the preset calibration table in `docs/thinking-partner/OPEN.md`; Grok only if a session switches to it, and then it is recorded here |
 
 ## 3. What AI wrote
 
