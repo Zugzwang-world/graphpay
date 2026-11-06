@@ -72,7 +72,13 @@ Updated 23:10 IST, Fri 6 Nov (night Coordinator, `local_1caa580c-…`).
 
 ## w1-identity
 
-Started 23:02 IST, Fri 6 Nov (session `local_45f7cf5d-c31e-4dbf-b849-466f3067bdd3`). W1 rewrites this section at the end of each step.
+Updated 23:35 IST, Fri 6 Nov (W1 Identity, session `local_45f7cf5d-c31e-4dbf-b849-466f3067bdd3`).
+- **Done: the new shops are on ENS** (Sepolia), each with storefront, risk and dispatch agents:
+  - `filter-and-fold.graphpay.eth`, `idli-index.graphpay.eth`, `tawa-tangle.graphpay.eth`.
+  - Each pays into its old shop's wallet, so no money moved. The old names stay registered as history.
+  - 30 transactions; all 100 ENS acceptance reads pass for the new names (`docs/sessions/identity/namespace.md`).
+- **Waiting on:** the Coordinator's go for the `story.json` label flip, after W2 writes the new shops' Arkiv rows.
+- **Next:** the kill (a funded spare, the site's Kill route, the watcher's revoke, a refused payment, a fresh spare).
 
 ## w2-city
 

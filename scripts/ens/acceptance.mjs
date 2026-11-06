@@ -1,13 +1,14 @@
-// node scripts/ens/acceptance.mjs [--fork <loopback url>]
+// node scripts/ens/acceptance.mjs [--fork <loopback url>] [--relabel <shop key>=<label>,…]
 // Read-only checks on Ethereum Sepolia (or a fork): B1 (every name registered, epoch, own resolver,
 // kind, wallet), B4 (x-graphpay-accepts), B5 (the wildcard), B8's record reads and B9 (a)'s address
 // reads and its payee comparison (each cast shop's last settled order's merchant against the shop's ENS
 // address). B8's MCP call is made against the hosted endpoint.
+// With --relabel, the shops are checked under their new labels (before the story flips to them).
 // Exit 1 on any failure. Prints names, nodes and public addresses only.
 
 import { createPublicClient, getAddress, http } from 'viem';
-import { config } from '../../packages/config/index.mjs';
-import { coinResource, disposableAgent, ensChain, KEYS, namehash, namespacePlan, parseAccepts, permissionedResolverAbi, readAddressBytes, readText, RESOLVER, retryingReads, textResource, WHITECHAIN_COIN_TYPE, walkName } from '../../packages/ens/index.mjs';
+import { activeCast, config } from '../../packages/config/index.mjs';
+import { coinResource, disposableAgent, ensChain, KEYS, namehash, namespacePlan, parseAccepts, parseRelabel, permissionedResolverAbi, readAddressBytes, readText, relabelShops, RESOLVER, retryingReads, textResource, WHITECHAIN_COIN_TYPE, walkName } from '../../packages/ens/index.mjs';
 import { checkoutAbi } from '../../packages/contracts/index.mjs';
 import { clientsFor } from '../lib/chains.mjs';
 import { loadEnv } from '../lib/env-loader.mjs';
@@ -18,7 +19,9 @@ const { values } = loadEnv();
 const wallets = roleAddresses(values);
 const rawClient = fork ? createPublicClient({ chain: ensChain(), transport: http(fork, { timeout: 120_000 }) }) : (await clientsFor(config.ens.network, Object.fromEntries(values))).publicClient;
 const client = retryingReads(rawClient);
-const plan = namespacePlan();
+if (process.argv.some((a) => a.startsWith('--relabel='))) throw new Error('use --relabel <shop key>=<label>,…, not --relabel=…');
+const relabel = parseRelabel(process.argv.includes('--relabel') ? (process.argv[process.argv.indexOf('--relabel') + 1] ?? '') : undefined);
+const plan = namespacePlan({ cast: relabel.size > 0 ? relabelShops(activeCast(), relabel) : activeCast() });
 const disposable = process.env.DISPOSABLE_N ? [disposableAgent(Number(process.env.DISPOSABLE_N))] : [];
 const agents = [...plan.agents, ...disposable];
 const failures = [];
