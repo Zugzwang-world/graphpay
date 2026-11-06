@@ -42,6 +42,9 @@ const label = (cast: LineCast, role: string): string => cast.agents[role]?.label
 export function endSentence(m: ErrandModel): string | null {
   const end = m.end;
   if (!end || end.status === 'paid') return null;
+  // Once the signature has gone out, never "nothing was paid": the phone confirms through the
+  // payer's newest order, and only an unconfirmed payment ends here.
+  if (end.status !== 'refused' && (m.signed || m.settledTx !== null || m.paid !== null)) return 'The errand stopped after signing. The payment is not confirmed yet: check the pass before trying again.';
   if (end.status === 'failed') {
     const why = end.reason ?? '';
     if (/busy/i.test(why)) return 'Another errand is running. Try again in a minute.';
