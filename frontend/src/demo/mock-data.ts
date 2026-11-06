@@ -13,22 +13,10 @@ import { story, productById } from '@/data/story';
 import { usdt } from '@/lib/money';
 import { DAY, HOUR, isoDate } from '@/lib/time';
 import { whitechainTx } from './links';
+import { startOfCityDay } from './rules';
 
 export interface MockState extends Omit<DemoSnapshot, 'mode' | 'now'> {
   nextOrderNumber: number;
-}
-
-function startOfCityDay(now: number): number {
-  // Midnight in the city, found by stepping back from `now` by its city clock time.
-  const clock = new Intl.DateTimeFormat('en-GB', {
-    timeZone: story.city.timeZone,
-    hour: '2-digit',
-    minute: '2-digit',
-    second: '2-digit',
-    hourCycle: 'h23',
-  }).format(now);
-  const [h, m, s] = clock.split(':').map(Number) as [number, number, number];
-  return now - ((h * 60 + m) * 60 + s) * 1000 - (now % 1000);
 }
 
 export function seedAgents(now: number): AgentState[] {
@@ -137,5 +125,3 @@ export function seedState(now: number): MockState {
     nextOrderNumber: n,
   };
 }
-
-export { startOfCityDay };

@@ -246,7 +246,8 @@ export type DemoEvent =
   | { type: 'demo.reset' };
 
 export type DemoEventType = DemoEvent['type'];
-export type EventOf<T extends DemoEventType> = Extract<DemoEvent, { type: T }>;
+/** The event shape for one type, including members whose `type` is a union. */
+export type EventOf<T extends DemoEventType> = DemoEvent extends infer E ? (E extends { type: infer U } ? (T extends U ? E : never) : never) : never;
 
 export interface DemoAdapter {
   mode: 'mock' | 'live';

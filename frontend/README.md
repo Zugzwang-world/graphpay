@@ -13,7 +13,28 @@ cd frontend
 npm install
 npm run dev        # http://localhost:5180
 npm run build      # typecheck + production build
+npm test           # the seven journeys against the mock adapter (Vitest, fake timers)
 ```
+
+Dev extras: `?debug` logs every mock event to the console, and in dev the mock adapter is available as `window.__demo`.
+
+## How the mock engine works
+
+- **One store for both phones.** `MockAdapter` (`src/demo/mock-adapter.ts`) holds the in-memory state. Both apps read it through `DemoProvider` and the same snapshot, so an action in one phone appears live in the other.
+- **Events drive state.** `src/demo/state.ts` folds `DemoEvent`s into the snapshot. A status changes when its event arrives, never when a button is pressed. A test checks that replaying the events gives exactly the store's state, so a live adapter can replace the mock.
+- **Scripted journeys** with delays from `src/demo/timing.ts` (agents think 1–3 s, settlement 2–4 s). Reset bumps an epoch, so steps still pending are dropped.
+- **Shared rules** in `src/demo/rules.ts`: refundable maximum, refund eligibility, pass state (the worst state wins), renewal schedules and next charge dates in the city time zone.
+- **Behaviour copied from the real system (Appendix D):**
+  - The ENS gate refuses a paused or revoked agent before any quote.
+  - A payment over the cap is refused (`cap`).
+  - The trap shop is rejected for its refund rate.
+  - A closed shop is not considered and takes no quote. Closing it with a quote open withdraws the quote.
+  - A quote expiring before payment re-quotes silently.
+  - A renewal due while the shop is closed is skipped and retried when it opens.
+  - An agent can never raise its own cap.
+  - The customer pays no gas.
+- **Every explorer link is mock** (`mock: true`). Its hash is generated, and the UI must say so.
+- **Story note:** the sample pass is 6.00 a day with 2.00 already used, so after the first 4.00 order the pass is used up. A second order or a reorder is refused for the cap until the cap is raised in C7. This makes journey 5 natural, but it is worth knowing during a demo.
 
 ## Structure
 
@@ -100,7 +121,7 @@ All are marked `PROPOSED (mock only)` in `src/demo/contract.ts`.
 ## Milestones
 
 - [x] **F0** Foundations: project, tokens, fonts, story data, copy, contract, mock seed data, README
-- [ ] **F1** Mock engine: shared store, event bus, scripted journeys, reset
+- [x] **F1** Mock engine: shared store, event bus, scripted journeys, reset (`npm test`: 22 journey tests)
 - [ ] **F2** Stage: dark stage, two iPhone frames, strip, narrow-width switch
 - [ ] **F3** Shared components 1: header and coin hamburger, page strip, chips, sheets, states, dev state switcher
 - [ ] **F4** Shared components 2: iOS keyboard, AmountEntry, StatusTracker, AgentAvatar, sounds, SVG fox

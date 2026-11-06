@@ -398,6 +398,33 @@ export const copy = {
   mascot: {
     label: 'GraphPay fox',
   },
+
+  schedule: {
+    daily: 'every day',
+    dailyShort: 'Daily',
+    weekly: 'every {day}',
+    biweekly: 'every other {day}',
+    biweeklyShort: '{day}, 2 wk',
+    monthly: 'on the {date} of every month',
+  },
+
+  /** Lines the mock adapter's scripted agents say. */
+  mock: {
+    errorRetry: 'The agents lost the connection for a moment.',
+    refundDeclined: 'Declined by the shop',
+  },
+  mockGraph: {
+    question: 'Who sells {product} near {area}, and how do their buyers rate them?',
+  },
+  mockRisk: {
+    manyRefunds: 'this buyer asks for refunds often',
+  },
+  mockRenewal: {
+    none: 'No renewal to run. Set one up from an order first.',
+  },
+  mockRefund: {
+    shopInitiated: 'Refunded by the shop',
+  },
 } as const;
 
 export type Copy = typeof copy;
