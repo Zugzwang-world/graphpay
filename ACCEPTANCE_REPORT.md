@@ -1,8 +1,8 @@
 # Acceptance report
 
-Written by `pnpm acceptance` at 2026-11-06T00:03:12.292Z. Checks and pass criteria: `planning/ACCEPTANCE_TESTS.md` and `docs/plan/ACCEPTANCE_ADDITIONS.md`. Only D7 may be `blocked` (C7 and E3 no longer wait on supply, ADR-0054); a check without a result is `not run`, never `pass`.
+Written by `pnpm acceptance` at 2026-11-06T00:09:35.655Z. Checks and pass criteria: `planning/ACCEPTANCE_TESTS.md` and `docs/plan/ACCEPTANCE_ADDITIONS.md`. Only D7 may be `blocked` (C7 and E3 no longer wait on supply, ADR-0054); a check without a result is `not run`, never `pass`.
 
-**41 pass, 0 fail, 1 blocked, 6 not run** (of 48).
+**42 pass, 0 fail, 1 blocked, 5 not run** (of 48).
 
 | id | check | status | note |
 |---|---|---|---|
@@ -28,7 +28,7 @@ Written by `pnpm acceptance` at 2026-11-06T00:03:12.292Z. Checks and pass criter
 | C1 | Contracts are verified on the explorer | pass |  |
 | C2 | A payment through the facilitator costs the payer no gas | pass |  |
 | C3 | Partial refund, re-order and renewal work | pass |  |
-| C4 | Revoked-agent and over-cap failures are recorded | not run | (a) needs a POLICY_WRITER revoke of the scout agent while the workers hold that key; (b) passes |
+| C4 | Revoked-agent and over-cap failures are recorded | pass |  |
 | C5 | A repeat request returns "already paid" | pass |  |
 | C6 | Hosted endpoints return 401 without the passcode or token | pass |  |
 | C7 | **The qualifying payment in test USDT `0xcedfB56113143d55b2358b8CFbB0dEB5Ad2f55a7`** | pass |  |
@@ -709,12 +709,12 @@ Status: **pass**.
 
 ## C4: Revoked-agent and over-cap failures are recorded
 
-Status: **not run** ((a) needs a POLICY_WRITER revoke of the scout agent while the workers hold that key; (b) passes).
+Status: **pass**.
 
-### C4 (2026-11-06T00:03:12.276Z)
+### C4 (2026-11-06T00:09:35.633Z)
 
 - What: revoked-agent and over-cap failures are recorded
-- Pass: null
+- Pass: true
 - Expected: (a) PaymentFailed(AGENT_REVOKED), gas 160,525 ±15%, an on-chain fail edge; (b) 402 CAP_EXCEEDED, no transaction, an off-chain fail edge
 - Evidence: `{"file":"docs/sessions/integration/hosted/paid-2026-11-06T00-00-52-957Z.json","startedAt":"2026-11-06T00:00:52.957Z","site":"https://graphpay-event.vercel.app"}`
 
@@ -736,8 +736,31 @@ Status: **not run** ((a) needs a POLICY_WRITER revoke of the scout agent while t
     }
   },
   "a": {
-    "pass": null,
-    "why": "needs a POLICY_WRITER revoke of the scout agent while the workers hold that key"
+    "pass": true,
+    "file": "docs/sessions/integration/hosted/c4a-2026-11-06T00-07-29-876Z.json",
+    "attempt": {
+      "status": 402,
+      "reason": "AGENT_REVOKED",
+      "orderId": "0x6af2397b92461068b29850e41167e9bed2018606793ed8e0dfba85526989b4ef",
+      "tx": "0x312d31320300c20205ac46a66501ac4738c2ac572ef1abebd21534765aee6021",
+      "explorer": "https://explorer.testnet.whitechain.io/tx/0x312d31320300c20205ac46a66501ac4738c2ac572ef1abebd21534765aee6021",
+      "gasUsed": 136574,
+      "paymentFailed": {
+        "reason": 1,
+        "logIndex": 1,
+        "ref": "1874:0x312d31320300c20205ac46a66501ac4738c2ac572ef1abebd21534765aee6021:1"
+      }
+    },
+    "revoke": "https://explorer.testnet.whitechain.io/tx/0x4fc9dabb3d9c1a16f56c30aeac5a18bda720c8dabab7f5b881359f89ef5534bc",
+    "restore": "https://explorer.testnet.whitechain.io/tx/0xbafe960b7e34da24e8b84da0822f89ca4ad965263bda9c2bf082b9002d0511a7",
+    "restoredExactly": true,
+    "failEdges": [
+      {
+        "entityKey": "0xd39ad5ba868ed08493ac5b8bd83639f2c16a2b7e8ab52b7ccc14ef1888958982",
+        "kind": "fail",
+        "ref": "1874:0x312d31320300c20205ac46a66501ac4738c2ac572ef1abebd21534765aee6021:1"
+      }
+    ]
   }
 }
 ```

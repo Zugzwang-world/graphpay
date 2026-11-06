@@ -302,6 +302,17 @@ async function hosted(root, id, env) {
     return { pass, ...(pass === null ? { why: `not run yet: ${Object.keys(parts).filter((k) => parts[k] === null).join(', ')}` } : {}), what, measured: { ...parts, refundTx: row.refund ?? null, reorderTx: row.reorder ?? null, renewalTx: renewal.measured }, expected: 'Refunded(800000, full false), payer +0.80, gas 75,344 ±15%; re-order OrderCreated(kind 1, parent) + PaymentSettled 1.20, gas 252,082 ±15%; SubscriptionRenewed(cycle 2) + PaymentSettled of a kind-2 order, gas 201,555 ±15%', evidence: { ...evidence, renewal: renewal.evidence } };
   }
   if (id === 'C4') {
+    // (a) from integration/c4a.mjs (the revoke, the refused payment, the restore), and the
+    // mirror's on-chain fail edge for its PaymentFailed log, exactly once.
+    const dir = join(root, 'docs/sessions/integration/hosted');
+    const c4a = readdirSync(dir).filter((f) => f.startsWith('c4a-')).sort().at(-1);
+    if (c4a) {
+      const k = JSON.parse(readFileSync(join(dir, c4a), 'utf8'));
+      const ref = k.attempt?.paymentFailed?.ref;
+      const arkiv = await connectArkiv({ backend: 'rabdi', env: {} });
+      const edges = ref ? (await readAll(arkiv.publicClient, ENTITIES.edge, { owner: writerAddresses().W_LEDGER, cap: 4000, truncate: true })).filter((e) => e.ref === ref) : [];
+      row.a = { pass: k.pass === true && edges.length === 1 && edges[0].kind === 'fail', file: `docs/sessions/integration/hosted/${c4a}`, attempt: k.attempt, revoke: k.revoke?.explorer, restore: k.restore?.explorer, restoredExactly: k.restoredExactly, failEdges: edges.map((e) => ({ entityKey: e.$key, kind: e.kind, ref: e.ref })) };
+    }
     const pass = row.a?.pass === false || row.b?.pass === false ? false : row.a?.pass === true && row.b?.pass === true ? true : null;
     return { pass, ...(pass === null ? { why: `(a) ${row.a?.why ?? 'not run'}; (b) ${row.b?.pass ? 'passes' : 'not run'}` } : {}), what, measured: row, expected: '(a) PaymentFailed(AGENT_REVOKED), gas 160,525 ±15%, an on-chain fail edge; (b) 402 CAP_EXCEEDED, no transaction, an off-chain fail edge', evidence };
   }
