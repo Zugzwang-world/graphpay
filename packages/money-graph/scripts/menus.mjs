@@ -7,6 +7,8 @@
 //                     instead of the story's live labels
 //   --images <dir>    every item's image from <dir>/<sku>.<jpg|png|webp|svg>, where one exists
 //                     (small files we own; each is uploaded first and the item's `image` points at it)
+//   --storefronts <dir>  every shop's storefront photo from <dir>/<label>.<ext> (the shop's ENS
+//                     label), uploaded the same way; the menu's `shop.image` points at it
 //   --image <file> --shop <story shop key> --sku <sku>   one image for one item
 // Prints addresses-free labels, keys, hashes and links only; never a URL with a secret.
 // W_DIRECTORY creates (and, on a changed menu, patches) its own `menu` rows: not while a
@@ -25,6 +27,7 @@ const flag = (name) => (process.argv.includes(name) ? process.argv[process.argv.
 const execute = process.argv.includes('--execute');
 const castName = flag('--cast');
 const imagesDir = flag('--images');
+const storefrontsDir = flag('--storefronts');
 const imageFile = flag('--image');
 const imageShop = flag('--shop');
 const imageSku = flag('--sku');
@@ -37,10 +40,21 @@ if (imageFile) {
   if (!TYPES[extname(imageFile)]) throw new Error('menus: the image is .svg, .png, .jpg or .webp');
   target.imageFile = imageFile;
 }
-// --images is read from the repo root (pnpm --filter runs scripts in the package), and every item
-// must have its image there: a menu written without them would replace one that has them.
+// --images and --storefronts are read from the repo root (pnpm --filter runs scripts in the
+// package), and every item and shop must have its image there: a menu written without them would
+// replace one that has them.
+const fromRoot = (d) => (isAbsolute(d) ? d : resolve(fileURLToPath(new URL('../../../', import.meta.url)), d));
+if (storefrontsDir) {
+  const dir = fromRoot(storefrontsDir);
+  if (!existsSync(dir)) throw new Error(`menus: --storefronts ${storefrontsDir} is not a directory in the repo`);
+  for (const m of menus) {
+    const label = m.shopEns.split('.')[0];
+    m.imageFile = Object.keys(TYPES).map((ext) => join(dir, `${label}${ext}`)).find((f) => existsSync(f));
+    if (!m.imageFile) throw new Error(`menus: ${label} has no storefront photo in ${storefrontsDir}`);
+  }
+}
 if (imagesDir) {
-  const dir = isAbsolute(imagesDir) ? imagesDir : resolve(fileURLToPath(new URL('../../../', import.meta.url)), imagesDir);
+  const dir = fromRoot(imagesDir);
   if (!existsSync(dir)) throw new Error(`menus: --images ${imagesDir} is not a directory in the repo`);
   for (const m of menus) {
     for (const item of m.items) {
@@ -55,7 +69,8 @@ if (!execute) {
     const doc = menuDocument({ ...m, version: 1 });
     const bytes = menuBytes(doc);
     const images = m.items.filter((i) => i.imageFile).map((i) => `${i.sku} (${statSync(i.imageFile).size} bytes)`);
-    console.log(`${m.shopEns}: ${bytes.length} bytes, sha256 ${sha256Hex(bytes)} without the image references; ${images.length} of ${m.items.length} items with an image${images.length ? `: ${images.join(', ')}` : ''} (dry run, nothing uploaded)`);
+    const storefront = m.imageFile ? `the storefront (${statSync(m.imageFile).size} bytes) and ` : '';
+    console.log(`${m.shopEns}: ${bytes.length} bytes, sha256 ${sha256Hex(bytes)} without the image references; ${storefront}${images.length} of ${m.items.length} items with an image${images.length ? `: ${images.join(', ')}` : ''} (dry run, nothing uploaded)`);
   }
   process.exit(0);
 }
@@ -64,6 +79,11 @@ const env = loadSecrets();
 const arkiv = await connectArkiv({ backend: 'rabdi', env, role: 'W_DIRECTORY' });
 const swarm = swarmClient();
 for (const m of menus) {
+  if (m.imageFile) {
+    const bytes = new Uint8Array(readFileSync(m.imageFile));
+    m.image = await uploadMenuImage(swarm, { bytes, name: `storefront-${m.imageFile.split('/').pop()}`, contentType: TYPES[extname(m.imageFile)] });
+    console.log(`storefront ${m.image.name}: ref ${m.image.ref}, ${m.image.bytes} bytes, sha256 ${m.image.sha256}`);
+  }
   for (const item of m.items) {
     if (!item.imageFile) continue;
     const bytes = new Uint8Array(readFileSync(item.imageFile));
@@ -87,7 +107,8 @@ for (const m of menus) {
   const r = await writeMenu(arkiv, swarm, { shopEns: m.shopEns, document });
   console.log(`${m.shopEns}: v${r.version} ${r.created ? 'created' : r.unchanged ? 'unchanged' : 'patched'} entity ${r.entityKey} ref ${r.reference}${r.txHash ? ` tx ${r.txHash}` : ''}`);
   const images = m.items.filter((i) => i.image).map((i) => ({ sku: i.sku, ref: i.image.ref, link: swarm.link(i.image.ref, i.image.name), sha256: i.image.sha256, bytes: i.image.bytes }));
+  const storefront = m.image ? { ref: m.image.ref, link: swarm.link(m.image.ref, m.image.name), sha256: m.image.sha256, bytes: m.image.bytes } : null;
   const before = (earlier?.menus ?? []).find((e) => e.shopEns === m.shopEns && e.reference === r.reference);
-  out.push({ shopEns: m.shopEns, entityKey: r.entityKey, txHash: r.txHash ?? before?.txHash ?? null, reference: r.reference, link: r.link, version: r.version, contentHash: sha256Hex(menuBytes({ ...document, version: r.version })), images });
+  out.push({ shopEns: m.shopEns, entityKey: r.entityKey, txHash: r.txHash ?? before?.txHash ?? null, reference: r.reference, link: r.link, version: r.version, contentHash: sha256Hex(menuBytes({ ...document, version: r.version })), ...(storefront ? { storefront } : {}), images });
   save();
 }

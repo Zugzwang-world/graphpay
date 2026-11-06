@@ -43,14 +43,15 @@ export async function uploadMenuImage(swarm, { bytes, name, contentType }) {
 export const menuImageLink = (swarm, image) => swarm.link(image.ref, image.name);
 
 // The public document: only what the shop publishes anyway. Prices are micro-USDT (6 decimals).
-// An item may carry an `image` (see uploadMenuImage); menus without one read as before.
-export function menuDocument({ shopEns, name, items, version, synthetic = true }) {
+// An item may carry an `image` (see uploadMenuImage), and the shop its storefront photo as
+// `shop.image`; menus without either read as before.
+export function menuDocument({ shopEns, name, items, version, synthetic = true, image = null }) {
   if (!Array.isArray(items) || items.length === 0) throw new Error('money-graph: a menu needs at least one item');
   return {
     schema: 'graphpay.menu.v1',
     synthetic: Boolean(synthetic),
     version,
-    shop: { ens: normalizedName(shopEns), name },
+    shop: { ens: normalizedName(shopEns), name, ...(image ? { image: imageField(image) } : {}) },
     items: items.map((i) => ({ sku: i.sku, name: i.name, unit: i.unit, quantity: i.quantity, priceMicro: i.priceMicro, ...(i.image ? { image: imageField(i.image) } : {}) })),
   };
 }
