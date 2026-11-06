@@ -2,7 +2,6 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { MiddleSwitch } from '@/components/middle-switch';
 import { LiveRunBridge } from '@/components/live-run-bridge';
-import { QrCode } from '@/components/qr-code';
 import { siteModel } from '@/lib/site.server';
 
 export const metadata: Metadata = { title: 'Live' };
@@ -26,17 +25,6 @@ export default function LiveStagePage() {
         </div>
         <div className="stage-middle">
           <MiddleSwitch />
-          <aside className="phone-links" aria-label="Open the phone views on your own phone">
-            <figure>
-              <QrCode url={`${model.siteUrl}/phones/customer.html`} size={56} label={`QR code for ${customerLabel}`} />
-              <figcaption className="small">{customerLabel}</figcaption>
-            </figure>
-            <figure>
-              <QrCode url={`${model.siteUrl}/phones/merchant.html`} size={56} label={`QR code for ${merchantLabel}`} />
-              <figcaption className="small">{merchantLabel}</figcaption>
-            </figure>
-            <p className="small muted">Scan to follow along on your own phone. Testnets only; no personal data collected.</p>
-          </aside>
         </div>
         <div className="stage-merchant">
           <p className="stage-label">

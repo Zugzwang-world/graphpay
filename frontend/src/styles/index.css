@@ -174,7 +174,7 @@
 @keyframes tracker-pulse { 50% { transform: scale(1.08); } }
 .tracker-current { animation: tracker-pulse 1.8s ease-in-out infinite; }
 
-@keyframes avatar-think { 50% { transform: translateY(-3px); } }
+@keyframes avatar-think { 50% { transform: translateY(-5px); } }
 @keyframes avatar-pop { 50% { transform: scale(1.1); } }
 @keyframes avatar-drop { 50% { transform: translateY(3px) rotate(-6deg); } }
 @keyframes avatar-nod { 50% { transform: rotate(9deg); } }
