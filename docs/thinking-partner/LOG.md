@@ -92,6 +92,6 @@ One line per PR: time (IST) · activity · result · PR link. Append under your 
 - 06:55 IST · records · 06:45 relay: M4 and M16 done, acceptance at 42 pass, 0 fail; LOG rolled up; OPEN's closed M0 tables condensed · https://github.com/Zugzwang-world/graphpay/pull/68
 - 08:30 IST · records · morning relay: 42 pass, 0 fail; usage 82%; the story brief, a message to wake the sessions, and the budget call are the founder's · https://github.com/Zugzwang-world/graphpay/pull/69
 - 09:35 IST · records · the 09:35 brief filed; ADR-0063 (both SDKs as @graphpay_ethglobal by 13:00), ADR-0064 (one SDK per lane, the cab-ride moment), ADR-0065 (apps/demo-ui); labels and issue templates; the names renamed in the records; NOW and Founder now for the handoff · https://github.com/Zugzwang-world/graphpay/pull/72
-- 09:46 IST · records · the standing rule "no target times" (ADR-0066) in the coordinator file, NOW, OPEN and the master plan; every session told · PR_LINK
+- 09:46 IST · records · the standing rule "no target times" (ADR-0066) in the coordinator file, NOW, OPEN and the master plan; every session told · https://github.com/Zugzwang-world/graphpay/pull/76
 
 ## submission
