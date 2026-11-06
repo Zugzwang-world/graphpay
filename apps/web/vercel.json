@@ -5,6 +5,10 @@
     {
       "path": "/api/cron/renew",
       "schedule": "* * * * *"
+    },
+    {
+      "path": "/api/cron/heal",
+      "schedule": "* * * * *"
     }
   ]
 }
