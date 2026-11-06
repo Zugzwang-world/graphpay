@@ -1,8 +1,16 @@
 # ADR-0078: The owner's cap reaches the spending policy through the watcher, never above the configured cap
-Status: accepted · Date: 2026-11-07 00:10 IST · Decided by: the night Coordinator, under the founder's authority (W3 brief, item 4b) · Source: the W3 brief `docs/thinking-partner/briefs/2258-w3-payments.md`; NOW, "Decided tonight (Coordinator)", 00:00 IST
+Status: accepted · Date: 2026-11-07 00:10 IST · Decided by: the night Coordinator, under the founder's authority (W3 brief, item 4b) · Source: the W3 brief `docs/thinking-partner/briefs/2258-w3-payments.md`; NOW, "Decided tonight (Coordinator)", 00:00 IST; the Coordinator's approval to W3 with these bounds. Amends `planning/SPEC/IDENTITY_ENS.md` §8; cites ADR-0021
 
 ## Decision
 When the payer agent's owner changes its daily cap (`POST /api/customer/cap`), the owner's wallet writes the ENS record `graphpay.cap_micro` on Sepolia. The ENS watcher on the Mac then writes the same cap into the agent's spending policy on the checkout, as min(the owner's ENS cap, the payments setup's configured cap, `buyerAgents.<agent>.capMicro`). POLICY_WRITER stays local. The route waits up to 45 s for the policy and records the change on Arkiv (a W_SYNC `request` edge from the owner to the agent, ref `own:`).
+
+## Bounds (the Coordinator's, enforced in code)
+- The policy never goes above the configured cap: the watcher writes min(the owner's ENS cap, `buyerAgents.<agent>.capMicro`).
+- Only the owner's change to `graphpay.cap_micro` on an agent's own node triggers a write, and only for an agent with a pass (a configured cap and a policy on chain).
+- One `setPolicy` per change, idempotent: nothing is written when the policy already holds that cap.
+- The chain id is checked before each signing.
+- A refusal is logged, never retried in a loop.
+- The watcher still never creates a policy, writes an address, lifts a revocation or changes an epoch. ADR-0021 stands: no hosted key can lift a cap above the payments setup's bound.
 
 ## Why
 - **The brief asks for both records.** It says "the owner changes the payer's cap, in both the spending policy and the ENS record".
