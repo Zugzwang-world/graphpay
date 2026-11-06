@@ -83,18 +83,13 @@ export function apiCostUsd(model, usage) {
   const base = prices[model];
   const long = base.longPrompt;
   const card = long && input + read + write5m + write1h > long.aboveInputTokens ? long : base;
-  const rate = (key) => {
+  // A price is needed only for a token kind the response used: Kimi's cards have no cache-write prices.
+  const cost = (count, key) => {
+    if (count === 0) return 0;
     if (!Number.isFinite(card[key])) throw new Error(`no ${key} price for model "${model}" in the config file`);
-    return card[key];
+    return count * card[key];
   };
-  return (
-    (input * rate('input') +
-      output * rate('output') +
-      write5m * rate('cacheWrite5m') +
-      write1h * rate('cacheWrite1h') +
-      read * rate('cacheRead')) /
-    1e6
-  );
+  return (cost(input, 'input') + cost(output, 'output') + cost(write5m, 'cacheWrite5m') + cost(write1h, 'cacheWrite1h') + cost(read, 'cacheRead')) / 1e6;
 }
 
 // RPC candidates in order: the secret URL (if set), the keyed Arkiv URL (if the key

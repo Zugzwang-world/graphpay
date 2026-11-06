@@ -1,8 +1,10 @@
 // pnpm agents:errand [--runs N] [--buyer KEY] [--out DIR]
 // Runs the story's errand on the mock services (planning/PROMPTS/10-agents.md
 // step 6). AGENT_MODE picks the models: mock (the default; no key is read and
-// nothing is paid for), anthropic (the story config's active preset, or
-// AGENT_PRESET), or auto. An unknown AGENT_MODE is refused before anything runs.
+// nothing is paid for), live (the story config's active preset, or AGENT_PRESET;
+// `anthropic` is its old name), or auto. An unknown AGENT_MODE is refused before
+// anything runs. The keys of the preset's providers (ANTHROPIC_API_KEY,
+// KIMI_API_KEY) are loaded from .env.
 // Prints one row per errand for the preset calibration table in
 // docs/thinking-partner/OPEN.md (seconds and API cost, ADR-0048) and writes each
 // run log to --out when given. The key is loaded from .env, never printed, and
@@ -12,6 +14,7 @@ import { mkdirSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { resolveAgentMode, runErrand } from '../../packages/agents/index.mjs';
+import { config } from '../../packages/config/index.mjs';
 import { createMockWorld } from '../../packages/agents/mocks/index.mjs';
 import { loadEnv } from '../lib/env-loader.mjs';
 import { installErrorBoundary, redactor } from '../lib/redact.mjs';
@@ -38,16 +41,16 @@ if (import.meta.url === pathToFileURL(process.argv[1] ?? '').href) {
   const raw = process.env.AGENT_MODE ?? '';
   resolveAgentMode({ AGENT_MODE: raw }); // a typo throws here, before any file is read
   const env = { ...process.env };
-  if (raw === 'anthropic' || raw === 'auto') {
+  if (raw === 'live' || raw === 'anthropic' || raw === 'auto') {
     try {
       ({ values } = loadEnv());
-      if (values.get('ANTHROPIC_API_KEY')) env.ANTHROPIC_API_KEY = values.get('ANTHROPIC_API_KEY');
+      for (const name of ['ANTHROPIC_API_KEY', config.models.moonshot.keyEnv]) if (values.get(name)) env[name] = values.get(name);
     } catch (error) {
-      if (raw === 'anthropic') throw error;
+      if (raw !== 'auto') throw error;
     }
   }
-  const mode = resolveAgentMode({ AGENT_MODE: raw, ANTHROPIC_API_KEY: env.ANTHROPIC_API_KEY });
-  if (mode === 'anthropic' && !env.ANTHROPIC_API_KEY) throw new Error('ANTHROPIC_API_KEY is not set in .env');
+  // The model factory names the missing key (by variable name, never its value) before any call.
+  const mode = resolveAgentMode({ ...env, AGENT_MODE: raw });
   const redact = redactor(values);
   const ist = () => new Date().toLocaleTimeString('en-GB', { timeZone: 'Asia/Kolkata', hour: '2-digit', minute: '2-digit' });
   const rows = [];
