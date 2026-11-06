@@ -5,7 +5,7 @@ import { checkoutAbi } from '@graphpay/contracts';
 import { siteModel } from './site.server.ts';
 import { allowanceCovers } from './renew.server.ts';
 import { revertOf } from './subscription-live.server.ts';
-import { SUBSCRIBE_COOLDOWN_MS, SubscriptionRefusal, cancelSubscription, forgetSubscriptions, ofPlan, planOf, subscribe, summaryOf, type Created, type SubState, type SubscriptionDeps } from './subscription.server.ts';
+import { SUBSCRIBE_COOLDOWN_MS, SUBSCRIBE_SPACING_S, SubscriptionRefusal, cancelSubscription, forgetSubscriptions, ofPlan, planOf, subscribe, summaryOf, type Created, type SubState, type SubscriptionDeps } from './subscription.server.ts';
 
 const T0 = 1_800_000_000_000;
 const SUB = `0x${'5a'.repeat(32)}`;
@@ -81,9 +81,18 @@ test('one live subscription to the plan at a time; a paused payer and another pl
   assert.equal(await code(subscribe({}, paused.d)), 'PAYER_NOT_ACTIVE');
   assert.equal(paused.created.length, 0);
   assert.equal(await code(subscribe({ plan: 'another-plan' }, deps().d)), 'NOT_THIS_PLAN');
-  // A cancelled one, or another payer's, does not block a new one.
-  const fresh = deps({ subs: [sub({ status: 'CANCELLED' }), sub({ subId: OTHER, payerNode: namehash('someone.eth') })] });
+  // A cancelled one long ago, or another payer's, does not block a new one.
+  const fresh = deps({ subs: [sub({ status: 'CANCELLED', nextChargeAt: 1_799_990_000n }), sub({ subId: OTHER, payerNode: namehash('someone.eth') })] });
   assert.equal(await code(subscribe({}, fresh.d)), 'ok');
+});
+
+test('across instances, no new subscription within a demo cycle of the newest one\'s start, read from the chain', async () => {
+  // Started at T0/1000 - 60 (one charge of a 120 s period, next at +60): a minute ago.
+  const recent = deps({ subs: [sub({ status: 'CANCELLED', cycle: 1, nextChargeAt: BigInt(T0 / 1000 + 60) })] });
+  assert.equal(await code(subscribe({}, recent.d)), 'TOO_SOON');
+  assert.equal(recent.created.length, 0);
+  const older = deps({ subs: [sub({ status: 'CANCELLED', cycle: 1, nextChargeAt: BigInt(T0 / 1000 - SUBSCRIBE_SPACING_S) })] });
+  assert.equal(await code(subscribe({}, older.d)), 'ok');
 });
 
 test('a second subscribe waits out the cooldown; a refusal before signing frees it, any other failure keeps it', async () => {

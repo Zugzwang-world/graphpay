@@ -110,7 +110,7 @@ export async function renewDue(env: Record<string, string | undefined> = process
     }
     try {
       // eth_chainId before every send (CLAUDE.md).
-      if ((await w.publicClient.getChainId()) !== w.chain.id) throw new StartupError('the RPC is not on Whitechain');
+      if ((await w.publicClient.getChainId()) !== config.networks.whitechain.chainId) throw new StartupError('the RPC is not on Whitechain');
       const estimate = await w.publicClient.estimateContractGas({ ...c, functionName: 'renew', args: [subId], account: renewer });
       const gas = (estimate * 12n) / 10n > GAS_FLOOR ? (estimate * 12n) / 10n : GAS_FLOOR;
       const tx = await wallet.writeContract({ ...c, functionName: 'renew', args: [subId], account: renewer, chain: w.chain, gas });

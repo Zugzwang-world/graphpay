@@ -57,7 +57,8 @@ export const liveSources: Sources = {
     return data.node?.out ?? [];
   },
   trail: async (orderId) => (await graphql<{ order: OrderEdge[] }>(`query($id: String!) { order(id: $id) { ${EDGE} } }`, { id: orderId })).order,
-  subscription: () => payerSubscription(),
+  // Bounded: a slow chain read is no subscription on this answer, never a slow customer state.
+  subscription: () => Promise.race([payerSubscription(), new Promise<null>((resolve) => setTimeout(() => resolve(null), 8_000))]),
 };
 
 export async function readCustomerState(sources: Sources = liveSources, nowS = Math.floor(Date.now() / 1000)): Promise<CustomerState> {

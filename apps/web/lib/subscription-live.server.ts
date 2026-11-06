@@ -4,7 +4,7 @@
 // simulates and sends. Every send waits for its receipt; nothing is retried blind. Keys are read from
 // the env by role name, never leave this file and are never logged; errors are logged by name only.
 import { activeCast, config } from '@graphpay/config';
-import { SUB_STATUS, cancelTypes, checkoutAbi, checkoutDomain, eip2612Types, permit2Domain, permitHash, permitSingleTypes, renewalOrderId, subscribeTypes, tokenDomain } from '@graphpay/contracts';
+import { FAIL_REASON, SUB_STATUS, cancelTypes, checkoutAbi, checkoutDomain, eip2612Types, permit2Domain, permitHash, permitSingleTypes, renewalOrderId, subscribeTypes, tokenDomain } from '@graphpay/contracts';
 import { createEnsReader, ensPublicClient } from '@graphpay/ens';
 import { DEFAULT_APPROVAL_MICRO, StartupError } from '@graphpay/facilitator';
 import { BaseError, ContractFunctionRevertedError, createWalletClient, encodeAbiParameters, erc20Abi, isAddressEqual, keccak256, parseAbi, parseEventLogs, type Hex } from 'viem';
@@ -76,9 +76,9 @@ async function ctx(): Promise<Ctx> {
   return { w: await chainFor(), checkout: checkout as `0x${string}`, token: config.whitechain.tokens.usdt, permit2: config.whitechain.system.permit2 };
 }
 
-// eth_chainId before every signing step (CLAUDE.md): any other chain is refused.
+// eth_chainId before every signing step (CLAUDE.md): only the configured Whitechain Sepolia (1874).
 async function chainOk(c: Ctx): Promise<void> {
-  if ((await c.w.publicClient.getChainId()) !== c.w.chain.id) throw new ChainRefused();
+  if ((await c.w.publicClient.getChainId()) !== config.networks.whitechain.chainId) throw new ChainRefused();
 }
 
 const read = (c: Ctx, functionName: string, args: unknown[] = []) => c.w.publicClient.readContract({ address: c.checkout, abi: checkoutAbi, functionName, args } as never) as Promise<unknown>;
@@ -122,7 +122,8 @@ export function revertOf(error: unknown): string | null {
   return `${name}${detail}`;
 }
 
-// The renewer must be a relayer, never the admin, and keep the cron's floor after this send.
+// The renewer must be a relayer, never the admin, and keep the cron's floor after this send (also
+// checked before the payer signs anything, against the send's gas floor).
 async function renewerReady(c: Ctx, address: `0x${string}`, gas: bigint, keepFloor: boolean): Promise<void> {
   const [isRelayer, owner, balance, gasPrice] = await Promise.all([read(c, 'isRelayer', [address]) as Promise<boolean>, read(c, 'owner') as Promise<string>, c.w.publicClient.getBalance({ address }), c.w.publicClient.getGasPrice()]);
   if (!isRelayer) throw new StartupError('the renewer key is not a relayer on the checkout');
@@ -149,11 +150,24 @@ async function sendAsRenewer(c: Ctx, functionName: 'createSubscription' | 'cance
   await chainOk(c);
   const wallet = createWalletClient({ account: renewer, chain: c.w.chain, transport: c.w.transport });
   const hash = await wallet.writeContract({ address: c.checkout, abi: checkoutAbi, functionName, args, account: renewer, chain: c.w.chain, gas } as never);
+  let receipt: Awaited<ReturnType<Whitechain['publicClient']['waitForTransactionReceipt']>>;
   try {
-    return { hash, receipt: await c.w.publicClient.waitForTransactionReceipt({ hash, timeout: RECEIPT_MS }) };
+    receipt = await c.w.publicClient.waitForTransactionReceipt({ hash, timeout: RECEIPT_MS });
   } catch {
     console.error(`subscription ${functionName} pending: ${hash}`);
     return { hash, receipt: null };
+  }
+  // viem answers with the receipt of whatever took the nonce (a cron renew from another instance can):
+  // only this transaction's own receipt decides anything.
+  if (receipt.transactionHash.toLowerCase() !== hash.toLowerCase()) throw new Replaced();
+  return { hash, receipt };
+}
+
+// Our transaction was replaced by another one with the same nonce: it was never mined.
+class Replaced extends Error {
+  constructor() {
+    super('the transaction was replaced');
+    this.name = 'Replaced';
   }
 }
 
@@ -164,9 +178,12 @@ async function create(plan: Plan): Promise<Created> {
   await chainOk(c);
   const payer = account(payerKeyName());
   const pc = c.w.publicClient;
+  // The renewer can pay for this send and keep the cron's floor, before anything is signed.
+  await renewerReady(c, account(RENEWER_KEY).address, CREATE_GAS_FLOOR, true);
   // The paying wallet is bound to the payer agent's node (the checkout refuses anything else).
   if (String(await read(c, 'nodeOfWallet', [payer.address])).toLowerCase() !== plan.payerNode) throw new SubscriptionRefusal('PAYER_NOT_BOUND');
-  // The payee comes from ENS at signing time (ADR-0046); when this server holds the shop's key, they must agree.
+  // The payee comes from ENS at signing time (ADR-0046), and must be confirmed by this server: the shop
+  // key's own address, or the configured merchant list (the renewer does not pass the facilitator's).
   let payee: `0x${string}`;
   try {
     const r = await Promise.race([
@@ -180,18 +197,25 @@ async function create(plan: Plan): Promise<Created> {
   }
   const shop = activeCast().shops.find((s) => plan.shopEns.startsWith(`${s.label}.`));
   const shopKey = shop ? process.env[`${shop.walletRole}_PRIVATE_KEY`] : undefined;
-  if (shopKey && KEY_SHAPE.test(shopKey) && !isAddressEqual(privateKeyToAccount(shopKey as Hex).address, payee)) throw new SubscriptionRefusal('PAYEE_MISMATCH');
+  const listed = (process.env.ALLOWED_MERCHANTS ?? '').split(',').map((a) => a.trim()).filter((a) => /^0x[0-9a-fA-F]{40}$/.test(a));
+  const confirmed = shopKey && KEY_SHAPE.test(shopKey) ? isAddressEqual(privateKeyToAccount(shopKey as Hex).address, payee) : listed.some((a) => isAddressEqual(a as `0x${string}`, payee));
+  if (!confirmed) throw new SubscriptionRefusal('PAYEE_MISMATCH');
 
   const block = await pc.getBlock();
   const now = Number(block.timestamp);
   const allowanceMicro = plan.priceMicro * BigInt(plan.maxCharges);
-  const [[, , p2nonce], erc20Allowance, balance, policy, spent] = await Promise.all([
+  const [[, , p2nonce], erc20Allowance, balance, policy, spent, subs] = await Promise.all([
     pc.readContract({ address: c.permit2, abi: permit2Abi, functionName: 'allowance', args: [payer.address, c.token.address, c.checkout] }),
     pc.readContract({ address: c.token.address, abi: erc20Abi, functionName: 'allowance', args: [payer.address, c.permit2] }),
     pc.readContract({ address: c.token.address, abi: erc20Abi, functionName: 'balanceOf', args: [payer.address] }),
     read(c, 'policies', [plan.payerNode]) as Promise<{ revoked: boolean; dailyCapMicro: bigint; expiry: bigint }>,
     read(c, 'spentToday', [plan.payerNode]) as Promise<bigint>,
+    latestSubscriptions(c),
   ]);
+  // The payer's one Permit2 allowance to the checkout is shared by all its subscriptions: a new one is
+  // never signed while any of them is still active (it would draw on the new allowance too).
+  const live = subs.find((x) => x.status === 'ACTIVE' && isAddressEqual(x.subscriber as `0x${string}`, payer.address));
+  if (live) throw new SubscriptionRefusal('ALREADY_SUBSCRIBED', 409, { subId: live.subId });
   // The first charge runs in this transaction under the payer's pass: say so before anything is signed.
   if (policy.revoked || (policy.expiry !== 0n && BigInt(now) >= policy.expiry)) throw new SubscriptionRefusal('PAYER_NOT_ACTIVE');
   if (spent + plan.priceMicro > policy.dailyCapMicro) throw new SubscriptionRefusal('OVER_PASS');
@@ -230,10 +254,13 @@ async function create(plan: Plan): Promise<Created> {
   const base = { subId: subId.toLowerCase(), transaction: hash, firstChargeAt: now, allowanceMicro: String(allowanceMicro) };
   if (!receipt) return { ...base, status: 'pending', nextChargeAt: now + plan.periodSeconds, charged: null, firstOrderId: null, failReason: null };
   if (receipt.status !== 'success') throw new Error('createSubscription reverted');
-  const events = eventsOf(c, receipt.logs);
+  // Only this subscription's own events count, and the checkout must hold it.
+  const ours = (e: { args: Record<string, unknown> }) => String(e.args.subId ?? '').toLowerCase() === subId.toLowerCase();
+  const events = eventsOf(c, receipt.logs).filter(ours);
   const renewed = events.find((e) => e.eventName === 'SubscriptionRenewed');
   const failed = events.find((e) => e.eventName === 'RenewalFailed');
   const after = (await read(c, 'subscription', [subId])) as RawSub;
+  if (SUB_STATUS[Number(after.status)] === 'NONE' || !events.some((e) => e.eventName === 'SubscriptionCreated')) throw new Error('the checkout holds no such subscription');
   const next = BigInt(after.retryAt) > BigInt(after.nextChargeAt) ? BigInt(after.retryAt) : BigInt(after.nextChargeAt);
   return {
     ...base,
@@ -241,7 +268,7 @@ async function create(plan: Plan): Promise<Created> {
     nextChargeAt: Number(next),
     charged: renewed ? true : failed ? false : null,
     firstOrderId: renewed ? renewalOrderId(subId, 1) : null,
-    failReason: failed ? String(failed.args.reason) : null,
+    failReason: failed ? (FAIL_REASON[Number(failed.args.reason)] ?? 'UNKNOWN') : null,
   };
 }
 
@@ -256,8 +283,9 @@ async function cancel(sub: SubState): Promise<Cancelled> {
   const { hash, receipt } = await sendAsRenewer(c, 'cancelWithSig', [sub.subId, deadline, sig], CANCEL_GAS_FLOOR);
   if (!receipt) return { subId: sub.subId, transaction: hash, status: 'pending', effectiveAt: null };
   if (receipt.status !== 'success') throw new Error('cancelWithSig reverted');
-  const cancelled = eventsOf(c, receipt.logs).find((e) => e.eventName === 'SubscriptionCancelled');
-  return { subId: sub.subId, transaction: hash, status: 'confirmed', effectiveAt: cancelled ? Number(cancelled.args.effectiveAt) : null };
+  const cancelled = eventsOf(c, receipt.logs).find((e) => e.eventName === 'SubscriptionCancelled' && String(e.args.subId ?? '').toLowerCase() === sub.subId.toLowerCase());
+  if (!cancelled) throw new Error('the receipt carries no cancel of this subscription');
+  return { subId: sub.subId, transaction: hash, status: 'confirmed', effectiveAt: Number(cancelled.args.effectiveAt) };
 }
 
 export function liveSubscriptionDeps(payerStatus: () => Promise<string>): SubscriptionDeps {

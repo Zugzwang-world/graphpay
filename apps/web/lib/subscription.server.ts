@@ -13,6 +13,14 @@ import type { SubscriptionSummary } from './contracts.ts';
 export const SUBSCRIBE_WAITING_FOR = "the payer agent's and the renewer's keys on this server (the Coordinator sets them in Vercel)";
 // One subscribe per instance at most this often: each costs the renewer's gas and the payer its first charge.
 export const SUBSCRIBE_COOLDOWN_MS = 60_000;
+// And across instances, from the chain itself: no new subscription to the plan within this long of the
+// newest one's start (a whole demo cycle: the first charge, one renewal, a cancel).
+export const SUBSCRIBE_SPACING_S = 180;
+
+// When a subscription started: its first charge time (the next charge less the periods already charged).
+export function startOf(s: SubState): bigint {
+  return s.nextChargeAt - BigInt(s.cycle) * BigInt(s.period);
+}
 
 export type SubscriptionRefusalCode =
   | 'NOT_THIS_PLAN'
@@ -181,8 +189,10 @@ export async function subscribe(input: { plan?: unknown }, deps: SubscriptionDep
     // A paused, revoked or unreadable payer agent starts nothing.
     if ((await deps.payerStatus()) !== 'ACTIVE') throw new SubscriptionRefusal('PAYER_NOT_ACTIVE');
     // One live subscription to the plan at a time: a second would share the payer's one Permit2 allowance.
-    const active = ofPlan(await deps.latest(), plan).find((s) => s.status === 'ACTIVE');
+    const mine = ofPlan(await deps.latest(), plan);
+    const active = mine.find((s) => s.status === 'ACTIVE');
     if (active) throw new SubscriptionRefusal('ALREADY_SUBSCRIBED', 409, { subId: active.subId });
+    if (mine[0] && startOf(mine[0]) > BigInt(Math.floor(now / 1000) - SUBSCRIBE_SPACING_S)) throw new SubscriptionRefusal('TOO_SOON', 429);
     lastSubscribe = now;
     let created: Created;
     try {
