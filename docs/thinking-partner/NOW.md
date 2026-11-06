@@ -73,15 +73,13 @@ Updated 23:10 IST, Fri 6 Nov (night Coordinator, `local_1caa580c-…`).
 
 ## w1-identity
 
-Updated 00:20 IST, Sat 7 Nov (W1 Identity, session `local_45f7cf5d-c31e-4dbf-b849-466f3067bdd3`).
-- **Done: the new shop names** are on ENS, on the old wallets (#158).
-- **Done: the kill works live** (#175). At 00:16 IST the site killed `disposable-2`.
-  - The owner's unregister landed on Sepolia, and the watcher revoked its pass on Whitechain 9 s later.
-  - Its next payment was refused `ENS_EXPIRED_OR_REVOKED`, and the refusal is recorded on Arkiv.
-  - A fresh spare, `disposable-3`, was ready at 00:19 (made by hand this once). Evidence: `docs/sessions/identity/kill-disposable-2.json`.
-- **Ready:** the `story.json` flip (labels and category; branch `claude/w1-flip`). It waits for the Coordinator's go after W2.
-- **In review:** the owner's cap reaching the payer's pass through the watcher, for W3's cap route (#179).
-- **Next:** the flip on the go; after W5's restart, the workers make each fresh spare themselves.
+Updated 00:26 IST, Sat 7 Nov (W1 Identity, session `local_45f7cf5d-c31e-4dbf-b849-466f3067bdd3`).
+- **Done:** the new shop names on ENS (#158); the kill, live and proven at 00:16 IST (#175, #183).
+- **Now: the story flip** (this PR, on the Coordinator's go after W2's history). The shops go by `filter-and-fold`, `idli-index` and `tawa-tangle`, category south-indian.
+  - W4 holds errands until W5's restart.
+- **Next:**
+  1. W5 restarts the workers on the new names; that also loads the spare keeper and the owner's-cap change.
+  2. One live errand pays Filter & Fold through `filter-and-fold.graphpay.eth`.
 
 ## w2-city
 

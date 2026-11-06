@@ -1,14 +1,18 @@
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { test } from 'node:test';
-import { castEntries, config, story as ourStory } from '../../../packages/config/index.mjs';
+import { activeCast, castEntries, config, story as ourStory } from '../../../packages/config/index.mjs';
 import { projectStory } from '../story-projection.mjs';
 import { ErrandMapper, readFrames, refusalOf } from '../src/errand.ts';
 
 const story = projectStory(ourStory);
 const txLink = (tx: string) => ({ label: 'tx', url: `https://explorer.example/tx/${tx}` });
-// A real paid errand recorded on Nov 5 (the runner's own trace, docs/sessions/integration/runs).
-const run = JSON.parse(readFileSync(new URL('../../../docs/sessions/integration/runs/run-a8d00695846884f3/run.json', import.meta.url), 'utf8')).agents;
+// A real paid errand recorded on Nov 5 (the runner's own trace, docs/sessions/integration/runs). It
+// predates the shops' new ENS names (#158): there each shop is named by its old label, which is
+// still its story key, so the recording is replayed under today's names.
+const recorded = readFileSync(new URL('../../../docs/sessions/integration/runs/run-a8d00695846884f3/run.json', import.meta.url), 'utf8');
+const renamed = activeCast(ourStory).shops.reduce((text, s) => (s.key === s.label ? text : text.split(`${s.key}.${config.root.ens}`).join(`${s.label}.${config.root.ens}`)), recorded);
+const run = JSON.parse(renamed).agents;
 
 function replay(events: unknown[], result: unknown) {
   const m = new ErrandMapper(story, txLink);
