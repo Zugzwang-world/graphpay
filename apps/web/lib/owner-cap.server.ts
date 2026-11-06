@@ -67,8 +67,17 @@ export interface OwnerCapResult {
 let busy = false;
 let lastChange = Number.NEGATIVE_INFINITY;
 
+// A read that may not outlive the change's budget: past it, it counts as not seen (null).
+function within<T>(read: Promise<T>, ms: number): Promise<T | null> {
+  if (ms <= 0) return Promise.resolve(null);
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  return Promise.race([read, new Promise<null>((resolve) => (timer = setTimeout(() => resolve(null), ms)))]).finally(() => clearTimeout(timer));
+}
+
 export async function setOwnerCap(input: { capMicro?: unknown }, deps: OwnerCapDeps): Promise<OwnerCapResult> {
   const model = siteModel();
+  // The budget counts from the first read.
+  const started = deps.now();
   if (typeof input.capMicro !== 'string' || !/^[1-9][0-9]{0,12}$/.test(input.capMicro)) throw new OwnerCapRefusal('BAD_CAP', 400);
   const cap = BigInt(input.capMicro);
   const configured = deps.configuredMicro();
@@ -80,13 +89,12 @@ export async function setOwnerCap(input: { capMicro?: unknown }, deps: OwnerCapD
   if (busy || now - lastChange < CAP_COOLDOWN_MS) throw new OwnerCapRefusal('TOO_SOON', 429);
   busy = true;
   lastChange = now;
-  const started = deps.now();
   try {
     const before = await deps.ensCap();
     const ens = await deps.setEnsCap(cap);
     // From here the ENS change stands: a failed read only means "not seen yet", and the change is
     // recorded whatever the policy shows.
-    const read = async () => deps.policy().catch(() => null);
+    const read = async () => within(deps.policy().catch(() => null), started + CHANGE_BUDGET_MS - deps.now());
     // The policy follows by the policy writer on the Mac; the route waits a while for it.
     let policy = await read();
     const until = Math.min(deps.now() + POLICY_WAIT_MS, started + CHANGE_BUDGET_MS);
