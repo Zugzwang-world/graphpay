@@ -45,13 +45,13 @@ Updated 04:25 IST. **M6 is built: the gate is merged (PR #34); the watcher PR is
 
 ## arkiv
 
-Updated 09:50 IST, Fri 6 Nov (T3).
+Updated 10:40 IST, Fri 6 Nov (T3).
 
-- **Where we are:** the SDK is ready to publish as `@graphpay_ethglobal/arkiv-graph` 0.1.0 (the Coordinator's 09:40 corrections applied). The tarball installs in an empty folder on Node 22.23.4 and the README quickstart runs there; the leaderboard example too.
-- **This step (Friday item 18):** a short 5-minute quickstart that runs in memory (ArkivSim) and the same code on Rabdi with the developer's own key; a leaderboard example; CHANGELOG, FEEDBACK (a log), MIT licence; the package renamed everywhere in the repo.
-- **Running:** the reviewer pass; the PR then merges on green.
-- **Blockers:** none for the package. Publishing needs the founder's npm login (the Coordinator publishes).
-- **Next:** tell the Coordinator when the PR has merged and the pack check passes on main, then Swarm (menu upload, refund evidence).
+- **Where we are:** the SDK `@graphpay_ethglobal/arkiv-graph` 0.1.0 is merged and ready to publish (PR #74; the Coordinator publishes with T6's package). Now Friday item 15: the Arkiv judges' drafts.
+- **This step:** `arkiv/friction.md` (7 gaps we hit at the event, each with a repro, plus the open booth questions), `arkiv/how-you-use-arkiv.md` (feature to what the user sees, with what is shipped and what is only built) and `arkiv/swarm.md` (honestly "pending"; nothing uploaded yet).
+- **Running:** nothing.
+- **Blockers:** none. Swarm goes next only if weekly usage is under about 88% (now 84%).
+- **Next:** Swarm: a probe upload through the public gateway, then the menu.
 
 ## agents
 
