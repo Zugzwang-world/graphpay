@@ -20,6 +20,7 @@ Updated 23:10 IST, Fri 6 Nov (night Coordinator). **Only the submission (Sat 09:
 
 **Closed tonight:**
 - the big city: trimmed by the founder at 00:52 IST to what is seeded; W2 finishes race mode on it;
+- race mode: kept at S by the founder (01:24 IST);
 - the payer resumed at 23:00 IST, and Filter & Fold open again;
 - the demo scope: the night brief decides it (the new shops on chain, the big city, caps, the kill, subscriptions);
 - the Submission session: W7 replaces it;
