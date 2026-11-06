@@ -1,4 +1,4 @@
-# T1 Payments: resume note (05:11 IST, Fri 6 Nov)
+# T1 Payments: resume note (10:56 IST, Fri 6 Nov)
 
 Read `docs/plan/sessions/T1-payments.md` first; this note says where the work stands.
 
@@ -7,11 +7,13 @@ Read `docs/plan/sessions/T1-payments.md` first; this note says where the work st
 - **M4** merged (#58) and live (`m4-hosted.md`). **M3 part B** merged (#45): C7 paid once as `acceptance.vitalik` (`c7.json`; never run `usdt-ready --go` again: it refuses anyway), the lifecycle as `rehearsal.vitalik` (`m3-lifecycle.json`), the subscription created, renewed and cancelled. scout's policy restored and read back. Notes: `m3-part-b.md`.
 
 ## Next, in order
+0. Paused at the Coordinator's usage rule (87% at the last check, pause at 92%). Nothing half-done: the quote-retry PR is on auto-merge; F3 merged (#78).
 1. Watch the `(M4 done)` PR until it merges.
 2. Friday items (`docs/plan/MASTER_PLAN.md` §4 item 6: the demo cast's policies) after the story lock.
 3. Real payments go through the hosted facilitator only; no local FACILITATOR or RENEWER sends during the demo.
 
 ## Open threads
+- Live finding (10:49 IST): W_DIRECTORY has three writers on different instances (the shop's quote, Join's presence and hand-off rows, T5's Open toggle). A quote write failed with WriteUncertainError. Fixed by the bounded retry (`retryUncertain`) and Join's hold during the 402 (#93). T3 was told that arkiv-graph's writer can adopt a replacement transaction on the direct path (it doesn't call verifyRecovered there).
 - OPEN.md: CI required check; config role addresses.
 - C4(b) as the acceptance agent is M13's (over-cap off-chain after C2 + C3).
 - anvil: start it in a subshell, `(nohup anvil --fork-url <public RPC> --port 8547 --chain-id 1874 --silent > /dev/null 2>&1 &)`.

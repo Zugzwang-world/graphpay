@@ -211,19 +211,21 @@ export const facilitator = once('facilitator', async () => {
 // ---------------------------------------------------------------- shop
 
 // Arkiv writers, connected on first use: W_DIRECTORY for quotes, W_SYNC for the recorder.
-// A short recovery window, so an uncertain send and its retries fit inside the shop's 120 s.
+// A short recovery window for each uncertain send (the SDK's own receipt wait still applies).
 const arkivFor = (role: 'W_DIRECTORY' | 'W_SYNC') => once(`arkiv ${role}`, (): Promise<ArkivConnection> => connectArkiv({ backend: 'rabdi', env: process.env, role, recoveryMs: 15_000 }));
 
 // W_DIRECTORY also writes from other instances (the agents' presence and hand-off rows, the
 // Open toggle), so a quote write can lose its nonce to them three times and end uncertain. A
 // retry is safe: the payer matches the quote by the key this step returns, and a stray copy is
-// readonly and gone in 15 minutes. Anything else is not retried.
-export async function retryUncertain<T>(write: () => Promise<T>, { tries = 3, sleep = (ms: number) => new Promise((r) => setTimeout(r, ms)) } = {}): Promise<T> {
+// readonly and gone in 15 minutes. Anything else is not retried, and no try starts after 45 s,
+// so the 503 always lands inside the shop's 120 s.
+export async function retryUncertain<T>(write: () => Promise<T>, { tries = 3, budgetMs = 45_000, clock = Date.now, sleep = (ms: number) => new Promise((r) => setTimeout(r, ms)) } = {}): Promise<T> {
+  const started = clock();
   for (let i = 1; ; i += 1) {
     try {
       return await write();
     } catch (e) {
-      if ((e as Error)?.name !== 'WriteUncertainError' || i >= tries) throw e;
+      if ((e as Error)?.name !== 'WriteUncertainError' || i >= tries || clock() - started > budgetMs) throw e;
       log(`shop: quote write uncertain (attempt ${i}), retrying`);
       await sleep(500 + Math.floor(Math.random() * 1500));
     }

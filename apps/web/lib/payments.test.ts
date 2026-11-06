@@ -108,6 +108,10 @@ test('a quote write that ends uncertain is retried at most twice; any other erro
     calls = 0;
     await assert.rejects(retryUncertain(async () => (calls++, Promise.reject(new TypeError('bad input'))), { sleep: nap }), TypeError);
     assert.equal(calls, 1, 'a revert or a bad input is never retried');
+    let now = 0;
+    calls = 0;
+    await assert.rejects(retryUncertain(async () => ((calls++, (now += 50_000)), Promise.reject(uncertain())), { sleep: nap, clock: () => now }), { name: 'WriteUncertainError' });
+    assert.equal(calls, 1, 'no new try after the 45 s budget');
   } finally {
     console.error = original;
   }
