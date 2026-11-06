@@ -212,10 +212,16 @@ export async function runBuyerTeam(ctx) {
     const task = { need, window: 'D90' };
     log.agentStart(names.analyst, 'analyst', task);
     const startedAt = meter?.timing ? meter.now() : null;
-    const tools = tracedMcpTools(await mcp.tools(), log, names.analyst, { only: ['graphql', 'explain'] });
+    let tools = null;
+    try {
+      tools = tracedMcpTools(await mcp.tools(), log, names.analyst, { only: ['graphql', 'explain'] });
+    } catch {
+      tools = null; // the read below fails closed: no shop is eligible, and the analyst still ends
+    }
     const variables = { category: need.category, city: need.city.toLowerCase() };
     const query = async () => {
       try {
+        if (!tools?.graphql) throw new Error('the graph tools are not available');
         return rankingFromAnswer(await callTool(tools.graphql, { query: RANKING_QUERY, variables }));
       } catch (error) {
         return { ok: false, reason: 'GRAPH_READ_FAILED', detail: errorText(error) };
@@ -227,7 +233,7 @@ export async function runBuyerTeam(ctx) {
       read = await query();
     }
     adoptRanking(read);
-    if (read.ok && read.explainId) await callTool(tools.explain, { explainId: read.explainId }).catch(() => null);
+    if (read.ok && read.explainId && tools?.explain) await callTool(tools.explain, { explainId: read.explainId }).catch(() => null);
     const graph = read.ok ? { ...MODEL_VIEW.graphql(read.answer), shown: 'the full answer and its reads are on the human’s screen' } : { error: read.reason };
     const asked = await askModel({ role: 'analyst', ens: names.analyst, task: { ...task, graph }, models, log, meter, signal, prompt: promptFor('analyst-data') });
     const out = compareAnalyst(asked.output);

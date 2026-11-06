@@ -134,3 +134,15 @@ test('a directory read that fails is tried once more; a second failure leaves no
 test('steps must be code or model', async () => {
   await assert.rejects(run({ steps: 'magic' }), /steps must be one of code, model/);
 });
+
+test('when the graph tools cannot be listed, the analyst still ends, nothing is eligible and nothing is paid', async () => {
+  const world = createMockWorld({ now: NOON_IST });
+  world.mcp.tools = async () => {
+    throw new Error('mcp down');
+  };
+  const { runLog } = await runErrand({ now: NOON_IST, mode: 'mock', retryMs: 0, cast: world.cast, hooks: world.hooks, mcp: world.mcp, mockModels: world.mockModels });
+  assert.ok(events(runLog, 'agent.end').some((e) => e.role === 'analyst'));
+  assert.ok(guards(runLog, false).some((g) => g.guard === 'G2' && /GRAPH_READ_FAILED/.test(g.detail)));
+  assert.equal(runLog.result.status, 'no-purchase');
+  assert.equal(world.hooks.signed.length, 0);
+});

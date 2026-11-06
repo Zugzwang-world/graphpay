@@ -100,11 +100,10 @@ Updated 23:50 IST, Fri 6 Nov (W3 Payments, session `local_b65be40a-eb20-4d86-b78
 
 ## w4-agents
 
-Updated 23:35 IST, Fri 6 Nov (W4 Agents, session `local_3404db4e-486c-4f86-8b3a-67ceb53ef025`).
-- **Item 1, the relative deadline ([#153](https://github.com/Zugzwang-world/graphpay/pull/153), merged 23:18 IST):** the request says "delivered within an hour"; code reads the hour from the moment of the request, so errands work at any hour.
-- **Item 2, measuring ([#157](https://github.com/Zugzwang-world/graphpay/pull/157), merged 23:26 IST):** every agent's end event carries each model call (tokens in and cached, out and reasoning, cost, tools, seconds).
-- **The live baseline (23:30 IST):** paid 4.80 in 91.4 s; 19 model calls, 33,287 tokens, $0.1455; 62.6 s of it was the models.
-- **Item 3, first cut ([#162](https://github.com/Zugzwang-world/graphpay/pull/162)):** the routine agents think at Kimi's low effort; the model reads short tool replies (the screens keep the whole data); the concierge gets the limits from code. Next: measure it live, then move the routine steps into code.
+Updated 23:52 IST, Fri 6 Nov (W4 Agents, session `local_3404db4e-486c-4f86-8b3a-67ceb53ef025`).
+- **Done:** item 1, the relative deadline ([#153](https://github.com/Zugzwang-world/graphpay/pull/153)); item 2, every model call measured ([#157](https://github.com/Zugzwang-world/graphpay/pull/157)); item 3's first cut, low effort and short tool replies ([#162](https://github.com/Zugzwang-world/graphpay/pull/162)).
+- **Live so far:** the baseline paid in 91.4 s with 19 model calls and $0.1455; the first cut paid in 87.6 s, $0.1435. Each model call costs 1.5 to 4 s even at low effort, so the number of calls is what counts.
+- **Item 3, second cut (in its PR, with the reviewer):** the routine steps in code, one model call each for the concierge, the analyst and the risk agent: 3 calls instead of 19. On Kimi over mock services: 14 s, about 3,000 tokens, $0.027, the same screens. Next: deploy, then three live errands in a row that pay.
 - **Blockers:** none.
 
 ## w5-ops
