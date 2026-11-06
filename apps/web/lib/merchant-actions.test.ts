@@ -20,11 +20,13 @@ interface Opts {
   balance?: bigint;
   allowance?: bigint;
   receipt?: 'success' | 'reverted' | 'timeout';
+  gas?: bigint;
+  writeFails?: boolean;
   // The receipt of an earlier send, as the node answers for it later.
   laterReceipt?: boolean;
 }
 
-function fakeChain(order: { status: number; amountMicro?: bigint; refundedMicro?: bigint; merchant?: string }, { chainId = 1874, hold = null, balance = 10_000_000n, allowance = 10_000_000n, receipt = 'success', laterReceipt = false }: Opts = {}) {
+function fakeChain(order: { status: number; amountMicro?: bigint; refundedMicro?: bigint; merchant?: string }, { chainId = 1874, hold = null, balance = 10_000_000n, allowance = 10_000_000n, receipt = 'success', laterReceipt = false, gas = 50_000_000_000_000_000n, writeFails = false }: Opts = {}) {
   const sent: { fn: string; args: unknown[] }[] = [];
   const chain: Chain = {
     chainId: 1874,
@@ -32,12 +34,14 @@ function fakeChain(order: { status: number; amountMicro?: bigint; refundedMicro?
     token: TOKEN,
     publicClient: {
       getChainId: async () => chainId,
+      getBalance: async () => gas,
       readContract: async ({ functionName }: { functionName: string }) => {
         if (functionName === 'balanceOf') return balance;
         if (functionName === 'allowance') return allowance;
         return { status: order.status, amountMicro: order.amountMicro ?? 4_800_000n, refundedMicro: order.refundedMicro ?? 0n, merchant: order.merchant ?? SHOP_WALLET };
       },
-      simulateContract: async ({ functionName, args }: { functionName: string; args: unknown[] }) => ({ request: { fn: functionName, args } }),
+      // Like viem: simulated from an address, the returned request carries a node-managed (json-rpc) account.
+      simulateContract: async ({ functionName, args, account }: { functionName: string; args: unknown[]; account?: unknown }) => ({ request: { fn: functionName, args, account: { address: account, type: 'json-rpc' } } }),
       waitForTransactionReceipt: async () => {
         if (receipt === 'timeout') throw new Error('timed out waiting for the receipt');
         return { status: receipt };
@@ -48,10 +52,13 @@ function fakeChain(order: { status: number; amountMicro?: bigint; refundedMicro?
       },
     } as unknown as Chain['publicClient'],
     walletClient: {
-      account: { address: SHOP_WALLET },
-      writeContract: async (request: { fn: string; args: unknown[] }) => {
+      account: { address: SHOP_WALLET, type: 'local' },
+      writeContract: async (request: { fn: string; args: unknown[]; account?: { type?: string } }) => {
+        // A node-managed account makes viem call eth_sendTransaction, which public RPCs refuse (production's 502).
+        if (request.account?.type !== 'local') throw new Error('the node would be asked to sign: eth_sendTransaction is not available');
         if (hold) await hold;
-        sent.push(request);
+        if (writeFails) throw new Error('the answer was lost');
+        sent.push({ fn: request.fn, args: request.args });
         return `0x${String(sent.length).padStart(64, '0')}`;
       },
     } as unknown as Chain['walletClient'],
@@ -106,7 +113,7 @@ test('a refund of another shop’s order is refused', async () => {
 
 test('a chain that is not Whitechain Sepolia signs nothing', async () => {
   const { chain, sent } = fakeChain({ status: 2 }, { chainId: 1 });
-  await assert.rejects(markDispatched(ORDER, chain), /reports chain 1/);
+  await assert.rejects(markDispatched(ORDER, chain), (e: unknown) => e instanceof Error && e.name === 'ChainRefused');
   assert.equal(sent.length, 0);
 });
 
@@ -182,4 +189,22 @@ test('public access: a visitor acts only on the story persona’s orders, once p
   visitorGuard(order, id, { open: true, now: 1_000 + ORDER_COOLDOWN_MS, persona });
   // The gated mode keeps the passcode as its only gate.
   visitorGuard({ ...order, buyerNode: `0x${'bb'.repeat(32)}` }, id, { open: false, persona });
+});
+
+test('a send that fails after it may have reached the node locks the order, so a retry cannot refund twice', async () => {
+  const order = fresh();
+  const { chain, sent } = fakeChain({ status: 2 }, { writeFails: true });
+  await assert.rejects(refundOrder(order, 800_000n, chain), /answer was lost/);
+  // The same order, tried again at once: refused, nothing sent.
+  const again = fakeChain({ status: 2 });
+  await assert.rejects(refundOrder(order, 800_000n, again.chain), (e: unknown) => e instanceof Refusal && e.code === 'STILL_PENDING');
+  assert.equal(again.sent.length, 0);
+  assert.equal(sent.length, 0);
+});
+
+test('a shop wallet with no native coin for gas is refused with its own code before anything is sent', async () => {
+  const order = fresh();
+  const { chain, sent } = fakeChain({ status: 2 }, { gas: 0n });
+  await assert.rejects(markDispatched(order, chain), (e: unknown) => e instanceof Refusal && e.code === 'GAS_LOW');
+  assert.equal(sent.length, 0);
 });

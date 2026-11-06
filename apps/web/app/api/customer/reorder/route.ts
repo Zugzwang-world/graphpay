@@ -5,7 +5,7 @@ import { json, notLive, readJsonObject } from '../../../../lib/http.ts';
 import { requirePasscode } from '../../../../lib/passcode.ts';
 import { REORDER_WAITING_FOR, ReorderRefusal, codeOf, reorder } from '../../../../lib/reorder.server.ts';
 import { liveReorderDeps, payerKeyConfigured } from '../../../../lib/reorder-live.server.ts';
-import { failureKind } from '../../../../lib/owner-actions.server.ts';
+import { errorNames } from '@graphpay/facilitator';
 
 export const dynamic = 'force-dynamic';
 // The quote, the signature and the facilitator's settlement (up to 60 s).
@@ -25,7 +25,7 @@ export async function POST(request: Request): Promise<Response> {
     // The buyer's own refusals (a cap, a revoked pass) are codes; anything else is one fixed line.
     const code = codeOf(error);
     if (code) return json({ error: code }, 409);
-    console.error('customer reorder failed:', failureKind(error));
+    console.error('customer reorder failed:', errorNames(error));
     return json({ error: 'the re-order could not be completed; check the last order before trying again' }, 502);
   }
 }

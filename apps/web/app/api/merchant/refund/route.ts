@@ -4,7 +4,7 @@
 import { json, notLive, readJsonObject } from '../../../../lib/http.ts';
 import { requirePasscode } from '../../../../lib/passcode.ts';
 import { Busy, Refusal, SHOP_KEY_WAITING_FOR, isOrderId, refundOrder, shopKeyConfigured } from '../../../../lib/merchant-actions.server.ts';
-import { failureKind } from '../../../../lib/owner-actions.server.ts';
+import { errorNames } from '@graphpay/facilitator';
 
 export const dynamic = 'force-dynamic';
 // A send waits for its receipt (up to 60 s).
@@ -35,7 +35,7 @@ export async function POST(request: Request): Promise<Response> {
   } catch (error) {
     if (error instanceof Refusal) return json({ error: error.code }, error.status);
     if (error instanceof Busy) return json({ error: 'another signing is still running; wait for it' }, 429);
-    console.error('merchant refund failed:', failureKind(error));
+    console.error('merchant refund failed:', errorNames(error));
     return json({ error: 'the refund could not be sent; check the order, then try again once' }, 502);
   }
 }

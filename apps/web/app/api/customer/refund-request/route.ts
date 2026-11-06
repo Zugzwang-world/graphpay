@@ -4,7 +4,7 @@
 import { json, notLive, readJsonObject } from '../../../../lib/http.ts';
 import { requirePasscode } from '../../../../lib/passcode.ts';
 import { REFUND_WAITING_FOR, RefundRefusal, recorderKeyConfigured, requestRefund } from '../../../../lib/refund-request.server.ts';
-import { failureKind } from '../../../../lib/owner-actions.server.ts';
+import { errorNames } from '@graphpay/facilitator';
 
 export const dynamic = 'force-dynamic';
 // An Arkiv write waits for its transaction.
@@ -20,7 +20,7 @@ export async function POST(request: Request): Promise<Response> {
     return json(await requestRefund({ orderId: body.orderId, amountMicro: body.amountMicro, reason: body.reason }));
   } catch (error) {
     if (error instanceof RefundRefusal) return json({ error: error.code }, error.status);
-    console.error('customer refund request failed:', failureKind(error));
+    console.error('customer refund request failed:', errorNames(error));
     return json({ error: 'the request could not be recorded; try again once' }, 502);
   }
 }
