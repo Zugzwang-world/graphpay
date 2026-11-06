@@ -75,6 +75,13 @@ Agents (T4) and Join add one row per full errand run, so the presets can be cali
 | 13:28 | Join live runner on the production site, payer (after #108, #112 and T1's settle-safety #114) | live | `kimi-k3.1-pro-highspeed`, high | 128.9 | 32,584 tokens: $0.13–$0.65 at the config's prices (exact `apiCostUsd` in the server log) | **paid** 4.80 to kesar: https://explorer.testnet.whitechain.io/tx/0x9749a7f766282021a4e0e255276b938e53c608f55985a68b4b59b08d852a1e1a ; 7 agents, 16 tool calls, no retry |
 | 13:30 | Join live runner on the production site, payer (the second of the founder's two) | live | `kimi-k3.1-pro-highspeed`, high | 115.1 | 28,712 tokens: $0.11–$0.57 | **paid** 4.80 to kesar: https://explorer.testnet.whitechain.io/tx/0x11588a5e47611c1e9095219ab95b8907d8b0f59a602f56d8b12d11a16cfa0a13 ; 7 agents, 15 tool calls, no retry |
 | 23:30 | W4 baseline: one live errand on the production site (`scripts/agents/site-errand.mjs`), payer | live | `kimi-k3.1-pro-highspeed`, high (every role) | 91.4 | $0.1455 (the sum of the agents' own call costs) | **paid** 4.80 to kesar: https://explorer.testnet.whitechain.io/tx/0xeac35d0ad3cfd0ed77f51bfd76974b545b973d1be69e13b1edb535d48e76abe6 ; 19 calls, 33,287 tokens (29,050 in, 14,592 of them cached; 4,237 out, 2,187 reasoning); 62.6 s of model time; per call in `docs/sessions/w4-agents/runs/` |
+| 23:45 | W4 code mode on mock services (`AGENT_MODE=live AGENT_PRESET=live pnpm agents:errand --runs 2`), before the analyst went to low | live | `kimi-k3.1-pro-highspeed`, concierge and analyst high, risk low; scout, payer, storefront and dispatch in code | 18.2, 27.4 | $0.0359, $0.0530 | paid the good shop, the concierge's own choice; 3 calls, 3,352 and 4,396 tokens; nothing paid on chain (mocks) |
+| 23:47 | W4 code mode on mock services, the analyst at low | live | `kimi-k3.1-pro-highspeed`, concierge high, analyst and risk low; the rest in code | 13.8, 14.3 | $0.0267, $0.0271 | paid the good shop, the concierge's own choice; 3 calls, 2,927 and 3,043 tokens; nothing paid on chain (mocks) |
+| 23:49 | W4 first cut (#162) live on the production site, payer | live | `kimi-k3.1-pro-highspeed`, concierge and analyst high, the rest low | 87.6 | $0.1435 | **paid** 4.80 to kesar: https://explorer.testnet.whitechain.io/tx/0xd4fd98b7e85fb5af7cd661fb58bac2d6fd89b5fd467f476a81eca363bff69d2f ; 19 calls, 33,346 tokens (29,251 in, 14,592 cached; 4,095 out, 2,098 reasoning); only 4% faster than the baseline: each call costs 1.5 to 4 s even at low, so the number of calls is what counts |
+| 00:10 | W4 code mode live, before merging: Join's live runner run locally with this branch's agents, over the production shop, facilitator, ENS and Arkiv | live | `kimi-k3.1-pro-highspeed`, concierge high, analyst and risk low; the rest in code | 57.3 (the runner's own clock) | $0.0358 | **refused before signing, correctly:** the payer was PAUSED again (`ENS_PAUSED` at the gate); scout, analyst, risk, storefront, quote and 402 all ran; 3 calls, 3,282 tokens; the analyst's one call took 20.5 s for 608 tokens (its answers are now kept short) |
+| 00:11 | W4 code mode on mock services, short answers | live | the same | 15.6, 11.7 | $0.0266, $0.0227 | paid the good shop, the concierge's own choice; 3 calls, 2,887 and 2,839 tokens |
+| 00:14 | W4 code mode live, local runner (as at 00:10) | live | the same | 22.0 | $0.0265 | refused at G8, the shop's re-check before the 402: the buyer-standing read failed (`fetch failed`), so the guard failed closed; now a read that throws is tried once more |
+| 00:15 | W4 code mode live, local runner, after that fix | live | the same | 55.2 | $0.0247 | **paid** 4.80 to kesar: https://explorer.testnet.whitechain.io/tx/0xfe0a4327fb7dca69d7363f05c73a8cc15b486b57184fc2f1e72c6812785070d5 ; 3 calls, 2,886 tokens (1,884 in, 768 cached; 1,002 out, 605 reasoning); 13.6 s of model time; the payer's 41.7 s is the quote, the 402, the checks, the signature and the settlement |
 
 ## Kickoff rules and booth questions (closed; rolled up 06:55 IST)
 
@@ -172,6 +179,22 @@ Updated 23:38 IST, Fri 6 Nov (W7 Submission).
 
 - **Acceptance E1 reads the old clock deadline** (owner: the Coordinator, who regenerates acceptance). What: `acceptance/checks.mjs` E1 expects the run's deadline to contain `T23:59:00` (`order.deadlineLocal`); the request now says "delivered within an hour". Why: E1 would fail on every fresh run. Recommendation: expect the deadline one hour after the run's request, to the minute (`result.mandate.deadlineIso`); E1 needs a fresh `e2e:food` run anyway.
 
+## w2-city
+
+- **The flip waits for the restart that follows the history** (owner: the Coordinator, who times it; W5 restarts the workers). What, in order:
+  1. W2's history for the new shops is complete (1,258 of 1,258 events);
+  2. then W5 restarts the workers;
+  3. then W1's flip merges.
+
+  Why: a mirror that read the new shops' tallies part-way would plan their first live payment from stale counts and overwrite their totals (reviewer finding, ADR-0077). Recommendation: keep that order. A mirror started after the history is fine; W5's restart on W2's "done" is that restart.
+- **W1's flip changes the labels and the category together** (owner: W1). What: in `packages/config/story.json`, set `shops[].label` to the final cast's labels by story role and every `shops[].category` to `south-indian`, in one PR:
+  - good → `filter-and-fold`;
+  - runner-up → `idli-index`;
+  - trap → `tawa-tangle`.
+
+  Why: the analyst ranks `nodes(category)`, and the new rows are `south-indian`; a labels-only flip would rank the old shops. A test in `packages/city` fails it. Recommendation: one PR.
+- **After the flip, delist the old shops' directory rows** (owner: W2). What: kesar-kingdom, syrup-street and jamun-junction stay listed under their new display names, so until then the map shows each name twice. Why: the old rows feed acceptance D8 at S until acceptance moves to M. Recommendation: W2 delists them once acceptance checks M.
+
 ## w6-sdk
 
 - **npm's web approval for both SDKs at 1.0.0** (owner: the founder). What: W6 runs `npm login` (the sign-in link), then publishes both packages one after the other (one approval link, which lasts about 5 minutes; last time npm reused it for the second package). Where: the links come in this chat and as a notification; open them in the browser signed in to npm as the owner of `graphpay_ethglobal`. Why: the brief's done-when is both packages on npm at 1.0.0. Recommendation: about 10 minutes at the browser, as soon as both PRs are merged.
@@ -207,3 +230,13 @@ Updated 23:38 IST, Fri 6 Nov (W7 Submission).
   - Refusals: `NO_REQUEST`, `ALREADY_DECIDED`, `STILL_PENDING` (the chain shows a refund the graph does not yet), `NOT_REFUNDABLE`, `NOT_THE_STORY_BUYER`, `NOT_OURS`, `NO_SUCH_ORDER`, `BAD_ORDER`, `BAD_NOTE`, `TRAIL_TOO_LONG`, `TOO_SOON`.
   - Event: a `request` edge in `/api/merchant/events` *from the shop to the payer agent*, ref `dec:<orderId>:<the request's minute>`, one per request. A refund request is the same kind the other way round (payer to shop, ref `req:`). The note is in the route's answer only; the graph's edges carry no payload.
   - Recommendation: wire `declineRefund` to the route. In `apps/phones/src/orders.ts`, `isLive` drops `dec:` rows today, so nothing changes on the phones yet. When it is widened, add a `dec:` branch where `request` rows are folded (refund status `declined`), or the decline becomes a second pending request and rings `refund_request`. The `/order/<id>` page already words it "Refund declined" (`lib/order-trail.ts`). The unlinked `/merchant` page still says "Refund requested by" the shop.
+- **Over the pass, "for everyone"** (from w3-payments; owner: the frontend pass).
+  - What: `POST /api/customer/over-pass`, empty body. The payer agent signs the story's `order.overPass` order: 100 of the combo, 480 test USDT. The signed attempt goes to our facilitator's verify step only, which never sends. It refuses (`CAP_EXCEEDED`, the lower of the ENS cap and the policy cap), and its recorder writes the refusal to Arkiv. Only an attempt above the whole pass is ever signed.
+  - Answer: `{ refused, reason, sent: false, request, item, quantity, attemptedMicro, passMicro, spentTodayMicro, leftMicro, orderId, arkiv: { ref, entityKey }, repeated? }`. A second tap within a minute gets the same answer with `repeated: true`, and no new record. `NOT_OVER_PASS` means the order fits the pass, so nothing is signed.
+  - Event: a `fail` edge from the payer agent to the shop, ref `att:<orderId>:…`, in the merchant stream.
+  - Recommendation: a "Dosas for everyone" chip (its text is `order.overPass.request`) that calls the route and shows a refused attempt (`RefusedAttempt` kind `payment`, reason `cap`) with the Arkiv entity link.
+- **The agent tries to raise its own cap** (from w3-payments; owner: the frontend pass).
+  - What: `POST /api/customer/raise-cap`, body `{ capMicro? }`; the default is double the ENS cap. The route simulates `setText(graphpay.cap_micro)` from the payer agent's address on Sepolia, at a stated block, and the resolver reverts `EACUnauthorizedAccountRoles`. Nothing is sent, and only that revert is recorded.
+  - Answer: `{ refused: true, sent: false, simulated: true, revert, agent, owner, key, attemptedMicro, currentMicro, resolver, block, arkivTx, entityKey, repeated? }`.
+  - Event: a `request` edge from the payer agent to the persona, ref `cap:<node>:<minute>`, amount 0 (the figure is in its payload). It is not in the shop's stream.
+  - Recommendation: wire `tryRaiseCap` to the route and show `cap.change.refused` with the revert reason and the Arkiv link.

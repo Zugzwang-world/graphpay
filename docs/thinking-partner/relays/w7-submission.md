@@ -1,6 +1,6 @@
 # Relay: w7-submission (the night Submission stream)
 
-Updated 23:43 IST, Fri 6 Nov, by W7 Submission (`local_abd77623-de22-4fe2-a0a9-865fdd43dba2`). Brief: [`briefs/2258-w7-submission.md`](../briefs/2258-w7-submission.md).
+Updated 00:13 IST, Sat 7 Nov, by W7 Submission (`local_abd77623-de22-4fe2-a0a9-865fdd43dba2`). Brief: [`briefs/2258-w7-submission.md`](../briefs/2258-w7-submission.md).
 
 ## Plain language
 
@@ -15,7 +15,17 @@ W7 writes what a judge reads, so the founder can paste the ETHGlobal submission 
 
 - **The form text** ([#164](https://github.com/Zugzwang-world/graphpay/pull/164)): [`docs/submission/ETHGLOBAL.md`](../../submission/ETHGLOBAL.md), with name, one-liner (90 characters), description, how it's made, links, one block for each of the three partner prizes, and a "before you press Submit" list. The brief's done-when is met.
 
-**In this step's PR:** the video shot list ([`VIDEO.md`](../../submission/VIDEO.md), prompts for the founder's own words, not a script) and the submission checklist ([`CHECKLIST.md`](../../submission/CHECKLIST.md), `planning/SPONSOR_CHECKLIST.md` §6 row by row), both from the M17 plan; two wording fixes; the README links the disclosure.
+**Also landed:** the shot list and the checklist ([#166](https://github.com/Zugzwang-world/graphpay/pull/166)); AI_USAGE's effort split and W1's names in the README ([#170](https://github.com/Zugzwang-world/graphpay/pull/170)).
+
+**In this step's PR:** an independent audit (a fresh reviewer given only the files) found 17 problems, all fixed:
+- the kit payment ran by script, not from a browser wallet;
+- the AgentPay SDK's 0.01 payment came 13 minutes before what the docs called the first test-USDT payment, which is now "the first agent payment through our facilitator";
+- receipts lapse after 30 days, like every ledger row, and can be rebuilt from their `ref`;
+- the Swarm photo is stored and checkable, but the phones show the site's copy;
+- "every payment becomes a receipt" now reads "every agent payment": the mirror parks a payer it does not know;
+- numbers re-matched to their sources, the namespace's 90 transactions, the cap record of 300, and two form-text links repointed.
+
+W5's self-healing (#172) and W3's Subscribe and Cancel on `/customer` (#173) are folded in.
 
 **The founder must:**
 - review the README and the partner files;

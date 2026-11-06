@@ -13,7 +13,7 @@ const trap = cast.shopByRole('trap').ens;
 const payer = cast.payers.payer.ens;
 const NOON_IST = Date.parse('2026-11-06T06:30:00.000Z');
 
-const run = (options = {}) => runMockErrand({ now: NOON_IST, ...options });
+const run = (options = {}) => runMockErrand({ now: NOON_IST, retryMs: 0, ...options });
 const events = (runLog, type) => runLog.events.filter((e) => e.type === type);
 const guards = (runLog, ok) => events(runLog, 'guard').filter((e) => e.ok === ok);
 const refusals = (runLog) => runLog.result.refusals.map((r) => r.reason);
@@ -47,8 +47,8 @@ test('scout and analyst run in parallel: both start before either ends', async (
   assert.ok(lastStart < firstEnd, `starts ${lastStart} must precede ends ${firstEnd}`);
 });
 
-test('the analyst answers with an explain id and the risk agent checks graphql and ens_check in one step', async () => {
-  const { runLog } = await run();
+test('the analyst answers with an explain id and the risk agent checks graphql and ens_check in one step (the models make every call)', async () => {
+  const { runLog } = await run({ steps: 'model' });
   const graphqlResult = events(runLog, 'tool.result').find((e) => e.tool === 'graphql' && e.agent === cast.buyer.analyst);
   assert.match(graphqlResult.output.extensions.arkiv.explainId, /^[0-9a-f]{12}$/);
   assert.ok(events(runLog, 'tool.call').some((e) => e.tool === 'explain'));
@@ -65,8 +65,8 @@ test('the trap is never paid: a price-only concierge picks it and the guard refu
   assert.equal(paidAt(world, trap).length, 0);
 });
 
-test('the trap is never paid: a lying analyst cannot make it eligible', async () => {
-  const { runLog, world } = await run({ play: { analyst: 'lying', concierge: 'trusts-analyst' } });
+test('the trap is never paid: a lying analyst cannot make it eligible (the models make every call)', async () => {
+  const { runLog, world } = await run({ steps: 'model', play: { analyst: 'lying', concierge: 'trusts-analyst' } });
   assert.equal(runLog.result.status, 'refused');
   assert.deepEqual(refusals(runLog), ['SHOP_NOT_ELIGIBLE']);
   assert.ok(guards(runLog, false).some((g) => g.guard === 'G2' && g.detail.includes("code's ranking stands")));
@@ -75,14 +75,14 @@ test('the trap is never paid: a lying analyst cannot make it eligible', async ()
 });
 
 test('the model cannot widen the limits: a concierge asking for 10× the budget still pays within 6', async () => {
-  const { runLog, state } = await run({ play: { concierge: 'widen-limits' } });
+  const { runLog, state } = await run({ steps: 'model', play: { concierge: 'widen-limits' } });
   assert.equal(state.need.budgetUsdt, '6.000000');
   assert.ok(events(runLog, 'guard').some((g) => g.guard === 'G1' && /budget 60 → 6\.000000/.test(g.detail)));
   assert.equal(runLog.result.status, 'paid');
 });
 
 test('one payment per errand: three parallel pay_shop calls make one payment', async () => {
-  const { runLog, world } = await run({ play: { concierge: 'triple-pay' } });
+  const { runLog, world } = await run({ steps: 'model', play: { concierge: 'triple-pay' } });
   assert.equal(runLog.result.status, 'paid');
   assert.equal(world.hooks.signed.length, 1);
   assert.equal(paidAt(world, good).length, 1);
@@ -92,7 +92,7 @@ test('one payment per errand: three parallel pay_shop calls make one payment', a
 });
 
 test('pay_order is single-flight: an overspending payer calling it three times pays once', async () => {
-  const { runLog, world } = await run({ play: { payer: 'overspend' } });
+  const { runLog, world } = await run({ steps: 'model', play: { payer: 'overspend' } });
   assert.equal(runLog.result.status, 'paid');
   assert.equal(world.hooks.signed.length, 1);
   const results = events(runLog, 'tool.result').filter((e) => e.tool === 'pay_order').map((e) => e.output.status);
@@ -100,7 +100,7 @@ test('pay_order is single-flight: an overspending payer calling it three times p
 });
 
 test('the payer acts only on the approved order: a wrong-shop payer cannot name a shop, URL or amount', async () => {
-  const { runLog, world } = await run({ play: { payer: 'wrong-shop' } });
+  const { runLog, world } = await run({ steps: 'model', play: { payer: 'wrong-shop' } });
   assert.equal(world.hooks.signed.length, 0);
   assert.equal(paidAt(world, trap).length, 0);
   assert.equal(runLog.result.status, 'refused');
@@ -213,9 +213,16 @@ test('the story errand pays at any hour: its deadline is an hour from the reques
 });
 
 test("the guard checks each shop's ETA against the span from the request: within 30 minutes no eligible shop can deliver", async () => {
+  // A concierge model that ignores the deadline picks the good shop and the guard refuses it.
+  const picked = await run({ steps: 'model', request: cast.order.request.replace('an hour', '30 minutes') });
+  assert.equal(picked.runLog.result.status, 'refused');
+  assert.deepEqual(refusals(picked.runLog), ['MISSES_DEADLINE']);
+  assert.equal(picked.world.hooks.signed.length, 0);
+  // With the routine steps in code, nothing fits and nothing is paid; the result and the feed say why.
   const { runLog, world } = await run({ request: cast.order.request.replace('an hour', '30 minutes') });
   assert.equal(runLog.result.status, 'refused');
   assert.deepEqual(refusals(runLog), ['MISSES_DEADLINE']);
+  assert.ok(guards(runLog, false).some((g) => g.guard === 'G3' && /MISSES_DEADLINE: .*no eligible shop has an offer within the budget and the deadline/.test(g.detail)));
   assert.equal(world.hooks.signed.length, 0);
 });
 
@@ -240,21 +247,33 @@ test('an AGENT_MODE typo fails before any model or service is touched', async ()
 
 test('a key echoed by a throwing model never reaches the run log (G14)', async () => {
   const key = ['sk', 'ant', 'api03', 'K'.repeat(40)].join('-');
-  const { runLog } = await run({ faults: { scout: `throw:provider error for key ${key}` }, secrets: [key] });
+  const { runLog } = await run({ steps: 'model', faults: { scout: `throw:provider error for key ${key}` }, secrets: [key] });
   const text = JSON.stringify(runLog);
   assert.equal(text.includes(key), false);
   assert.ok(events(runLog, 'agent.end').some((e) => e.role === 'scout' && /<redacted>/.test(e.error)));
+  const coded = await run({ faults: { concierge: `throw:provider error for key ${key}` }, secrets: [key] });
+  assert.equal(JSON.stringify(coded.runLog).includes(key), false);
+  assert.ok(guards(coded.runLog, true).some((g) => g.guard === 'G2' && /<redacted>/.test(g.detail)));
+  assert.equal(coded.runLog.result.status, 'paid', "code pays its best eligible offer when the concierge's model fails");
 });
 
 test('an empty reply or a max_tokens stop is recorded as no answer; tool data still decides', async () => {
-  const empty = await run({ faults: { concierge: 'empty' } });
+  const empty = await run({ steps: 'model', faults: { concierge: 'empty' } });
   const end = events(empty.runLog, 'agent.end').find((e) => e.role === 'concierge');
   assert.match(end.error, /empty reply/);
   assert.equal(empty.runLog.result.status, 'paid');
   assert.equal(empty.runLog.result.narrative, null);
-  const cut = await run({ faults: { scout: 'max-tokens' } });
+  const cut = await run({ steps: 'model', faults: { scout: 'max-tokens' } });
   assert.match(events(cut.runLog, 'agent.end').find((e) => e.role === 'scout').error, /max_tokens/);
   assert.equal(cut.runLog.result.status, 'paid');
+  // Routine steps in code: an empty choice falls to code's best offer; the guard line says so.
+  const coded = await run({ faults: { concierge: 'empty' } });
+  assert.equal(coded.runLog.result.status, 'paid');
+  assert.equal(coded.runLog.result.chosenShop, good);
+  assert.ok(guards(coded.runLog, true).some((g) => g.guard === 'G2' && /named no shop \(no answer: empty reply\)/.test(g.detail)));
+  const cutRisk = await run({ faults: { risk: 'max-tokens' } });
+  assert.match(events(cutRisk.runLog, 'agent.end').find((e) => e.role === 'risk').error, /max_tokens/);
+  assert.equal(cutRisk.runLog.result.status, 'paid', "code's risk check approves on its own reads");
 });
 
 test('only the final text block of a reply is read (ADR-0048)', async () => {
@@ -264,8 +283,8 @@ test('only the final text block of a reply is read (ADR-0048)', async () => {
   assert.equal(end.output.chosenShop, good);
 });
 
-test('the prompts are the spec text with the shared tail; analyst and risk get the SDL', async () => {
-  const { world } = await run();
+test('the prompts are the spec text with the shared tail; analyst and risk get the SDL (the models make every call)', async () => {
+  const { world } = await run({ steps: 'model' });
   const seen = world.mockModels.seen.prompts;
   for (const role of ['concierge', 'scout', 'analyst', 'payer', 'storefront', 'risk', 'dispatch']) {
     assert.ok(seen[role]?.[0]?.endsWith(TAIL), role);
@@ -308,7 +327,7 @@ test('get_quote cannot swap the order while pay_order is signing it', async () =
 });
 
 test('the run log carries every model call per agent; usageOf adds them up to the meter, and mock runs stay untimed', async () => {
-  const { runLog, metrics } = await run();
+  const { runLog, metrics } = await run({ steps: 'model' });
   const ends = events(runLog, 'agent.end');
   assert.ok(ends.length >= 7);
   for (const e of ends) {
@@ -321,6 +340,6 @@ test('the run log carries every model call per agent; usageOf adds them up to th
   assert.deepEqual(metrics.usage, usage);
   assert.deepEqual(events(runLog, 'agent.end').find((e) => e.role === 'scout').calls.map((c) => c.tools), [['directory_list'], ['catalog_read', 'catalog_read', 'catalog_read'], []]);
   assert.match(usageTable(usage), /\| \*\*errand\*\* \| \d+ calls/);
-  const timed = await run({ timing: true });
+  const timed = await run({ steps: 'model', timing: true });
   assert.ok(events(timed.runLog, 'agent.end').every((e) => Number.isFinite(e.seconds) && e.calls.every((c) => Number.isFinite(c.seconds))));
 });

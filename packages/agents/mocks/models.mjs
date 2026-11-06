@@ -73,9 +73,29 @@ function needFrom(task, { widen = false } = {}) {
   };
 }
 
+// W4's choose form: the reports are in the task and the reply is the choice, in one call.
+function chooseFrom(task, play) {
+  const offers = task.offers ?? [];
+  const deadline = Date.parse(task.limits.deadlineIso);
+  const now = Date.parse(task.now);
+  const fits = (o) => Number(o.priceUsdt) <= Number(task.limits.budgetUsdt) && now + o.etaMinutes * 60_000 <= deadline;
+  if (play === 'no-choice') return null;
+  if (play === 'unknown-choice') return 'a shop that is not in the ranking';
+  if (play === 'trap-upper') return (task.ranking ?? []).find((r) => !r.eligible)?.ens.toUpperCase() ?? null;
+  if (play === 'late-pick') return (task.ranking ?? []).filter((r) => r.eligible).at(-1)?.ens ?? null;
+  if (play === 'price-only') return [...offers].sort((a, b) => Number(a.priceUsdt) - Number(b.priceUsdt))[0]?.shop ?? null;
+  if (play === 'trusts-analyst') return task.analyst?.recommendation ?? null;
+  return (task.ranking ?? []).find((r) => r.eligible && offers.some((o) => o.shop === r.ens && fits(o)))?.ens ?? null;
+}
+
 function conciergeScript(play) {
   return (view) => {
     const { task } = view;
+    if (Array.isArray(task.offers)) {
+      const shop = chooseFrom(task, play);
+      const price = task.offers.find((o) => o.shop === shop)?.priceUsdt;
+      return answer({ summary: shop ? `Chose ${shop} for ${price ?? '?'} USDT (MOCK narrative).` : 'No shop fits the request (MOCK).', chosenShop: shop });
+    }
     if (view.step === 0) {
       const need = needFrom(task, { widen: play === 'widen-limits' });
       return calls('concierge', 0, [
@@ -126,18 +146,23 @@ const MODEL_QUERY = `query Shops($category: String!, $city: String!) {
 
 function analystScript(play, cast) {
   const volumeRef = volumeReference(cast);
-  return (view) => {
-    if (view.step === 0) {
-      return calls('analyst', 0, [['graphql', { query: MODEL_QUERY, variables: { category: view.task.need.category, city: view.task.need.city.toLowerCase() } }]]);
-    }
-    if (view.step === 1) return calls('analyst', 1, [['explain', { explainId: last(view, 'graphql')?.extensions?.arkiv?.explainId ?? 'none' }]]);
-    const ranking = rankShops(talliesFromNodes(last(view, 'graphql')?.data?.nodes ?? []), volumeRef);
+  const judge = (nodes) => {
+    const ranking = rankShops(talliesFromNodes(nodes), volumeRef);
     if (play === 'lying') {
       const trap = cast.shopByRole('trap').ens;
       const lie = ranking.map((r) => (r.ens === trap ? { ...r, score: 0.999, eligible: true, reasons: [] } : r)).sort((a, b) => b.score - a.score);
       return answer({ ranking: lie, recommendation: trap, notes: 'MOCK lying analyst: calls the cheapest shop safe.' });
     }
     return answer({ ranking, recommendation: ranking.find((r) => r.eligible)?.ens ?? null, notes: 'Ranked by 90-day refunds and on-time rate (MOCK data).' });
+  };
+  return (view) => {
+    // W4's data form: code ran the query; the graph's answer is in the task.
+    if (view.task.graph) return judge(view.task.graph.data?.nodes ?? []);
+    if (view.step === 0) {
+      return calls('analyst', 0, [['graphql', { query: MODEL_QUERY, variables: { category: view.task.need.category, city: view.task.need.city.toLowerCase() } }]]);
+    }
+    if (view.step === 1) return calls('analyst', 1, [['explain', { explainId: last(view, 'graphql')?.extensions?.arkiv?.explainId ?? 'none' }]]);
+    return judge(last(view, 'graphql')?.data?.nodes ?? []);
   };
 }
 
@@ -172,8 +197,13 @@ function storefrontScript() {
 
 const STANDING_QUERY = `query Standing($ens: String!) { node(ens: $ens) { ens status reputation(window: D90) { orders cancellations disputes } } }`;
 
-function riskScript() {
+function riskScript(play) {
   return (view) => {
+    // W4's data form: code read the ENS state and the standing; they are in the task.
+    if (view.task.ens) {
+      const ok = view.task.ens.status === 'ACTIVE' && play !== 'declines';
+      return answer({ decision: ok ? 'approve' : 'decline', reasons: ok ? [] : [play === 'declines' ? 'MOCK: the risk agent says no' : `ENS status ${view.task.ens.status ?? 'unknown'}`] });
+    }
     if (view.step === 0) {
       return calls('risk', 0, [
         ['graphql', { query: STANDING_QUERY, variables: { ens: view.task.buyerAgent } }],
@@ -220,7 +250,7 @@ export function createScriptedModels({ cast, play = {}, faults = {} }) {
     analyst: analystScript(play.analyst, cast),
     payer: payerScript(play.payer, cast),
     storefront: storefrontScript(),
-    risk: riskScript(),
+    risk: riskScript(play.risk),
     dispatch: dispatchScript(),
   };
   const seen = { prompts: {} };

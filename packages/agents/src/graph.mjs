@@ -31,13 +31,21 @@ export async function readRanking(mcp, { category, city, query = RANKING_QUERY }
   } catch (error) {
     return { ok: false, reason: 'GRAPH_READ_FAILED', detail: errorText(error) };
   }
+  return rankingFromAnswer(answer);
+}
+
+// The tallies of a ranking query's answer: parsed (code's `mcp.call`), or as the MCP tool gave it
+// (W4: code runs the query through the analyst's traced tool). Also → `answer`, the parsed JSON.
+export function rankingFromAnswer(raw) {
+  const answer = mcpJson(raw);
   if (Array.isArray(answer?.errors) && answer.errors.length > 0) {
     return { ok: false, reason: 'GRAPH_READ_FAILED', detail: String(answer.errors[0]?.message ?? 'graphql error').slice(0, 300) };
   }
+  if (raw?.isError) return { ok: false, reason: 'GRAPH_READ_FAILED', detail: 'the graph answered an error' };
   const nodes = answer?.data?.nodes;
   if (!Array.isArray(nodes)) return { ok: false, reason: 'GRAPH_READ_FAILED', detail: 'the answer has no nodes' };
   const arkiv = answer.extensions?.arkiv ?? {};
-  return { ok: true, tallies: talliesFromNodes(nodes), explainId: arkiv.explainId ?? null, calls: arkiv.calls ?? null };
+  return { ok: true, tallies: talliesFromNodes(nodes), explainId: arkiv.explainId ?? null, calls: arkiv.calls ?? null, answer };
 }
 
 const COLUMNS = ['ens', 'status', 'orders', 'cancellations', 'disputes', 'daily_cap_usdt', 'spend_today_usdt', 'principal', 'principal_verified'];
@@ -85,7 +93,7 @@ export async function readBuyerStanding(mcp, ens) {
   try {
     answer = await mcp.call('ask', { intent: 'buyer_risk', ens: [ens], window: 'D90', verify: false });
   } catch (error) {
-    return { ok: false, reason: 'GRAPH_READ_FAILED', detail: errorText(error) };
+    return { ok: false, reason: 'GRAPH_READ_FAILED', detail: errorText(error), thrown: true };
   }
   const standing = parseBuyerRisk(answer?.text, ens);
   if (!standing) return { ok: false, reason: 'GRAPH_READ_FAILED', detail: `no readable standing for ${ens}` };
