@@ -75,6 +75,9 @@ importers:
       '@graphpay/shop':
         specifier: workspace:*
         version: link:../../packages/shop
+      '@graphpay_ethglobal/agentpay':
+        specifier: workspace:*
+        version: link:../../packages/agentpay
       '@graphpay_ethglobal/arkiv-graph':
         specifier: workspace:*
         version: link:../../packages/arkiv-graph
@@ -109,24 +112,24 @@ importers:
 
   examples/agentpay-ride:
     dependencies:
-      '@graphpay/agentpay':
-        specifier: workspace:*
-        version: link:../../packages/agentpay
       '@graphpay/config':
         specifier: workspace:*
         version: link:../../packages/config
+      '@graphpay_ethglobal/agentpay':
+        specifier: workspace:*
+        version: link:../../packages/agentpay
 
   examples/agentpay-sweets:
     dependencies:
-      '@graphpay/agentpay':
-        specifier: workspace:*
-        version: link:../../packages/agentpay
       '@graphpay/config':
         specifier: workspace:*
         version: link:../../packages/config
       '@graphpay/contracts':
         specifier: workspace:*
         version: link:../../packages/contracts
+      '@graphpay_ethglobal/agentpay':
+        specifier: workspace:*
+        version: link:../../packages/agentpay
       viem:
         specifier: 2.57.16
         version: 2.57.16(typescript@5.9.3)(zod@4.6.7)
@@ -181,12 +184,6 @@ importers:
 
   packages/agentpay:
     dependencies:
-      '@graphpay/config':
-        specifier: workspace:*
-        version: link:../config
-      '@graphpay/contracts':
-        specifier: workspace:*
-        version: link:../contracts
       '@modelcontextprotocol/sdk':
         specifier: 1.32.2
         version: 1.32.2(zod@4.6.7)
@@ -200,6 +197,12 @@ importers:
         specifier: 4.6.7
         version: 4.6.7
     devDependencies:
+      '@graphpay/config':
+        specifier: workspace:*
+        version: link:../config
+      '@graphpay/contracts':
+        specifier: workspace:*
+        version: link:../contracts
       '@graphpay/facilitator':
         specifier: workspace:*
         version: link:../facilitator
@@ -212,6 +215,9 @@ importers:
       '@ai-sdk/anthropic':
         specifier: 4.0.96
         version: 4.0.96(zod@4.6.7)
+      '@ai-sdk/moonshotai':
+        specifier: 3.0.84
+        version: 3.0.84(zod@4.6.7)
       '@graphpay/config':
         specifier: workspace:*
         version: link:../config
@@ -236,12 +242,12 @@ importers:
 
   packages/checkout-kit:
     dependencies:
-      '@graphpay/agentpay':
-        specifier: workspace:*
-        version: link:../agentpay
       '@graphpay/contracts':
         specifier: workspace:*
         version: link:../contracts
+      '@graphpay_ethglobal/agentpay':
+        specifier: workspace:*
+        version: link:../agentpay
       react:
         specifier: '>=19'
         version: 19.3.1
@@ -403,6 +409,12 @@ packages:
 
   '@ai-sdk/mcp@2.0.90':
     resolution: {integrity: sha512-OCjo4WpxpEtJ6ZIhoni9KxKfSHNua33Ox/gpUNtY+CU1TlZxMVBu5P0jbMNlUxTyqgD0UDtyw5IiU1PAE9Jwgw==}
+    engines: {node: '>=22'}
+    peerDependencies:
+      zod: ^3.25.76 || ^4.1.8
+
+  '@ai-sdk/moonshotai@3.0.84':
+    resolution: {integrity: sha512-i1o4ebNi92SHAld1SCxNBIyde8UhRl161HAu5GgJq9gueVTCClyBTpDrawExoxq0YVLfOdsLBgkXI6iPOpZqHw==}
     engines: {node: '>=22'}
     peerDependencies:
       zod: ^3.25.76 || ^4.1.8
@@ -1406,6 +1418,12 @@ snapshots:
       '@ai-sdk/provider-utils': 5.0.74(zod@4.6.7)
       cross-spawn: 7.0.6
       pkce-challenge: 5.0.1
+      zod: 4.6.7
+
+  '@ai-sdk/moonshotai@3.0.84(zod@4.6.7)':
+    dependencies:
+      '@ai-sdk/provider': 4.0.35
+      '@ai-sdk/provider-utils': 5.0.74(zod@4.6.7)
       zod: 4.6.7
 
   '@ai-sdk/provider-utils@5.0.74(zod@4.6.7)':

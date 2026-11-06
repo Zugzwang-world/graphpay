@@ -22,7 +22,7 @@
     "test": "node --test \"test/*.test.mjs\""
   },
   "dependencies": {
-    "@graphpay/agentpay": "workspace:*",
+    "@graphpay_ethglobal/agentpay": "workspace:*",
     "@graphpay/contracts": "workspace:*",
     "viem": "2.57.16"
   },

@@ -56,7 +56,7 @@ export interface RunLog {
   schema: 'graphpay.agent-run/v1';
   label: string;
   runId: string;
-  mode: 'mock' | 'anthropic';
+  mode: 'mock' | 'live';
   model: string;
   synthetic: true;
   cast: unknown;
@@ -226,9 +226,10 @@ export interface ErrandOptions {
   /** ms; fixes the clock for deterministic runs. */
   now?: number;
   clock?: () => number;
-  /** AGENT_MODE, AGENT_PRESET, ANTHROPIC_API_KEY. Default: process.env. */
+  /** AGENT_MODE, AGENT_PRESET and the keys of the preset's providers (ANTHROPIC_API_KEY, KIMI_API_KEY). Default: process.env. */
   env?: Record<string, string | undefined>;
-  mode?: 'mock' | 'anthropic';
+  /** `anthropic` is the old name of `live`. */
+  mode?: 'mock' | 'live' | 'anthropic';
   models?: ModelFactory;
   mockModels?: (role: Role) => LanguageModel | null;
   /** E2E_BUYER: the cast key of the paying agent (default "payer"). */
@@ -318,9 +319,9 @@ export declare function presignCheck(input: {
   contracts?: Set<string>;
 }): Promise<{ ok: true; requirement: Record<string, any>; amountMicro: bigint; paymentRequired: unknown; quoteEntity: QuoteEntity } | { ok: false; reason: string; detail: string; requote?: boolean }>;
 
-export declare function resolveAgentMode(env?: Record<string, string | undefined>): 'mock' | 'anthropic';
-export declare function createModelFactory(options: { mode: 'mock' | 'anthropic'; env?: Record<string, string | undefined>; mocks?: (role: Role) => LanguageModel | null }): ModelFactory;
-export declare const AGENT_MODES: readonly ['mock', 'anthropic', 'auto'];
+export declare function resolveAgentMode(env?: Record<string, string | undefined>): 'mock' | 'live';
+export declare function createModelFactory(options: { mode: 'mock' | 'live'; env?: Record<string, string | undefined>; mocks?: (role: Role) => LanguageModel | null }): ModelFactory;
+export declare const AGENT_MODES: readonly ['mock', 'live', 'anthropic', 'auto'];
 
 export declare function parseMandate(
   request: string,

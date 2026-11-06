@@ -1,6 +1,6 @@
 # @graphpay/checkout-kit
 
-Take payments in test USDT on Whitechain from a browser wallet, with no gas for the buyer, in about 20 lines. **It sits on `@graphpay/agentpay` (the merchant, the 402 flow, refunds and the CSV export) and on GraphPay's x402 facilitator, which verifies and settles the payment; it adds a catalog, a browser-wallet client and a button, and uses only the SDK's public exports.** **Testnets only** (Whitechain Sepolia, chain 1874). Not published to npm.
+Take payments in test USDT on Whitechain from a browser wallet, with no gas for the buyer, in about 20 lines. **It sits on `@graphpay_ethglobal/agentpay` (the merchant, the 402 flow, refunds and the CSV export) and on GraphPay's x402 facilitator, which verifies and settles the payment; it adds a catalog, a browser-wallet client and a button, and uses only the SDK's public exports.** **Testnets only** (Whitechain Sepolia, chain 1874). Not published to npm.
 
 ## The shop: 20 lines
 
@@ -32,7 +32,7 @@ import { GraphPayButton } from '@graphpay/checkout-kit/react';
 3. On confirm, the wallet asks for a signature over that order (a Permit2 witness, so payee, amount, deadline and order id are inside it) and, the first time, for a gasless approval of exactly the order amount. They go back as `PAYMENT-SIGNATURE`. Our facilitator verifies and settles; it pays the gas and cannot redirect the money.
 4. The receipt shows the settlement with its explorer link. A payment that cannot be confirmed (a timeout, a 5xx) is never re-quoted: the button offers "Check again", which re-sends the same signature (it can never pay twice) until the order is resolved or its deadline has passed.
 
-A **re-order** is the same route with `?parent=<order id>`: the parent must be a paid order of this shop by the same payer. For anything beyond the button, `graphpayCheckout`, `getQuote`, `payQuote` and `connectWallet` are exported from `@graphpay/checkout-kit/client` (viem only, no Node modules). The shop's own `shop.merchant` is the `@graphpay/agentpay` merchant: refunds, delivery marks, subscriptions and the accountant CSV (`exportCsv`).
+A **re-order** is the same route with `?parent=<order id>`: the parent must be a paid order of this shop by the same payer. For anything beyond the button, `graphpayCheckout`, `getQuote`, `payQuote` and `connectWallet` are exported from `@graphpay/checkout-kit/client` (viem only, no Node modules). The shop's own `shop.merchant` is the `@graphpay_ethglobal/agentpay` merchant: refunds, delivery marks, subscriptions and the accountant CSV (`exportCsv`).
 
 ## Deviations from `WEBSITE_SPEC.md` §10
 

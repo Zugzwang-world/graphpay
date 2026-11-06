@@ -188,7 +188,10 @@ test('an AGENT_MODE typo never starts a paid run', () => {
   assert.equal(resolveAgentMode({}), 'mock');
   assert.equal(resolveAgentMode({ AGENT_MODE: 'mock' }), 'mock');
   assert.equal(resolveAgentMode({ AGENT_MODE: 'auto' }), 'mock');
-  assert.equal(resolveAgentMode({ AGENT_MODE: 'auto', ANTHROPIC_API_KEY: 'x' }), 'anthropic');
-  assert.equal(resolveAgentMode({ AGENT_MODE: 'anthropic' }), 'anthropic');
-  for (const typo of ['antropic', 'Anthropic', 'live', 'mock ', 'ANTHROPIC']) assert.throws(() => resolveAgentMode({ AGENT_MODE: typo }), /refusing to start/, typo);
+  assert.equal(resolveAgentMode({ AGENT_MODE: 'auto', ANTHROPIC_API_KEY: 'x' }), 'mock', 'the active preset is Kimi: an Anthropic key alone starts nothing');
+  assert.equal(resolveAgentMode({ AGENT_MODE: 'auto', KIMI_API_KEY: 'x' }), 'live');
+  assert.equal(resolveAgentMode({ AGENT_MODE: 'auto', AGENT_PRESET: 'anthropic-testing', ANTHROPIC_API_KEY: 'x' }), 'live');
+  assert.equal(resolveAgentMode({ AGENT_MODE: 'live' }), 'live');
+  assert.equal(resolveAgentMode({ AGENT_MODE: 'anthropic' }), 'live', 'the old name of live');
+  for (const typo of ['antropic', 'Anthropic', 'lve', 'Live', 'mock ', 'ANTHROPIC']) assert.throws(() => resolveAgentMode({ AGENT_MODE: typo }), /refusing to start/, typo);
 });

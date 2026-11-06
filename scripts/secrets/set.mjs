@@ -5,6 +5,7 @@
 
 import { EnvError, safeName, setEnvValue } from '../lib/env-file.mjs';
 import { locateEnvFile } from '../lib/env-loader.mjs';
+import { findSecrets } from '../lib/secret-shapes.mjs';
 import { assertSettable, fail, guard, validateValue } from './common.mjs';
 
 guard();
@@ -95,6 +96,8 @@ async function main() {
   await validateValue(name, value);
   const { path } = locateEnvFile({ create: true });
   console.log(`${name}: ${setEnvValue(path, name, value, { overwrite })}`);
+  // A new provider's first real key tests its scan rule without anyone seeing the key.
+  if (name.endsWith('_API_KEY')) console.log(`${name}: the secret scan recognises this key: ${findSecrets(value).length > 0 ? 'yes' : 'no'}`);
 }
 
 main().catch(fail);

@@ -10,7 +10,7 @@
 
 import { encodeAbiParameters, getAddress, keccak256, stringToHex } from 'viem';
 import { namehash, normalize } from 'viem/ens';
-import { RENEWAL_BIT, ORDER_KIND } from '@graphpay/contracts';
+import { RENEWAL_BIT, ORDER_KIND } from './vendor/index.mjs';
 import { MAX_U64, toMicro } from './money.mjs';
 
 export const ORDER_SCHEMA = 'agentpay.order/v1';

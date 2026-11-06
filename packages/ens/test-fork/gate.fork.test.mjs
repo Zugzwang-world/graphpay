@@ -1,13 +1,13 @@
 // Fork tests for the gate and the owner actions (planning/PROMPTS/06-ens-gate-kill-watcher.md):
 // the pause, the kill ladder (unregister, then `renew` leaves the label RESERVED; a lapse then
-// `renew` keeps the epoch) and the 20 s bite. Run against an anvil fork of Sepolia taken after
-// the namespace and disposable-2 were provisioned (scripts/ens/real-run.mjs --fork ... --disposable 2).
+// `renew` keeps the epoch) and the 20 s bite. Run against an anvil fork of Sepolia on which
+// disposable-2 and disposable-3 were provisioned (scripts/ens/real-run.mjs --fork ... --disposable n, once each).
 // Fork keys are public: nothing here touches a real chain.
 //   pnpm --filter @graphpay/ens test:fork
 
 import assert from 'node:assert/strict';
 import { after, before, test } from 'node:test';
-import { createPublicClient, createWalletClient, encodeFunctionData, getAddress, http } from 'viem';
+import { createPublicClient, createWalletClient, encodeFunctionData, getAddress, http, zeroAddress } from 'viem';
 import { loadEnv } from '../../../scripts/lib/env-loader.mjs';
 import { roleAddresses } from '../../../scripts/lib/wallets.mjs';
 import {
@@ -16,6 +16,7 @@ import {
   memoryCheckpoint,
   createOwnerActions,
   createTxRunner,
+  AGENT_TOKEN_ROLES,
   disposableAgent,
   ensChain,
   labelId,
@@ -75,6 +76,9 @@ const actions = async (...roles) => {
 };
 const gateFor = (epochs = {}, capMicro = 5_000_000n) =>
   createEnsGate({ client, expectedEpoch: async (node) => epochs[node] ?? 0, policyCapMicro: async () => capMicro, spentToday: async () => 0n });
+// disposable-1 was killed on the real chain; the fork tests kill KILL and lapse LAPSE (provision both on the fork first).
+const KILL = disposableAgent(2);
+const LAPSE = disposableAgent(3);
 const scout = plan.agents.find((a) => a.selfHeld && a.capMicro > 0n);
 const reasonOf = async (gate, name, amount = 1_000_000n) => {
   const r = await gate.ensGate(name, amount);
@@ -112,7 +116,7 @@ isolated('pause bites within 25 s of its receipt and resume allows the name agai
 });
 
 isolated('kill ladder: unregister refuses at once; a second kill says "killed earlier"; renew after unregister leaves the label RESERVED and refused', async () => {
-  const d = disposableAgent(1);
+  const d = KILL;
   const a = await actions(d.ownerWalletRole);
   const check = createEnsGate({ client, expectedEpoch: async () => 0, policyCapMicro: async () => 1_000_000n, spentToday: async () => 0n });
   assert.equal(await reasonOf(check, d.name, 100_000n), 'ok');
@@ -138,12 +142,12 @@ isolated('kill ladder: unregister refuses at once; a second kill says "killed ea
 });
 
 isolated('a lapse then renew revives the same epoch; a never-registered label is the next free disposable', async () => {
-  const d = disposableAgent(2);
+  const d = LAPSE;
   const a = await actions(d.ownerWalletRole);
   const at = await locate(client, d.name);
   const before = await registryState(client, at.registry, d.label);
   assert.equal(before.status, STATUS.REGISTERED);
-  assert.equal(await nextFreeDisposable(client), 3);
+  assert.equal(await nextFreeDisposable(client), 4);
   // Jump past the expiry (a time lapse emits nothing), then renew: same owner, same epoch.
   const jump = Number(before.expiry - (await client.getBlock()).timestamp) + 10;
   await client.request({ method: 'evm_increaseTime', params: [`0x${jump.toString(16)}`] });
@@ -164,7 +168,7 @@ isolated('a lapse then renew revives the same epoch; a never-registered label is
 
 
 isolated('watcher on the fork: unregister revokes the policy; a later renew does not un-revoke it; a pause patches the node; the policy cap never moves', async () => {
-  const d = disposableAgent(1);
+  const d = KILL;
   const a = await actions(d.ownerWalletRole);
   const calls = [];
   const patches = [];
@@ -173,7 +177,8 @@ isolated('watcher on the fork: unregister revokes the policy; a later renew does
   await watcher.start();
   const pr = await a.pause(d.name);
   const pl = await watcher.poll();
-  assert.deepEqual([pr.changed, pl.events], [true, 1]);
+  assert.equal(pr.changed, true);
+  assert.ok(pl.events >= 1); // the poll window also replays the last blocks
   assert.deepEqual(patches.at(-1), { status: 'paused' });
   await a.kill(d.name);
   await watcher.poll();
@@ -192,4 +197,44 @@ isolated('watcher on the fork: unregister revokes the policy; a later renew does
   assert.equal(calls.length, 1, `renew ${renewed ? 'succeeded' : 'reverted'}: no un-revoke`);
   assert.notEqual((await registryState(client, at.registry, d.label)).status, STATUS.REGISTERED);
   console.log(`# renew after unregister: ${renewed ? 'accepted, label is RESERVED' : 'reverted'}`);
+});
+
+// B7: a renew keeps the epoch (see the lapse test above); a new registration after an unregister, and after a
+// lapse, gets e + 1. The view of an AVAILABLE label is the next version, so right after an unregister it
+// already shows a higher epoch than the one it was killed at (the pack measured +2).
+isolated('B7: the epoch after re-registering: a new registration after an unregister or a lapse gets e + 1', async () => {
+  const operator = await senderFor('OPERATOR');
+  const runner = createTxRunner({ client, chainId: 11155111, log: () => {} });
+  const reRegister = async (d, holder, resolver, registry) => {
+    const t = (await client.getBlock()).timestamp;
+    const data = encodeFunctionData({ abi: userRegistryAbi, functionName: 'register', args: [d.label, holder, zeroAddress, resolver, AGENT_TOKEN_ROLES, t + 86_400n * 14n] });
+    await runner.send('re-register', operator, { to: registry, data });
+    return registryState(client, registry, d.label);
+  };
+
+  // An unregister, then a new registration (first: the time jump below lapses every short-lived label).
+  const d1 = KILL;
+  const a1 = await actions(d1.ownerWalletRole);
+  const at1 = await locate(client, d1.name);
+  const e1 = at1.state.epoch;
+  await a1.kill(d1.name);
+  const view = await registryState(client, at1.registry, d1.label);
+  assert.equal(view.status, STATUS.AVAILABLE);
+  console.log(`# B7: an AVAILABLE label after an unregister shows epoch ${view.epoch} (registered epoch was ${e1})`);
+  assert.ok(view.epoch > e1, 'the view of an unregistered label is never the epoch it was killed at');
+  const fresh = await reRegister(d1, at1.state.latestOwner, at1.resolver, at1.registry);
+  assert.equal(fresh.status, STATUS.REGISTERED);
+  assert.equal(fresh.epoch, e1 + 1, 'a new registration after an unregister is e + 1');
+
+  // A lapse, then a new registration of the same label.
+  const d2 = LAPSE;
+  const at2 = await locate(client, d2.name);
+  const e = at2.state.epoch;
+  const jump = Number(at2.state.expiry - (await client.getBlock()).timestamp) + 10;
+  await client.request({ method: 'evm_increaseTime', params: [`0x${jump.toString(16)}`] });
+  await client.request({ method: 'evm_mine', params: [] });
+  assert.equal((await registryState(client, at2.registry, d2.label)).status, STATUS.AVAILABLE);
+  const again = await reRegister(d2, at2.state.latestOwner, at2.resolver, at2.registry);
+  assert.equal(again.status, STATUS.REGISTERED);
+  assert.equal(again.epoch, e + 1, 'a new registration after a lapse is e + 1');
 });

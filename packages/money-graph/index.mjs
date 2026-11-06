@@ -16,3 +16,5 @@ export { openShop, closeShop, openShopKeys, markPresence, agentsOnline, recordHa
 export { SDL, graphqlSchema, runGraphql, createContext, createGraphEngine, checkLimits, ownersFor, rate, usdt } from './src/graphql.mjs';
 export { MCP_TOOLS, askDocument, askTable, createMcpServer, handleMcpRequest } from './src/mcp.mjs';
 export { QUESTIONS, RACE_QUESTIONS, ask, score, plainPayRows, graphDocument, graphAnswer, callTap, raceQuestion } from './src/bench.mjs';
+export { ZERO_BATCH, swarmClient, sha256Hex, SwarmError } from './src/swarm.mjs';
+export { menuDocument, menuBytes, menuValues, writeMenu, readMenu, castMenus } from './src/menu.mjs';

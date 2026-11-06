@@ -22,6 +22,17 @@ const REASONS: Record<string, string> = {
   OVER_REFUNDABLE: 'That is more than is left to refund.',
   BAD_AMOUNT: 'Nothing is left to refund.',
   FLOAT_LOW: 'The shop wallet lacks the balance or the approval for this refund.',
+  NO_ORDER: 'There is no order to act on yet.',
+  NOT_THIS_ORDER: 'That is not the latest order.',
+  BAD_REASON: 'The reason must be short plain text.',
+  TOO_SOON: 'One was just sent or is still settling. Wait a few minutes before trying again.',
+  NOT_REORDERABLE: 'The last order has to be paid before it can be ordered again.',
+  PRICE_CHANGED: 'The shop now quotes a different price or quantity. Nothing was paid.',
+  NOT_PAID: 'The payment did not go through. Nothing was paid.',
+  OVER_PERIOD_CAP: 'That would pass the agent\'s spending cap. Nothing was paid.',
+  OVER_DAILY_CAP: 'That would pass the agent\'s daily cap. Nothing was paid.',
+  PASS_REVOKED: 'The agent\'s spending pass is revoked. Nothing was paid.',
+  PASS_EXPIRED: 'The agent\'s spending pass has expired. Nothing was paid.',
   STILL_PENDING: 'The last send for this order is still confirming. Check the explorer before trying again.',
 };
 
