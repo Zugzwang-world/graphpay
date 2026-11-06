@@ -7,7 +7,7 @@ import { test } from 'node:test';
 import { generatePrivateKey, privateKeyToAccount } from 'viem/accounts';
 import { config } from '@graphpay/config';
 import { storyShops } from '@graphpay/shop';
-import { hostedEnv, route } from './payments.server.ts';
+import { hostedEnv, retryUncertain, route } from './payments.server.ts';
 import { GET as cron } from '../app/api/cron/renew/route.ts';
 import { POST as recorderPost } from '../app/api/recorder/[...path]/route.ts';
 
@@ -90,5 +90,25 @@ test('recorder: 503 without its token, 401 without the bearer, 503 until the W_S
   } finally {
     console.error = original;
     delete process.env.RECORDER_TOKEN;
+  }
+});
+
+test('a quote write that ends uncertain is retried at most twice; any other error is not', async () => {
+  const original = console.error;
+  console.error = () => {};
+  const uncertain = () => Object.assign(new Error('nonces were taken'), { name: 'WriteUncertainError' });
+  const nap = async () => {};
+  try {
+    let calls = 0;
+    assert.equal(await retryUncertain(async () => (++calls < 3 ? Promise.reject(uncertain()) : 'key'), { sleep: nap }), 'key');
+    assert.equal(calls, 3);
+    calls = 0;
+    await assert.rejects(retryUncertain(async () => (calls++, Promise.reject(uncertain())), { sleep: nap }), { name: 'WriteUncertainError' });
+    assert.equal(calls, 3, 'three tries, then the 503');
+    calls = 0;
+    await assert.rejects(retryUncertain(async () => (calls++, Promise.reject(new TypeError('bad input'))), { sleep: nap }), TypeError);
+    assert.equal(calls, 1, 'a revert or a bad input is never retried');
+  } finally {
+    console.error = original;
   }
 });
