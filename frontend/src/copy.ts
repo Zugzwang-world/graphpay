@@ -28,8 +28,21 @@ export const copy = {
     runNextRenewal: 'Run next renewal now',
     resetDemo: 'Reset demo',
     resetConfirm: 'Reset the demo? Every order, refund and renewal goes back to the starting data.',
+    resetShort: 'Reset everything?',
+    resetYes: 'Reset',
+    resetDone: 'Demo reset to the starting data',
+    renewalPending: 'Charging the next renewal…',
     openShopHint: 'Tip: open the shop in the merchant app first.',
     switchLabel: 'Show app',
+    customerTab: 'Customer',
+    merchantTab: 'Merchant',
+    demoControls: 'Demo controls',
+  },
+
+  /** Temporary text inside the phones until the pages are built (F3–F10). */
+  placeholder: {
+    customer: 'The desk, orders, refunds, renewals and agents arrive in the next milestones.',
+    merchant: 'Shop Home, refunds, renewals and payouts arrive in the next milestones.',
   },
 
   common: {

@@ -1,13 +1,13 @@
 ﻿import { useState } from 'react';
 import { createAdapter, DemoProvider } from '@/demo';
-import { EngineConsole } from '@/components/stage/EngineConsole';
+import { Stage } from '@/components/stage/Stage';
+import { AppPlaceholder } from '@/apps/AppPlaceholder';
 
-/** F1: the mock engine console. F2 replaces this with the two-phone stage. */
 export function App() {
   const [adapter] = useState(createAdapter);
   return (
     <DemoProvider adapter={adapter}>
-      <EngineConsole />
+      <Stage customer={<AppPlaceholder app="customer" />} merchant={<AppPlaceholder app="merchant" />} />
     </DemoProvider>
   );
 }

@@ -122,7 +122,7 @@ All are marked `PROPOSED (mock only)` in `src/demo/contract.ts`.
 
 - [x] **F0** Foundations: project, tokens, fonts, story data, copy, contract, mock seed data, README
 - [x] **F1** Mock engine: shared store, event bus, scripted journeys, reset (`npm test`: 22 journey tests)
-- [ ] **F2** Stage: dark stage, two iPhone frames, strip, narrow-width switch
+- [x] **F2** Stage: dark stage, two iPhone frames, strip, narrow-width switch
 - [ ] **F3** Shared components 1: header and coin hamburger, page strip, chips, sheets, states, dev state switcher
 - [ ] **F4** Shared components 2: iOS keyboard, AmountEntry, StatusTracker, AgentAvatar, sounds, SVG fox
 - [ ] **F5** Customer journey 1: desk, shop cards, quote and receipt

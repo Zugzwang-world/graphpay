@@ -35,6 +35,11 @@
   --color-stage-muted: #9aa6b2;
   --color-stage-line: #26313d;
 
+  /* the simulated phone hardware (generic, no brand) */
+  --color-bezel: #15181d;
+  --color-bezel-edge: #2c323b;
+  --color-island: #000000;
+
   /* iOS system pieces */
   --color-ios-keyboard: #d1d4db;
   --color-ios-key: #ffffff;
