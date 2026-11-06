@@ -1,0 +1,219 @@
+{
+  "runId": "run-a4e03b7d2c43922f",
+  "owner": "0x146002b43a9fb8eb963699e77ed18579dc30a6e4",
+  "startedAt": "2026-11-06T04:49:18.756Z",
+  "polls": [
+    {
+      "at": 1793940559051,
+      "rows": 0,
+      "agents": []
+    },
+    {
+      "at": 1793940564383,
+      "rows": 0,
+      "agents": []
+    },
+    {
+      "at": 1793940569732,
+      "rows": 0,
+      "agents": []
+    },
+    {
+      "at": 1793940575101,
+      "rows": 1,
+      "agents": [
+        "concierge.vitalik.graphpay.eth"
+      ]
+    },
+    {
+      "at": 1793940639251,
+      "rows": 1,
+      "agents": [
+        "concierge.vitalik.graphpay.eth"
+      ]
+    },
+    {
+      "at": 1793940699626,
+      "rows": 1,
+      "agents": [
+        "concierge.vitalik.graphpay.eth"
+      ]
+    },
+    {
+      "at": 1793940759994,
+      "rows": 1,
+      "agents": [
+        "concierge.vitalik.graphpay.eth"
+      ]
+    },
+    {
+      "at": 1793940820356,
+      "rows": 1,
+      "agents": [
+        "concierge.vitalik.graphpay.eth"
+      ]
+    },
+    {
+      "at": 1793940880721,
+      "rows": 1,
+      "agents": [
+        "concierge.vitalik.graphpay.eth"
+      ]
+    },
+    {
+      "at": 1793940941085,
+      "rows": 1,
+      "agents": [
+        "concierge.vitalik.graphpay.eth"
+      ]
+    },
+    {
+      "at": 1793941001454,
+      "rows": 1,
+      "agents": [
+        "concierge.vitalik.graphpay.eth"
+      ]
+    },
+    {
+      "at": 1793941061786,
+      "rows": 1,
+      "agents": [
+        "concierge.vitalik.graphpay.eth"
+      ]
+    },
+    {
+      "at": 1793941122127,
+      "rows": 1,
+      "agents": [
+        "concierge.vitalik.graphpay.eth"
+      ]
+    },
+    {
+      "at": 1793941182476,
+      "rows": 1,
+      "agents": [
+        "concierge.vitalik.graphpay.eth"
+      ]
+    },
+    {
+      "at": 1793941242831,
+      "rows": 1,
+      "agents": [
+        "concierge.vitalik.graphpay.eth"
+      ]
+    },
+    {
+      "at": 1793941303231,
+      "rows": 1,
+      "agents": [
+        "concierge.vitalik.graphpay.eth"
+      ]
+    },
+    {
+      "at": 1793941363608,
+      "rows": 1,
+      "agents": [
+        "concierge.vitalik.graphpay.eth"
+      ]
+    },
+    {
+      "at": 1793941373978,
+      "rows": 1,
+      "agents": [
+        "concierge.vitalik.graphpay.eth"
+      ]
+    },
+    {
+      "at": 1793941384353,
+      "rows": 1,
+      "agents": [
+        "concierge.vitalik.graphpay.eth"
+      ]
+    },
+    {
+      "at": 1793941394728,
+      "rows": 1,
+      "agents": [
+        "concierge.vitalik.graphpay.eth"
+      ]
+    },
+    {
+      "at": 1793941405122,
+      "rows": 1,
+      "agents": [
+        "concierge.vitalik.graphpay.eth"
+      ]
+    },
+    {
+      "at": 1793941415535,
+      "rows": 1,
+      "agents": [
+        "concierge.vitalik.graphpay.eth"
+      ]
+    },
+    {
+      "at": 1793941425908,
+      "rows": 1,
+      "agents": [
+        "concierge.vitalik.graphpay.eth"
+      ]
+    },
+    {
+      "at": 1793941436303,
+      "rows": 1,
+      "agents": [
+        "concierge.vitalik.graphpay.eth"
+      ]
+    },
+    {
+      "at": 1793941446723,
+      "rows": 1,
+      "agents": [
+        "concierge.vitalik.graphpay.eth"
+      ]
+    },
+    {
+      "at": 1793941457119,
+      "rows": 1,
+      "agents": [
+        "concierge.vitalik.graphpay.eth"
+      ]
+    },
+    {
+      "at": 1793941467474,
+      "rows": 1,
+      "agents": [
+        "concierge.vitalik.graphpay.eth"
+      ]
+    },
+    {
+      "at": 1793941477811,
+      "rows": 0,
+      "agents": []
+    }
+  ],
+  "errandStartMs": 1793940568386,
+  "lastExpiresAt": "277856",
+  "firstSeenMs": 1793940575101,
+  "firstRows": [
+    {
+      "key": "0xc0f55fb4d06da8a7062ec94fc1ec331c4ef772c9e7d6c37718ed30c4fd9d5524",
+      "agentEns": "concierge.vitalik.graphpay.eth",
+      "role": "concierge",
+      "expiresAt": "277856",
+      "owner": "0x146002b43A9Fb8EB963699e77Ed18579dC30A6e4"
+    }
+  ],
+  "errandEndMs": 1793940575429,
+  "errandLine": "errand: no-purchase, chose null, 1.0 s, $0.0000",
+  "exitCode": 1,
+  "handoffs": 0,
+  "goneMs": 1793941477811,
+  "expiredAtMs": 1793941474000,
+  "secondsToPresence": 6.7,
+  "minutesToGoneObserved": 15.04,
+  "minutesToGone": 14.98,
+  "ownersOk": true,
+  "pass": true,
+  "endedAt": "2026-11-06T05:04:38.105Z"
+}
