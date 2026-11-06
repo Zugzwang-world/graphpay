@@ -5,7 +5,7 @@
 // The caller passes the env values (process.env on Vercel, the loaded .env in scripts);
 // nothing here reads a file or prints a URL.
 
-import { ArkivSim, arkivChain, arkivClients, arkivTransport, assertChain, createWriter } from '@graphpay/arkiv-graph';
+import { ArkivSim, arkivChain, arkivClients, arkivTransport, assertChain, createWriter } from '@graphpay_ethglobal/arkiv-graph';
 import { privateKeyToAccount } from 'viem/accounts';
 import { ENTITY_CONTRACT, RABDI, writerAddresses } from './model.mjs';
 

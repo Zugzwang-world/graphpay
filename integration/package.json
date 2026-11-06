@@ -11,7 +11,7 @@
     "@ai-sdk/mcp": "2.0.90",
     "@arkiv-network/sdk": "1.0.1",
     "@graphpay/agents": "workspace:*",
-    "@graphpay/arkiv-graph": "workspace:*",
+    "@graphpay_ethglobal/arkiv-graph": "workspace:*",
     "@graphpay/config": "workspace:*",
     "@graphpay/contracts": "workspace:*",
     "@graphpay/ens": "workspace:*",

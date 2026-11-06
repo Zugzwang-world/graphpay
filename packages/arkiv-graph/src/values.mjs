@@ -2,6 +2,7 @@
 // its column: a bare bigint is a u256 to the SDK and silently matches nothing on a
 // u64 column, so nothing here passes one through.
 
+import { createHash } from 'node:crypto';
 import { addr, bool, bytes, i32, key, str, u64 } from '@arkiv-network/sdk';
 import { hexToString, stringToHex } from 'viem';
 
@@ -78,4 +79,9 @@ export function fromJsonBytes(hex) {
 // UTC day number (days since 1970-01-01) of a unix time in seconds.
 export function dayOf(ts) {
   return Math.floor(Number(ts) / 86_400);
+}
+
+// A 32-byte node key from any name: sha256 of the trimmed, lower-cased text.
+export function nodeKeyOf(name) {
+  return `0x${createHash('sha256').update(String(name).trim().toLowerCase()).digest('hex')}`;
 }

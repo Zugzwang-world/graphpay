@@ -2,7 +2,7 @@
 // 1-day life, extended while it runs. The lease and the website's lag chip read it.
 
 import { ExpirationTime } from '@arkiv-network/sdk';
-import { readAll } from '@graphpay/arkiv-graph';
+import { readAll } from '@graphpay_ethglobal/arkiv-graph';
 import { ENTITIES, LIFETIME, writerAddresses } from './model.mjs';
 
 // values: { instance, state, cursorBlock, cursorLog, headBlock, lagBlocks, updatedTs }.

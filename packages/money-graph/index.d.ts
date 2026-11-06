@@ -1,4 +1,4 @@
-import type { Graph, EntityDef, Row, Writer, TransportStats, ArkivSim } from '@graphpay/arkiv-graph';
+import type { Graph, EntityDef, Row, Writer, TransportStats, ArkivSim } from '@graphpay_ethglobal/arkiv-graph';
 import type { PublicArkivClient, WalletArkivClient } from '@arkiv-network/sdk';
 import type { Hex } from 'viem';
 

@@ -6,7 +6,7 @@
 
 import { ENTITY_EVENTS_ABI, key, str, u64 } from '@arkiv-network/sdk';
 import { eq } from '@arkiv-network/sdk/query';
-import { countRows, findOne, fromJsonBytes, readAll } from '@graphpay/arkiv-graph';
+import { countRows, findOne, fromJsonBytes, readAll } from '@graphpay_ethglobal/arkiv-graph';
 import { ENTITIES, ENTITY_CONTRACT, tallyRules } from '@graphpay/money-graph';
 import { decodeEventLog } from 'viem';
 

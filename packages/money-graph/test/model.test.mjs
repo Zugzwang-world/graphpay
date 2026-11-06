@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { checkDefinition, checkIndexes } from '@graphpay/arkiv-graph';
+import { checkDefinition, checkIndexes } from '@graphpay_ethglobal/arkiv-graph';
 import { ENTITIES, QUERIES, tallyRules, trustedOwners, writerAddresses } from '../index.mjs';
 
 test('every entity passes the definition check', () => {

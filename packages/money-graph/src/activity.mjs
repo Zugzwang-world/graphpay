@@ -9,7 +9,7 @@
 
 import { ExpirationTime, key as keyValue, str } from '@arkiv-network/sdk';
 import { eq } from '@arkiv-network/sdk/query';
-import { checkedOwner, findOne, readAll } from '@graphpay/arkiv-graph';
+import { checkedOwner, findOne, readAll } from '@graphpay_ethglobal/arkiv-graph';
 import { normalizedName } from './identity.mjs';
 import { ENTITIES, LIFETIME, writerAddresses } from './model.mjs';
 

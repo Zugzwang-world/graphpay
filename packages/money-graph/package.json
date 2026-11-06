@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "private": true,
   "type": "module",
-  "description": "GraphPay's money graph on @graphpay/arkiv-graph: model, ledger, recorder, quotes and the shop directory.",
+  "description": "GraphPay's money graph on @graphpay_ethglobal/arkiv-graph: model, ledger, recorder, quotes and the shop directory.",
   "exports": {
     ".": {
       "types": "./index.d.ts",
@@ -18,7 +18,7 @@
   },
   "dependencies": {
     "@arkiv-network/sdk": "1.0.1",
-    "@graphpay/arkiv-graph": "workspace:*",
+    "@graphpay_ethglobal/arkiv-graph": "workspace:*",
     "@graphpay/config": "workspace:*",
     "@modelcontextprotocol/sdk": "1.32.2",
     "dataloader": "2.2.3",

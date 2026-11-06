@@ -1,7 +1,7 @@
 // Test doubles: an in-memory ledger with Arkiv's nonce rule (one write per confirmed
 // nonce), a chain source over pre-decoded events, the cast as actors, and a fold of
 // the tally rules (SPEC/ARKIV_GRAPH.md §3) to check what the edges add up to. The real
-// tally planner and ArkivSim come from @graphpay/arkiv-graph (M7a).
+// tally planner and ArkivSim come from @graphpay_ethglobal/arkiv-graph (M7a).
 
 import { activeCast, config } from '@graphpay/config';
 import { keccak256, toHex } from 'viem';

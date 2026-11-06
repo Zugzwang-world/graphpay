@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { checkoutAbi } from '@graphpay/contracts';
-import { readAll } from '@graphpay/arkiv-graph';
+import { readAll } from '@graphpay_ethglobal/arkiv-graph';
 import { ENTITIES } from '@graphpay/money-graph';
 import { d1Verdict, EDGE_EVENTS, mirrorTxOf, recount, storedTally } from '../src/checks.mjs';
 import { withRawSendHook } from '../src/intercept.mjs';

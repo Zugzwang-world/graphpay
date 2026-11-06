@@ -5,7 +5,7 @@
 // store an owner already holds is refused; a failed run is wiped, then seeded again.
 
 import { ExpirationTime } from '@arkiv-network/sdk';
-import { countRows, readAll } from '@graphpay/arkiv-graph';
+import { countRows, readAll } from '@graphpay_ethglobal/arkiv-graph';
 import { ENTITIES, LIFETIME, createLedger, microDegrees, nodeOf, shopValues } from '@graphpay/money-graph';
 import { key } from '@arkiv-network/sdk';
 import { eq } from '@arkiv-network/sdk/query';

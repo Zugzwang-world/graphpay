@@ -1,4 +1,4 @@
-// @graphpay/money-graph: GraphPay's money graph on @graphpay/arkiv-graph (uses only its
+// @graphpay/money-graph: GraphPay's money graph on @graphpay_ethglobal/arkiv-graph (uses only its
 // public API). The model (nodes keyed by ENS name and epoch, readonly edges, tallies,
 // pair links, the shop directory, quotes), the connection with the backend switch, the
 // mirror's ledger (W_LEDGER), the recorder's edges (W_SYNC), quotes and discovery

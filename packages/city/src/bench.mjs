@@ -3,7 +3,7 @@
 // identity (node and epoch) and by name. They differ only for Q2, where the
 // re-registered shop's two holders share a name.
 
-import { dayOf } from '@graphpay/arkiv-graph';
+import { dayOf } from '@graphpay_ethglobal/arkiv-graph';
 import { rate } from '@graphpay/money-graph';
 
 const DAY = 86_400;
