@@ -134,7 +134,8 @@ One line per PR: time (IST) · activity · result · PR link. Append under your 
 - 00:13 IST · w7-submission · an independent audit's 17 findings fixed across the submission files (exact claims: the kit payment by script, the first facilitator payment, receipts lapse at 30 days, the Swarm photo stored not shown); #172 and #173 folded in · https://github.com/Zugzwang-world/graphpay/pull/178
 - 00:18 IST · w7-submission · keep current: the live 0.80 coffee re-order and the live Sunday-box subscription (subscribe, cron renewal, cancel) in the README and the form text; the kill on /customer (#175); the refund Decline route (#163) · https://github.com/Zugzwang-world/graphpay/pull/180
 - 00:25 IST · w7-submission · keep current: W4's routine steps in code (3 model calls, 55 s; #182, ADR-0078) in AI_USAGE and the form text; W3's live limits (#169) in the README and ENS.md · https://github.com/Zugzwang-world/graphpay/pull/187
-- 00:29 IST · w7-submission · keep current: the production kill (#183; unregister, revoke, refusal on Arkiv, each checked on its chain) is the evidence in the README, the form text, ENS.md and the checklist · this PR
+- 00:29 IST · w7-submission · keep current: the production kill (#183; unregister, revoke, refusal on Arkiv, each checked on its chain) is the evidence in the README, the form text, ENS.md and the checklist · https://github.com/Zugzwang-world/graphpay/pull/193
+- 00:33 IST · w7-submission · the label flip (#189): every live link and the ENS snippet use filter-and-fold.graphpay.eth, history keeps the old names, category south-indian; W4's production errand (55.5 s, 3 calls, #192) in AI_USAGE, the README and the shot list · this PR
 
 ## w1-identity
 

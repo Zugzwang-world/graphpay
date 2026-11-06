@@ -31,7 +31,7 @@ The shop's phone rings with the buyer agent's ENS name and its reputation. The s
 
 The human stays in charge. Pausing an agent is one ENS record. The owner can kill an agent by unregistering its name: the watcher revokes its pass on Whitechain, and its next payment is refused and recorded on Arkiv. A kill from the site: https://sepolia.etherscan.io/tx/0x08f116fc2ceebb93e1de209fcbb2f60ac53c094c25b3b06d7da6eb16f194fff5 (the revoke: https://explorer.testnet.whitechain.io/tx/0x40d51ac52b440bc33bb6ec2686fe53c53b77be370a84970a0790a744bbd8233a). An agent cannot raise its own cap, because its ENS resolver refuses the write. The payee is read from the shop's ENS name at pay time, never hard-coded.
 
-Every agent payment becomes a receipt on Arkiv that cannot be edited, linked back to its Whitechain transaction, plus running tallies for both sides, written in one atomic batch. Any agent can ask the graph over GraphQL or MCP and see the exact Arkiv reads behind each answer: https://graphpay-event.vercel.app/api/graphql?query=%7Bnode%28ens%3A%22kesar-kingdom.graphpay.eth%22%29%7Bcategory%20tally%7Borders%20refunds%7D%7D%7D
+Every agent payment becomes a receipt on Arkiv that cannot be edited, linked back to its Whitechain transaction, plus running tallies for both sides, written in one atomic batch. Any agent can ask the graph over GraphQL or MCP and see the exact Arkiv reads behind each answer: https://graphpay-event.vercel.app/api/graphql?query=%7Bnode%28ens%3A%22filter-and-fold.graphpay.eth%22%29%7Bcategory%20tally%7Borders%20refunds%7D%7D%7D
 
 Both SDKs we wrote are on npm, MIT, testnet only: @graphpay_ethglobal/arkiv-graph (a generic graph on Arkiv with explain traces) and @graphpay_ethglobal/agentpay (agent payments over x402 on Whitechain). Every claim above, with its evidence: https://github.com/Zugzwang-world/graphpay#verify-each-claim
 
@@ -117,7 +117,7 @@ Limitations: https://github.com/Zugzwang-world/graphpay#limitations
 
 ## What can still change tonight (W7 updates this file when it lands)
 
-- **W1, the shops' ENS names:** the good shop's name in the GraphQL link and the ENS text (`kesar-kingdom.graphpay.eth` today).
+- **W1, the shops' ENS names:** done; the links use `filter-and-fold.graphpay.eth` since the label flip (#189).
 - **W2, the race at size M:** the "two reads where plain code needs five" line becomes the size-M numbers, labelled synthetic with the city size.
 - **W6, the SDKs at 1.0.0:** the package lines, once 1.0.0 is on npm.
 - **W3, the re-order and subscriptions:** a newer refund, re-order or renewal link, if one replaces these.
