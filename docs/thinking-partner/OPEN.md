@@ -171,13 +171,14 @@ Updated 23:38 IST, Fri 6 Nov (W7 Submission).
 
 ## w3-payments
 
-- **The owner's cap change goes live with W1's watcher** (owner: W3, with W1 and W5). What: `POST /api/customer/cap` (#179) writes the owner's ENS cap. The policy follows through the watcher on the Mac, never above the configured cap (ADR-0078). Why: until W1's watcher change is merged and W5 has restarted the workers, the route answers `policy.applied: false`. Recommendation: merge W1's PR, restart the workers, and W3 proves it once, 300 → 250 → 300.
-- **The "everyone" quantity** (owner: founder; default taken). What: `order.overPass.quantity` is 100, a synthetic story value; the brief gives no headcount. Why: any figure above the pass is refused the same way. Recommendation: keep 100, or set the real headcount in `story.json`.
+- **The "everyone" quantity** (owner: founder; default taken). What: `order.overPass.quantity` is 100, a synthetic story value labelled as such; the brief gives no headcount. Why: any figure above the pass is refused the same way. Recommendation: keep 100, or set the real headcount in `story.json`.
+- **A reconcile at the watcher's start** (owner: W1; not needed tonight). What: a cap the owner sets while the workers are down reaches the policy only with the owner's next change (ADR-0079, known gap). Recommendation: after the event, read each paying agent's ENS cap at start and apply min(ENS cap, configured cap).
 - Closed tonight:
   - the 0.80 re-order (#155);
   - subscribe, renew and cancel (#173);
   - the refund decline (#163);
-  - over the pass and the refused cap raise (#169);
+  - over the pass and the refused cap raise (#169, #190);
+  - the owner's cap change in both records (#179, #191, ADR-0079), proven live 300 → 250 → 300;
   - acceptance C3 on the re-order's own item (W5).
 
 ## w4-agents
@@ -186,20 +187,10 @@ Updated 23:38 IST, Fri 6 Nov (W7 Submission).
 
 ## w2-city
 
-- **The flip waits for the restart that follows the history** (owner: the Coordinator, who times it; W5 restarts the workers). What, in order:
-  1. W2's history for the new shops is complete (1,258 of 1,258 events);
-  2. then W5 restarts the workers;
-  3. then W1's flip merges.
-
-  Why: a mirror that read the new shops' tallies part-way would plan their first live payment from stale counts and overwrite their totals (reviewer finding, ADR-0077). Recommendation: keep that order. A mirror started after the history is fine; W5's restart on W2's "done" is that restart.
-- **W1's flip changes the labels and the category together** (owner: W1). What: in `packages/config/story.json`, set `shops[].label` to the final cast's labels by story role and every `shops[].category` to `south-indian`, in one PR:
-  - good → `filter-and-fold`;
-  - runner-up → `idli-index`;
-  - trap → `tawa-tangle`.
-
-  Why: the analyst ranks `nodes(category)`, and the new rows are `south-indian`; a labels-only flip would rank the old shops. A test in `packages/city` fails it. Recommendation: one PR.
-- **After the flip, delist the old shops' directory rows** (owner: W2). What: kesar-kingdom, syrup-street and jamun-junction stay listed under their new display names, so until then the map shows each name twice. Why: the old rows feed acceptance D8 at S until acceptance moves to M. Recommendation: W2 delists them once acceptance checks M.
-- **`arkiv/swarm.md` names the old menus** (owner: W7). What: its worked example is Kesar Kingdom's menu (version 2, one fox image). The final cast's menus are in `docs/sessions/arkiv/swarm-menus.json`: entity key, transaction, reference, link, and each image's reference and hash. Why: the Swarm judges open those links. Recommendation: use Filter & Fold's menu as the example ([menu.json](https://api.gateway.ethswarm.org/bzz/1e3df1a9613b7da3250a3247f13a03b29011453368ff683b6411a33c307f389f/menu.json)); the old three stay listed there under `previous`.
+- **Race mode at M needs M's plain store** (owner: the founder). What: the big city M is trimmed to what was seeded (ADR-0080): 3,175 events, graph store only. Race mode's plain side reads the plain store, which was never written for M, so race mode stays at S and D7 stays blocked. Why: writing it is M seeding (about 140 transactions, about 0.5 tGLM, about 13 minutes, write-only after two small reads), which the founder stopped. Recommendation: yes if race at M matters for the pitch. W2 then writes it, measures D7 (Q2: 2 against 14, from the generator), and switches race mode to M with the measured reads. Otherwise race mode stays at S (2 against 5, measured).
+- **After the flip, delist the old shops' directory rows** (owner: W2). What: kesar-kingdom, syrup-street and jamun-junction stay listed under their new display names, so the map shows each name twice. Why: acceptance D8 still runs at S, where they are the cast. Recommendation: delist them once D8 moves off S (`node packages/city/scripts/cast.mjs --execute --store delist-test`, in #186).
+- **`arkiv/swarm.md` names the old menus** (owner: W7). What: its worked example is Kesar Kingdom's menu. The final cast's menus, now version 2 with their storefront photos, are in `docs/sessions/arkiv/swarm-menus.json`: entity, transaction, reference, link, and each image's reference and hash. Recommendation: use Filter & Fold's as the example ([menu.json](https://api.gateway.ethswarm.org/bzz/3f26da16d819311ceca5fde8e4af8077b497c272292df78d7f3292433df2dc76/menu.json)).
+- Closed 00:31 IST: W1's flip changed the labels and the category together, after the history and the workers' restart (#189).
 
 ## w6-sdk
 
@@ -225,6 +216,14 @@ Updated 23:38 IST, Fri 6 Nov (W7 Submission).
 - **The subscription in the customer state** (from w3-payments; owner: the frontend pass). What: `GET /api/state/customer` now fills `subscription`: `{ subId, plan, period, priceMicro, nextChargeAt, renewals: [{ at, transaction }], active, status, cycle, periodSeconds, chargesLeft, item, shopEns }`, newest charge first. Events: each charge is a `renew` edge plus a `pay` edge in the merchant stream. The subscription itself is a `subscribe` edge, and a cancel is a `cancel` edge, both from the persona. Recommendation: fill `snapshot.renewals` from it; when `active` and `chargesLeft` is 0, offer Cancel, since the demo plan has used its charges and a new subscribe waits for the cancel.
 - **Pause and Resume on the tapped card** (from w5-ops; owner: the frontend pass). What: `/api/customer/pause` and `/api/customer/resume` now act on `{ agent: <ENS name> }`; with no agent they still mean the payer. `apps/phones/src/live-adapter.ts` `pauseAgent(ens)` and `resumeAgent(ens)` send `{}` and report every change as the payer's. Why: the W5 brief, "act on the agent whose card was tapped". Recommendation: send `{ agent: ens }`, and emit `agent.permission` for that agent. A card without a spending pass (Concierge, Analyst) gets HTTP 409, `reason: "NO_PASS"`, with an `error` sentence to show as it is; or hide Pause on those cards.
 - **Self-healing on the phones** (from w5-ops; owner: the frontend pass). What: a paused agent resumes by itself after 2 minutes; a closed shop reopens after 5 (the cron `/api/cron/heal`). The pause answer carries `resumesAfterS`. `GET /api/state/heal` gives each pausable agent's `status`, `pausedAt` and `resumesAt`, and the shop's `open`, `openUntil`, `closedAt` and `reopensAt` (ISO times). Why: `/api/state/customer` covers only the payer, and the merchant phone keeps its own Open state, so it shows Closed after the cron reopens the shop. Recommendation: poll `/api/state/heal` with the customer state; show "resumes by itself at …" and "reopens at …".
+- **The menus, the dishes and the storefronts on Swarm** (from w2-city; owner: the frontend pass). What: each shop's `menu` row on Arkiv points to its Swarm `menu.json`. Its `shop.image` is the storefront photo, and each item's `image` is that dish's photo. Each image is `{ ref, name, contentType, sha256, bytes }`, opened at `https://api.gateway.ethswarm.org/bzz/<ref>/<name>`. Read it with `readMenu` (`@graphpay/money-graph`), which checks every hash. The list is `docs/sessions/arkiv/swarm-menus.json`. Recommendation: open the photos from Swarm where the Swarm prize is shown; the phones' own copies are the same files.
+- **The big city's shops are not on the map** (from w2-city; owner: the frontend pass). What: M's 120 synthetic places were held back from the W_DIRECTORY directory. `apps/web/lib/map.server.ts` reads up to 100 synthetic shops on every poll, and the stage's phones poll `/api/map`; Arkiv's keyless query window, shared with the live errand, cannot carry that. Recommendation: filter the map's synthetic query by dataset (`graphpay-city-v1-S`), or show M's places from `story.json` (`syntheticCity.places`) without reading Arkiv.
+- **Race mode's size and its 429** (from w2-city; owner: the frontend pass). What:
+  - `/api/race` reads any seeded size (`size`); without one it takes `syntheticCity.raceSize`, S until M has a plain store.
+  - On a city of more than 1,000 payment rows a plain race starts once every 10 minutes per server, and inside that gap it answers 429 with `{ error }` saying when the next can start. `components/race-view.tsx` shows every 429 as "Another race is running".
+  - The deck's "48 reads" is the lab's 10,000-event city; label it "lab", or show the measured S numbers (2 against 5).
+
+  Recommendation: show the 429's `error` text.
 
 ## w5-ops
 

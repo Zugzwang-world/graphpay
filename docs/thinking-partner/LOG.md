@@ -111,7 +111,8 @@ One line per PR: time (IST) · activity · result · PR link. Append under your 
 - 00:12 IST · records · NOW and TRACKER: W5's per-agent pause and self-healing (#172) replace the bridge loop; W3's subscriptions (#173); W6's arkiv-graph 1.0.0 (#174); the mirror held for W2's history · https://github.com/Zugzwang-world/graphpay/pull/176
 - 00:24 IST · records · NOW rewritten by stream (W1 kill live and flip cleared, W2 step 1 done, W3 limits live, W4 routine in code, W5 self-healing proven, W6 1.0.0 merged, W7 done); TRACKER to match · https://github.com/Zugzwang-world/graphpay/pull/184
 - 00:44 IST · records · NOW and TRACKER: the label flip live (#189), the workers restart and proof errand next, the mirror stalled on the shared Arkiv budget, W4's code mode live (#182), W5's acceptance updates (#188) · https://github.com/Zugzwang-world/graphpay/pull/197
-- 01:00 IST · records · the founder's 00:52 IST word: the big city trimmed, seeding stopped (00:58 IST), the mirror first, then the restart, W1's proof errand, W4's three, acceptance; the menus (#181) · coord/night-records-8
+- 01:00 IST · records · the founder's 00:52 IST word: the big city trimmed, seeding stopped (00:58 IST), the mirror first, then the restart, W1's proof errand, W4's three, acceptance; the menus (#181) · https://github.com/Zugzwang-world/graphpay/pull/200
+- 01:20 IST · records · W1 done: the flip proven by the 01:07 IST errand through filter-and-fold (mirror edge, 242 orders, ENS 101 pass); the mirror back on post-flip main; W4, W3, W2 and W5 next · coord/night-records-9
 
 ## booth
 
@@ -140,7 +141,8 @@ One line per PR: time (IST) · activity · result · PR link. Append under your 
 - 00:33 IST · w7-submission · the label flip (#189): every live link and the ENS snippet use filter-and-fold.graphpay.eth, history keeps the old names, category south-indian; W4's production errand (55.5 s, 3 calls, #192) in AI_USAGE, the README and the shot list · https://github.com/Zugzwang-world/graphpay/pull/195
 - 00:37 IST · w7-submission · arkiv-graph 1.0.0 on npm (00:34 IST) in the README and reach.md; agentpay still 0.1.1 · https://github.com/Zugzwang-world/graphpay/pull/196
 - 00:48 IST · w7-submission · keep current: the owner's cap route (#179, ADR-0079) in the README and ENS.md; the workers' watchdog (#194) · https://github.com/Zugzwang-world/graphpay/pull/198
-- 00:58 IST · w7-submission · the dosa menus on Swarm (#181) under the new names, with their dish photos, in swarm.md, the README and the form text (menu and photo hashes checked on the gateway) · this PR
+- 00:58 IST · w7-submission · the dosa menus on Swarm (#181) under the new names, with their dish photos, in swarm.md, the README and the form text (menu and photo hashes checked on the gateway) · https://github.com/Zugzwang-world/graphpay/pull/199
+- 01:20 IST · w7-submission · the version-2 menus with storefront photos (#201) in swarm.md, the README and the form text (hashes checked) · this PR
 
 ## w1-identity
 
@@ -148,6 +150,7 @@ One line per PR: time (IST) · activity · result · PR link. Append under your 
 - 00:00 IST · w1-identity · the kill: POST /api/customer/kill-disposable (owner unregisters a ready spare, the watcher revokes, the next payment refused and recorded), the spare keeper and its workers hook; spare disposable-2 live and funded; spare keys 2–9 in Vercel · https://github.com/Zugzwang-world/graphpay/pull/175
 - 00:20 IST · w1-identity · the kill proven on production: disposable-2 unregistered by the site (00:16), its pass revoked by the watcher 9 s later, its next payment refused ENS_EXPIRED_OR_REVOKED and recorded on Arkiv, fresh spare disposable-3 ready (00:19); evidence kill-disposable-2.json · https://github.com/Zugzwang-world/graphpay/pull/183
 - 00:26 IST · w1-identity · the story flip: the shops go by filter-and-fold, idli-index and tawa-tangle on ENS, category south-indian (labels and category only; the phones' Nov 5 recording replayed under the new names) · https://github.com/Zugzwang-world/graphpay/pull/189
+- 01:16 IST · w1-identity · the flip proven live: after the 01:00 workers restart, the 01:07 errand paid Filter & Fold through filter-and-fold.graphpay.eth (tx 0xcc69…5cb5; shopNode the new name's, merchant SHOP_KESAR; the mirror's pay edge to the new shop; ENS acceptance 101 pass); also merged: the owner's cap through the watcher (#191) · https://github.com/Zugzwang-world/graphpay/pull/202
 
 ## w4-agents
 
@@ -173,12 +176,16 @@ One line per PR: time (IST) · activity · result · PR link. Append under your 
 - 00:03 IST · w3-payments · merged: feat(pay): subscribe and cancel the Sunday box; live: subscribed 2.40 (tx 0xf3f7…c393), the cron renewed it (0x8d40…de83), cancelled by the payer's signature (0x70ed…7b42); edges on Arkiv · https://github.com/Zugzwang-world/graphpay/pull/173
 - 00:17 IST · w3-payments · merged: feat(pay): the shop declines a refund request; live: request then decline on Arkiv (0xf103…54fa, 0xff07…3b20) · https://github.com/Zugzwang-world/graphpay/pull/163
 - 00:21 IST · w3-payments · merged: feat(pay): the limits live: 480 over a 300 pass refused CAP_EXCEEDED, nothing sent, recorded; the agent's own cap raise refused EACUnauthorizedAccountRoles, recorded (0xabc4…4144) · https://github.com/Zugzwang-world/graphpay/pull/169
-- 00:25 IST · w3-payments · in PR: feat(pay): the owner changes the payer's cap; the policy follows through the watcher (ADR-0078) · https://github.com/Zugzwang-world/graphpay/pull/179
+- 00:49 IST · w3-payments · merged: feat(pay): the owner changes the payer's cap; the policy follows through the watcher (ADR-0079) · https://github.com/Zugzwang-world/graphpay/pull/179
+- 00:48 IST · w3-payments · merged: fix(pay): over-pass belts (above the payer's balance too; only a decision on the payer is a refusal; one deadline) · https://github.com/Zugzwang-world/graphpay/pull/190
+- 01:20 IST · w3-payments · live: the owner's cap 300 → 250 → 300 in ENS and the policy (Sepolia 0x88ee…6bca and 0x9ede…0d62; the watcher's setPolicy 0x9ee9…eb1c and 0xa817…224e); records on Arkiv
+- 01:22 IST · w3-payments · in PR: fix(pay): the owner's cap route waits up to 90 s for the policy · https://github.com/Zugzwang-world/graphpay/pull/204
 
 ## w2-city
 
 - 00:15 IST · w2-city · item 1: the dosa shops on Arkiv under their own names at epoch 0 (directory, nodes and the full labelled 90-day history, south-indian; the analyst reads 241, 60 and 110 orders with the story's rates); each seeded city keeps its own cast, which fixes race Q2 at S and D4 (ADR-0077) · https://github.com/Zugzwang-world/graphpay/pull/167
 - 00:20 IST · w2-city · item 2: the three menus on Swarm, every item with its dish image (12 images), each menu's row on Arkiv, verified on read-back; a W_DIRECTORY write takes a transaction found by nonce only if it holds its own row · https://github.com/Zugzwang-world/graphpay/pull/181
+- 01:15 IST · w2-city · item 2 done: each menu now carries its shop's storefront photo on Swarm (menu version 2; 15 images in all, each checked by hash); the big city trimmed to what was seeded, race mode stays at S · https://github.com/Zugzwang-world/graphpay/pull/201
 
 ## w6-sdk
 
