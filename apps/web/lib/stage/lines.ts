@@ -5,7 +5,7 @@
 // only once the director has reached that step.
 
 import type { ErrandModel } from './errand.ts';
-import { clock, microUsdt, percent, usdt } from './format.ts';
+import { microUsdt, percent, usdt } from './format.ts';
 import type { StepKey } from './scenes.ts';
 
 export interface CastAgent {
@@ -96,8 +96,7 @@ export function customerErrandLines(m: ErrandModel, cast: LineCast): Line[] {
     add({ key: 'quote', step: 'quote', role: 'payer', text: `Bill: ${usdt(m.quote.priceUsdt)} USDT, inside today’s pass. Signing once.`, card: 'bill' });
   }
   if (m.arrived.paid !== undefined && m.paid) {
-    const eta = clock(m.paid.arrivesAt ?? m.dispatchEta, cast.timeZone);
-    add({ key: 'paid', step: 'paid', role: 'payer', text: `Paid ${usdt(m.paid.amountUsdt)}.${eta ? ` Arrives by ${eta}.` : ''}`, card: 'receipt', tone: 'ok' });
+    add({ key: 'paid', step: 'paid', role: 'payer', text: `Paid ${usdt(m.paid.amountUsdt)}.`, card: 'receipt', tone: 'ok' });
   }
   return out;
 }
@@ -122,11 +121,16 @@ export function merchantErrandLines(m: ErrandModel, cast: LineCast): Line[] {
   }
   if (m.arrived.paid !== undefined && m.paid) {
     add({ key: 'm-paid', step: 'paid', role: 'storefront', text: `Received ${usdt(m.paid.amountUsdt)} from ${payer}.`, card: 'shop-bill', tone: 'ok' });
-    const eta = clock(m.paid.arrivesAt ?? m.dispatchEta, cast.timeZone);
-    add({ key: 'm-dispatch', step: 'paid', role: 'dispatch', text: eta ? `On its way, arriving by ${eta}.` : 'On its way.' });
   }
   return out;
 }
+
+// Right after the payment settles, the shop's dispatch agent marks the order dispatched on chain.
+export const dispatchLines = {
+  sending: () => 'Marking the order dispatched on Whitechain.',
+  shopDone: () => 'Dispatched. Marked on Whitechain.',
+  customerDone: (cast: LineCast) => `${cast.merchant.name} dispatched the order.`,
+};
 
 // Scene 5 and 6 lines, in the same style.
 export const refundLines = {
@@ -136,6 +140,8 @@ export const refundLines = {
   refunded: (amountMicro: string) => `Refunded ${microUsdt(amountMicro)}.`,
   declined: () => 'The shop declined the refund.',
   shopRequest: (cast: LineCast, amountMicro: string) => `Refund request: ${microUsdt(amountMicro)}, ${cast.order.refundReason}.`,
+  // The shop's risk agent accepts on its own once the request lands: what it checked, then its answer.
+  riskAccept: (amountMicro: string, paidUsdt: string | null, photo: boolean) => `${photo ? 'Photo on Swarm. ' : ''}${microUsdt(amountMicro)} of ${paidUsdt ? usdt(paidUsdt) : 'the order'}, on a dispatched order. Accept.`,
   shopRefunded: (cast: LineCast, amountMicro: string) => `Refunded ${microUsdt(amountMicro)} to ${cast.agents.payer?.ens ?? ''}.`,
   shopDeclined: () => 'Declined. The note is on Arkiv.',
 };

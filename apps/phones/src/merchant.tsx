@@ -8,19 +8,38 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import clsx from 'clsx';
 import { story } from '@/data/story';
 import { foldAll } from '../../web/lib/stage/errand.ts';
-import { merchantErrandLines, pauseLines, refundLines, type Line as LineData } from '../../web/lib/stage/lines.ts';
+import { dispatchLines, merchantErrandLines, pauseLines, refundLines, type Line as LineData } from '../../web/lib/stage/lines.ts';
 import { stepIndex, type BeatKey } from '../../web/lib/stage/scenes.ts';
 import { microUsdt, orderNumber, usdt } from '../../web/lib/stage/format.ts';
 import { getJson, getTextRetry, postJson, Refusal, type HealState } from './api';
 import { cast, links, networks, order, productOf, timeZone } from './cast';
 import { foldOrders, rowFromEdge, rowKey, rowsFromCsv, type LedgerRow } from './orders';
 import { embedded, postEvent, useNow, useStage } from './stage-link';
-import { ArkivPending, Card, Line, ProofLink, SwarmPhoto, TeamStrip, useAutoScroll, type TeamMember } from './ui';
+import { ArkivPending, Card, Line, Pending, ProofLink, SwarmPhoto, TeamStrip, useAutoScroll, type TeamMember } from './ui';
 import { AgentsView, ProofList, ScoreboardView, type ProofItem } from './views';
 
 const RECONNECT_MS = 1_500;
 const RECONNECT_MAX_MS = 30_000;
 const RENEW_OPEN_MS = 300_000;
+// The routes allow one shop action per order every 30 s (ORDER_COOLDOWN_MS on the server): the refund
+// waits that out after the dispatch, with a little margin, and a TOO_SOON answer is waited out again.
+const ORDER_GUARD_MS = 32_000;
+const RETRY_MS = 4_000;
+const RETRIES = 10;
+// Answers that only mean "not yet" (the order not readable as paid yet, a send still running, the guard).
+const NOT_YET = new Set(['NOT_DELIVERABLE', 'NO_SUCH_ORDER', 'STILL_PENDING', 'TOO_SOON']);
+const notYet = (error: unknown) => error instanceof Refusal && (NOT_YET.has(error.code) || error.status === 429);
+const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+
+interface Dispatch {
+  orderId: string;
+  phase: 'sending' | 'dispatched' | 'error';
+  tx: string | null;
+  // When the dispatch that went through was asked for: the per-order guard counts from about then.
+  sentAt: number;
+  at: number | null;
+  error: string | null;
+}
 
 interface RefundAsk {
   orderId: string;
@@ -30,7 +49,7 @@ interface RefundAsk {
   arkivTx: string | null;
   entityKey: string | null;
   at: number;
-  phase: 'asked' | 'accepting' | 'refunded' | 'declining' | 'declined' | 'error';
+  phase: 'asked' | 'accepting' | 'refunded' | 'error';
   tx: string | null;
   decisionAt: number | null;
   error: string | null;
@@ -166,22 +185,44 @@ export function MerchantPhone() {
   const [refused, setRefused] = useState<{ at: number; code: string } | null>(null);
   const seen = useRef(0);
   useEffect(() => {
+    // A new errand: the stage replaced the relayed list, so this phone starts over too.
+    if (stage.events.length < seen.current) {
+      seen.current = 0;
+      setAsk(null);
+      setRefused(null);
+    }
+    const same = (a: { orderId: string } | null, id: unknown) => a !== null && typeof id === 'string' && a.orderId.toLowerCase() === id.toLowerCase();
     for (const e of stage.events.slice(seen.current)) {
       if (e.key === 'refund-request' && typeof e.data?.orderId === 'string') {
         const d = e.data;
-        setAsk({
-          orderId: e.data.orderId,
-          amountMicro: typeof d.amountMicro === 'string' ? d.amountMicro : order.refundMicro,
-          swarmRef: typeof d.swarmRef === 'string' ? d.swarmRef : null,
-          file: typeof d.file === 'string' ? d.file : null,
-          arkivTx: typeof d.arkivTx === 'string' ? d.arkivTx : null,
-          entityKey: typeof d.entityKey === 'string' ? d.entityKey : null,
-          at: e.at,
-          phase: 'asked',
-          tx: null,
-          decisionAt: null,
-          error: null,
-        });
+        // One refund per order: a second request for an order already being refunded changes nothing.
+        setAsk((a) =>
+          same(a, d.orderId) && a!.phase !== 'asked' && a!.phase !== 'error'
+            ? a
+            : {
+                orderId: d.orderId as string,
+                amountMicro: typeof d.amountMicro === 'string' ? d.amountMicro : order.refundMicro,
+                swarmRef: typeof d.swarmRef === 'string' ? d.swarmRef : null,
+                file: typeof d.file === 'string' ? d.file : null,
+                arkivTx: typeof d.arkivTx === 'string' ? d.arkivTx : null,
+                entityKey: typeof d.entityKey === 'string' ? d.entityKey : null,
+                at: e.at,
+                phase: 'asked',
+                tx: null,
+                decisionAt: null,
+                error: null,
+              },
+        );
+      } else if ((e.key === 'refund-accepted' || e.key === 'refund') && typeof e.data?.orderId === 'string') {
+        // This phone's own answers, sent back by the stage after a reload: never accepted twice.
+        const d = e.data;
+        accepting.current = (d.orderId as string).toLowerCase();
+        setAsk((a) => (same(a, d.orderId) ? (e.key === 'refund' ? { ...a!, phase: 'refunded', tx: typeof d.transaction === 'string' ? d.transaction : a!.tx, decisionAt: e.at } : a!.phase === 'refunded' ? a : { ...a!, phase: 'accepting' }) : a));
+      } else if (e.key === 'dispatched' && typeof e.data?.orderId === 'string') {
+        // Likewise for the dispatch: shown as it was, never sent twice.
+        const id = e.data.orderId;
+        dispatching.current = id;
+        setDispatch({ orderId: id, phase: 'dispatched', tx: typeof e.data.transaction === 'string' ? e.data.transaction : null, sentAt: e.at, at: e.at, error: null });
       } else if (e.key === 'reorder-refused') {
         setRefused({ at: e.at, code: typeof e.data?.code === 'string' ? e.data.code : '' });
       } else if (e.key === 'refund-start' || e.key === 'pause-start') {
@@ -191,37 +232,81 @@ export function MerchantPhone() {
     seen.current = stage.events.length;
   }, [stage.events]);
 
-  const accept = async () => {
-    if (!ask || ask.phase !== 'asked') return;
-    setAsk({ ...ask, phase: 'accepting', error: null });
-    try {
-      const answer = await postJson<{ transaction?: string | null; amountMicro?: string }>('/api/merchant/refund', { orderId: ask.orderId, amountMicro: ask.amountMicro });
-      const tx = answer.transaction ?? null;
-      setAsk((a) => (a ? { ...a, phase: 'refunded', tx, decisionAt: Date.now() } : a));
-      postEvent('refund', tx ? [{ label: 'Refund on Whitechain', href: links.whitechainTx(tx) }] : [], { orderId: ask.orderId, amountMicro: answer.amountMicro ?? ask.amountMicro, transaction: tx });
-    } catch (error) {
-      setAsk((a) => (a ? { ...a, phase: 'asked', error: error instanceof Refusal ? error.message : 'The refund did not go through. Try again in a minute.' } : a));
-    }
-  };
-  const decline = async () => {
-    if (!ask || ask.phase !== 'asked') return;
-    setAsk({ ...ask, phase: 'declining', error: null });
-    try {
-      const answer = await postJson<{ arkivTx?: string | null; entityKey?: string | null }>('/api/merchant/refund-decline', { orderId: ask.orderId });
-      setAsk((a) => (a ? { ...a, phase: 'declined', tx: answer.arkivTx ?? null, decisionAt: Date.now() } : a));
-      postEvent('refund-declined', answer.arkivTx ? [{ label: 'Decline on Arkiv', href: links.arkivTx(answer.arkivTx) }] : [], { orderId: ask.orderId, arkivTx: answer.arkivTx ?? null, entityKey: answer.entityKey ?? null });
-    } catch (error) {
-      setAsk((a) => (a ? { ...a, phase: 'asked', error: error instanceof Refusal ? error.message : 'The decline did not go through. Try again in a minute.' } : a));
-    }
-  };
+  // Right after the payment settles, the shop marks the order dispatched on chain (POST
+  // /api/merchant/dispatch), once per order, with no wait for a delivery time. Only the errand that
+  // reached this shop, on the stage, dispatches.
+  const [dispatch, setDispatch] = useState<Dispatch | null>(null);
+  const dispatchRef = useRef<Dispatch | null>(null);
+  dispatchRef.current = dispatch;
+  const ours = (model.order?.shop ?? model.best) === cast.merchant.ens;
+  const paidOrderId = embedded && ours && model.paid ? model.paid.orderId : null;
+  const dispatching = useRef<string | null>(null);
+  useEffect(() => {
+    if (!paidOrderId || dispatching.current === paidOrderId) return;
+    dispatching.current = paidOrderId;
+    const orderId = paidOrderId;
+    void (async () => {
+      setDispatch({ orderId, phase: 'sending', tx: null, sentAt: Date.now(), at: null, error: null });
+      for (let attempt = 0; attempt < RETRIES; attempt++) {
+        const sentAt = Date.now();
+        try {
+          const answer = await postJson<{ transaction?: string | null; status?: string }>('/api/merchant/dispatch', { orderId });
+          const tx = answer.transaction ?? null;
+          if (dispatching.current !== orderId) return;
+          setDispatch({ orderId, phase: 'dispatched', tx, sentAt, at: Date.now(), error: null });
+          postEvent('dispatched', tx ? [{ label: 'Dispatched on Whitechain', href: links.whitechainTx(tx) }] : [], { orderId, transaction: tx });
+          return;
+        } catch (error) {
+          if (!notYet(error) || attempt === RETRIES - 1) {
+            if (dispatching.current === orderId) setDispatch({ orderId, phase: 'error', tx: null, sentAt, at: null, error: error instanceof Refusal ? error.message : 'The dispatch did not go through.' });
+            return;
+          }
+          await sleep(RETRY_MS);
+        }
+      }
+    })();
+  }, [paidOrderId]);
+
+  // Scene 5: the shop accepts the refund by itself once the request lands. Its risk agent says what
+  // it checked, then the real refund goes out (POST /api/merchant/refund), after the per-order guard.
+  const accepting = useRef<string | null>(null);
+  useEffect(() => {
+    if (!ask || ask.phase !== 'asked' || accepting.current === ask.orderId.toLowerCase()) return;
+    accepting.current = ask.orderId.toLowerCase();
+    const { orderId, amountMicro } = ask;
+    void (async () => {
+      setAsk((a) => (a ? { ...a, phase: 'accepting', error: null } : a));
+      postEvent('refund-accepted', [], { orderId, amountMicro });
+      const d = dispatchRef.current;
+      const wait = d && d.orderId.toLowerCase() === orderId.toLowerCase() ? d.sentAt + ORDER_GUARD_MS - Date.now() : 0;
+      if (wait > 0) await sleep(wait);
+      for (let attempt = 0; attempt < RETRIES; attempt++) {
+        try {
+          const answer = await postJson<{ transaction?: string | null; amountMicro?: string }>('/api/merchant/refund', { orderId, amountMicro });
+          const tx = answer.transaction ?? null;
+          setAsk((a) => (a ? { ...a, phase: 'refunded', tx, decisionAt: Date.now() } : a));
+          postEvent('refund', tx ? [{ label: 'Refund on Whitechain', href: links.whitechainTx(tx) }] : [], { orderId, amountMicro: answer.amountMicro ?? amountMicro, transaction: tx });
+          return;
+        } catch (error) {
+          if (!notYet(error) || attempt === RETRIES - 1) {
+            setAsk((a) => (a ? { ...a, phase: 'error', error: error instanceof Refusal ? error.message : 'The refund did not go through. Try again in a minute.' } : a));
+            return;
+          }
+          await sleep(error instanceof Refusal && error.code === 'TOO_SOON' ? 8_000 : RETRY_MS);
+        }
+      }
+    })();
+  }, [ask]);
 
   // The `req:` edge of the request confirms it on Arkiv.
   const reqEdge = ask ? rows.find((r) => r.kind === 'request' && r.ref.startsWith(`req:${ask.orderId}`)) : undefined;
   const reqKey = lastEdge && ask && lastEdge.row.ref.startsWith(`req:${ask.orderId}`) ? lastEdge.entityKey : null;
 
   const errandLines = useMemo(() => merchantErrandLines(model, cast).filter((l) => stepIndex(l.step) <= shownIndex), [model, shownIndex]);
-  const scroller = useAutoScroll(`${errandLines.length}|${ask?.phase}|${refused?.at}|${beat}`);
-  const speaking = refused ? 'storefront' : ask ? 'storefront' : (errandLines[errandLines.length - 1]?.role ?? null);
+  // This run's dispatch, shown with the payment once the director has reached it.
+  const shownDispatch = dispatch && model.paid && dispatch.orderId === model.paid.orderId && shownIndex >= stepIndex('paid') ? dispatch : null;
+  const scroller = useAutoScroll(`${errandLines.length}|${shownDispatch?.phase}|${ask?.phase}|${refused?.at}|${beat}`);
+  const speaking = refused ? 'storefront' : ask ? (ask.phase === 'accepting' ? 'risk' : 'storefront') : shownDispatch ? 'dispatch' : (errandLines[errandLines.length - 1]?.role ?? null);
   const awake = shownIndex >= stepIndex('order');
   const members: TeamMember[] = ['storefront', 'risk', 'dispatch'].map((role) => ({
     role,
@@ -251,7 +336,10 @@ export function MerchantPhone() {
     <div className="flex h-full flex-col bg-bg pt-[54px]">
       <header className="flex items-center gap-3 border-b border-line bg-surface px-4 pt-1 pb-3">
         <div className="min-w-0 flex-1">
-          <h1 className="font-heading text-title leading-tight font-bold text-ink">{story.shop.name}</h1>
+          <div className="flex min-w-0 items-center gap-2">
+            <h1 className="truncate font-heading text-title leading-tight font-bold text-ink">{story.shop.name}</h1>
+            <span className="stage-role" data-side="merchant">Merchant</span>
+          </div>
           <p className="truncate text-caption text-muted">{openNote ?? (open === null ? '' : open ? 'Open, taking orders' : heal?.shop?.reopensAt ? `Closed. Opens again by itself.` : 'Closed')}</p>
         </div>
         <button type="button" onClick={() => void toggleOpen()} disabled={openBusy || open === null} className={clsx('stage-switch', open ? 'is-on' : 'is-off')} aria-pressed={open ?? false} aria-label={open ? 'Open: tap to close the shop' : 'Closed: tap to open the shop'}>
@@ -269,9 +357,9 @@ export function MerchantPhone() {
         ) : view === 'agents' ? (
           <AgentsView side="merchant" state={null} heal={heal} />
         ) : view === 'history' ? (
-          <MerchantLedger rows={shopRows.length} model={model} ask={ask} now={now} received={received} refundedMicro={refundedMicro} count={count} />
+          <MerchantLedger rows={shopRows.length} model={model} dispatch={shownDispatch} ask={ask} now={now} received={received} refundedMicro={refundedMicro} count={count} />
         ) : view === 'replay' ? (
-          <ProofList title="This run" items={replayItems(model, ask, refused)} now={now} replay empty="No run reached the shop yet." />
+          <ProofList title="This run" items={replayItems(model, shownDispatch, ask, refused)} now={now} replay empty="No run reached the shop yet." />
         ) : errandLines.length === 0 && !ask && !refused ? (
           <div className="flex h-full flex-col items-center justify-center gap-2 text-center">
             <p className="font-heading text-title font-bold text-ink">{open === false ? 'Closed for now' : 'Open for orders'}</p>
@@ -281,9 +369,18 @@ export function MerchantPhone() {
           <div className="flex flex-col gap-4">
             {errandLines.map((l) => (
               <Line key={l.key} role={l.role} text={l.text} tone={l.tone}>
-                {l.card ? <ShopCard line={l} model={model} now={now} rows={rows} /> : null}
+                {l.card ? <ShopCard line={l} model={model} dispatch={shownDispatch} now={now} rows={rows} /> : null}
               </Line>
             ))}
+            {shownDispatch ? (
+              <Line role="dispatch" text={shownDispatch.phase === 'dispatched' ? dispatchLines.shopDone() : shownDispatch.phase === 'error' ? (shownDispatch.error ?? '') : dispatchLines.sending()} tone={shownDispatch.phase === 'dispatched' ? 'ok' : shownDispatch.phase === 'error' ? 'bad' : undefined}>
+                {shownDispatch.tx ? (
+                  <div className="flex flex-wrap gap-2">
+                    <ProofLink href={links.whitechainTx(shownDispatch.tx)} network={networks.whitechain} label="Dispatched" at={shownDispatch.at} now={now} />
+                  </div>
+                ) : null}
+              </Line>
+            ) : null}
             {ask ? (
               <Line role="storefront" text={refundLines.shopRequest(cast, ask.amountMicro)}>
                 <Card tone="bad" className="stage-slide">
@@ -293,29 +390,18 @@ export function MerchantPhone() {
                     {ask.swarmRef && ask.file ? <ProofLink href={links.swarm(ask.swarmRef, ask.file)} network={networks.swarm} label="Photo" at={ask.at} now={now} /> : null}
                     {reqEdge || reqKey || ask.entityKey ? <ProofLink href={ask.entityKey ? links.arkivEntity(ask.entityKey) : ask.arkivTx ? links.arkivTx(ask.arkivTx) : null} network={networks.arkiv} label={reqEdge ? 'Confirmed' : 'Request'} at={ask.at} now={now} /> : <ArkivPending />}
                   </div>
-                  {ask.phase === 'asked' ? (
-                    <div className="mt-3 grid grid-cols-2 gap-2">
-                      <button type="button" onClick={() => void accept()} className="stage-accept rounded-full bg-ok px-4 py-3 text-body font-bold text-white">
-                        Accept
-                      </button>
-                      <button type="button" onClick={() => void decline()} className="rounded-full border border-line bg-surface px-4 py-3 text-body font-bold text-ink">
-                        Decline
-                      </button>
-                    </div>
-                  ) : null}
-                  {ask.phase === 'accepting' || ask.phase === 'declining' ? <p className="mt-3 text-caption font-bold text-muted">{ask.phase === 'accepting' ? `Sending the money back on ${networks.whitechain}.` : `Writing the decline to ${networks.arkiv}.`}</p> : null}
-                  {ask.error ? <p className="mt-2 text-caption font-bold text-bad">{ask.error}</p> : null}
                 </Card>
+              </Line>
+            ) : null}
+            {ask && ask.phase !== 'asked' ? (
+              <Line role="risk" text={refundLines.riskAccept(ask.amountMicro, model.paid?.amountUsdt ?? null, Boolean(ask.swarmRef))} tone="ok">
+                {ask.phase === 'accepting' ? <p className="text-caption font-bold text-muted">Sending the money back on {networks.whitechain}.</p> : null}
+                {ask.error ? <p className="text-caption font-bold text-bad">{ask.error}</p> : null}
               </Line>
             ) : null}
             {ask?.phase === 'refunded' ? (
               <Line role="storefront" text={refundLines.shopRefunded(cast, ask.amountMicro)} tone="ok">
                 <div className="flex flex-wrap gap-2">{ask.tx ? <ProofLink href={links.whitechainTx(ask.tx)} network={networks.whitechain} at={ask.decisionAt} now={now} /> : null}</div>
-              </Line>
-            ) : null}
-            {ask?.phase === 'declined' ? (
-              <Line role="storefront" text={refundLines.shopDeclined()}>
-                <div className="flex flex-wrap gap-2">{ask.tx ? <ProofLink href={links.arkivTx(ask.tx)} network={networks.arkiv} at={ask.decisionAt} now={now} /> : null}</div>
               </Line>
             ) : null}
             {refused ? <Line role="storefront" text={pauseLines.shopRefused(cast)} tone="bad" /> : null}
@@ -333,7 +419,7 @@ export function MerchantPhone() {
   );
 }
 
-function ShopCard({ line, model, now, rows }: { line: LineData; model: ReturnType<typeof foldAll>; now: number; rows: LedgerRow[] }) {
+function ShopCard({ line, model, dispatch, now, rows }: { line: LineData; model: ReturnType<typeof foldAll>; dispatch: Dispatch | null; now: number; rows: LedgerRow[] }) {
   if (line.card === 'quote-request') {
     const product = productOf(cast.merchant.ens, model.offers.find((o) => o.shop === cast.merchant.ens)?.sku ?? order.sku);
     return (
@@ -358,8 +444,8 @@ function ShopCard({ line, model, now, rows }: { line: LineData; model: ReturnTyp
           <p className="tabular font-heading text-amount font-bold text-ink">{usdt(model.paid.amountUsdt)}</p>
         </div>
         <div className="mt-2 flex flex-wrap items-center gap-2">
-          <span className="text-caption font-bold text-ok">Received</span>
-          <ProofLink href={links.whitechainTx(model.paid.tx)} network={networks.whitechain} at={model.arrived.settled} now={now} />
+          <ProofLink href={links.whitechainTx(model.paid.tx)} network={networks.whitechain} label="Received" at={model.arrived.settled} now={now} />
+          {dispatch?.tx ? <ProofLink href={links.whitechainTx(dispatch.tx)} network={networks.whitechain} label="Dispatched" at={dispatch.at} now={now} /> : dispatch?.phase === 'sending' ? <Pending>Dispatching</Pending> : null}
           {edge ? <span className="text-caption font-bold text-muted">On {networks.arkiv}</span> : <ArkivPending />}
         </div>
       </Card>
@@ -368,10 +454,11 @@ function ShopCard({ line, model, now, rows }: { line: LineData; model: ReturnTyp
   return null;
 }
 
-function MerchantLedger({ rows, model, ask, now, received, refundedMicro, count }: { rows: number; model: ReturnType<typeof foldAll>; ask: RefundAsk | null; now: number; received: bigint; refundedMicro: bigint; count: number }) {
+function MerchantLedger({ rows, model, dispatch, ask, now, received, refundedMicro, count }: { rows: number; model: ReturnType<typeof foldAll>; dispatch: Dispatch | null; ask: RefundAsk | null; now: number; received: bigint; refundedMicro: bigint; count: number }) {
   const [exporting, setExporting] = useState<'idle' | 'busy' | 'done' | 'failed'>('idle');
   const items: ProofItem[] = [];
   if (model.paid) items.push({ key: 'paid', label: `Received from ${cast.agents.payer?.ens}`, amount: usdt(model.paid.amountUsdt), href: links.whitechainTx(model.paid.tx), network: networks.whitechain, at: model.arrived.settled ?? null, tone: 'ok' });
+  if (dispatch?.tx) items.push({ key: 'dispatched', label: 'Dispatched', href: links.whitechainTx(dispatch.tx), network: networks.whitechain, at: dispatch.at });
   if (ask?.phase === 'refunded') items.push({ key: 'refund', label: 'Refunded', amount: microUsdt(ask.amountMicro), href: ask.tx ? links.whitechainTx(ask.tx) : null, network: networks.whitechain, at: ask.decisionAt });
   const download = async () => {
     setExporting('busy');
@@ -410,11 +497,12 @@ function MerchantLedger({ rows, model, ask, now, received, refundedMicro, count 
   );
 }
 
-function replayItems(model: ReturnType<typeof foldAll>, ask: RefundAsk | null, refused: { at: number } | null): ProofItem[] {
+function replayItems(model: ReturnType<typeof foldAll>, dispatch: Dispatch | null, ask: RefundAsk | null, refused: { at: number } | null): ProofItem[] {
   const items: ProofItem[] = [];
   if (model.quote) items.push({ key: 'order', label: `Quote ${orderNumber(model.quote.orderId)} for ${cast.agents.payer?.ens}`, href: null, network: '', at: null });
   if (model.quote) items.push({ key: 'bill', label: 'Bill sent', amount: usdt(model.quote.priceUsdt), href: null, network: '', at: null });
   if (model.paid) items.push({ key: 'paid', label: 'Received', amount: usdt(model.paid.amountUsdt), href: links.whitechainTx(model.paid.tx), network: networks.whitechain, at: model.arrived.settled ?? null, tone: 'ok' });
+  if (dispatch?.tx) items.push({ key: 'dispatched', label: 'Dispatched', href: links.whitechainTx(dispatch.tx), network: networks.whitechain, at: dispatch.at });
   if (ask?.phase === 'refunded') items.push({ key: 'refund', label: 'Refunded', amount: microUsdt(ask.amountMicro), href: ask.tx ? links.whitechainTx(ask.tx) : null, network: networks.whitechain, at: ask.decisionAt });
   if (refused) items.push({ key: 'refused', label: 'Refused: payer paused, nothing received', href: null, network: '', at: refused.at, tone: 'bad' });
   return items;

@@ -69,6 +69,10 @@
 
 .stage-earnings { animation: stage-fade-in 500ms ease-out both; }
 
+/* Who is who on the stage: USER beside the customer's name, MERCHANT beside the shop's, in every scene. */
+.stage-role { flex: none; display: inline-flex; align-items: center; height: 30px; padding: 0 12px; border-radius: 9999px; background: var(--color-brand); color: var(--color-white); font-family: var(--font-heading); font-size: 17px; font-weight: 800; line-height: 1; letter-spacing: 0.08em; text-transform: uppercase; }
+.stage-role[data-side='merchant'] { background: var(--color-ink); }
+
 @media (prefers-reduced-motion: reduce) {
   .stage-line, .stage-slide, .stage-fade, .stage-replay, .stage-earnings { animation: stage-fade-in 120ms ease-out both !important; }
   .stage-bubble, .stage-chosen, .stage-activity[data-state='on'], .stage-pulse-dot { animation: none !important; }

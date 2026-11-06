@@ -2,7 +2,7 @@
 
 // Scenes 5 to 10 of the middle (final website brief §5): the refund with its photo on Swarm, the off
 // switch, then what we proved on Arkiv, ENS and Whitechain, and the close. Live numbers come from
-// the phones' answers, the race and the registry; the lab's number is labelled lab.
+// the phones' answers and the registry; the lab's numbers are labelled lab.
 
 import { useEffect, useState } from 'react';
 import { entityUrl, txUrl } from '@/lib/explorer';
@@ -11,7 +11,7 @@ import { proofs } from '@/lib/stage/proofs';
 import { useSite } from '../site-context';
 import { useDirector } from './director';
 import { NetLink, Pending, Figurine, SceneHead, ensPage, useClock } from './common';
-import { useNpmVersion, useRace } from './data';
+import { useNpmVersion } from './data';
 
 const last = <T,>(list: T[], pick: (x: T) => boolean): T | undefined => [...list].reverse().find(pick);
 const str = (v: unknown) => (typeof v === 'string' ? v : null);
@@ -24,6 +24,7 @@ export function SceneRefund() {
   const photo = last(d.events, (e) => e.key === 'refund-photo');
   const request = last(d.events, (e) => e.key === 'refund-request');
   const refund = last(d.events, (e) => e.key === 'refund');
+  const accepted = last(d.events, (e) => e.key === 'refund-accepted');
   const declined = last(d.events, (e) => e.key === 'refund-declined');
   const orderId = str(request?.data?.orderId) ?? str(last(d.events, (e) => e.key === 'refund-start')?.data?.orderId);
   const edge = d.edges.find((e) => e.kind === 'refund' && orderId !== null && e.orderId?.toLowerCase() === orderId.toLowerCase());
@@ -44,7 +45,7 @@ export function SceneRefund() {
         </>
       ),
     },
-    { key: 'accept', title: declined ? 'The shop declined' : 'The shop accepts', on: Boolean(refund || declined), bad: Boolean(declined), link: null },
+    { key: 'accept', title: declined ? 'The shop declined' : 'The shop’s risk agent accepts, by itself', on: Boolean(accepted || refund || declined), bad: Boolean(declined), link: null },
     { key: 'money', title: `${amount} back on ${model.networks.whitechain.name.split(' ')[0]}`, on: Boolean(refund), link: <NetLink href={txUrl(model.explorers, 'whitechain', refund?.data?.transaction)} network={model.networks.whitechain.name} at={refund?.at} now={now} /> },
     { key: 'board', title: 'The shop’s scoreboard: refunds +1', on: Boolean(edge), wait: Boolean(refund) && !edge, link: edge ? <NetLink href={entityUrl(model.explorers, edge.entityKey) ?? txUrl(model.explorers, 'rabdi', edge.arkivTx)} network={model.networks.rabdi.name} at={edge.at} now={now} /> : null },
   ];
@@ -159,19 +160,37 @@ function NpmCard({ name, line, readme }: { name: string; line: string; readme: s
   );
 }
 
-// Scene 7: one payment written, the race live at size S, the numbers, the arkiv-graph card.
+// Scene 7: one payment written, the two lab meters (speed and data), the arkiv-graph card.
+// Scene 7's two meters: the lab benchmark on 9,612 payments (the founder's figures, 7 Nov). The
+// top-10 question: GraphPay answered in 0.65 s and 31 KB, plain Arkiv in 1.17 s and about 1 MB with
+// every page fetched at once. Speed and data only.
+const LAB = 'lab, 9,612 payments';
+const METERS = [
+  { key: 'speed', from: 1, to: 1.8, text: (v: number) => `${v.toFixed(1)}x faster`, fine: '0.65 s against 1.17 s' },
+  { key: 'data', from: 1, to: 30, text: (v: number) => `about ${Math.round(v)}x less data`, fine: '31 KB against about 1 MB, every page at once' },
+];
+const METER_MS = 1_800;
+
 export function SceneArkiv() {
   const { model } = useSite();
   const d = useDirector();
-  const [run, setRun] = useState(0);
-  useEffect(() => setRun(1), []);
-  const plain = useRace('plain', run);
-  const graph = useRace('graph', run);
+  // Both meters fill from zero to their values, eased, once the scene is in.
+  const [fill, setFill] = useState(0);
+  useEffect(() => {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return setFill(1);
+    let frame = 0;
+    const start = performance.now() + 500;
+    const step = (now: number) => {
+      const t = Math.min(1, Math.max(0, (now - start) / METER_MS));
+      setFill(1 - (1 - t) ** 3);
+      if (t < 1) frame = requestAnimationFrame(step);
+    };
+    frame = requestAnimationFrame(step);
+    return () => cancelAnimationFrame(frame);
+  }, []);
   const pkg = model.links.packages.find((p) => p.key === 'arkiv-graph');
   const best = d.model.graph?.boards.find((b) => b.ens === (d.model.best ?? model.merchant.ens));
   const orders = best?.orders ?? null;
-  const plainReads = plain.calls ?? plain.reads;
-  const graphReads = graph.calls ?? graph.reads;
   return (
     <div className="scene scene-arkiv">
       <SceneHead number={7} title={`What we proved on ${model.networks.rabdi.name.split(' ')[0]}`} />
@@ -186,33 +205,17 @@ export function SceneArkiv() {
         </div>
         <p className="fine">About 0.00031 tGLM a payment, lab measure{orders !== null && d.model.paid ? `. The shop’s scoreboard: ${orders} orders, then ${orders + 1}.` : '.'}</p>
       </div>
-      <div className="race">
-        <p className="race-q">Race, live: the top shops by sales, synthetic city, size S</p>
-        <div className="race-sides">
-          <div className="race-side">
-            <span>Plain {model.networks.rabdi.name.split(' ')[0]}</span>
-            <b>{plainReads}</b>
-            <span>reads{plain.bytes ? `, ${Math.round(plain.bytes / 1024)} KB` : ''}</span>
-            <div className="race-bar" style={{ width: `${Math.min(100, plainReads * 18)}%` }} />
+      <div className="meters">
+        {METERS.map((m) => (
+          <div key={m.key} className="meter" role="img" aria-label={`${m.text(m.to)}, ${LAB}`}>
+            <b>{m.text(m.from + (m.to - m.from) * fill)}</b>
+            <div className="meter-track" aria-hidden>
+              <i style={{ width: `${Math.round(fill * 100)}%` }} />
+            </div>
+            <span>{LAB}</span>
+            <p className="fine">{m.fine}</p>
           </div>
-          <div className="race-side is-graph">
-            <span>GraphPay</span>
-            <b>{graphReads}</b>
-            <span>reads{graph.bytes ? `, ${Math.round(graph.bytes / 1024)} KB` : ''}</span>
-            <div className="race-bar" style={{ width: `${Math.min(100, graphReads * 18)}%` }} />
-          </div>
-        </div>
-        {plain.error || graph.error ? <p className="fine">{plain.error ?? graph.error}</p> : null}
-      </div>
-      <div className="metrics">
-        <div>
-          <b>5 to 2</b>
-          <span>reads, live, size S</span>
-        </div>
-        <div>
-          <b>48 to 2</b>
-          <span>reads, lab, 9,612 payments</span>
-        </div>
+        ))}
       </div>
       {pkg ? <NpmCard name={pkg.name} readme={pkg.readme} line="A graph layer over Arkiv: nodes, edges and totals, written atomically, every read explained." /> : null}
     </div>
@@ -264,6 +267,7 @@ export function SceneWhitechain() {
   const d = useDirector();
   const list = proofs(model);
   const refund = last(d.events, (e) => e.key === 'refund');
+  const accepted = last(d.events, (e) => e.key === 'refund-accepted');
   const runLinks = [
     ...(d.model.paid ? [{ label: `This run’s payment, ${usdt(d.model.paid.amountUsdt)}`, href: txUrl(model.explorers, 'whitechain', d.model.paid.tx) }] : []),
     ...(refund ? [{ label: 'This run’s refund', href: txUrl(model.explorers, 'whitechain', refund.data?.transaction) }] : []),

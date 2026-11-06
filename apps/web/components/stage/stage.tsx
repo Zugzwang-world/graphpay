@@ -138,6 +138,10 @@ function RunChips() {
     for (const e of d.events) {
       const data = e.data ?? {};
       const s = (v: unknown) => (typeof v === 'string' ? v : null);
+      if (e.key === 'dispatched' && d.pace.shown >= stepIndex('paid')) {
+        const href = txUrl(x, 'whitechain', s(data.transaction));
+        if (href) out.push({ key: `dispatched-${e.at}`, label: 'Dispatched', network: n.whitechain.name.split(' ')[0] ?? n.whitechain.name, href, at: e.at });
+      }
       if (e.key === 'refund-photo' && e.chips[0]) out.push({ key: `photo-${e.at}`, label: 'Refund photo', network: 'Swarm', href: e.chips[0].href, at: e.at });
       if (e.key === 'refund-request') {
         const href = txUrl(x, 'rabdi', s(data.arkivTx));

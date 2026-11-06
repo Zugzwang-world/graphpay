@@ -22,9 +22,14 @@ export function ProofLink({ href, network, at, now, label }: { href: string | nu
   );
 }
 
+// A step still on its way (a transaction waiting for its receipt), until its link shows.
+export function Pending({ children }: { children: ReactNode }) {
+  return <span className="inline-flex min-h-8 items-center gap-2 rounded-full bg-soft px-3 text-caption font-bold text-muted"><span className="stage-pulse-dot" aria-hidden />{children}</span>;
+}
+
 // "Writing to Arkiv" until the record's edge lands; then its link.
 export function ArkivPending() {
-  return <span className="inline-flex min-h-8 items-center gap-2 rounded-full bg-soft px-3 text-caption font-bold text-muted"><span className="stage-pulse-dot" aria-hidden />Writing to Arkiv</span>;
+  return <Pending>Writing to Arkiv</Pending>;
 }
 
 export type Activity = 'idle' | 'thinking' | 'talking' | 'success' | 'refused';

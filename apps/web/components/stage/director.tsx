@@ -150,8 +150,9 @@ export function Director({ customer, merchant, children }: { customer: RefObject
         }
         setEvents((list) => [...list, event]);
         send(fromCustomer ? merchant : customer, { type: RELAY, events: [event] });
-        // Each phone event moves the middle exactly once: the first of its scene enters it.
-        if (event.key === 'refund-start') setQueued('refund', true);
+        // Each phone event moves the middle exactly once: the first of its scene enters it. The refund
+        // scene opens only once the shop has marked the order dispatched on chain.
+        if (event.key === 'refund-start' && state.current.events.some((e) => e.key === 'dispatched')) setQueued('refund', true);
         if (event.key === 'pause-start') setQueued('pause', true);
       }
     };

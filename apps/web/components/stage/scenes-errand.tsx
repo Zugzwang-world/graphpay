@@ -380,8 +380,11 @@ export function SceneX402() {
   const lanes = ['Payer', 'Shop', 'Facilitator', 'ENS', model.networks.whitechain.name.split(' ')[0] ?? 'Whitechain', model.networks.rabdi.name.split(' ')[0] ?? 'Arkiv'];
   const laneX = (i: number) => 80 + i * 152;
   const paidEdge = m.paid ? d.edges.find((e) => e.kind === 'pay' && e.settlementTx?.toLowerCase() === m.paid?.tx) : undefined;
+  // The shop marks the order dispatched on chain right after the payment (its phone's event).
+  const dispatched = m.paid ? d.events.find((e) => e.key === 'dispatched' && typeof e.data?.orderId === 'string' && e.data.orderId.toLowerCase() === m.paid?.orderId.toLowerCase()) : undefined;
+  const dispatchTx = typeof dispatched?.data?.transaction === 'string' ? dispatched.data.transaction : null;
   const price = usdt(m.quote?.priceUsdt ?? m.paid?.amountUsdt ?? '');
-  type Arrow = { from: number; to: number; label: string; on: boolean; link?: { href: string | null; network: string; at?: number | null }; pending?: boolean; protocol?: boolean };
+  type Arrow = { from: number; to: number; label: string; on: boolean; link?: { href: string | null; network: string; at?: number | null }; pending?: boolean; pendingText?: string; protocol?: boolean };
   const arrows: Arrow[] = [
     { from: 0, to: 1, label: `Quote ${m.quote?.quantity ?? 1} × ${model.order.item}`, on: at('quote') },
     { from: 1, to: 0, label: `Bill ${orderNumber(m.quote?.orderId)}: ${price} USDT`, on: at('quote') },
@@ -392,7 +395,7 @@ export function SceneX402() {
     { from: 2, to: 3, label: 'Is the payer active? Its cap?', on: at('verify'), protocol: true },
     { from: 3, to: 2, label: 'Active, inside the cap', on: at('verify'), protocol: true },
     { from: 2, to: 4, label: 'Settle', on: at('settled'), link: { href: txUrl(model.explorers, 'whitechain', m.settledTx ?? m.paid?.tx), network: model.networks.whitechain.name, at: m.arrived.settled } },
-    { from: 1, to: 0, label: 'Paid. On its way.', on: at('dispatch') },
+    { from: 1, to: 0, label: dispatched ? 'Dispatched, on chain' : 'Paid. Dispatching.', on: at('dispatch'), link: dispatchTx ? { href: txUrl(model.explorers, 'whitechain', dispatchTx), network: model.networks.whitechain.name, at: dispatched?.at } : undefined, pending: !dispatchTx, pendingText: `Marking on ${model.networks.whitechain.name.split(' ')[0]}` },
     { from: 4, to: 5, label: 'The receipt', on: at('paid'), link: paidEdge ? { href: paidEdge.entityKey ? entityUrl(model.explorers, paidEdge.entityKey) : txUrl(model.explorers, 'rabdi', paidEdge.arkivTx), network: model.networks.rabdi.name, at: paidEdge.at } : undefined, pending: !paidEdge },
   ];
   return (
@@ -414,7 +417,7 @@ export function SceneX402() {
               <span className="seq-label">{a.label}</span>
               <i aria-hidden />
               {a.on && (a.link || a.pending) ? (
-                <span className="seq-link">{a.link ? <NetLink href={a.link.href} network={a.link.network} at={a.link.at} now={now} /> : <Pending>Writing to {model.networks.rabdi.name.split(' ')[0]}</Pending>}</span>
+                <span className="seq-link">{a.link ? <NetLink href={a.link.href} network={a.link.network} at={a.link.at} now={now} /> : <Pending>{a.pendingText ?? `Writing to ${model.networks.rabdi.name.split(' ')[0]}`}</Pending>}</span>
               ) : null}
             </div>
           );

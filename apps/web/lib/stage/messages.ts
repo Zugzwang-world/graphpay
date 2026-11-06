@@ -16,10 +16,13 @@ export const RELAY = 'graphpay.relay';
 export const HELLO = 'graphpay.hello';
 
 export type PhoneEventKey =
+  // scene 4: the shop marks the paid order dispatched on chain
+  | 'dispatched'
   // scene 5
   | 'refund-start'
   | 'refund-photo'
   | 'refund-request'
+  | 'refund-accepted'
   | 'refund'
   | 'refund-declined'
   // scene 6
@@ -33,7 +36,7 @@ export type PhoneEventKey =
   // a merchant stream edge, forwarded by the shop's phone (the stage opens no stream of its own)
   | 'edge';
 
-export const PHONE_EVENT_KEYS: readonly PhoneEventKey[] = ['refund-start', 'refund-photo', 'refund-request', 'refund', 'refund-declined', 'pause-start', 'paused', 'resumed', 'reorder-refused', 'shop-open', 'renewal', 'edge'];
+export const PHONE_EVENT_KEYS: readonly PhoneEventKey[] = ['dispatched', 'refund-start', 'refund-photo', 'refund-request', 'refund-accepted', 'refund', 'refund-declined', 'pause-start', 'paused', 'resumed', 'reorder-refused', 'shop-open', 'renewal', 'edge'];
 
 export interface Chip {
   label: string;

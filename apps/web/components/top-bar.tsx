@@ -68,14 +68,19 @@ export function TopBar() {
   const menus = Object.entries(swarm?.menus ?? {}).map(([shop, href]) => ({ label: model.shops.find((s) => s.ens === shop)?.displayName ?? shop, href }));
   const list = proofs(model);
   const latest = [...chips].sort((a, b) => b.at - a.at);
-  const shown = latest.slice(0, 3);
-  const rest = latest.slice(3);
+  // Two chips fit beside the live note at 1440 px; the rest are one tap away.
+  const shown = latest.slice(0, 2);
+  const rest = latest.slice(2);
 
   return (
     <header className="topbar">
       <a href="/" className="brand" aria-label="GraphPay, the stage">
         <span className="brand-name">GraphPay</span>
       </a>
+      <p className="bar-live">
+        <i aria-hidden />
+        Everything is live, not recorded.
+      </p>
       <nav className="bar-records" aria-label="GraphPay’s public records">
         {ens ? (
           <a className="bar-link" href={ens} {...ext}>
@@ -132,7 +137,7 @@ export function TopBar() {
           </a>
         ))}
         {rest.length ? (
-          <Menu label={`${rest.length} more`}>
+          <Menu label={`+${rest.length}`}>
             {rest.map((c) => (
               <a key={c.key} href={c.href} {...ext}>
                 {c.label}: {c.network}, {ago(c.at, now)}

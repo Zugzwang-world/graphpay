@@ -3,7 +3,7 @@ import { test } from 'node:test';
 import { BEATS, BROWSE_BEATS, ERRAND_STEPS, beatOf, isBeatKey } from './scenes.ts';
 import { foldAll, parseAsk } from './errand.ts';
 import { advance, caughtUp, restPace } from './pace.ts';
-import { customerErrandLines, endSentence, merchantErrandLines, type LineCast } from './lines.ts';
+import { customerErrandLines, endSentence, merchantErrandLines, refundLines, type LineCast } from './lines.ts';
 import { ago, orderNumber, percent } from './format.ts';
 
 // A made-up cast: role words are structure, the names here are not the story's.
@@ -148,11 +148,12 @@ test('the lines are the templates filled from the frames', () => {
   assert.equal(lines[3]!.text, 'One: 245 orders, 1.2% refunds, 97% on time. Two: 18% refunds, rejected.');
   assert.equal(lines[4]!.text, 'Order 1 × a thing from One, at most 6.00 USDT, within the hour.');
   assert.equal(lines[6]!.text, 'Bill: 4.80 USDT, inside today’s pass. Signing once.');
-  assert.equal(lines[7]!.text, 'Paid 4.80. Arrives by 03:26.');
+  // No arrival time: the shop marks the order dispatched on chain right after the payment.
+  assert.equal(lines[7]!.text, 'Paid 4.80.');
   const shop = merchantErrandLines(m, cast);
-  assert.deepEqual(shop.map((l) => l.key), ['m-quote', 'm-vet', 'm-risk', 'm-bill', 'm-paid', 'm-dispatch']);
+  assert.deepEqual(shop.map((l) => l.key), ['m-quote', 'm-vet', 'm-risk', 'm-bill', 'm-paid']);
   assert.equal(shop[2]!.text, `Graph: 33 paid orders, 0 disputes. ENS: owned by ${cast.persona.ens}, active. Approved.`);
-  assert.equal(shop[5]!.text, 'On its way, arriving by 03:26.');
+  assert.equal(refundLines.riskAccept('800000', '4.80', true), 'Photo on Swarm. 0.80 of 4.80, on a dispatched order. Accept.');
 });
 
 test('small formats', () => {
