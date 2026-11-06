@@ -100,3 +100,24 @@ test('apiCostUsd for Kimi: cache reads at the cached rate, the rest of the promp
   assert.ok(Math.abs(fast.costUsd - (400 * 4 + 500 * 20 + 600 * 0.2) / 1e6) < 1e-12);
   assert.throws(() => createMeter().step('scout', { provider: 'unknown', model: 'x' }, { usage }), /no cost rule/);
 });
+
+test('Kimi gets the output schema in its instructions, not as a response_format, and the reply is parsed and validated here', async () => {
+  const { runAgent } = await import('../src/agents.mjs');
+  const { createRunLog } = await import('../src/runlog.mjs');
+  const seen = [];
+  const replies = ['```json\n{"summary":"Paid it","chosenShop":null}\n```', 'I will think about it.', ''];
+  const fetch = async (url, init) => {
+    seen.push(JSON.parse(init.body));
+    return new Response(JSON.stringify(completion({ role: 'assistant', content: replies[seen.length - 1], reasoning_content: 'ok' })), { status: 200, headers: { 'content-type': 'application/json' } });
+  };
+  const models = createModelFactory({ mode: 'live', env, fetch });
+  const go = () => runAgent({ role: 'concierge', ens: 'concierge.x.graphpay.eth', task: { a: 1 }, tools: {}, models, log: createRunLog(), meter: createMeter() });
+  const ok = await go();
+  assert.deepEqual(ok.output, { summary: 'Paid it', chosenShop: null });
+  assert.equal('response_format' in seen[0], false);
+  const system = seen[0].messages.find((m) => m.role === 'system').content;
+  assert.match(system, /JSON Schema/);
+  assert.match(system, /chosenShop/);
+  assert.match((await go()).error, /not the JSON/);
+  assert.match((await go()).error, /empty reply/);
+});

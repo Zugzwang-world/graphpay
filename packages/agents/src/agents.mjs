@@ -7,6 +7,17 @@ import { isStepCount, NoObjectGeneratedError, NoOutputGeneratedError, Output, To
 import { OUTPUTS, WIRE_OUTPUTS } from './contracts.mjs';
 import { promptFor, task as taskMessage } from './prompts.mjs';
 import { errorText } from './scrub.mjs';
+import { z } from 'zod';
+
+// Kimi answers a request that carries a response_format with the JSON at once and never calls
+// its tools (seen on the first live errand). For providers that do, the schema goes into the
+// instructions and the last reply is parsed here; code validates it against OUTPUTS either way.
+const PROMPTED_JSON = new Set(['moonshot']);
+
+function jsonFromReply(text) {
+  const body = String(text ?? '').trim().replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '');
+  return JSON.parse(body);
+}
 
 export const MAX_STEPS = 8;
 
@@ -26,13 +37,16 @@ function noAnswerReason(error, steps) {
 export async function runAgent({ role, ens, task, tools, models, log, meter, sdl, executed = new Set(), signal }) {
   const { model, settings, callSettings } = models(role);
   log.agentStart(ens, role, task);
+  const prompted = PROMPTED_JSON.has(settings.provider);
   let steps = 0;
   let usageTokens = 0;
   const agent = new ToolLoopAgent({
     model,
-    instructions: promptFor(role, { sdl }),
+    instructions: prompted
+      ? `${promptFor(role, { sdl })}\nYour final reply is exactly one JSON object that matches this JSON Schema, with no other text:\n${JSON.stringify(z.toJSONSchema(WIRE_OUTPUTS[role]))}`
+      : promptFor(role, { sdl }),
     tools,
-    output: Output.object({ schema: WIRE_OUTPUTS[role] }),
+    ...(prompted ? {} : { output: Output.object({ schema: WIRE_OUTPUTS[role] }) }),
     stopWhen: isStepCount(MAX_STEPS),
     ...callSettings,
     onStepFinish: (step) => {
@@ -53,10 +67,22 @@ export async function runAgent({ role, ens, task, tools, models, log, meter, sdl
   try {
     const result = await agent.generate({ prompt: taskMessage(task), abortSignal: signal });
     let raw;
-    try {
-      raw = result.output;
-    } catch (e) {
-      error = noAnswerReason(e, steps);
+    if (prompted) {
+      if (result.finishReason === 'length') error = 'no answer: the reply hit max_tokens';
+      else if (!result.text || result.text.trim() === '') error = steps >= MAX_STEPS ? `no answer: stopped after ${MAX_STEPS} steps` : 'no answer: empty reply';
+      else {
+        try {
+          raw = jsonFromReply(result.text);
+        } catch {
+          error = 'no answer: the reply is not the JSON the output schema asks for';
+        }
+      }
+    } else {
+      try {
+        raw = result.output;
+      } catch (e) {
+        error = noAnswerReason(e, steps);
+      }
     }
     if (!error) {
       const parsed = OUTPUTS[role].safeParse(raw);
