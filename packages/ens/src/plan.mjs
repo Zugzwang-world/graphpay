@@ -3,6 +3,7 @@
 // No name, cap or address is written here (acceptance A7, A8).
 
 import { activeCast, config } from '@graphpay/config';
+import { normalize } from 'viem/ens';
 
 const ns = () => config.ens.namespace;
 
@@ -77,6 +78,32 @@ export function namespacePlan({ cast = activeCast(), root = config.root.ens } = 
   if (names.includes(wildcard.name)) throw new Error('a cast name collides with the wildcard');
   const rootEntry = { kind: 'root', name: root, label: root.split('.')[0], parent: root.split('.').slice(1).join('.'), context: t.root };
   return { root: rootEntry, owners, agents, wildcard, cast, human };
+}
+
+// The cast with some shops under new ENS labels (`relabel`: shop key → new label). Each shop
+// keeps its key, wallet role and everything else, so a renamed shop's records point at the
+// wallet its old name used and no funds move; the old name is never touched on chain. A new
+// label must be one normalised label, new to the namespace (persona, shops, wildcard).
+export function relabelShops(cast, relabel) {
+  const map = relabel instanceof Map ? relabel : new Map(Object.entries(relabel ?? {}));
+  const taken = new Set([cast.persona.label, ns().wildcardLabel, ...cast.shops.map((s) => s.label)]);
+  const fresh = new Set();
+  for (const [key, label] of map) {
+    if (!cast.shops.some((s) => s.key === key)) throw new Error(`relabel: ${key} is not a shop of the story`);
+    if (typeof label !== 'string' || !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(label) || normalize(label) !== label) throw new Error(`relabel: ${label} is not one normalised label`);
+    if (taken.has(label) || fresh.has(label)) throw new Error(`relabel: ${label} is already a label of the namespace`);
+    fresh.add(label);
+  }
+  return { ...cast, shops: cast.shops.map((s) => (map.has(s.key) ? { ...s, label: map.get(s.key) } : s)) };
+}
+
+// A `--relabel` argument, `<shop key>=<label>[,…]`, as the map relabelShops takes.
+export function parseRelabel(text = '') {
+  return new Map(text.split(',').filter(Boolean).map((pair) => {
+    const [key, label, extra] = pair.split('=');
+    if (!key || !label || extra !== undefined) throw new Error(`relabel takes <shop key>=<label> pairs, got ${pair}`);
+    return [key.trim(), label.trim()];
+  }));
 }
 
 // disposable-<n> under the persona, held by DISPOSABLE_<n> (a fresh wallet per kill).

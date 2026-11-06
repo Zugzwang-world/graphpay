@@ -480,9 +480,249 @@
       "block": 12071844,
       "gasUsed": 156903,
       "at": "2026-11-05T20:28:14.320Z"
+    },
+    {
+      "step": "B1",
+      "name": "filter-and-fold.graphpay.eth",
+      "hash": "0xab3ff9f3b7379f59095649ceb3321713e1e5cfbefbacb0c02741667c7681c573",
+      "block": 12078094,
+      "gasUsed": 1017447,
+      "at": "2026-11-06T17:40:00.783Z"
+    },
+    {
+      "step": "B2",
+      "name": "filter-and-fold.graphpay.eth",
+      "hash": "0x10550fadbc3273acb20db1073effd53d2f57892e999c67603c735fba299a98c5",
+      "block": 12078095,
+      "gasUsed": 2408445,
+      "at": "2026-11-06T17:40:15.071Z"
+    },
+    {
+      "step": "B3",
+      "name": "filter-and-fold.graphpay.eth",
+      "hash": "0x045cbe0db0fe87b168e9ba9fd22b141abd7223bad3cbf1b373aac21aca4d68c3",
+      "block": 12078096,
+      "gasUsed": 718859,
+      "at": "2026-11-06T17:40:26.014Z"
+    },
+    {
+      "step": "B4",
+      "name": "filter-and-fold.graphpay.eth",
+      "hash": "0xf119d36570051d71087475378c42a9f5b714f1ed7a27d1eacddeaf9005029136",
+      "block": 12078097,
+      "gasUsed": 251695,
+      "at": "2026-11-06T17:40:40.766Z"
+    },
+    {
+      "step": "B1",
+      "name": "tawa-tangle.graphpay.eth",
+      "hash": "0xa42703f7e326aea2665de725019329f6f840ffe652d25a1c316ac1bd3526a0db",
+      "block": 12078098,
+      "gasUsed": 1017447,
+      "at": "2026-11-06T17:40:49.907Z"
+    },
+    {
+      "step": "B2",
+      "name": "tawa-tangle.graphpay.eth",
+      "hash": "0x175b754b55a355c6e4de8808bf16a4e84d3026b015607fa2527bdd91bf506b6a",
+      "block": 12078099,
+      "gasUsed": 2408121,
+      "at": "2026-11-06T17:41:02.998Z"
+    },
+    {
+      "step": "B3",
+      "name": "tawa-tangle.graphpay.eth",
+      "hash": "0xb39a238a8c6822454dfbd6a8283a65200eb8ca1458f3f7634ebe6465253879dd",
+      "block": 12078100,
+      "gasUsed": 718811,
+      "at": "2026-11-06T17:41:15.200Z"
+    },
+    {
+      "step": "B4",
+      "name": "tawa-tangle.graphpay.eth",
+      "hash": "0x27e2e0351bbc54fa9c02d02a59fb539680a53802b3471495aaf9a3d4c789177a",
+      "block": 12078101,
+      "gasUsed": 251647,
+      "at": "2026-11-06T17:41:27.547Z"
+    },
+    {
+      "step": "B1",
+      "name": "idli-index.graphpay.eth",
+      "hash": "0x442fd77abd758011bff0cae55168f4327b02a32069b034dcc6c718b3384b8203",
+      "block": 12078102,
+      "gasUsed": 1017447,
+      "at": "2026-11-06T17:41:36.993Z"
+    },
+    {
+      "step": "B2",
+      "name": "idli-index.graphpay.eth",
+      "hash": "0x1e47edb74da524352be1e13df46f54245d5fc352e61bba06dd641ec7b9b57dc0",
+      "block": 12078103,
+      "gasUsed": 2408049,
+      "at": "2026-11-06T17:41:49.548Z"
+    },
+    {
+      "step": "B3",
+      "name": "idli-index.graphpay.eth",
+      "hash": "0x09ef47ee717814288bd428575c10fefb7056fed84e133b8ec846a4a94bac0452",
+      "block": 12078104,
+      "gasUsed": 718799,
+      "at": "2026-11-06T17:42:03.662Z"
+    },
+    {
+      "step": "B4",
+      "name": "idli-index.graphpay.eth",
+      "hash": "0xbacfb4f7c893db8f9581a608cb24b01f3f34913afefd776014f0fd9376d2d182",
+      "block": 12078106,
+      "gasUsed": 251635,
+      "at": "2026-11-06T17:42:27.224Z"
+    },
+    {
+      "step": "C1",
+      "name": "storefront.filter-and-fold.graphpay.eth",
+      "hash": "0xef38e47c5e93fec34eb9fe0cf8d59582f58811ca4eac44106d28e4193ba5ae97",
+      "block": 12078110,
+      "gasUsed": 2659782,
+      "at": "2026-11-06T17:43:14.852Z"
+    },
+    {
+      "step": "C2",
+      "name": "storefront.filter-and-fold.graphpay.eth",
+      "hash": "0x8a1997f36c5c96fc1807c09f6ab793caee6a136a1c8743ded38b0c1cf66b51ec",
+      "block": 12078111,
+      "gasUsed": 274614,
+      "at": "2026-11-06T17:43:25.370Z"
+    },
+    {
+      "step": "C1",
+      "name": "risk.filter-and-fold.graphpay.eth",
+      "hash": "0x4ac09ed680d8f0d0bd255d5a72a5e22d499a24c59027ab6c0bc6d3820d45555c",
+      "block": 12078112,
+      "gasUsed": 2659062,
+      "at": "2026-11-06T17:43:39.393Z"
+    },
+    {
+      "step": "C2",
+      "name": "risk.filter-and-fold.graphpay.eth",
+      "hash": "0x24d27ab0e6fb3a420d9e31a76258b508119605668a039208b5e4d3e1afdd8b01",
+      "block": 12078113,
+      "gasUsed": 274542,
+      "at": "2026-11-06T17:43:51.026Z"
+    },
+    {
+      "step": "C1",
+      "name": "dispatch.filter-and-fold.graphpay.eth",
+      "hash": "0xae71940b1ea99fe1115faa7d54691fa4a7997d8b77bf9582bf700798c25187d2",
+      "block": 12078114,
+      "gasUsed": 2659542,
+      "at": "2026-11-06T17:44:00.661Z"
+    },
+    {
+      "step": "C2",
+      "name": "dispatch.filter-and-fold.graphpay.eth",
+      "hash": "0x75b465fc07a95b09758f820d18720ac8b767c88e64f2fd796ff385f0a02fe5e0",
+      "block": 12078115,
+      "gasUsed": 274578,
+      "at": "2026-11-06T17:44:14.794Z"
+    },
+    {
+      "step": "C1",
+      "name": "storefront.tawa-tangle.graphpay.eth",
+      "hash": "0xa2590e4e68b575d92ecd94b3bb9f018479aa34ec09bf19ae0e679fa587f8172a",
+      "block": 12078116,
+      "gasUsed": 2659302,
+      "at": "2026-11-06T17:44:26.933Z"
+    },
+    {
+      "step": "C2",
+      "name": "storefront.tawa-tangle.graphpay.eth",
+      "hash": "0x2897b1ee9eb7638d612911e235f894522c4f5df757ebb864e363d47521e0b5f4",
+      "block": 12078118,
+      "gasUsed": 274614,
+      "at": "2026-11-06T17:44:50.136Z"
+    },
+    {
+      "step": "C1",
+      "name": "risk.tawa-tangle.graphpay.eth",
+      "hash": "0x53cf51386f59b2e423e3969d686be21293c54813178987ea4b489f2c00a0418a",
+      "block": 12078119,
+      "gasUsed": 2656915,
+      "at": "2026-11-06T17:45:01.967Z"
+    },
+    {
+      "step": "C2",
+      "name": "risk.tawa-tangle.graphpay.eth",
+      "hash": "0x587b6606d87bae854b090496a8367f1222737aa0811206bf6ed5898a2cfab3fd",
+      "block": 12078121,
+      "gasUsed": 274542,
+      "at": "2026-11-06T17:45:27.070Z"
+    },
+    {
+      "step": "C1",
+      "name": "dispatch.tawa-tangle.graphpay.eth",
+      "hash": "0x51a3bc7b3904be4ad70bbe420ad5da157854329bc005bca60bfc74da89d607ce",
+      "block": 12078122,
+      "gasUsed": 2659062,
+      "at": "2026-11-06T17:45:38.876Z"
+    },
+    {
+      "step": "C2",
+      "name": "dispatch.tawa-tangle.graphpay.eth",
+      "hash": "0xafb6e99ee2cacd0df1c5a2c96b2f0942bffc794fee0ef73c344581fa8e16b044",
+      "block": 12078123,
+      "gasUsed": 274590,
+      "at": "2026-11-06T17:45:49.123Z"
+    },
+    {
+      "step": "C1",
+      "name": "storefront.idli-index.graphpay.eth",
+      "hash": "0x7380c4ea6a33c1fa16eef5a79404611727643afe64a7d295713ca6589e65dc73",
+      "block": 12078124,
+      "gasUsed": 2659182,
+      "at": "2026-11-06T17:46:01.136Z"
+    },
+    {
+      "step": "C2",
+      "name": "storefront.idli-index.graphpay.eth",
+      "hash": "0x89b414474b5727aaa380b3ca380e07cb499cff3c6118273b4c3738ce07e1aa52",
+      "block": 12078126,
+      "gasUsed": 274614,
+      "at": "2026-11-06T17:46:26.182Z"
+    },
+    {
+      "step": "C1",
+      "name": "risk.idli-index.graphpay.eth",
+      "hash": "0xb8601ad2572c93e1b527ec7bb10f2e054f3e9f10e2b09d1ac1e464b4f63373c1",
+      "block": 12078127,
+      "gasUsed": 2656783,
+      "at": "2026-11-06T17:46:38.473Z"
+    },
+    {
+      "step": "C2",
+      "name": "risk.idli-index.graphpay.eth",
+      "hash": "0x3720a8510d5f99b2b0d9190cd8880680cd4dc88f0affdd731c3a2307993a8432",
+      "block": 12078129,
+      "gasUsed": 274542,
+      "at": "2026-11-06T17:47:01.882Z"
+    },
+    {
+      "step": "C1",
+      "name": "dispatch.idli-index.graphpay.eth",
+      "hash": "0x65f8ec37f54bb7c154ba29d4bc33c3584718105afcad2fa7d97ace05be702b39",
+      "block": 12078131,
+      "gasUsed": 2658930,
+      "at": "2026-11-06T17:47:25.077Z"
+    },
+    {
+      "step": "C2",
+      "name": "dispatch.idli-index.graphpay.eth",
+      "hash": "0xb00db43853c55906762aade2ae69f5a650d2808d565db257ca74a18db4e9863a",
+      "block": 12078134,
+      "gasUsed": 274590,
+      "at": "2026-11-06T17:48:02.177Z"
     }
   ],
-  "updatedAt": "2026-11-05T20:38:33.103Z",
+  "updatedAt": "2026-11-06T17:48:09.874Z",
   "mode": "real",
   "root": {
     "name": "graphpay.eth",
@@ -513,6 +753,24 @@
       "name": "syrup-street.graphpay.eth",
       "registry": "0xf65Bf917B4b0A79D8bad73c32ddC3Ac499ca455E",
       "resolver": "0xB68852099F9AB856801d28C1Cbb82d647407fA5C",
+      "holder": "0xc5698726c0b67D3fBF095cE2CCa48e1e4bcdD892"
+    },
+    {
+      "name": "filter-and-fold.graphpay.eth",
+      "registry": "0x11a90816A90AfECA6015a62f05eDa63109265e09",
+      "resolver": "0xEcC5040101201165323437aB43ec16BD61EdE04e",
+      "holder": "0x26940565cb470e25B06F5a39cB4E3B98b3e0d03E"
+    },
+    {
+      "name": "tawa-tangle.graphpay.eth",
+      "registry": "0x22755E497c6CCc3941c52b89Ab5B6EA055f3C76B",
+      "resolver": "0x7396d11cE4F34f1740e0aB28602f130c0949e4b6",
+      "holder": "0x0674ABc7Ee4c403b599f9f114eE7fA4f2F56f26a"
+    },
+    {
+      "name": "idli-index.graphpay.eth",
+      "registry": "0x425feA911b78c026a1e8D85f3559D82779A7d50d",
+      "resolver": "0xF120F34F81df81CBDFE3E73186F7f18cE4f7aeBF",
       "holder": "0xc5698726c0b67D3fBF095cE2CCa48e1e4bcdD892"
     }
   ],
@@ -660,10 +918,114 @@
       "resolver": "0x5Ee50F111fE8E3FE4C09B89279b72991597FF497",
       "registry": "0xc3E7e0CFFBc3fBeE3576F58c02d10BB2062a2efa",
       "holder": "0xd8A05802c8e07E5Bdb8c0B2D2EEc0f6F8501291E"
+    },
+    {
+      "name": "storefront.filter-and-fold.graphpay.eth",
+      "node": "0xe6b0494363748c6d598448ff7f162e3df45f559f1b519b61f0033d706b155234",
+      "epoch": 0,
+      "expiry": 1796578992,
+      "resolver": "0x5F85DbFA5aE629Bf20C9dfA5FB607633AAA1069e",
+      "registry": "0x11a90816A90AfECA6015a62f05eDa63109265e09",
+      "holder": "0x26940565cb470e25B06F5a39cB4E3B98b3e0d03E"
+    },
+    {
+      "name": "risk.filter-and-fold.graphpay.eth",
+      "node": "0x1a4d47e0bcf2adb3dae0d743fd6bb33727045710ea2246cb15667aa805f2f4db",
+      "epoch": 0,
+      "expiry": 1796579016,
+      "resolver": "0xf721134785fAd7D716445D399e2f93CE10217c1F",
+      "registry": "0x11a90816A90AfECA6015a62f05eDa63109265e09",
+      "holder": "0x26940565cb470e25B06F5a39cB4E3B98b3e0d03E"
+    },
+    {
+      "name": "dispatch.filter-and-fold.graphpay.eth",
+      "node": "0x74adaf13eb1f8721c8c493876fe5d1ea9b2447cd3fd6c820a56648362b7d3e33",
+      "epoch": 0,
+      "expiry": 1796579040,
+      "resolver": "0x3D9eFE5B60E4d3B3b4000b161001D1Faaa74960f",
+      "registry": "0x11a90816A90AfECA6015a62f05eDa63109265e09",
+      "holder": "0x26940565cb470e25B06F5a39cB4E3B98b3e0d03E"
+    },
+    {
+      "name": "storefront.tawa-tangle.graphpay.eth",
+      "node": "0xbcddfb5f6a39de0e3675176f781b0f610877431692b3377800dfecddd2f825cf",
+      "epoch": 0,
+      "expiry": 1796579064,
+      "resolver": "0x3B6fD726ce138Ef52A26A1248d18773E333846E9",
+      "registry": "0x22755E497c6CCc3941c52b89Ab5B6EA055f3C76B",
+      "holder": "0x0674ABc7Ee4c403b599f9f114eE7fA4f2F56f26a"
+    },
+    {
+      "name": "risk.tawa-tangle.graphpay.eth",
+      "node": "0x043064bfe21c5c185beeb50fbe3337629d0cf86376dc2684da13ef704c3e60cd",
+      "epoch": 0,
+      "expiry": 1796579100,
+      "resolver": "0x82750688d86197297b99B10d77734EfB4aa63210",
+      "registry": "0x22755E497c6CCc3941c52b89Ab5B6EA055f3C76B",
+      "holder": "0x0674ABc7Ee4c403b599f9f114eE7fA4f2F56f26a"
+    },
+    {
+      "name": "dispatch.tawa-tangle.graphpay.eth",
+      "node": "0xcd64ce7b2f97a6c0422b2e7ccb3223f1924d88c7a9021698ef4f5f4a1dc7e904",
+      "epoch": 0,
+      "expiry": 1796579136,
+      "resolver": "0x21B48623676206E8a0bbC33aDf866BA6c71C977a",
+      "registry": "0x22755E497c6CCc3941c52b89Ab5B6EA055f3C76B",
+      "holder": "0x0674ABc7Ee4c403b599f9f114eE7fA4f2F56f26a"
+    },
+    {
+      "name": "storefront.idli-index.graphpay.eth",
+      "node": "0xa27f32d4c742791d9440c316778b218c19f4a0ced2b7a7108e639a31d5f81210",
+      "epoch": 0,
+      "expiry": 1796579172,
+      "resolver": "0x63847a2533E7B68cE0922C25322c506f346530c7",
+      "registry": "0x425feA911b78c026a1e8D85f3559D82779A7d50d",
+      "holder": "0xc5698726c0b67D3fBF095cE2CCa48e1e4bcdD892"
+    },
+    {
+      "name": "risk.idli-index.graphpay.eth",
+      "node": "0x74301cf8cad911147b1a55116df30df283f70a1bdb4cc796ed246dc77b55c369",
+      "epoch": 0,
+      "expiry": 1796579196,
+      "resolver": "0xC034381E67E6A9F61b04EA330EF24c4C29909523",
+      "registry": "0x425feA911b78c026a1e8D85f3559D82779A7d50d",
+      "holder": "0xc5698726c0b67D3fBF095cE2CCa48e1e4bcdD892"
+    },
+    {
+      "name": "dispatch.idli-index.graphpay.eth",
+      "node": "0xb0eb9443e9c41ceb7add11f0e1fe6c351e5ee9e84cb7daa259c919b4ad53f140",
+      "epoch": 0,
+      "expiry": 1796579256,
+      "resolver": "0xef72877fAfabB634470C2DB73Fc420159c9B3B84",
+      "registry": "0x425feA911b78c026a1e8D85f3559D82779A7d50d",
+      "holder": "0xc5698726c0b67D3fBF095cE2CCa48e1e4bcdD892"
     }
   ],
   "wildcard": {
     "name": "sim.graphpay.eth",
     "resolver": "0x5269D69477A9E17bec141065029343c0183B56b5"
-  }
+  },
+  "renamed": [
+    {
+      "shop": "kesar-kingdom",
+      "from": "kesar-kingdom.graphpay.eth",
+      "to": "filter-and-fold.graphpay.eth",
+      "walletRole": "SHOP_KESAR",
+      "at": "2026-11-06T17:48:09.875Z"
+    },
+    {
+      "shop": "syrup-street",
+      "from": "syrup-street.graphpay.eth",
+      "to": "idli-index.graphpay.eth",
+      "walletRole": "SHOP_SYRUP",
+      "at": "2026-11-06T17:48:09.875Z"
+    },
+    {
+      "shop": "jamun-junction",
+      "from": "jamun-junction.graphpay.eth",
+      "to": "tawa-tangle.graphpay.eth",
+      "walletRole": "SHOP_JAMUN",
+      "at": "2026-11-06T17:48:09.875Z"
+    }
+  ]
 }

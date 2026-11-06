@@ -1,6 +1,16 @@
 # Namespace under graphpay.eth (Ethereum Sepolia, chain 11155111)
 
-Generated from `docs/sessions/identity/namespace.json` by `scripts/ens/namespace-doc.mjs`; updated 2026-11-05T20:38:33.103Z. Real run: 60 transactions, 72,668,520 gas. Names come from the story config and addresses from `packages/config/graphpay.config.json`; this file records what was created.
+Generated from `docs/sessions/identity/namespace.json` by `scripts/ens/namespace-doc.mjs`; updated 2026-11-06T17:48:09.874Z. Real run: 90 transactions, 112,256,708 gas. Names come from the story config and addresses from `packages/config/graphpay.config.json`; this file records what was created.
+
+## Renamed shops
+
+Each new name was built like the old one (its own registry and resolvers, the same records) and points at the wallet the old name used, so no funds moved. The old names stay registered as history; nothing on chain was changed for them.
+
+| old name (history) | new name | wallet | registered (UTC) |
+|---|---|---|---|
+| kesar-kingdom.graphpay.eth | filter-and-fold.graphpay.eth | SHOP_KESAR [`0x26940565cb470e25B06F5a39cB4E3B98b3e0d03E`](https://sepolia.etherscan.io/address/0x26940565cb470e25B06F5a39cB4E3B98b3e0d03E) | 2026-11-06 17:48 |
+| syrup-street.graphpay.eth | idli-index.graphpay.eth | SHOP_SYRUP [`0xc5698726c0b67D3fBF095cE2CCa48e1e4bcdD892`](https://sepolia.etherscan.io/address/0xc5698726c0b67D3fBF095cE2CCa48e1e4bcdD892) | 2026-11-06 17:48 |
+| jamun-junction.graphpay.eth | tawa-tangle.graphpay.eth | SHOP_JAMUN [`0x0674ABc7Ee4c403b599f9f114eE7fA4f2F56f26a`](https://sepolia.etherscan.io/address/0x0674ABc7Ee4c403b599f9f114eE7fA4f2F56f26a) | 2026-11-06 17:48 |
 
 ## Hand-off table (payments policies, Join's mirror)
 
@@ -24,6 +34,15 @@ Read by `node` and `epoch` (fresh ENSv2 names are epoch 0). The wallet is the to
 | risk.syrup-street.graphpay.eth | `0xc97b0969e4a51733649dc96052fcc06f2c18a162a8e1b1d8f2b843dbb8a07659` | 0 | [`0xc5698726c0b67D3fBF095cE2CCa48e1e4bcdD892`](https://sepolia.etherscan.io/address/0xc5698726c0b67D3fBF095cE2CCa48e1e4bcdD892) | 2026-12-05 |
 | dispatch.syrup-street.graphpay.eth | `0xa46bff94b5ed8f25a73d84dac041bdfc688c87d1c9b4d4a44168b4c11a91715b` | 0 | [`0xc5698726c0b67D3fBF095cE2CCa48e1e4bcdD892`](https://sepolia.etherscan.io/address/0xc5698726c0b67D3fBF095cE2CCa48e1e4bcdD892) | 2026-12-05 |
 | disposable-1.vitalik.graphpay.eth | `0xf817b7a950f0ac3a20ba2cfc2d37d3ad9245f5b0ec8b35d138a5980363d2fab7` | 0 | [`0xd8A05802c8e07E5Bdb8c0B2D2EEc0f6F8501291E`](https://sepolia.etherscan.io/address/0xd8A05802c8e07E5Bdb8c0B2D2EEc0f6F8501291E) | 2026-11-19 |
+| storefront.filter-and-fold.graphpay.eth | `0xe6b0494363748c6d598448ff7f162e3df45f559f1b519b61f0033d706b155234` | 0 | [`0x26940565cb470e25B06F5a39cB4E3B98b3e0d03E`](https://sepolia.etherscan.io/address/0x26940565cb470e25B06F5a39cB4E3B98b3e0d03E) | 2026-12-06 |
+| risk.filter-and-fold.graphpay.eth | `0x1a4d47e0bcf2adb3dae0d743fd6bb33727045710ea2246cb15667aa805f2f4db` | 0 | [`0x26940565cb470e25B06F5a39cB4E3B98b3e0d03E`](https://sepolia.etherscan.io/address/0x26940565cb470e25B06F5a39cB4E3B98b3e0d03E) | 2026-12-06 |
+| dispatch.filter-and-fold.graphpay.eth | `0x74adaf13eb1f8721c8c493876fe5d1ea9b2447cd3fd6c820a56648362b7d3e33` | 0 | [`0x26940565cb470e25B06F5a39cB4E3B98b3e0d03E`](https://sepolia.etherscan.io/address/0x26940565cb470e25B06F5a39cB4E3B98b3e0d03E) | 2026-12-06 |
+| storefront.tawa-tangle.graphpay.eth | `0xbcddfb5f6a39de0e3675176f781b0f610877431692b3377800dfecddd2f825cf` | 0 | [`0x0674ABc7Ee4c403b599f9f114eE7fA4f2F56f26a`](https://sepolia.etherscan.io/address/0x0674ABc7Ee4c403b599f9f114eE7fA4f2F56f26a) | 2026-12-06 |
+| risk.tawa-tangle.graphpay.eth | `0x043064bfe21c5c185beeb50fbe3337629d0cf86376dc2684da13ef704c3e60cd` | 0 | [`0x0674ABc7Ee4c403b599f9f114eE7fA4f2F56f26a`](https://sepolia.etherscan.io/address/0x0674ABc7Ee4c403b599f9f114eE7fA4f2F56f26a) | 2026-12-06 |
+| dispatch.tawa-tangle.graphpay.eth | `0xcd64ce7b2f97a6c0422b2e7ccb3223f1924d88c7a9021698ef4f5f4a1dc7e904` | 0 | [`0x0674ABc7Ee4c403b599f9f114eE7fA4f2F56f26a`](https://sepolia.etherscan.io/address/0x0674ABc7Ee4c403b599f9f114eE7fA4f2F56f26a) | 2026-12-06 |
+| storefront.idli-index.graphpay.eth | `0xa27f32d4c742791d9440c316778b218c19f4a0ced2b7a7108e639a31d5f81210` | 0 | [`0xc5698726c0b67D3fBF095cE2CCa48e1e4bcdD892`](https://sepolia.etherscan.io/address/0xc5698726c0b67D3fBF095cE2CCa48e1e4bcdD892) | 2026-12-06 |
+| risk.idli-index.graphpay.eth | `0x74301cf8cad911147b1a55116df30df283f70a1bdb4cc796ed246dc77b55c369` | 0 | [`0xc5698726c0b67D3fBF095cE2CCa48e1e4bcdD892`](https://sepolia.etherscan.io/address/0xc5698726c0b67D3fBF095cE2CCa48e1e4bcdD892) | 2026-12-06 |
+| dispatch.idli-index.graphpay.eth | `0xb0eb9443e9c41ceb7add11f0e1fe6c351e5ee9e84cb7daa259c919b4ad53f140` | 0 | [`0xc5698726c0b67D3fBF095cE2CCa48e1e4bcdD892`](https://sepolia.etherscan.io/address/0xc5698726c0b67D3fBF095cE2CCa48e1e4bcdD892) | 2026-12-06 |
 
 ## Root, owners and wildcard
 
@@ -34,6 +53,9 @@ Read by `node` and `epoch` (fresh ENSv2 names are epoch 0). The wallet is the to
 | kesar-kingdom.graphpay.eth | [`0x21109528eb0Ae7c670Aa97c048670522eb5Cc711`](https://sepolia.etherscan.io/address/0x21109528eb0Ae7c670Aa97c048670522eb5Cc711) | [`0xF72e747D651cD928D01Fac7f272993156b0CF944`](https://sepolia.etherscan.io/address/0xF72e747D651cD928D01Fac7f272993156b0CF944) |
 | jamun-junction.graphpay.eth | [`0xD93d565cb6A798F71D4619Ae2A06d56A947e67F2`](https://sepolia.etherscan.io/address/0xD93d565cb6A798F71D4619Ae2A06d56A947e67F2) | [`0x21b4B28b52567229e4d7e583c895a7A31bBd19c8`](https://sepolia.etherscan.io/address/0x21b4B28b52567229e4d7e583c895a7A31bBd19c8) |
 | syrup-street.graphpay.eth | [`0xf65Bf917B4b0A79D8bad73c32ddC3Ac499ca455E`](https://sepolia.etherscan.io/address/0xf65Bf917B4b0A79D8bad73c32ddC3Ac499ca455E) | [`0xB68852099F9AB856801d28C1Cbb82d647407fA5C`](https://sepolia.etherscan.io/address/0xB68852099F9AB856801d28C1Cbb82d647407fA5C) |
+| filter-and-fold.graphpay.eth | [`0x11a90816A90AfECA6015a62f05eDa63109265e09`](https://sepolia.etherscan.io/address/0x11a90816A90AfECA6015a62f05eDa63109265e09) | [`0xEcC5040101201165323437aB43ec16BD61EdE04e`](https://sepolia.etherscan.io/address/0xEcC5040101201165323437aB43ec16BD61EdE04e) |
+| tawa-tangle.graphpay.eth | [`0x22755E497c6CCc3941c52b89Ab5B6EA055f3C76B`](https://sepolia.etherscan.io/address/0x22755E497c6CCc3941c52b89Ab5B6EA055f3C76B) | [`0x7396d11cE4F34f1740e0aB28602f130c0949e4b6`](https://sepolia.etherscan.io/address/0x7396d11cE4F34f1740e0aB28602f130c0949e4b6) |
+| idli-index.graphpay.eth | [`0x425feA911b78c026a1e8D85f3559D82779A7d50d`](https://sepolia.etherscan.io/address/0x425feA911b78c026a1e8D85f3559D82779A7d50d) | [`0xF120F34F81df81CBDFE3E73186F7f18cE4f7aeBF`](https://sepolia.etherscan.io/address/0xF120F34F81df81CBDFE3E73186F7f18cE4f7aeBF) |
 | sim.graphpay.eth (reserved wildcard) | none | [`0x5269D69477A9E17bec141065029343c0183B56b5`](https://sepolia.etherscan.io/address/0x5269D69477A9E17bec141065029343c0183B56b5) |
 
 ## Agent resolvers and registries
@@ -56,6 +78,15 @@ Read by `node` and `epoch` (fresh ENSv2 names are epoch 0). The wallet is the to
 | risk.syrup-street.graphpay.eth | [`0xf65Bf917B4b0A79D8bad73c32ddC3Ac499ca455E`](https://sepolia.etherscan.io/address/0xf65Bf917B4b0A79D8bad73c32ddC3Ac499ca455E) | [`0x0d4aD4d722c01bbB2a29177c38dB6859c51bc167`](https://sepolia.etherscan.io/address/0x0d4aD4d722c01bbB2a29177c38dB6859c51bc167) |
 | dispatch.syrup-street.graphpay.eth | [`0xf65Bf917B4b0A79D8bad73c32ddC3Ac499ca455E`](https://sepolia.etherscan.io/address/0xf65Bf917B4b0A79D8bad73c32ddC3Ac499ca455E) | [`0x8C834538A841595fd109d94fde219498C5fa3a7D`](https://sepolia.etherscan.io/address/0x8C834538A841595fd109d94fde219498C5fa3a7D) |
 | disposable-1.vitalik.graphpay.eth | [`0xc3E7e0CFFBc3fBeE3576F58c02d10BB2062a2efa`](https://sepolia.etherscan.io/address/0xc3E7e0CFFBc3fBeE3576F58c02d10BB2062a2efa) | [`0x5Ee50F111fE8E3FE4C09B89279b72991597FF497`](https://sepolia.etherscan.io/address/0x5Ee50F111fE8E3FE4C09B89279b72991597FF497) |
+| storefront.filter-and-fold.graphpay.eth | [`0x11a90816A90AfECA6015a62f05eDa63109265e09`](https://sepolia.etherscan.io/address/0x11a90816A90AfECA6015a62f05eDa63109265e09) | [`0x5F85DbFA5aE629Bf20C9dfA5FB607633AAA1069e`](https://sepolia.etherscan.io/address/0x5F85DbFA5aE629Bf20C9dfA5FB607633AAA1069e) |
+| risk.filter-and-fold.graphpay.eth | [`0x11a90816A90AfECA6015a62f05eDa63109265e09`](https://sepolia.etherscan.io/address/0x11a90816A90AfECA6015a62f05eDa63109265e09) | [`0xf721134785fAd7D716445D399e2f93CE10217c1F`](https://sepolia.etherscan.io/address/0xf721134785fAd7D716445D399e2f93CE10217c1F) |
+| dispatch.filter-and-fold.graphpay.eth | [`0x11a90816A90AfECA6015a62f05eDa63109265e09`](https://sepolia.etherscan.io/address/0x11a90816A90AfECA6015a62f05eDa63109265e09) | [`0x3D9eFE5B60E4d3B3b4000b161001D1Faaa74960f`](https://sepolia.etherscan.io/address/0x3D9eFE5B60E4d3B3b4000b161001D1Faaa74960f) |
+| storefront.tawa-tangle.graphpay.eth | [`0x22755E497c6CCc3941c52b89Ab5B6EA055f3C76B`](https://sepolia.etherscan.io/address/0x22755E497c6CCc3941c52b89Ab5B6EA055f3C76B) | [`0x3B6fD726ce138Ef52A26A1248d18773E333846E9`](https://sepolia.etherscan.io/address/0x3B6fD726ce138Ef52A26A1248d18773E333846E9) |
+| risk.tawa-tangle.graphpay.eth | [`0x22755E497c6CCc3941c52b89Ab5B6EA055f3C76B`](https://sepolia.etherscan.io/address/0x22755E497c6CCc3941c52b89Ab5B6EA055f3C76B) | [`0x82750688d86197297b99B10d77734EfB4aa63210`](https://sepolia.etherscan.io/address/0x82750688d86197297b99B10d77734EfB4aa63210) |
+| dispatch.tawa-tangle.graphpay.eth | [`0x22755E497c6CCc3941c52b89Ab5B6EA055f3C76B`](https://sepolia.etherscan.io/address/0x22755E497c6CCc3941c52b89Ab5B6EA055f3C76B) | [`0x21B48623676206E8a0bbC33aDf866BA6c71C977a`](https://sepolia.etherscan.io/address/0x21B48623676206E8a0bbC33aDf866BA6c71C977a) |
+| storefront.idli-index.graphpay.eth | [`0x425feA911b78c026a1e8D85f3559D82779A7d50d`](https://sepolia.etherscan.io/address/0x425feA911b78c026a1e8D85f3559D82779A7d50d) | [`0x63847a2533E7B68cE0922C25322c506f346530c7`](https://sepolia.etherscan.io/address/0x63847a2533E7B68cE0922C25322c506f346530c7) |
+| risk.idli-index.graphpay.eth | [`0x425feA911b78c026a1e8D85f3559D82779A7d50d`](https://sepolia.etherscan.io/address/0x425feA911b78c026a1e8D85f3559D82779A7d50d) | [`0xC034381E67E6A9F61b04EA330EF24c4C29909523`](https://sepolia.etherscan.io/address/0xC034381E67E6A9F61b04EA330EF24c4C29909523) |
+| dispatch.idli-index.graphpay.eth | [`0x425feA911b78c026a1e8D85f3559D82779A7d50d`](https://sepolia.etherscan.io/address/0x425feA911b78c026a1e8D85f3559D82779A7d50d) | [`0xef72877fAfabB634470C2DB73Fc420159c9B3B84`](https://sepolia.etherscan.io/address/0xef72877fAfabB634470C2DB73Fc420159c9B3B84) |
 
 ## Transactions
 
@@ -121,4 +152,34 @@ Read by `node` and `epoch` (fresh ENSv2 names are epoch 0). The wallet is the to
 | C3 | disposable-1.vitalik.graphpay.eth | [0xfa59a83e…](https://sepolia.etherscan.io/tx/0xfa59a83e7181d8ac7558ad5d5047a572e4a371d82cde48ddf6d222e6d337435f) | 12071841 | 495,949 |
 | D1 | sim.graphpay.eth | [0xec0b41b3…](https://sepolia.etherscan.io/tx/0xec0b41b368d92ec2862b06b6cdf7ebbdca8762b57daa41ce34e9b4ee1c796fb6) | 12071842 | 1,375,667 |
 | D2 | sim.graphpay.eth | [0x0763f4b6…](https://sepolia.etherscan.io/tx/0x0763f4b6d752f4c782baf1b0bd206b340116a96c1b7b9c85dbe38290f9eb85db) | 12071844 | 156,903 |
+| B1 | filter-and-fold.graphpay.eth | [0xab3ff9f3…](https://sepolia.etherscan.io/tx/0xab3ff9f3b7379f59095649ceb3321713e1e5cfbefbacb0c02741667c7681c573) | 12078094 | 1,017,447 |
+| B2 | filter-and-fold.graphpay.eth | [0x10550fad…](https://sepolia.etherscan.io/tx/0x10550fadbc3273acb20db1073effd53d2f57892e999c67603c735fba299a98c5) | 12078095 | 2,408,445 |
+| B3 | filter-and-fold.graphpay.eth | [0x045cbe0d…](https://sepolia.etherscan.io/tx/0x045cbe0db0fe87b168e9ba9fd22b141abd7223bad3cbf1b373aac21aca4d68c3) | 12078096 | 718,859 |
+| B4 | filter-and-fold.graphpay.eth | [0xf119d365…](https://sepolia.etherscan.io/tx/0xf119d36570051d71087475378c42a9f5b714f1ed7a27d1eacddeaf9005029136) | 12078097 | 251,695 |
+| B1 | tawa-tangle.graphpay.eth | [0xa42703f7…](https://sepolia.etherscan.io/tx/0xa42703f7e326aea2665de725019329f6f840ffe652d25a1c316ac1bd3526a0db) | 12078098 | 1,017,447 |
+| B2 | tawa-tangle.graphpay.eth | [0x175b754b…](https://sepolia.etherscan.io/tx/0x175b754b55a355c6e4de8808bf16a4e84d3026b015607fa2527bdd91bf506b6a) | 12078099 | 2,408,121 |
+| B3 | tawa-tangle.graphpay.eth | [0xb39a238a…](https://sepolia.etherscan.io/tx/0xb39a238a8c6822454dfbd6a8283a65200eb8ca1458f3f7634ebe6465253879dd) | 12078100 | 718,811 |
+| B4 | tawa-tangle.graphpay.eth | [0x27e2e035…](https://sepolia.etherscan.io/tx/0x27e2e0351bbc54fa9c02d02a59fb539680a53802b3471495aaf9a3d4c789177a) | 12078101 | 251,647 |
+| B1 | idli-index.graphpay.eth | [0x442fd77a…](https://sepolia.etherscan.io/tx/0x442fd77abd758011bff0cae55168f4327b02a32069b034dcc6c718b3384b8203) | 12078102 | 1,017,447 |
+| B2 | idli-index.graphpay.eth | [0x1e47edb7…](https://sepolia.etherscan.io/tx/0x1e47edb74da524352be1e13df46f54245d5fc352e61bba06dd641ec7b9b57dc0) | 12078103 | 2,408,049 |
+| B3 | idli-index.graphpay.eth | [0x09ef47ee…](https://sepolia.etherscan.io/tx/0x09ef47ee717814288bd428575c10fefb7056fed84e133b8ec846a4a94bac0452) | 12078104 | 718,799 |
+| B4 | idli-index.graphpay.eth | [0xbacfb4f7…](https://sepolia.etherscan.io/tx/0xbacfb4f7c893db8f9581a608cb24b01f3f34913afefd776014f0fd9376d2d182) | 12078106 | 251,635 |
+| C1 | storefront.filter-and-fold.graphpay.eth | [0xef38e47c…](https://sepolia.etherscan.io/tx/0xef38e47c5e93fec34eb9fe0cf8d59582f58811ca4eac44106d28e4193ba5ae97) | 12078110 | 2,659,782 |
+| C2 | storefront.filter-and-fold.graphpay.eth | [0x8a1997f3…](https://sepolia.etherscan.io/tx/0x8a1997f36c5c96fc1807c09f6ab793caee6a136a1c8743ded38b0c1cf66b51ec) | 12078111 | 274,614 |
+| C1 | risk.filter-and-fold.graphpay.eth | [0x4ac09ed6…](https://sepolia.etherscan.io/tx/0x4ac09ed680d8f0d0bd255d5a72a5e22d499a24c59027ab6c0bc6d3820d45555c) | 12078112 | 2,659,062 |
+| C2 | risk.filter-and-fold.graphpay.eth | [0x24d27ab0…](https://sepolia.etherscan.io/tx/0x24d27ab0e6fb3a420d9e31a76258b508119605668a039208b5e4d3e1afdd8b01) | 12078113 | 274,542 |
+| C1 | dispatch.filter-and-fold.graphpay.eth | [0xae71940b…](https://sepolia.etherscan.io/tx/0xae71940b1ea99fe1115faa7d54691fa4a7997d8b77bf9582bf700798c25187d2) | 12078114 | 2,659,542 |
+| C2 | dispatch.filter-and-fold.graphpay.eth | [0x75b465fc…](https://sepolia.etherscan.io/tx/0x75b465fc07a95b09758f820d18720ac8b767c88e64f2fd796ff385f0a02fe5e0) | 12078115 | 274,578 |
+| C1 | storefront.tawa-tangle.graphpay.eth | [0xa2590e4e…](https://sepolia.etherscan.io/tx/0xa2590e4e68b575d92ecd94b3bb9f018479aa34ec09bf19ae0e679fa587f8172a) | 12078116 | 2,659,302 |
+| C2 | storefront.tawa-tangle.graphpay.eth | [0x2897b1ee…](https://sepolia.etherscan.io/tx/0x2897b1ee9eb7638d612911e235f894522c4f5df757ebb864e363d47521e0b5f4) | 12078118 | 274,614 |
+| C1 | risk.tawa-tangle.graphpay.eth | [0x53cf5138…](https://sepolia.etherscan.io/tx/0x53cf51386f59b2e423e3969d686be21293c54813178987ea4b489f2c00a0418a) | 12078119 | 2,656,915 |
+| C2 | risk.tawa-tangle.graphpay.eth | [0x587b6606…](https://sepolia.etherscan.io/tx/0x587b6606d87bae854b090496a8367f1222737aa0811206bf6ed5898a2cfab3fd) | 12078121 | 274,542 |
+| C1 | dispatch.tawa-tangle.graphpay.eth | [0x51a3bc7b…](https://sepolia.etherscan.io/tx/0x51a3bc7b3904be4ad70bbe420ad5da157854329bc005bca60bfc74da89d607ce) | 12078122 | 2,659,062 |
+| C2 | dispatch.tawa-tangle.graphpay.eth | [0xafb6e99e…](https://sepolia.etherscan.io/tx/0xafb6e99ee2cacd0df1c5a2c96b2f0942bffc794fee0ef73c344581fa8e16b044) | 12078123 | 274,590 |
+| C1 | storefront.idli-index.graphpay.eth | [0x7380c4ea…](https://sepolia.etherscan.io/tx/0x7380c4ea6a33c1fa16eef5a79404611727643afe64a7d295713ca6589e65dc73) | 12078124 | 2,659,182 |
+| C2 | storefront.idli-index.graphpay.eth | [0x89b41447…](https://sepolia.etherscan.io/tx/0x89b414474b5727aaa380b3ca380e07cb499cff3c6118273b4c3738ce07e1aa52) | 12078126 | 274,614 |
+| C1 | risk.idli-index.graphpay.eth | [0xb8601ad2…](https://sepolia.etherscan.io/tx/0xb8601ad2572c93e1b527ec7bb10f2e054f3e9f10e2b09d1ac1e464b4f63373c1) | 12078127 | 2,656,783 |
+| C2 | risk.idli-index.graphpay.eth | [0x3720a851…](https://sepolia.etherscan.io/tx/0x3720a8510d5f99b2b0d9190cd8880680cd4dc88f0affdd731c3a2307993a8432) | 12078129 | 274,542 |
+| C1 | dispatch.idli-index.graphpay.eth | [0x65f8ec37…](https://sepolia.etherscan.io/tx/0x65f8ec37f54bb7c154ba29d4bc33c3584718105afcad2fa7d97ace05be702b39) | 12078131 | 2,658,930 |
+| C2 | dispatch.idli-index.graphpay.eth | [0xb00db438…](https://sepolia.etherscan.io/tx/0xb00db43853c55906762aade2ae69f5a650d2808d565db257ca74a18db4e9863a) | 12078134 | 274,590 |
 

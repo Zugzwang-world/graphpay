@@ -20,6 +20,17 @@ out.push(`# Namespace under ${rec.root.name} (Ethereum Sepolia, chain ${config.n
 out.push('');
 out.push(`Generated from \`${JSON_FILE}\` by \`scripts/ens/namespace-doc.mjs\`; updated ${rec.updatedAt}. Real run: ${rec.txs.length} transactions, ${gas.toLocaleString('en')} gas. Names come from the story config and addresses from \`packages/config/graphpay.config.json\`; this file records what was created.`);
 out.push('');
+if (rec.renamed?.length) {
+  out.push('## Renamed shops');
+  out.push('');
+  out.push('Each new name was built like the old one (its own registry and resolvers, the same records) and points at the wallet the old name used, so no funds moved. The old names stay registered as history; nothing on chain was changed for them.');
+  out.push('');
+  out.push('| old name (history) | new name | wallet | registered (UTC) |');
+  out.push('|---|---|---|---|');
+  const holderOf = (name) => rec.owners.find((o) => o.name === name)?.holder;
+  for (const r of rec.renamed) out.push(`| ${r.from} | ${r.to} | ${r.walletRole} ${holderOf(r.to) ? addr(holderOf(r.to)) : ''} | ${r.at.slice(0, 16).replace('T', ' ')} |`);
+  out.push('');
+}
 out.push('## Hand-off table (payments policies, Join\'s mirror)');
 out.push('');
 out.push('Read by `node` and `epoch` (fresh ENSv2 names are epoch 0). The wallet is the token holder and the coin type 2147485522 address record. Only paying agents get an AgentPolicy; the others are held by their owner.');
