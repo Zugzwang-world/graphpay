@@ -109,11 +109,12 @@ Updated 23:35 IST, Fri 6 Nov (W4 Agents, session `local_3404db4e-486c-4f86-8b3a-
 
 ## w5-ops
 
-Updated 23:35 IST, Fri 6 Nov (W5 Ops).
+Updated 23:50 IST, Fri 6 Nov (W5 Ops).
 - **The payer is ACTIVE**, with a **300 test USDT** pass for tonight (policy and ENS; #152). PAYER holds 125 test USDT.
 - **The shop (Filter & Fold) is open.**
-- **In review:** Pause and Resume per agent (payer and scout only; the others say why), and the self-healing cron: a paused agent resumes after 2 minutes, a closed shop reopens after 5. The reviewer agent runs before it merges.
-- **Next:** prove both live on production; restart the workers after W1's new labels; acceptance at 0 failures.
+- **The mirror hung at 23:29 IST** (the same silent stall as at 22:02). W5 restarted the workers at 23:43 IST from a dedicated checkout of main (`.claude/worktrees/w5-workers`, pid 79148). It caught up by 23:49 IST: 2 blocks behind, nothing new parked.
+- **In review:** Pause and Resume per agent (payer and scout only; the others say why), and the self-healing cron: a paused agent resumes after 2 minutes, a closed shop reopens after 5. The reviewer's blocking finding and nine others are fixed; it is checking the fixes.
+- **Next:** prove both live on production; restart the workers after W1's label flip; acceptance at 0 failures.
 
 ## w6-sdk
 
