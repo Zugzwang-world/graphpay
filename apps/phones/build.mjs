@@ -6,7 +6,7 @@
 //   node apps/phones/build.mjs          (apps/web's build runs it before next build)
 
 import { execFileSync } from 'node:child_process';
-import { existsSync, rmSync } from 'node:fs';
+import { cpSync, existsSync, rmSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
@@ -78,4 +78,6 @@ await build({
     rollupOptions: { input: { customer: join(here, 'customer.html'), merchant: join(here, 'merchant.html') } },
   },
 });
+// Grok's resized figurines and photos (apps/phones/grok-images.mjs), served from our own site.
+if (existsSync(join(here, 'static/grok'))) cpSync(join(here, 'static/grok'), join(outDir, 'grok'), { recursive: true });
 console.log(`apps/phones: built the customer and merchant phones into ${outDir.slice(repo.length + 1)}/`);

@@ -4,6 +4,7 @@ import { ArrowRight, RotateCcw, Send } from 'lucide-react';
 import { AgentAvatar } from '@/components/shared/AgentAvatar';
 import { IosTextInput } from '@/components/shared/IosKeyboard';
 import { Mascot } from '@/components/shared/Mascot';
+import { Photo, dishPhoto, shopPhoto } from '@/components/shared/Photo';
 import { ExplorerLink, MoneyAmount, StatusChip } from '@/components/shared/Primitives';
 import { InlineBanner, Skeleton } from '@/components/shared/States';
 import { useAppNavigation } from '@/components/shared/AppShell';
@@ -56,7 +57,7 @@ function ThreadRow({ item, onQuote }: { item: ThreadItem; onQuote: () => void })
   if (item.kind === 'agent') {
     const agent = snapshot?.agents.find((entry) => entry.ref.ens === item.agent.ens);
     const name = agent?.label ?? agentByEns(item.agent.ens)?.label ?? item.agent.role;
-    const activity = item.status === 'thinking' ? 'thinking' : item.status === 'refused' ? 'refused' : item.status === 'paid' ? 'paid' : item.status === 'checked' ? 'success' : 'idle';
+    const activity = item.status === 'thinking' ? 'thinking' : item.status === 'refused' ? 'refused' : item.status === 'paid' ? 'paid' : item.status === 'checked' ? 'success' : 'talking';
     return <div className="thread-agent-enter flex items-start gap-2">
       <AgentAvatar agent={item.agent} label={name} status={agent?.status} activity={activity} size={36} />
       <div className="min-w-0 max-w-[82%] flex-1"><div className="mb-1 flex flex-wrap items-center gap-1"><span title={item.agent.ens} className="text-caption font-bold">{name}</span><StatusChip status={item.status} /></div>
@@ -72,8 +73,9 @@ function ThreadRow({ item, onQuote }: { item: ThreadItem; onQuote: () => void })
 
 function ShopChoiceCard({ choice }: { choice: ShopChoice }) {
   return <article className={clsx('rounded-card border border-line border-l-4 bg-surface p-3 shadow-card', choice.verdict === 'chosen' ? 'border-l-ok' : choice.verdict === 'rejected' ? 'border-l-bad' : 'border-l-line')}>
+    <Photo src={shopPhoto(choice.shop.ens)} className="-mx-3 -mt-3 mb-2 h-16 w-[calc(100%+1.5rem)] rounded-t-card object-cover" />
     <div className="flex items-start justify-between gap-2"><h3 className="font-heading text-section font-bold">{choice.shop.name}</h3>{choice.verdict !== 'considered' && <StatusChip status={choice.verdict} />}</div>
-    <div className="mt-1"><MoneyAmount amount={choice.price} /></div>
+    <div className="mt-1 flex items-center gap-2"><Photo src={dishPhoto(choice.shop.ens)} className="h-12 w-12 shrink-0 rounded-input object-cover" /><MoneyAmount amount={choice.price} /></div>
     <p className="mt-2 text-caption text-muted">{fill(copy.customer.desk.shopFacts, { distance: choice.distanceKm, paid: choice.paidOrders.toLocaleString('en-IN'), refunds: choice.refundRate, repeat: choice.repeatBuyers.toLocaleString('en-IN') })}</p>
     {choice.reason && <p className="mt-2 text-caption font-bold text-bad">{fill(copy.customer.desk.rejectedReason, { reason: choice.reason })}</p>}
   </article>;

@@ -6,6 +6,7 @@ import { useAppNavigation } from '@/components/shared/AppShell';
 import { usePhoneLayer } from '@/components/stage/PhoneFrame';
 import { Countdown, ExplorerLink, MoneyAmount, ReceiptCard, StatusChip } from '@/components/shared/Primitives';
 import { InlineBanner, Skeleton } from '@/components/shared/States';
+import { Photo, dishPhoto } from '@/components/shared/Photo';
 import { useDemo } from '@/demo/DemoProvider';
 import { story } from '@/data/story';
 import { copy, fill } from '@/copy';
@@ -43,7 +44,7 @@ export function CustomerQuoteSheet() {
       <div className="min-h-0 flex-1 overflow-y-auto p-4 pb-8">
         <div className="mb-4 flex items-center justify-between gap-2 text-caption"><StatusChip status={phase === 'paid' ? 'paid' : phase === 'failed' ? 'refused' : 'quoted'} />{phase !== 'paid' && phase !== 'failed' && <span className="text-muted">{expired ? copy.customer.quote.expiredRequoting : <>{copy.customer.quote.validFor.replace('{time}', '')}<Countdown until={event.validUntil} onExpire={() => setExpired(true)} /></>}</span>}</div>
         {expired && phase === 'quoted' ? <div role="status" className="flex flex-col gap-3 rounded-card border border-info bg-surface p-4"><p className="text-body text-info">{copy.customer.quote.expiredRequoting}</p><Skeleton className="h-20 w-full" /></div> : <article className="rounded-card border border-info bg-surface p-4 shadow-card">
-          <div className="mb-3 flex items-center gap-2">{storefront && <AgentAvatar agent={storefront.ref} label={storefront.label} size={36} />}<div><p className="font-heading text-section font-bold">{event.shop.name}</p><p className="text-caption text-muted">{storefront?.label}</p></div></div>
+          <div className="mb-3 flex items-center gap-2">{storefront && <AgentAvatar agent={storefront.ref} label={storefront.label} size={36} />}<div><Photo src={dishPhoto(event.shop.ens)} className="h-14 w-14 shrink-0 rounded-input object-cover" /><p className="font-heading text-section font-bold">{event.shop.name}</p><p className="text-caption text-muted">{storefront?.label}</p></div></div>
           <div className="flex flex-col gap-2 border-t border-line py-3 text-body">{event.items.map((item, index) => <div key={`${item.name}-${index}`} className="flex justify-between gap-2"><span>{item.name} × {item.qty}</span><MoneyAmount amount={item.price} /></div>)}</div>
           <div className="flex items-center justify-between border-t border-line pt-3"><span className="text-body font-bold">{copy.customer.quote.total}</span><MoneyAmount amount={event.total} large /></div>
           <p className="mt-3 break-all text-caption text-muted">{fill(copy.customer.quote.payTo, { ens: event.shop.ens })}</p>

@@ -229,12 +229,12 @@ export function createMockShopSurface({ cast, shop, quotes, clock = Date.now, be
     paid: [],
     async catalog() {
       return {
-        items: [{ sku: product.sku, item: product.name, priceMicro: product.priceMicro, quantity: product.quantity, stock: 100, etaMinutes: shop.scenario.etaMinutes, distanceKm: shop.scenario.distanceKm }],
+        items: [{ sku: product.sku, item: product.short ?? product.name, priceMicro: product.priceMicro, quantity: product.quantity, stock: 100, etaMinutes: shop.scenario.etaMinutes, distanceKm: shop.scenario.distanceKm }],
         synthetic: true,
       };
     },
     async quote({ item, quantity, buyer, payer, wallet }) {
-      if (item !== product.name) throw new Error('MOCK shop does not sell that item');
+      if (item !== (product.short ?? product.name)) throw new Error('MOCK shop does not sell that item');
       const priceMicro = (BigInt(product.priceMicro) * BigInt(quantity) + BigInt(product.quantity) - 1n) / BigInt(product.quantity);
       const exp = Math.floor(clock() / 1000) + 600;
       const orderId = `0x${hex(`order:${shop.ens}|${buyer}|${payer}|${wallet}|${item}|${quantity}|${exp}|${orders.size}`)}`;

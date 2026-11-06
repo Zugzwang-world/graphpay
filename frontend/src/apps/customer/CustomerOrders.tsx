@@ -5,6 +5,7 @@ import { useAppNavigation } from '@/components/shared/AppShell';
 import { ExplorerLink, MoneyAmount, StatusChip } from '@/components/shared/Primitives';
 import { EmptyState, InlineBanner } from '@/components/shared/States';
 import { StatusTracker } from '@/components/shared/StatusTracker';
+import { Photo, dishPhoto } from '@/components/shared/Photo';
 import { useDemo } from '@/demo/DemoProvider';
 import { canRequestRefund, isFullyRefunded } from '@/demo/rules';
 import type { Order, Refund } from '@/demo/contract';
@@ -42,7 +43,8 @@ export function CustomerOrders() {
   return <div className="flex flex-col gap-3 p-4 pb-8">
     <h2 className="font-heading text-section font-bold">{copy.customer.orders.title}</h2>
     {orders.length === 0 ? <div className="flex flex-col items-center gap-3 rounded-card border border-line bg-surface p-6 text-center shadow-card">{concierge && <AgentAvatar agent={concierge.ref} label={concierge.label} activity="welcoming" size={52} />}<EmptyState title={emptyLine} action={copy.customer.orders.askAgents} onAction={() => navigate('desk')} /></div> : orders.map((order) => <button key={order.id} type="button" onClick={() => selectOrder(order.id)} className="flex min-h-20 items-center justify-between gap-3 rounded-card border border-line bg-surface p-4 text-left shadow-card">
-      <span className="min-w-0"><strong className="block truncate font-heading text-section">{order.items.map((item) => `${item.name} × ${item.qty}`).join(', ')}</strong><span className="block truncate text-caption text-muted">{order.shop.name} · {formatDate(order.createdAt)}</span><span className="mt-2 inline-block"><StatusChip status={isFullyRefunded(order) ? 'refunded' : order.status} /></span></span>
+      <Photo src={dishPhoto(order.shop.ens)} className="h-14 w-14 shrink-0 rounded-input object-cover" />
+      <span className="min-w-0 flex-1"><strong className="block truncate font-heading text-section">{order.items.map((item) => `${item.name} × ${item.qty}`).join(', ')}</strong><span className="block truncate text-caption text-muted">{order.shop.name} · {formatDate(order.createdAt)}</span><span className="mt-2 inline-block"><StatusChip status={isFullyRefunded(order) ? 'refunded' : order.status} /></span></span>
       <span className="flex shrink-0 items-center gap-1"><MoneyAmount amount={order.total} /><ArrowRight size={16} className="text-muted" aria-hidden /></span>
     </button>)}
   </div>;
@@ -55,7 +57,7 @@ function OrderDetail({ order, onBack, onRefund, onRenewal, onReorder, reordering
   const refundReason = eligibility.ok ? null : eligibility.why === 'not_paid' ? copy.customer.orders.refundNotPaid : eligibility.why === 'fully_refunded' ? copy.customer.orders.refundFull : copy.customer.orders.refundPending;
   return <div className="flex flex-col gap-4 p-4 pb-8">
     <button type="button" onClick={onBack} className="inline-flex min-h-11 items-center gap-2 self-start rounded-full text-body font-bold text-brand"><ArrowLeft size={17} aria-hidden />{copy.customer.orders.title}</button>
-    <article className="rounded-card border border-line bg-surface p-4 shadow-card"><h2 className="font-heading text-section font-bold">{fill(copy.customer.orders.detailTitle, { number: order.number })}</h2><p className="mt-2 text-body font-bold">{order.items.map((item) => `${item.name} × ${item.qty}`).join(', ')}</p><p className="text-caption text-muted">{order.shop.name} · {order.shop.ens}</p><p className="mt-2 text-caption text-muted">{formatDate(order.createdAt)}</p><div className="mt-3"><MoneyAmount amount={order.total} large /></div><div className="mt-3 flex flex-wrap gap-2">{order.links.map((link, index) => <ExplorerLink key={`${link.url}-${index}`} link={link} />)}</div></article>
+    <article className="rounded-card border border-line bg-surface p-4 shadow-card"><h2 className="font-heading text-section font-bold">{fill(copy.customer.orders.detailTitle, { number: order.number })}</h2><p className="mt-2 text-body font-bold">{order.items.map((item) => `${item.name} × ${item.qty}`).join(', ')}</p><p className="text-caption text-muted">{order.shop.name} · {order.shop.ens}</p><Photo src={dishPhoto(order.shop.ens)} className="mt-2 h-24 w-full rounded-input object-cover" /><p className="mt-2 text-caption text-muted">{formatDate(order.createdAt)}</p><div className="mt-3"><MoneyAmount amount={order.total} large /></div><div className="mt-3 flex flex-wrap gap-2">{order.links.map((link, index) => <ExplorerLink key={`${link.url}-${index}`} link={link} />)}</div></article>
     <StatusTracker label={fill(copy.customer.orders.detailTitle, { number: order.number })} steps={orderSteps.map((name, index) => ({ id: name, label: copy.status[name], state: index < step || order.status === 'delivered' ? 'done' as const : index === step ? 'current' as const : 'todo' as const }))} />
     {refund && <RefundProgress refund={refund} shop={order.shop.name} />}
     {error && <InlineBanner tone="bad"><span>{error}</span><button type="button" onClick={onReorder} className="ml-2 inline-flex items-center gap-1 font-bold underline"><RotateCcw size={13} aria-hidden />{copy.common.retry}</button></InlineBanner>}

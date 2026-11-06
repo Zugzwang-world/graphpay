@@ -23,9 +23,10 @@ export function priceOf(product, quantity) {
   return ceilDiv(BigInt(product.priceMicro) * BigInt(quantity), BigInt(product.quantity));
 }
 
-// The item by its sku or its name (exact spelling).
+// The item by its sku, its name or its short name (exact spelling). The short name is what the agents
+// and the quote call the item, so a shop can show a longer name on its menu.
 export function productOf(shop, item) {
-  return shop.products.find((p) => p.sku === item || p.name === item) ?? null;
+  return shop.products.find((p) => p.sku === item || p.name === item || (p.short !== undefined && p.short === item)) ?? null;
 }
 
 export function catalogOf(shop) {
@@ -36,7 +37,8 @@ export function catalogOf(shop) {
       const unit = BigInt(p.priceMicro) % BigInt(p.quantity) === 0n ? Number(BigInt(p.priceMicro) / BigInt(p.quantity)) : undefined;
       return {
         sku: p.sku,
-        item: p.name,
+        item: p.short ?? p.name,
+        name: p.name,
         unit: p.unit,
         quantity: p.quantity,
         priceMicro: p.priceMicro,
