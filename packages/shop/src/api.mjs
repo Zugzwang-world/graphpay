@@ -6,8 +6,9 @@
 //   POST …/orders/:parentId/reorder          the same, for a re-order of a paid order
 // Without PAYMENT-SIGNATURE a pay call answers 402 with exactly one `accepts` entry (after writing
 // the quote to Arkiv when it carries a requestId, M7 amendment §5); with it, the facilitator
-// verifies and settles. alreadyPaid comes from the chain; a facilitator outage is a 502 (a retry
-// is safe: the order id is the Permit2 nonce, so it can never be paid twice).
+// verifies and settles. alreadyPaid comes from the chain. A verify outage is a 502 (retry is safe);
+// a settle outage is a 502 only when the facilitator refused before any send, else a 504 pending
+// (the payment may have gone out; the order id is the Permit2 nonce, so it can never pay twice).
 
 import { createHash, timingSafeEqual } from 'node:crypto';
 import { isAddress, isAddressEqual } from 'viem';
@@ -228,7 +229,7 @@ export function shopHandler(deps) {
       verdict = await facilitator.verify(paymentPayload, requirement);
     } catch (e) {
       log(`shop: facilitator verify unavailable (${errorNames(e)})`);
-      return json(502, { error: 'facilitator unavailable; retry is safe' });
+      return json(502, { error: 'facilitator verify unavailable; retry is safe' }); // nothing can have been sent
     }
     if (!verdict.isValid) {
       const s = { success: false, errorReason: verdict.invalidReason ?? 'invalid', transaction: '', network, payer: verdict.payer };
@@ -239,7 +240,13 @@ export function shopHandler(deps) {
       settled = await facilitator.settle(paymentPayload, requirement);
     } catch (e) {
       log(`shop: facilitator settle unavailable (${errorNames(e)})`);
-      return json(502, { error: 'facilitator unavailable; retry is safe' });
+      // Only the facilitator's own refusals before any send (a full queue, a rate limit) are safe to
+      // retry. Any other failure may come after the relayer broadcast (a send error, a timeout past
+      // the function's limit): the payment is unknown, and the payer keeps it unsettled (G16).
+      if (e?.name === 'SettleError' && (e.errorReason === 'busy' || e.errorReason === 'rate_limited')) {
+        return json(502, { error: 'facilitator busy; retry is safe', reason: e.errorReason });
+      }
+      return json(504, { status: 'pending', reason: 'settle_unknown', orderId: order.orderId });
     }
     if (settled.success) {
       let delivery = 'not_configured';

@@ -765,3 +765,47 @@ test('hex fields in either case are the same order', async () => {
 });
 
 export { requirementFor };
+
+test('viemChain.sendSettle: signs first, hands the hash over before the broadcast, adopts it when the call errors', async () => {
+  const { viemChain } = await import('../src/chain.mjs');
+  const { keccak256 } = await import('viem');
+  const signedTx = '0x02f8aa';
+  const make = ({ sendFails, known }) => {
+    const walletClient = {
+      prepareTransactionRequest: async (r) => r,
+      signTransaction: async () => signedTx,
+      sendRawTransaction: async () => {
+        if (sendFails) throw new Error('already known');
+        return keccak256(signedTx);
+      },
+    };
+    const publicClient = { getChainId: async () => 1874, getTransaction: async () => (known ? { hash: keccak256(signedTx) } : Promise.reject(new Error('not found'))) };
+    return viemChain({ publicClient, walletClient, account: { address: MERCHANT }, checkout: MERCHANT, token: TOKEN, permit2: PERMIT2, chain: { id: 1874 } });
+  };
+  const order = makeOrder();
+  const args = [order, keccak256('0x01'), { permitted: { token: TOKEN.address, amount: order.amountMicro }, nonce: 1n, deadline: order.deadline }, MERCHANT, '0x', '0x'];
+  const seen = [];
+  assert.equal(await make({ sendFails: false }).sendSettle(args, 400_000n, { onSigned: (h) => seen.push(h) }), keccak256(signedTx));
+  assert.deepEqual(seen, [keccak256(signedTx)], 'the hash is known before the broadcast');
+  assert.equal(await make({ sendFails: true, known: true }).sendSettle(args, 400_000n), keccak256(signedTx), 'a broadcast the node holds is adopted');
+  await assert.rejects(make({ sendFails: true, known: false }).sendSettle(args, 400_000n), /already known/);
+});
+
+test('a send that errors after signing keeps its hash in flight: a retry waits on it and never sends again', async () => {
+  const s = await setup();
+  const hash = `0x${'e'.repeat(64)}`;
+  let sends = 0;
+  s.chain.sendSettle = async (_args, _gas, { onSigned } = {}) => {
+    sends += 1;
+    onSigned?.(hash);
+    throw new Error('the call errored after the node took it');
+  };
+  await assert.rejects(s.f.settle(s.paymentPayload, s.requirement));
+  const waited = [];
+  s.chain.waitReceipt = async (h) => (waited.push(h), s.chain.receipt);
+  const again = await s.f.settle(s.paymentPayload, s.requirement);
+  assert.equal(again.success, true);
+  assert.equal(again.transaction, hash);
+  assert.deepEqual(waited, [hash]);
+  assert.equal(sends, 1);
+});

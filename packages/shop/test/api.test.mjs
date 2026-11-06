@@ -322,7 +322,7 @@ async function signedFor(w, q) {
   return http.encodePaymentSignatureHeader(await client.createPaymentPayload(pr));
 }
 
-test('a facilitator outage is 502 (retry is safe); refusals and failures are 402 with PAYMENT-RESPONSE', async () => {
+test('a verify outage is 502 (retry is safe); a settle failure is 502 only when refused before any send, else 504 pending; refusals and failures are 402', async () => {
   const base = world();
   const q = await quoteFor(base);
   const signature = await signedFor(base, q);
@@ -330,9 +330,22 @@ test('a facilitator outage is 502 (retry is safe); refusals and failures are 402
   const down = world({ facilitator: { verify: async () => { throw new Error('fetch failed https://facilitator/KEY'); }, settle: async () => ({}) } });
   const r502 = await post(down.handle, q.payUrl, q.terms, { signature });
   assert.equal(r502.status, 502);
+  assert.deepEqual(await r502.json(), { error: 'facilitator verify unavailable; retry is safe' });
   assert.deepEqual(down.lines, ['shop: facilitator verify unavailable (Error)']);
+  // A settle that throws after the relayer may have broadcast: unknown, never "retry is safe".
   const settleDown = world({ facilitator: { verify: async () => ({ isValid: true }), settle: async () => { throw new TypeError('x'); } } });
-  assert.equal((await post(settleDown.handle, q.payUrl, q.terms, { signature })).status, 502);
+  const unknown = await post(settleDown.handle, q.payUrl, q.terms, { signature });
+  assert.equal(unknown.status, 504);
+  assert.deepEqual(await unknown.json(), { status: 'pending', reason: 'settle_unknown', orderId: q.orderId });
+  // The facilitator's own refusals before any send (x402's SettleError from a 429 or 503) stay retry-safe.
+  for (const reason of ['busy', 'rate_limited']) {
+    const full = world({ facilitator: { verify: async () => ({ isValid: true }), settle: async () => { throw Object.assign(new Error(reason), { name: 'SettleError', errorReason: reason }); } } });
+    const res = await post(full.handle, q.payUrl, q.terms, { signature });
+    assert.equal(res.status, 502);
+    assert.deepEqual(await res.json(), { error: 'facilitator busy; retry is safe', reason });
+  }
+  const otherSettleError = world({ facilitator: { verify: async () => ({ isValid: true }), settle: async () => { throw Object.assign(new Error('x'), { name: 'SettleError', errorReason: 'unexpected' }); } } });
+  assert.equal((await post(otherSettleError.handle, q.payUrl, q.terms, { signature })).status, 504);
 
   const refused = world({ facilitator: { verify: async () => ({ isValid: false, invalidReason: 'CAP_EXCEEDED' }), settle: async () => assert.fail('no settle after a refusal') } });
   const r = await post(refused.handle, q.payUrl, q.terms, { signature });

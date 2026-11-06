@@ -87,11 +87,12 @@ export function facilitatorHandler({ facilitator, scheme, authToken, ready, heal
       }
       if (request.method !== 'POST' || (name !== 'verify' && name !== 'settle')) return json(404, { error: 'not found' });
       if (!bearerOk(request, authToken)) return json(401, { error: 'unauthorized' });
-      if (!bucket.take('all')) return json(429, { error: 'rate limited' });
+      // Refusals before any send carry x402's settle shape, so a client sees them as such.
+      if (!bucket.take('all')) return json(429, { error: 'rate limited', success: false, errorReason: 'rate_limited', transaction: '', network: '' });
       try {
         await ready();
       } catch {
-        return json(503, { error: 'starting' });
+        return json(503, { error: 'starting', success: false, errorReason: 'busy', transaction: '', network: '' });
       }
       const body = await readJson(request);
       if (body.error) return json(body.error, { error: body.error === 413 ? 'body too large' : 'bad request' });
