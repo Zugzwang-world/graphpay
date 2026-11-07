@@ -29,7 +29,7 @@ Updated 07:32 IST, Sat 7 Nov. **The backend is closed.** Only the submission (09
 - **The payer** is ACTIVE: 57.6 of its 300 pass spent today, and PAYER holds 91.4 test USDT (refilled from the shop's takings at 06:11 IST).
 - **Filter & Fold** is open. Production is the newest build of main (#224).
 - **The Arkiv key:** a teammate's key works. It is in `.env` and in Vercel Production, the site was redeployed on the newest build of main, and the workers restarted on it. The mirror polls on the keyed endpoint, 2 blocks behind.
-- **A bug found at 07:17 IST, fix held for your go:** the customer state read the last 30 days of payments with a limit of 50, and the graph lists them in no time order. With 55 payments, the newest was dropped: the phone shows the 06:29 order, and the stage's refund request and re-order answer NOT_THIS_ORDER on any newer one. The fix reads today's payments first, with the graph's full list of 100.
+- **A bug found at 07:17 IST, fix held for your go:** the customer state read the last 30 days of payments with a limit of 50, and the graph lists them in no time order. With 55 payments, the newest was dropped: the phone shows the 06:29 order, and the stage's refund request and re-order answer NOT_THIS_ORDER on any newer one. The fix reads today's payments, then yesterday's, then the last 30 days; it asks for the engine's whole list (500) and refuses a cut one. The reviewer found nothing blocking.
 - **Held since your "merge nothing else":** #220 (a visitor refunds an order once) and #221 (ADR-0082, the stage's scene 7 shows the lab's benchmark).
 
 **Founder now** (OPEN):

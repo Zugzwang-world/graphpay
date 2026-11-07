@@ -9,6 +9,7 @@ import { arkivEngine } from '../app/api/graphql/arkiv.server.ts';
 import { rpcCall } from './chain.server.ts';
 import type { CustomerState, SubscriptionSummary } from './contracts.ts';
 import { agentStatusOf, newestPayment, orderSummary, policyOf, type EnsStatus, type OrderEdge, type Policy } from './customer-state.ts';
+import { LIST_CAP, type GraphqlRunner } from './merchant-feed.ts';
 import { checkoutAddress, siteModel } from './site.server.ts';
 import { payerSubscription } from './subscription-live.server.ts';
 
@@ -40,23 +41,32 @@ async function ethCall<T>(functionName: 'policies' | 'spentToday', node: `0x${st
   return decodeFunctionResult({ abi: checkoutAbi, functionName, data: result as `0x${string}` }) as T;
 }
 
+// Lists up to the engine's row cap, as the merchant feed reads them (runGraphql's own default is 100).
+const run: GraphqlRunner = async (query, variables) => runGraphql({ engine: await arkivEngine(), query, variables, listCap: LIST_CAP });
+
 const graphql = async <T>(query: string, variables: Record<string, unknown>): Promise<T> => {
-  const answer = await runGraphql({ engine: await arkivEngine(), query, variables });
+  const answer = await run(query, variables);
   if (answer.errors?.length || answer.data === undefined) throw new Error('the graph did not answer');
   return answer.data as T;
 };
 
 const EDGE = 'kind amountMicro ts ref orderId to { ens }';
 
+// The engine returns a node's oldest edges first and cuts the rest at the list cap without a flag,
+// so a full list is refused, never read as complete: the payment it cut may be the newest.
+export const paymentsFrom = (runner: GraphqlRunner): Sources['payments'] => async (name, sinceDay) => {
+  const answer = await runner(`query($ens: String!, $since: Int!, $limit: Int!) { node(ens: $ens) { out(kind: "pay", sinceDay: $since, limit: $limit) { ${EDGE} } } }`, { ens: name, since: sinceDay, limit: LIST_CAP });
+  if (answer.errors?.length || answer.data === undefined) throw new Error('the graph did not answer');
+  const out = (answer.data as { node: { out: OrderEdge[] } | null }).node?.out ?? [];
+  if (out.length >= LIST_CAP || answer.extensions?.arkiv?.truncated === true) throw new Error('the graph cut the payments list');
+  return out;
+};
+
 export const liveSources: Sources = {
   ensStatus: async (name) => (await (await ensGate()).ensCheck(name)).status,
   policy: async (node) => policyOf(await ethCall<Parameters<typeof policyOf>[0]>('policies', node)),
   spentToday: (node) => ethCall<bigint>('spentToday', node),
-  // 100 is the graph's list cap. It lists edges in no time order, so the newest needs every row.
-  payments: async (name, sinceDay) => {
-    const data = await graphql<{ node: { out: OrderEdge[] } | null }>(`query($ens: String!, $since: Int!) { node(ens: $ens) { out(kind: "pay", sinceDay: $since, limit: 100) { ${EDGE} } } }`, { ens: name, since: sinceDay });
-    return data.node?.out ?? [];
-  },
+  payments: paymentsFrom(run),
   trail: async (orderId) => (await graphql<{ order: OrderEdge[] }>(`query($id: String!) { order(id: $id) { ${EDGE} } }`, { id: orderId })).order,
   // Bounded: a slow chain read is no subscription on this answer, never a slow customer state.
   subscription: () => Promise.race([payerSubscription(), new Promise<null>((resolve) => setTimeout(() => resolve(null), 8_000))]),
@@ -66,20 +76,26 @@ export async function readCustomerState(sources: Sources = liveSources, nowS = M
   const agent = siteModel().payer.ens;
   const node = namehash(agent) as `0x${string}`;
   const today = Math.floor(nowS / 86_400);
+  // The newest payment with an order id: today's first, then from yesterday (the day boundary), then
+  // the last 30 days. A 30-day read capped at 50 dropped the newest (07:17 IST Sat 7 Nov), so the phone,
+  // the refund request and the re-order held on to an older order.
+  const newest = async (): Promise<OrderEdge | null> => {
+    for (const since of [today, today - 1, today - 30]) {
+      const payment = newestPayment(await sources.payments(agent, since));
+      if (payment) return payment;
+    }
+    return null;
+  };
   // Independent sources: all are awaited, and any one failing fails the whole answer, so the
   // phone never shows a half-known agent as active.
   // The subscription is the one source that may fail on its own: it never decides the agent's status.
-  const [ens, policy, spent, payments, subscription] = await Promise.all([
+  const [ens, policy, spent, payment, subscription] = await Promise.all([
     sources.ensStatus(agent),
     sources.policy(node),
     sources.spentToday(node),
-    sources.payments(agent, today),
+    newest(),
     sources.subscription().catch(() => null),
   ]);
-  // A 30-day read outgrew the list and dropped the newest payment: the phone, the re-order and the
-  // refund request held on to an older order (07:17 IST Sat 7 Nov, 55 payments against a limit of 50).
-  // Today's payments come first; the last 30 days only when today has none.
-  const payment = newestPayment(payments) ?? newestPayment(await sources.payments(agent, today - 30));
   const lastOrder = payment?.orderId ? orderSummary(payment, await sources.trail(payment.orderId)) : null;
   return {
     agent: { ens: agent, status: agentStatusOf(ens, policy, nowS), epoch: policy?.epoch ?? 0 },
