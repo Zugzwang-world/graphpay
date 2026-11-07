@@ -42,7 +42,9 @@ async function ethCall<T>(functionName: 'policies' | 'spentToday', node: `0x${st
 }
 
 // Lists up to the engine's row cap, as the merchant feed reads them (runGraphql's own default is 100).
-const run: GraphqlRunner = async (query, variables) => runGraphql({ engine: await arkivEngine(), query, variables, listCap: LIST_CAP });
+export const runnerFor = (engine: typeof arkivEngine, writers?: Parameters<typeof runGraphql>[0]['writers']): GraphqlRunner => async (query, variables) =>
+  runGraphql({ engine: await engine(), query, variables, listCap: LIST_CAP, writers });
+const run = runnerFor(arkivEngine);
 
 const graphql = async <T>(query: string, variables: Record<string, unknown>): Promise<T> => {
   const answer = await run(query, variables);

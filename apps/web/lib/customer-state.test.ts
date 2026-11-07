@@ -1,7 +1,9 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
+import { generatePrivateKey } from 'viem/accounts';
+import { connectArkiv, createGraphEngine, createLedger, newSim, writerAddresses } from '@graphpay/money-graph';
 import { agentStatusOf, newestPayment, orderStatusOf, orderSummary, policyOf, type OrderEdge, type Policy } from './customer-state.ts';
-import { paymentsFrom, readCustomerState, type Sources } from './customer-state.server.ts';
+import { paymentsFrom, readCustomerState, runnerFor, type Sources } from './customer-state.server.ts';
 import { LIST_CAP, type GraphqlRunner } from './merchant-feed.ts';
 import { siteModel } from './site.server.ts';
 
@@ -92,17 +94,37 @@ test('a wider read of the payments that fails fails the whole answer, as any sou
 
 // The engine returns a node's oldest edges first and cuts the rest at the list cap without a flag
 // (what kept the 06:29 IST order as the last one at 07:17 IST, Sat 7 Nov). This double does the same.
-const cutting = (total: number): GraphqlRunner => async (_query, variables) => {
+const cutting = (total: number, sinceDay = 7): GraphqlRunner => async (_query, variables) => {
+  assert.equal(variables.since, sinceDay, 'the read asks for the day it was given');
   const rows = Array.from({ length: total }, (_, n) => pay(NOW - (total - n) * 60, `0x${n.toString(16).padStart(4, '0')}`));
   return { data: { node: { out: rows.slice(0, Number(variables.limit)) } } };
 };
 
 test('the payments read asks for the whole list and refuses a cut one', async () => {
-  const edges = await paymentsFrom(cutting(55))('payer.sim.example.eth', 0);
+  const edges = await paymentsFrom(cutting(55))('payer.sim.example.eth', 7);
   assert.equal(edges.length, 55);
   assert.equal(newestPayment(edges)?.orderId, '0x0036', 'the newest of 55 is in the list');
-  await assert.rejects(paymentsFrom(cutting(LIST_CAP + 1))('payer.sim.example.eth', 0), /cut/);
-  await assert.rejects(paymentsFrom(async () => ({ data: { node: { out: [] } }, extensions: { arkiv: { truncated: true } } }))('payer.sim.example.eth', 0), /cut/);
+  await assert.rejects(paymentsFrom(cutting(LIST_CAP + 1))('payer.sim.example.eth', 7), /cut/);
+  await assert.rejects(paymentsFrom(async () => ({ data: { node: { out: [] } }, extensions: { arkiv: { truncated: true } } }))('payer.sim.example.eth', 7), /cut/);
+});
+
+test('the live runner lists past runGraphql\'s default of 100: 150 payments in a day come back whole from the real engine', async () => {
+  const sim = newSim();
+  const writer = await connectArkiv({ backend: 'sim', sim, role: 'W_LEDGER', privateKey: generatePrivateKey(), recoveryMs: 300, pollMs: 20 });
+  const ledger = createLedger({ arkiv: writer, stream: 'whitechain' });
+  await ledger.load();
+  const buyer = { ens: 'payer.sim.example.eth', epoch: 0, kind: 'agent', columns: { owner_node: undefined } };
+  const shop = { ens: 'shop.sim.example.eth', epoch: 0, kind: 'shop' };
+  const today = Math.floor(NOW / 86_400);
+  for (let n = 0; n < 150; n++) {
+    const ts = NOW - 150 + n;
+    await ledger.apply({ ref: `1874:0x${n.toString(16).padStart(64, '0')}:0`, kind: 'pay', from: buyer, to: shop, amountMicro: 600_000n, ts, orderId: `0x${n.toString(16).padStart(4, '0')}`, day: Math.floor(ts / 86_400), position: { block: BigInt(100 + n), logIndex: 0 } });
+  }
+  const engine = createGraphEngine(await connectArkiv({ backend: 'sim', sim }));
+  const run = runnerFor(async () => engine, { ...writerAddresses(), W_LEDGER: writer.owner as `0x${string}` });
+  const edges = await paymentsFrom(run)('payer.sim.example.eth', today);
+  assert.equal(edges.length, 150);
+  assert.equal(newestPayment(edges)?.orderId, '0x0095');
 });
 
 test('a paused name is Paused on the phone; no payments is no last order', async () => {
