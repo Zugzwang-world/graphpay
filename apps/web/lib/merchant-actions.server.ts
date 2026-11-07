@@ -197,7 +197,7 @@ export function visitorGuard(order: OrderState, orderId: string, { open = public
   lastAction.set(orderId, now);
 }
 
-// An order the hosted shop already marked delivered (its own dispatch lands about 3 s after payment):
+// An order the hosted shop already marked delivered (its own dispatch lands about 5 s after payment):
 // nothing is sent; the delivery's own transaction comes back, or null when it is older than the blocks read.
 export interface AlreadyDelivered {
   transaction: string | null;
@@ -255,7 +255,13 @@ export function markDispatched(orderId: string, chain?: Promise<Chain>): Promise
       if (error instanceof Refusal || error instanceof ChainRefused) throw error;
       const until = Date.now() + RACE.waitMs;
       for (;;) {
-        if ((await readOrder(c, orderId).catch(() => null))?.status === 'DELIVERED') return already();
+        if ((await readOrder(c, orderId).catch(() => null))?.status === 'DELIVERED') {
+          // The lock this failed send set (in the queue, after settled(): no other send of this order ran)
+          // is lifted: the order is delivered and a stray markDelivered moves no money, so the refund that
+          // follows is not held as STILL_PENDING.
+          unsure.delete(orderId);
+          return already();
+        }
         if (Date.now() >= until) throw error;
         await new Promise((r) => setTimeout(r, 1_000));
       }

@@ -27,9 +27,11 @@ interface Opts {
   // The OrderDelivered log the hosted shop's own dispatch left, and the chain's head.
   delivery?: { orderId: string; block: bigint; transaction: string };
   head?: bigint;
+  // The hosted shop's own mark lands while this send fails (a nonce clash on the shared key).
+  deliveredAfterWrite?: boolean;
 }
 
-function fakeChain(order: { status: number; amountMicro?: bigint; refundedMicro?: bigint; merchant?: string }, { chainId = 1874, hold = null, balance = 10_000_000n, allowance = 10_000_000n, receipt = 'success', laterReceipt = false, gas = 50_000_000_000_000_000n, writeFails = false, delivery, head = 100_000n }: Opts = {}) {
+function fakeChain(order: { status: number; amountMicro?: bigint; refundedMicro?: bigint; merchant?: string }, { chainId = 1874, hold = null, balance = 10_000_000n, allowance = 10_000_000n, receipt = 'success', laterReceipt = false, gas = 50_000_000_000_000_000n, writeFails = false, delivery, head = 100_000n, deliveredAfterWrite = false }: Opts = {}) {
   const sent: { fn: string; args: unknown[] }[] = [];
   const ranges: [bigint, bigint][] = [];
   const chain: Chain = {
@@ -67,7 +69,10 @@ function fakeChain(order: { status: number; amountMicro?: bigint; refundedMicro?
         // A node-managed account makes viem call eth_sendTransaction, which public RPCs refuse (production's 502).
         if (request.account?.type !== 'local') throw new Error('the node would be asked to sign: eth_sendTransaction is not available');
         if (hold) await hold;
-        if (writeFails) throw new Error('the answer was lost');
+        if (writeFails) {
+          if (deliveredAfterWrite) order.status = 3;
+          throw new Error('the answer was lost');
+        }
         sent.push({ fn: request.fn, args: request.args });
         return `0x${String(sent.length).padStart(64, '0')}`;
       },
@@ -232,6 +237,18 @@ test('a send that fails after it may have reached the node locks the order, so a
   await assert.rejects(refundOrder(order, 800_000n, again.chain), (e: unknown) => e instanceof Refusal && e.code === 'STILL_PENDING');
   assert.equal(again.sent.length, 0);
   assert.equal(sent.length, 0);
+});
+
+test('a dispatch that loses the race to the hosted shop answers from the chain once its mark shows, and the refund that follows is not held', async () => {
+  const order = fresh();
+  const transaction = `0x${'ef'.repeat(32)}`;
+  const { chain, sent } = fakeChain({ status: 2 }, { writeFails: true, deliveredAfterWrite: true, delivery: { orderId: order, block: 99_990n, transaction } });
+  assert.deepEqual(await markDispatched(order, chain), { transaction, status: 'confirmed', alreadyDelivered: true });
+  assert.equal(sent.length, 0);
+  // The failed send's lock is lifted: the refund goes out instead of STILL_PENDING.
+  const after = fakeChain({ status: 3 });
+  assert.equal((await refundOrder(order, null, after.chain)).status, 'confirmed');
+  assert.deepEqual(after.sent.map((s) => s.fn), ['refund']);
 });
 
 test('a shop wallet with no native coin for gas is refused with its own code before anything is sent', async () => {
