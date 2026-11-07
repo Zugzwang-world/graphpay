@@ -191,10 +191,10 @@ export function visitorGuard(order: OrderState, orderId: string, { open = public
   lastAction.set(orderId, now);
 }
 
-// Public access: a visitor refunds an order once. Every open copy of the stage runs the shop's
-// phone, and an automatic Accept in each would refund the same request again (a live double
-// refund, 04:09 IST Sat 7 Nov); the 30 s cooldown is per server instance. The refunded amount
-// is read from the chain, so every instance agrees. The gated mode keeps a later full refund.
+// Public access: a visitor refunds an order once. The route is open to anyone, a second tap or a
+// retry after a slow answer refunded one request twice (04:09 IST Sat 7 Nov), and the 30 s
+// cooldown is per server instance. The refunded amount is read from the chain, so every instance
+// agrees. The gated mode keeps a later full refund.
 export function refundOnce(order: OrderState, { open = publicAccess() }: { open?: boolean } = {}): void {
   if (open && order.refundedMicro > 0n) throw new Refusal('ALREADY_REFUNDED');
 }
