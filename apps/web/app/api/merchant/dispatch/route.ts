@@ -1,5 +1,6 @@
 // Mark a paid order dispatched (WEBSITE_SPEC.md §4, §7): the shop's own key signs markDelivered on
-// Whitechain Sepolia, behind the passcode; the order must be this shop's and PAID.
+// Whitechain Sepolia, behind the passcode; the order must be this shop's and PAID. An order already
+// delivered on chain answers 200 with its existing delivery transaction and alreadyDelivered, sending nothing.
 import { json, notLive, readJsonObject } from '../../../../lib/http.ts';
 import { requirePasscode } from '../../../../lib/passcode.ts';
 import { Busy, Refusal, SHOP_KEY_WAITING_FOR, isOrderId, markDispatched, shopKeyConfigured } from '../../../../lib/merchant-actions.server.ts';

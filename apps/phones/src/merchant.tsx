@@ -26,6 +26,9 @@ const RENEW_OPEN_MS = 300_000;
 const ORDER_GUARD_MS = 32_000;
 const RETRY_MS = 4_000;
 const RETRIES = 10;
+// The hosted shop marks its own paid order delivered a few seconds after payment, with the same key: the
+// phone asks after that, so the two never race on one order (the route then answers from the chain).
+const HOSTED_MARK_MS = 8_000;
 // Answers that only mean "not yet" (the order not readable as paid yet, a send still running, the guard).
 const NOT_YET = new Set(['NOT_DELIVERABLE', 'NO_SUCH_ORDER', 'STILL_PENDING', 'TOO_SOON']);
 const notYet = (error: unknown) => error instanceof Refusal && (NOT_YET.has(error.code) || error.status === 429);
@@ -287,6 +290,8 @@ export function MerchantPhone() {
     const orderId = paidOrderId;
     void (async () => {
       setDispatch({ orderId, phase: 'sending', tx: null, sentAt: Date.now(), at: null, error: null });
+      await sleep(HOSTED_MARK_MS);
+      if (dispatching.current !== orderId) return;
       for (let attempt = 0; attempt < RETRIES; attempt++) {
         const sentAt = Date.now();
         try {
@@ -507,7 +512,7 @@ function ShopCard({ line, model, dispatch, now, rows }: { line: LineData; model:
         </div>
         <div className="mt-2 flex flex-wrap items-center gap-2">
           <ProofLink href={links.whitechainTx(model.paid.tx)} network={networks.whitechain} label="Received" at={model.arrived.settled} now={now} />
-          {dispatch?.tx ? <ProofLink href={links.whitechainTx(dispatch.tx)} network={networks.whitechain} label="Dispatched" at={dispatch.at} now={now} /> : dispatch?.phase === 'sending' ? <Pending>Dispatching</Pending> : null}
+          {dispatch?.tx ? <ProofLink href={links.whitechainTx(dispatch.tx)} network={networks.whitechain} label="Dispatched" at={dispatch.at} now={now} /> : dispatch?.phase === 'dispatched' ? <span className="text-caption font-bold text-muted">Dispatched</span> : dispatch?.phase === 'sending' ? <Pending>Dispatching</Pending> : null}
           {edge ? <span className="text-caption font-bold text-muted">On {networks.arkiv}</span> : <ArkivPending />}
         </div>
       </Card>

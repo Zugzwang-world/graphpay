@@ -12,6 +12,7 @@ import { customerErrandLines, dispatchLines, endSentence, pauseLines, refundLine
 import { advance, caughtUp, restPace, type Pace } from '../../web/lib/stage/pace.ts';
 import { ERRAND_STEPS, stepIndex, type BeatKey } from '../../web/lib/stage/scenes.ts';
 import { clock, microUsdt, orderNumber, percent, usdt } from '../../web/lib/stage/format.ts';
+import { dispatchBadge, dispatchedOf } from '../../web/lib/stage/dispatch.ts';
 import { getJson, postJson, Refusal, type CustomerState, type HealState } from './api';
 import { cast, links, menuOf, networks, order, payer, productOf, renewal, shopOf, timeZone } from './cast';
 import { readFrames } from './errand';
@@ -210,8 +211,7 @@ export function CustomerPhone() {
 
   // The shop marks the paid order dispatched on chain right after the payment (relayed from its
   // phone through the stage). On the stage, the refund unlocks only once that is confirmed.
-  const dispatchEvent = model.paid ? stage.events.find((e) => e.key === 'dispatched' && typeof e.data?.orderId === 'string' && e.data.orderId.toLowerCase() === model.paid?.orderId.toLowerCase()) : undefined;
-  const dispatched = dispatchEvent ? { tx: typeof dispatchEvent.data?.transaction === 'string' ? dispatchEvent.data.transaction : null, at: dispatchEvent.at } : null;
+  const dispatched = dispatchedOf(stage.events, model.paid?.orderId);
 
   // Scene 5: Refund, then one tap to attach the photo: it goes to Swarm from this browser, then the
   // request is recorded on Arkiv, and the shop accepts it by itself.
@@ -591,7 +591,7 @@ function ErrandCard({ line, model, shownIndex, now, state, dispatched, embedded:
         <p className="mt-1 text-caption font-bold text-ink">Gas paid by GraphPay, you paid 0.</p>
         <div className="mt-2 flex flex-wrap items-center gap-2">
           <ProofLink href={links.whitechainTx(model.paid.tx)} network={networks.whitechain} label="Paid" at={model.end?.at ?? model.arrived.settled} now={now} />
-          {dispatched?.tx ? <ProofLink href={links.whitechainTx(dispatched.tx)} network={networks.whitechain} label="Dispatched" at={dispatched.at} now={now} /> : onStage ? <Pending>Dispatching</Pending> : null}
+          {dispatched?.tx ? <ProofLink href={links.whitechainTx(dispatched.tx)} network={networks.whitechain} label="Dispatched" at={dispatched.at} now={now} /> : dispatchBadge(dispatched, onStage) === 'done' ? <span className="text-caption font-bold text-muted">Dispatched</span> : onStage ? <Pending>Dispatching</Pending> : null}
           {!refundOpen && state && refundable ? (
             <button type="button" onClick={onRefund} className="stage-refund-button min-h-8 rounded-full border border-bad/40 px-3 text-caption font-bold text-bad">
               Refund

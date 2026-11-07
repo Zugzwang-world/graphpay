@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { Busy, MAX_WAITING, Refusal, markDispatched, refundOrder, shopKeyConfigured, shopKeyName, type Chain } from './merchant-actions.server.ts';
+import { Busy, MAX_WAITING, Refusal, markDispatched, RACE, refundOrder, shopKeyConfigured, shopKeyName, type Chain } from './merchant-actions.server.ts';
 
 // These tests check the gated mode; the public-access guards are tested on their own.
 process.env.GRAPHPAY_PUBLIC_ACCESS = '0';
@@ -24,10 +24,14 @@ interface Opts {
   writeFails?: boolean;
   // The receipt of an earlier send, as the node answers for it later.
   laterReceipt?: boolean;
+  // The OrderDelivered log the hosted shop's own dispatch left, and the chain's head.
+  delivery?: { orderId: string; block: bigint; transaction: string };
+  head?: bigint;
 }
 
-function fakeChain(order: { status: number; amountMicro?: bigint; refundedMicro?: bigint; merchant?: string }, { chainId = 1874, hold = null, balance = 10_000_000n, allowance = 10_000_000n, receipt = 'success', laterReceipt = false, gas = 50_000_000_000_000_000n, writeFails = false }: Opts = {}) {
+function fakeChain(order: { status: number; amountMicro?: bigint; refundedMicro?: bigint; merchant?: string }, { chainId = 1874, hold = null, balance = 10_000_000n, allowance = 10_000_000n, receipt = 'success', laterReceipt = false, gas = 50_000_000_000_000_000n, writeFails = false, delivery, head = 100_000n }: Opts = {}) {
   const sent: { fn: string; args: unknown[] }[] = [];
+  const ranges: [bigint, bigint][] = [];
   const chain: Chain = {
     chainId: 1874,
     checkout: CHECKOUT,
@@ -50,6 +54,12 @@ function fakeChain(order: { status: number; amountMicro?: bigint; refundedMicro?
         if (!laterReceipt) throw new Error('not found');
         return { status: 'success' };
       },
+      getBlockNumber: async () => head,
+      getLogs: async ({ args, fromBlock, toBlock }: { args: { orderId: string }; fromBlock: bigint; toBlock: bigint }) => {
+        ranges.push([fromBlock, toBlock]);
+        if (!delivery || args.orderId !== delivery.orderId || delivery.block < fromBlock || delivery.block > toBlock) return [];
+        return [{ blockNumber: delivery.block, transactionHash: delivery.transaction }];
+      },
     } as unknown as Chain['publicClient'],
     walletClient: {
       account: { address: SHOP_WALLET, type: 'local' },
@@ -63,24 +73,46 @@ function fakeChain(order: { status: number; amountMicro?: bigint; refundedMicro?
       },
     } as unknown as Chain['walletClient'],
   };
-  return { chain: Promise.resolve(chain), sent };
+  return { chain: Promise.resolve(chain), sent, ranges };
 }
+
+RACE.waitMs = 0;
 
 test('a paid order of this shop is marked dispatched, once; the transaction comes back', async () => {
   const order = fresh();
   const { chain, sent } = fakeChain({ status: 2 });
   const out = await markDispatched(order, chain);
-  assert.match(out.transaction, /^0x[0-9a-f]{64}$/);
+  assert.match(out.transaction ?? '', /^0x[0-9a-f]{64}$/);
   assert.equal(out.status, 'confirmed');
   assert.deepEqual(sent, [{ fn: 'markDelivered', args: [order] }]);
 });
 
 test('dispatch refuses another shop’s order, a missing order and an order that is not waiting, and sends nothing', async () => {
-  for (const [order, code] of [[{ status: 2, merchant: OTHER }, 'NOT_OURS'], [{ status: 0 }, 'NO_SUCH_ORDER'], [{ status: 3 }, 'NOT_DELIVERABLE'], [{ status: 1 }, 'NOT_DELIVERABLE'], [{ status: 5 }, 'NOT_DELIVERABLE']] as const) {
+  for (const [order, code] of [[{ status: 2, merchant: OTHER }, 'NOT_OURS'], [{ status: 0 }, 'NO_SUCH_ORDER'], [{ status: 1 }, 'NOT_DELIVERABLE'], [{ status: 5 }, 'NOT_DELIVERABLE']] as const) {
     const { chain, sent } = fakeChain(order);
     await assert.rejects(markDispatched(ORDER, chain), (e) => e instanceof Refusal && e.code === code, code);
     assert.equal(sent.length, 0);
   }
+});
+
+test('an order already delivered on chain answers confirmed with its own delivery transaction, and sends nothing', async () => {
+  const order = fresh();
+  const transaction = `0x${'de'.repeat(32)}`;
+  // Delivered 1,500 blocks ago (about 25 minutes): found in the second range, newest first.
+  const { chain, sent, ranges } = fakeChain({ status: 3 }, { delivery: { orderId: order, block: 98_500n, transaction }, head: 100_000n });
+  assert.deepEqual(await markDispatched(order, chain), { transaction, status: 'confirmed', alreadyDelivered: true });
+  assert.equal(sent.length, 0);
+  assert.deepEqual(ranges, [[99_001n, 100_000n], [98_001n, 99_000n]]);
+  // Older than the blocks read: still delivered, still nothing sent, no transaction to show.
+  const old = fakeChain({ status: 3 }, { delivery: { orderId: order, block: 90_000n, transaction }, head: 100_000n });
+  assert.deepEqual(await markDispatched(order, old.chain), { transaction: null, status: 'confirmed', alreadyDelivered: true });
+  assert.equal(old.sent.length, 0);
+});
+
+test('an order not yet paid is still refused NOT_DELIVERABLE (409), and nothing is sent', async () => {
+  const { chain, sent } = fakeChain({ status: 1 });
+  await assert.rejects(markDispatched(fresh(), chain), (e) => e instanceof Refusal && e.code === 'NOT_DELIVERABLE' && e.status === 409);
+  assert.equal(sent.length, 0);
 });
 
 test('a partial refund, a full refund and an over-refund: the amount can never exceed what is left', async () => {
@@ -126,7 +158,7 @@ test('sends run one at a time, and a client cannot stack them: past the limit th
   release();
   await Promise.all(first);
   assert.equal(held.sent.length, MAX_WAITING);
-  assert.match((await markDispatched(ORDER, fakeChain({ status: 2 }).chain)).transaction, /^0x/);
+  assert.match((await markDispatched(ORDER, fakeChain({ status: 2 }).chain)).transaction ?? '', /^0x/);
 });
 
 test('the shop’s key is named from the story (never typed here) and counted only when well-formed', () => {
