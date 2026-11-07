@@ -52,8 +52,9 @@ export const liveSources: Sources = {
   ensStatus: async (name) => (await (await ensGate()).ensCheck(name)).status,
   policy: async (node) => policyOf(await ethCall<Parameters<typeof policyOf>[0]>('policies', node)),
   spentToday: (node) => ethCall<bigint>('spentToday', node),
+  // 100 is the graph's list cap. It lists edges in no time order, so the newest needs every row.
   payments: async (name, sinceDay) => {
-    const data = await graphql<{ node: { out: OrderEdge[] } | null }>(`query($ens: String!, $since: Int!) { node(ens: $ens) { out(kind: "pay", sinceDay: $since, limit: 50) { ${EDGE} } } }`, { ens: name, since: sinceDay });
+    const data = await graphql<{ node: { out: OrderEdge[] } | null }>(`query($ens: String!, $since: Int!) { node(ens: $ens) { out(kind: "pay", sinceDay: $since, limit: 100) { ${EDGE} } } }`, { ens: name, since: sinceDay });
     return data.node?.out ?? [];
   },
   trail: async (orderId) => (await graphql<{ order: OrderEdge[] }>(`query($id: String!) { order(id: $id) { ${EDGE} } }`, { id: orderId })).order,
@@ -64,6 +65,7 @@ export const liveSources: Sources = {
 export async function readCustomerState(sources: Sources = liveSources, nowS = Math.floor(Date.now() / 1000)): Promise<CustomerState> {
   const agent = siteModel().payer.ens;
   const node = namehash(agent) as `0x${string}`;
+  const today = Math.floor(nowS / 86_400);
   // Independent sources: all are awaited, and any one failing fails the whole answer, so the
   // phone never shows a half-known agent as active.
   // The subscription is the one source that may fail on its own: it never decides the agent's status.
@@ -71,10 +73,13 @@ export async function readCustomerState(sources: Sources = liveSources, nowS = M
     sources.ensStatus(agent),
     sources.policy(node),
     sources.spentToday(node),
-    sources.payments(agent, Math.floor(nowS / 86_400) - 30),
+    sources.payments(agent, today),
     sources.subscription().catch(() => null),
   ]);
-  const payment = newestPayment(payments);
+  // A 30-day read outgrew the list and dropped the newest payment: the phone, the re-order and the
+  // refund request held on to an older order (07:17 IST Sat 7 Nov, 55 payments against a limit of 50).
+  // Today's payments come first; the last 30 days only when today has none.
+  const payment = newestPayment(payments) ?? newestPayment(await sources.payments(agent, today - 30));
   const lastOrder = payment?.orderId ? orderSummary(payment, await sources.trail(payment.orderId)) : null;
   return {
     agent: { ens: agent, status: agentStatusOf(ens, policy, nowS), epoch: policy?.epoch ?? 0 },

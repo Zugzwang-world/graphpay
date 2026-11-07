@@ -1,10 +1,10 @@
 # NOW
 
-Updated 02:15 IST, Sat 7 Nov (night Coordinator)
+Updated 07:32 IST, Sat 7 Nov (night Coordinator)
 
 ## Summary (Coordinator only)
 
-Updated 02:15 IST, Sat 7 Nov. **The backend is closed.** Only the submission (09:00 IST) and the presentation (09:30 IST) remain (ADR-0066). Every deliverable's status is in [`TRACKER.md`](TRACKER.md). The frontend pass starts from [`BACKEND_FOR_FRONTEND.md`](BACKEND_FOR_FRONTEND.md).
+Updated 07:32 IST, Sat 7 Nov. **The backend is closed.** Only the submission (09:00 IST) and the presentation (09:30 IST) remain (ADR-0066). Every deliverable's status is in [`TRACKER.md`](TRACKER.md). The frontend pass starts from [`BACKEND_FOR_FRONTEND.md`](BACKEND_FOR_FRONTEND.md).
 
 **What the night run landed** (brief `docs/archive/thinking-partner-briefs/2259-night-coordinator.md`; seven streams on Opus 5.5 at max; every stream has stopped):
 - **W1 Identity:**
@@ -25,15 +25,15 @@ Updated 02:15 IST, Sat 7 Nov. **The backend is closed.** Only the submission (09
   - the workers (the mirror 2 blocks behind, polling), under W5's watchdog in `.claude/worktrees/w5-workers`;
   - the self-healing and renewal crons on Vercel.
 
-**The Arkiv key** (02:01–02:10 IST):
-- The founder's new key is in `.env` and in Vercel Production as Sensitive.
-- The site was redeployed and the workers restarted on it.
-- **But Arkiv refuses this key for quota too:** three probes on the keyed endpoint answered 429 QUOTA_EXCEEDED. Reads therefore still use the keyless endpoint, as #148 designed.
-- The mirror polls fine on the keyless window now that the big readers have stopped (the M seed, the acceptance run).
-- **Ask the Arkiv team** to check this key's quota. With a working key, run the same `secrets:set`; the Coordinator pushes it and restarts.
+**Live now** (07:30 IST):
+- **The payer** is ACTIVE: 57.6 of its 300 pass spent today, and PAYER holds 91.4 test USDT (refilled from the shop's takings at 06:11 IST).
+- **Filter & Fold** is open. Production is the newest build of main (#224).
+- **The Arkiv key:** a teammate's key works. It is in `.env` and in Vercel Production, the site was redeployed on the newest build of main, and the workers restarted on it. The mirror polls on the keyed endpoint, 2 blocks behind.
+- **A bug found at 07:17 IST, fix held for your go:** the customer state read the last 30 days of payments with a limit of 50, and the graph lists them in no time order. With 55 payments, the newest was dropped: the phone shows the 06:29 order, and the stage's refund request and re-order answer NOT_THIS_ORDER on any newer one. The fix reads today's payments first, with the graph's full list of 100.
+- **Held since your "merge nothing else":** #220 (a visitor refunds an order once) and #221 (ADR-0082, the stage's scene 7 shows the lab's benchmark).
 
 **Founder now** (OPEN):
-1. The Arkiv key's quota (above).
+1. Your go for the last-order fix (above); then #220 and #221.
 2. The video, in your own voice (`docs/submission/VIDEO.md`).
 3. Review the README and the team list.
 4. The disclosure.
@@ -42,17 +42,19 @@ Updated 02:15 IST, Sat 7 Nov. **The backend is closed.** Only the submission (09
 
 ## records
 
-Updated 02:15 IST, Sat 7 Nov (night Coordinator, `local_1caa580c-…`).
+Updated 07:32 IST, Sat 7 Nov (night Coordinator, `local_1caa580c-…`).
 - **Done:**
   - took over at 22:59 IST and retired the day sessions;
   - timed W2's rows, then W1's flip, then W5's restart;
   - merged every stream's work, keeping the live errand working all night (no revert was needed);
   - `BACKEND_FOR_FRONTEND.md`;
   - the folder rolled up;
-  - the new Arkiv key stored, pushed, redeployed and restarted on (refused for quota);
   - ADR-0081;
-  - the backend closed on the founder's word.
-- **Running:** the 10-minute tick, until the founder ends this session.
+  - the backend closed on the founder's word;
+  - the teammate's Arkiv key: probed, pushed, redeployed on the newest build of main (#224), the workers restarted on it;
+  - PAYER refilled from the shop's takings (06:11 IST);
+  - the stale last order found (07:17 IST) and its fix opened, held for the founder's go.
+- **Running:** the 10-minute tick (live site, mirror, balances, PRs; nothing merges without the founder's word), until the founder ends this session.
 
 ## w1-identity
 

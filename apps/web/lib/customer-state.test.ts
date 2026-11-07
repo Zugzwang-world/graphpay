@@ -62,6 +62,20 @@ test('the state of the story payer agent: cap and spend from the contract, statu
   assert.equal(state.subscription, null);
 });
 
+test('the last order is read from today first, and from the last 30 days only when today has none', async () => {
+  const today = Math.floor(NOW / 86_400);
+  const asked: number[] = [];
+  const byDay = (days: Record<number, OrderEdge[]>): Sources['payments'] => async (_, sinceDay) => (asked.push(sinceDay), days[sinceDay] ?? []);
+  const old = [pay(NOW - 3 * 86_400, '0xold')];
+  const fresh = await readCustomerState(sources({ payments: byDay({ [today]: [pay(NOW - 60, '0xtoday')], [today - 30]: old }), trail: async () => [] }), NOW);
+  assert.equal(fresh.lastOrder?.orderId, '0xtoday');
+  assert.deepEqual(asked, [today], 'a payment today needs no 30-day read');
+  asked.length = 0;
+  const quiet = await readCustomerState(sources({ payments: byDay({ [today - 30]: old }), trail: async () => [] }), NOW);
+  assert.equal(quiet.lastOrder?.orderId, '0xold');
+  assert.deepEqual(asked, [today, today - 30]);
+});
+
 test('a paused name is Paused on the phone; no payments is no last order', async () => {
   const state = await readCustomerState(sources({ ensStatus: async () => 'PAUSED', payments: async () => [] }), NOW);
   assert.equal(state.agent.status, 'PAUSED');
