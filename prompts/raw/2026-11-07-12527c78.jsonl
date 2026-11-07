@@ -1,1 +1,2 @@
 {"ts":"2026-11-07T01:10:56.283Z","session":"12527c78","prompt":"if thats the case - remove the race, keep the refund"}
+{"ts":"2026-11-07T01:19:44.131Z","session":"12527c78","prompt":"A new Arkiv key from a teammate's account is stored with secrets:set. Probe it first; if it answers without QUOTA_EXCEEDED, push it to Vercel, redeploy and restart the workers. If it is refused, keep the 09:00 fresh mirror plan."}
