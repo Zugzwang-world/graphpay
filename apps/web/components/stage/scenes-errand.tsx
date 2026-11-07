@@ -395,7 +395,7 @@ export function SceneX402() {
     { from: 2, to: 3, label: 'Is the payer active? Its cap?', on: at('verify'), protocol: true },
     { from: 3, to: 2, label: 'Active, inside the cap', on: at('verify'), protocol: true },
     { from: 2, to: 4, label: 'Settle', on: at('settled'), link: { href: txUrl(model.explorers, 'whitechain', m.settledTx ?? m.paid?.tx), network: model.networks.whitechain.name, at: m.arrived.settled } },
-    { from: 1, to: 0, label: dispatched ? 'Dispatched, on chain' : 'Paid. Dispatching.', on: at('dispatch'), link: dispatchTx ? { href: txUrl(model.explorers, 'whitechain', dispatchTx), network: model.networks.whitechain.name, at: dispatched?.at } : undefined, pending: !dispatchTx, pendingText: `Marking on ${model.networks.whitechain.name.split(' ')[0]}` },
+    { from: 1, to: 0, label: dispatched ? 'Dispatched, on chain' : 'Paid. Dispatching.', on: at('dispatch'), link: dispatchTx ? { href: txUrl(model.explorers, 'whitechain', dispatchTx), network: model.networks.whitechain.name, at: dispatched?.at } : undefined, pending: !dispatched, pendingText: `Marking on ${model.networks.whitechain.name.split(' ')[0]}` },
     { from: 4, to: 5, label: 'The receipt', on: at('paid'), link: paidEdge ? { href: paidEdge.entityKey ? entityUrl(model.explorers, paidEdge.entityKey) : txUrl(model.explorers, 'rabdi', paidEdge.arkivTx), network: model.networks.rabdi.name, at: paidEdge.at } : undefined, pending: !paidEdge },
   ];
   return (

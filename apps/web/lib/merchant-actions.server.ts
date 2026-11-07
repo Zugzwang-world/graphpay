@@ -5,7 +5,7 @@
 // name from the request; the key is read from the env by role name and never leaves here.
 import { ORDER_STATUS, checkoutAbi } from '@graphpay/contracts';
 import { activeCast, castEntries, config } from '@graphpay/config';
-import { createWalletClient, erc20Abi, getAddress, isAddressEqual, namehash, type Hex, type PublicClient, type WalletClient } from 'viem';
+import { createWalletClient, erc20Abi, getAbiItem, getAddress, isAddressEqual, namehash, type Hex, type PublicClient, type WalletClient } from 'viem';
 import { privateKeyToAccount } from 'viem/accounts';
 import { checkoutAddress } from './site.server.ts';
 import { publicAccess } from './passcode.ts';
@@ -41,7 +41,7 @@ export interface OrderState {
 }
 
 export interface Chain {
-  publicClient: Pick<PublicClient, 'readContract' | 'simulateContract' | 'waitForTransactionReceipt' | 'getTransactionReceipt' | 'getChainId' | 'getBalance'>;
+  publicClient: Pick<PublicClient, 'readContract' | 'simulateContract' | 'waitForTransactionReceipt' | 'getTransactionReceipt' | 'getChainId' | 'getBalance' | 'getBlockNumber' | 'getLogs'>;
   // The token the checkout pays refunds in (the merchant's float).
   token: `0x${string}`;
   walletClient: Pick<WalletClient, 'writeContract'> & { account: { address: `0x${string}` } };
@@ -183,23 +183,83 @@ export const ORDER_COOLDOWN_MS = 30_000;
 const lastAction = new Map<string, number>();
 const personaNode = (): string => namehash(castEntries().find((e) => e.kind === 'persona')!.ensName).toLowerCase();
 
-export function visitorGuard(order: OrderState, orderId: string, { open = publicAccess(), now = Date.now(), persona = personaNode() }: { open?: boolean; now?: number; persona?: string } = {}): void {
+// The persona part alone, for an answer that sends nothing (it needs no cooldown).
+export function visitorBuyer(order: OrderState, { open = publicAccess(), persona = personaNode() }: { open?: boolean; persona?: string } = {}): void {
   if (!open) return;
   if (order.buyerNode.toLowerCase() !== persona) throw new Refusal('NOT_THE_STORY_BUYER', 403);
+}
+
+export function visitorGuard(order: OrderState, orderId: string, { open = publicAccess(), now = Date.now(), persona = personaNode() }: { open?: boolean; now?: number; persona?: string } = {}): void {
+  if (!open) return;
+  visitorBuyer(order, { open, persona });
   const last = lastAction.get(orderId);
   if (last !== undefined && now - last < ORDER_COOLDOWN_MS) throw new Refusal('TOO_SOON', 429);
   lastAction.set(orderId, now);
 }
 
-export function markDispatched(orderId: string, chain?: Promise<Chain>): Promise<Sent> {
+// An order the hosted shop already marked delivered (its own dispatch lands about 3 s after payment):
+// nothing is sent; the delivery's own transaction comes back, or null when it is older than the blocks read.
+export interface AlreadyDelivered {
+  transaction: string | null;
+  status: 'confirmed';
+  alreadyDelivered: true;
+}
+
+// The OrderDelivered log of one order, from the chain (never the Arkiv mirror, which lags): the last
+// 2,000 blocks (one a second, about 33 minutes), newest first, in ranges every endpoint answers
+// (FACTS.md: public Ankr refuses more than about 1,000 blocks; the keyed URL was not measured).
+export const DELIVERY_RANGE = 1_000n;
+export const DELIVERY_RANGES = 2;
+const ORDER_DELIVERED = getAbiItem({ abi: checkoutAbi, name: 'OrderDelivered' });
+
+async function deliveryTransaction(chain: Chain, orderId: string): Promise<string | null> {
+  try {
+    const head = await chain.publicClient.getBlockNumber();
+    for (let i = 0; i < DELIVERY_RANGES; i += 1) {
+      const toBlock = head - BigInt(i) * DELIVERY_RANGE;
+      if (toBlock < 0n) break;
+      const fromBlock = toBlock >= DELIVERY_RANGE - 1n ? toBlock - (DELIVERY_RANGE - 1n) : 0n;
+      const logs = await chain.publicClient.getLogs({ address: chain.checkout, event: ORDER_DELIVERED, args: { orderId: orderId as Hex }, fromBlock, toBlock });
+      const hit = logs.find((l) => l.transactionHash);
+      if (hit?.transactionHash) return hit.transactionHash;
+      if (fromBlock === 0n) break;
+    }
+  } catch (error) {
+    // The order is delivered either way; the kind only (a chain error's message can name an RPC).
+    console.error('merchant dispatch: delivery lookup failed:', error instanceof Error ? error.name : typeof error);
+  }
+  return null;
+}
+
+// A send that lost the race to the hosted shop's own mark (same key: a revert, a nonce clash) is
+// answered from the chain once that mark shows, read again every second for up to waitMs.
+export const RACE = { waitMs: 10_000 };
+
+export function markDispatched(orderId: string, chain?: Promise<Chain>): Promise<Sent | AlreadyDelivered> {
   return serially(async () => {
     const c = await (chain ?? liveChain());
     const order = await readOrder(c, orderId);
     ours(c, order);
+    const already = async (): Promise<AlreadyDelivered> => ({ transaction: await deliveryTransaction(c, orderId), status: 'confirmed', alreadyDelivered: true });
+    // Idempotent, before the send lock: already delivered on chain is the answer a fresh dispatch would give, with no send.
+    if (order.status === 'DELIVERED') {
+      visitorBuyer(order);
+      return already();
+    }
     await settled(c, orderId);
     if (order.status !== 'PAID') throw new Refusal('NOT_DELIVERABLE');
     visitorGuard(order, orderId);
-    return send(c, orderId, 'markDelivered', [orderId]);
+    try {
+      return await send(c, orderId, 'markDelivered', [orderId]);
+    } catch (error) {
+      if (error instanceof Refusal || error instanceof ChainRefused) throw error;
+      const until = Date.now() + RACE.waitMs;
+      for (;;) {
+        if ((await readOrder(c, orderId).catch(() => null))?.status === 'DELIVERED') return already();
+        if (Date.now() >= until) throw error;
+        await new Promise((r) => setTimeout(r, 1_000));
+      }
+    }
   });
 }
 
